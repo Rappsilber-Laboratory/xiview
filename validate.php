@@ -103,7 +103,6 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="./js/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/linkColourAssignment.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/validate.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/loadSpectrum.js<?php echo $cacheBuster ?>"></script>
