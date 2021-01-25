@@ -488,8 +488,11 @@ CLMSUI.NGLUtils = {
         var cp = structure.getChainProxy();
         var rp = structure.getResidueProxy();
 
-        var remarkLines = ["model,chain1,res1,chain2,res2,distance"];
+        var remarkLines = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
         var selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
+
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+
 
         var crossLinkLines = [];
         for (var link of links){
@@ -504,9 +507,14 @@ CLMSUI.NGLUtils = {
                 var name2 = rp.qualifiedName().replace("/", ":");
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
                 var distObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
+
+                const xiviewLink = crosslinkMap.get(link.origId);
+                p1 = xiviewLink.fromProtein.accession;
+                p2 = xiviewLink.toProtein.accession;
+
                 crossLinkLines.push((pdbids[link.residueA.chainIndex] || structure.name) + ","
-                    + chainA + "," + link.residueA.resno + ","
-                    + chainB + "," + link.residueB.resno + ","
+                    + p1 + "," + chainA + "," + link.residueA.resno + ","
+                    + p2 + "," + chainB + "," + link.residueB.resno + ","
                     + distObj.getXLinkDistanceFromPDBCoords(distObj.matrices, link.residueA.seqIndex, link.residueB.seqIndex, link.residueA.chainIndex, link.residueB.chainIndex));
             }
         }
