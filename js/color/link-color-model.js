@@ -1,11 +1,11 @@
 var CLMSUI = CLMSUI || {};
 CLMSUI.linkColour = CLMSUI.linkColour || {};
 
-CLMSUI.BackboneModelTypes.DefaultLinkColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+CLMSUI.BackboneModelTypes.DefaultLinkColourModel = CLMSUI.BackboneModelTypes.ColorModel.extend({
     initialize: function() {
         this
             .set("labels", this.get("colScale").copy().range(["Self Crosslinks", "Self Crosslinks (Overlapping Peptides)", "Between Protein Crosslinks"]))
-            .set("type", "ordinal")
+            .set("type", "categorical")
         ;
     },
     getValue: function(link) {
@@ -24,7 +24,7 @@ CLMSUI.BackboneModelTypes.DefaultLinkColourModel = CLMSUI.BackboneModelTypes.Col
     },
 });
 
-CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColorModel.extend({
     initialize: function(attrs, options) {
 
         this.searchMap = options.searchMap;
@@ -68,7 +68,7 @@ CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourMod
         this
             .set("colScale", colScale)
             .set("labels", this.get("colScale").copy().range(labelRange))
-            .set("type", "ordinal")
+            .set("type", "categorical")
         ;
     },
     getValue: function(link) {
@@ -125,7 +125,7 @@ CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourMod
     },
 });
 
-CLMSUI.BackboneModelTypes.DistanceColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+CLMSUI.BackboneModelTypes.DistanceColourModel = CLMSUI.BackboneModelTypes.ColorModel.extend({
     initialize: function() {
         this
             .set("type", "threshold")
@@ -142,7 +142,7 @@ CLMSUI.BackboneModelTypes.DistanceColourModel = CLMSUI.BackboneModelTypes.Colour
     },
 });
 
-CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.ColorModel.extend({
     initialize: function(properties, options) {
         let colScale;
         let labels = ["Same Protein"];
@@ -188,8 +188,8 @@ CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.Co
     },
 });
 
-CLMSUI.BackboneModelTypes.HighestScoreColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
-    initialize: function(properties, options) {
+CLMSUI.BackboneModelTypes.HighestScoreColourModel = CLMSUI.BackboneModelTypes.ColorModel.extend({
+    initialize: function() {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low Score", "Mid Score", "High Score"]));
     },
