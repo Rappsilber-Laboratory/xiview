@@ -26,15 +26,24 @@ CLMSUI.loadSpectrum = function(match, randId, spectrumModel) {
 
         console.log("loadSpectrum match:" + match.id);
 
-        d3.text('../CLMS-model/php/peakList.php?upload=' + match.searchId + '-' + randId + '&spid=' + match.spectrumId, function(error, text) {
+        d3.json('../CLMS-model/php/peakList.php?upload=' + match.searchId + '-' + randId + '&spid=' + match.spectrumId, function(error, json) {
             if (error) {
-                console.log("error getting peak list", error);
+                console.log("error getting peak list", json);
             } else {
                 d3.select("#range-error").text("");
-                peakArray = text.trim().split(/\r?\n/);
-                for (var p = 0; p < peakArray.length; p++) {
-                    peakArray[p] = peakArray[p].split(/\s/);
+
+                // peakArray = text.trim().split(/\r?\n/);
+                // for (var p = 0; p < peakArray.length; p++) {
+                //     peakArray[p] = peakArray[p].split(/\s/);
+                // }
+
+                console.log(json);
+                const peakArray = [];
+                const peakCount = json.mz.length;
+                for (let i = 0; i < peakCount; i++) {
+                    peakArray.push([json.mz[i], json.intensity[i]]);
                 }
+
                 formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
                 console.log(formatted_data);
                 xiSPEC.setData(formatted_data);
