@@ -725,10 +725,10 @@ CLMSUI.modelUtils = {
         var proteins = clmsModel.get("participants");
         var first = true;
         var columns = [];
-        var dontStoreArray = ["proteinID", "Accession"].map(function(str) {
-            return str.toLocaleLowerCase();
-        });
-        var dontStoreSet = d3.set(dontStoreArray);
+        // var dontStoreArray = ["proteinID", "Accession"].map(function(str) {
+        //     return str.toLocaleLowerCase();
+        // });
+        // var dontStoreSet = d3.set(dontStoreArray);
         var matchedProteinCount = 0;
 
         var protMap = CLMSUI.modelUtils.makeMultiKeyProteinMap(clmsModel);
@@ -739,7 +739,7 @@ CLMSUI.modelUtils = {
                 var keys = d3.keys(d).map(function(key) {
                     return key.toLocaleLowerCase();
                 });
-                columns = _.difference(keys, dontStoreArray);
+                columns = keys;//_.difference(keys, dontStoreArray);
                 first = false;
             }
 
@@ -758,7 +758,7 @@ CLMSUI.modelUtils = {
                         var key = entry.key;
                         var val = entry.value;
                         var column = key.toLocaleLowerCase();
-                        if (!dontStoreSet.has(column) && column !== "name") {
+                        // if (!dontStoreSet.has(column) && column !== "name") {
                             if (column == "complex") {
                                 groupsFound = true;
                             }
@@ -766,7 +766,7 @@ CLMSUI.modelUtils = {
                                 val = +val;
                             }
                             protein.setMeta (column, val);
-                        }
+                        // }
                     });
                 }
             }
@@ -774,7 +774,7 @@ CLMSUI.modelUtils = {
 
         if (columns) {
           CLMSUI.vent.trigger("proteinMetadataUpdated", {
-                columns: _.difference (columns, ["name", "Name"]),
+                columns: columns,//_.difference (columns, ["name", "Name"]),
                 items: proteins,
                 matchedItemCount: matchedProteinCount
             }, {

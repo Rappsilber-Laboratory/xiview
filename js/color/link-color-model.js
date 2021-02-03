@@ -195,7 +195,7 @@ CLMSUI.BackboneModelTypes.HighestScoreColourModel = CLMSUI.BackboneModelTypes.Co
     },
     getValue: function (link) {
         let scores = [];
-        if (link.crossLinks) {
+        if (link.crossLinks) { // watch out! proteins also have an att called crossLinks
             for (let crosslink of link.crossLinks) {
                 //todo if we were certain the matches were sorted by score we could speed this up by only taking first match
                 for (let m_pp of crosslink.filteredMatches_pp) {
