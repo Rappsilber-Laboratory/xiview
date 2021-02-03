@@ -681,7 +681,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     centerView: function() {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         if (stageModel) {
             stageModel.get("structureComp").stage.autoView(1000);
         }
@@ -689,7 +689,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     savePDB: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.exportPDB (
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
                 ["PDB ID: "+stageModel.getStructureName(),
@@ -703,7 +703,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     exportPymol: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.exportPymolCrossLinkSyntax (
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
                 ["PDB ID: "+stageModel.getStructureName(),
@@ -716,7 +716,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     export3dLinksCSV: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.export3dLinksCSV (
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
@@ -725,7 +725,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     //todo - unnecessary duplication
     export3dLinksCSVSelected: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.export3dLinksCSV (
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), true
         );
@@ -733,7 +733,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     exportHaddock: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.exportHaddockCrossLinkSyntax (
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
                 ["PDB ID: "+stageModel.getStructureName(),

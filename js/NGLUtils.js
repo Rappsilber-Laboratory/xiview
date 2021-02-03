@@ -3,22 +3,24 @@ var CLMSUI = CLMSUI || {};
 CLMSUI.NGLUtils = {
     repopulateNGL: function (pdbInfo) {
         //console.log ("pdbInfo", pdbInfo);
-        var pdbSettings = pdbInfo.pdbSettings;
+        this.pdbSettings = pdbInfo.pdbSettings;
         var stage = pdbInfo.stage;
         var compositeModel = pdbInfo.compositeModel;
+
+        const self = this;
 
         console.log ("CLEAR STAGE");
         stage.removeAllComponents(); // necessary to remove old stuff so old sequences don't pop up in sequence finding
 
         function returnFailure(reason) {
-            var id = _.pluck(pdbSettings, "id").join(", ");
+            var id = _.pluck(self.pdbSettings, "id").join(", ");
             var emptySequenceMap = [];
             emptySequenceMap.failureReason = "Error for " + id + ", " + reason;
             compositeModel.trigger("3dsync", emptySequenceMap);
         }
 
         Promise.all (
-            pdbSettings.map (function (pdbSetting) {
+            self.pdbSettings.map (function (pdbSetting) {
                 return stage.loadFile (pdbSetting.uri, pdbSetting.params);
             })
         )
@@ -31,7 +33,7 @@ CLMSUI.NGLUtils = {
                 structureCompArray = structureCompArray || [];  // set to empty array if undefined to avoid error in next bit
                 //CLMSUI.utils.xilog ("structureComp", structureCompArray);
                 structureCompArray.forEach (function (scomp, i) {   // give structure a name if none present (usually because loaded as local file)
-                    scomp.structure.name = scomp.structure.name || pdbSettings[i].id;
+                    scomp.structure.name = scomp.structure.name || self.pdbSettings[i].id;
                 });
 
                 var structureComp;
@@ -438,26 +440,28 @@ CLMSUI.NGLUtils = {
     },
 
     exportPymolCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks) {
-        var crossLinks = nglModelWrapper.getFullLinks();
-        var pymolLinks =  CLMSUI.NGLUtils.makePymolCrossLinkSyntax (structure, crossLinks, remarks);
-        var fileName = downloadFilename ("pymol", "pml");
+        const crossLinks = nglModelWrapper.getFullLinks();
+        const pymolLinks =  CLMSUI.NGLUtils.makePymolCrossLinkSyntax (structure, crossLinks, remarks);
+        const fileName = downloadFilename ("pymol", "pml");
         download (pymolLinks.join("\r\n"), "plain/text", fileName);
     },
 
     makePymolCrossLinkSyntax: function (structure, links, remarks) {
-        var pdbids = structure.chainToOriginalStructureIDMap || {};
-        var cp = structure.getChainProxy();
-        var rp = structure.getResidueProxy();
+        const pdbids = structure.chainToOriginalStructureIDMap || {};
+        const cp = structure.getChainProxy();
+        const rp = structure.getResidueProxy();
 
-        var remarkLines = (remarks || []).map (function (remark) {
+        const remarkLines = (remarks || []).map (function (remark) {
             return "# "+remark;
         });
 
-        var pdbs = d3.set(d3.values(pdbids)).values();
+        let pdbs = d3.set(d3.values(pdbids)).values();
         if (_.isEmpty (pdbs)) { pdbs = [structure.name]; }
-        var pdbLines = pdbs.map (function (pdb) { return "fetch "+pdb+", async=0"; });
 
-        var crossLinkLines = links.map (function (link) {
+        const localFile = typeof(this.pdbSettings[0].pdbCode) === "undefined";
+        const pdbLines = pdbs.map (function (pdb) { return (localFile? "load " : "fetch ") + pdb + (localFile? "" : ", async=0"); });
+
+        const crossLinkLines = links.map (function (link) {
             cp.index = link.residueA.chainIndex;
             var chainA = cp.chainname;
             cp.index = link.residueB.chainIndex;
@@ -472,7 +476,7 @@ CLMSUI.NGLUtils = {
             ;
         });
 
-        var lines = remarkLines.concat(pdbLines, crossLinkLines);
+        const lines = remarkLines.concat(pdbLines, crossLinkLines);
         return lines;
     },
 
