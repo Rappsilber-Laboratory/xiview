@@ -470,9 +470,18 @@ CLMSUI.NGLUtils = {
             var name1 = rp.qualifiedName().replace("/", ":");
             rp.index = link.residueB.NGLglobalIndex;
             var name2 = rp.qualifiedName().replace("/", ":");
+
+            let pdbIdA = (pdbids[link.residueA.chainIndex] || structure.name);
+            let pdbIdB = (pdbids[link.residueB.chainIndex] || structure.name);
+
+            if (localFile) {
+                pdbIdA = pdbIdA.replace(".pdb", "");
+                pdbIdB = pdbIdB.replace(".pdb", "");
+            }
+
             return "distance "+name1+"-"+name2+
-                ", resi "+link.residueA.resno+" and name CA and chain "+chainA+" and "+(pdbids[link.residueA.chainIndex] || structure.name)+
-                ", resi "+link.residueB.resno+" and name CA and chain "+chainB+" and "+(pdbids[link.residueB.chainIndex] || structure.name)
+                ", resi "+link.residueA.resno+" and name CA and chain "+chainA+" and "+ pdbIdA+
+                ", resi "+link.residueB.resno+" and name CA and chain "+chainB+" and "+ pdbIdB
             ;
         });
 
