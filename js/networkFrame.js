@@ -552,6 +552,7 @@ CLMSUI.init.views = function () {
                 },
                 {
                     name: "?Auto Group?",
+                    name: "Auto Group",
                     func: compModel.autoGroup,
                     context: compModel,
                     tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)"
