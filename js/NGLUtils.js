@@ -3,22 +3,24 @@ var CLMSUI = CLMSUI || {};
 CLMSUI.NGLUtils = {
     repopulateNGL: function (pdbInfo) {
         //console.log ("pdbInfo", pdbInfo);
-        var pdbSettings = pdbInfo.pdbSettings;
+        this.pdbSettings = pdbInfo.pdbSettings;
         var stage = pdbInfo.stage;
         var compositeModel = pdbInfo.compositeModel;
+
+        const self = this;
 
         console.log ("CLEAR STAGE");
         stage.removeAllComponents(); // necessary to remove old stuff so old sequences don't pop up in sequence finding
 
         function returnFailure(reason) {
-            var id = _.pluck(pdbSettings, "id").join(", ");
+            var id = _.pluck(self.pdbSettings, "id").join(", ");
             var emptySequenceMap = [];
             emptySequenceMap.failureReason = "Error for " + id + ", " + reason;
             compositeModel.trigger("3dsync", emptySequenceMap);
         }
 
         Promise.all (
-            pdbSettings.map (function (pdbSetting) {
+            self.pdbSettings.map (function (pdbSetting) {
                 return stage.loadFile (pdbSetting.uri, pdbSetting.params);
             })
         )
@@ -31,7 +33,7 @@ CLMSUI.NGLUtils = {
                 structureCompArray = structureCompArray || [];  // set to empty array if undefined to avoid error in next bit
                 //CLMSUI.utils.xilog ("structureComp", structureCompArray);
                 structureCompArray.forEach (function (scomp, i) {   // give structure a name if none present (usually because loaded as local file)
-                    scomp.structure.name = scomp.structure.name || pdbSettings[i].id;
+                    scomp.structure.name = scomp.structure.name || self.pdbSettings[i].id;
                 });
 
                 var structureComp;
@@ -438,26 +440,28 @@ CLMSUI.NGLUtils = {
     },
 
     exportPymolCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks) {
-        var crossLinks = nglModelWrapper.getFullLinks();
-        var pymolLinks =  CLMSUI.NGLUtils.makePymolCrossLinkSyntax (structure, crossLinks, remarks);
-        var fileName = downloadFilename ("pymol", "pml");
+        const crossLinks = nglModelWrapper.getFullLinks();
+        const pymolLinks =  CLMSUI.NGLUtils.makePymolCrossLinkSyntax (structure, crossLinks, remarks);
+        const fileName = downloadFilename ("pymol", "pml");
         download (pymolLinks.join("\r\n"), "plain/text", fileName);
     },
 
     makePymolCrossLinkSyntax: function (structure, links, remarks) {
-        var pdbids = structure.chainToOriginalStructureIDMap || {};
-        var cp = structure.getChainProxy();
-        var rp = structure.getResidueProxy();
+        const pdbids = structure.chainToOriginalStructureIDMap || {};
+        const cp = structure.getChainProxy();
+        const rp = structure.getResidueProxy();
 
-        var remarkLines = (remarks || []).map (function (remark) {
+        const remarkLines = (remarks || []).map (function (remark) {
             return "# "+remark;
         });
 
-        var pdbs = d3.set(d3.values(pdbids)).values();
+        let pdbs = d3.set(d3.values(pdbids)).values();
         if (_.isEmpty (pdbs)) { pdbs = [structure.name]; }
-        var pdbLines = pdbs.map (function (pdb) { return "fetch "+pdb+", async=0"; });
 
-        var crossLinkLines = links.map (function (link) {
+        const localFile = typeof(this.pdbSettings[0].pdbCode) === "undefined";
+        const pdbLines = pdbs.map (function (pdb) { return (localFile? "load " : "fetch ") + pdb + (localFile? "" : ", async=0"); });
+
+        const crossLinkLines = links.map (function (link) {
             cp.index = link.residueA.chainIndex;
             var chainA = cp.chainname;
             cp.index = link.residueB.chainIndex;
@@ -466,13 +470,22 @@ CLMSUI.NGLUtils = {
             var name1 = rp.qualifiedName().replace("/", ":");
             rp.index = link.residueB.NGLglobalIndex;
             var name2 = rp.qualifiedName().replace("/", ":");
+
+            let pdbIdA = (pdbids[link.residueA.chainIndex] || structure.name);
+            let pdbIdB = (pdbids[link.residueB.chainIndex] || structure.name);
+
+            if (localFile) {
+                pdbIdA = pdbIdA.replace(".pdb", "");
+                pdbIdB = pdbIdB.replace(".pdb", "");
+            }
+
             return "distance "+name1+"-"+name2+
-                ", resi "+link.residueA.resno+" and name CA and chain "+chainA+" and "+(pdbids[link.residueA.chainIndex] || structure.name)+
-                ", resi "+link.residueB.resno+" and name CA and chain "+chainB+" and "+(pdbids[link.residueB.chainIndex] || structure.name)
+                ", resi "+link.residueA.resno+" and name CA and chain "+chainA+" and "+ pdbIdA+
+                ", resi "+link.residueB.resno+" and name CA and chain "+chainB+" and "+ pdbIdB
             ;
         });
 
-        var lines = remarkLines.concat(pdbLines, crossLinkLines);
+        const lines = remarkLines.concat(pdbLines, crossLinkLines);
         return lines;
     },
 
@@ -488,8 +501,11 @@ CLMSUI.NGLUtils = {
         var cp = structure.getChainProxy();
         var rp = structure.getResidueProxy();
 
-        var remarkLines = ["model,chain1,res1,chain2,res2,distance"];
+        var remarkLines = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
         var selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
+
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+
 
         var crossLinkLines = [];
         for (var link of links){
@@ -504,9 +520,14 @@ CLMSUI.NGLUtils = {
                 var name2 = rp.qualifiedName().replace("/", ":");
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
                 var distObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
+
+                const xiviewLink = crosslinkMap.get(link.origId);
+                p1 = xiviewLink.fromProtein.accession;
+                p2 = xiviewLink.toProtein.accession;
+
                 crossLinkLines.push((pdbids[link.residueA.chainIndex] || structure.name) + ","
-                    + chainA + "," + link.residueA.resno + ","
-                    + chainB + "," + link.residueB.resno + ","
+                    + p1 + "," + chainA + "," + link.residueA.resno + ","
+                    + p2 + "," + chainB + "," + link.residueB.resno + ","
                     + distObj.getXLinkDistanceFromPDBCoords(distObj.matrices, link.residueA.seqIndex, link.residueB.seqIndex, link.residueA.chainIndex, link.residueB.chainIndex));
             }
         }

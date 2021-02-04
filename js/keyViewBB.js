@@ -326,6 +326,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         var self = this;
         var colourSections = this.options.colourConfigs.map (function (config) {
             return {
+                id: config.id,
                 header: "Current "+config.id+" Colour Scheme",
                 rows: [],
                 colourModelKey: config.modelID
@@ -397,9 +398,9 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
             if (colourAssign) {
                 if (colourAssign.get("type") === "threshold") {
                     var pid = this.el.id;
-                    var tcs = updateSection.select(".threecs");
+                    var tcs = updateSection.select("table#colourInfo"+colourSection.id+"colourKey > .threecs");
                     if (tcs.empty()) {
-                        updateSection.select("table tbody").append("tr").append("td")
+                        updateSection.select("table#colourInfo"+colourSection.id+"colourKey tbody").append("tr").append("td")
                             .attr("colspan", 2)
                             .append("div")
                             .attr("id", pid + "3cs" + i)

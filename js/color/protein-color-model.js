@@ -1,10 +1,10 @@
 var CLMSUI = CLMSUI || {};
 
-CLMSUI.BackboneModelTypes.DefaultProteinColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+CLMSUI.BackboneModelTypes.DefaultProteinColourModel = CLMSUI.BackboneModelTypes.ColorModel.extend({
     initialize: function() {
         this
             .set("labels", this.get("colScale").copy().range(["Protein"]))
-            .set("type", "ordinal")
+            .set("type", "categorical")
         ;
     },
     getValue: function () {

@@ -7,7 +7,7 @@ var CLMSUI = CLMSUI || {};
 
 CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -24,13 +24,13 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
             bottom: 5,
             left: 5
         },
-        subclassColour: "black",
+        subclassColour: "gray",
         partofColour: "brown",
         canHideToolbarArea: true,
         canTakeImage: true,
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         CLMSUI.GoTermsViewBB.__super__.initialize.apply(this, arguments);
 
         var self = this;
@@ -51,11 +51,11 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
             .text("Term Type ►")
             .append("select")
             .attr("id", mainDivSel.attr("id") + "goTermSelect")
-            .on("change", function() {
+            .on("change", function () {
                 self.updateThenRender();
             });
 
-        var termSelectData = ["cellular_component", "biological_process", "molecular_function"];
+        var termSelectData = ["protein containing complex"];//"cellular_component", "biological_process", "molecular_function"];
 
         var options = this.termSelect.selectAll("option")
             .data(termSelectData)
@@ -64,17 +64,17 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         // Set the text and value for your options
 
-        options.text(function(d) {
-                return d;
-            })
-            .attr("value", function(d) {
+        options.text(function (d) {
+            return d;
+        })
+            .attr("value", function (d) {
                 return d;
             });
 
         controlDiv.append("input")
-            .attr ("type", "text")
-            .attr ("placeholder", "Search Go Term Names...")
-            .attr ("class", "btn-1 goTextMatch")
+            .attr("type", "text")
+            .attr("placeholder", "Search Go Term Names...")
+            .attr("class", "btn-1 goTextMatch")
         ;
 
         controlDiv.append("span").attr("class", "goTextResult");
@@ -86,11 +86,11 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         // SVG element
         this.svg = this.chartDiv.append("svg");
-        this.svg.on("click", function(d) {
-                // self.model.set("groupedGoTerms", []);
-                // self.model.trigger("groupedGoTermsChanged");
-            })
-            .on("contextmenu", function(d) {
+        this.svg.on("click", function (d) {
+            // self.model.set("groupedGoTerms", []);
+            // self.model.trigger("groupedGoTermsChanged");
+        })
+            .on("contextmenu", function (d) {
                 //d3.event.preventDefault();
                 // react on right-clicking
                 //self.fixed = [];
@@ -129,7 +129,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
             .data(data)
             .enter()
             .append('svg:marker')
-            .attr('id', function(d) {
+            .attr('id', function (d) {
                 return 'marker_' + d.name;
             })
             .attr('markerHeight', 15)
@@ -138,71 +138,81 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
             // .attr('orient', 'auto')
             .attr('refX', 0)
             .attr('refY', 0)
-            .attr('viewBox', function(d) {
+            .attr('viewBox', function (d) {
                 return d.viewbox;
             })
             .append('svg:path')
-            .attr('d', function(d) {
+            .attr('d', function (d) {
                 return d.path;
             })
-            .attr('fill', function(d) {
+            .attr('fill', function (d) {
                 return d.color;
             })
-            .attr('transform', function(d) {
+            .attr('transform', function (d) {
                 return d.transform;
             })
         ;
 
         // initial update done via hiddenChanged trigger above - which is called after all views are set up
-        //this.update();  // can do this here as go terms are available on the view's initialisation
+        this.update();  // needed here to init interactors in goterms, temp hack, todo
     },
 
 
     goTextMatch: function (evt) {
         var self = this;
         var val = evt.target.value;
-        var regex = new RegExp (val, "i");
-        var textPos = this.textPos.bind(this);
+        var regex = new RegExp(val, "i");
+        //var textPos = this.textPos.bind(this);
 
         var allInteractorSet = new Set();
         var goMatchCount = 0;
 
         var nodes = this.foregroundGroup.selectAll(".node")
-            .each (function (d) {
+            .each(function (d) {
                 d.strMatch = val && val.length > 1 && d.name.match(regex);
                 if (d.strMatch) {
                     goMatchCount++;
-                    var interactorSet = d.term.getInteractors ();
+                    var interactorSet = d.term.getInteractors();
                     if (interactorSet) {
-                        interactorSet.forEach (allInteractorSet.add, allInteractorSet);
+                        interactorSet.forEach(allInteractorSet.add, allInteractorSet);
                     }
                 }
             })
-            .sort (function (a, b) {
+            .sort(function (a, b) {
                 return (a.strMatch ? 1 : 0) - (b.strMatch ? 1 : 0);
             })
-            .classed ("highlightedGOTerm", function (d) { return d.strMatch; })
+            .classed("highlightedGOTerm", function (d) {
+                return d.strMatch;
+            })
         ;
 
         nodes.select("rect")
-            .style ("stroke", function (d) { return d.strMatch ? null : d3.rgb(d.color).darker(2); })
+            .style("stroke", function (d) {
+                return d.strMatch ? null : d3.rgb(d.color).darker(2);
+            })
         ;
 
         nodes.select("text")
-            .attr ("clip-path", function (d) { return d.strMatch ? null : self.textOrient (d); })
-            .call (textPos, function() { return false; })
+            .attr("clip-path", function (d) {
+                return d.strMatch ? null : self.textOrient(d);
+            })
+            .call(textPos, function () {
+                return false;
+            })
         ;
 
-        var interactors = Array.from (allInteractorSet.values());
-        var msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount+" matching GO terms, mapping to "+interactors.length+" proteins" : "No matches");
+        var interactors = Array.from(allInteractorSet.values());
+        var msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
         d3.select(this.el).select(".goTextResult").text(msg);
         this.model[evt.key === "Enter" || evt.keyCode === 13 || evt.which === 13 ? "setSelectedProteins" : "setHighlightedProteins"](interactors, false);
     },
 
-    update: function() {
+    update: function () {
         var termType = d3.select("#goTermsPanelgoTermSelect")
             .selectAll("option")
-            .filter(function() { return d3.select(this).property("selected"); })
+            .filter(function () {
+                return d3.select(this).property("selected");
+            })
             .datum()
             .trim()
         ;
@@ -223,7 +233,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 for (var goId of protein.uniprot.go) {
                     var goTerm = go.get(goId);
                     if (goTerm) {
-                        goTerm.interactors = goTerm.interactors || new Set ();  // Lazy instantiation
+                        goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
                         goTerm.interactors.add(protein);
                     }
                 }
@@ -233,41 +243,39 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
         var nodes = new Map();
         var linksMap = new Map();
 
-        CLMSUI.GoTerm.prototype.getCount= 0;
+        CLMSUI.GoTerm.prototype.getCount = 0;
         if (termType == "biological_process") {
-            go.get("GO0008150").getInteractors (true);
+            go.get("GO0008150").getInteractors(true);
             sankeyNode("GO0008150");
         } else if (termType == "molecular_function") {
-            go.get("GO0003674").getInteractors (true);
+            go.get("GO0003674").getInteractors(true);
             sankeyNode("GO0003674");
         } else { // default to cellular component
-            go.get("GO0005575").getInteractors (true);
-            sankeyNode("GO0005575");
+            go.get("GO0032991").getInteractors(true);
+            sankeyNode("GO0032991");
         }
-
-        //console.log ("getInteractor count", CLMSUI.GoTerm.prototype.getCount);
 
         function sankeyNode(goId) {
             if (!nodes.has(goId)) {
-                var goTerm = go.get(goId);
-                var node = {
+                const goTerm = go.get(goId);
+                const node = {
                     name: goTerm.name,
                     id: goTerm.id,
                     term: goTerm,
                 };
                 nodes.set(node.id, node);
-                var interactorCount = goTerm.filtInteractorCount;
-                //interactorSet = interactorSet || goTerm.getInteractors();
+                const interactorCount = goTerm.filtInteractorCount;
 
                 if (goTerm.part_of) {
-                    for (var partOfId of goTerm.part_of) {
-                        var partOfTerm = go.get(partOfId);
-                        if (partOfTerm.namespace == goTerm.namespace) {
-                            var linkId = partOfId + "_" + node.id;
-                            var link = {
+                    for (let partOfId of goTerm.part_of) {
+                        const partOfTerm = go.get(partOfId);
+                        if (partOfTerm.isDescendantOf("GO0032991")) {
+                        // if (partOfTerm.namespace == goTerm.namespace) {
+                            const linkId = partOfId + "_" + node.id;
+                            const link = {
                                 source: sankeyNode(partOfId),
                                 target: node,
-                                value: interactorCount, //interactorSet.size,
+                                value: interactorCount,
                                 id: linkId,
                                 partOf: true
                             };
@@ -276,14 +284,15 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                     }
                 }
                 if (goTerm.is_a) {
-                    for (var superclassId of goTerm.is_a) {
-                        var superclassTerm = go.get(superclassId);
-                        if (superclassTerm.namespace == goTerm.namespace) {
-                            var linkId = superclassId + "_" + node.id;
-                            var link = {
+                    for (let superclassId of goTerm.is_a) {
+                        const superclassTerm = go.get(superclassId);
+                        if (superclassTerm.isDescendantOf("GO0032991")) {
+                        // if (superclassTerm.namespace == goTerm.namespace) {
+                            const linkId = superclassId + "_" + node.id;
+                            const link = {
                                 source: sankeyNode(superclassId),
                                 target: node,
-                                value: interactorCount, //interactorSet.size,
+                                value: interactorCount,
                                 id: linkId,
                                 partOf: false
                             };
@@ -292,18 +301,22 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                     }
                 }
                 if (goTerm.parts) {
-                    for (var partId of goTerm.parts) {
-                        var partTerm = go.get(partId);
-                        if (partTerm.namespace == goTerm.namespace && partTerm.filtInteractorCount > 1) {
-                            sankeyNode(partId);
+                    for (let partId of goTerm.parts) {
+                        const partTerm = go.get(partId);
+                        if (partTerm.isDescendantOf("GO0032991")) {
+                            if (partTerm.namespace == goTerm.namespace && partTerm.filtInteractorCount > 1) {
+                                sankeyNode(partId);
+                            }
                         }
                     }
                 }
                 if (goTerm.subclasses) {
-                    for (var subclassId of goTerm.subclasses) {
-                        var subclassTerm = go.get(subclassId);
-                        if (subclassTerm.namespace == goTerm.namespace && subclassTerm.filtInteractorCount > 1) {
-                            sankeyNode(subclassId);
+                    for (let subclassId of goTerm.subclasses) {
+                        const subclassTerm = go.get(subclassId);
+                        if (subclassTerm.isDescendantOf("GO0032991")){
+                            if (subclassTerm.namespace == goTerm.namespace && subclassTerm.filtInteractorCount > 1) {
+                                sankeyNode(subclassId);
+                            }
                         }
                     }
                 }
@@ -321,24 +334,29 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    leftRightSwitch: function (d) {
-        return d.x < this.sankey.size()[0] / 1.5;   // if true, right
-    },
-
-    textOrient: function (d) {
-        var orient = this.leftRightSwitch(d) ? "right" : "left";
-        return "url(#sankeyColumn"+orient+")";
-    },
-
-    textPos: function (sel, val1) {
-        var self = this;
-        sel
-            .filter (function (d) { return !self.leftRightSwitch(d); })
-            .style ("text-anchor", function (d) { return d.strMatch || val1(d) ? "end" : "start"; })
-            .attr ("x", function (d) { return d.strMatch || val1(d) ? -6 : -self.colWidth + self.sankey.nodeWidth(); })
-        ;
-    },
-
+    // leftRightSwitch: function (d) {
+    //     return false;//d.x < this.sankey.size()[0] / 1.5;   // if true, right
+    // },
+    //
+    // textOrient: function (d) {
+    //     var orient = this.leftRightSwitch(d) ? "right" : "left";
+    //     return "url(#sankeyColumn" + orient + ")";
+    // },
+    //
+    // textPos: function (sel, val1) {
+    //     var self = this;
+    //     sel
+    //         .filter(function (d) {
+    //             return !self.leftRightSwitch(d);
+    //         })
+    //         .style("text-anchor", function (d) {
+    //             return d.strMatch || val1(d) ? "end" : "start";
+    //         })
+    //         .attr("x", function (d) {
+    //             return d.strMatch || val1(d) ? -6 : -self.colWidth + self.sankey.nodeWidth();
+    //         })
+    //     ;
+    // },
 
     render: function (renderOptions) {
         if (this.isVisible()) {
@@ -363,40 +381,48 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 ;
 
                 //console.log ("res", this.sankey);
-                var maxDepth = d3.max (this.data.nodes, function (d) { return d.depth; });
+                var maxDepth = d3.max(this.data.nodes, function (d) {
+                    return d.depth;
+                });
                 var colWidth = (width - this.sankey.nodePadding() - this.sankey.nodeWidth()) / maxDepth;
                 this.colWidth = colWidth;
                 //console.log ("data", this.data, maxDepth, colWidth);
 
-                this.svg.select("defs").selectAll("clipPath.sankeyColumn").remove();
-                var leftRight = [
-                  {x: -colWidth + this.sankey.nodeWidth(), width: colWidth - this.sankey.nodeWidth(), orient: "left"},
-                  {x: 0, width: colWidth, orient: "right"}
-                ];
-                this.svg.select("defs").selectAll("clipPath.sankeyColumn")
-                    .data(leftRight)
-                    .enter()
-                    .append("clipPath")
-                    .attr ("id", function(d) { return "sankeyColumn" + d.orient; })
-                    .attr ("class", "sankeyColumn")
-                    .append("rect")
-                        .attr ("y", -10)
-                        .attr ("height", height + 10)
-                        .attr ("x", function(d) { return isFinite(d.x) ? d.x : 0; })
-                        .attr ("width", function (d) { return d.width ? d.width : 0; })
-                ;
+                // this.svg.select("defs").selectAll("clipPath.sankeyColumn").remove();
+                // var leftRight = [
+                //     {x: -colWidth + this.sankey.nodeWidth(), width: colWidth - this.sankey.nodeWidth(), orient: "left"},
+                //     {x: 0, width: colWidth, orient: "right"}
+                // ];
+                // this.svg.select("defs").selectAll("clipPath.sankeyColumn")
+                //     .data(leftRight)
+                //     .enter()
+                //     .append("clipPath")
+                //     .attr("id", function (d) {
+                //         return "sankeyColumn" + d.orient;
+                //     })
+                //     .attr("class", "sankeyColumn")
+                //     .append("rect")
+                //     .attr("y", -10)
+                //     .attr("height", height + 10)
+                //     .attr("x", function (d) {
+                //         return isFinite(d.x) ? d.x : 0;
+                //     })
+                //     .attr("width", function (d) {
+                //         return d.width ? d.width : 0;
+                //     })
+                // ;
 
                 var color = d3.scale.category20();
 
                 var path = this.sankey.link();
                 var self = this;
 
-                var textPos = self.textPos.bind(self);
+                // var textPos = self.textPos.bind(self);
 
 
                 var linkSel = self.backgroundGroup.selectAll(".goLink")
                     .data(this.data.links,
-                        function(d) {
+                        function (d) {
                             return d.id;
                         }
                     );
@@ -404,168 +430,99 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 linkSel.enter()
                     .append("path")
                     .attr("class", "goLink")
-                    .style("stroke", function(d) {
+                    .style("stroke", function (d) {
                         return d.partOf ? self.options.partofColour : self.options.subclassColour; //"#bdbdbd"
                     })
-                    .style("display", "none")
-                    .attr('marker-start', function(d, i) {
+                    // .style("display", "none")
+                    .attr('marker-start', function (d, i) {
                         return 'url(#marker_' + (d.partOf ? "diamond" : "arrow") + ')';
                     })
                 ;
-                // .on("mouseover", function(d) {d3.select(this).style("stroke-opacity", 1);})
-                // .on("mouseout", function(d) {d3.select(this)scale(1.1) .style("stroke-opacity", 0);});
-                // .append("title")
-                // .text(function(d) {
-                //     return d.target.name + (d.partOf ? " is part of " : " is a ") + d.source.name + "\n" + d.value;
-                // });
-
 
                 var nodeSel = this.foregroundGroup.selectAll(".node")
-                    .data(this.data.nodes, function(d) {
+                    .data(this.data.nodes, function (d) {
                         return d.id;
                     })
                 ;
 
                 var nodeEnter = nodeSel.enter().append("g")
                     .attr("class", "node")
-                    // .call(d3.behavior.drag()
-                    //     .origin(function(d) {
-                    //         return d;
-                    //     })
-                    //     .on("drag", dragmove));
-                    .on("click", function(d) {
+                    .on("click", function (d) {
                         self.model.setSelectedProteins([], false);
                         self.model.setSelectedProteins(Array.from(d.term.getInteractors().values()), true);
                         // self.model.get("groupedGoTerms").push(d.term);
                         // self.model.trigger("groupedGoTermsChanged");
                         d3.event.stopPropagation();
                     })
-                    .on("mouseover", function(d) {
-                        var term = d.term;
-                        // nodeSel
-                        //     .style("display", function(d2) {
-                        //         return term.isDirectRelation(d2.term) ? null : "none";  // ? 1 : 0;
-                        //     })
-                        //     .select ("text")
-                        //     .attr ("clip-path", function (d2) {
-                        //         return d2.strMatch || term.isDirectRelation(d2.term) ? null : self.textOrient(d2);  // ? 1 : 0;
-                        //     })
-                        //     .call (textPos, function () { return true; })
-                        // ;
-
-                        // nodeSel.style("opacity", function(d2) {
-                        //    return term.isDirectRelation(d2.term) ? 1 : 0;
-                        // });
-                        // nodeSel.select("rect").attr("fill", function(dr) {
-                        //     return d == dr ? d.color = color(d.name.replace(/ .*/, "")) : "none";
-                        // });
-
+                    .on("mouseover", function (d) {
+                        const term = d.term;
                         self.hideAllExceptMe(term);
-
-                        linkSel.style("display", function(dlink) {
-                            return d.id == dlink.source.id || d.id == dlink.target.id ? null : "none";
-                        });
-
-                        //i'm finding these get in the way - cc
-                        // self.model.get("tooltipModel")
-                        //     .set("header", "GO Term "+d.id)
-                        //     .set("contents", CLMSUI.modelUtils.makeTooltipContents.goTerm(d.term))
-                        //     .set("location", {
-                        //         pageX: d3.event.pageX,
-                        //         pageY: d3.event.pageY
-                        //     })
-                        // ;
-
+                        self.hideAllLinksExceptTo(term);
                         self.model.setHighlightedProteins(Array.from(term.getInteractors().values()));
                     })
-                    .on("mouseout", function() {
-                        //if (self.fixed.length == 0) {
-                        // nodeSel
-                        //     .style("display", null)
-                        //     .select ("text")
-                        //     .attr ("clip-path", function(d2) { return d2.strMatch ? null : self.textOrient(d2); })
-                        //     .call (textPos, function () { return false; })
-                        // ;
-
-                        // nodeSel.style("opacity", 1);
-                        // nodeSel.select("rect").attr("fill", function(d) {
-                        //    return d.color = color(d.name.replace(/ .*/, ""));
-                        // });
-
+                    .on("mouseout", function () {
                         self.hideAllExceptMe();
-
-                        linkSel.style("display", "none");
-                        // }
-                        self.model.get("tooltipModel").set("contents", null);
+                        self.hideAllLinksExceptTo();
                         self.model.setHighlightedProteins([]);
                     })
-                    .on("contextmenu", function(d) {
+                    .on("contextmenu", function (d) {
                         //d3.event.preventDefault();
                         //d3.event.stopPropagation();
                         // react on right-clicking
                         //self.fixed.push(d.id);
-
                     });
 
                 nodeEnter.append("rect")
                     .attr("width", self.sankey.nodeWidth())
-                    .style("fill", function(d) {
+                    .style("fill", function (d) {
                         return d.color = color(d.name.replace(/ .*/, ""));
-                        // var toFill = (self.fixed.length == 0 || self.fixed.contains(d.id));
-                        // return toFill ? color(d.name.replace(/ .*/, "")) : "none";
                     })
-                    .style("fill-opacity", function(d) {
-                        return 0.2; //d.color = color(d.name.replace(/ .*/, ""));
+                    .style("fill-opacity", function (d) {
+                        return 0.2;
                     })
-                    .style("stroke", function(d) {
+                    .style("stroke", function (d) {
                         return d3.rgb(d.color).darker(2);
                     })
                     .append("title")
-                    .text(function(d) {
-                        return d.name + ":" + d.value;
+                    .text(function (d) {
+                        return d.id + ":" + d.name;// + ":" + d.value;
                     });
 
                 nodeEnter.append("text")
                     .attr("dy", ".35em")
-                    .attr("clip-path", function(d) { return self.textOrient(d); })
-                    .text(function(d) {
+                    // .attr("clip-path", function (d) {
+                    //     return self.textOrient(d);
+                    // })
+                    .text(function (d) {
                         return d.name;
                     });
 
-                nodeSel.attr("transform", function(d) {
+                nodeSel.attr("transform", function (d) {
                     return "translate(" + (d.x ? d.x : 0) + "," + (d.y ? d.y : 0) + ")";
                 });
                 nodeSel.select("rect")
-                    .attr("height", function(d) {
+                    .attr("height", function (d) {
                         return Math.max(1, (d.dy ? d.dy : 0));
                     });
                 nodeSel.select("text")
-                    .attr("x", function(d) {
+                    .attr("x", function (d) {
                         //return (d.x < width / 1.5) ? 6 + self.sankey.nodeWidth() : -6;
-                        return (d.x < width / 1.5) ? 6 + self.sankey.nodeWidth() : -colWidth + self.sankey.nodeWidth() ;
+                        // return (d.x < width / 1.5) ? 6 + self.sankey.nodeWidth() : -colWidth + self.sankey.nodeWidth() ;
+                        return -6;//6 + self.sankey.nodeWidth();
                     })
-                    .style("text-anchor", function(d) {
-                        return "start";
-                        //return self.leftRightSwitch(d) ? "start" : "end";
+                    .style("text-anchor", function (d) {
+                        return "end";
+                        // return self.leftRightSwitch(d) ? "start" : "end";
                     })
-                    .attr("y", function(d) {
+                    .attr("y", function (d) {
                         return (d.dy ? d.dy : 0) / 4;
                     })
                 ;
 
                 linkSel.attr("d", path);
-                // .style("stroke-width", function(d) {
-                //     return 4;//Math.max(1, (d.dy ? d.dy : 0));
-                // });
 
                 nodeSel.exit().remove();
                 linkSel.exit().remove();
-
-                function dragmove(d) {
-                    d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
-                    self.sankey.relayout();
-                    linkSel.attr("d", path);
-                }
             }
         }
 
@@ -573,20 +530,32 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     hideAllExceptMe: function (term) {
-        var nodeSel = this.foregroundGroup.selectAll(".node")
-            .data(this.data.nodes, function(d) {
+        const nodeSel = this.foregroundGroup.selectAll(".node")
+            .data(this.data.nodes, function (d) {
                 return d.id;
             })
         ;
-        if (!term){
+        if (!term) {
             nodeSel.style("opacity", function (d2) {
                 return 1;
             });
-        }else {
+        } else {
             nodeSel.style("opacity", function (d2) {
                 return term.isDirectRelation(d2.term) ? 1 : 0;
             });
         }
+    },
+
+    hideAllLinksExceptTo: function (term) {
+        const linkSel = this.backgroundGroup.selectAll(".goLink")
+            .data(this.data.links,
+                function (d) {
+                    return d.id;
+                }
+            );
+        linkSel.style("display", function (dlink) {
+            return !term || (term.id === dlink.source.id || term.id === dlink.target.id) ? null : "none";
+        });
     },
 
     updateThenRender: function () {
@@ -596,20 +565,20 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    relayout: function(descriptor) {
+    relayout: function (descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render({iterations: 6});
         }
         return this;
     },
 
-    reshow: function() {
+    reshow: function () {
         return this.update();
     },
 
     // called when things need repositioned, but not re-rendered from data
     // gets called before render
-    resize: function() {
+    resize: function () {
         return this.render();
     },
 

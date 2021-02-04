@@ -639,6 +639,79 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
         });
     },
 
+
+    autoGroup: function() {
+        const self = this;
+        CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
+            const groupMap = new Map();
+            const go = self.get("go");
+            for (let goTerm of go.values()) {
+                if (!goTerm.subclasses && !goTerm.parts) {
+                    const interactors = goTerm.getInteractors();
+                    if (interactors && interactors.size > 1) {
+                        // console.log("*"+ goTerm.name);
+                        if (goTerm.isDescendantOf("GO0032991")) {
+                                console.log(">" + goTerm.name);
+
+                                var participantIds = new Set();
+                                for (var p of interactors) {
+                                    participantIds.add(p.id);
+                                }
+                                groupMap.set(goTerm.name, participantIds);
+
+                            } else {
+                                // console.log("!" + goTerm.name);
+                            }
+
+                    }
+                }
+            }
+
+            self.set("groups", groupMap);
+            self.trigger("change:groups");
+
+
+
+
+            // var proteins = this.model.get("clmsModel").get("participants").values();
+            // for (var protein of proteins) {
+            //
+            //     if (protein.uniprot) {
+            //         var peri = false;
+            //         var intr = false;
+            //         for (var goId of protein.uniprot.go) {
+            //             var goTerm = go.get(goId);
+            //             if (goTerm) {
+            //                 //GO0071944
+            //                 if (goTerm.isDescendantOf("GO0071944") == true) {
+            //                     peri = true;
+            //                 } //GO0071944
+            //                 if (goTerm.isDescendantOf("GO0005622") == true) {
+            //                     intr = true;
+            //                 }
+            //             }
+            //
+            //         }
+            //
+            //         if (peri == true && intr == true) {
+            //             both.add(protein.id);
+            //         } else if (peri == true) {
+            //             periphery.add(protein.id);
+            //         } else if (intr == true) {
+            //             intracellular.add(protein.id);
+            //         } else {
+            //             uncharacterised.add(protein.id);
+            //         }
+            //     }
+            //
+            // }
+            // this.model.set("groups", groupMap);
+
+
+
+        });
+    },
+
     // Things that can cause a cross-link's minimum distance to change:
     // 1. New PDB File loaded
     // 2. Change in alignment
