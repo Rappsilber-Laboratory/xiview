@@ -551,10 +551,10 @@ CLMSUI.init.views = function () {
                     tooltip: "Clears all groups"
                 },
                 {
-                    name: "Auto Group",
-                    func: compModel.clearGroups,
+                    name: "?Auto Group?",
+                    func: compModel.autoGroup,
                     context: compModel,
-                    tooltip: "Attempts to group protein complexes based on GO terms. (Will clear old groups.)"
+                    tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)"
                 }
             ],
             //tooltipModel: compModel.get("tooltipModel")

@@ -154,7 +154,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
         ;
 
         // initial update done via hiddenChanged trigger above - which is called after all views are set up
-        //this.update();  // can do this here as go terms are available on the view's initialisation
+        this.update();  // needed here to init interactors in goterms, temp hack, todo
     },
 
 

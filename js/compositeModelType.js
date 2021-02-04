@@ -643,32 +643,36 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
     autoGroup: function() {
         const self = this;
         CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
-            self.set("groups", new Map());
+            const groupMap = new Map();
+            const go = self.get("go");
+            for (let goTerm of go.values()) {
+                if (!goTerm.subclasses && !goTerm.parts) {
+                    const interactors = goTerm.getInteractors();
+                    if (interactors && interactors.size > 1) {
+                        // console.log("*"+ goTerm.name);
+                        if (goTerm.isDescendantOf("GO0032991")) {
+                                console.log(">" + goTerm.name);
+
+                                var participantIds = new Set();
+                                for (var p of interactors) {
+                                    participantIds.add(p.id);
+                                }
+                                groupMap.set(goTerm.name, participantIds);
+
+                            } else {
+                                // console.log("!" + goTerm.name);
+                            }
+
+                    }
+                }
+            }
+
+            self.set("groups", groupMap);
             self.trigger("change:groups");
-            //
-            // var groupMap = new Map();
-            // var uncharacterised = new Set();
-            // var periphery = new Set();
-            // //groupMap.set("uncharacterised", uncharacterised);
-            //
-            // var periphery = new Set();
-            // groupMap.set("periphery", periphery);
-            //
-            // var intracellular = new Set();
-            // groupMap.set("intracellular", intracellular);
-            //
-            // var both = new Set();
-            // groupMap.set("periphery_intracellular", both);
-            //
-            // /* // not gonna work
-            // var characterised = new Set();
-            // groupMap.set("characterised", characterised);
-            // characterised.add("periphery");
-            // characterised.add("intracellular");
-            // characterised.add("periphery_intracellular");
-            // */
-            //
-            // var go = this.model.get("go");
+
+
+
+
             // var proteins = this.model.get("clmsModel").get("participants").values();
             // for (var protein of proteins) {
             //
