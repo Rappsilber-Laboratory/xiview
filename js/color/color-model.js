@@ -248,7 +248,9 @@ CLMSUI.linkColour.makeMetadataColorModel = function (field, label, objs) { // ob
                 allColors = false
             } else {
                 allNumbers = false;
-                val = val.trim();
+                if (val.trim){
+                    val = val.trim();
+                }
                 categories.add(val);
                 if (allColors && !CLMSUI.utils.commonRegexes.hexColour.test(val)) {
                    allColors = false;
