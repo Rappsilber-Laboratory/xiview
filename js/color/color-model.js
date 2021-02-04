@@ -248,12 +248,12 @@ CLMSUI.linkColour.makeMetadataColorModel = function (field, label, objs) { // ob
                 allColors = false
             } else {
                 allNumbers = false;
-                if (val.trim){
+                if (val.trim) {
                     val = val.trim();
                 }
                 categories.add(val);
                 if (allColors && !CLMSUI.utils.commonRegexes.hexColour.test(val)) {
-                   allColors = false;
+                    allColors = false;
                 }
             }
         }
@@ -301,7 +301,7 @@ CLMSUI.linkColour.makeMetadataColorModel = function (field, label, objs) { // ob
             type: "categorical",
         });
     } else {
-         // make normal categorical
+        // make normal categorical
         const range = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"];
 
         return new CLMSUI.BackboneModelTypes.MetaDataCategoricalColorModel({
@@ -320,7 +320,7 @@ CLMSUI.BackboneModelTypes.MetaDataHexValuesColorModel = CLMSUI.BackboneModelType
         this.set("labels", this.get("colScale").copy());
     },
     getValue: function (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
-        if (typeof (obj) === "P_PLink") { //} obj.crossLinks) {
+        if (obj.isPPLink) { //} obj.crossLinks) {
             return obj.crossLinks[0].id;
         }
         return obj.id;
@@ -333,7 +333,7 @@ CLMSUI.BackboneModelTypes.MetaDataCategoricalColorModel = CLMSUI.BackboneModelTy
         this.set("labels", this.get("colScale").copy().range(domain)); //
     },
     getValue: function (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
-        if (typeof (obj) === "P_PLink") { //} obj.crossLinks) {
+        if (obj.isPPLink) { //} obj.crossLinks) {
             return obj.crossLinks[0].getMeta(this.get("field"));
         }
         return obj.getMeta(this.get("field"));
@@ -341,18 +341,28 @@ CLMSUI.BackboneModelTypes.MetaDataCategoricalColorModel = CLMSUI.BackboneModelTy
 });
 
 CLMSUI.BackboneModelTypes.ThresholdColorModel = CLMSUI.BackboneModelTypes.ColorModel.extend({ // todo -code duplication with Highest score col model
-    initialize: function() {
+    initialize: function () {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low", "Mid", "High"]));
     },
     getValue: function (obj) {
-        return obj.getMeta(this.get("field"));
+        // return obj.getMeta(this.get("field"));
+
+        let scores = [];
+        if (obj.isPPLink) { // watch out! proteins also have an att called crossLinks
+            for (let crosslink of obj.crossLinks) {
+                scores.push(crosslink.getMeta(this.get("field")));
+            }
+        } else {
+            scores.push(obj.getMeta(this.get("field")));
+        }
+        return Math.max.apply(Math, scores);
     },
     getLabelColourPairings: function () {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength);//.concat(this.get("undefinedColour"));
-        return d3.zip (labels, colScaleRange);
+        return d3.zip(labels, colScaleRange);
     },
 });
