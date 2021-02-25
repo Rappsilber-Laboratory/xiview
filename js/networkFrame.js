@@ -431,13 +431,6 @@ CLMSUI.init.views = function () {
             eventName: "scatterplotViewShow",
             tooltip: "Configurable view for comparing two crosslink/match properties",
         },
-        // {
-        //     id: "listChkBxPlaceholder",
-        //     label: "List",
-        //     eventName: "listViewShow",
-        //     tooltip: "Sortable list of cross-links, can convert to heatmap",
-        //     sectionEnd: true
-        // },
         {
             id: "alignChkBxPlaceholder",
             label: "Alignment",
@@ -573,34 +566,29 @@ CLMSUI.init.views = function () {
 
     // Generate buttons for load dropdown
     var loadButtonData = [{
-        name: "PDB Data",
+            name: "PDB",
         eventName: "pdbFileChooserShow",
         tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
     },
         {
-            name: "STRING Data",
+            name: "STRING",
             eventName: "stringDataChooserShow",
             tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
         },
-        // {
-        //     name: "Crosslinks (CSV)",
-        //     eventName: "csvFileChooserShow",
-        //     tooltip: "Load Cross-Links from a local CSV File"
-        // },
         {
-            name: "Crosslink or PPI Metadata",
+            name: "Edge Metadata",
             eventName: "linkMetaDataFileChooserShow",
-            tooltip: "Load crosslink or PPI Meta-Data from a local CSV file"
+            tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
         },
         {
-            name: "Protein Metadata",
+            name: "Node Metadata",
             eventName: "proteinMetaDataFileChooserShow",
-            tooltip: "Load Protein Meta-Data from a local CSV file"
+            tooltip: "Load node (protein) meta-data from a local CSV file"
         },
         {
-            name: "User Annotations",
+            name: "Sequence Annotations",
             eventName: "userAnnotationsMetaDataFileChooserShow",
-            tooltip: "Load User Annotations from a local CSV file"
+            tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
         },
     ];
     loadButtonData.forEach(function (bdata) {
@@ -612,7 +600,7 @@ CLMSUI.init.views = function () {
         el: "#loadDropdownPlaceholder",
         model: compModel.get("clmsModel"),
         myOptions: {
-            title: "Load",
+            title: "Import",
             menu: loadButtonData,
             //tooltipModel: compModel.get("tooltipModel"),
         }
