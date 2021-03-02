@@ -167,9 +167,9 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
                 }
             }
 
-            if (d.class) {
-                ind.classed(d.class, true);
-            }
+            // if (d.class) {
+            //     ind.classed(d.class, true);
+            // }
 
             // if tooltip data provided, add either as title attribute or if the tooltipmodel passed as an option, use that
             if (d.tooltip) {
