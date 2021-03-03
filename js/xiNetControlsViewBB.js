@@ -23,9 +23,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             },
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
-
-            // "change .xinetDragToPan": "dragActionChanged",
-            // "change .xinetDragToSelect": "dragActionChanged",
             "change .fixSelected": "setFixSelected",
             "change .showLabels": "setShowLabels",
             "change .fixedSize": "setFixedSize",
@@ -71,10 +68,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             }
         };
         xmlhttp.send();
-    },
-
-    defaultOptions: {
-        dragTo: "Pan",
     },
 
     initialize: function(viewOptions) {
@@ -127,26 +120,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
         // Various view options set up...
         var toggleButtonData = [
-            // {
-            //     class: "xinetDragToPan",
-            //     label: "Pan",
-            //     id: "dragToPan",
-            //     tooltip: "drag to pan in xiNET",
-            //     group: "dragTo",
-            //     type: "radio",
-            //     value: "Pan",
-            //     header: "Drag to"
-            // },
-            // {
-            //     class: "xinetDragToSelect",
-            //     label: "Select",
-            //     id: "dragToSelect",
-            //     tooltip: "drag to select in xiNET",
-            //     group: "dragTo",
-            //     type: "radio",
-            //     value: "Select",
-            //     sectionEnd: true,
-            // },
             {
                 initialState: this.model.get("xinetFixSelected"),
                 class: "fixSelected",
@@ -196,7 +169,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
         d3.select("body")
             .append("label")
-            .attr("id", "xiNetButtonBarppiStep1")
             .text("Step 1 ")
             .append("input")
             .attr("type", "number")
@@ -209,7 +181,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
         d3.select("body")
             .append("label")
-            .attr("id", "xiNetButtonBarppiStep2")
             .text("Step 2 ")
             .append("input")
             .attr("type", "number")
@@ -251,18 +222,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                 // tooltipModel: self.model.get("tooltipModel"),
             }
         });
-
-        //hack to take out pan/select option in firefox TODO - change to detecting relevant feature (getIntersectionList)
-        // if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-            // Do Firefox-related activities
-            d3.selectAll(".xinetDragToPan").style("display", "none");
-            d3.selectAll(".xinetDragToSelect").style("display", "none");
-        // };
     },
-
-    // dragActionChanged: function() {
-    //     this.model.set("xinetDragToPan", d3.select("input.xinetDragToPan").property("checked"));
-    // },
 
     setShowLabels: function() {
         this.model.set("xinetShowLabels", d3.select("input.showLabels").property("checked"));
@@ -292,64 +252,64 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
         this.model.set("xinetPpiSteps", steps);
     },
 
-    autoGroup: function() {
-        var groupMap = new Map();
-        var uncharacterised = new Set();
-        var periphery = new Set();
-        //groupMap.set("uncharacterised", uncharacterised);
-
-        var periphery = new Set();
-        groupMap.set("periphery", periphery);
-
-        var intracellular = new Set();
-        groupMap.set("intracellular", intracellular);
-
-        var both = new Set();
-        groupMap.set("periphery_intracellular", both);
-
-        /* // not gonna work
-        var characterised = new Set();
-        groupMap.set("characterised", characterised);
-        characterised.add("periphery");
-        characterised.add("intracellular");
-        characterised.add("periphery_intracellular");
-        */
-
-        var go = this.model.get("go");
-        var proteins = this.model.get("clmsModel").get("participants").values();
-        for (var protein of proteins) {
-
-            if (protein.uniprot) {
-                var peri = false;
-                var intr = false;
-                for (var goId of protein.uniprot.go) {
-                    var goTerm = go.get(goId);
-                    if (goTerm) {
-                        //GO0071944
-                        if (goTerm.isDescendantOf("GO0071944") == true) {
-                            peri = true;
-                        } //GO0071944
-                        if (goTerm.isDescendantOf("GO0005622") == true) {
-                            intr = true;
-                        }
-                    }
-
-                }
-
-                if (peri == true && intr == true) {
-                    both.add(protein.id);
-                } else if (peri == true) {
-                    periphery.add(protein.id);
-                } else if (intr == true) {
-                    intracellular.add(protein.id);
-                } else {
-                    uncharacterised.add(protein.id);
-                }
-            }
-
-        }
-        this.model.set("groups", groupMap);
-    },
+    // autoGroup: function() {
+    //     var groupMap = new Map();
+    //     var uncharacterised = new Set();
+    //     var periphery = new Set();
+    //     //groupMap.set("uncharacterised", uncharacterised);
+    //
+    //     var periphery = new Set();
+    //     groupMap.set("periphery", periphery);
+    //
+    //     var intracellular = new Set();
+    //     groupMap.set("intracellular", intracellular);
+    //
+    //     var both = new Set();
+    //     groupMap.set("periphery_intracellular", both);
+    //
+    //     /* // not gonna work
+    //     var characterised = new Set();
+    //     groupMap.set("characterised", characterised);
+    //     characterised.add("periphery");
+    //     characterised.add("intracellular");
+    //     characterised.add("periphery_intracellular");
+    //     */
+    //
+    //     var go = this.model.get("go");
+    //     var proteins = this.model.get("clmsModel").get("participants").values();
+    //     for (var protein of proteins) {
+    //
+    //         if (protein.uniprot) {
+    //             var peri = false;
+    //             var intr = false;
+    //             for (var goId of protein.uniprot.go) {
+    //                 var goTerm = go.get(goId);
+    //                 if (goTerm) {
+    //                     //GO0071944
+    //                     if (goTerm.isDescendantOf("GO0071944") == true) {
+    //                         peri = true;
+    //                     } //GO0071944
+    //                     if (goTerm.isDescendantOf("GO0005622") == true) {
+    //                         intr = true;
+    //                     }
+    //                 }
+    //
+    //             }
+    //
+    //             if (peri == true && intr == true) {
+    //                 both.add(protein.id);
+    //             } else if (peri == true) {
+    //                 periphery.add(protein.id);
+    //             } else if (intr == true) {
+    //                 intracellular.add(protein.id);
+    //             } else {
+    //                 uncharacterised.add(protein.id);
+    //             }
+    //         }
+    //
+    //     }
+    //     this.model.set("groups", groupMap);
+    // },
 
     identifier: "xiNET Controls",
 });
