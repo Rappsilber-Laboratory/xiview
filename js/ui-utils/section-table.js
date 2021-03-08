@@ -1,5 +1,5 @@
 //has to be loaded after Utils.js
-//used by proteinINfoViewBB.js? and KeyViewBB.js
+//only used by KeyViewBB.js
 CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
     const self = this;
     const legalDom = CLMSUI.utils.makeLegalDomID;

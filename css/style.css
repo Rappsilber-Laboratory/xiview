@@ -575,7 +575,7 @@ A.btn {
 }
 
 .sectionTable table td:first-child, .sectionTable table th {
-    text-transform: capitalize;
+    /*text-transform: capitalize;*/
 }
 
 .sectionTable tbody tr > td {
