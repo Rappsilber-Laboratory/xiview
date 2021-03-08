@@ -2,38 +2,43 @@
 //
 //  Martin Graham, Rappsilber Laboratory, 2015
 
-
 var CLMSUI = CLMSUI || {};
 
 CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
-    events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+    events: function () {
+        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
         return _.extend({
-            "mouseenter .sectionTable h2": "highlightProteins",
-            "mouseleave .sectionTable h2": "unhighlightProteins",
+            "mouseenter .proteinTabs span": "highlightProteins",
+            "mouseleave .proteinTabs span": "unhighlightProteins",
         }, parentEvents, {});
     },
 
     defaultOptions: {
-        fixedFontKeys: d3.set(["sequence", "seq"]),
-        removeTheseKeys: d3.set(["canonicalSeq", "seq_mods", "filteredNotDecoyNotLinearCrossLinks", "hidden", "TargetProteinID"]),
-        expandTheseKeys: d3.set(["uniprot", "meta"]),
+        removeTheseKeys: new Set(["canonicalSeq", "seq_mods", "filteredNotDecoyNotLinearCrossLinks", "hidden", "targetProteinID", "form", "is_decoy", "manuallyHidden"]),
+        expandTheseKeys: new Set(["uniprot", "meta"]),
+        orderedKeys: ["name", "id", "accession", "description", "size", "sequence"],
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         CLMSUI.ProteinInfoViewBB.__super__.initialize.apply(this, arguments);
 
-        // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el);
-        mainDivSel.append("div")
-            .attr("class", "panelInner")
-            .classed("proteinInfoPanel", true)
-            .append("h1")
-            .attr("class", "infoHeader")
-            .text("Info for 0 Selected Proteins");
+        const flexContainer = d3.select(this.el)
+            .append("div")
+            .classed("verticalFlexContainer", true);
+
+        const toolBarArea = flexContainer.append("div")
+            .classed("toolbarArea", true);
+        toolBarArea.append("h1")
+            .classed("infoHeader", true)
+            .text("0 Selected Proteins");
+        toolBarArea.append("div")
+            .classed("proteinTabs", true);
+
+        flexContainer.append("div")
+            .classed("proteinInfoPanel sectionTable panelInner", true); //todo tidy css
 
         this.listenTo(this.model, "change:selectedProteins proteinMetadataUpdated", this.render);
         this.listenTo(this.model, "filteringDone change:selection change:highlights", this.showCrossLinksState);
@@ -42,52 +47,159 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    render: function() {
-        // only render if visible
-        console.log("prot info render called");
+    render: function () {
         if (this.isVisible()) {
-            var dataSource = this.model.get("selectedProteins");
-            var prots = dataSource; // ? CLMS.arrayFromMapValues(dataSource) : [];
-            prots.sort(function(a, b) {
+            const prots = this.model.get("selectedProteins");
+            prots.sort(function (a, b) {
                 return a.name.localeCompare(b.name);
             });
+
+            if (prots.length === 1 || prots.indexOf(this.displayedProt) === -1) {
+                this.displayedProt = prots[0];
+            } else if (prots.length === 0) {
+                this.displayedProt = null;
+            }
+
+            d3.select(this.el).select(".infoHeader")
+                .text(prots.length + " Selected Protein" + (prots.length !== 1 ? "s" : ""));
+
+            // d3 data bind
+            const protJoin = d3.select(this.el).select("div.proteinTabs").selectAll(".protTab").data(prots,
+                function (d) {
+                    return CLMSUI.utils.makeLegalDomID(d.id);
+                });
+            const self = this;
+            protJoin.enter().append("span")
+                .classed("protTab", true)
+                .text(
+                    function (d) {
+                        return d.name + " ; ";
+                    }
+                )
+                .on("click", function (d) {
+                    self.displayedProt = d;
+                    self.updateTabs();
+                    self.updateTable(d);
+                })
+            ;
+            protJoin.exit().remove();
+            protJoin.order();
+
+            this.updateTabs();
+            // this.showProteinHighlightsState();
+            this.updateTable(this.displayedProt);
+        }
+        return this;
+    },
+
+    updateTabs: function () {
+        const self = this;
+        d3.select(this.el).select("div.proteinTabs").selectAll(".protTab").classed("selectedTab",
+            function (d) {
+                //console.log(d, self.displayedProt, d === self.displayedProt);
+                return d === self.displayedProt;
+            });
+
+    },
+
+    updateTable: function (protein) {
+        const divSel = d3.select(this.el).select("div.proteinInfoPanel");
+        //deliberately doesn't use d3 from here on
+        const div = divSel[0][0];
+        div.textContent = "";
+        if (protein) {
+            console.log("update protein info table", protein.id, protein.name);
+            const table = document.createElement("table");
+            let tBody = table.createTBody();
+
+            const self = this;
+            const goTermsMap = CLMSUI.compositeModelInst.get("go");
+
+            for (let key of this.options.orderedKeys) {
+                addRow(key);
+            }
+
+            for (let key in protein) {
+                if (this.options.orderedKeys.indexOf(key) === -1 && typeof protein[key] !== "function"
+                        && !this.options.removeTheseKeys.has(key)) {
+                    if (this.options.expandTheseKeys.has(key)) {
+                        addMetaRows(key);
+                    } else {
+                        addRow(key);
+                    }
+                }
+            }
+
+            function addRow(key) {
+                let row = tBody.insertRow();
+                let cell1 = row.insertCell();
+                cell1.textContent = key;
+                let cell2 = row.insertCell();
+                const value = protein[key];
+                if (Array.isArray(value)) {
+                    cell2.textContent = value.length;
+                } else if (key === "sequence") {
+                    cell2.innerHTML = self.makeInteractiveSeqString(protein, protein.sequence, protein.crossLinks, true);
+                } else {
+                    cell2.textContent = value;
+                }
+                if (key.indexOf("seq") !== -1) {
+                    cell2.classList.add('fixedSizeFont');
+                }
+            }
+
+            function addMetaRows(key) {
+                const metaObj = protein[key];
+                let row = tBody.insertRow();
+                let cell1 = row.insertCell();
+                cell1.textContent = key;
+                cell1.colSpan = 1;
+                let cell2 = row.insertCell();
+                const innerTable = document.createElement("table");
+                let innerTBody = innerTable.createTBody();
+                for (let subkey in metaObj) {
+                    if (subkey !== "sequence" && subkey !== "features") {
+                        let innerRow = innerTBody.insertRow();
+                        let subCell1 = innerRow.insertCell();
+                        subCell1.textContent = subkey;
+                        let subCell2 = innerRow.insertCell();
+                        const value = metaObj[subkey];
+                        if (Array.isArray(value)) {
+                            const innerInnerTable = document.createElement("table");
+                            let innerInnerTBody = innerInnerTable.createTBody();
+                            for (let subValue of value) {
+                                let row = innerInnerTBody.insertRow();
+                                let cell1 = row.insertCell();
+                                if (subkey === "go"){
+                                    cell1.textContent = subValue + " : " + goTermsMap.get(subValue).name;
+                                }
+                                else {
+                                    cell1.textContent = subValue.toString();
+                                }
+                            }
+                            subCell2.append(innerInnerTable);
+                        } else {
+                            subCell2.textContent = value;
+                        }
+                        if (subkey.indexOf("seq") !== -1) {
+                            subCell2.classList.add('fixedSizeFont');
+                        }
+                    }
+                }
+                cell2.append(innerTable);
+            }
+
+            div.appendChild(table);
+
             var tabs = d3.select(this.el).select("div.panelInner");
 
-            tabs.select("h1.infoHeader")
-                .text("Info for " + prots.length + " Selected Protein" + (prots.length !== 1 ? "s" : ""));
-
-            var self = this;
-
-            var rowFilterFunc = function(d) {
-                var entries = d3.entries(d);
-                var badKeys = self.options.removeTheseKeys;
-                return entries.filter(function(entry) {
-                    if ($.isArray(entry.value)) {
-                        entry.value = entry.value.length;
-                    } else if (entry.key === "sequence") {
-                        entry.value = self.makeInteractiveSeqString(d, d.sequence, d.crossLinks, true);
-                    }
-                    return !($.isFunction(entry.value) || (badKeys && badKeys.has(entry.key)));
-                });
-            };
-
-            var cellFunc = function(d, i) {
-                d3.select(this).html(i === 0 ? d.value.replace("_", " ") : d.value);
-            };
-
-            var headerFunc = function(d) {
-                return d.name.replace("_", " ");
-            };
-
-            CLMSUI.utils.sectionTable.call(this, tabs, prots, "protInfo", ["Property", "Value"], headerFunc, rowFilterFunc, cellFunc, [0]);
-
             tabs.selectAll("span.hit")
-                .on("click", function() {
+                .on("click", function () {
                     var idArray = self.splitDataAttr(d3.select(this), "data-linkids");
                     var crossLinks = self.getCrossLinksFromIDs(idArray, true);
                     self.model.setMarkedCrossLinks("selection", crossLinks, true, d3.event.ctrlKey);
                 })
-                .on("mouseover", function() {
+                .on("mouseover", function () {
                     //console.log ("model", self.model);
                     var d3sel = d3.select(this);
                     var idArray = self.splitDataAttr(d3sel, "data-linkids");
@@ -105,18 +217,17 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
                     //     });
                     self.model.setMarkedCrossLinks("highlights", crossLinks, true, false);
                 })
-                .on("mouseout", function() {
+                .on("mouseout", function () {
                     self.model.get("tooltipModel").set("contents", null);
                     self.model.setMarkedCrossLinks("highlights", [], false, false);
                 });
 
             this.showCrossLinksState();
-        }
 
-        return this;
+        }
     },
 
-    showCrossLinksState: function() {
+    showCrossLinksState: function () {
         var self = this;
         //console.log ("in prot info filter");
         if (this.isVisible()) {
@@ -126,16 +237,16 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
             var highidset = d3.set(_.pluck(highlightedLinks, "id"));
 
             d3.select(this.el).selectAll("span.hit")
-                .each(function() {
+                .each(function () {
                     var d3sel = d3.select(this);
                     var idArray = self.splitDataAttr(d3sel, "data-linkids");
                     var crossLinks = self.getCrossLinksFromIDs(idArray, true);
                     //d3sel.classed ("filteredOutResidue", crossLinks.length === 0);
-                    var selYes = crossLinks.some(function(xlink) {
+                    var selYes = crossLinks.some(function (xlink) {
                         return selidset.has(xlink.id);
                     });
                     //d3sel.classed ("selected", selYes);
-                    var highYes = crossLinks.some(function(xlink) {
+                    var highYes = crossLinks.some(function (xlink) {
                         return highidset.has(xlink.id);
                     });
                     //d3sel.classed ("highlighted", highYes);
@@ -157,58 +268,59 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    showProteinHighlightsState: function() {
+    showProteinHighlightsState: function () {
         var highlightSet = d3.set(_.pluck(this.model.get("highlightedProteins"), "id"));
-        d3.select(this.el).selectAll(".sectionTable h2")
-            .classed("highlighted", function(d) {
+        //d3.select(this.el).selectAll(".sectionTable h2")
+        d3.select(this.el).selectAll(".protTab")
+            .classed("highlighted", function (d) {
                 return highlightSet.has(d.id);
             });
         return this;
     },
 
-    highlightProteins: function(evt) {
+    highlightProteins: function (evt) {
         this.model.setHighlightedProteins([d3.select(evt.target).datum()]);
         return this;
     },
 
-    unhighlightProteins: function() {
+    unhighlightProteins: function () {
         this.model.setHighlightedProteins([]);
         return this;
     },
 
-    splitDataAttr: function(d3sel, dataAttrName, splitChar) {
+    splitDataAttr: function (d3sel, dataAttrName, splitChar) {
         var ids = d3sel.attr(dataAttrName);
         return ids ? ids.split(splitChar || ",") : [];
     },
 
-    getCrossLinksFromIDs: function(linkIDs, filter) {
+    getCrossLinksFromIDs: function (linkIDs, filter) {
         linkIDs = d3.set(linkIDs).values(); // strips out duplicates
 
         var allLinks = this.model.get("clmsModel").get("crossLinks");
-        var crossLinks = linkIDs.map(function(linkId) {
+        var crossLinks = linkIDs.map(function (linkId) {
             return allLinks.get(linkId);
         });
 
         if (filter) {
-            crossLinks = crossLinks.filter(function(xlink) {
+            crossLinks = crossLinks.filter(function (xlink) {
                 return xlink.filteredMatches_pp.length > 0;
             });
         }
         return crossLinks;
     },
 
-    makeInteractiveSeqString: function(protein, seq, xlinks, filterDecoys) {
+    makeInteractiveSeqString: function (protein, seq, xlinks, filterDecoys) {
         var proteinId = protein.id;
         if (filterDecoys) {
-            xlinks = xlinks.filter(function(xlink) {
+            xlinks = xlinks.filter(function (xlink) {
                 return !xlink.isDecoyLink();
             });
         }
-        var map = d3.map(xlinks, function(d) {
+        var map = d3.map(xlinks, function (d) {
             return d.id;
         });
         var endPoints = {};
-        map.forEach(function(id, xlink) { // saves calculating values() - map.values().forEach (function (xlink)
+        map.forEach(function (id, xlink) { // saves calculating values() - map.values().forEach (function (xlink)
             if (proteinId === xlink.fromProtein.id) {
                 var fromRes = xlink.fromResidue;
                 endPoints[fromRes] = endPoints[fromRes] || [];
@@ -226,13 +338,13 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
             }
         });
         var endPointEntries = d3.entries(endPoints);
-        endPointEntries.sort(function(a, b) {
+        endPointEntries.sort(function (a, b) {
             return a.key - b.key;
         });
 
         var strSegs = [];
         var last = 0;
-        endPointEntries.forEach(function(ep) {
+        endPointEntries.forEach(function (ep) {
             var pos = +ep.key;
             var linkIds = _.pluck(ep.value, "id");
             strSegs.push(seq.slice(last, pos - 1));
@@ -241,7 +353,7 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
         });
         strSegs.push(seq.slice(last, seq.length));
         var iStr = strSegs.join("");
-        //console.log ("iStr", iStr);
+        //console.log("iStr", iStr);
 
         return iStr;
     },

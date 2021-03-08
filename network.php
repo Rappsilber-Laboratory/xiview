@@ -147,6 +147,7 @@
          <script type="text/javascript" src="./js/goTermsSankeyViewBB.js<?php echo $cacheBuster ?>"></script>
          <script type="text/javascript" src="./js/goTerm.js<?php echo $cacheBuster ?>"></script>
          <script type="text/javascript" src="./js/sankey.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/section-table.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="../userGUI/js/dialogs.js<?php echo $cacheBuster ?>"></script>
 

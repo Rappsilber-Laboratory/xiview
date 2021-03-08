@@ -1,5 +1,24 @@
-#proteinInfoPanel .panelInner {
+ .panelInner {
     overflow-y: auto;
+    /*height: 100%;*/
+}
+
+#proteinInfoPanel .protTab {
+    cursor: pointer;
+    /*color:white;*/
+    /*background: blue;*/
+}
+
+#proteinInfoPanel .selectedTab {
+    color:white;
+    background-color: #091D42;
+    cursor: default;
+}
+
+#proteinInfoPanel .selectedTab.highlighted {
+    color:#091D42;
+    background-color: #fdc086;
+    cursor: default;
 }
 
 .proteinInfoPanel .sectionTable h2.highlighted {
@@ -15,6 +34,11 @@
 
 .proteinInfoPanel table {
     table-layout: fixed;
+}
+
+.proteinInfoTable {
+    overflow-y: scroll;
+
 }
 
 .proteinInfoPanel table td:first-child, .proteinInfoPanel table th:first-child {

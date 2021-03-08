@@ -152,6 +152,9 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
             var ind = d3.select(this);
             if (d.name) {
                 ind.append("span").text(d.name);
+                if (d.class) {
+                    ind.classed(d.class, true);
+                }
             } else if (d.id) {
                 var targetSel = d3.select("#" + CLMSUI.utils.makeLegalDomID(d.id));
                 if (!targetSel.empty()) {
@@ -165,10 +168,6 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
                         ind.select("#" + CLMSUI.utils.makeLegalDomID(d.id)); // this pushes parent d3 datum onto this element
                     }
                 }
-            }
-
-            if (d.class) {
-                ind.classed(d.class, true);
             }
 
             // if tooltip data provided, add either as title attribute or if the tooltipmodel passed as an option, use that
