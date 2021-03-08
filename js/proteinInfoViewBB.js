@@ -17,7 +17,7 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     defaultOptions: {
-        removeTheseKeys: new Set(["canonicalSeq", "seq_mods", "filteredNotDecoyNotLinearCrossLinks", "hidden", "targetProteinID", "form", "is_decoy"]),
+        removeTheseKeys: new Set(["canonicalSeq", "seq_mods", "filteredNotDecoyNotLinearCrossLinks", "hidden", "targetProteinID", "form", "is_decoy", "manuallyHidden"]),
         expandTheseKeys: new Set(["uniprot", "meta"]),
         orderedKeys: ["name", "id", "accession", "description", "size", "sequence"],
     },
