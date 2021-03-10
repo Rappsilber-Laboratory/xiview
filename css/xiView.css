@@ -1,1 +1,4 @@
 /* take out monolinks checkbox*/
+body {
+    overflow: hidden;
+}

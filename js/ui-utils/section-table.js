@@ -23,10 +23,6 @@ CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, head
                 }
                 setArrow.call(this, d);
             })
-        //.on ("mouseover", function(d) {
-        // eventually backbone shared highlighting code to go here?
-        // except it's data specific, one table may show per protein, another links, another something else, so not doable here
-        //})
     ;
     newHeaders.append("svg")
         .append("polygon")
@@ -53,104 +49,10 @@ CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, head
 
     const tables = dataJoin.selectAll("table");
 
-    // yet another cobble a table together function, but as a string
-    var makeTable237 = function(arrOfObjs) {
-        var t = "<table>";//<tr>";
-        // var headers = d3.keys(arrOfObjs[0]);
-        // headers.forEach(function(h) {
-        //     t += "<TH>" + h + "</TH>";
-        // });
-        // t += "</TR>";
-        // arrOfObjs.forEach(function(obj) {
-        //     t += "<TR>";
-        //     d3.values(obj).forEach(function(h) {
-        //         t += "<TD>" + h + "</TD>";
-        //     });
-        //     t += "</TR>";
-        // });
-        t += "</TABLE>";
-        return t;
-    };
-
-    // yet another cobble a table together function, but as a string
-    /*const makeTable237 = function (arrOfObjs) {
-        if (arrOfObjs) {
-            let t = "<table>";//<tr>";
-            // const headers = d3.keys(arrOfObjs[0]);
-            // headers.forEach(function (h) {
-            //     t += "<TH>" + h + "</TH>";
-            // });
-            // t += "</TR>";
-            const goTermsMap = CLMSUI.compositeModelInst.get("go");
-            arrOfObjs.forEach(function (obj) {
-                // if (obj.key !== "features") { //todo -hack for UniprotKB object
-                //     t += "<TR>";
-                //     d3.values(obj).forEach(function (h) {
-                //         if (typeof (h) == "string") {
-                //             t += "<TD>" + h + "</TD>";
-                //         } else {
-                //             t += "<TD>";
-                //             for (let i of h) {
-                //                 if (obj.key !== "go") {
-                //                     t += i + "</BR>";
-                //                 } else {
-                //                     t += i + " : " + goTermsMap.get(i).name + "</BR>";
-                //                 }
-                //             }
-                //             t += "</TD>";
-                //         }
-                //     });
-                //     t += "</TR>";
-                // }
-                //
-                //not this
-                // if (obj.key == "go") {
-                //     t += "<TR>";
-                //     d3.values(obj).forEach(function (h) {
-                //         const isArray = typeof (h);
-                //         t += "<TD>" + isArray + h + "</TD>";
-                //     });
-                //     t += "</TR>";
-                //     //  return makeTable237(obj.value);
-                //     // var goTermsMap = CLMSUI.compositeModelInst.get("go");
-                //     // var goTermsText = "";
-                //     // // for (var goId of interactor.uniprot.go) {
-                //     // //     var goTerm = goTermsMap.get(goId);
-                //     // //     goTermsText += goTerm.name + "<br>";
-                //     // // }
-                //     // // contents.push(["GO", goTermsText]);
-                //     // d3.values(obj).forEach(function (h) {
-                //     //     goTermsText += h + ":" + goTermsMap.get(h) + "; ";
-                //     // });
-                //     // t += "<TR>";
-                //     // d3.values(obj).forEach(function (h) {
-                //     //     t += "<TD>" + goTermsText + "</TD>";
-                //     // });
-                //     // t += "</TR>";
-                // }
-
-
-
-            });
-            t += "</TABLE>";
-            return t;
-        } else {
-            return "";
-        }
-    };*/
-
     const arrayExpandFunc = function (d, entries) {
         const expandKeys = self.options.expandTheseKeys;
         return entries.map(function (entry) {
-            let subTableValues = d[entry.key];
-            //if (typeof(subTableValues) === "object") { // convert object into array of objects that'll have Key/Value as headings
-            if ($.isPlainObject(subTableValues)) { // convert object into array of objects that'll have Key/Value as headings
-                subTableValues = d3.entries(subTableValues);
-            }
-            return (expandKeys && expandKeys.has(entry.key)) ? {
-                key: entry.key,
-                value: makeTable237(subTableValues)
-            } : entry;
+            return entry;
         });
     };
 
