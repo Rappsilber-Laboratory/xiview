@@ -317,7 +317,6 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
             parentEvents = parentEvents();
         }
         return _.extend({}, parentEvents, {
-            //"click li label": "showColour",
         });
     },
 
@@ -359,8 +358,13 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
             return {
                 name: selectedKey,
                 func: function() {
-                    d3.select(".saveLayoutName").property("value", selectedKey);
-                    CLMSUI.compositeModelInst.clearGroups();
+                    d3.select(".savedLayoutName").property("value", selectedKey);
+                    // CLMSUI.compositeModelInst.clearGroups();
+                    // const self = this;
+                    // CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear current groups before adding groups from saved layout?", "Clear Groups", "Combine current and saved", "Clear current, only groups from saved layout", function () {
+                    //     self.set("groups", new Map());
+                    //     self.trigger("change:groups");
+                    // });
                     CLMSUI.vent.trigger("xinetLoadLayout", layouts[selectedKey]);
                 },
                 context: CLMSUI.compositeModelInst

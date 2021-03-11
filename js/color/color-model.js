@@ -12,7 +12,7 @@ CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
         unit: "",
     },
     // used by threeColourSliderBB.js
-    setDomain: function (newDomain) {
+    setDomain: function(newDomain) {
         this.get("colScale").domain(newDomain);
         this.triggerColourModelChanged({
             domain: newDomain
@@ -20,7 +20,7 @@ CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
         return this;
     },
     // used by KeyViewBB.changeColour
-    setRange: function (newRange) {
+    setRange: function(newRange) {
         this.get("colScale").range(newRange);
         this.triggerColourModelChanged({
             range: newRange
@@ -34,21 +34,21 @@ CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
         return val != undefined ? (this.get("type") !== "ordinal" ? d3.bisect(dom, val) : dom.indexOf(val)) : undefined;
     },
     //used by scatterplot
-    getDomainCount: function () {
+    getDomainCount: function() {
         const domain = this.get("colScale").domain();
         return this.isCategorical() ? (this.get("type") === "threshold" ? domain.length + 1 : domain.length) : domain[1] - domain[0] + 1;
     },
 
     // general entry point - all concrete subclasses must implement getValue(), all also implement initialise
-    getColour: function (obj) {  // obj is generally a crosslink, but is non-specific at this point
+    getColour: function(obj) {  // obj is generally a crosslink, but is non-specific at this point
         const val = this.getValue(obj);
         return val !== undefined ? this.get("colScale")(val) : this.get("undefinedColour");
     },
-    getColourByValue: function (val) {
+    getColourByValue: function(val) {
         return val !== undefined ? this.get("colScale")(val) : this.get("undefinedColour");
     },
     // called by setDomain & setRange above
-    triggerColourModelChanged: function (changedAttrs) {
+    triggerColourModelChanged: function(changedAttrs) {
         this.trigger("colourModelChanged", this, changedAttrs);
     },
     // used by BaseFrameView.makeChartTitle, scatterplot & distogram
@@ -61,7 +61,7 @@ CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
         const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength).concat(this.get("undefinedColour"));
-        return d3.zip(labels, colScaleRange);
+        return d3.zip (labels, colScaleRange);
     },
 });
 
@@ -72,7 +72,7 @@ CLMSUI.BackboneModelTypes.ColourModelCollection = Backbone.Collection.extend({
 
 CLMSUI.linkColour.setupColourModels = function (userConfig) {
     const defaultConfig = {
-        default: {domain: [0, 1, 2], range: ["#9970ab", "#35978f", "#35978f"]},
+        default: {domain: [0, 1, 2], range: ["#7570b3", "#d95f02", "#1b9e77"]},
         distance: {domain: [15, 25], range: ['#5AAE61', '#FDB863', '#9970AB']}
     };
     const config = $.extend(true, {}, defaultConfig, userConfig);    // true = deep merging
@@ -110,7 +110,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
         title: "Distance (Å)",
         longDescription: "Colour crosslinks by adjustable distance category. Requires PDB file to be loaded (via Load -> PDB Data).",
         id: "Distance",
-        superDomain: [0, 120], // super domain is used in conjunction with drawing sliders, it's the maximum that the values in the threshold can be
+        superDomain: [0, 120], // superdomain is used in conjunction with drawing sliders, it's the maximum that the values in the threshold can be
     });
 
     //init highest score colour model
@@ -119,8 +119,8 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     const maxScore = clmsModel.get("maxScore");
 
     const hiScores = [];
-    for (let crosslink of clmsModel.get("crossLinks").values()) {
-        const scores = crosslink.filteredMatches_pp.map(function (m) {
+    for (let crosslink of clmsModel.get("crossLinks").values()){
+        const scores = crosslink.filteredMatches_pp.map(function(m) {
             return m.match.score();
         });
         hiScores.push(Math.max.apply(Math, scores));
@@ -140,7 +140,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
         title: "Highest Score",
         longDescription: "Highest score from supporting matches that meet current filter.",
         id: "HiScores",
-        superDomain: [minScore, maxScore], // super domain is used in conjunction with drawing sliders, it's the maximum that the values in the threshold can be
+        superDomain: [minScore, maxScore], // superdomain is used in conjunction with drawing sliders, it's the maximum that the values in the threshold can be
     });
 
     const linkColourCollection = new CLMSUI.BackboneModelTypes.ColourModelCollection([
@@ -168,7 +168,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     });*/
 
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
-    linkColourCollection.listenTo(CLMSUI.vent, "linkMetadataUpdated", function (metaMetaData) {
+    linkColourCollection.listenTo(CLMSUI.vent, "linkMetadataUpdated", function(metaMetaData) {
         const columns = metaMetaData.columns;
         const crossLinks = metaMetaData.items;
         const colMaps = columns.map(function (field) {
@@ -184,7 +184,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
 
     // Protein colour schemes
 
-    CLMSUI.linkColour.defaultProteinColoursBB = new CLMSUI.BackboneModelTypes.DefaultProteinColourModel({
+    CLMSUI.linkColour.defaultProteinColoursBB = new CLMSUI.BackboneModelTypes.DefaultProteinColourModel ({
         colScale: d3.scale.ordinal().domain([0]).range(["#fff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
@@ -205,7 +205,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     };
 
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
-    proteinColourCollection.listenTo(CLMSUI.vent, "proteinMetadataUpdated", function (metaMetaData) {
+    proteinColourCollection.listenTo(CLMSUI.vent, "proteinMetadataUpdated", function(metaMetaData) {
         const columns = metaMetaData.columns;
         const proteins = metaMetaData.items;
         const colMaps = columns.map(function (field) {
@@ -219,70 +219,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     CLMSUI.linkColour.ProteinCollection = proteinColourCollection;
 };
 
-// CLMSUI.linkColour.colourRangeMaker = function (extents) {
-//     let range = ["green", "blue"];
-//     if (extents[0] < 0 && extents[1] > 0) {
-//         extents.splice(1, 0, 0);
-//         range.splice(1, 0, "#888");
-//     } else if (extents[0] === extents[1]) {
-//         range = ["#888"];
-//     }
-//     return range;
-// };
-
 CLMSUI.linkColour.makeColourModel = function(field, label, objs) {
-    // const linkArr = links.length ? links : CLMS.arrayFromMapValues(links);
-    // // first attempt to treat as if numbers
-    // const extents = d3.extent(linkArr, function (link) {
-    //     return link.getMeta(field);
-    // });
-    // let range = CLMSUI.linkColour.colourRangeMaker(extents);
-    //
-    // // see if it is a list of colours
-    // const hexRegex = CLMSUI.utils.commonRegexes.hexColour;
-    // const dataIsColours = (hexRegex.test(extents[0]) && hexRegex.test(extents[1]));
-    // let isCategorical = false;
-    //
-    // // if it isn't a list of colours and consists of only a few unique values, make it categorical
-    // if (!dataIsColours) {
-    //     const uniq = d3.set(linkArr.map(function (link) {
-    //         return link.getMeta(field);
-    //     })).size();
-    //     // if the values in this metadata form 6 or less distinct values count it as categorical
-    //     isCategorical = uniq < 7;
-    //     if (isCategorical) {
-    //         //extents.push(undefined);  // removed, undefined will automatically get assigned a value in an ordinal scale if present
-    //         range = colorbrewer.Dark2[8].slice();
-    //     }
-    // }
-    //
-    // const newColourModel = new CLMSUI.BackboneModelTypes.MetaDataColourModel({
-    //     colScale: (isCategorical ? d3.scale.ordinal() : d3.scale.linear()).domain(extents).range(range),
-    //     id: label,
-    //     title: label || field,
-    //     longDescription: (label || field) + ", " + (isCategorical ? "categorical" : "") + " data extracted from Cross-Link metadata.",
-    //     field: field,
-    //     type: isCategorical ? "ordinal" : "linear",
-    // });
-    //
-    // if (dataIsColours) {
-    //     // if data is just a list of colours make this colour scale just return the value for getColour
-    //     newColourModel.getColour = function(crosslink) {
-    //         const val = this.getValue(crosslink);
-    //         return val !== undefined ? val : this.get("undefinedColour");
-    //     };
-    //     newColourModel.getColourByValue = function(val) {
-    //         return val !== undefined ? val : this.get("undefinedColour");
-    //     };
-    //     newColourModel
-    //         .set("fixed", true)
-    //         .set("longDescription", (label || field) + ", fixed colours per crosslink from metadata. Not editable.")
-    //     ;
-    // }
-    //
-    // return newColourModel;
-
-
     let allColors = true, allNumbers = true, min = Number.POSITIVE_INFINITY, max = Number.NEGATIVE_INFINITY;
     const categories = new Set();
     const numbers = [];
@@ -381,25 +318,6 @@ CLMSUI.BackboneModelTypes.MetaDataHexValuesColourModel = CLMSUI.BackboneModelTyp
 
 CLMSUI.BackboneModelTypes.MetaDataColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
     initialize: function(properties, options) {
-        // const domain = this.get("colScale").domain();
-        // let labels;
-        // if (this.isCategorical()) {
-        //     labels = domain.map(function(domVal) {
-        //         return String(domVal)
-        //             .toLowerCase()
-        //             .replace(/\b[a-z](?=[a-z]{1})/g, function(letter) {
-        //                 return letter.toUpperCase();
-        //             });
-        //     });
-        // } else {
-        //     labels = (domain.length === 2 ? ["Min", "Max"] : ["Min", "Zero", "Max"]);
-        //     domain.map(function(domVal, i) {
-        //         labels[i] += " (" + domVal + ")";
-        //     });
-        // }
-        //
-        // this.set("labels", this.get("colScale").copy().range(labels));
-
         const domain = this.get("colScale").domain();
         this.set("labels", this.get("colScale").copy().range(domain)); //
     },
@@ -422,18 +340,30 @@ CLMSUI.BackboneModelTypes.ThresholdColourModel = CLMSUI.BackboneModelTypes.Colou
         let scores = [];
         if (obj.isPPLink) { // watch out! proteins also have an att called crossLinks
             for (let crosslink of obj.crossLinks) {
-                scores.push(crosslink.getMeta(this.get("field")));
+                const val = crosslink.getMeta(this.get("field"));
+                if (isFinite(val) && !isNaN(parseFloat(val))) {
+                    scores.push(val);
+                }
             }
         } else {
-            scores.push(obj.getMeta(this.get("field")));
+            // scores.push(obj.getMeta(this.get("field")));
+            const val = obj.getMeta(this.get("field"));
+            if (isFinite(val) && !isNaN(parseFloat(val))) {
+                scores.push(val);
+            }
         }
-        return Math.max.apply(Math, scores);
+        const max = Math.max.apply(Math, scores);
+        if (isFinite(max)){
+            return max;
+        } else {
+            return undefined;
+        }
     },
     getLabelColourPairings: function () {
         const colScale = this.get("colScale");
-        const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));
+        const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
-        const colScaleRange = colScale.range().slice(0, minLength);//.concat(this.get("undefinedColour"));
+        const colScaleRange = colScale.range().slice(0, minLength).concat(this.get("undefinedColour"));
         return d3.zip(labels, colScaleRange);
     },
 });

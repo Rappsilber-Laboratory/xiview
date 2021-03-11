@@ -4,7 +4,7 @@ CLMSUI.linkColour = CLMSUI.linkColour || {};
 CLMSUI.BackboneModelTypes.DefaultLinkColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
     initialize: function() {
         this
-            .set("labels", this.get("colScale").copy().range(["Self Crosslinks", "Self Crosslinks (Overlapping Peptides)", "Between Protein Crosslinks"]))
+            .set("labels", this.get("colScale").copy().range(["Self", "Homomultimeric (Overlapping Peptides)", "Heteromeric"]))
             .set("type", "ordinal")
         ;
     },

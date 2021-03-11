@@ -1,3 +1,6 @@
+body {
+    overflow: hidden;
+}
 #filterModeDiv{
     display: none;
 }
@@ -7,6 +10,6 @@
 #navNumberFilters{
 /*    display: none; */
 }
-.validationControls{
+.validationControls {
     display: none;
 }
