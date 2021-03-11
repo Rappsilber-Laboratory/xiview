@@ -72,7 +72,7 @@ CLMSUI.BackboneModelTypes.ColourModelCollection = Backbone.Collection.extend({
 
 CLMSUI.linkColour.setupColourModels = function (userConfig) {
     const defaultConfig = {
-        default: {domain: [0, 1, 2], range: ["#9970ab", "#35978f", "#35978f"]},
+        default: {domain: [0, 1, 2], range: ["#7570b3", "#d95f02", "#1b9e77"]},
         distance: {domain: [15, 25], range: ['#5AAE61', '#FDB863', '#9970AB']}
     };
     const config = $.extend(true, {}, defaultConfig, userConfig);    // true = deep merging
@@ -352,13 +352,18 @@ CLMSUI.BackboneModelTypes.ThresholdColourModel = CLMSUI.BackboneModelTypes.Colou
                 scores.push(val);
             }
         }
-        return Math.max.apply(Math, scores);
+        const max = Math.max.apply(Math, scores);
+        if (isFinite(max)){
+            return max;
+        } else {
+            return undefined;
+        }
     },
     getLabelColourPairings: function () {
         const colScale = this.get("colScale");
-        const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));
+        const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
-        const colScaleRange = colScale.range().slice(0, minLength);//.concat(this.get("undefinedColour"));
+        const colScaleRange = colScale.range().slice(0, minLength).concat(this.get("undefinedColour"));
         return d3.zip(labels, colScaleRange);
     },
 });
