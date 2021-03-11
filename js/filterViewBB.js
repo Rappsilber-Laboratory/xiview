@@ -55,7 +55,7 @@ CLMSUI.FilterViewBB = Backbone.View.extend({
                     tooltip: "Show ambiguous crosslinks",
                 },
                 {
-                    label: "Heteromultimeric",
+                    label: "Heteromeric",
                     id: "betweenLinks",
                     tooltip: "Show crosslinks between different proteins",
                 },
