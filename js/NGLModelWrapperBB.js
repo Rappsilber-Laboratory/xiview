@@ -864,9 +864,9 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
             }, this);
 
             sele = "(" + modParts.join(" OR ") + " )" + (options.allAtoms || options.chainsOnly ? "" : " AND .CA");
-            if (NGL.Debug) {
+            // if (NGL.Debug) {
                 console.log("SELE", sele);
-            }
+            // }
         }
 
         return sele;
