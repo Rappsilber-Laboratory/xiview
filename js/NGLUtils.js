@@ -490,49 +490,81 @@ CLMSUI.NGLUtils = {
     },
 
     export3dLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
-        var crossLinks = nglModelWrapper.getFullLinks();
-        var pymolLinks =  CLMSUI.NGLUtils.make3dLinkSyntax (structure, crossLinks, nglModelWrapper, selectedOnly);
-        var fileName = downloadFilename ("CSV_NGL", "csv");
-        download (pymolLinks.join("\r\n"), "plain/text", fileName);
+        const crosslinks = nglModelWrapper.getFullLinks();
+        const linkExportArray =  CLMSUI.NGLUtils.make3dLinkSyntax (structure, crosslinks, nglModelWrapper, selectedOnly);
+        const fileName = downloadFilename ("CSV_NGL", "csv");
+        download (linkExportArray.join("\r\n"), "plain/text", fileName);
     },
 
     make3dLinkSyntax: function (structure, links, nglModelWrapper, selectedOnly) {
-        var pdbids = structure.chainToOriginalStructureIDMap || {};
-        var cp = structure.getChainProxy();
-        var rp = structure.getResidueProxy();
-
-        var remarkLines = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
-        var selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
-
+        const pdbIds = structure.chainToOriginalStructureIDMap || {};
+        const chainProxy = structure.getChainProxy();
+        const residueProxy = structure.getResidueProxy();
+        const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
         const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
 
-
-        var crossLinkLines = [];
-        for (var link of links){
+        const header = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
+        const crosslinkLines = [];
+        for (let link of links){
             if (!selectedOnly || selectedLinkIds.indexOf(link.origId) !== -1) {
-                cp.index = link.residueA.chainIndex;
-                var chainA = cp.chainname;
-                cp.index = link.residueB.chainIndex;
-                var chainB = cp.chainname;
-                rp.index = link.residueA.NGLglobalIndex;
-                var name1 = rp.qualifiedName().replace("/", ":");
-                rp.index = link.residueB.NGLglobalIndex;
-                var name2 = rp.qualifiedName().replace("/", ":");
+                chainProxy.index = link.residueA.chainIndex;
+                const chainA = chainProxy.chainname;
+                chainProxy.index = link.residueB.chainIndex;
+                const chainB = chainProxy.chainname;
+                residueProxy.index = link.residueA.NGLglobalIndex;
+                const name1 = residueProxy.qualifiedName().replace("/", ":");
+                residueProxy.index = link.residueB.NGLglobalIndex;
+                const name2 = residueProxy.qualifiedName().replace("/", ":");
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
-                var distObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
+                const distObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
 
                 const xiviewLink = crosslinkMap.get(link.origId);
                 p1 = xiviewLink.fromProtein.accession;
                 p2 = xiviewLink.toProtein.accession;
 
-                crossLinkLines.push((pdbids[link.residueA.chainIndex] || structure.name) + ","
+                crosslinkLines.push((pdbIds[link.residueA.chainIndex] || structure.name) + ","
                     + p1 + "," + chainA + "," + link.residueA.resno + ","
                     + p2 + "," + chainB + "," + link.residueB.resno + ","
                     + distObj.getXLinkDistanceFromPDBCoords(distObj.matrices, link.residueA.seqIndex, link.residueB.seqIndex, link.residueA.chainIndex, link.residueB.chainIndex));
             }
         }
 
-        return remarkLines.concat(crossLinkLines);
+        return header.concat(crosslinkLines);
+    },
+
+    exportChimeraPseudobonds: function (structure, nglModelWrapper, name, selectedOnly) {
+        const chainProxy = structure.getChainProxy();
+        const bondArray = [];
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+        const colorScheme = nglModelWrapper.get("compositeModel").get("linkColourAssignment");
+
+        for (let link of nglModelWrapper.getFullLinks()){
+            chainProxy.index = link.residueA.chainIndex;
+            const chainA = chainProxy.chainname;
+            chainProxy.index = link.residueB.chainIndex;
+            const chainB = chainProxy.chainname;
+
+            const xiviewLink = crosslinkMap.get(link.origId);
+            const color = colorScheme.getColour(xiviewLink);
+
+            bondArray.push("/" + chainA + ":" + link.residueA.resno + "@CA /"  + chainB + ":" + link.residueB.resno + "@CA " + color);
+        }
+        const fileName = downloadFilename ("ChimeraX", "pb");
+        download (bondArray.join("\r\n"), "plain/text", fileName);
+    },
+
+    exportJWalk: function (structure, nglModelWrapper) {
+        const chainProxy = structure.getChainProxy();
+        const crosslinkLines = [];
+        for (let link of nglModelWrapper.getFullLinks()){
+            chainProxy.index = link.residueA.chainIndex;
+            const chainA = chainProxy.chainname;
+            chainProxy.index = link.residueB.chainIndex;
+            const chainB = chainProxy.chainname;
+            crosslinkLines.push(link.residueA.resno + "|" + chainA + "|"  + link.residueB.resno + "|" + chainB + "|" );
+        }
+        const fileName = downloadFilename ("jWalk", "txt");
+        download (crosslinkLines.join("\r\n"), "plain/text", fileName);
     },
 
     exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crossLinkerObj) {

@@ -21,6 +21,8 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             "click #nglPanellinksCSVExport": "export3dLinksCSV",
             "click #nglPanellinksCSVExportSelected": "export3dLinksCSVSelected",
             "click #nglPanelhaddockExport": "exportHaddock",
+            "click #nglPanelexportChimeraPB": "exportChimeraPB",
+            "click #nglPanelexportJWalk": "exportJWalk",
             "click .distanceLabelCB": "toggleLabels",
             "click .selectedOnlyCB": "toggleNonSelectedLinks",
             "click .showResiduesCB": "toggleResidues",
@@ -112,6 +114,18 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                 label: "Haddock Distance Restraints File",
                 id: "haddockExport",
                 d3tooltip: "Export a Haddock command script containing the complete filtered inter-pdb(model) crosslinks. Requires 'Show > Inter-Model Distances' to be set"
+            },
+            {
+                class: "exportChimeraPB",
+                label: "ChimeraX Pseudobonds",
+                id: "exportChimeraPB",
+                d3tooltip: "Export Chimera Pseudobonds of the links currently displayed in NGL"
+            },
+            {
+                class: "exportJWalk",
+                label: "JWalk",
+                id: "exportJWalk",
+                d3tooltip: "Export a jWalk text file of the links currently displayed in NGL"
             },
         ];
         saveExportButtonData
@@ -778,6 +792,22 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.export3dLinksCSV (
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), true
+        );
+        return this;
+    },
+
+    exportChimeraPB: function () {
+        const stageModel = this.model.get("stageModel");
+        CLMSUI.NGLUtils.exportChimeraPseudobonds(
+            stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
+        );
+        return this;
+    },
+
+    exportJWalk: function () {
+        const stageModel = this.model.get("stageModel");
+        CLMSUI.NGLUtils.exportJWalk(
+            stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
     },
