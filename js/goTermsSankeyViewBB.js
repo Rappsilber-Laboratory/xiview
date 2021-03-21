@@ -55,7 +55,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 self.updateThenRender();
             });
 
-        var termSelectData = ["protein containing complex"];//"cellular_component", "biological_process", "molecular_function"];
+        var termSelectData = ["cellular_component", "biological_process", "molecular_function"];
 
         var options = this.termSelect.selectAll("option")
             .data(termSelectData)
@@ -251,8 +251,8 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
             go.get("GO0003674").getInteractors(true);
             sankeyNode("GO0003674");
         } else { // default to cellular component
-            go.get("GO0032991").getInteractors(true);
-            sankeyNode("GO0032991");
+            go.get("GO0005575").getInteractors(true);
+            sankeyNode("GO0005575");
         }
 
         function sankeyNode(goId) {
@@ -269,8 +269,8 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 if (goTerm.part_of) {
                     for (let partOfId of goTerm.part_of) {
                         const partOfTerm = go.get(partOfId);
-                        if (partOfTerm.isDescendantOf("GO0032991")) {
-                        // if (partOfTerm.namespace == goTerm.namespace) {
+                        // if (partOfTerm.isDescendantOf("GO0032991")) {
+                        if (partOfTerm.namespace == goTerm.namespace) {
                             const linkId = partOfId + "_" + node.id;
                             const link = {
                                 source: sankeyNode(partOfId),
@@ -286,8 +286,8 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 if (goTerm.is_a) {
                     for (let superclassId of goTerm.is_a) {
                         const superclassTerm = go.get(superclassId);
-                        if (superclassTerm.isDescendantOf("GO0032991")) {
-                        // if (superclassTerm.namespace == goTerm.namespace) {
+                        // if (superclassTerm.isDescendantOf("GO0032991")) {
+                        if (superclassTerm.namespace == goTerm.namespace) {
                             const linkId = superclassId + "_" + node.id;
                             const link = {
                                 source: sankeyNode(superclassId),
@@ -303,21 +303,21 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 if (goTerm.parts) {
                     for (let partId of goTerm.parts) {
                         const partTerm = go.get(partId);
-                        if (partTerm.isDescendantOf("GO0032991")) {
+                        // if (partTerm.isDescendantOf("GO0032991")) {
                             if (partTerm.namespace == goTerm.namespace && partTerm.filtInteractorCount > 1) {
                                 sankeyNode(partId);
                             }
-                        }
+                        // }
                     }
                 }
                 if (goTerm.subclasses) {
                     for (let subclassId of goTerm.subclasses) {
                         const subclassTerm = go.get(subclassId);
-                        if (subclassTerm.isDescendantOf("GO0032991")){
+                        // if (subclassTerm.isDescendantOf("GO0032991")){
                             if (subclassTerm.namespace == goTerm.namespace && subclassTerm.filtInteractorCount > 1) {
                                 sankeyNode(subclassId);
                             }
-                        }
+                        // }
                     }
                 }
                 return node;
@@ -433,7 +433,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                     .style("stroke", function (d) {
                         return d.partOf ? self.options.partofColour : self.options.subclassColour; //"#bdbdbd"
                     })
-                    // .style("display", "none")
+                    .style("display", "none")
                     .attr('marker-start', function (d, i) {
                         return 'url(#marker_' + (d.partOf ? "diamond" : "arrow") + ')';
                     })
@@ -554,7 +554,8 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
                 }
             );
         linkSel.style("display", function (dlink) {
-            return !term || (term.id === dlink.source.id || term.id === dlink.target.id) ? null : "none";
+            if (!term) return "none";
+            return /*!term ||*/ (term.id === dlink.source.id || term.id === dlink.target.id) ? null : "none";
         });
     },
 

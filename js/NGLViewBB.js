@@ -117,7 +117,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             },
             {
                 class: "exportChimeraPB",
-                label: "Chimera Pseudobonds",
+                label: "ChimeraX Pseudobonds",
                 id: "exportChimeraPB",
                 d3tooltip: "Export Chimera Pseudobonds of the links currently displayed in NGL"
             },
