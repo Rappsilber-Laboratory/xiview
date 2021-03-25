@@ -614,7 +614,7 @@ CLMSUI.NGLUtils = {
                 subunits.set(chainA, p1);
             }
             if (!subunits.has(chainB)){
-                subunits.set(chainA, p2);
+                subunits.set(chainB, p2);
             }
         }
 
