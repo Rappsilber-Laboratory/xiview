@@ -499,7 +499,6 @@ CLMSUI.NGLUtils = {
     make3dLinkSyntax: function (structure, links, nglModelWrapper, selectedOnly) {
         const pdbIds = structure.chainToOriginalStructureIDMap || {};
         const chainProxy = structure.getChainProxy();
-        const residueProxy = structure.getResidueProxy();
         const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
         const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
 
@@ -511,10 +510,6 @@ CLMSUI.NGLUtils = {
                 const chainA = chainProxy.chainname;
                 chainProxy.index = link.residueB.chainIndex;
                 const chainB = chainProxy.chainname;
-                residueProxy.index = link.residueA.NGLglobalIndex;
-                const name1 = residueProxy.qualifiedName().replace("/", ":");
-                residueProxy.index = link.residueB.NGLglobalIndex;
-                const name2 = residueProxy.qualifiedName().replace("/", ":");
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
                 const distObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
 
@@ -565,6 +560,88 @@ CLMSUI.NGLUtils = {
         }
         const fileName = downloadFilename ("jWalk", "txt");
         download (crosslinkLines.join("\r\n"), "plain/text", fileName);
+    },
+
+
+    exportXlinkAnalyzer: function (structure, nglModelWrapper, name, selectedOnly) {
+        const csvFileName = downloadFilename ("xlinkAnalyzer_CSV", "csv");
+
+        const json = {
+            data:[{
+                "fileGroup":{
+                    "files":[
+                        "./" + csvFileName
+                    ]
+                },
+                "mapping":{
+                },
+                "name":"xiVIEW export",
+                "type":"Xlink Analyzer"
+            }],
+            subcomplexes: [],
+            subunits: [],
+            xlinkanalyzerVersion:"1.1.1"
+        };
+
+        const xiViewProteins = nglModelWrapper.get("compositeModel").get("clmsModel").get("participants"); // ECMA map
+        const mapping = json.data[0].mapping;
+
+        for (let prot of xiViewProteins.values()) {
+            if (!prot.is_decoy) {
+                mapping[prot.id] = [prot.id];
+            }
+        }
+
+        const chainProxy = structure.getChainProxy();
+        const subunits = new Map();
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+
+        const header = ["Protein1,Protein2,AbsPos1,AbsPos2,score"];
+        const crosslinkLines = [];
+        for (let link of nglModelWrapper.getFullLinks()){
+            chainProxy.index = link.residueA.chainIndex;
+            const chainA = chainProxy.chainname;
+            chainProxy.index = link.residueB.chainIndex;
+            const chainB = chainProxy.chainname;
+
+            const xiviewLink = crosslinkMap.get(link.origId);
+            p1 = xiviewLink.fromProtein.id;
+            p2 = xiviewLink.toProtein.id;
+
+            crosslinkLines.push( p1 + "," + p2 + "," + link.residueA.resno + "," + link.residueB.resno + ",666");
+
+            if (!subunits.has(chainA)){
+                subunits.set(chainA, p1);
+            }
+            if (!subunits.has(chainB)){
+                subunits.set(chainA, p2);
+            }
+        }
+
+        //json.subunits = Array.from(subunits.keys());
+
+        for (let subunit of subunits.entries()){
+            const su = {
+                "chainIds": [
+                    subunit[0]
+                ],
+                "color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "domains": [],
+                "info": {},
+                "name": subunit[1],
+                "selection": ":." + subunit[0]
+            };
+            json.subunits.push(su);
+        }
+
+        download (header.concat(crosslinkLines).join("\r\n"), "plain/text", csvFileName);
+        const jsonFileName = downloadFilename ("xlinkAnalyzer", "json");
+        download (JSON.stringify(json, null, 4), "json", jsonFileName);
     },
 
     exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crossLinkerObj) {

@@ -23,6 +23,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             "click #nglPanelhaddockExport": "exportHaddock",
             "click #nglPanelexportChimeraPB": "exportChimeraPB",
             "click #nglPanelexportJWalk": "exportJWalk",
+            "click #nglPanelexportXlinkAnalyzer": "exportXlinkAnalyzer",
             "click .distanceLabelCB": "toggleLabels",
             "click .selectedOnlyCB": "toggleNonSelectedLinks",
             "click .showResiduesCB": "toggleResidues",
@@ -126,6 +127,12 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                 label: "JWalk",
                 id: "exportJWalk",
                 d3tooltip: "Export a jWalk text file of the links currently displayed in NGL"
+            },
+            {
+                class: "exportXlinkAnalyzer",
+                label: "XlinkAnalyzer",
+                id: "exportXlinkAnalyzer",
+                d3tooltip: "Exports two files: XlinkAnalyzer json (recording the mapping from search seq's to PDB seq's) and XlinkAnalyzer CSV (of the links currently displayed in NGL)"
             },
         ];
         saveExportButtonData
@@ -807,6 +814,14 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     exportJWalk: function () {
         const stageModel = this.model.get("stageModel");
         CLMSUI.NGLUtils.exportJWalk(
+            stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
+        );
+        return this;
+    },
+
+    exportXlinkAnalyzer: function () {
+        const stageModel = this.model.get("stageModel");
+        CLMSUI.NGLUtils.exportXlinkAnalyzer(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
