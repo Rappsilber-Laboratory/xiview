@@ -96,7 +96,7 @@ var allDataLoaded = _.after(4, CLMSUI.init.postDataLoaded);
 // for qunit testing
 CLMSUI.init.pretendLoad = function () {
     allDataLoaded();
-    // allDataLoaded();
+    allDataLoaded();
 };
 
 

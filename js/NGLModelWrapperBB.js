@@ -840,15 +840,21 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
                     // selection syntax picks up ":123" as residue 123 in chain "empty name", but ": AND 123" doesn't work.
                     // Similarly ":/0 " works but "/0 AND :" doesn't.
                     // Shouldn't have many pdbs with empty chain names though.
-                    if (chainEntry.key) {
+                    if (typeof chainEntry.key != "undefined") {
+
+                        let key = chainEntry.key;
+                        if (key === "") {
+                            // key = "''";
+                            alert("ERROR: blank chain ID in PDB - crosslinks in wrong place on structure");
+                        }
                         var vals = chainBranch.values();
                         if (options.chainsOnly) {
-                            return ":" + chainEntry.key;
+                            return ":" + key;
                         } else if (vals.length === 1) {
-                            return "( " + vals[0] + ":" + chainEntry.key + " )"; // if single val, chain:resno is quicker
+                            return "( " + vals[0] + ":" + key + " )"; // if single val, chain:resno is quicker
                         } else {
                             vals = CLMSUI.modelUtils.joinConsecutiveNumbersIntoRanges(vals);
-                            return "( :" + chainEntry.key + " AND (" + vals.join(" OR ") + ") )";
+                            return "( :" + key + " AND (" + vals.join(" OR ") + ") )";
                         }
                     } else {
                         if (options.chainsOnly) {
