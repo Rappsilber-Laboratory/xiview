@@ -616,21 +616,27 @@ CLMSUI.NGLUtils = {
 
             crosslinkLines.push( p1 + "," + p2 + "," + link.residueA.resno + "," + link.residueB.resno + "," + highestScore);
 
-            if (!subunits.has(chainA)){
-                subunits.set(chainA, p1);
+
+
+            if (!subunits.has(p1)){
+                subunits.set(p1, new Set());
             }
-            if (!subunits.has(chainB)){
-                subunits.set(chainB, p2);
+            subunits.get(p1).add(chainA);
+
+            if (!subunits.has(p2)){
+                subunits.set(p2, new Set());
             }
+            subunits.get(p2).add(chainB);
+
         }
 
         //json.subunits = Array.from(subunits.keys());
 
         for (let subunit of subunits.entries()){
+            const chainIdArr = Array.from(subunit[1].values())
+            const selString = ":." + chainIdArr.join(",.");
             const su = {
-                "chainIds": [
-                    subunit[0]
-                ],
+                "chainIds": chainIdArr,
                 "color": [
                     0.0,
                     0.0,
@@ -639,8 +645,8 @@ CLMSUI.NGLUtils = {
                 ],
                 "domains": [],
                 "info": {},
-                "name": subunit[1],
-                "selection": ":." + subunit[0]
+                "name": subunit[0],
+                "selection": selString
             };
             json.subunits.push(su);
         }
