@@ -608,7 +608,13 @@ CLMSUI.NGLUtils = {
             p1 = xiviewLink.fromProtein.id;
             p2 = xiviewLink.toProtein.id;
 
-            crosslinkLines.push( p1 + "," + p2 + "," + link.residueA.resno + "," + link.residueB.resno + ",666");
+            //todo - highestScore as function of crosslink
+            const scores = xiviewLink.filteredMatches_pp.map(function(m) {
+                return m.match.score();
+            });
+            const highestScore = Math.max.apply(Math, scores);
+
+            crosslinkLines.push( p1 + "," + p2 + "," + link.residueA.resno + "," + link.residueB.resno + "," + highestScore);
 
             if (!subunits.has(chainA)){
                 subunits.set(chainA, p1);
