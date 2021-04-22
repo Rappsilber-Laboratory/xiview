@@ -24,6 +24,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
             "change .fixSelected": "setFixSelected",
+            "change .showExpandedGroupLabels": "setShowExpandedGroupLabels",
             "change .showLabels": "setShowLabels",
             "change .fixedSize": "setFixedSize",
             "change .thickLinks": "setThickLinksShown",
@@ -143,6 +144,15 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                 sectionEnd: true,
             },
             {
+                initialState: this.model.get("xinetShowExpandedGroupLabels"),
+                class: "showExpandedGroupLabels",
+                label: "Label Expanded Groups",
+                id: "showExpandedGroupLabels",
+                tooltip: "Show labels on expanded groups in xiNET",
+                header: "Groups",
+                sectionBegin: true,
+            },
+            {
                 initialState: this.model.get("xinetThickLinks"),
                 class: "thickLinks",
                 label: "Background PPI Links",
@@ -221,6 +231,10 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
     setShowLabels: function() {
         this.model.set("xinetShowLabels", d3.select("input.showLabels").property("checked"));
+    },
+
+    setShowExpandedGroupLabels: function() {
+        this.model.set("xinetShowExpandedGroupLabels", d3.select("input.showExpandedGroupLabels").property("checked"));
     },
 
     setFixSelected: function() {
