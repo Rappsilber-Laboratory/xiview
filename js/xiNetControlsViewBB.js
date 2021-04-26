@@ -72,7 +72,8 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
             "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
-            "<button class='btn btn-1 btn-1a xinetSvgDownload'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG"+"</button>";
+            "<span class='noBreak sectionDividerLeft' ></span>" +
+            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG"+"</button>";
 
         mainDivSel.html(
             buttonHtml
