@@ -49,7 +49,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                         var sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
                         var params = "sid=" + sid +
                             "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
-                            "&name=" + encodeURIComponent(d3.select(".saveLayoutName").property("value"));
+                            "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
                         xmlhttp.send(params);
                     };
 
@@ -66,7 +66,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
         var mainDivSel = d3.select(this.el);
 
         var buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
-            // "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
+            "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
             "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
@@ -107,7 +107,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             el: "#loadLayoutButton",
             model: CLMSUI.compositeModelInst,
             myOptions: {
-                title: "Load Layout▼",
+                title: "Load ▼",
             }
         });
 
