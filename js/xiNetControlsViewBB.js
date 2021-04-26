@@ -67,7 +67,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
         var buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
             // "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
-            "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
