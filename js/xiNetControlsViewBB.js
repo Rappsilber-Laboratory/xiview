@@ -85,7 +85,8 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
-            "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>";
+            "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
+            "<button class='btn btn-1 btn-1a xinetSvgDownload'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG"+"</button>";
 
         mainDivSel.html(
             buttonHtml
@@ -202,12 +203,12 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             .classed('xinetPpiStep', true);
 
         CLMSUI.utils.makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
-        toggleButtonData.splice(0, 0, {
-            name: CLMSUI.utils.commonLabels.downloadImg + "SVG",
-            tooltip: "Download image from xiNET as SVG; a vector format that can be edited in InkScape or Illustrator",
-            class: "xinetSvgDownload",
-            sectionEnd: true,
-        });
+        // toggleButtonData.splice(0, 0, {
+        //     name: CLMSUI.utils.commonLabels.downloadImg + "SVG",
+        //     tooltip: "Download image from xiNET as SVG; a vector format that can be edited in InkScape or Illustrator",
+        //     class: "xinetSvgDownload",
+        //     sectionEnd: true,
+        // });
         toggleButtonData.push({
             class: "xinetPpiStep",
             id: "ppiStep1",
