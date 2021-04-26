@@ -69,20 +69,22 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             // "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
-            "<input type='text' name='name' id='name' class='saveLayoutName' value='' placeholder='Enter Save Layout Name'>" +
-            "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>";
+            "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
+            "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
+            "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
+            "<button class='btn btn-1 btn-1a xinetSvgDownload'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG"+"</button>";
 
         mainDivSel.html(
             buttonHtml
         );
 
         if (!CLMSUI.loggedIn){
-            d3.select(".saveLayoutName").style("display", "none");
+            d3.select(".savedLayoutName").style("display", "none");
             d3.select(".saveLayoutButton").style("display", "none");
         }
 
         if (this.model.get("clmsModel").get("xiNETLayout")) {
-            d3.select(".saveLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
+            d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
         }
 
         var tooltips = {
@@ -118,14 +120,8 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                 id: "fixSelected",
                 tooltip: "Fix selected nodes in place during auto-layout.",
                 header: "Auto Layout",
+                sectionEnd: true,
             },
-            // {
-            //     class: "autoGroupButton",
-            //     label: "Autogroup",
-            //     id: "autoGroupButton",
-            //     //tooltip: "Fix selected nodes in place during auto-layout.",
-            //     sectionEnd: true,
-            // },
             {
                 initialState: this.model.get("xinetShowLabels"),
                 class: "showLabels",
@@ -162,6 +158,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             },
         ];
 
+        var self = this;
         toggleButtonData
             .forEach(function(d) {
                 d.type = d.type || "checkbox";
@@ -197,12 +194,12 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             .classed('xinetPpiStep', true);
 
         CLMSUI.utils.makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
-        toggleButtonData.splice(0, 0, {
-            name: CLMSUI.utils.commonLabels.downloadImg + "SVG",
-            tooltip: "Download image from xiNET as SVG; a vector format that can be edited in InkScape or Illustrator",
-            class: "xinetSvgDownload",
-            sectionEnd: true,
-        });
+        // toggleButtonData.splice(0, 0, {
+        //     name: CLMSUI.utils.commonLabels.downloadImg + "SVG",
+        //     tooltip: "Download image from xiNET as SVG; a vector format that can be edited in InkScape or Illustrator",
+        //     class: "xinetSvgDownload",
+        //     sectionEnd: true,
+        // });
         toggleButtonData.push({
             class: "xinetPpiStep",
             id: "ppiStep1",
