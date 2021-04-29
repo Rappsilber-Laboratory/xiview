@@ -82,7 +82,7 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
         var clmsModel = this.get("clmsModel");
         var crossLinksArr = this.getAllCrossLinks();
         var clCount = crossLinksArr.length;
-        var searches = CLMS.arrayFromMapValues(clmsModel.get("searches"));
+        var searches = Array.from(clmsModel.get("searches").values());
         var result;
 
         if (filterModel) {
@@ -243,8 +243,8 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
             }, this);
         }
 
-        var b = performance.now();
-        console.log("ser filtering time", (b - a), "ms");
+        // var b = performance.now();
+        // console.log("ser filtering time", (b - a), "ms");
 
 
         //hack for francis, take out protein-protein links with only one supporting cross-link
@@ -316,11 +316,9 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
         //console.log ("xlinks", this.filteredXLinks);
 
         //hiding linkless participants
-        CLMS.arrayFromMapValues(clmsModel.get("participants")).forEach(function(participant) {
+        for (let participant of clmsModel.get("participants").values()) {
             participant.hidden = true;
-            var partCls = participant.crossLinks;
-            for (var pCl = 0; pCl < partCls.length; ++pCl) {
-                var pCrossLink = partCls[pCl];
+            for (let pCrossLink of participant.crossLinks) {
                 if (pCrossLink.filteredMatches_pp.length &&
                     !pCrossLink.isDecoyLink() &&
                     !pCrossLink.isLinearLink()) {
@@ -328,7 +326,7 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
                     break;
                 }
             }
-        });
+        }
 
         /*
         var cfilter = crossfilter (clmsModel.get("matches"));
@@ -353,7 +351,7 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
     },
 
     getAllCrossLinks: function () {
-        return CLMS.arrayFromMapValues (this.get("clmsModel").get("crossLinks"));
+        return Array.from(this.get("clmsModel").get("crossLinks").values());
     },
 
     getAllTTCrossLinks: function () {
@@ -549,11 +547,8 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
     },
 
     hideUnselectedProteins: function() {
-        var participantsArr = CLMS.arrayFromMapValues(this.get("clmsModel").get("participants"));
-        var participantCount = participantsArr.length;
-        var selected = this.get("selectedProteins");
-        for (var p = 0; p < participantCount; p++) {
-            var participant = participantsArr[p];
+        const selected = this.get("selectedProteins");
+        for (let participant of this.get("clmsModel").get("participants").values()) {
             if (selected.indexOf(participant) == -1) {
                 participant.manuallyHidden = true;
             }
@@ -562,12 +557,9 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
     },
 
     showHiddenProteins: function() {
-        var participantsArr = CLMS.arrayFromMapValues(this.get("clmsModel").get("participants"));
-        var participantCount = participantsArr.length;
-        for (var p = 0; p < participantCount; p++) {
-            participantsArr[p].manuallyHidden = false;
+        for (let participant of this.get("clmsModel").get("participants").values()) {
+            participant.manuallyHidden = false;
         }
-
         this.get("filterModel").trigger("change");
     },
 
@@ -602,7 +594,7 @@ CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
 
     proteinSelectionTextFilter: function () {
         var filterText = d3.select("#proteinSelectionFilter").property("value").trim().toLowerCase();
-        var participantsArr = CLMS.arrayFromMapValues(this.get("clmsModel").get("participants"));
+        var participantsArr = Array.from(this.get("clmsModel").get("participants").values());
 
         var toSelect = participantsArr.filter (function (p) {
             return (p.name.toLowerCase().indexOf(filterText) != -1 || p.description.toLowerCase().indexOf(filterText) != -1);

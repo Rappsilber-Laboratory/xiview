@@ -69,7 +69,7 @@
         <script type="text/javascript" src="../vendor/js/byrei-dyndiv_1.0rc1-src.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/d3.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/colorbrewer.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/ngl_verbose.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/ngl.dev.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/c3.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/split.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/svgexp.js<?php echo $cacheBuster ?>"></script>
@@ -96,6 +96,7 @@
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/Link.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/RenderedCrossLink.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/P_PLink.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/G_GLink.js--><?php //echo $cacheBuster ?><!--"></script>-->
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Rotator.js<?php echo $cacheBuster ?>"></script>
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
         <script type="text/javascript" src="./js/Utils.js<?php echo $cacheBuster ?>"></script>
@@ -252,7 +253,7 @@
 
 				CLMSUI.init.models (json);
 				var searches = CLMSUI.compositeModelInst.get("clmsModel").get("searches");
-				document.title = CLMS.arrayFromMapKeys(searches).join();
+				document.title = Array.from(searches.keys()).join();
 
 				CLMSUI.split = Split(["#topDiv", "#bottomDiv"],
 					{ direction: "vertical", sizes: [80,20], minSize: [200,0],

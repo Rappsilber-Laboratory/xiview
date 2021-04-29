@@ -178,7 +178,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
     // Return selected proteins, or all proteins if nothing selected
     getSelectedProteins: function () {
         var selectedProteins = this.model.get("selectedProteins");
-        return _.isEmpty (selectedProteins) ? CLMS.arrayFromMapValues(this.model.get("clmsModel").get("participants")) : selectedProteins;
+        return _.isEmpty (selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
     },
 
     updateProteinDropdown: function(parentElem) {

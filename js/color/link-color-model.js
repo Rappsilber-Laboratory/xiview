@@ -30,7 +30,7 @@ CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourMod
         this.searchMap = options.searchMap;
         // find the search to group mappings
         const groups = new Map();
-        const searchArray = CLMS.arrayFromMapValues(this.searchMap);
+        const searchArray = Array.from(this.searchMap.values()); // todo - tidy
         searchArray.forEach(function(search) {
             let arr = groups.get(search.group);
             if (!arr) {
@@ -43,7 +43,7 @@ CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourMod
         // build scales on the basis of this mapping
         const groupDomain = [-1]; //[undefined];
         let labelRange = ["Multiple Groups"];
-        const groupArray = CLMS.arrayFromMapEntries(groups);
+        const groupArray = Array.from(groups.entries());
         groupArray.forEach(function(group) {
             groupDomain.push(group[0]);
             labelRange.push("Group " + group[0] + " (" + group[1].join(", ") + ")");
@@ -146,7 +146,7 @@ CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.Co
     initialize: function(properties, options) {
         let colScale;
         let labels = ["Same Protein"];
-        const proteinIDs = _.pluck(CLMSUI.modelUtils.filterOutDecoyInteractors(CLMS.arrayFromMapValues(options.proteins)), "id");
+        const proteinIDs = _.pluck(CLMSUI.modelUtils.filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
 
         if (proteinIDs && proteinIDs.length > 2 && proteinIDs.length < 6) {
             const groupDomain = ["same"];
@@ -177,7 +177,7 @@ CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.Co
 
     getValue: function(link) {
         let id1, id2;
-        if (link.crossLinks) {
+        if (link.isPPLink) {
             id1 = link.crossLinks[0].fromProtein.id;
             id2 = link.crossLinks[0].toProtein ? link.crossLinks[0].toProtein.id : undefined;
         } else {
@@ -195,7 +195,7 @@ CLMSUI.BackboneModelTypes.HighestScoreColourModel = CLMSUI.BackboneModelTypes.Co
     },
     getValue: function (link) {
         let scores = [];
-        if (link.crossLinks) { // watch out! proteins also have an att called crossLinks
+        if (link.isPPLink) { // watch out! proteins also have an att called crossLinks
             for (let crosslink of link.crossLinks) {
                 //todo if we were certain the matches were sorted by score we could speed this up by only taking first match
                 for (let m_pp of crosslink.filteredMatches_pp) {

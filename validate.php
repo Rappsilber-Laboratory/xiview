@@ -176,7 +176,7 @@ header('Content-type: text/html; charset=utf-8');
                 CLMSUI.init.modelsEssential(json);
 
                 var searches = CLMSUI.compositeModelInst.get("clmsModel").get("searches");
-                document.title = "Validate " + CLMS.arrayFromMapKeys(searches).join();
+                document.title = "Validate " + Array.from(searches.keys()).join();
                 Split (["#topDiv", "#bottomDiv"], { direction: "vertical",
                         sizes: [60,40], minSize: [200,10],
                             onDragEnd: function () {CLMSUI.vent.trigger ("resizeSpectrumSubViews", true);

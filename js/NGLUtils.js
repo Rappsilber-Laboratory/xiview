@@ -71,7 +71,7 @@ CLMSUI.NGLUtils = {
 
                     var nglSequences = CLMSUI.NGLUtils.getChainSequencesFromNGLStructure (structureComp);
                     var interactorMap = compositeModel.get("clmsModel").get("participants");
-                    var interactorArr = CLMS.arrayFromMapValues(interactorMap);
+                    var interactorArr = Array.from(interactorMap.values());
 
                     // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                     // between ngl protein chains and clms proteins. This is asynchronous so we use a callback
@@ -220,7 +220,7 @@ CLMSUI.NGLUtils = {
             });
             // sometimes there are several blocks for the same uniprot/pdb combination so had to map then take the values to remove duplicate pairings i.e. 3C2I
             // we calculate the alignment later on, this routine is purely to pair pdb chains to our proteins via uniprot accession numbers
-            var mapArr = CLMS.arrayFromMapValues(map);
+            var mapArr = Array.from(map.values());
             CLMSUI.utils.xilog ("PDB Service Map All", mapArr);
 
             if (callback) {

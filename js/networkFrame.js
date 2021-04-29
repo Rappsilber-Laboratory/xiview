@@ -52,8 +52,7 @@ CLMSUI.init.postDataLoaded = function () {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     var uniprotFeatureTypes = new Map();
-    var participantArray = CLMS.arrayFromMapValues(CLMSUI.compositeModelInst.get("clmsModel").get("participants"));
-    participantArray.forEach(function (participant) {
+    for (let participant of CLMSUI.compositeModelInst.get("clmsModel").get("participants")) { //todo - remove static ref?
         if (participant.uniprot) {
             var featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
@@ -68,10 +67,10 @@ CLMSUI.init.postDataLoaded = function () {
                 }
             });
         }
-    });
+    }
 
     // add uniprot feature types
-    annotationTypes = annotationTypes.concat(CLMS.arrayFromMapValues(uniprotFeatureTypes));
+    annotationTypes = annotationTypes.concat(Array.from(uniprotFeatureTypes.values()));
     var annotationTypeCollection = new CLMSUI.BackboneModelTypes.AnnotationTypeCollection(annotationTypes);
     CLMSUI.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
@@ -121,10 +120,10 @@ CLMSUI.init.models = function (options) {
     var alignmentCollectionInst = new CLMSUI.BackboneModelTypes.ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
-    // HACK - does nothing at moment anyway because uniprot annotations aren't available
+    // HACK - does nothing at moment anyway because uniprot annotations aren't available //todo - this comment is wrong, right
     alignmentCollectionInst.listenToOnce(CLMSUI.vent, "uniprotDataParsed", function (clmsModel) {
-        this.addNewProteins(CLMS.arrayFromMapValues(clmsModel.get("participants")));
-        console.log("ASYNC. uniprot sequences poked to collection", this);
+        this.addNewProteins(Array.from(clmsModel.get("participants").values()));
+        // console.log("ASYNC. uniprot sequences poked to collection", this);
         allDataLoaded();
     });
 
@@ -161,7 +160,7 @@ CLMSUI.init.models = function (options) {
     // this listener makes new alignment sequence models based on the current participant set (this usually gets called after a csv file is loaded)
     // it uses the same code as that used when a xi search is the source of data, see earlier in this code (roughly line 96'ish)
     alignmentCollectionInst.listenTo(CLMSUI.compositeModelInst.get("clmsModel"), "change:matches", function () {
-        this.addNewProteins(CLMS.arrayFromMapValues(CLMSUI.compositeModelInst.get("clmsModel").get("participants")));
+        this.addNewProteins(Array.from(CLMSUI.compositeModelInst.get("clmsModel").get("participants").values()));
         // this triggers an event to say loads has changed in the alignment collection
         // more efficient to listen to that then redraw/recalc for every seq addition
         this.bulkAlignChangeFinished();
@@ -349,7 +348,7 @@ CLMSUI.init.modelsEssential = function (options) {
     // and then tell the views that filtering has occurred via a custom event ("filtering Done") in applyFilter().
     // This ordering means the views are only notified once the changed data is ready.
     CLMSUI.compositeModelInst.listenTo(filterModelInst, "change", function () {
-        console.log("filterChange");
+        // console.log("filterChange");
         this.applyFilter();
     });
 
@@ -751,14 +750,14 @@ CLMSUI.init.viewsEssential = function (options) {
                     } else {
                         // this works if first item in array has the same id, might in future send matchid to php to return for reliability
                         //var thisMatchID = json.rawMatches && json.rawMatches[0] ? json.rawMatches[0].id : -1;
-                        var returnedMatchID = json.matchid;
+                        const returnedMatchID = json.matchid;
 
                         //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
                         if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-                            var altModel = new window.CLMS.model.SearchResultsModel();
+                            const altModel = new window.CLMS.model.SearchResultsModel();
                             altModel.parseJSON(json);
-                            var allCrossLinks = CLMS.arrayFromMapValues(altModel.get("crossLinks"));
+                            const allCrossLinks = Array.from(altModel.get("crossLinks").values());
                             // empty selection first
                             // (important or it will crash coz selection contains links to proteins not in clms model)
                             self.alternativesModel

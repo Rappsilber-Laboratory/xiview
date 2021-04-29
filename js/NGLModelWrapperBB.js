@@ -837,7 +837,7 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
                 var modelBranch = modelEntry.value;
                 var perChainResidues = modelBranch.entries().map(function(chainEntry) {
                     var chainBranch = chainEntry.value;
-                    // selection syntax picks up ":123" as residue 123 in chain "empty name" (no, it doesn't - 20/04/21), but ": AND 123" doesn't work.
+                    // selection syntax picks up ":123" as residue 123 in chain "empty name" (no, it doesn't - CC, 20/04/21), but ": AND 123" doesn't work.
                     // Similarly ":/0 " works but "/0 AND :" doesn't.
                     // Shouldn't have many pdbs with empty chain names though.
                     if (chainEntry.key) {
@@ -855,7 +855,7 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
                             return ":/" + modelEntry.key;
                         }
                         var emptyChainNameRes = chainBranch.values().map(function(resVal) {
-                            return ":" + resVal;
+                            return resVal + ":";
                         });
                         return "( " + emptyChainNameRes.join(" OR ") + " )";
                     }
@@ -913,7 +913,7 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
 
     // Return chain indices covered by currently visible proteins
     getShowableChains: function(showAll) {
-        var protMap = CLMS.arrayFromMapValues(this.getCompositeModel().get("clmsModel").get("participants"));
+        var protMap = Array.from(this.getCompositeModel().get("clmsModel").get("participants").values()); //todo -tidy
         var prots = Array.from(protMap).filter(function(prot) {
             return !prot.hidden;
         }).map(function(prot) {
