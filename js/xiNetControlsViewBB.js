@@ -19,11 +19,11 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                 CLMSUI.vent.trigger("xinetSvgDownload", true);
             },
             "click .autoLayoutButton": function() {
-                CLMSUI.vent.trigger("xinetAutoLayout", true);
+                const fixSelected = d3.select("input.fixSelected").property("checked");
+                CLMSUI.vent.trigger("xinetAutoLayout", fixSelected? this.model.get("selectedProteins") : [])
             },
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
-            "change .fixSelected": "setFixSelected",
             "change .showExpandedGroupLabels": "setShowExpandedGroupLabels",
             "change .showLabels": "setShowLabels",
             "change .fixedSize": "setFixedSize",
@@ -232,10 +232,6 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
     setShowExpandedGroupLabels: function() {
         this.model.set("xinetShowExpandedGroupLabels", d3.select("input.showExpandedGroupLabels").property("checked"));
-    },
-
-    setFixSelected: function() {
-        this.model.set("xinetFixSelected", d3.select("input.fixSelected").property("checked"));
     },
 
     setFixedSize: function() {

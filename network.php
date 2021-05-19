@@ -97,8 +97,9 @@
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/RenderedProtein.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Group.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/Link.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/RenderedCrossLink.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/RenderedCrosslink.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/P_PLink.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/G_GLink.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Rotator.js<?php echo $cacheBuster ?>"></script>
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
         <script type="text/javascript" src="./js/Utils.js<?php echo $cacheBuster ?>"></script>
