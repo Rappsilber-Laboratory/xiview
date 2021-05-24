@@ -311,10 +311,10 @@
         }
 
         // 2. Can load GO file in parallel - saves I/O time on initialising (whichever is shorter, go terms or spectrum matches)
-        url = "./go.obo";
-        d3.text (url, function(error, txt) {
+        const goUrl = "./go.obo";
+        d3.text (goUrl, function(error, txt) {
             if (error) {
-                console.log("error", error, "for", url, arguments);
+                console.log("error", error, "for", goUrl, arguments);
             } else {
                 CLMSUI.go = CLMSUI.modelUtils.loadGOAnnotations (txt);  // temp store until CLMS model is built
                 //CLMSUI.jsongo = CLMSUI.modelUtils.jsonifyGoMap (CLMSUI.go);
