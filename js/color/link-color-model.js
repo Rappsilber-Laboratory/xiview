@@ -72,8 +72,8 @@ CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourMod
         ;
     },
     getValue: function(link) {
-        if (link.crossLinks) {
-            for (let crosslink of link.crossLinks) {
+        if (link.isAggregateLink) {
+            for (let crosslink of link.getCrosslinks()) {
                 const filteredMatchesAndPepPositions = crosslink.filteredMatches_pp;
 
                 let value = null;
@@ -177,9 +177,10 @@ CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.Co
 
     getValue: function(link) {
         let id1, id2;
-        if (link.isPPLink) {
-            id1 = link.crossLinks[0].fromProtein.id;
-            id2 = link.crossLinks[0].toProtein ? link.crossLinks[0].toProtein.id : undefined;
+        if (link.isAggregateLink) {
+            const crosslink = link.getCrosslinks()[0];
+            id1 = link.crosslink.fromProtein.id;
+            id2 = link.crosslink.toProtein ? link.crossLinks[0].toProtein.id : undefined;
         } else {
             id1 = link.fromProtein.id;
             id2 = link.toProtein ? link.toProtein.id : undefined;
@@ -195,8 +196,8 @@ CLMSUI.BackboneModelTypes.HighestScoreColourModel = CLMSUI.BackboneModelTypes.Co
     },
     getValue: function (link) {
         let scores = [];
-        if (link.isPPLink) { // watch out! proteins also have an att called crossLinks
-            for (let crosslink of link.crossLinks) {
+        if (link.isAggregateLink) {
+            for (let crosslink of link.getCrosslinks()) {
                 //todo if we were certain the matches were sorted by score we could speed this up by only taking first match
                 for (let m_pp of crosslink.filteredMatches_pp) {
                     scores.push(m_pp.match.score());
