@@ -101,7 +101,7 @@ CLMSUI.circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
     // 0...2...............5..................... - feature range [2..5] starts at node start -1 to node end to cover approporiate links
 
     return {
-        nodes: CLMS.arrayFromMapValues(nodeCoordMap),
+        nodes: Array.from(nodeCoordMap.values()),
         links: linkCoords,
         features: featureCoords
     };
@@ -540,7 +540,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         };
 
         // return order as is
-        this.interactorOrder = _.pluck(CLMS.arrayFromMapValues(this.model.get("clmsModel").get("participants")), "id");
+        this.interactorOrder = _.pluck(Array.from(this.model.get("clmsModel").get("participants").values()), "id");
 
         var alignCall = 0;
 
@@ -593,7 +593,6 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         if (orderOptions.reverseConsecutive) {
             this.options.sortDir = -this.options.sortDir; // reverse direction of consecutive resorts
         }
-        //var prots = CLMS.arrayFromMapValues(this.model.get("clmsModel").get("participants"));
         var prots = this.filterInteractors(this.model.get("clmsModel").get("participants"));
         var proteinSort = function(field) {
             var numberSort = prots.length ? !isNaN(prots[0][field]) : false; // stop undefined 'prots[0].field' bug when no prots

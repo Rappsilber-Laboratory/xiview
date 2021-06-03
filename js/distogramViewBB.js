@@ -706,7 +706,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     recalcRandomBinning: function(linkCount) {
-        var searchArray = CLMS.arrayFromMapValues(this.model.get("clmsModel").get("searches"));
+        var searchArray = Array.from(this.model.get("clmsModel").get("searches").values());
         var crosslinkerSpecificityMap = CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray);
         var distObj = this.model.get("clmsModel").get("distancesObj");
         var rscope = this.options.randomScope;

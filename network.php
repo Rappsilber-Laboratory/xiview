@@ -72,7 +72,7 @@
         <script type="text/javascript" src="../vendor/js/byrei-dyndiv_1.0rc1-src.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/d3.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/colorbrewer.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/ngl_verbose.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/ngl.dev.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/c3.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/split.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/svgexp.js<?php echo $cacheBuster ?>"></script>
@@ -256,7 +256,7 @@
 
 				CLMSUI.init.models (json);
 				var searches = CLMSUI.compositeModelInst.get("clmsModel").get("searches");
-				document.title = CLMS.arrayFromMapKeys(searches).join();
+				document.title = Array.from(searches.keys()).join();
 
 				CLMSUI.split = Split(["#topDiv", "#bottomDiv"],
 					{ direction: "vertical", sizes: [80,20], minSize: [200,0],
@@ -314,10 +314,10 @@
         }
 
         // 2. Can load GO file in parallel - saves I/O time on initialising (whichever is shorter, go terms or spectrum matches)
-        const url = "./go.obo";
-        d3.text (url, function(error, txt) {
+        const goUrl = "./go.obo";
+        d3.text (goUrl, function(error, txt) {
             if (error) {
-                console.log("error", error, "for", url, arguments);
+                console.log("error", error, "for", goUrl, arguments);
             } else {
                 CLMSUI.go = CLMSUI.modelUtils.loadGOAnnotations (txt);  // temp store until CLMS model is built
                 //CLMSUI.jsongo = CLMSUI.modelUtils.jsonifyGoMap (CLMSUI.go);

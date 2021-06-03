@@ -309,8 +309,8 @@ CLMSUI.BackboneModelTypes.MetaDataHexValuesColourModel = CLMSUI.BackboneModelTyp
         this.set("labels", this.get("colScale").copy());
     },
     getValue: function (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
-        if (obj.isPPLink) { //} obj.crossLinks) {
-            return obj.crossLinks[0].id;
+        if (obj.isAggregateLink) { //} obj.crossLinks) {
+            return obj.getCrosslinks()[0].id;
         }
         return obj.id;
     },
@@ -322,8 +322,8 @@ CLMSUI.BackboneModelTypes.MetaDataColourModel = CLMSUI.BackboneModelTypes.Colour
         this.set("labels", this.get("colScale").copy().range(domain)); //
     },
     getValue: function (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
-        if (obj.isPPLink) { //} obj.crossLinks) {
-            return obj.crossLinks[0].getMeta(this.get("field"));
+        if (obj.isAggregateLink) { //} obj.crossLinks) {
+            return obj.getCrosslinks()[0].getMeta(this.get("field"));
         }
         return obj.getMeta(this.get("field"));
     },
@@ -338,8 +338,8 @@ CLMSUI.BackboneModelTypes.ThresholdColourModel = CLMSUI.BackboneModelTypes.Colou
         // return obj.getMeta(this.get("field"));
 
         let scores = [];
-        if (obj.isPPLink) { // watch out! proteins also have an att called crossLinks
-            for (let crosslink of obj.crossLinks) {
+        if (obj.isAggregateLink) {
+            for (let crosslink of obj.getCrosslinks()) {
                 const val = crosslink.getMeta(this.get("field"));
                 if (isFinite(val) && !isNaN(parseFloat(val))) {
                     scores.push(val);

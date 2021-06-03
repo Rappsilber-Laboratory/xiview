@@ -501,7 +501,7 @@ CLMSUI.modelUtils = {
         var ids = [];
         if (interactorCollection) {
             if (interactorCollection.length === undefined) {    // obj to array if necessary
-                interactorCollection = CLMS.arrayFromMapValues(interactorCollection);
+                interactorCollection = Array.from(interactorCollection.values());
             }
             ids = _.pluck (CLMSUI.modelUtils.filterOutDecoyInteractors(interactorCollection), "accession")
                 .filter(function(accession) {
@@ -602,7 +602,7 @@ CLMSUI.modelUtils = {
 
     updateLinkMetadata: function (metaDataFileContents, clmsModel) {
         var crossLinks = clmsModel.get("crossLinks");
-        var crossLinksArr = CLMS.arrayFromMapValues (crossLinks);
+        var crossLinksArr = Array.from (crossLinks.values());
         var protMap = CLMSUI.modelUtils.makeMultiKeyProteinMap(clmsModel);
         var crossLinksByProteinPairing = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crossLinksArr);
 
@@ -1193,7 +1193,7 @@ CLMSUI.modelUtils = {
     },
 
     getSearchGroups: function(clmsModel) {
-        var searchArr = CLMS.arrayFromMapValues(clmsModel.get("searches"));
+        const searchArr = Array.from(clmsModel.get("searches").values());
         var uniqueGroups = _.uniq(_.pluck(searchArr, "group"));
         //console.log ("SSS", searchArr, uniqueGroups);
         uniqueGroups.sort(function(a, b) {
