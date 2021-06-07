@@ -91,7 +91,7 @@ DIV.tableWrapper TABLE SPAN {
 }
 
 P.seq, TD.seq {
-    font-family: Consolas, Courier;
+    font-family: monospace;
 }
 
 DIV.checkHolder {

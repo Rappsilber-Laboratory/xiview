@@ -30,7 +30,7 @@
 
 .listView TD.number {
 	text-align: right;
-	font-family: "Courier", monospace;
+	font-family: monospace;
 	font-weight: bold;
 }
 
