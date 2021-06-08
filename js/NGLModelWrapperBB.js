@@ -384,6 +384,13 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
         linkList.forEach (function (link) {
             this._fullLinkNGLIndexMap[link.residueA.NGLglobalIndex+"-"+link.residueB.NGLglobalIndex] = link;
         }, this);
+
+        this._halfLinkNGLIndexMap = {};
+        halfLinkList.forEach (function (link) {
+            this._halfLinkNGLIndexMap[link.residue.NGLglobalIndex] = link;
+        }, this);
+
+
         this._origFullLinkCount = this.getOriginalCrossLinkCount (linkList);
         this._origHalfLinkCount = this.getOriginalCrossLinkCount (halfLinkList);
 
@@ -436,6 +443,10 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
         return this._fullLinkNGLIndexMap[NGLGlobalResIndex1 + "-" + NGLGlobalResIndex2];
     },
 
+    getHalfLinkByNGLResIndex: function (NGLGlobalResIndex1) {
+        return this._halfLinkNGLIndexMap[NGLGlobalResIndex1];
+    },
+
     getResidues: function (fullLink) {
         if (fullLink === undefined) {
             return this._residueList;
@@ -448,6 +459,22 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
         } else {
             return [fullLink.residueA, fullLink.residueB];
         }
+    },
+
+
+    getHalfLinkResidues: function (fullLink) {
+        // if (fullLink === undefined) {
+        //     return this._residueList;
+        // } else if (Array.isArray(fullLink)) {
+        const halfLink = this.getHalfLinks();
+            var residues = [];
+            halfLink.forEach(function(l) {
+                residues.push(l.residue); // push two values at once so don't use .map
+            });
+            return residues;
+        // } else {
+        //     return [fullLink.residueA, fullLink.residueB];
+        // }
     },
 
     getSharedLinks: function(residueA, residueB) {
