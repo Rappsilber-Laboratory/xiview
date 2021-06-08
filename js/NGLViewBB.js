@@ -1099,7 +1099,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         this.resEmphRepr = comp.addRepresentation("spacefill", {
             sele: resEmphSele,
             color:  this.colorOptions.halfLinkResidueColourScheme,
-            radiusScale: 2,//0.9,
+            radiusScale: 1,//0.9,
             //opacity: 0.7,
             name: "resEmph"
         });
