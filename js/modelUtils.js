@@ -512,18 +512,6 @@ CLMSUI.modelUtils = {
         return ids;
     },
 
-    getPDBIDsForProteins: function(accessionIDs, successFunc) {
-        if (accessionIDs.length) {
-            var xmlString = "<orgPdbQuery><queryType>org.pdb.query.simple.UpAccessionIdQuery</queryType>" +
-                "<description>PDB Query Using Uniprot IDs</description><accessionIdList>" +
-                accessionIDs.join(",") +
-                "</accessionIdList></orgPdbQuery>";
-            var encodedXmlString = encodeURIComponent(xmlString);
-
-            $.post("https://www.rcsb.org/pdb/rest/search/?req=browser&sortfield=Release Date", encodedXmlString, successFunc);
-        }
-    },
-
     loadUserFile: function (fileObj, successFunc, associatedData) {
         if (window.File && window.FileReader && window.FileList && window.Blob) {
             var reader = new FileReader();

@@ -462,19 +462,23 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
     },
 
 
-    getHalfLinkResidues: function (fullLink) {
-        // if (fullLink === undefined) {
-        //     return this._residueList;
-        // } else if (Array.isArray(fullLink)) {
-        const halfLink = this.getHalfLinks();
+    getHalfLinkResidues: function (halfLink) {
+        if (halfLink === undefined) {
+            const halfLink = this.getHalfLinks();
             var residues = [];
             halfLink.forEach(function(l) {
                 residues.push(l.residue); // push two values at once so don't use .map
             });
             return residues;
-        // } else {
-        //     return [fullLink.residueA, fullLink.residueB];
-        // }
+        } else if (Array.isArray(halfLink)) {
+            var residues = [];
+            halfLink.forEach(function(l) {
+                residues.push(l.residue); // push two values at once so don't use .map
+            });
+            return residues;
+        } else {
+            return [halfLink.residue];
+        }
     },
 
     getSharedLinks: function(residueA, residueB) {

@@ -75,9 +75,9 @@ CLMSUI.NGLUtils = {
 
                     // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                     // between ngl protein chains and clms proteins. This is asynchronous so we use a callback
-                    // if (pdbSettings[0].pdbCode && CLMSUI.modelUtils.getLegalAccessionIDs(interactorMap).length) {
+                    // if (self.pdbSettings[0].pdbCode && CLMSUI.modelUtils.getLegalAccessionIDs(interactorMap).length) {
                     //     console.log("WEB SERVICE CALLED");
-                    //     CLMSUI.NGLUtils.matchPDBChainsToUniprot(pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
+                    //     CLMSUI.NGLUtils.matchPDBChainsToUniprot(self.pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
                     //         CLMSUI.utils.xilog ("UniprotMapRes", uniprotMappingResults, nglSequences);
                     //         if (uniprotMappingResults.remaining.length) { // Some PDB sequences don't have unicode protein matches in this search
                     //             var remainingSequences = _.pluck (uniprotMappingResults.remaining, "seqObj");   // strip the remaining ones back to just sequence objects
@@ -253,8 +253,14 @@ CLMSUI.NGLUtils = {
             }
         }
 
+
         pdbUris.forEach (function (pdbUri) {
-            $.get("https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
+            // https://1d-coordinates.rcsb.org/#1d-coordinates-api
+            const url = 'https://1d-coordinates.rcsb.org/graphql?'+ encodeURI('query={alignment(from:PDB_ENTITY,to:UNIPROT,queryId:"'+pdbUri.id+'"){target_alignment{target_id}}}');
+
+            // const query = "{alignment(from:NCBI_PROTEIN,to:PDB_ENTITY,queryId:"XP_642496"){target_alignment{target_id}}}"
+
+            $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
                 function(data, status, xhr) {
                     if (status === "success" && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
                         dataArr.push (data);
@@ -276,18 +282,6 @@ CLMSUI.NGLUtils = {
             });
         });
 
-        /*
-        $.get("https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbCode,
-            function(data, status, xhr) {
-
-                if (status === "success" && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
-                    dealWithReturnedData (data);
-                } else { // usually some kind of error if reached here as we didn't detect xml
-                    handleError(data, status);
-                }
-            }
-        )
-        */
     },
 
     // Fallback protein-to-pdb chain matching routines for when we don't have a pdbcode to query the pdb web services or it's offline or we still have sequences in the pdb unmatched to proteins

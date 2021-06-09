@@ -334,34 +334,6 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             }
         });
 
-
-        // Residue colour scheme
-        NGL.ColormakerRegistry.add("external", function () {
-            this.lastResidueIndex = null;
-            this.lastColour = null;
-            this.dontGrey = true;
-            this.atomColor = function (atom) {
-                var arindex = atom.residueIndex;
-                if (this.lastResidueIndex === arindex) {    // saves recalculating, as colour is per residue
-                    return this.lastColour;
-                }
-                this.lastResidueIndex = arindex;
-
-                var residue = self.model.get("stageModel").getResidueByNGLGlobalIndex(arindex);
-
-                if (residue !== undefined) {
-                    var linkCount = self.xlRepr ? self.xlRepr.nglModelWrapper.getHalfLinkCountByResidue(residue) : 0;
-                    this.lastColour = (linkCount > 0 ? 0x000077 : 0xcccccc);
-                } else {
-                    this.lastColour = 0xcccccc;
-                }
-                //console.log ("rid", arindex, this.lastColour);
-                return this.lastColour;
-            };
-            this.filterSensitive = true;
-        });
-
-
         // Current cross-view protein colour scheme
         NGL.ColormakerRegistry.add("external2", function () {
             this.lastChainIndex = null;
@@ -404,7 +376,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             entityindex: "Entity Index",
             entitytype: "Entity Type",
             partialcharge: "Partial Charge",
-            external: "Residues with Half-Links",
+            // external: "Residues with Half-Links",
             external2: "Xi Legend Protein Scheme",
         };
         //var labellabel = d3.set(["uniform", "chainindex", "chainname", "modelindex"]);
@@ -426,12 +398,13 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                         nglRep: self.xlRepr.resRepr,
                         colourScheme: self.xlRepr.colorOptions.residueColourScheme,
                         immediateUpdate: false
-                    },
-                    {
-                        nglRep: self.xlRepr.resEmphRepr,
-                        colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
-                        immediateUpdate: false
-                    },
+                    }
+                    ,
+                    // {
+                    //     nglRep: self.xlRepr.halfLinkResRepr,
+                    //     colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
+                    //     immediateUpdate: false
+                    // },
                     {nglRep: self.xlRepr.sstrucRepr, colourScheme: self.xlRepr.colorOptions.residueColourScheme},
                 ]);
             }
@@ -471,13 +444,15 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             //.listenTo (this.model, "filteringDone", this.showFiltered) // any property changing in the filter model means rerendering this view
             .listenTo(this.model.get("filterModel"), "change", this.showFiltered) // any property changing in the filter model means rerendering this view
             .listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function () {
-                this.rerenderColourSchemes([this.xlRepr ? ({
+                this.rerenderColourSchemes([this.xlRepr ? {
                     nglRep: this.xlRepr.linkRepr,
                     colourScheme: this.xlRepr.colorOptions.linkColourScheme
-                }, {
-                    nglRep: this.xlRepr.resEmphRepr,
-                    colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
-                }) : {nglRep: null, colourScheme: null}]);
+                }
+                // , {
+                //     nglRep: this.xlRepr.halfLinkResRepr,
+                //     colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
+                // }
+                : {nglRep: null, colourScheme: null}]);
             })  // if crosslink colour model changes internally, or is swapped for new one
             .listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function () {
                 this.rerenderColourSchemes([this.xlRepr ? {
@@ -755,7 +730,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                     immediateUpdate: false
                 },
                 {
-                    nglRep: self.xlRepr.resEmphRepr,
+                    nglRep: self.xlRepr.halfLinkResRepr,
                     colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
                     immediateUpdate: false
                 },
@@ -871,7 +846,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.options.showResidues = bool;
         if (this.xlRepr) {
             this.xlRepr.resRepr.setVisibility(bool);
-            this.xlRepr.resEmphRepr.setVisibility(bool);
+            this.xlRepr.halfLinkResRepr.setVisibility(bool);
         }
         return this;
     },
@@ -941,6 +916,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     showHighlightedLinks: function() {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setHighlightedLinks (this.xlRepr.nglModelWrapper.getFullLinks());
+            // this.xlRepr.setHighlightedRes (this.xlRepr.nglModelWrapper.getFullLinks());
         }
         return this;
     },
@@ -948,6 +924,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     showSelectedLinks: function() {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setSelectedLinks (this.xlRepr.nglModelWrapper.getFullLinks());
+            this.xlRepr.setSelectedRes (this.xlRepr.nglModelWrapper.getHalfLinks());
         }
         return this;
     },
@@ -996,7 +973,6 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         return CLMSUI.utils.makeLegalFileName(CLMSUI.utils.searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + CLMSUI.utils.filterStateToString());
     },
 });
-
 
 
 CLMSUI.CrosslinkRepresentation = function(newNGLModelWrapper, params) {
@@ -1085,7 +1061,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
 
         var comp = this.structureComp;
         var resSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getResidues());
-        var resEmphSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getHalfLinkResidues());
+        var halfLinkResSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getHalfLinkResidues());
 
         this.replaceChainRepresentation(this.options.chainRep);
 
@@ -1096,13 +1072,28 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             name: "res"
         });
 
-        this.resEmphRepr = comp.addRepresentation("spacefill", {
-            sele: resEmphSele,
+        this.halfLinkResRepr = comp.addRepresentation("spacefill", {
+            sele: halfLinkResSele,
             color:  this.colorOptions.halfLinkResidueColourScheme,
-            radiusScale: 1,//0.9,
-            //opacity: 0.7,
-            name: "resEmph"
+            radiusScale: 0.9,
+            name: "halfLinkRes"
         });
+
+        // this.halfLinkResEmphRepr = comp.addRepresentation("spacefill", {
+        //     sele: halfLinkResSele,
+        //     color:  this.options.selectedLinksColor,
+        //     radiusScale: 1,
+        //     opacity: 0.7,
+        //     name: "halfLinkResEmph"
+        // });
+        //
+        // this.halfLinkResHighRepr = comp.addRepresentation("spacefill", {
+        //     sele: halfLinkResSele,
+        //     color:  this.options.highlightedLinksColor,
+        //     radiusScale: 1,
+        //     opacity: 0.7,
+        //     name: "halfLinkResHigh"
+        // });
 
         return this;
     },
@@ -1437,7 +1428,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             this.rerenderColourSchemes ([
                 {nglRep: this.sstrucRepr, colourScheme: this.colorOptions.residueColourScheme, immediateUpdate: false},
                 {nglRep: this.resRepr, colourScheme: this.colorOptions.residueColourScheme, immediateUpdate: false},
-                {nglRep: this.resEmphRepr, colourScheme: this.colorOptions.halfLinkResidueColourScheme, immediateUpdate: false},
+                // {nglRep: this.halfLinkResRepr, colourScheme: this.colorOptions.halfLinkResidueColourScheme, immediateUpdate: false},
             ]);
         }
 
@@ -1470,7 +1461,6 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         return this;
     },
 
-
     // Populate NGL representations with residues
 
     // Repopulate a residue representation with a set of residues
@@ -1486,17 +1476,21 @@ CLMSUI.CrosslinkRepresentation.prototype = {
     setDisplayedResidues: function(residues, halfLinkResidues) {
         var a = performance.now();
         this.setResidues(residues, this.resRepr);
-        this.setResidues(halfLinkResidues, this.resEmphRepr);
+        this.setResidues(halfLinkResidues, this.halfLinkResRepr);
         CLMSUI.utils.xilog("set displayed residues, time", performance.now() - a);
         return this;
     },
 
-    // setSelectedResidues: function(residues) {
-    //     this.setResidues(residues, this.resEmphRepr);
-    //     CLMSUI.utils.xilog("set selected residues");
-    //     return this;
-    // },
+    setSelectedResidues: function(residues) {
+        this.setResidues(residues, this.halfLinkResEmphRepr);
+        CLMSUI.utils.xilog("set selected residues");
+        return this;
+    },
 
+    setSelectedRes: function(halfLinks) {
+        const filteredHalfLinks = this.filterByLinkState(halfLinks, "selection")
+        return this.setSelectedResidues (this.nglModelWrapper.getHalfLinkResidues(halfLinks));
+    },
 
     // Populate NGL distance representations with crosslinks
 

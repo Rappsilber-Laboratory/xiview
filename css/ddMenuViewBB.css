@@ -73,7 +73,7 @@
 }
 
 .dropdown .ddSectionHeader {
-    background: #091D42;
+    /*background: #091D42;*/
     /* opacity: 0.8; */
     text-transform: lowercase;
     font-variant: small-caps;

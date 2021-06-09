@@ -8,7 +8,7 @@ var CLMSUI = CLMSUI || {};
 
 CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -19,17 +19,17 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             "change .selectPdbButton": "selectPDBFile",
             "keyup .inputPDBCode": "enteringPDBCode",
             "click button.PDBSubmit": "loadPDBCode",
-            "click .cAlphaOnly": "toggleCAlphaSetting",
+            // "click .cAlphaOnly": "toggleCAlphaSetting",
         });
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         CLMSUI.PDBFileChooserBB.__super__.initialize.apply(this, arguments);
         this.cAlphaOnly = false;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
         var mainDivSel = d3.select(this.el);
-        mainDivSel.classed ("metaLoadPanel", true);
+        mainDivSel.classed("metaLoadPanel", true);
 
         var wrapperPanel = mainDivSel.append("div")
             .attr("class", "panelInner");
@@ -52,7 +52,6 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         */
 
 
-
         box.append("p").attr("class", "smallHeading").text("PDB Source");
 
         box.append("div")
@@ -73,10 +72,9 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             .property("multiple", true)
         ;
 
-
         var pdbCodeSpan = box.append("span")
-            .attr("class", "btn nopadLeft")
-            .text("or Enter 4-character PDB IDs")
+                .attr("class", "btn nopadLeft")
+                .text("or Enter 4-character PDB IDs")
             //.append("div")
         ;
 
@@ -97,30 +95,44 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
 
         pdbCodeSpan.append("span").text("& Press Enter");
 
-        
         var queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
 
         queryBox.append("p").attr("class", "smallHeading").text("PDB Query Services");
 
         var qButtonData = [
-            // {class: "pdbWindowButton", text: "Show PDBs Matching UniProt Accessions @ RCSB.org", tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"},
-            {class: "ebiPdbWindowButton", text: "Show PDBs Matching a Protein Sequence @ EBI", tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"}
+            {
+                class: "pdbWindowButton",
+                text: "Show PDBs Matching UniProt Accessions @ RCSB.org",
+                tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"
+            },
+            {
+                class: "ebiPdbWindowButton",
+                text: "Show PDBs Matching a Protein Sequence @ EBI",
+                tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"
+            }
         ];
-        queryBox.selectAll("button").data(qButtonData, function (d) { return d.text; })
+        queryBox.selectAll("button").data(qButtonData, function (d) {
+            return d.text;
+        })
             .enter()
             .append("button")
-            .attr("class", function(d) { return d.class; })
-            .text(function(d) { return d.text; })
-            .attr("title", function(d) { return d.tooltip; })
+            .attr("class", function (d) {
+                return d.class;
+            })
+            .text(function (d) {
+                return d.text;
+            })
+            .attr("title", function (d) {
+                return d.tooltip;
+            })
         ;
 
         queryBox.selectAll("button")
-            .classed ("btn btn-1 btn-1a", true)
+            .classed("btn btn-1 btn-1a", true)
             .append("i").attr("class", "fa fa-xi fa-external-link")
         ;
 
         this.updateProteinDropdown(queryBox);
-
 
         wrapperPanel.append("p").attr("class", "smallHeading").text("Load Results");
         wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
@@ -131,20 +143,22 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             backgroundColor: "white",
             tooltip: false
         });
+
         //console.log("STAGE", this.stage);
 
         function sanitise(str) {
             return str.replace(/[^a-z0-9 ,.?!]/ig, '');
         }
 
-        function updatePD () {
-            this.updateProteinDropdown (d3.select(this.el).select(".queryBox"));
+        function updatePD() {
+            this.updateProteinDropdown(d3.select(this.el).select(".queryBox"));
         }
-        this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
-        this.listenTo (this.model, "change:selectedProteins", updatePD);
-        this.listenTo (CLMSUI.vent, "proteinMetadataUpdated", updatePD);
 
-        this.listenTo (this.model, "3dsync", function(newSequences) {
+        // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
+        this.listenTo(this.model, "change:selectedProteins", updatePD);
+        this.listenTo(CLMSUI.vent, "proteinMetadataUpdated", updatePD);
+
+        this.listenTo(this.model, "3dsync", function (newSequences) {
             var count = _.isEmpty(newSequences) ? 0 : newSequences.length;
             var success = count > 0;
             this.setCompletedEffect();
@@ -152,7 +166,9 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             // list pdb's these sequences derive from
             //console.log ("seq", newSequences);
             var pdbString = nameArr ?
-                d3.set (nameArr.map(function(name) { return name.substr(0, _./*last*/indexOf (name, ":")); })).values().join(", ") : "?"
+                d3.set(nameArr.map(function (name) {
+                    return name.substr(0, _./*last*/indexOf(name, ":"));
+                })).values().join(", ") : "?"
             ;
 
             var msg = newSequences.failureReason ? "" : "Completed Loading " + sanitise(pdbString) + ".<br>";
@@ -165,11 +181,11 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             this.setStatusText(msg, success);
         });
 
-        this.listenTo (CLMSUI.vent, "alignmentProgress", this.setStatusText);
+        this.listenTo(CLMSUI.vent, "alignmentProgress", this.setStatusText);
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {
-            this.setVisible (true);
+            this.setVisible(true);
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
@@ -178,30 +194,37 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
     // Return selected proteins, or all proteins if nothing selected
     getSelectedProteins: function () {
         var selectedProteins = this.model.get("selectedProteins");
-        return _.isEmpty (selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
+        return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
     },
 
-    updateProteinDropdown: function(parentElem) {
+    updateProteinDropdown: function (parentElem) {
         var proteins = this.getSelectedProteins();
 
         CLMSUI.utils.addMultipleSelectControls({
             addToElem: parentElem,
             selectList: ["Proteins"],
-            optionList: CLMSUI.modelUtils.filterOutDecoyInteractors (proteins),
+            optionList: CLMSUI.modelUtils.filterOutDecoyInteractors(proteins),
             keepOldOptions: false,
-            selectLabelFunc: function() {
+            selectLabelFunc: function () {
                 return "Select Protein for EBI Sequence Search ►";
             },
-            optionLabelFunc: function (d) { return d.name; },
-            optionValueFunc: function(d) { return d.id; },
-            optionSortFunc: function (a, b) { return a.name.localeCompare (b.name); },
-            idFunc: function(d) { return d.id; },
+            optionLabelFunc: function (d) {
+                return d.name;
+            },
+            optionValueFunc: function (d) {
+                return d.id;
+            },
+            optionSortFunc: function (a, b) {
+                return a.name.localeCompare(b.name);
+            },
+            idFunc: function (d) {
+                return d.id;
+            },
         });
 
     },
 
-
-    launchExternalPDBWindow: function() {
+    launchExternalPDBWindow: function () {
         // http://stackoverflow.com/questions/15818892/chrome-javascript-window-open-in-new-tab
         // annoying workaround whereby we need to open a blank window here and set the location later
         // otherwise chrome/pop-up blockers think it is some spammy popup rather than something the user wants.
@@ -210,34 +233,87 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         var newtab = window.open("", "_blank");
         var accessionIDs = CLMSUI.modelUtils.getLegalAccessionIDs(this.getSelectedProteins());
         if (accessionIDs.length) {
-            CLMSUI.modelUtils.getPDBIDsForProteins(
-                accessionIDs,
-                function(data) {
-                    var ids = data.split("\n");
-                    var lastID = ids[ids.length - 2]; // -2 'cos last is actually an empty string after last \n
-                    newtab.location = "https://www.rcsb.org/pdb/results/results.do?qrid=" + lastID;
+            // https://search.rcsb.org/#search-example-8
+            const query = {
+                "query": {
+                    "type": "group",
+                    "logical_operator": "and",
+                    "nodes": [
+                        {
+                            "type": "group",
+                            "logical_operator": "and",
+                            "nodes": [
+                                {
+                                    "type": "group",
+                                    "logical_operator": "and",
+                                    "nodes": [
+                                        {
+                                            "type": "group",
+                                            "logical_operator": "and",
+                                            "nodes": [
+                                                {
+                                                    "type": "terminal",
+                                                    "service": "text",
+                                                    "parameters": {
+                                                        "attribute": "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession",
+                                                        "negation": false,
+                                                        "operator": "in",
+                                                        "value": accessionIDs
+                                                    },
+                                                    "node_id": 0
+                                                },
+                                                {
+                                                    "type": "terminal",
+                                                    "service": "text",
+                                                    "parameters": {
+                                                        "attribute": "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_name",
+                                                        "operator": "exact_match",
+                                                        "value": "UniProt"
+                                                    },
+                                                    "node_id": 1
+                                                }
+                                            ],
+                                            "label": "nested-attribute"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "label": "text"
+                        }
+                    ],
+                    "label": "query-builder"
+                },
+                "return_type": "entry",
+                "request_options": {
+                    "scoring_strategy": "combined",
+                    "sort": [
+                        {
+                            "sort_by": "score",
+                            "direction": "desc"
+                        }
+                    ]
                 }
-            );
+            };
+            newtab.location = "https://www.rcsb.org/search?request=" + encodeURI(JSON.stringify(query));
         } else {
             newtab.document.body.innerHTML = "No legal Accession IDs are in the current dataset. These are required to query the PDB service.";
         }
     },
 
-
-    getSelectedOption: function(higherElem, selectName) {
+    getSelectedOption: function (higherElem, selectName) {
         var funcMeta;
 
         //this.controlDiv
         higherElem
             .selectAll("select")
-            .filter(function(d) {
+            .filter(function (d) {
                 return d === selectName;
             })
             .selectAll("option")
-            .filter(function() {
+            .filter(function () {
                 return d3.select(this).property("selected");
             })
-            .each(function(d) {
+            .each(function (d) {
                 funcMeta = d;
             })
         ;
@@ -245,14 +321,14 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         return funcMeta;
     },
 
-    launchExternalEBIPDBWindow: function() {
+    launchExternalEBIPDBWindow: function () {
         var chosenSeq = (this.getSelectedOption(d3.select(this.el).select(".columnbar"), "Proteins") || {
             sequence: ""
         }).sequence;
         window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
     },
 
-    selectPDBFile: function(evt) {
+    selectPDBFile: function (evt) {
         this.setWaitingEffect();
         this.loadRoute = "file";
         var self = this;
@@ -260,7 +336,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         var pdbSettings = [];
         var fileCount = evt.target.files.length;
 
-        var onLastLoad = _.after (fileCount, function() {
+        var onLastLoad = _.after(fileCount, function () {
                 CLMSUI.NGLUtils.repopulateNGL({
                     pdbSettings: pdbSettings,
                     stage: self.stage,
@@ -272,14 +348,14 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         for (var n = 0; n < fileCount; n++) {
             var fileObj = evt.target.files[n];
 
-            CLMSUI.modelUtils.loadUserFile (
+            CLMSUI.modelUtils.loadUserFile(
                 fileObj,
                 function (fileContents, associatedData) {
                     var blob = new Blob([fileContents], {
                         type: 'application/text'
                     });
                     var name = associatedData.name;
-                    pdbSettings.push ({
+                    pdbSettings.push({
                         id: name,
                         uri: blob,
                         local: true,
@@ -297,7 +373,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         evt.target.value = null;    // reset value so same file can be chosen twice in succession
     },
 
-    enteringPDBCode: function(evt) {
+    enteringPDBCode: function (evt) {
         var valid = this.isPDBCodeValid();
         d3.select(this.el).select(".PDBSubmit").property("disabled", !valid);
         if (valid && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
@@ -305,13 +381,19 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         }
     },
 
-    loadPDBCode: function() {
+    loadPDBCode: function () {
         var pdbCode = d3.select(this.el).select(".inputPDBCode").property("value");
         this.loadRoute = "pdb";
         this.setWaitingEffect();
 
-        var pdbSettings = pdbCode.match(CLMSUI.utils.commonRegexes.multiPdbSplitter).map (function (code) {
-            return {id: code, pdbCode: code, uri:"rcsb://"+code, local: false, params: {calphaOnly: this.cAlphaOnly}};
+        var pdbSettings = pdbCode.match(CLMSUI.utils.commonRegexes.multiPdbSplitter).map(function (code) {
+            return {
+                id: code,
+                pdbCode: code,
+                uri: "rcsb://" + code,
+                local: false,
+                params: {calphaOnly: this.cAlphaOnly}
+            };
         }, this);
 
         CLMSUI.NGLUtils.repopulateNGL({
@@ -321,16 +403,16 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         });
     },
 
-    isPDBCodeValid: function() {
+    isPDBCodeValid: function () {
         var elem = d3.select(this.el).select(".inputPDBCode");
         return elem.node().checkValidity();
     },
 
-    toggleCAlphaSetting: function (evt) {
-        var val = evt.target.checked;
-        this.cAlphaOnly = val;
-        return this;
-    },
+    // toggleCAlphaSetting: function (evt) {
+    //     var val = evt.target.checked;
+    //     this.cAlphaOnly = val;
+    //     return this;
+    // },
 
     identifier: "PDB File Chooser",
 });
