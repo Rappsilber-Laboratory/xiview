@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $cacheBuster = '?v='.microtime(true);
+    $cacheBuster = '';//?v='.microtime(true);
 ?>
 
 <!DOCTYPE html>
@@ -106,7 +106,6 @@
         <script type="text/javascript" src="./js/annotationTypeModel.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/compositeModelType.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/modelUtils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/NGLUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/stringUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/fdr.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/distancesObj.js<?php echo $cacheBuster ?>"></script>
@@ -117,11 +116,9 @@
         <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/minigramViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/NGLModelWrapperBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/PDBFileChooser.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/STRINGFileChooser.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/metaDataFileChoosers.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/NGLViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/bioseq32.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/alignModelType.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/alignViewBB3.js<?php echo $cacheBuster ?>"></script>
@@ -146,6 +143,11 @@
          <script type="text/javascript" src="./js/goTerm.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/sankey.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/ui-utils/section-table.js<?php echo $cacheBuster ?>"></script>
+
+        <script type="text/javascript" src="./js/ngl/NGLUtils.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ngl/NGLModelWrapperBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ngl/CrosslinkRepresentation.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ngl/NGLViewBB.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="../userGUI/js/dialogs.js<?php echo $cacheBuster ?>"></script>
 
