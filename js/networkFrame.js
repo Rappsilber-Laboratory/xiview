@@ -19,7 +19,7 @@ CLMSUI.init.postDataLoaded = function () {
     });
 
     //init annotation types
-    var annotationTypes = [
+    let annotationTypes = [
         new CLMSUI.BackboneModelTypes.AnnotationType({
             category: "AA",
             type: "Digestible",
@@ -30,7 +30,7 @@ CLMSUI.init.postDataLoaded = function () {
         new CLMSUI.BackboneModelTypes.AnnotationType({
             category: "AA",
             type: "Crosslinkable-1",
-            tooltip: "Mark CrossLinkable residues (first or only reactive gruop)",
+            tooltip: "Mark CrossLinkable residues (first or only reactive group)",
             source: "Search",
             colour: "#a6cee3",
         }),
@@ -51,14 +51,14 @@ CLMSUI.init.postDataLoaded = function () {
     ];
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
-    var uniprotFeatureTypes = new Map();
+    const uniprotFeatureTypes = new Map();
     for (let participant of CLMSUI.compositeModelInst.get("clmsModel").get("participants")) { //todo - remove static ref?
         if (participant.uniprot) {
-            var featureArray = Array.from(participant.uniprot.features);
+            const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
-                var key = feature.category + "-" + feature.type;
+                const key = feature.category + "-" + feature.type;
                 if (!uniprotFeatureTypes.has(key)) {
-                    var annotationType = new CLMSUI.BackboneModelTypes.AnnotationType(feature);
+                    const annotationType = new CLMSUI.BackboneModelTypes.AnnotationType(feature);
                     annotationType
                         .set("source", "Uniprot")
                         .set("typeAlignmentID", "Canonical")
@@ -71,7 +71,7 @@ CLMSUI.init.postDataLoaded = function () {
 
     // add uniprot feature types
     annotationTypes = annotationTypes.concat(Array.from(uniprotFeatureTypes.values()));
-    var annotationTypeCollection = new CLMSUI.BackboneModelTypes.AnnotationTypeCollection(annotationTypes);
+    const annotationTypeCollection = new CLMSUI.BackboneModelTypes.AnnotationTypeCollection(annotationTypes);
     CLMSUI.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
     CLMSUI.vent.trigger("buildAsyncViews");
@@ -83,13 +83,13 @@ CLMSUI.init.postDataLoaded = function () {
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
     if (CLMSUI.compositeModelInst.get("clmsModel").get("searches").size > 1) {
-        d3.select("#linkColourSelect").property("value","Group");
+        d3.select("#linkColourSelect").property("value", "Group");
     }
 
 };
 
 // This bar function calls postDataLoaded on the 4th go, ensuring all data is in place from various data loading ops
-var allDataLoaded = _.after(4, CLMSUI.init.postDataLoaded);
+const allDataLoaded = _.after(4, CLMSUI.init.postDataLoaded);
 
 // for qunit testing
 CLMSUI.init.pretendLoad = function () {
@@ -117,7 +117,7 @@ CLMSUI.init.blosumLoading = function (options) {
 CLMSUI.init.models = function (options) {
 
     // define alignment model and listeners first, so they're ready to pick up events from other models
-    var alignmentCollectionInst = new CLMSUI.BackboneModelTypes.ProtAlignCollection();
+    const alignmentCollectionInst = new CLMSUI.BackboneModelTypes.ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
     // HACK - does nothing at moment anyway because uniprot annotations aren't available //todo - this comment is wrong, right
@@ -138,7 +138,7 @@ CLMSUI.init.models = function (options) {
             // remove before add so if someone decides to reload the same file/code (why, but possible) we don't end up removing what we've just added
             if (removeThese && removeThese.length) {
                 removeThese.forEach(function (structureName) {
-                    var seqModels = this.getSequencesByPredicate(function (seq) {
+                    const seqModels = this.getSequencesByPredicate(function (seq) {
                         return structureName + ":" === seq.get("id").substring(0, structureName.length + 1);
                     });
                     this.removeSequences(seqModels);
@@ -169,13 +169,13 @@ CLMSUI.init.models = function (options) {
     });
 
     // Set up colour models, some (most) of which depend on data properties
-    var crossLinkerKeys = d3.keys(CLMSUI.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
-    var storedDistanceColourSettings = crossLinkerKeys.length === 1 ? _.propertyOf(CLMSUI.utils.getLocalStorage())(["distanceColours", crossLinkerKeys[0]]) : undefined;
+    const crossLinkerKeys = d3.keys(CLMSUI.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
+    const storedDistanceColourSettings = crossLinkerKeys.length === 1 ? _.propertyOf(CLMSUI.utils.getLocalStorage())(["distanceColours", crossLinkerKeys[0]]) : undefined;
     CLMSUI.linkColour.setupColourModels({distance: storedDistanceColourSettings});
 
     if (crossLinkerKeys.length === 1) {
         CLMSUI.compositeModelInst.listenTo(CLMSUI.linkColour.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
-            var obj = {distanceColours: {}};
+            const obj = {distanceColours: {}};
             obj.distanceColours[crossLinkerKeys[0]] = attr;
             CLMSUI.utils.setLocalStorage(obj);
         });
@@ -210,9 +210,9 @@ CLMSUI.init.models = function (options) {
 CLMSUI.init.modelsEssential = function (options) {
     CLMSUI.oldDB = options.oldDB || false;
 
-    var hasMissing = !_.isEmpty(options.missingSearchIDs);
-    var hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
-    var hasNoMatches = _.isEmpty(options.rawMatches);
+    const hasMissing = !_.isEmpty(options.missingSearchIDs);
+    const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
+    const hasNoMatches = _.isEmpty(options.rawMatches);
 
     CLMSUI.utils.displayError(function () {
             return hasMissing || hasIncorrect || hasNoMatches;
@@ -223,7 +223,7 @@ CLMSUI.init.modelsEssential = function (options) {
     );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    var clmsModelInst = new window.CLMS.model.SearchResultsModel();
+    const clmsModelInst = new window.CLMS.model.SearchResultsModel();
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -232,7 +232,7 @@ CLMSUI.init.modelsEssential = function (options) {
         prot.size = prot.size || 1;
     });
 
-    var urlChunkMap = CLMSUI.modelUtils.parseURLQueryString(window.location.search.slice(1));
+    const urlChunkMap = CLMSUI.modelUtils.parseURLQueryString(window.location.search.slice(1));
 
     // Anonymiser for screen shots / videos. MJG 17/05/17, add &anon to url for this
     if (urlChunkMap.anon) {
@@ -245,11 +245,11 @@ CLMSUI.init.modelsEssential = function (options) {
     // Add c- and n-term positions to searchresultsmodel on a per protein basis // MJG 29/05/17
     //~ clmsModelInst.set("terminiPositions", CLMSUI.modelUtils.getTerminiPositions (options.peptides));
 
-    var scoreExtentInstance = CLMSUI.modelUtils.matchScoreRange(clmsModelInst.get("matches"), true);
+    const scoreExtentInstance = CLMSUI.modelUtils.matchScoreRange(clmsModelInst.get("matches"), true);
     if (scoreExtentInstance[0]) {
         scoreExtentInstance[0] = Math.min(0, scoreExtentInstance[0]); // make scoreExtent min zero, if existing min isn't negative
     }
-    var filterSettings = {
+    let filterSettings = {
         decoys: clmsModelInst.get("decoysPresent"),
         betweenLinks: true, //clmsModelInst.targetProteinCount > 1,
         A: clmsModelInst.get("manualValidatedPresent"),
@@ -264,22 +264,22 @@ CLMSUI.init.modelsEssential = function (options) {
         //distanceCutoff: [0, 250],
         searchGroups: CLMSUI.modelUtils.getSearchGroups(clmsModelInst),
     };
-    var urlFilterSettings = CLMSUI.BackboneModelTypes.FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
+    const urlFilterSettings = CLMSUI.BackboneModelTypes.FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
     filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
     console.log("urlFilterSettings", urlFilterSettings, "progFilterSettings", filterSettings);
-    var filterModelInst = new CLMSUI.BackboneModelTypes.FilterModel(filterSettings, {
+    const filterModelInst = new CLMSUI.BackboneModelTypes.FilterModel(filterSettings, {
         scoreExtent: scoreExtentInstance,
         //distanceExtent: [0, 250],
         possibleSearchGroups: CLMSUI.modelUtils.getSearchGroups(clmsModelInst),
     });
 
-    var tooltipModelInst = new CLMSUI.BackboneModelTypes.TooltipModel();
+    const tooltipModelInst = new CLMSUI.BackboneModelTypes.TooltipModel();
 
 
     // Make score and distance minigram models, and add listeners to make sure they synchronise to attributes in filter model
-    var minigramModels = ["matchScoreCutoff", "distanceCutoff"].map(function (filterAttrName) {
-        var filterAttr = filterModelInst.get(filterAttrName);
-        var miniModel = new CLMSUI.BackboneModelTypes.MinigramModel({
+    const minigramModels = ["matchScoreCutoff", "distanceCutoff"].map(function (filterAttrName) {
+        const filterAttr = filterModelInst.get(filterAttrName);
+        const miniModel = new CLMSUI.BackboneModelTypes.MinigramModel({
             domainStart: filterAttr[0],// || 0,
             domainEnd: filterAttr[1],// || 1,
         });
@@ -305,8 +305,8 @@ CLMSUI.init.modelsEssential = function (options) {
         return CLMSUI.modelUtils.flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
     };
     minigramModels[1].data = function () {
-        var crossLinks = CLMSUI.compositeModelInst.getAllCrossLinks();
-        var distances = crossLinks
+        const crossLinks = CLMSUI.compositeModelInst.getAllCrossLinks();
+        const distances = crossLinks
             .map(function (clink) {
                 return clink.getMeta("distance");
             })
@@ -321,7 +321,7 @@ CLMSUI.init.modelsEssential = function (options) {
     minigramModels[1]
         .listenTo(clmsModelInst, "change:distancesObj", function (clmsModel, distObj) {
             //console.log ("minigram arguments", arguments, this);
-            var max = Math.ceil(distObj.maxDistance);
+            const max = Math.ceil(distObj.maxDistance);
             this.set("extent", [0, max + 1]);
             filterModelInst.distanceExtent = [0, max];
             filterModelInst
@@ -356,14 +356,14 @@ CLMSUI.init.modelsEssential = function (options) {
 
 CLMSUI.init.views = function () {
 
-    var compModel = CLMSUI.compositeModelInst;
-    var matchesFound = !_.isEmpty(compModel.get("clmsModel").get("matches"));
+    const compModel = CLMSUI.compositeModelInst;
+    const matchesFound = !_.isEmpty(compModel.get("clmsModel").get("matches"));
     //console.log("MODEL", compModel);
 
     //todo: only if there is validated {
     // compModel.get("filterModel").set("unval", false); // set to false in filter model defaults
 
-    var windowIds = ["spectrumPanelWrapper", "spectrumSettingsWrapper", "keyPanel", "nglPanel", "distoPanel", "matrixPanel", "alignPanel", "circularPanel", "proteinInfoPanel", "pdbPanel", "stringPanel", "csvPanel", "searchSummaryPanel", "linkMetaLoadPanel", "proteinMetaLoadPanel", "userAnnotationsMetaLoadPanel", "gafAnnotationsMetaLoadPanel", "scatterplotPanel", "urlSearchBox", "listPanel", "goTermsPanel"];
+    const windowIds = ["spectrumPanelWrapper", "spectrumSettingsWrapper", "keyPanel", "nglPanel", "distoPanel", "matrixPanel", "alignPanel", "circularPanel", "proteinInfoPanel", "pdbPanel", "stringPanel", "csvPanel", "searchSummaryPanel", "linkMetaLoadPanel", "proteinMetaLoadPanel", "userAnnotationsMetaLoadPanel", "gafAnnotationsMetaLoadPanel", "scatterplotPanel", "urlSearchBox", "listPanel", "goTermsPanel"];
     // something funny happens if I do a data join and enter with d3 instead
     // ('distoPanel' datum trickles down into chart axes due to unintended d3 select.select inheritance)
     // http://stackoverflow.com/questions/18831949/d3js-make-new-parent-data-descend-into-child-nodes
@@ -378,13 +378,13 @@ CLMSUI.init.views = function () {
     });
 
     // Generate checkboxes for view dropdown
-    var checkBoxData = [        {
-            id: "keyChkBxPlaceholder",
-            label: "Legend & Colours",
-            eventName: "keyViewShow",
-            tooltip: "Explains and allows changing of current colour scheme",
-            sectionEnd: true
-        },
+    const checkBoxData = [{
+        id: "keyChkBxPlaceholder",
+        label: "Legend & Colours",
+        eventName: "keyViewShow",
+        tooltip: "Explains and allows changing of current colour scheme",
+        sectionEnd: true
+    },
         {
             id: "circularChkBxPlaceholder",
             label: "Circular",
@@ -449,18 +449,18 @@ CLMSUI.init.views = function () {
         },
     ];
     checkBoxData.forEach(function (cbdata) {
-        var options = $.extend({
+        const options = $.extend({
             labelFirst: false
         }, cbdata);
-        var cbView = new CLMSUI.utils.checkBoxView({
+        const cbView = new CLMSUI.utils.checkBoxView({
             myOptions: options
         });
         $("#viewDropdownPlaceholder").append(cbView.$el);
     }, this);
 
     // Add them to a drop-down menu (this rips them away from where they currently are - document)
-    var maybeViews = ["#nglChkBxPlaceholder" /*, "#distoChkBxPlaceholder"*/];
-    var mostViews = checkBoxData.map(function (d) {
+    const maybeViews = ["#nglChkBxPlaceholder" /*, "#distoChkBxPlaceholder"*/];
+    const mostViews = checkBoxData.map(function (d) {
         return "#" + d.id;
     }).filter(function (id) {
         return id !== "#keyChkBxPlaceholder" && id !== "#nglChkBxPlaceholder";
@@ -543,7 +543,6 @@ CLMSUI.init.views = function () {
                     tooltip: "Clears all groups"
                 },
                 {
-                    name: "?Auto Group?",
                     name: "Auto Group",
                     func: compModel.autoGroup,
                     context: compModel,
@@ -562,11 +561,11 @@ CLMSUI.init.views = function () {
         });
 
     // Generate buttons for load dropdown
-    var loadButtonData = [{
-            name: "PDB",
-            eventName: "pdbFileChooserShow",
-            tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
-        },
+    const loadButtonData = [{
+        name: "PDB",
+        eventName: "pdbFileChooserShow",
+        tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
+    },
         {
             name: "STRING",
             eventName: "stringDataChooserShow",
@@ -632,10 +631,11 @@ CLMSUI.init.views = function () {
 
 CLMSUI.init.viewsEssential = function (options) {
 
-    var compModel = CLMSUI.compositeModelInst;
-    var filterModel = compModel.get("filterModel");
+    const compModel = CLMSUI.compositeModelInst;
+    const filterModel = compModel.get("filterModel");
 
-    var singleTargetProtein = compModel.get("clmsModel").targetProteinCount < 2;
+
+    // var singleTargetProtein = compModel.get("clmsModel").targetProteinCount < 2;
     new CLMSUI.FilterViewBB({
         el: "#filterPlaceholder",
         model: filterModel,
@@ -667,7 +667,7 @@ CLMSUI.init.viewsEssential = function (options) {
 
 
     // Generate minigram views
-    var minigramViewConfig = [
+    const minigramViewConfig = [
         {
             id: "score",
             el: "#filterPlaceholdermatchScoreSliderHolder",
@@ -683,7 +683,7 @@ CLMSUI.init.viewsEssential = function (options) {
             label: "Distance"
         },
     ];
-    var minigramViews = minigramViewConfig.map(function (config) {
+    const minigramViews = minigramViewConfig.map(function (config) {
         return new CLMSUI.MinigramViewBB({
             el: config.el,
             model: compModel.get("minigramModels")[config.id],
@@ -718,7 +718,7 @@ CLMSUI.init.viewsEssential = function (options) {
     // 2. Event A in spectrumWrapper fires event B
     // 3. selectionViewer listens for event B to highlight row in table - which means it must have built the table
     // 4. Thus selectionViewer must do its routine for event A before spectrumWrapper, so we initialise it first
-    var selectionViewer = new CLMSUI.SelectionTableViewBB({
+    const selectionViewer = new CLMSUI.SelectionTableViewBB({
         el: "#bottomDiv",
         model: compModel,
     });
@@ -740,10 +740,10 @@ CLMSUI.init.viewsEssential = function (options) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match
-                var url = "../CLMS-model/php/spectrumMatches.php?sid=" +
+                const url = "../CLMS-model/php/spectrumMatches.php?sid=" +
                     this.model.get("clmsModel").get("sid") +
                     "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
-                var self = this;
+                const self = this;
                 d3.json(url, function (error, json) {
                     if (error) {
                         console.log("error", error, "for", url, arguments);
@@ -753,7 +753,7 @@ CLMSUI.init.viewsEssential = function (options) {
                         const returnedMatchID = json.matchid;
 
                         //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
-                        if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
+                        if (returnedMatchID === self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
                             const altModel = new window.CLMS.model.SearchResultsModel();
                             altModel.parseJSON(json);
@@ -780,7 +780,7 @@ CLMSUI.init.viewsEssential = function (options) {
             }
         });
 
-    var xiSPEC_options = {
+    const xiSPEC_options = {
         targetDiv: 'modular_xispec',
         baseDir: CLMSUI.xiSpecBaseDir,
         xiAnnotatorBaseURL: CLMSUI.xiAnnotRoot,
@@ -788,7 +788,7 @@ CLMSUI.init.viewsEssential = function (options) {
         showCustomConfig: true,
         showQualityControl: "min",
         colorScheme: colorbrewer.PRGn[8],
-    }
+    };
 
     xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
 
@@ -801,7 +801,7 @@ CLMSUI.init.viewsEssential = function (options) {
     // used to transport one Match between views
     xiSPEC.activeSpectrum.listenTo(CLMSUI.vent, "individualMatchSelected", function (match) {
         if (match) {
-            var randId = CLMSUI.compositeModelInst.get("clmsModel").getSearchRandomId(match);
+            const randId = CLMSUI.compositeModelInst.get("clmsModel").getSearchRandomId(match);
             CLMSUI.loadSpectrum(match, randId, this.model);
         } else {
             xiSPEC.clear();
@@ -908,7 +908,7 @@ CLMSUI.init.viewsEssential = function (options) {
         .attr("class", "rappsilberImage")
         .attr("src", "./images/logos/rappsilber-lab-small.png")
         .on("click", function () {
-            window.open("http://rappsilberlab.org", "_blank");
+            window.open("https://rappsilberlab.org", "_blank");
         });
 
 
@@ -924,7 +924,7 @@ CLMSUI.init.viewsEssential = function (options) {
 
 CLMSUI.init.viewsThatNeedAsyncData = function () {
 
-    var compModel = CLMSUI.compositeModelInst;
+    const compModel = CLMSUI.compositeModelInst;
 
     // This generates the legend div, we don't keep a handle to it - the event object has one
     new CLMSUI.KeyViewBB({
@@ -1046,7 +1046,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
         displayEventName: "nglViewShow",
     });
 
-    var urlChunkMap = CLMSUI.modelUtils.parseURLQueryString(window.location.search.slice(1));
+    const urlChunkMap = CLMSUI.modelUtils.parseURLQueryString(window.location.search.slice(1));
     new CLMSUI.PDBFileChooserBB({
         el: "#pdbPanel",
         model: compModel,

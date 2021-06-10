@@ -8,8 +8,8 @@ CLMSUI.BackboneModelTypes.AnnotationType = Backbone.Model.extend({
         shown: false,
         colour: undefined,
     },
-    initialize: function(options) {
-        var defaultOptions = {};
+    initialize: function (options) {
+        const defaultOptions = {};
         this.options = _.extend(defaultOptions, options);
         this
             .set("id", (options.category + "-" + options.type).toLocaleLowerCase())
@@ -22,31 +22,31 @@ CLMSUI.BackboneModelTypes.AnnotationType = Backbone.Model.extend({
 
 CLMSUI.BackboneModelTypes.AnnotationTypeCollection = Backbone.Collection.extend({
     initialize: function (models, options) {
-        this.listenTo (CLMSUI.vent, "userAnnotationsUpdated", function (details) {
+        this.listenTo(CLMSUI.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
-                this.add (details.types);
+                this.add(details.types);
             }
         });
     },
     model: CLMSUI.BackboneModelTypes.AnnotationType,
-    modelId: function (attrs) { 
+    modelId: function (attrs) {
         return (attrs.category + "-" + attrs.type).toLocaleLowerCase();
     },
-    comparator: function(model) {
+    comparator: function (model) {
         return model.get("id");
     },
     getColour: function (catName, typeName) {
         catName = catName || "undefined";
         typeName = typeName || "undefined";
-        var id = this.modelId ({category: catName, type: typeName});
-        var annotTypeModel = this.get (id);
-        
+        const id = this.modelId({category: catName, type: typeName});
+        const annotTypeModel = this.get(id);
+
         if (annotTypeModel) {
             if (!annotTypeModel.get("colour")) {
                 catName = this.dict[catName] || catName;
-                var catColour = this.baseScale(catName);
-                var hash = 0,
+                const catColour = this.baseScale(catName);
+                let hash = 0,
                     i, chr;
                 if (typeName) {
                     for (i = 0; i < typeName.length; i++) {
@@ -56,10 +56,10 @@ CLMSUI.BackboneModelTypes.AnnotationTypeCollection = Backbone.Collection.extend(
                     }
                 }
 
-                var shade = (hash & 255) / 255;
+                let shade = (hash & 255) / 255;
                 shade = (shade * 0.7) + 0.2;
-                var hsl = d3.hsl(catColour);
-                var newHsl = d3.hsl(hsl.h, shade, shade);
+                const hsl = d3.hsl(catColour);
+                const newHsl = d3.hsl(hsl.h, shade, shade);
                 annotTypeModel.set("colour", newHsl.toString());
             }
             return annotTypeModel.get("colour");

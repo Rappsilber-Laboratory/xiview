@@ -1,9 +1,9 @@
 var CLMSUI = CLMSUI || {};
 
-var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
+const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
 
-    events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+    events: function () {
+        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -11,20 +11,20 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
             'click #clearHighlights': 'clearSpectrumHighlights',
         }, parentEvents, {});
     },
-    
+
     defaultOptions: {
         canBringToTop: true,
         canHideToolbarArea: false,
         canTakeImage: true,
     },
 
-    initialize: function(options) {
+    initialize: function (options) {
         SpectrumViewWrapper.__super__.initialize.apply(this, arguments);
 
 
         //this.options = _.extend({}, this.options, this.defaultOptions, options.myOptions);
 
-        var _html = "" // i think its a mistake (of mine, I think - cc) to use id's in following instaed of classes... its a backbone thing
+        const _html = "" // i think its a mistake (of mine, I think - cc) to use id's in following instead of classes... its a backbone thing
             //~ +"<div id='spectrum'>"
             +
             "<div id='modular_xispec' class='spectrumPlotsDiv'>" +
@@ -58,7 +58,7 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                 "?": "Q",
                 R: "R"
             };
-            var buttonData = d3.entries(this.validationMap).map(function(entry) {
+            const buttonData = d3.entries(this.validationMap).map(function (entry) {
                 return {
                     label: entry.key,
                     klass: entry.value
@@ -66,7 +66,7 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
             });
 
             // Add validation buttons
-            var self = this;
+            const self = this;
             d3.select(this.el).select("div.validationControls")
                 .append("table")
                 .append("tr")
@@ -75,23 +75,23 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                 .enter()
                 .append("td")
                 .append("button")
-                .attr("class", function(d) {
+                .attr("class", function (d) {
                     return "validationButton " + d.klass;
                 })
-                .text(function(d) {
+                .text(function (d) {
                     return d.label;
                 })
-                .attr("title", function(d) {
-                    var alreadySet = d3.select(this).classed("validatedState");
+                .attr("title", function (d) {
+                    const alreadySet = d3.select(this).classed("validatedState");
                     return (alreadySet ? "Validation State is currently Set to " : "Set Validation State to ") + d.label;
                 })
-                .on("click", function(d) {
-                    var lsm = self.model.get("lastSelectedMatch");
+                .on("click", function (d) {
+                    const lsm = self.model.get("lastSelectedMatch");
                     if (lsm && lsm.match) {
                         //ar randId = CLMSUI.modelUtils.getRandomSearchId (self.model.get("clmsModel"), lsm.match);
-                        var randId = self.model.get("clmsModel").getSearchRandomId(lsm.match);
+                        const randId = self.model.get("clmsModel").getSearchRandomId(lsm.match);
                         //console.log ("randId", randId);
-                        CLMSUI.validate(lsm.match.id, d.label, randId, function() {
+                        CLMSUI.validate(lsm.match.id, d.label, randId, function () {
                             lsm.match.validated = d.label;
                             self.setButtonValidationState(lsm.match);
                             self.model.trigger("matchValidationStateUpdated");
@@ -116,7 +116,7 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         // 2. Event A in spectrumWrapper fires event B
         // 3. selectionViewer listens for event B to highlight row in table - which means it must have built the table
         // 4. Thus selectionViewer must do it's routine for event A before spectrumWrapper, so we initialise it first
-        var altsSelectionViewer = new CLMSUI.SelectionTableViewBB({
+        const altsSelectionViewer = new CLMSUI.SelectionTableViewBB({
             el: "#alternatives",
             model: this.alternativesModel,
             mainModel: this.model
@@ -129,7 +129,7 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         //~ );
 
         // redraw / hide table on selected cross-link change
-        altsSelectionViewer.listenTo(this.alternativesModel, "selectionMatchesLinksChanged" /*"change:selection"*/ , function() {
+        altsSelectionViewer.listenTo(this.alternativesModel, "selectionMatchesLinksChanged" /*"change:selection"*/, function () {
             altsSelectionViewer.render();
             //~ alert();
             //~ var emptySelection = (selection.length === 0);
@@ -140,21 +140,20 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         //~ selectionViewer.setVisible (false);
 
 
-
         // Only if spectrum viewer visible...
         // When crosslink selection changes, pick highest scoring filtered match of the set
         // and tell it to show the spectrum for that match
-        this.listenTo(this.model, "selectionMatchesLinksChanged" /*"change:selection"*/ , function(model) {
-            var highestScore = Number.MIN_VALUE;
-            var highestScoringMatch = null;
-            var selection = model.get("selection");
-            var selectedMatches = model.get("match_selection");
+        this.listenTo(this.model, "selectionMatchesLinksChanged" /*"change:selection"*/, function (model) {
+            let highestScore = Number.MIN_VALUE;
+            let highestScoringMatch = null;
+            const selection = model.get("selection");
+            const selectedMatches = model.get("match_selection");
 
-            selection.forEach(function(selCrossLink) {
-                var filteredMatches_pp = selCrossLink.filteredMatches_pp;
+            selection.forEach(function (selCrossLink) {
+                const filteredMatches_pp = selCrossLink.filteredMatches_pp;
                 // DB query orders by score
                 //console.log ("fpp", filteredMatches_pp);
-                var filteredSelectedMatches = filteredMatches_pp ? filteredMatches_pp.filter(function(match) {
+                const filteredSelectedMatches = filteredMatches_pp ? filteredMatches_pp.filter(function (match) {
                     return selectedMatches.get(match.match.id);
                 }) : [];
                 if (filteredSelectedMatches.length) {
@@ -172,7 +171,7 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
             });
         });
 
-        this.listenTo(this.model, "change:lastSelectedMatch", function(model, selectedMatch) {
+        this.listenTo(this.model, "change:lastSelectedMatch", function (model, selectedMatch) {
             selectedMatch = selectedMatch || model.get("lastSelectedMatch");
             this.triggerSpectrumViewer(selectedMatch.match, selectedMatch.directSelection);
         });
@@ -181,7 +180,7 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         this.enableControls(false);
     },
 
-    enableControls: function(state) {
+    enableControls: function (state) {
         d3.select(this.el)
             .selectAll(".validationControls,#spectrumControls")
             //.style ("background", state ? null : "#888888")
@@ -190,21 +189,21 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
             .classed("spectrumDisabled", !state);
     },
 
-    setButtonValidationState: function(match) {
+    setButtonValidationState: function (match) {
         d3.select(this.el).selectAll("button.validationButton").classed("validatedState", false);
         if (match && match.validated) {
-            var klass = this.validationMap[match.validated];
+            const klass = this.validationMap[match.validated];
             if (klass) {
                 d3.select(this.el).select("." + klass).classed("validatedState", true);
             }
         }
     },
 
-    triggerSpectrumViewer: function(match, forceShow) {
+    triggerSpectrumViewer: function (match, forceShow) {
         //console.log ("MATCH selected", match, forceShow);
         if (this.isVisible() || forceShow) {
             this.newestSelectionShown = true;
-            var visible = !!match;
+            const visible = !!match;
             if (this.isVisible() !== visible) {
                 //console.log ("CHANGE VISIBILITY");
                 CLMSUI.vent.trigger("spectrumShow", visible);
@@ -230,12 +229,12 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         }
     },
 
-    relayout: function() {
+    relayout: function () {
         // if a new selected match has been made while the spectrum viewer was hidden,
         // load it in when the spectrum viewer is made visible
         if (!this.newestSelectionShown) {
             //console.log ("LAZY LOADING SPECTRUM");
-            var selectedMatch = this.model.get("lastSelectedMatch") || {
+            const selectedMatch = this.model.get("lastSelectedMatch") || {
                 match: null
             };
             this.triggerSpectrumViewer(selectedMatch.match, true);
@@ -243,11 +242,11 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         // resize the spectrum on drag
         CLMSUI.vent.trigger("resizeSpectrumSubViews", true);
 
-        var altModel = this.alternativesModel.get("clmsModel");
-        var keepDisplayNone = (altModel && altModel.get("matches").length === 1); // altModel check as sometime clmsModel isn't populated (undefined)
+        const altModel = this.alternativesModel.get("clmsModel");
+        const keepDisplayNone = (altModel && altModel.get("matches").length === 1); // altModel check as sometime clmsModel isn't populated (undefined)
 
-        var alts = d3.select("#alternatives");
-        var w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
+        const alts = d3.select("#alternatives");
+        const w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
         alts.attr("style", "width:" + w + "px;" + (keepDisplayNone ? " display: none;" : "")); //dont know why d3 style() aint working
         // mjg - i dunno why d3.style doesn't work either - i might replace later the layout of the wrapper with a flexbox based layout to see if that helps.
         //cc - yes, probably better, theres old code of mine scattered around that should use flexbox also...
@@ -258,13 +257,13 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
 
     identifier: "Spectrum View",
 
-    optionsToString: function() {
+    optionsToString: function () {
         //console.log ("this", this);
-        var match = this.primaryMatch;
+        const match = this.primaryMatch;
         console.log("MATCH", match);
-        var description = [{
-                field: "id"
-            },
+        const description = [{
+            field: "id"
+        },
             {
                 label: "prot1",
                 value: CLMSUI.utils.proteinConcat(match, 0, this.model.get("clmsModel"))
@@ -320,23 +319,23 @@ var SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                 label: "Decoy"
             }
         );
-        description.forEach(function(desc) {
+        description.forEach(function (desc) {
             desc.value = desc.value || match[desc.field] || "null";
         });
         //description.push(["crossLinks", match.crossLinks.map(function(xlink) { return xlink.id; }).join("&") ]);
-        var description1 = description.map(function(desc) {
+        const description1 = description.map(function (desc) {
             return (desc.label || desc.field) + "=" + desc.value;
         });
-        var joinedDescription = description1.join("-");
+        const joinedDescription = description1.join("-");
         return joinedDescription;
     },
 
     // Returns a useful filename given the view and filters current states
-    filenameStateString: function() {
+    filenameStateString: function () {
         return CLMSUI.utils.makeLegalFileName(this.identifier + "-" + this.optionsToString());
     },
 
-    clearSpectrumHighlights: function() {
+    clearSpectrumHighlights: function () {
         xiSPEC.vent.trigger('clearSpectrumHighlights');
     }
 });

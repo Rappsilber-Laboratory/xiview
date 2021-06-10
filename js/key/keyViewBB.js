@@ -1,8 +1,8 @@
 var CLMSUI = CLMSUI || {};
 
 CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
-    events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+    events: function () {
+        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -11,31 +11,31 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
             "click .downloadButton3": "downloadKey",
         });
     },
-    
+
     defaultOptions: {
         colourConfigs: [
             {
                 id: "cross-link",
                 modelID: "linkColourAssignment",
-                collectionID : "Collection",
+                collectionID: "Collection",
                 placeholderID: "linkColourDropdownPlaceholder",
             }, {
                 id: "protein",
                 modelID: "proteinColourAssignment",
-                collectionID : "ProteinCollection",
+                collectionID: "ProteinCollection",
                 placeholderID: "proteinColourDropdownPlaceholder",
             }
         ],
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         CLMSUI.KeyViewBB.__super__.initialize.apply(this, arguments);
 
-        var topDiv = d3.select(this.el).append("div")
+        const topDiv = d3.select(this.el).append("div")
             .attr("class", "verticalFlexContainer keyPanel")
         ;
 
-        var chartDiv = topDiv.append("div")
+        const chartDiv = topDiv.append("div")
             .attr("class", "panelInner")
             .attr("flex-grow", "1")
         ;
@@ -45,61 +45,63 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.sliderSubViews = [];
 
         // re-render if colour models changed outside of here
-        var changeString = this.options.colourConfigs.map (function (config) {
+        const changeString = this.options.colourConfigs.map(function (config) {
             return "change:" + config.modelID;
         }).join(" ");
         this.listenTo(this.model, changeString, this.render);
-        
+
         // update is only triggered once when adding/removing multiple models to/from a collection
-        this.options.colourConfigs.forEach (function (config) {
-            this.listenTo (CLMSUI.linkColour[config.collectionID], "update", this.render);
+        this.options.colourConfigs.forEach(function (config) {
+            this.listenTo(CLMSUI.linkColour[config.collectionID], "update", this.render);
         }, this);
 
         return this;
     },
 
-    setupColourSection: function(chartDiv) {
-        var sectionDiv = chartDiv.append("div");
+    setupColourSection: function (chartDiv) {
+        const sectionDiv = chartDiv.append("div");
         //sectionDiv.append("h3").text("Chosen Colour Scheme Legend").attr("class", "groupHeader");
 
-        var sectionData = this.options.colourConfigs.map (function (config) {
+        const sectionData = this.options.colourConfigs.map(function (config) {
             return {
-                id: config.id+"colourKey",
-                header: "Current "+config.id+" Colour Scheme",
+                id: config.id + "colourKey",
+                header: "Current " + config.id + " Colour Scheme",
                 controlPlaceholderID: config.placeholderID,
                 colourModelKey: config.modelID,
                 rows: [],
                 sectionType: "colourModel"
-            }; 
+            };
         });
 
-        var headerFunc = function(d) {
+        const headerFunc = function (d) {
             return d.header.replace("_", " ");
         };
-        var rowFilterFunc = function(d) {
-            return d.rows.map(function(row) {
+        const rowFilterFunc = function (d) {
+            return d.rows.map(function (row) {
                 return {
                     key: row[0],
                     value: row[1]
                 };
             });
         };
-        var cellFunc = function(d) {
+        const cellFunc = function (d) {
             d3.select(this).text(d.value);
         };
-        var self = this;
-        var clickFunc = function(showSection, d, i) {
+        const self = this;
+        const clickFunc = function (showSection, d, i) {
             if (showSection && (d.sectionType === "colourModel") && self.sliderSubViews[i]) {
                 self.sliderSubViews[i].show(true);
             }
         };
 
         CLMSUI.utils.sectionTable.call(this, sectionDiv, sectionData, "colourInfo", ["Colour (Editable)", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], clickFunc);
-        
+
         // add colour scheme selection placeholders (added in networkFrame.js)
         sectionDiv.selectAll("section")
             .classed("colourKeyBottomGap", true)
-            .insert("label", ":first-child").attr("id", function(d) { return d.controlPlaceholderID; })
+            .insert("label", ":first-child").attr("id", function (d) {
+            return d.controlPlaceholderID;
+        })
         ;
 
         // add download colour scheme svg button
@@ -110,11 +112,11 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         ;
     },
 
-    setupLegendSection: function(chartDiv) {
-        var sectionDiv = chartDiv.append("div");
+    setupLegendSection: function (chartDiv) {
+        const sectionDiv = chartDiv.append("div");
         sectionDiv.append("h3").text("View Legends").attr("class", "groupHeader");
 
-        var svgs = {
+        const svgs = {
             clinkp: "<line x1='0' y1='15' x2='50' y2='15' class='monochrome'/>",
             ambigp: "<line x1='0' y1='15' x2='50' y2='15' class='monochrome ambiguous'/>",
             multip: "<line x1='0' y1='15' x2='50' y2='15' class='multiLinkStroke'/><line x1='0' y1='15' x2='50' y2='15' class='monochrome'/>",
@@ -142,7 +144,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
             alignVariation: "<rect x='0' y='8' width='50' height ='15' class='seqVar'/><text x='24' y='18' class='peptideAAText'>LIEKFLR<text>",
         };
 
-        var texts = {
+        const texts = {
             clinkp: "Crosslink(s) between different proteins.",
             ambigp: "Ambiguous Crosslink(s).",
             multip: "Multiple Linkage Sites.",
@@ -171,63 +173,63 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         };
 
 
-        var viewLegendSectionData = [{
-                id: "proteinKey",
-                header: "XiNet Protein-Protein Level Legend",
-                rows: ["clinkp", "multip", "selflinkp", "selflinkpc", "ambigp", "annotp"].map(function(row) {
-                    return [row, texts[row]];
-                })
-            },
+        const viewLegendSectionData = [{
+            id: "proteinKey",
+            header: "XiNet Protein-Protein Level Legend",
+            rows: ["clinkp", "multip", "selflinkp", "selflinkpc", "ambigp", "annotp"].map(function (row) {
+                return [row, texts[row]];
+            })
+        },
             {
                 id: "residueKey",
                 header: "XiNet Residue Level Legend",
-                rows: ["clinkr", "selflinkr", "homom", "ambigr", "highlight", "annotr"].map(function(row) {
+                rows: ["clinkr", "selflinkr", "homom", "ambigr", "highlight", "annotr"].map(function (row) {
                     return [row, texts[row]];
                 })
             },
             {
                 id: "circularKey",
                 header: "Circular View Legend",
-                rows: ["circleCrossLink", "homom", "ambigr", "circleAnnot"].map(function(row) {
+                rows: ["circleCrossLink", "homom", "ambigr", "circleAnnot"].map(function (row) {
                     return [row, texts[row]];
                 })
             },
             {
                 id: "matrixKey",
                 header: "Matrix View Legend",
-                rows: ["scatterNormal", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function(row) {
+                rows: ["scatterNormal", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function (row) {
                     return [row, texts[row]];
                 })
             },
             {
                 id: "scatterplotKey",
                 header: "Scatterplot Legend",
-                rows: ["scatterNormal", "scatterDecoy", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function(row) {
+                rows: ["scatterNormal", "scatterDecoy", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function (row) {
                     return [row, texts[row]];
                 })
             },
             {
                 id: "alignmentKey",
                 header: "Alignment Legend",
-                rows: ["alignMatch", "alignMissing", "alignExtra", "alignVariation"].map(function(row) {
+                rows: ["alignMatch", "alignMissing", "alignExtra", "alignVariation"].map(function (row) {
                     return [row, texts[row]];
                 })
             },
         ];
 
-        var headerFunc = function(d) {
+        const headerFunc = function (d) {
             return d.header.replace("_", " ");
         };
-        var rowFilterFunc = function(d) {
-            return d.rows.map(function(row) {
+        const rowFilterFunc = function (d) {
+            return d.rows.map(function (row) {
                 return {
                     key: row[0],
                     value: row[1]
                 };
             });
         };
-        var cellFunc = function(d, i) {
-            var sel = d3.select(this);
+        const cellFunc = function (d, i) {
+            const sel = d3.select(this);
             if (i === 0) {
                 sel.append("svg")
                     .attr("class", "miniKey")
@@ -240,20 +242,20 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         CLMSUI.utils.sectionTable.call(this, sectionDiv, viewLegendSectionData, "keyInfo", ["Mark", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], null);
 
-        var colScheme = CLMSUI.linkColour.defaultColoursBB;
-        var notLinear = function() {
+        const colScheme = CLMSUI.linkColour.defaultColoursBB;
+        const notLinear = function () {
             return false;
         };
-        var cols = {
+        const cols = {
             intra: {
-                isSelfLink: function() {
+                isSelfLink: function () {
                     return true;
                 },
                 isLinearLink: notLinear,
                 filteredMatches_pp: [],
             },
             homom: {
-                isSelfLink: function() {
+                isSelfLink: function () {
                     return true;
                 },
                 isLinearLink: notLinear,
@@ -265,23 +267,23 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
                 }],
             },
             inter: {
-                isSelfLink: function() {
+                isSelfLink: function () {
                     return false;
                 },
                 isLinearLink: notLinear,
                 filteredMatches_pp: [],
             }
         };
-        d3.keys(cols).forEach(function(key) {
+        d3.keys(cols).forEach(function (key) {
             cols[key].colour = colScheme.getColour(cols[key]);
             //console.log ("key", key, cols[key]);
-        } /*, colScheme*/ );
+        } /*, colScheme*/);
 
         sectionDiv.selectAll("table").selectAll("path.dynColour,line.dynColour")
-            .each(function() {
-                var d3Sel = d3.select(this);
-                var colType = d3Sel.classed("selfLink") ? (d3Sel.classed("homomultimer") ? "homom" : "intra") : "inter";
-                var colour = cols[colType].colour;
+            .each(function () {
+                const d3Sel = d3.select(this);
+                const colType = d3Sel.classed("selfLink") ? (d3Sel.classed("homomultimer") ? "homom" : "intra") : "inter";
+                const colour = cols[colType].colour;
                 d3Sel.style("stroke", colour);
                 if (d3Sel.classed("filled")) {
                     d3Sel.style("fill", colour);
@@ -289,18 +291,18 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
             });
     },
 
-    changeColour: function(evt) {
-        var parentDatum = d3.select(evt.target.parentNode.parentNode.parentNode).datum();
-        var colourModelKey = parentDatum.colourModelKey;
-        var colourAssign = this.model.get(colourModelKey);
-        
+    changeColour: function (evt) {
+        const parentDatum = d3.select(evt.target.parentNode.parentNode.parentNode).datum();
+        const colourModelKey = parentDatum.colourModelKey;
+        const colourAssign = this.model.get(colourModelKey);
+
         if (colourAssign) {
-            var newValue = evt.target.value;
-            var rowData = d3.select(evt.target.parentNode.parentNode).datum();
-            var i = _.last(rowData);
-            
-            var colScale = colourAssign.get("colScale");
-            var colScaleRange = colScale.range();
+            const newValue = evt.target.value;
+            const rowData = d3.select(evt.target.parentNode.parentNode).datum();
+            const i = _.last(rowData);
+
+            const colScale = colourAssign.get("colScale");
+            const colScaleRange = colScale.range();
             if (rowData[1] === colourAssign.get("undefinedLabel")) {
                 colourAssign.set("undefinedColour", newValue);
             } else {
@@ -311,10 +313,10 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         }
     },
 
-    relayout: function() {
+    relayout: function () {
         //console.log ("dragend fired");
-        var colourAssigns = _.pluck(this.options.colourConfigs, "modelID").map (this.model.get, this.model);
-        colourAssigns.forEach (function (colourAssign, i) {
+        const colourAssigns = _.pluck(this.options.colourConfigs, "modelID").map(this.model.get, this.model);
+        colourAssigns.forEach(function (colourAssign, i) {
             if (colourAssign && colourAssign.get("type") === "threshold" && this.sliderSubViews[i]) {
                 this.sliderSubViews[i].resize().render();
             }
@@ -322,61 +324,67 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    render: function() {
-        var self = this;
-        var colourSections = this.options.colourConfigs.map (function (config) {
+    render: function () {
+        const self = this;
+        const colourSections = this.options.colourConfigs.map(function (config) {
             return {
                 id: config.id,
-                header: "Current "+config.id+" Colour Scheme",
+                header: "Current " + config.id + " Colour Scheme",
                 rows: [],
                 colourModelKey: config.modelID
-            }; 
+            };
         });
 
         // Update colour key sections
-        colourSections.forEach (function (colourSection) {
-            
-            var colourAssign = this.model.get(colourSection.colourModelKey);
-            if (colourAssign) {
-                var labelColourPairings = colourAssign.getLabelColourPairings ();
+        colourSections.forEach(function (colourSection) {
 
-                colourSection.rows = labelColourPairings.map(function(val, i) {
-                    var rgbCol = val[1];
-                    var rgbHex = d3.rgb(rgbCol).toString();
-                    var span = "<input type='color' value='" + rgbHex + "' title='Press to change colour for " + val[0] + "'/>";
+            const colourAssign = this.model.get(colourSection.colourModelKey);
+            if (colourAssign) {
+                const labelColourPairings = colourAssign.getLabelColourPairings();
+
+                colourSection.rows = labelColourPairings.map(function (val, i) {
+                    const rgbCol = val[1];
+                    const rgbHex = d3.rgb(rgbCol).toString();
+                    const span = "<input type='color' value='" + rgbHex + "' title='Press to change colour for " + val[0] + "'/>";
                     return [span, val[0], i];
                 });
             }
         }, this);
 
-        var updateSection = d3.select(this.el).selectAll("section").data(colourSections, function(d) {
+        const updateSection = d3.select(this.el).selectAll("section").data(colourSections, function (d) {
             return d.header;
         });
-        updateSection.select("h2 span").text(function(d) {
-            var colourAssign = self.model.get(d.colourModelKey);
+        updateSection.select("h2 span").text(function (d) {
+            const colourAssign = self.model.get(d.colourModelKey);
             return d.header + ": " + colourAssign.get("title");
         });
 
-        var rowSel = updateSection.select("tbody").selectAll("tr")
-            .data(function(d) {
+        const rowSel = updateSection.select("tbody").selectAll("tr")
+            .data(function (d) {
                 return d.rows;
-            }, function(d) {
+            }, function (d) {
                 return !d.rows ? d.join(",") : "";
             }) // key function = all fields joined
         ;
         rowSel.exit().remove();
         rowSel.enter().append("tr");
-        rowSel.sort (function (a,b) { return a[2] - b[2]; });   // sort so rows are in same order as colourSection[0].rows
+        rowSel.sort(function (a, b) {
+            return a[2] - b[2];
+        });   // sort so rows are in same order as colourSection[0].rows
 
-        var cellSel = rowSel.selectAll("td").data(function(d) { return d.slice(0, 2); });
+        const cellSel = rowSel.selectAll("td").data(function (d) {
+            return d.slice(0, 2);
+        });
         cellSel.enter().append("td");
-        cellSel.html(function(d) { return d; });
-        
+        cellSel.html(function (d) {
+            return d;
+        });
+
         // hide / disable various pieces of the tables if color schemes are uneditable
-        updateSection.each (function (d) {
-            var colourAssign = self.model.get(d.colourModelKey);
-            var isFixed = colourAssign.get("fixed");
-            var section = d3.select(this);
+        updateSection.each(function (d) {
+            const colourAssign = self.model.get(d.colourModelKey);
+            const isFixed = colourAssign.get("fixed");
+            const section = d3.select(this);
             if (isFixed) {
                 section.selectAll("input[type='color']").attr("title", "Not editable.");
             }
@@ -386,21 +394,21 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         // always remove old sliderSubViews if present
         if (this.sliderSubViews) {
-            this.sliderSubViews.forEach (function (slider) {
+            this.sliderSubViews.forEach(function (slider) {
                 slider.remove();
             });
             this.sliderSubViews = [];
         }
 
         // add in new sliderview if appropriate
-        colourSections.forEach (function (colourSection, i) {
-            var colourAssign = self.model.get(colourSection.colourModelKey);
+        colourSections.forEach(function (colourSection, i) {
+            const colourAssign = self.model.get(colourSection.colourModelKey);
             if (colourAssign) {
                 if (colourAssign.get("type") === "threshold") {
-                    var pid = this.el.id;
-                    var tcs = updateSection.select("table#colourInfo"+colourSection.id+"colourKey > .threecs");
+                    const pid = this.el.id;
+                    const tcs = updateSection.select("table#colourInfo" + colourSection.id + "colourKey > .threecs");
                     if (tcs.empty()) {
-                        updateSection.select("table#colourInfo"+colourSection.id+"colourKey tbody").append("tr").append("td")
+                        updateSection.select("table#colourInfo" + colourSection.id + "colourKey tbody").append("tr").append("td")
                             .attr("colspan", 2)
                             .append("div")
                             .attr("id", pid + "3cs" + i)
@@ -408,14 +416,14 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
                     }
 
                     this.sliderSubViews[i] = new CLMSUI.ThreeColourSliderBB({
-                            el: "#" + pid + "3cs" + i,
-                            model: colourAssign,
-                            unitText: " "+colourAssign.get("unit"),
-                            title: colourAssign.get("title") + " Cutoffs",
-                            orientation: "horizontal",
-                            absolutePosition: false,
-                            sliderThickness: 25,
-                        })
+                        el: "#" + pid + "3cs" + i,
+                        model: colourAssign,
+                        unitText: " " + colourAssign.get("unit"),
+                        title: colourAssign.get("title") + " Cutoffs",
+                        orientation: "horizontal",
+                        absolutePosition: false,
+                        sliderThickness: 25,
+                    })
                         .show(true)
                     ;
 
@@ -427,10 +435,10 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    downloadKey: function(evt) {
-        var d = d3.select(evt.target).datum();  // d3 datum for this button
-        var tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey");
-        CLMSUI.utils.updateColourKey (this.model.get(d.colourModelKey), tempSVG);
+    downloadKey: function (evt) {
+        const d = d3.select(evt.target).datum();  // d3 datum for this button
+        const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey");
+        CLMSUI.utils.updateColourKey(this.model.get(d.colourModelKey), tempSVG);
         this.downloadSVG(null, tempSVG);
         tempSVG.remove();
     },

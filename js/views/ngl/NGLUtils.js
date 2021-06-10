@@ -316,7 +316,7 @@ CLMSUI.NGLUtils = {
         // webworker way, only do if enough proteins and cores to make it worthwhile
         if ((!window || !!window.Worker) && proteins.length > 20 && workerpool.cpus > 2) {
             let count = proteins.length;
-            const pool = workerpool.pool("js/alignWorker.js");
+            const pool = workerpool.pool("js/align/alignWorker.js");
 
             proteins.forEach(function (prot, i) {
                 const protAlignModel = protAlignCollection.get(prot.id);

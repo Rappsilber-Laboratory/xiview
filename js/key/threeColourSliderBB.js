@@ -1,15 +1,3 @@
-//		colour-slider
-//		Copyright 2016 Rappsilber Laboratory
-//
-//    	This product includes software developed at
-//    	the Rappsilber Laboratory (http://www.rappsilberlab.org/).
-//
-//		author: Colin Combe, Martin Graham
-//
-//		ThreeColourSliderBB.js
-//
-//      A brush slider with three colours taken from an underlying colour scale passed in as the model
-
 var CLMSUI = CLMSUI || {};
 
 CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
@@ -19,9 +7,9 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         //"mouseup input.filterTypeNumber": "directInput",
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
 
-        var defaultOptions = {
+        const defaultOptions = {
             unitText: "",
             extent: this.model.get("colScale").domain() || [40, 60],
             domain: this.model.get("superDomain") || [0, 100],
@@ -32,20 +20,20 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         };
         this.options = _.extend({}, defaultOptions, viewOptions);
 
-        var self = this;
-        var top = d3.select(this.el);
+        const self = this;
+        const top = d3.select(this.el);
 
-        var isVert = this.isVerticallyOriented();
-        var orientCoord = isVert ? "y" : "x";
-        var perpOrientCoord = isVert ? "x" : "y";
-        var thicknessDim = isVert ? "width" : "height";
+        const isVert = this.isVerticallyOriented();
+        const orientCoord = isVert ? "y" : "x";
+        const perpOrientCoord = isVert ? "x" : "y";
+        const thicknessDim = isVert ? "width" : "height";
 
         top
             .classed(isVert ? "verticalFlexContainer" : "horizontalFlexContainer", true)
             .classed("absolutePosition", this.options.absolutePosition)
             .classed("threeColourSlider", true);
 
-        $(window).on("resize", function() {
+        $(window).on("resize", function () {
             self.resize().render();
         });
 
@@ -66,33 +54,33 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
 
         this.brush = d3.svg.brush()[orientCoord](this.majorDim)
             .extent(self.options.extent)
-            .on("brushstart", function() {
+            .on("brushstart", function () {
                 self.brushstart();
             })
-            .on("brush", function() {
+            .on("brush", function () {
                 self.brushmove();
             })
-            .on("brushend", function() {
+            .on("brushend", function () {
                 self.brushend();
             });
 
-        var cutoffs = [{
-                class: "vmin"
-            },
+        const cutoffs = [{
+            class: "vmin"
+        },
             {
                 class: "vmax"
             },
         ];
-        var numberInputs = top.selectAll("div.inputWrapper")
+        const numberInputs = top.selectAll("div.inputWrapper")
             .data(cutoffs)
             .enter()
             .append("div")
-            .attr("class", function(d) {
+            .attr("class", function (d) {
                 return "inputWrapper " + d.class;
             });
         numberInputs.append("input")
             .attr({
-                class: function(d) {
+                class: function (d) {
                     return "filterTypeNumber " + d.class;
                 },
                 type: "number",
@@ -103,14 +91,14 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         numberInputs.append("span")
             .text(self.options.unitText);
 
-        var topGroup = top.append("svg").append("g");
+        const topGroup = top.append("svg").append("g");
 
         // upper brush rectangles with colours from underlying scale
         this.upperRange = topGroup.append("rect").attr(perpOrientCoord, 0).attr(orientCoord, /*-10*/ 0).attr(thicknessDim, this.options.sliderThickness);
         this.lowerRange = topGroup.append("rect").attr(perpOrientCoord, 0).attr(thicknessDim, this.options.sliderThickness);
         this.textFormat = d3.format(".2f");
 
-        var brushg = topGroup.append("g")
+        const brushg = topGroup.append("g")
             .attr("class", "brush")
             .call(this.brush);
 
@@ -125,7 +113,7 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         // text values in bar
         brushg.selectAll(".resize")
             .append("text")
-            .attr("transform", function(d, i) {
+            .attr("transform", function (d, i) {
                 return "translate(0," + (isVert ? (-2 + (i * 13)) : 11) + ")";
             })
             .attr("class", "brushValueText")
@@ -152,7 +140,7 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
             .text(self.options.title);
 
         // move min box to bottom of slider
-        top.append(function() {
+        top.append(function () {
             return top.select("div.vmin").remove().node();
         });
 
@@ -161,25 +149,25 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         return this;
     },
 
-    setMajorDimRange: function(isVert) {
-        var m = this.options.margin;
+    setMajorDimRange: function (isVert) {
+        const m = this.options.margin;
         this.majorDim.range(isVert ? [this.height - m.top, m.bottom] : [m.left, this.width - m.right]);
     },
 
-    resetStretchDimension: function() {
-        var d3el = d3.select(this.el);
+    resetStretchDimension: function () {
+        const d3el = d3.select(this.el);
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
-        var jqElem = $(d3el.select("svg").node());
-        var stretchDim = this.isVerticallyOriented() ? "height" : "width";
+        const jqElem = $(d3el.select("svg").node());
+        const stretchDim = this.isVerticallyOriented() ? "height" : "width";
         this[stretchDim] = jqElem[stretchDim](); //this.svg.node().clientHeight;
         return this;
     },
 
-    resize: function() {
+    resize: function () {
         this.resetStretchDimension();
 
         // changing y range automatically adjusts the extent, but we want to keep the same extent
-        var oldExtent = this.brush.extent();
+        const oldExtent = this.brush.extent();
         this.setMajorDimRange(this.isVerticallyOriented());
         this.brush.extent(oldExtent);
         this.brush(d3.select(this.el).select(".brush"));
@@ -187,22 +175,22 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         return this;
     },
 
-    render: function(args) {
+    render: function (args) {
         // use brush extent or domain value (when render is called from backbone)
         // domain value here is not the domain of the slider, but the domain of the colour scale (should fit within the slider's domain)
-        var s = (args && args.domain ? args.domain.slice() : undefined) || this.brush.extent();
-        var d3el = d3.select(this.el);
+        const s = (args && args.domain ? args.domain.slice() : undefined) || this.brush.extent();
+        const d3el = d3.select(this.el);
         this.brush.extent(s);
         d3el.select("svg g.brush").call(this.brush); // recall brush binding so background rect is resized and brush redrawn
 
         this.resetStretchDimension();
 
-        var colRange = this.model.get("colScale").range();
-        var isVert = this.isVerticallyOriented();
-        var orientDim1 = isVert ? "height" : "width";
-        var orientDim2 = isVert ? "y" : "x";
+        const colRange = this.model.get("colScale").range();
+        const isVert = this.isVerticallyOriented();
+        const orientDim1 = isVert ? "height" : "width";
+        const orientDim2 = isVert ? "y" : "x";
 
-        var majorDimRange = this.majorDim.range();
+        const majorDimRange = this.majorDim.range();
         this.upperRange
             .attr(orientDim1, Math.max(0, this.majorDim(s[1]) - majorDimRange[0]))
             .attr(orientDim2, majorDimRange[0])
@@ -213,13 +201,13 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
             .attr(orientDim2, this.majorDim(s[0]))
             .style("fill", colRange[isVert ? 0 : 2]);
 
-        var self = this;
+        const self = this;
         d3el.selectAll(".brushValueText")
-            .text(function(d, i) {
+            .text(function (d, i) {
                 return self.textFormat(s[s.length - i - 1]) + self.options.unitText;
             });
 
-        var rounded = s.map(function(val) {
+        const rounded = s.map(function (val) {
             return parseFloat(this.textFormat(val));
         }, this);
 
@@ -228,7 +216,7 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         return this;
     },
 
-    show: function(show) {
+    show: function (show) {
         d3.select(this.el).style("display", show ? null : "none");
         if (show) {
             this.resize().render();
@@ -236,34 +224,34 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         return this;
     },
 
-    brushstart: function() {
+    brushstart: function () {
         return this;
     },
 
-    brushmove: function() {
-        var s = this.brush.extent();
+    brushmove: function () {
+        const s = this.brush.extent();
         // round so values in domain are the same that are shown in text labels and input controls
-        var rounded = s.map(function(val) {
+        const rounded = s.map(function (val) {
             return parseFloat(this.textFormat(val));
         }, this);
         this.model.setDomain(rounded); // this'll trigger a re-render due to the colourModelChanged listener above ^^^
         return this;
     },
 
-    brushend: function() {
+    brushend: function () {
         return this;
     },
 
 
-    directInput: function(evt) {
-        var target = evt.target;
-        var value = +target.value;
-        var isMin = d3.select(target).classed("vmin");
-        var bounds = this.majorDim.domain();
+    directInput: function (evt) {
+        const target = evt.target;
+        const value = +target.value;
+        const isMin = d3.select(target).classed("vmin");
+        const bounds = this.majorDim.domain();
 
-        var s = this.brush.extent();
-        var correct = [bounds[0], isMin ? value : s[0], isMin ? s[1] : value, bounds[1]]
-            .sort(function(a, b) {
+        const s = this.brush.extent();
+        const correct = [bounds[0], isMin ? value : s[0], isMin ? s[1] : value, bounds[1]]
+            .sort(function (a, b) {
                 return a - b;
             })
             .slice(1, 3);
@@ -273,13 +261,13 @@ CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
         this.brushmove();
     },
 
-    directInputIfReturn: function(evt) {
+    directInputIfReturn: function (evt) {
         if (evt.keyCode === 13) {
             this.directInput(evt);
         }
     },
 
-    isVerticallyOriented: function() {
+    isVerticallyOriented: function () {
         return this.options.orientation.toLowerCase() === "vertical";
     },
 });

@@ -125,7 +125,7 @@ function download(content, contentType, fileName) {
 }
 
 function mostReadableId(protein) {
-    if (protein.accession && protein.name && (protein.accession != protein.name)) {
+    if (protein.accession && protein.name && (protein.accession !== protein.name)) {
         return "sp|" + protein.accession + "|" + protein.name;
     } else if (protein.name) {
         return protein.name;
@@ -506,7 +506,7 @@ function getPPIsCSV() {
         const linear = aCrosslink.isLinearLink();
         const decoyType = getDecoyTypeFromCrosslink(aCrosslink);
 
-        var searchesFound = new Set();
+        const searchesFound = new Set();
         for (let crosslink of ppi){
             const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
             for (let fm_pp of filteredMatchesAndPepPos) {
@@ -518,7 +518,7 @@ function getPPIsCSV() {
         row.push(mostReadableId(aCrosslink.fromProtein), (linear ? "" : mostReadableId(aCrosslink.toProtein)), ppi.length, decoyType);
 
         // // Add presence in searches
-        for (var s = 0; s < searchIDs.length; s++) {
+        for (let s = 0; s < searchIDs.length; s++) {
             row.push(searchesFound.has(searchIDs[s]) ? "X" : "");
         }
         //

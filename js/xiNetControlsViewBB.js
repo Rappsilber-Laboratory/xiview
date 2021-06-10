@@ -1,26 +1,19 @@
-//		xiNET controls
-//
-//		Martin Graham, Colin Combe, Rappsilber Laboratory
-//
-//		js/xiNetControlsViewBB.js
-
 var CLMSUI = CLMSUI || {};
 
 CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
-    events: function() {
-
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+    events: function () {
+        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
         return _.extend({}, parentEvents, {
-            "click .xinetSvgDownload": function() {
+            "click .xinetSvgDownload": function () {
                 CLMSUI.vent.trigger("xinetSvgDownload", true);
             },
-            "click .autoLayoutButton": function() {
+            "click .autoLayoutButton": function () {
                 const fixSelected = d3.select("input.fixSelected").property("checked");
-                CLMSUI.vent.trigger("xinetAutoLayout", fixSelected? this.model.get("selectedProteins") : [])
+                CLMSUI.vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : [])
             },
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
@@ -30,35 +23,34 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             "change .thickLinks": "setThickLinksShown",
             "change .xinetPpiStep": "updatePpiSteps",
         });
-
     },
 
-    saveLayout: function() {
-        var xmlhttp = new XMLHttpRequest();
-        var url = "./php/isLoggedIn.php";
+    saveLayout: function () {
+        const xmlhttp = new XMLHttpRequest();
+        const url = "./php/isLoggedIn.php";
         xmlhttp.open("POST", url, true);
         //Send the proper header information along with the request
         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlhttp.onreadystatechange = function() { //Call a function when the state changes.
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                if (xmlhttp.responseText == "false") {
+        xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+            if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                if (xmlhttp.responseText === "false") {
                     alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.")
                     window.open("../userGUI/userLogin.html", "_blank");
                 } else {
-                    var callback = function(layoutJson) {
-                        var xmlhttp = new XMLHttpRequest();
-                        var url = "./php/saveLayout.php";
+                    const callback = function (layoutJson) {
+                        const xmlhttp = new XMLHttpRequest();
+                        const url = "./php/saveLayout.php";
                         xmlhttp.open("POST", url, true);
                         //Send the proper header information along with the request
                         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                        xmlhttp.onreadystatechange = function() { //Call a function when the state changes.
-                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+                            if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                                 console.log("Saved layout " + xmlhttp.responseText, true);
                                 alert("Layout Saved");
                             }
                         };
-                        var sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
-                        var params = "sid=" + sid +
+                        const sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
+                        const params = "sid=" + sid +
                             "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
                             "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
                         xmlhttp.send(params);
@@ -71,23 +63,21 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
         xmlhttp.send();
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
 
         this.options = _.extend(this.defaultOptions, viewOptions.myOptions);
         CLMSUI.xiNetControlsViewBB.__super__.initialize.apply(this, arguments);
 
-        var self = this;
+        const mainDivSel = d3.select(this.el);
 
-        var mainDivSel = d3.select(this.el);
-
-        var buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
+        const buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
             "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
             "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
             "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
             "<span class='noBreak sectionDividerLeft' ></span>" +
-            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG"+"</button>";
+            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG" + "</button>";
 
         mainDivSel.html(
             buttonHtml
@@ -97,13 +87,13 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
         }
 
-        var tooltips = {
+        const tooltips = {
             autoLayoutButton: 'Automatically relayout network of displayed proteins',
             saveLayoutButton: 'Save the current layout for later',
             loadLayoutButton: 'Load a previously saved layout',
         };
-        d3.entries(tooltips).forEach(function(entry) {
-            var elem = d3.select(this.el).select("." + entry.key);
+        d3.entries(tooltips).forEach(function (entry) {
+            let elem = d3.select(this.el).select("." + entry.key);
             if (!elem.empty()) {
                 elem.attr("title", entry.value);
             } else {
@@ -122,7 +112,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
         });
 
         // Various view options set up...
-        var toggleButtonData = [
+        const toggleButtonData = [
             {
                 initialState: this.model.get("xinetFixSelected"),
                 class: "fixSelected",
@@ -144,7 +134,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             {
                 initialState: this.model.get("xinetFixedSize"),
                 class: "fixedSize",
-                label: "Fized Size",
+                label: "Fixed Size",
                 id: "fixedSize",
                 tooltip: "Make nodes fixed size (don't vary size by sequence length)",
                 sectionEnd: true,
@@ -163,14 +153,13 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                 class: "thickLinks",
                 label: "Background PPI Links",
                 id: "thickLinks",
-                tooltip: "Show thicker background links representing count of unique distance restaints per PPI",
+                tooltip: "Show thicker background links representing count of unique distance restraints per PPI",
                 header: "Links"
             },
         ];
 
-        var self = this;
         toggleButtonData
-            .forEach(function(d) {
+            .forEach(function (d) {
                 d.type = d.type || "checkbox";
                 d.value = d.value || d.label;
                 d.inputFirst = true;
@@ -224,7 +213,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             model: this.model,
             myOptions: {
                 title: "Display ▼",
-                menu: toggleButtonData.map(function(d) {
+                menu: toggleButtonData.map(function (d) {
                     d.id = self.el.id + d.id;
                     //d.tooltip = d.d3tooltip;
                     return d;
@@ -236,122 +225,62 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
         });
     },
 
-    setShowLabels: function() {
+    setShowLabels: function () {
         this.model.set("xinetShowLabels", d3.select("input.showLabels").property("checked"));
     },
 
-    setShowExpandedGroupLabels: function() {
+    setShowExpandedGroupLabels: function () {
         this.model.set("xinetShowExpandedGroupLabels", d3.select("input.showExpandedGroupLabels").property("checked"));
     },
 
-    setFixedSize: function() {
+    setFixedSize: function () {
         this.model.set("xinetFixedSize", d3.select("input.fixedSize").property("checked"));
     },
 
-    setThickLinksShown: function() {
-        var checkbox = d3.select("input.thickLinks");
-        var checked = checkbox.property("checked");
+    setThickLinksShown: function () {
+        const checkbox = d3.select("input.thickLinks");
+        const checked = checkbox.property("checked");
         // console.log("!" + checked);
         d3.select("input#xiNetButtonBarppiStep1").property("disabled", !checked);
         d3.select("input#xiNetButtonBarppiStep2").property("disabled", !checked);
         this.model.set("xinetThickLinks", checked);
     },
 
-    updatePpiSteps: function() {
-        var steps = [];
+    updatePpiSteps: function () {
+        const steps = [];
         steps[0] = d3.select("input#xiNetButtonBarppiStep1").property("value");
         steps[1] = d3.select("input#xiNetButtonBarppiStep2").property("value");
         this.model.set("xinetPpiSteps", steps);
     },
-
-    // autoGroup: function() {
-    //     var groupMap = new Map();
-    //     var uncharacterised = new Set();
-    //     var periphery = new Set();
-    //     //groupMap.set("uncharacterised", uncharacterised);
-    //
-    //     var periphery = new Set();
-    //     groupMap.set("periphery", periphery);
-    //
-    //     var intracellular = new Set();
-    //     groupMap.set("intracellular", intracellular);
-    //
-    //     var both = new Set();
-    //     groupMap.set("periphery_intracellular", both);
-    //
-    //     /* // not gonna work
-    //     var characterised = new Set();
-    //     groupMap.set("characterised", characterised);
-    //     characterised.add("periphery");
-    //     characterised.add("intracellular");
-    //     characterised.add("periphery_intracellular");
-    //     */
-    //
-    //     var go = this.model.get("go");
-    //     var proteins = this.model.get("clmsModel").get("participants").values();
-    //     for (var protein of proteins) {
-    //
-    //         if (protein.uniprot) {
-    //             var peri = false;
-    //             var intr = false;
-    //             for (var goId of protein.uniprot.go) {
-    //                 var goTerm = go.get(goId);
-    //                 if (goTerm) {
-    //                     //GO0071944
-    //                     if (goTerm.isDescendantOf("GO0071944") == true) {
-    //                         peri = true;
-    //                     } //GO0071944
-    //                     if (goTerm.isDescendantOf("GO0005622") == true) {
-    //                         intr = true;
-    //                     }
-    //                 }
-    //
-    //             }
-    //
-    //             if (peri == true && intr == true) {
-    //                 both.add(protein.id);
-    //             } else if (peri == true) {
-    //                 periphery.add(protein.id);
-    //             } else if (intr == true) {
-    //                 intracellular.add(protein.id);
-    //             } else {
-    //                 uncharacterised.add(protein.id);
-    //             }
-    //         }
-    //
-    //     }
-    //     this.model.set("groups", groupMap);
-    // },
 
     identifier: "xiNET Controls",
 });
 
 
 CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
-    events: function() {
-        var parentEvents = CLMSUI.DropDownMenuViewBB.prototype.events;
+    events: function () {
+        let parentEvents = CLMSUI.DropDownMenuViewBB.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
-        return _.extend({}, parentEvents, {
-        });
+        return _.extend({}, parentEvents, {});
     },
 
-    initialize: function() {
+    initialize: function () {
         CLMSUI.xiNetLayoutListViewBB.__super__.initialize.apply(this, arguments);
     },
 
-    setVis: function(show) {
-        var self = this;
+    setVis: function (show) {
+        const self = this;
         CLMSUI.xiNetLayoutListViewBB.__super__.setVis.call(self, show);
         if (show) {
-            var xmlhttp = new XMLHttpRequest();
-            var url = "./php/loadLayout.php";
+            const xmlhttp = new XMLHttpRequest();
+            const url = "./php/loadLayout.php";
             xmlhttp.open("POST", url, true);
             //Send the proper header information along with the request
             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xmlhttp.onreadystatechange = function() { //Call a function when the state changes.
-                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                     var layouts = JSON.parse(xmlhttp.responseText);
                     var menu = [];
                     for (var key in layouts) {
@@ -362,8 +291,8 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
                 }
                 // CLMSUI.xiNetLayoutListViewBB.__super__.setVis.call(self, show);
             };
-            var sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
-            var params = "sid=" + sid;
+            const sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
+            const params = "sid=" + sid;
             xmlhttp.send(params);
             return this;
         }
@@ -374,7 +303,7 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
         function menuItem(layouts, selectedKey) {
             return {
                 name: selectedKey,
-                func: function() {
+                func: function () {
                     d3.select(".savedLayoutName").property("value", selectedKey);
                     // CLMSUI.compositeModelInst.clearGroups();
                     // const self = this;

@@ -1,9 +1,9 @@
 var CLMSUI = CLMSUI || {};
 var xiSPEC = xiSPEC || {};
 
-CLMSUI.loadSpectrum = function(match, randId, spectrumModel) {
+CLMSUI.loadSpectrum = function (match, randId, spectrumModel) {
 
-    var formatted_data = {};
+    const formatted_data = {};
 
     formatted_data.sequence1 = match.matchedPeptides[0].seq_mods;
     formatted_data.linkPos1 = match.linkPos1 - 1;
@@ -16,14 +16,14 @@ CLMSUI.loadSpectrum = function(match, randId, spectrumModel) {
     formatted_data.precursorCharge = match.precursorCharge;
     formatted_data.fragmentTolerance = match.fragmentTolerance();
 
-    var search = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId);
+    const search = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId);
     formatted_data.customConfig = search.customsettings.split('\n');
 
 
     formatted_data.losses = [];
-    search.losses.forEach(function(loss) {
-        formatted_loss = {};
-        var match = /(?=.*NAME:([^;]+))(?=.*aminoacids:([^;]+))(?=.*MASS:([^;]+)).*/.exec(loss.description);
+    search.losses.forEach(function (loss) {
+        const formatted_loss = {};
+        const match = /(?=.*NAME:([^;]+))(?=.*aminoacids:([^;]+))(?=.*MASS:([^;]+)).*/.exec(loss.description);
         if (match) {
             formatted_loss.id = match[1];
             formatted_loss.specificity = match[2].split(',');
@@ -38,8 +38,8 @@ CLMSUI.loadSpectrum = function(match, randId, spectrumModel) {
         // formatted_data.customConfig.push(loss.description);
     });
 
-    var ions = match.ionTypes();
-    formatted_data.ionTypes = ions.map(function(ion) {
+    const ions = match.ionTypes();
+    formatted_data.ionTypes = ions.map(function (ion) {
         return ion.type.replace("Ion", "")
     }).join(';')
     formatted_data.precursorMZ = match.expMZ();
@@ -48,18 +48,18 @@ CLMSUI.loadSpectrum = function(match, randId, spectrumModel) {
 
     console.log("loadSpectrum match:" + match.id);
 
-    d3.text('../CLMS-model/php/peakList.php?sid=' + match.searchId + '-' + randId + '&spid=' + match.spectrumId, function(error, text) {
+    d3.text('../CLMS-model/php/peakList.php?sid=' + match.searchId + '-' + randId + '&spid=' + match.spectrumId, function (error, text) {
         if (error) {
             console.log("error getting peak list", error);
         } else {
-            if (text == "false") {
-                var xiVersion = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).version;
-                var message = "Missing peak list for spectrum " + match.spectrumId + ". xiSearch v" + xiVersion;
+            if (text === "false") {
+                const xiVersion = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).version;
+                const message = "Missing peak list for spectrum " + match.spectrumId + ". xiSearch v" + xiVersion;
                 alert(message);
                 xiSPEC.clear();
             } else {
                 d3.select("#range-error").text("");
-                formatted_data.peakList = JSON.parse(text).map(function(p) {
+                formatted_data.peakList = JSON.parse(text).map(function (p) {
                     return [p.mz, p.intensity];
                 });
                 console.log(formatted_data);
