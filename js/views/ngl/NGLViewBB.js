@@ -1,15 +1,9 @@
-//		Backbone view and controller for NGL 3D viewer
-//
-//		Martin Graham, Colin Combe, Rappsilber Laboratory, Alex Rose, PDB
-//
-//		js/NGLViewBB.js
-
 var CLMSUI = CLMSUI || {};
 
 CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     events: function () {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -58,15 +52,15 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     initialize: function (viewOptions) {
         CLMSUI.NGLViewBB.__super__.initialize.apply(this, arguments);
-        var self = this;
+        const self = this;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el);
+        const mainDivSel = d3.select(this.el);
 
-        var flexWrapperPanel = mainDivSel.append("div")
+        const flexWrapperPanel = mainDivSel.append("div")
             .attr("class", "verticalFlexContainer");
 
-        var buttonData = [{
+        const buttonData = [{
             label: CLMSUI.utils.commonLabels.downloadImg + "PNG",
             class: "downloadButton",
             type: "button",
@@ -82,11 +76,11 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             },
         ];
 
-        var toolbar = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
+        const toolbar = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
         CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
 
         // Generate Export/Save cross-link data dropdown
-        var saveExportButtonData = [{
+        const saveExportButtonData = [{
             class: "savePDBButton",
             label: "PDB & Crosslinks",
             id: "savePDB",
@@ -144,7 +138,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, saveExportButtonData);
 
         // ...then moved to a dropdown menu
-        var optid = this.el.id + "Exports";
+        const optid = this.el.id + "Exports";
         toolbar.append("p").attr("id", optid);
         new CLMSUI.DropDownMenuViewBB({
             el: "#" + optid,
@@ -163,11 +157,11 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
 
         // Assembly choice dropdown
-        var buildAssemblySelector = function () {
-            var stageModel = this.model.get("stageModel");
-            var assemblys = stageModel ? d3.keys(stageModel.get("structureComp").structure.biomolDict) : ["BU1", "AU"];
+        const buildAssemblySelector = function () {
+            const stageModel = this.model.get("stageModel");
+            const assemblys = stageModel ? d3.keys(stageModel.get("structureComp").structure.biomolDict) : ["BU1", "AU"];
             assemblys.unshift("Default");
-            var labelPairs = assemblys.map(function (ass) {
+            const labelPairs = assemblys.map(function (ass) {
                 return {
                     label: ass.replace("AU", "Asymmetric Unit").replace("BU", "Biological Unit "),
                     key: ass
@@ -205,7 +199,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
 
         // Various view options set up...
-        var toggleButtonData = [{
+        const toggleButtonData = [{
             initialState: this.options.selectedOnly,
             class: "selectedOnlyCB",
             label: "Selected Crosslinks Only",
@@ -295,10 +289,10 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
 
         // ...then moved to a dropdown menu
-        var optid = this.el.id + "Options";
-        toolbar.append("p").attr("id", optid);
+        const optid2 = this.el.id + "Options";
+        toolbar.append("p").attr("id", optid2);
         new CLMSUI.DropDownMenuViewBB({
-            el: "#" + optid,
+            el: "#" + optid2,
             model: self.model.get("clmsModel"),
             myOptions: {
                 title: "Show ▼",
@@ -312,11 +306,10 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             }
         });
 
-
         // Protein view type dropdown
-        var allReps = NGL.RepresentationRegistry.names.slice().sort();
-        var ignoreReps = ["axes", "base", "contact", "distance", "helixorient", "hyperball", "label", "rocket", "trace", "unitcell", "validation", "angle", "dihedral"];
-        var mainReps = _.difference(allReps, ignoreReps);
+        const allReps = NGL.RepresentationRegistry.names.slice().sort();
+        const ignoreReps = ["axes", "base", "contact", "distance", "helixorient", "hyperball", "label", "rocket", "trace", "unitcell", "validation", "angle", "dihedral"];
+        const mainReps = _.difference(allReps, ignoreReps);
         CLMSUI.utils.addMultipleSelectControls({
             addToElem: toolbar,
             selectList: ["Draw Proteins As"],
@@ -340,17 +333,17 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             this.lastColour = null;
             this.dontGrey = true;
             this.atomColor = function (atom) {
-                var acindex = atom.chainIndex;
+                const acindex = atom.chainIndex;
                 if (this.lastChainIndex === acindex) {    // saves recalculating, as colour is per residue
                     return this.lastColour;
                 }
                 this.lastChainIndex = acindex;
 
-                var proteinID = self.model.get("stageModel").get("reverseChainMap").get(acindex);
-                var protein = self.model.get("clmsModel").get("participants").get(proteinID);
+                const proteinID = self.model.get("stageModel").get("reverseChainMap").get(acindex);
+                const protein = self.model.get("clmsModel").get("participants").get(proteinID);
 
                 if (protein !== undefined) {
-                    var rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein));
+                    const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein));
                     this.lastColour = (rgb.r << 16) + (rgb.g << 8) + rgb.b;
                 } else {
                     this.lastColour = 0xcccccc;
@@ -361,9 +354,9 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             this.filterSensitive = true;
         });
 
-        var allColourSchemes = d3.values(NGL.ColormakerRegistry.getSchemes());
-        var ignoreColourSchemes = ["electrostatic", "volume", "geoquality", "moleculetype", "occupancy", "random", "value", "densityfit", "chainid", "randomcoilindex"];
-        var aliases = {
+        const allColourSchemes = d3.values(NGL.ColormakerRegistry.getSchemes());
+        const ignoreColourSchemes = ["electrostatic", "volume", "geoquality", "moleculetype", "occupancy", "random", "value", "densityfit", "chainid", "randomcoilindex"];
+        const aliases = {
             bfactor: "B Factor",
             uniform: "No Colouring",
             atomindex: "Atom Index",
@@ -380,13 +373,13 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             external2: "Xi Legend Protein Scheme",
         };
         //var labellabel = d3.set(["uniform", "chainindex", "chainname", "modelindex"]);
-        var mainColourSchemes = _.difference(allColourSchemes, ignoreColourSchemes);
+        const mainColourSchemes = _.difference(allColourSchemes, ignoreColourSchemes);
 
-        var colourChangeFunc = function () {
+        const colourChangeFunc = function () {
             if (self.xlRepr) {
-                var value = d3.event.target.value;
+                const value = d3.event.target.value;
                 self.colourScheme = value;
-                var structure = self.model.get("stageModel").get("structureComp").structure;
+                const structure = self.model.get("stageModel").get("structureComp").structure;
                 self.xlRepr.colorOptions.residueSubScheme = NGL.ColormakerRegistry.getScheme({
                     scheme: value || "uniform",
                     structure: structure
@@ -444,15 +437,19 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             //.listenTo (this.model, "filteringDone", this.showFiltered) // any property changing in the filter model means rerendering this view
             .listenTo(this.model.get("filterModel"), "change", this.showFiltered) // any property changing in the filter model means rerendering this view
             .listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function () {
-                this.rerenderColourSchemes([this.xlRepr ? {
-                    nglRep: this.xlRepr.linkRepr,
-                    colourScheme: this.xlRepr.colorOptions.linkColourScheme
+                if (this.xlRepr){
+                    this.rerenderColourSchemes([{
+                        nglRep: this.xlRepr.linkRepr,
+                        colourScheme: this.xlRepr.colorOptions.linkColourScheme
+                    }
+                    , {
+                        nglRep: this.xlRepr.halfLinkResRepr,
+                        colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
+                    }]);
                 }
-                // , {
-                //     nglRep: this.xlRepr.halfLinkResRepr,
-                //     colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
-                // }
-                : {nglRep: null, colourScheme: null}]);
+                else {
+                    this.rerenderColourSchemes([{nglRep: null, colourScheme: null}]);
+                }
             })  // if crosslink colour model changes internally, or is swapped for new one
             .listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function () {
                 this.rerenderColourSchemes([this.xlRepr ? {
@@ -464,7 +461,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             .listenTo(this.model, "change:highlights", this.showHighlightedLinks)
         ;
 
-        var disableHaddock = function (stageModel) {
+        const disableHaddock = function (stageModel) {
             mainDivSel.select(".exportHaddockButton").property("disabled", !stageModel.get("allowInterModelDistances") || stageModel.get("structureComp").structure.modelStore.count == 1);
         };
         // listen to CLMSUI.vent rather than directly to newStageModel's change:allowInterModelDistances as we needed to recalc distances before informing views
@@ -480,7 +477,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         this.listenTo(this.model, "change:stageModel", function (model, newStageModel) {
             // swap out stage models and listeners
-            var prevStageModel = model.previous("stageModel");
+            const prevStageModel = model.previous("stageModel");
             CLMSUI.utils.xilog("STAGE MODEL CHANGED", arguments, this, prevStageModel);
             if (prevStageModel) {
                 this.stopListening(prevStageModel); // remove old stagemodel linklist change listener;
@@ -559,12 +556,12 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     reportLinks: function () {
-        var fullLinkCount = this.xlRepr.nglModelWrapper.getFullLinkCount();
-        var halfLinkCount = this.xlRepr.nglModelWrapper.getHalfLinkCount();
-        var currentFilteredLinkCount = this.model.getFilteredCrossLinks().length;
-        var missingLinkCount = currentFilteredLinkCount - fullLinkCount - halfLinkCount;
-        var commaFormat = d3.format(",");
-        var linkText = "Currently showing " + commaFormat(fullLinkCount) + " in full " +
+        const fullLinkCount = this.xlRepr.nglModelWrapper.getFullLinkCount();
+        const halfLinkCount = this.xlRepr.nglModelWrapper.getHalfLinkCount();
+        const currentFilteredLinkCount = this.model.getFilteredCrossLinks().length;
+        const missingLinkCount = currentFilteredLinkCount - fullLinkCount - halfLinkCount;
+        const commaFormat = d3.format(",");
+        const linkText = "Currently showing " + commaFormat(fullLinkCount) + " in full " +
             (halfLinkCount ? "and " + commaFormat(halfLinkCount) + " in part " : "") +
             "of " + commaFormat(currentFilteredLinkCount) + " filtered TT crosslinks" +
             (missingLinkCount ? " (" + commaFormat(missingLinkCount) + " others outside of structure scope)" : "")
@@ -574,29 +571,29 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     repopulate: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         CLMSUI.utils.xilog("REPOPULATE", this.model, stageModel);
-        var sname = stageModel.getStructureName();
-        var overText = "PDB File: " + (sname.length === 4 ?
+        const sname = stageModel.getStructureName();
+        let overText = "PDB File: " + (sname.length === 4 ?
             "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
             " - " + stageModel.get("structureComp").structure.title;
 
-        var interactors = CLMSUI.modelUtils.filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
-        var alignColl = this.model.get("alignColl");
-        var pdbLengthsPerProtein = interactors.map(function (inter) {
-            var pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);
-            var contigPDBFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(pdbFeatures);
+        const interactors = CLMSUI.modelUtils.filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
+        const alignColl = this.model.get("alignColl");
+        const pdbLengthsPerProtein = interactors.map(function (inter) {
+            const pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);
+            const contigPDBFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(pdbFeatures);
 
-            var totalLength = d3.sum(contigPDBFeatures, function (d) {
+            const totalLength = d3.sum(contigPDBFeatures, function (d) {
                 return d.end - d.begin + 1;
             });
             //console.log ("pppp", inter, pdbFeatures, contigPDBFeatures, totalLength);
             return totalLength;
         }, this);
-        var totalPDBLength = d3.sum(pdbLengthsPerProtein);
-        var totalProteinLength = CLMSUI.modelUtils.totalProteinLength(interactors);
-        var pcent = d3.format(".0%")(totalPDBLength / totalProteinLength);
-        var commaFormat = d3.format(",");
+        const totalPDBLength = d3.sum(pdbLengthsPerProtein);
+        const totalProteinLength = CLMSUI.modelUtils.totalProteinLength(interactors);
+        const pcent = d3.format(".0%")(totalPDBLength / totalProteinLength);
+        const commaFormat = d3.format(",");
 
         overText += " - covers approx " + commaFormat(totalPDBLength) + " of " + commaFormat(totalProteinLength) + " AAs (" + pcent + ")";
         this.chartDiv.select("div.overlayInfo").html(overText);
@@ -626,9 +623,9 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     relayout: function () {
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         if (stageModel) {
-            var stage = stageModel.get("structureComp").stage;
+            const stage = stageModel.get("structureComp").stage;
             if (stage) {
                 stage.handleResize();
             }
@@ -642,11 +639,11 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     downloadImage: function () {
         // https://github.com/arose/ngl/issues/33
-        var stageModel = this.model.get("stageModel");
+        const stageModel = this.model.get("stageModel");
         if (stageModel) {
-            var stage = stageModel.get("structureComp").stage;
-            var self = this;
-            var scale = 4;
+            const stage = stageModel.get("structureComp").stage;
+            const self = this;
+            const scale = 4;
 
             stage.makeImage({
                 factor: scale, // make it big so it can be used for piccy
@@ -657,27 +654,27 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                 // All following to take NGL generated canvas blob and add a key to it...
                 // make fresh canvas
                 if (self.options.exportKey) {
-                    var gap = 50;
-                    var canvasObj = CLMSUI.utils.makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
+                    const gap = 50;
+                    const canvasObj = CLMSUI.utils.makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
 
                     // draw blob as image to this canvas
-                    var DOMURL = URL || webkitURL || window;
-                    var url = DOMURL.createObjectURL(blob);
-                    var img = new Image();
+                    const DOMURL = URL || webkitURL || window;
+                    const url = DOMURL.createObjectURL(blob);
+                    const img = new Image();
                     img.onload = function () {
                         canvasObj.context.drawImage(img, 0, gap);
 
                         // make key svg and turn it into a blob
-                        var tempSVG = self.addKey({
+                        const tempSVG = self.addKey({
                             addToSelection: d3.select(self.el),
                             addOrigin: self.options.exportTitle
                         });
-                        var svgString = new XMLSerializer().serializeToString(tempSVG.node());
-                        var keyblob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+                        const svgString = new XMLSerializer().serializeToString(tempSVG.node());
+                        const keyblob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
 
                         // add the key blob as an image to canvas
-                        var keyurl = DOMURL.createObjectURL(keyblob);
-                        var keyimg = new Image();
+                        const keyurl = DOMURL.createObjectURL(keyblob);
+                        const keyimg = new Image();
                         keyimg.onload = function () {
                             canvasObj.context.drawImage(keyimg, 0, 0);
 
@@ -708,7 +705,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     colorChange: function () {
         const val = d3.select(".greyer").property("checked");
         console.log("GREYNESS", val)
-        NGL.ColormakerRegistry.removeScheme (this.xlRepr.colorOptions.residueColourScheme);
+        NGL.ColormakerRegistry.removeScheme(this.xlRepr.colorOptions.residueColourScheme);
         // NGL.ColormakerRegistry.removeScheme (this.colorOptions.linkColourScheme);
 
         const self = this;
@@ -739,7 +736,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         }
     },
 
-    centerView: function() {
+    centerView: function () {
         const stageModel = this.model.get("stageModel");
         if (stageModel) {
             stageModel.get("structureComp").stage.autoView(1000);
@@ -749,34 +746,34 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     savePDB: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.exportPDB (
+        CLMSUI.NGLExportUtils.exportPDB(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
-                ["PDB ID: "+stageModel.getStructureName(),
-                "Exported by "+this.identifier+" and XiView",
-                 "Xi Crosslinks in CONECT and LINK records",
-                 "Search ID: "+CLMSUI.utils.searchesToString(),
-                 "Filter: "+CLMSUI.utils.filterStateToString()
-                ]
+            ["PDB ID: " + stageModel.getStructureName(),
+                "Exported by " + this.identifier + " and XiView",
+                "Xi Crosslinks in CONECT and LINK records",
+                "Search ID: " + CLMSUI.utils.searchesToString(),
+                "Filter: " + CLMSUI.utils.filterStateToString()
+            ]
         );
         return this;
     },
 
     exportPymol: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.exportPymolCrossLinkSyntax (
+        CLMSUI.NGLExportUtils.exportPymolCrossLinkSyntax(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
-                ["PDB ID: "+stageModel.getStructureName(),
-                "Exported by "+this.identifier+" and XiView",
-                 "Search ID: "+CLMSUI.utils.searchesToString(),
-                 "Filter: "+CLMSUI.utils.filterStateToString()
-                ]
+            ["PDB ID: " + stageModel.getStructureName(),
+                "Exported by " + this.identifier + " and XiView",
+                "Search ID: " + CLMSUI.utils.searchesToString(),
+                "Filter: " + CLMSUI.utils.filterStateToString()
+            ]
         );
         return this;
     },
 
     export3dLinksCSV: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.export3dLinksCSV (
+        CLMSUI.NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -785,7 +782,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     //todo - unnecessary duplication
     export3dLinksCSVSelected: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.export3dLinksCSV (
+        CLMSUI.NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), true
         );
         return this;
@@ -793,7 +790,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportChimeraPB: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.exportChimeraPseudobonds(
+        CLMSUI.NGLExportUtils.exportChimeraPseudobonds(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -801,7 +798,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportJWalk: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.exportJWalk(
+        CLMSUI.NGLExportUtils.exportJWalk(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -809,7 +806,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportXlinkAnalyzer: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.exportXlinkAnalyzer(
+        CLMSUI.NGLExportUtils.exportXlinkAnalyzer(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -817,20 +814,23 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportHaddock: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLUtils.exportHaddockCrossLinkSyntax (
+        CLMSUI.NGLExportUtils.exportHaddockCrossLinkSyntax(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
-                ["PDB ID: "+stageModel.getStructureName(),
-                "Exported by "+this.identifier+" and XiView",
-                 "Search ID: "+CLMSUI.utils.searchesToString(),
-                 "Filter: "+CLMSUI.utils.filterStateToString()
-                ],
-                {crossLinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"), crossLinks: this.model.get("clmsModel").get("crossLinks")}
+            ["PDB ID: " + stageModel.getStructureName(),
+                "Exported by " + this.identifier + " and XiView",
+                "Search ID: " + CLMSUI.utils.searchesToString(),
+                "Filter: " + CLMSUI.utils.filterStateToString()
+            ],
+            {
+                crossLinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"),
+                crossLinks: this.model.get("clmsModel").get("crossLinks")
+            }
         );
         return this;
     },
 
-    toggleLabels: function(event) {
-        var bool = event.target.checked;
+    toggleLabels: function (event) {
+        const bool = event.target.checked;
         this.options.labelVisible = bool;
         if (this.xlRepr) {
             this.xlRepr.options.displayedLabelVisible = bool;
@@ -841,8 +841,8 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    toggleResidues: function(event) {
-        var bool = event.target.checked;
+    toggleResidues: function (event) {
+        const bool = event.target.checked;
         this.options.showResidues = bool;
         if (this.xlRepr) {
             this.xlRepr.resRepr.setVisibility(bool);
@@ -851,8 +851,8 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    toggleNonSelectedLinks: function(event) {
-        var bool = event.target.checked;
+    toggleNonSelectedLinks: function (event) {
+        const bool = event.target.checked;
         this.options.selectedOnly = bool;
         if (this.xlRepr) {
             this.xlRepr.linkRepr.setVisibility(!bool);
@@ -860,20 +860,20 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    toggleShortestLinksOnly: function(event) {
-        var bool = event.target.checked;
+    toggleShortestLinksOnly: function (event) {
+        const bool = event.target.checked;
         this.model.get("stageModel").set("showShortestLinksOnly", bool);
         return this;
     },
 
     toggleAllowInterModelDistances: function (event) {
-        var bool = event.target.checked;
+        const bool = event.target.checked;
         this.model.get("stageModel").set("allowInterModelDistances", bool);
         return this;
     },
 
-    toggleShowAllProteins: function(event) {
-        var bool = event.target.checked;
+    toggleShowAllProteins: function (event) {
+        const bool = event.target.checked;
         this.options.showAllProteins = bool;
         if (this.xlRepr) {
             this.xlRepr.options.showAllProteins = bool;
@@ -882,24 +882,24 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    setChainLabelLength: function() {
-        var checkedElem = d3.select(this.el).select("input.chainLabelLengthRB:checked");
+    setChainLabelLength: function () {
+        const checkedElem = d3.select(this.el).select("input.chainLabelLengthRB:checked");
         if (!checkedElem.empty()) {
-            var value = checkedElem.property("value");
+            const value = checkedElem.property("value");
             this.options.chainLabelSetting = value;
             if (this.xlRepr) {
-                this.xlRepr.updateOptions (this.options, ["chainLabelSetting"]);
-                this.xlRepr.redisplayChainLabels ();
+                this.xlRepr.updateOptions(this.options, ["chainLabelSetting"]);
+                this.xlRepr.redisplayChainLabels();
             }
         }
         return this;
     },
 
     setChainLabelFixedSize: function (event) {
-        var bool = event.target.checked;
+        const bool = event.target.checked;
         this.options.fixedLabelSize = bool;
         if (this.xlRepr) {
-            this.xlRepr.updateOptions (this.options, ["fixedLabelSize"]);
+            this.xlRepr.updateOptions(this.options, ["fixedLabelSize"]);
             this.xlRepr.labelRepr.setParameters({fixedSize: bool, radiusScale: bool ? 1 : 3});
         }
         return this;
@@ -908,35 +908,35 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     rerenderColourSchemes: function (repSchemePairs) {
         if (this.xlRepr && this.isVisible()) {
             CLMSUI.utils.xilog("rerendering ngl");
-            this.xlRepr.rerenderColourSchemes (repSchemePairs);
+            this.xlRepr.rerenderColourSchemes(repSchemePairs);
         }
         return this;
     },
 
-    showHighlightedLinks: function() {
+    showHighlightedLinks: function () {
         if (this.xlRepr && this.isVisible()) {
-            this.xlRepr.setHighlightedLinks (this.xlRepr.nglModelWrapper.getFullLinks());
+            this.xlRepr.setHighlightedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
             // this.xlRepr.setHighlightedRes (this.xlRepr.nglModelWrapper.getFullLinks());
         }
         return this;
     },
 
-    showSelectedLinks: function() {
+    showSelectedLinks: function () {
         if (this.xlRepr && this.isVisible()) {
-            this.xlRepr.setSelectedLinks (this.xlRepr.nglModelWrapper.getFullLinks());
-            this.xlRepr.setSelectedRes (this.xlRepr.nglModelWrapper.getHalfLinks());
+            this.xlRepr.setSelectedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
+            this.xlRepr.setSelectedRes(this.xlRepr.nglModelWrapper.getHalfLinks());
         }
         return this;
     },
 
-    showFiltered: function() {
+    showFiltered: function () {
         if (this.xlRepr && this.isVisible()) {
-            this.model.get("stageModel").setFilteredLinkList ();
+            this.model.get("stageModel").setFilteredLinkList();
         }
         return this;
     },
 
-    clearHighlighted: function() {
+    clearHighlighted: function () {
         if (this.xlRepr && this.isVisible()) {
             // next line eventually fires through an empty selection to showHighlighted above
             this.model.setMarkedCrossLinks("highlights", [], false, false);
@@ -947,29 +947,29 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     identifier: "NGL Viewer - PDB Structure",
 
-    optionsToString: function() {
-        var abbvMap = {
+    optionsToString: function () {
+        const abbvMap = {
             labelVisible: "LBLSVIS",
             selectedOnly: "SELONLY",
             showResidues: "RES",
             shortestLinksOnly: "SHORTONLY",
             allowInterModelDistances: "INTRMOD"
         };
-        var fields = ["rep", "labelVisible", "selectedOnly", "showResidues", "shortestLinksOnly", "allowInterModelDistances"];
-        var optionsPlus = $.extend({}, this.options);
+        const fields = ["rep", "labelVisible", "selectedOnly", "showResidues", "shortestLinksOnly", "allowInterModelDistances"];
+        const optionsPlus = $.extend({}, this.options);
         optionsPlus.rep = this.xlRepr.options.chainRep;
 
         return CLMSUI.utils.objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
     },
 
     pdbFilenameStateString: function () {
-        var stageModel = this.model.get("stageModel");
-        return CLMSUI.utils.makeLegalFileName (stageModel.getStructureName() + "-CrossLinks-"+CLMSUI.utils.searchesToString() + "-" + CLMSUI.utils.filterStateToString());
+        const stageModel = this.model.get("stageModel");
+        return CLMSUI.utils.makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + CLMSUI.utils.searchesToString() + "-" + CLMSUI.utils.filterStateToString());
     },
 
     // Returns a useful filename given the view and filters current states
-    filenameStateString: function() {
-        var stageModel = this.model.get("stageModel");
+    filenameStateString: function () {
+        const stageModel = this.model.get("stageModel");
         return CLMSUI.utils.makeLegalFileName(CLMSUI.utils.searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + CLMSUI.utils.filterStateToString());
     },
 });

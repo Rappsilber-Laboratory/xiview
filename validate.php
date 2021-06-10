@@ -93,20 +93,19 @@ header('Content-type: text/html; charset=utf-8');
 
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
         <script type="text/javascript" src="./js/Utils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filterModel.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/models.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/compositeModelType.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/modelUtils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/minigramViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filterViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/fdr.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/filter/filterModel.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/compositeModelType.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/modelUtils.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/filter/minigramViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/filter/filterViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/validate.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/loadSpectrum.js<?php echo $cacheBuster ?>"></script>
-
         <script type="text/javascript" src="./js/networkFrame.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/downloads.js<?php echo $cacheBuster ?>"></script>
 

@@ -179,8 +179,8 @@ CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.Co
         let id1, id2;
         if (link.isAggregateLink) {
             const crosslink = link.getCrosslinks()[0];
-            id1 = link.crosslink.fromProtein.id;
-            id2 = link.crosslink.toProtein ? link.crossLinks[0].toProtein.id : undefined;
+            id1 = link.getCrosslinks()[0].fromProtein.id;
+            id2 = link.getCrosslinks()[0].toProtein ? link.getCrosslinks()[0].toProtein.id : undefined;
         } else {
             id1 = link.fromProtein.id;
             id2 = link.toProtein ? link.toProtein.id : undefined;

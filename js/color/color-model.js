@@ -145,7 +145,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
 
     const linkColourCollection = new CLMSUI.BackboneModelTypes.ColourModelCollection([
         CLMSUI.linkColour.defaultColoursBB,
-   //temp     // CLMSUI.linkColour.interProteinColoursBB,
+        CLMSUI.linkColour.interProteinColoursBB,
         CLMSUI.linkColour.groupColoursBB,
         CLMSUI.linkColour.distanceColoursBB,
         CLMSUI.linkColour.highestScoreColoursBB
