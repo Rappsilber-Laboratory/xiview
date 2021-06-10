@@ -192,6 +192,8 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             // .attr("disabled", self.model.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
             .classed('xinetPpiStep', true);
 
+        const self = this;
+
         CLMSUI.utils.makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
         // toggleButtonData.splice(0, 0, {
         //     name: CLMSUI.utils.commonLabels.downloadImg + "SVG",
