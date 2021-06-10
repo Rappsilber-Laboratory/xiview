@@ -447,7 +447,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         const links = this.nglModelWrapper.getFullLinks();
         this
             .setDisplayedResidues(this.nglModelWrapper.getResidues(), this.nglModelWrapper.getHalfLinkResidues())
-            .setSelectedResidues([])
+            .setSelectedRes(this.nglModelWrapper.getHalfLinks())
             .setDisplayedLinks(links)
             .setSelectedLinks(links)
         ;
