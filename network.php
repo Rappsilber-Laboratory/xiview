@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $cacheBuster = '';//?v='.microtime(true);
+    $cacheBuster = '?v='.microtime(true);
 ?>
 
 <!DOCTYPE html>
