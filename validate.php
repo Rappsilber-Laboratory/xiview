@@ -86,9 +86,9 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="../vendor/js/backbone.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/spin.js<?php echo $cacheBuster ?>"></script>
 
-        <script type="text/javascript" src="../CLMS-model/src/CLMS/model/SearchResultsModel.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/CLMS/model/SpectrumMatch.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/CLMS/model/CrossLink.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../CLMS-model/src/search-results-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../CLMS-model/src/crosslink.js<?php echo $cacheBuster ?>"></script>
 
 
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->

@@ -1,4 +1,4 @@
-//has to be loaded after Utils.js
+//has to be loaded after utils.js
 //only used by KeyViewBB.js
 CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
     const self = this;

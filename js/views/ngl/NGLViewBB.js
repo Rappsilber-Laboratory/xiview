@@ -327,6 +327,34 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             }
         });
 
+
+        // Residue colour scheme
+        NGL.ColormakerRegistry.add("external", function () {
+            this.lastResidueIndex = null;
+            this.lastColour = null;
+            this.dontGrey = true;
+            this.atomColor = function (atom) {
+                var arindex = atom.residueIndex;
+                if (this.lastResidueIndex === arindex) {    // saves recalculating, as colour is per residue
+                    return this.lastColour;
+                }
+                this.lastResidueIndex = arindex;
+
+                var residue = self.model.get("stageModel").getResidueByNGLGlobalIndex(arindex);
+
+                if (residue !== undefined) {
+                    var linkCount = self.xlRepr ? self.xlRepr.nglModelWrapper.getHalfLinkCountByResidue(residue) : 0;
+                    this.lastColour = (linkCount > 0 ? 0x000077 : 0xcccccc);
+                } else {
+                    this.lastColour = 0xcccccc;
+                }
+                //console.log ("rid", arindex, this.lastColour);
+                return this.lastColour;
+            };
+            this.filterSensitive = true;
+        });
+
+
         // Current cross-view protein colour scheme
         NGL.ColormakerRegistry.add("external2", function () {
             this.lastChainIndex = null;
@@ -369,7 +397,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             entityindex: "Entity Index",
             entitytype: "Entity Type",
             partialcharge: "Partial Charge",
-            // external: "Residues with Half-Links",
+            external: "Residues with Half-Links",
             external2: "Xi Legend Protein Scheme",
         };
         //var labellabel = d3.set(["uniform", "chainindex", "chainname", "modelindex"]);
@@ -393,11 +421,11 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                         immediateUpdate: false
                     }
                     ,
-                    // {
-                    //     nglRep: self.xlRepr.halfLinkResRepr,
-                    //     colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
-                    //     immediateUpdate: false
-                    // },
+                    {
+                        nglRep: self.xlRepr.halfLinkResRepr,
+                        colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
+                        immediateUpdate: false
+                    },
                     {nglRep: self.xlRepr.sstrucRepr, colourScheme: self.xlRepr.colorOptions.residueColourScheme},
                 ]);
             }

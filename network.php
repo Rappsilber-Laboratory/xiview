@@ -85,9 +85,9 @@
         <script type="text/javascript" src="../vendor/js/d3-octree.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
 
-        <script type="text/javascript" src="../CLMS-model/src/CLMS/model/SearchResultsModel.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/CLMS/model/SpectrumMatch.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/CLMS/model/CrossLink.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../CLMS-model/src/search-results-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../CLMS-model/src/crosslink.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/CrosslinkViewerBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Interactor.js<?php echo $cacheBuster ?>"></script>
@@ -99,7 +99,7 @@
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/G_GLink.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Rotator.js<?php echo $cacheBuster ?>"></script>
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
-        <script type="text/javascript" src="./js/Utils.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/utils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/circle/circleArrange.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/filterModel.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
@@ -109,6 +109,13 @@
         <script type="text/javascript" src="./js/file-choosers/stringUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/distancesObj.js<?php echo $cacheBuster ?>"></script>
+
+        <script type="text/javascript" src="./js/ui-utils/section-table.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/base-frame-view.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/checkbox-view.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/color-collection-option-view.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js<?php echo $cacheBuster ?>"></script>
+
         <script type="text/javascript" src="./js/views/distogramViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/key/threeColourSliderBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/filterViewBB.js<?php echo $cacheBuster ?>"></script>
@@ -139,10 +146,10 @@
         <script type="text/javascript" src="./js/views/searchSummaryViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/urlSearchBoxViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/xiNetControlsViewBB.js<?php echo $cacheBuster ?>"></script>
+
         <script type="text/javascript" src="./js/views/go/goTermsSankeyViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/go/goTerm.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/go/sankey.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/ui-utils/section-table.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="./js/views/ngl/NGLUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/ngl/NGLExportUtils.js<?php echo $cacheBuster ?>"></script>
@@ -238,7 +245,7 @@
         var z;
 
 		var success = function (json) {
-			try {
+			// try {
                 if (json.error) {
                     throw "Error from server";
                 }
@@ -275,12 +282,12 @@
 				CLMSUI.init.views();
 				allDataLoaded ();
 
-  	        } catch (err) {
-                //console.log ("ERR", err);
-				CLMSUI.utils.displayError (function() { return true; }, "An error has occurred. \t&#9785;<p class='errorReason'>"
-                    + (json.error? json.error : err.stack)
-                    +"</p>");
-			}
+  	      //   } catch (err) {
+            //     //console.log ("ERR", err);
+			// 	CLMSUI.utils.displayError (function() { return true; }, "An error has occurred. \t&#9785;<p class='errorReason'>"
+            //         + (json.error? json.error : err.stack)
+            //         +"</p>");
+			// }
 		};
 
 

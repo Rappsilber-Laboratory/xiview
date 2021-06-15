@@ -255,11 +255,11 @@ CLMSUI.NGLUtils = {
 
 
         pdbUris.forEach(function (pdbUri) {
+            alert(pdbUri.id);
             // https://1d-coordinates.rcsb.org/#1d-coordinates-api
-            const url = 'https://1d-coordinates.rcsb.org/graphql?' + encodeURI('query={alignment(from:PDB_ENTITY,to:UNIPROT,queryId:"' + pdbUri.id + '"){target_alignment{target_id}}}');
-
+            const url = 'https://1d-coordinates.rcsb.org/graphql?query=' + encodeURI('{ alignment(from:PDB_ENTITY, to:UNIPROT, queryId:"' + pdbUri.id.toString().toUpperCase() + '_1") { target_alignment { target_id aligned_regions { query_begin query_end target_begin target_end } } } }');
             // const query = "{alignment(from:NCBI_PROTEIN,to:PDB_ENTITY,queryId:"XP_642496"){target_alignment{target_id}}}"
-
+            https://1d-coordinates.rcsb.org/graphql?query=%7Balignment(from:PDB_ENTITY,to:UNIPROT,queryId:%225lzv%22)%7Btarget_alignment%7Btarget_id%20aligned_regions%7Bquery_begin%20query_end%20target_begin%20target_end%7D%7D%7D%7D
             $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
                 function (data, status, xhr) {
                     if (status === "success" && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
