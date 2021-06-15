@@ -92,7 +92,7 @@ header('Content-type: text/html; charset=utf-8');
 
 
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
-        <script type="text/javascript" src="./js/Utils.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/utils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/filterModel.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/compositeModelType.js<?php echo $cacheBuster ?>"></script>
@@ -101,6 +101,12 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="./js/filter/filterViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/ui-utils/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
+
+        <script type="text/javascript" src="./js/ui-utils/base-frame-view.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/checkbox-view.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/color-collection-option-view.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js<?php echo $cacheBuster ?>"></script>
+
         <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>

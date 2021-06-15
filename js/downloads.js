@@ -375,7 +375,7 @@ function getSSL() {
 function getLinksCSV() {
     const clmsModel = CLMSUI.compositeModelInst.get("clmsModel");
 
-    let headerArray = ["Protein1", "SeqPos1", "LinkedRes1", "Protein2", "SeqPos2", "LinkedRes2", "Highest Score", "Match Count", "DecoyType", "AutoValidated", "Validated", "Link FDR", "3D Distance", "From Chain", "To Chain"];//, "PDB SeqPos 1", "PDB SeqPos 2"];
+    let headerArray = ["Protein1", "SeqPos1", "LinkedRes1", "Protein2", "SeqPos2", "LinkedRes2", "Highest Score", "Match Count", "DecoyType", "Self", "AutoValidated", "Validated", "Link FDR", "3D Distance", "From Chain", "To Chain"];//, "PDB SeqPos 1", "PDB SeqPos 2"];
     const searchIDs = Array.from(clmsModel.get("searches").keys());
     searchIDs.forEach(function (sid) {
         headerArray.push("Search_" + sid);
@@ -442,7 +442,7 @@ function getLinksCSV() {
             }
         }
 
-        row.push(highestScore, filteredMatchCount, decoyType, linkAutovalidated, validationStats.toString(), crossLink.getMeta("fdr"));
+        row.push(highestScore, filteredMatchCount, decoyType, crossLink.isSelfLink(), linkAutovalidated, validationStats.toString(), crossLink.getMeta("fdr"));
 
         // Distance info
         const pDist = physicalDistances[i];
