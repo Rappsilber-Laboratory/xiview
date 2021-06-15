@@ -56,7 +56,7 @@ CLMSUI.loadSpectrum = function (match, randId, spectrumModel) {
                 const xiVersion = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).version;
                 const message = "Missing peak list for spectrum " + match.spectrumId + ". xiSearch v" + xiVersion;
                 alert(message);
-                xiSPEC.clear();
+                // xiSPEC.clear();
             } else {
                 d3.select("#range-error").text("");
                 formatted_data.peakList = JSON.parse(text).map(function (p) {

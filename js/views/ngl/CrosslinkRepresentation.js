@@ -97,20 +97,20 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             name: "res"
         });
 
-        this.halfLinkResRepr = comp.addRepresentation("spacefill", {
-            sele: halfLinkResSele,
-            color: this.colorOptions.halfLinkResidueColourScheme,
-            radiusScale: 0.9,
-            name: "halfLinkRes"
-        });
-
-        this.halfLinkResEmphRepr = comp.addRepresentation("spacefill", {
-            sele: halfLinkResSele,
-            color: this.options.selectedLinksColor,
-            radiusScale: 1,
-            opacity: 0.7,
-            name: "halfLinkResEmph"
-        });
+        // this.halfLinkResRepr = comp.addRepresentation("spacefill", {
+        //     sele: halfLinkResSele,
+        //     color: this.colorOptions.halfLinkResidueColourScheme,
+        //     radiusScale: 0.9,
+        //     name: "halfLinkRes"
+        // });
+        //
+        // this.halfLinkResEmphRepr = comp.addRepresentation("spacefill", {
+        //     sele: halfLinkResSele,
+        //     color: this.options.selectedLinksColor,
+        //     radiusScale: 1,
+        //     opacity: 0.7,
+        //     name: "halfLinkResEmph"
+        // });
 
         // this.halfLinkResHighRepr = comp.addRepresentation("spacefill", {
         //     sele: halfLinkResSele,
@@ -447,7 +447,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         const links = this.nglModelWrapper.getFullLinks();
         this
             .setDisplayedResidues(this.nglModelWrapper.getResidues(), this.nglModelWrapper.getHalfLinkResidues())
-            .setSelectedRes(this.nglModelWrapper.getHalfLinks())
+            // .setSelectedRes(this.nglModelWrapper.getHalfLinks())
             .setDisplayedLinks(links)
             .setSelectedLinks(links)
         ;
@@ -458,7 +458,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             this.rerenderColourSchemes([
                 {nglRep: this.sstrucRepr, colourScheme: this.colorOptions.residueColourScheme, immediateUpdate: false},
                 {nglRep: this.resRepr, colourScheme: this.colorOptions.residueColourScheme, immediateUpdate: false},
-                {nglRep: this.halfLinkResRepr, colourScheme: this.colorOptions.halfLinkResidueColourScheme, immediateUpdate: false},
+                // {nglRep: this.halfLinkResRepr, colourScheme: this.colorOptions.halfLinkResidueColourScheme, immediateUpdate: false},
             ]);
         }
 
@@ -506,7 +506,7 @@ CLMSUI.CrosslinkRepresentation.prototype = {
     setDisplayedResidues: function (residues, halfLinkResidues) {
         const a = performance.now();
         this.setResidues(residues, this.resRepr);
-        this.setResidues(halfLinkResidues, this.halfLinkResRepr);
+        // this.setResidues(halfLinkResidues, this.halfLinkResRepr);
         CLMSUI.utils.xilog("set displayed residues, time", performance.now() - a);
         return this;
     },
@@ -518,8 +518,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
     },
 
     setSelectedRes: function (halfLinks) {
-        const filteredHalfLinks = this.filterByLinkState(halfLinks, "selection")
-        return this.setSelectedResidues(this.nglModelWrapper.getHalfLinkResidues(filteredHalfLinks));
+        // const filteredHalfLinks = this.filterByLinkState(halfLinks, "selection")
+        // return this.setSelectedResidues(this.nglModelWrapper.getHalfLinkResidues(filteredHalfLinks));
+        return this;
     },
 
     // Populate NGL distance representations with crosslinks

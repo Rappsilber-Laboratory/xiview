@@ -804,7 +804,7 @@ CLMSUI.init.viewsEssential = function (options) {
             const randId = CLMSUI.compositeModelInst.get("clmsModel").getSearchRandomId(match);
             CLMSUI.loadSpectrum(match, randId, this.model);
         } else {
-            xiSPEC.clear();
+            // xiSPEC.clear(); //todo - maybe it is better to clear it, but xiSPEC currently has no clear function
         }
     });
 
