@@ -29,7 +29,7 @@ CLMSUI.NGLExportUtils = {
 
     exportPymolCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks) {
         const crossLinks = nglModelWrapper.getFullLinks();
-        const pymolLinks = CLMSUI.NGLUtils.makePymolCrossLinkSyntax(structure, crossLinks, remarks);
+        const pymolLinks = CLMSUI.NGLExportUtils.makePymolCrossLinkSyntax(structure, crossLinks, remarks);
         const fileName = downloadFilename("pymol", "pml");
         download(pymolLinks.join("\r\n"), "plain/text", fileName);
     },
@@ -83,7 +83,7 @@ CLMSUI.NGLExportUtils = {
 
     export3dLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
         const crosslinks = nglModelWrapper.getFullLinks();
-        const linkExportArray = CLMSUI.NGLUtils.make3dLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
+        const linkExportArray = CLMSUI.NGLExportUtils.make3dLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
         const fileName = downloadFilename("CSV_NGL", "csv");
         download(linkExportArray.join("\r\n"), "plain/text", fileName);
     },
@@ -248,7 +248,7 @@ CLMSUI.NGLExportUtils = {
 
     exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crossLinkerObj) {
         const crossLinks = nglModelWrapper.getFullLinks();
-        const haddockLinks = CLMSUI.NGLUtils.makeHaddockCrossLinkSyntax(structure, crossLinks, remarks, crossLinkerObj);
+        const haddockLinks = CLMSUI.NGLExportUtils.makeHaddockCrossLinkSyntax(structure, crossLinks, remarks, crossLinkerObj);
         const fileName = downloadFilename("haddock", "tbl");
         download(haddockLinks.join("\r\n"), "plain/text", fileName);
     },

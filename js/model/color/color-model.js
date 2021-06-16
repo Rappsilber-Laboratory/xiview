@@ -1,70 +1,85 @@
 var CLMSUI = CLMSUI || {};
 CLMSUI.linkColour = CLMSUI.linkColour || {};
 
-ColourModel = Backbone.Model.extend({
-    defaults: {
-        title: undefined,
-        longDescription: undefined,
-        type: "linear",
-        fixed: false,
-        undefinedColour: "#aaa",
-        undefinedLabel: "Unknown",
-        unit: "",
-    },
+class ColourModel extends Backbone.Model {
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    defaults(){
+        return {
+            title: undefined,
+            longDescription: undefined,
+            type: "linear",
+            fixed: false,
+            undefinedColour: "#aaa",
+            undefinedLabel: "Unknown",
+            unit: "",
+        };
+    }
+
     // used by threeColourSliderBB.js
-    setDomain: function(newDomain) {
+    setDomain (newDomain) {
         this.get("colScale").domain(newDomain);
         this.triggerColourModelChanged({
             domain: newDomain
         });
         return this;
-    },
+    }
+
     // used by KeyViewBB.changeColour
-    setRange: function(newRange) {
+    setRange (newRange) {
         this.get("colScale").range(newRange);
         this.triggerColourModelChanged({
             range: newRange
         });
         return this;
-    },
+    }
+
     //used by distogram and scatterplot
-    getDomainIndex: function (obj) {    // obj is generally a crosslink, but is non-specific at this point
+    getDomainIndex (obj) {    // obj is generally a crosslink, but is non-specific at this point
         const val = this.getValue(obj);
         const dom = this.get("colScale").domain();
         return val != undefined ? (this.get("type") !== "ordinal" ? d3.bisect(dom, val) : dom.indexOf(val)) : undefined;
-    },
+    }
+
     //used by scatterplot
-    getDomainCount: function() {
+    getDomainCount () {
         const domain = this.get("colScale").domain();
         return this.isCategorical() ? (this.get("type") === "threshold" ? domain.length + 1 : domain.length) : domain[1] - domain[0] + 1;
-    },
+    }
 
     // general entry point - all concrete subclasses must implement getValue(), all also implement initialise
-    getColour: function(obj) {  // obj is generally a crosslink, but is non-specific at this point
+    getColour (obj) {  // obj is generally a crosslink, but is non-specific at this point
         const val = this.getValue(obj);
         return val !== undefined ? this.get("colScale")(val) : this.get("undefinedColour");
-    },
-    getColourByValue: function(val) {
+    }
+
+    getColourByValue (val) {
         return val !== undefined ? this.get("colScale")(val) : this.get("undefinedColour");
-    },
+    }
+
     // called by setDomain & setRange above
-    triggerColourModelChanged: function(changedAttrs) {
+    triggerColourModelChanged (changedAttrs) {
         this.trigger("colourModelChanged", this, changedAttrs);
-    },
+    }
+
     // used by BaseFrameView.makeChartTitle, scatterplot & distogram
-    isCategorical: function() {
+    isCategorical () {
         return this.get("type") !== "linear";
-    },
+    }
+
     // over-ridden by HighestScoreColourModel, called by CLMSUI.utils.updateColourKey & keyViewBB.render
-    getLabelColourPairings: function () {
+    getLabelColourPairings (){
         const colScale = this.get("colScale");
         const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength).concat(this.get("undefinedColour"));
         return d3.zip (labels, colScaleRange);
-    },
-});
+    }
+}
 
+//todo - es6 class?, is it worth it?
 ColourModelCollection = Backbone.Collection.extend({
     model: ColourModel,
 });
@@ -304,37 +319,40 @@ CLMSUI.linkColour.makeColourModel = function(field, label, objs) {
     }
 };
 
-MetaDataHexValuesColourModel = ColourModel.extend({
-    initialize: function () {
+class MetaDataHexValuesColourModel extends ColourModel {
+    initialize () {
         this.set("labels", this.get("colScale").copy());
-    },
-    getValue: function (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
+    }
+
+    getValue (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
         if (obj.isAggregateLink) { //} obj.crossLinks) {
             return obj.getCrosslinks()[0].id;
         }
         return obj.id;
-    },
-});
+    }
+}
 
-MetaDataColourModel = ColourModel.extend({
-    initialize: function(properties, options) {
+class MetaDataColourModel extends ColourModel{
+    initialize (properties, options) {
         const domain = this.get("colScale").domain();
         this.set("labels", this.get("colScale").copy().range(domain)); //
-    },
-    getValue: function (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
+    }
+
+    getValue (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
         if (obj.isAggregateLink) { //} obj.crossLinks) {
             return obj.getCrosslinks()[0].getMeta(this.get("field"));
         }
         return obj.getMeta(this.get("field"));
-    },
-});
+    }
+}
 
-ThresholdColourModel = ColourModel.extend({ // todo -code duplication with Highest score col model
-    initialize: function () {
+class ThresholdColourModel extends ColourModel{ // todo -code duplication with Highest score col model
+    initialize () {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low", "Mid", "High"]));
-    },
-    getValue: function (obj) {
+    }
+
+    getValue (obj) {
         // return obj.getMeta(this.get("field"));
 
         let scores = [];
@@ -358,12 +376,13 @@ ThresholdColourModel = ColourModel.extend({ // todo -code duplication with Highe
         } else {
             return undefined;
         }
-    },
-    getLabelColourPairings: function () {
+    }
+
+    getLabelColourPairings () {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength).concat(this.get("undefinedColour"));
         return d3.zip(labels, colScaleRange);
-    },
-});
+    }
+}

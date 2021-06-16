@@ -223,7 +223,7 @@ CLMSUI.init.modelsEssential = function (options) {
     );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = new clmsModel.SearchResultsModel();
+    const clmsModelInst = new clms.SearchResultsModel();
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -333,7 +333,7 @@ CLMSUI.init.modelsEssential = function (options) {
 
 
     // overarching model
-    CLMSUI.compositeModelInst = new CompositeModelType({
+    CLMSUI.compositeModelInst = new CompositeModel({
         clmsModel: clmsModelInst,
         filterModel: filterModelInst,
         tooltipModel: tooltipModelInst,
@@ -992,7 +992,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
         label: "Protein Colour Scheme"
     });
 
-    new xiNET.CrosslinkViewer({
+    new xinet.CrosslinkViewer({
         el: "#networkDiv",
         model: compModel,
         //     myOptions: {layout: storedLayout}

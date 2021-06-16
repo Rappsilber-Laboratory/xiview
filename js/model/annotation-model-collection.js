@@ -1,12 +1,19 @@
-AnnotationType = Backbone.Model.extend({
-    defaults: {
-        id: undefined,
-        category: undefined,
-        type: undefined,
-        shown: false,
-        colour: undefined,
-    },
-    initialize: function (options) {
+class AnnotationType extends Backbone.Model{
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    defaults(){
+        return {
+            id: undefined,
+            category: undefined,
+            type: undefined,
+            shown: false,
+            colour: undefined,
+        };
+    }
+
+    initialize (options) {
         const defaultOptions = {};
         this.options = _.extend(defaultOptions, options);
         this
@@ -14,27 +21,35 @@ AnnotationType = Backbone.Model.extend({
             .set("category", options.category)
             .set("type", options.type)
         ;
-    },
+    }
 
-});
+}
 
-AnnotationTypeCollection = Backbone.Collection.extend({
-    initialize: function (models, options) {
+class AnnotationTypeCollection extends Backbone.Collection {
+
+    constructor(attributes, options) {
+        super(attributes, options);
+        this.model = AnnotationType;
+    }
+
+    initialize (models, options) {
         this.listenTo(CLMSUI.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
                 this.add(details.types);
             }
         });
-    },
-    model: AnnotationType,
-    modelId: function (attrs) {
+    }
+
+    modelId (attrs) {
         return (attrs.category + "-" + attrs.type).toLocaleLowerCase();
-    },
-    comparator: function (model) {
+    }
+
+    comparator (model) {
         return model.get("id");
-    },
-    getColour: function (catName, typeName) {
+    }
+
+    getColour (catName, typeName) {
         catName = catName || "undefined";
         typeName = typeName || "undefined";
         const id = this.modelId({category: catName, type: typeName});
@@ -63,19 +78,21 @@ AnnotationTypeCollection = Backbone.Collection.extend({
             return annotTypeModel.get("colour");
         }
         return "#888888";
-    },
-    dict: {
+    }
+
+    dict = {
         "domains and sites": "sites",
         "structural": "secondary structure",
         "variants": "natural variations",
         "ptm": "amino acid modifications",
         "mutagenesis": "experimental info",
         "sequence information": "experimental info",
-    },
-    baseScale: d3.scale.ordinal()
+    };
+
+    baseScale = d3.scale.ordinal()
         .range(colorbrewer.Set3[11])
         .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"])
-    ,
+    ;
     /*
     CLMSUI.domainColours.cols = {
         "aa-cross-linkable": "#a6cee3",
@@ -83,4 +100,4 @@ AnnotationTypeCollection = Backbone.Collection.extend({
         "alignment-pdb aligned region": "#b2df8a",
     };
     */
-});
+}

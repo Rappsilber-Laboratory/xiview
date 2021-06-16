@@ -1,9 +1,9 @@
-var CLMSUI = CLMSUI || {};
-CLMSUI.BackboneModelTypes = CLMSUI.BackboneModelTypes || {};
+class CompositeModel extends Backbone.Model{
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
 
-CompositeModelType = Backbone.Model.extend({
-
-    initialize: function() {
+    initialize () {
         this.set({
             highlights: [], // listen to these two for differences in highlighted selected links
             selection: [],
@@ -42,12 +42,12 @@ CompositeModelType = Backbone.Model.extend({
         });
 
         this.calcAndStoreTTCrossLinkCount();
-    },
+    }
 
     // Set cross-link homomultimer states to true if any constituent matches are homomultimer
     // This means when we grab distances we get the worst-case distance (useful for setting ranges)
     // Another call to applyFilter will set them back to normal
-    calcWorstCaseHomomultimerStates: function () {
+    calcWorstCaseHomomultimerStates () {
         const crossLinksArr = this.getAllCrossLinks();
         crossLinksArr.forEach (function (clink) {
             clink.confirmedHomomultimer = false;
@@ -56,10 +56,10 @@ CompositeModelType = Backbone.Model.extend({
             }
         });
         return this;
-    },
+    }
 
     // Get distances if links are made homomultimer if possible, needed to generate initial distance range
-    getHomomDistances: function (crossLinkArr) {
+    getHomomDistances (crossLinkArr) {
         // Store current homo states
         const oldHom = _.pluck(crossLinkArr, "confirmedHomomultimer");
 
@@ -74,9 +74,9 @@ CompositeModelType = Backbone.Model.extend({
         this.getCrossLinkDistances (crossLinkArr);
 
         return dists;
-    },
+    }
 
-    applyFilter: function() {
+    applyFilter () {
         const filterModel = this.get("filterModel");
         const clmsModel = this.get("clmsModel");
         var crossLinksArr = this.getAllCrossLinks();
@@ -339,21 +339,21 @@ CompositeModelType = Backbone.Model.extend({
         this.trigger("filteringDone");
 
         return this;
-    },
+    }
 
-    getFilteredCrossLinks: function(type) { // if type of crosslinks not declared, make it 'targets' by default
+    getFilteredCrossLinks (type) { // if type of crosslinks not declared, make it 'targets' by default
         return this.filteredXLinks[type || "targets"];
-    },
+    }
 
-    getFilteredDatum: function (key) {
+    getFilteredDatum (key) {
         return this.filteredStats[key];
-    },
+    }
 
-    getAllCrossLinks: function () {
+    getAllCrossLinks () {
         return Array.from(this.get("clmsModel").get("crossLinks").values());
-    },
+    }
 
-    getAllTTCrossLinks: function () {
+    getAllTTCrossLinks () {
         const clmsModel = this.get("clmsModel");
         if (clmsModel) {
             const ttCrossLinks = this.getAllCrossLinks().filter(function (link) {
@@ -362,24 +362,24 @@ CompositeModelType = Backbone.Model.extend({
             return ttCrossLinks;
         }
         return null;
-    },
+    }
 
-    calcAndStoreTTCrossLinkCount: function() {
+    calcAndStoreTTCrossLinkCount () {
         const ttCrossLinks = this.getAllTTCrossLinks();
         if (ttCrossLinks !== null) {
             this.set("TTCrossLinkCount", ttCrossLinks.length);
         }
-    },
+    }
 
-    getMarkedMatches: function(modelProperty) {
+    getMarkedMatches (modelProperty) {
         return this.get("match_" + modelProperty);
-    },
+    }
 
-    getMarkedCrossLinks: function(modelProperty) {
+    getMarkedCrossLinks (modelProperty) {
         return this.get(modelProperty);
-    },
+    }
 
-    setMarkedMatches: function(modelProperty, matches, andAlternatives, add, dontForward) {
+    setMarkedMatches (modelProperty, matches, andAlternatives, add, dontForward) {
         if (matches) { // if undefined nothing happens, to clear selection pass an empty array - []
             const type = "match_" + modelProperty;
             const map = add ? d3.map(this.get(type).values(), function (d) {
@@ -420,11 +420,11 @@ CompositeModelType = Backbone.Model.extend({
                 this.triggerFinalMatchLinksChange(modelProperty, matchesChanged);
             }
         }
-    },
+    }
 
     // modelProperty can be "highlights" or "selection" (or a new one) depending on what array you want
     // to fill in the model
-    setMarkedCrossLinks: function(modelProperty, crossLinks, andAlternatives, add, dontForward) {
+    setMarkedCrossLinks (modelProperty, crossLinks, andAlternatives, add, dontForward) {
         if (crossLinks) { // if undefined nothing happens, to clear selection pass an empty array - []
             const removedLinks = d3.map();
             const newlyAddedLinks = d3.map();
@@ -497,26 +497,26 @@ CompositeModelType = Backbone.Model.extend({
                 this.triggerFinalMatchLinksChange(modelProperty, linksChanged);
             }
         }
-    },
+    }
 
-    triggerFinalMatchLinksChange: function(modelProperty, penultimateSetOfChanges) {
+    triggerFinalMatchLinksChange (modelProperty, penultimateSetOfChanges) {
         // if either of the last two backbone set operations did cause a change then trigger an event
         // so views waiting for both links and matches to finish updating can act
         const lastSetOfChanges = this.changedAttributes();
         if (penultimateSetOfChanges || lastSetOfChanges) {
             this.trigger(modelProperty + "MatchesLinksChanged", this);
         }
-    },
+    }
 
-    setHighlightedProteins: function(pArr, add) {
+    setHighlightedProteins (pArr, add) {
         let toHighlight = add ? pArr.concat(this.get("highlightedProteins")) : pArr;
         toHighlight = d3.map(toHighlight, function(d) {
             return d.id;
         }).values(); // remove any duplicates and returns a new array, so setting fires a change
         this.set("highlightedProteins", toHighlight);
-    },
+    }
 
-    setSelectedProteins: function(pArr, add) {
+    setSelectedProteins (pArr, add) {
         let toSelect = add ? this.get("selectedProteins").slice() : []; //see note below
         if (add && pArr.length == 1 && toSelect.indexOf(pArr[0]) > -1) { // if ctrl/shift click and already selected the remove
             toSelect = toSelect.filter(function(el) {
@@ -531,9 +531,9 @@ CompositeModelType = Backbone.Model.extend({
             }
         }
         this.set("selectedProteins", toSelect); //the array.slice() clones the array so this triggers a change
-    },
+    }
 
-    hideSelectedProteins: function() {
+    hideSelectedProteins () {
         const selectedArr = this.get("selectedProteins");
         const selectedCount = selectedArr.length;
         for (let s = 0; s < selectedCount; s++) {
@@ -543,9 +543,9 @@ CompositeModelType = Backbone.Model.extend({
         this.setSelectedProteins([]);
         this.get("filterModel").trigger("change", this.get("filterModel"));
 
-    },
+    }
 
-    hideUnselectedProteins: function() {
+    hideUnselectedProteins () {
         const selected = this.get("selectedProteins");
         for (let participant of this.get("clmsModel").get("participants").values()) {
             if (selected.indexOf(participant) == -1) {
@@ -553,17 +553,16 @@ CompositeModelType = Backbone.Model.extend({
             }
         }
         this.get("filterModel").trigger("change", this.get("filterModel"));
-    },
+    }
 
-    showHiddenProteins: function() {
+    showHiddenProteins () {
         for (let participant of this.get("clmsModel").get("participants").values()) {
             participant.manuallyHidden = false;
         }
         this.get("filterModel").trigger("change");
-    },
+    }
 
-
-    stepOutSelectedProteins: function() {
+    stepOutSelectedProteins () {
         const selectedArr = this.get("selectedProteins");
         const selectedCount = selectedArr.length;
         const toSelect = new Set();
@@ -589,9 +588,9 @@ CompositeModelType = Backbone.Model.extend({
         this.get("filterModel").trigger("change");
         this.setSelectedProteins(Array.from(toSelect));
 
-    },
+    }
 
-    proteinSelectionTextFilter: function () {
+    proteinSelectionTextFilter () {
         const filterText = d3.select("#proteinSelectionFilter").property("value").trim().toLowerCase();
         const participantsArr = Array.from(this.get("clmsModel").get("participants").values());
 
@@ -599,9 +598,9 @@ CompositeModelType = Backbone.Model.extend({
             return (p.name.toLowerCase().indexOf(filterText) != -1 || p.description.toLowerCase().indexOf(filterText) != -1);
         });
         this.setSelectedProteins(toSelect);
-    },
+    }
 
-    groupSelectedProteins: function(d3target, evt) {
+    groupSelectedProteins (d3target, evt) {
         const self = this;
         evt = evt.originalEvent;
         if (evt.key == "Enter"){
@@ -621,18 +620,17 @@ CompositeModelType = Backbone.Model.extend({
                 }
             }
         }
-    },
+    }
 
-    clearGroups: function() {
+    clearGroups () {
         const self = this;
         CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
             self.set("groups", new Map());
             self.trigger("change:groups");
         });
-    },
+    }
 
-
-    autoGroup: function() {
+    autoGroup () {
         const self = this;
         CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
             const groupMap = new Map();
@@ -702,7 +700,7 @@ CompositeModelType = Backbone.Model.extend({
 
 
         });
-    },
+    }
 
     // Things that can cause a cross-link's minimum distance to change:
     // 1. New PDB File loaded
@@ -710,7 +708,7 @@ CompositeModelType = Backbone.Model.extend({
     // 3. Change in PDB assembly
     // 4. Change in interModelDistances allowed flag
     // 5. Change in link's homomultimer status - due to match filtering
-    getSingleCrosslinkDistance: function (xlink, distancesObj, protAlignCollection, options) {
+    getSingleCrosslinkDistance (xlink, distancesObj, protAlignCollection, options) {
         if (xlink.toProtein){
             // distancesObj and alignCollection can be supplied to function or, if not present, taken from model
             distancesObj = distancesObj || this.get("clmsModel").get("distancesObj");
@@ -731,10 +729,10 @@ CompositeModelType = Backbone.Model.extend({
         } else {
             return;
         }
-    },
+    }
 
     // set includeUndefineds to true to preserve indexing of returned distances to input crosslinks
-    getCrossLinkDistances: function(crossLinks, options) {
+    getCrossLinkDistances (crossLinks, options) {
         options = options || {};
         const includeUndefineds = options.includeUndefineds || false;
 
@@ -750,9 +748,9 @@ CompositeModelType = Backbone.Model.extend({
         //console.log ("distArr", distArr);
 
         return distArr;
-    },
+    }
 
-    getParticipantFeatures: function (participant) {
+    getParticipantFeatures (participant) {
         const alignColl = this.get("alignColl");
         const featuresArray = [
             participant.uniprot ? participant.uniprot.features : [],
@@ -762,9 +760,9 @@ CompositeModelType = Backbone.Model.extend({
         return d3.merge(featuresArray.filter(function(arr) {
             return arr !== undefined;
         }));
-    },
+    }
 
-    getFilteredFeatures: function (participant) {
+    getFilteredFeatures (participant) {
 
         let features = this.getParticipantFeatures(participant);
 
@@ -801,9 +799,9 @@ CompositeModelType = Backbone.Model.extend({
         return features ? features.filter(function(f) {
             return featureFilterSet.has(f.type);
         }, this) : [];
-    },
+    }
 
-    getAttributeRange: function (attrMetaData) {
+    getAttributeRange (attrMetaData) {
         const allCrossLinks = this.getAllCrossLinks();
         const func = attrMetaData.unfilteredLinkFunc;
         const vals = allCrossLinks.map(function (link) {
@@ -816,25 +814,5 @@ CompositeModelType = Backbone.Model.extend({
         const extent = d3.extent(d3.merge(vals));
         //console.log (vals, extent);
         return extent;
-    },
-
-    generateUrlString: function() {
-        // make url parts from current filter attributes
-        let parts = this.get("filterModel").getURLQueryPairs();
-        if (this.get("pdbCode")) {
-            const pdbParts = CLMSUI.modelUtils.makeURLQueryPairs({pdb: this.get("pdbCode")});
-            parts = pdbParts.concat(parts);
-        }
-
-        // return parts of current url query string that aren't filter flags or values
-        const search = window.location.search.slice(1);
-        const nonFilterKeys = d3.set(["sid", "upload", "decoys", "unval", "lowestScore", "anon"]);
-        const nonFilterParts = search.split("&").filter(function (nfpart) {
-            return nonFilterKeys.has(nfpart.split("=", 1)[0]);
-        });
-        // and queue them to be at the start of new url query string (before filter attributes)
-        parts = nonFilterParts.concat(parts);
-
-        return window.location.origin + window.location.pathname + "?" + parts.join("&");
-    },
-});
+    }
+}

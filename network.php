@@ -89,31 +89,20 @@
 <!--        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js--><?php //echo $cacheBuster ?><!--"></script>-->
 <!--        <script type="text/javascript" src="../CLMS-model/src/crosslink.js--><?php //echo $cacheBuster ?><!--"></script>-->
 
-        <script type="text/javascript" src="../dist/clmsModel.js<?php echo $cacheBuster ?>"></script>
-
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/CrosslinkViewerBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Interactor.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/RenderedProtein.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Group.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/Link.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/RenderedCrosslink.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/P_PLink.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/link/G_GLink.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Rotator.js--><?php //echo $cacheBuster ?><!--"></script>-->
-
-        <script type="text/javascript" src="../dist/xiNET.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../dist/clms.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../dist/xinet.js<?php echo $cacheBuster ?>"></script>
 
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
         <script type="text/javascript" src="./js/utils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/circle/circleArrange.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filter/filterModel.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/filter/filter-model.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/annotationTypeModel.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/compositeModelType.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/annotation-model-collection.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/composite-model.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/modelUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/file-choosers/stringUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/distancesObj.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/distances.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="./js/ui-utils/section-table.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/ui-utils/base-frame-view.js<?php echo $cacheBuster ?>"></script>
@@ -159,8 +148,8 @@
 
         <script type="text/javascript" src="./js/views/ngl/NGLUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/ngl/NGLExportUtils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/views/ngl/NGLModelWrapperBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/views/ngl/CrosslinkRepresentation.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/ngl/ngl-wrapper-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/ngl/crosslink-representation.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/ngl/NGLViewBB.js<?php echo $cacheBuster ?>"></script>
 
 

@@ -1,49 +1,52 @@
-// var CLMSUI = CLMSUI || {};
-//
-// CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {},
-//
-//     {
-        FilterModel = Backbone.Model.extend({
-            defaults: {
-                manualMode: true,
-                fdrMode: false,
-                //subset
-                linears: true,
-                monolinks: true,
-                crosslinks: true,
-                betweenLinks: true,
-                selfLinks: true,
-                homomultimericLinks: true,
-                ambig: true,
-                aaApart: 0,
-                pepLength: 1,
-                //validation status
-                A: true,
-                B: true,
-                C: true,
-                Q: true,
-                unval: false,
-                AUTO: true, // if u change this to true one of the unit tests will fail
-                decoys: true,
-                //distance
-                distanceUndef: true,
-                //fdr
-                fdrThreshold: 0.05,
-                interFdrCut: undefined,
-                intraFdrCut: undefined,
-                // groups
-                multipleGroup: true,
-                //navigation
-                pepSeq: "",
-                protNames: "",
-                protDesc: "",
-                protPDB: false,
-                runName: "",
-                scanNumber: "",
-                urpPpi: 1,
-            },
+class FilterModel extends Backbone.Model{
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
 
-            extents: {
+    defaults() {
+        return {
+            manualMode: true,
+            fdrMode: false,
+            //subset
+            linears: true,
+            monolinks: true,
+            crosslinks: true,
+            betweenLinks: true,
+            selfLinks: true,
+            homomultimericLinks: true,
+            ambig: true,
+            aaApart: 0,
+            pepLength: 1,
+            //validation status
+            A: true,
+            B: true,
+            C: true,
+            Q: true,
+            unval: false,
+            AUTO: true, // if u change this to true one of the unit tests will fail
+            decoys: true,
+            //distance
+            distanceUndef: true,
+            //fdr
+            fdrThreshold: 0.05,
+            interFdrCut: undefined,
+            intraFdrCut: undefined,
+            // groups
+            multipleGroup: true,
+            //navigation
+            pepSeq: "",
+            protNames: "",
+            protDesc: "",
+            protPDB: false,
+            runName: "",
+            scanNumber: "",
+            urpPpi: 1,
+        }
+    }
+
+
+
+    extents = {
                 aaApart: {
                     min: 0,
                     max: 999
@@ -60,13 +63,13 @@
                     min: 0,
                     max: 100
                 }
-            },
+            };
 
-            patterns: {
+    patterns = {
                 pepSeq: "[A-Za-z]+-?[A-Za-z]*",
-            },
+            };
 
-            types: {
+    types = {
                 manualMode: "boolean",
                 fdrMode: "boolean",
                 //subset
@@ -103,9 +106,9 @@
                 runName: "text",
                 scanNumber: "number",
                 urpPpi: "number",
-            },
+            };
 
-            initialize: function(options, secondarySettings) {
+            initialize (options, secondarySettings) {
                 if (!this.get("matchScoreCutoff")) {
                     this.set("matchScoreCutoff", [undefined, undefined]);
                     // ^^^setting an array in defaults passes that same array reference to every instantiated model, so do it in initialize
@@ -127,9 +130,9 @@
                 this.preprocessedInputValues = d3.map(); // preprocessed user input values so they're not constantly reparsed for every match
 
                 this.resetValues = this.toJSON(); // Store copy of original values if needed to restore later
-            },
+            }
 
-            resetFilter: function() {
+            resetFilter () {
                 this
                     .clear({
                         silent: true
@@ -137,20 +140,20 @@
                     .set(this.resetValues);
 
                 return this;
-            },
+            }
 
-            getMinExtent: function (attrID) {
-                var extents = this.extents[attrID];
+            getMinExtent (attrID) {
+                const extents = this.extents[attrID];
                 return extents ? extents.min : null;
-            },
+            }
 
-            getMaxExtent: function (attrID) {
-                var extents = this.extents[attrID];
+            getMaxExtent (attrID) {
+                const extents = this.extents[attrID];
                 return extents ? extents.max : null;
-            },
+            }
 
-            preprocessFilterInputValues: function (searchArray) {
-                var protSplit1 = this.get("protNames").toLowerCase().split(","); // split by commas
+            preprocessFilterInputValues (searchArray) {
+                let protSplit1 = this.get("protNames").toLowerCase().split(","); // split by commas
                 this.preprocessedInputValues.set("protNames", protSplit1.map(function(prot) {
                     return prot.split("-").map(function(protSplit2) {
                         return protSplit2.trim();
@@ -166,8 +169,8 @@
                 })); // split these in turn by hyphens
                 //console.log ("preprocessedValues", this.preprocessedValues.get("protDesc"));
 
-                var pepSeq = this.get("pepSeq");
-                var splitPepSeq = pepSeq.split("-").map(function(part) {
+                const pepSeq = this.get("pepSeq");
+                const splitPepSeq = pepSeq.split("-").map(function (part) {
                     return {
                         upper: part.toUpperCase(),
                         lower: part.toLowerCase()
@@ -181,17 +184,17 @@
                 // Search group pre calculations
                 this.precalcedSearchGroupsSet = d3.set(this.get("searchGroups"));
 
-                var searchGroupMap = d3.map ();
+                const searchGroupMap = d3.map();
                 searchArray.forEach (function (search) {
                     searchGroupMap.set (search.id, search.group);
                 });
                 this.precalcedSearchToGroupMap = searchGroupMap;
-            },
+            }
 
-            subsetFilter: function(match) {
-                var linear = match.isLinear();
-                var mono = match.isMonoLink();
-                var ambig = match.isAmbig();
+            subsetFilter (match) {
+                const linear = match.isLinear();
+                const mono = match.isMonoLink();
+                const ambig = match.isAmbig();
 
                 //linears? - if linear (linkPos === 0) and linears not selected return false
                 //cross-links? - if xl (linkPos > 0) and xls not selected return false
@@ -215,21 +218,21 @@
                     return false;
                 }
 
-                var aaApart = +this.get("aaApart");
+                const aaApart = +this.get("aaApart");
                 if (!isNaN(aaApart)) {
                     // if not homomultimer and not ambig and is a selfLink
                     if ( /*!match.confirmedHomomultimer &&*/ !ambig && match.crossLinks[0].isSelfLink()) {
                         // linears report false for isSelfLink so they never get to this bit (where toResidue would be null)
-                        var unambigCrossLink = match.crossLinks[0];
+                        const unambigCrossLink = match.crossLinks[0];
                         if (Math.abs(unambigCrossLink.toResidue - unambigCrossLink.fromResidue) < aaApart) {
                             return false;
                         }
                     }
                 }
 
-                var pepLengthFilter = +this.get("pepLength");
+                const pepLengthFilter = +this.get("pepLength");
                 if (!isNaN(pepLengthFilter)) {
-                    var seq1length = match.matchedPeptides[0].sequence.length;
+                    const seq1length = match.matchedPeptides[0].sequence.length;
                     if (seq1length > 0 && (seq1length < pepLengthFilter ||
                             (!linear && !mono && match.matchedPeptides[1].sequence.length < pepLengthFilter))) {
                         return false;
@@ -237,34 +240,34 @@
                 }
 
                 return true;
-            },
+            }
 
-            scoreFilter: function(match) {
-                var score = match.score();
+            scoreFilter (match) {
+                const score = match.score();
                 //defend against not having a score (from a CSV file without such a column)
                 if (score === undefined) {
                     return true;
                 }
-                var msc = this.get("matchScoreCutoff");
+                const msc = this.get("matchScoreCutoff");
                 return (msc[0] == undefined || score >= msc[0]) && (msc[1] == undefined || score <= msc[1]); // == undefined cos shared links get undefined json'ified to null
-            },
+            }
 
-            decoyFilter: function(match) {
+            decoyFilter (match) {
                 return !match.isDecoy() || this.get("decoys");
-            },
+            }
 
-            distanceFilter: function (crossLink) {
-                var dist = crossLink.getMeta("distance");
+            distanceFilter (crossLink) {
+                const dist = crossLink.getMeta("distance");
                 if (dist === undefined) {   // show undefined distances if either no distances or specifically allowed (distanceUndef flag)
-                    var noDistances = this.distanceExtent[0] === undefined;
+                    const noDistances = this.distanceExtent[0] === undefined;
                     return noDistances || this.get("distanceUndef");
                 }
-                var dsc = this.get("distanceCutoff");
+                const dsc = this.get("distanceCutoff");
                 return (dsc[0] == undefined || dist >= dsc[0]) && (dsc[1] == undefined || dist <= dsc[1]); // == undefined cos shared links get undefined json'ified to null
-            },
+            }
 
-            validationStatusFilter: function(match) {
-                var vChar = match.validated;
+            validationStatusFilter (match) {
+                const vChar = match.validated;
                 if (vChar != 'R') {
                     if (this.get(vChar) || this.get(this.valMap.get(vChar))) return true;
                     if (match.autovalidated && this.get("AUTO")) return true;
@@ -272,52 +275,54 @@
                 }
 
                 return false;
-            },
+            }
 
             // Test if there are proteins at both ends of a match that are in the current pdb file.
-            pdbProteinFilter: function (match) {
+            pdbProteinFilter (match) {
                 if (this.get("protPDB")) {
-                    var dObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
+                    const dObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
                     if (dObj) {
-                        var chainMap = dObj.chainMap;
+                        const chainMap = dObj.chainMap;
                         if (chainMap) {
-                            var mpeps = match.matchedPeptides;
-                            var pass = mpeps.every (function (mpep) {
-                                var proteins = mpep.prt;
-                                return proteins.some (function (prot) { return chainMap[prot]; })   // ambig match can point to multiple proteins at one or both ends
+                            const mpeps = match.matchedPeptides;
+                            const pass = mpeps.every(function (mpep) {
+                                const proteins = mpep.prt;
+                                return proteins.some(function (prot) {
+                                    return chainMap[prot];
+                                })   // ambig match can point to multiple proteins at one or both ends
                             });
                             return pass;
                         }
                     }
                 }
                 return true;
-            },
+            }
 
-            proteinFilter: function (match, searchString, dataField, preProcessedField) {
+            proteinFilter (match, searchString, dataField, preProcessedField) {
                 if (searchString) {
                     //protein name check
-                    var stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
-                    var participants = CLMSUI.compositeModelInst.get("clmsModel").get("participants");
-                    var matchedPeptides = match.matchedPeptides;
-                    var matchedPepCount = matchedPeptides.length;
+                    const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
+                    const participants = CLMSUI.compositeModelInst.get("clmsModel").get("participants");
+                    const matchedPeptides = match.matchedPeptides;
+                    const matchedPepCount = matchedPeptides.length;
 
-                    for (var spa = 0; spa < stringPartArrays.length; spa++) {
-                        var stringPartArr = stringPartArrays[spa];
-                        var used = [];
-                        var matchedProteins = 0;
+                    for (let spa = 0; spa < stringPartArrays.length; spa++) {
+                        const stringPartArr = stringPartArrays[spa];
+                        const used = [];
+                        let matchedProteins = 0;
 
-                        for (var ns = 0; ns < stringPartArr.length; ns++) {
-                            var partString = stringPartArr[ns];
-                            var found = false;
+                        for (let ns = 0; ns < stringPartArr.length; ns++) {
+                            const partString = stringPartArr[ns];
+                            let found = false;
 
-                            for (var i = 0; i < matchedPepCount; i++) {
-                                var matchedPeptide = matchedPeptides[i];
+                            for (let i = 0; i < matchedPepCount; i++) {
+                                const matchedPeptide = matchedPeptides[i];
                                 if (found === false && typeof used[i] == 'undefined') {
-                                    var pids = matchedPeptide.prt;
-                                    var pidCount = pids.length;
-                                    for (var p = 0; p < pidCount; p++) {
-                                        var interactor = participants.get(pids[p]);
-                                        var toSearch = interactor[dataField];// + " " + interactor.description;
+                                    const pids = matchedPeptide.prt;
+                                    const pidCount = pids.length;
+                                    for (let p = 0; p < pidCount; p++) {
+                                        const interactor = participants.get(pids[p]);
+                                        let toSearch = interactor[dataField];// + " " + interactor.description;
                                         if (dataField == "name" && interactor.accession) {  // hacky nevermind
                                             toSearch = toSearch + " " + interactor.accession;
                                         }
@@ -345,20 +350,20 @@
                 }
                 // return true if no string to match against
                 return true;
-            },
+            }
 
-            navigationFilter: function(match) {
+            navigationFilter (match) {
                 // Arranged so cheaper checks are done first
 
                 //run name check
-                var runNameFilter = this.preprocessedInputValues.get("runName");
+                const runNameFilter = this.preprocessedInputValues.get("runName");
                 if (runNameFilter &&
                     match.runName().toLowerCase().indexOf(runNameFilter) == -1) {
                     return false;
                 }
 
                 //scan number check
-                var scanNumberFilter = this.preprocessedInputValues.get("scanNumber");
+                const scanNumberFilter = this.preprocessedInputValues.get("scanNumber");
                 if (!isNaN(scanNumberFilter) &&
                     match.scanNumber !== scanNumberFilter
                     //match.scanNumber.toString().toLowerCase().indexOf(scanNumberFilter.toLowerCase()) == -1
@@ -394,12 +399,12 @@
                 //peptide seq check function
                 function seqCheck(searchString, preprocPepStrings) { //preprocPepStrings: "KK-KR" will be [{upper:"KK", lower:"kk}, {upper:"KR", lower:"kr"}]
                     if (searchString) {
-                        var matchedPeptides = match.matchedPeptides;
-                        var matchedPepCount = matchedPeptides.length;
+                        const matchedPeptides = match.matchedPeptides;
+                        const matchedPepCount = matchedPeptides.length;
 
                         //var pepStrings = searchString.split('-');
                         //var pepStringsCount = pepStrings.length;
-                        var pepStringsCount = preprocPepStrings.length;
+                        const pepStringsCount = preprocPepStrings.length;
 
                         if (pepStringsCount == 1) {
                             var uppercasePep = preprocPepStrings[0].upper;
@@ -414,12 +419,12 @@
                             return false;
                         }
 
-                        var aggMatchedCount = 0;
-                        for (var ps = 0; ps < pepStringsCount; ps++) {
-                            var pepStringCases = preprocPepStrings[ps];
+                        let aggMatchedCount = 0;
+                        for (let ps = 0; ps < pepStringsCount; ps++) {
+                            const pepStringCases = preprocPepStrings[ps];
                             var uppercasePep = pepStringCases.upper;
                             var lowercasePep = pepStringCases.lower;
-                            var matchCount = 0;
+                            let matchCount = 0;
                             for (var i = 0; i < matchedPepCount; i++) {
                                 var matchedPeptide = matchedPeptides[i];
                                 if (matchedPeptide.sequence.indexOf(uppercasePep) != -1 ||
@@ -438,37 +443,37 @@
                     }
                     return true;
                 }
-            },
+            }
 
 
             // If activated, this only passes matches whose search ids belong to particular groups
-            groupFilter: function (match) {
+            groupFilter (match) {
                 if (this.possibleSearchGroups.length > 1) {
-                    var matchGroup = this.precalcedSearchToGroupMap.get (match.searchId);
+                    const matchGroup = this.precalcedSearchToGroupMap.get(match.searchId);
                     return this.precalcedSearchGroupsSet.has (matchGroup);
                 }
                 return true;
-            },
+            }
 
             // If activated, this only passes an array of matches if they are of the same group
-            groupFilter2: function (matchArr) {
+            groupFilter2 (matchArr) {
                 if (matchArr.length > 1 && this.possibleSearchGroups.length > 1 && !this.get("multipleGroup")) {
-                    var smap = this.precalcedSearchToGroupMap;
-                    var firstMatchGroup = smap.get (matchArr[0].match.searchId);
+                    const smap = this.precalcedSearchToGroupMap;
+                    const firstMatchGroup = smap.get(matchArr[0].match.searchId);
                     return matchArr.every (function (match) {
                         return smap.get(match.match.searchId) === firstMatchGroup;
                     }, this);
                 }
                 return true;
-            },
+            }
 
-            stateString: function() {
+            stateString () {
                 // https://library.stanford.edu/research/data-management-services/case-studies/case-study-file-naming-done-well
-                var fields = [];
+                let fields = [];
 
                 // http://www.indiana.edu/~letrs/help-services/QuickGuides/oed-abbr.html
                 // https://www.allacronyms.com/
-                var abbvMap = {
+                const abbvMap = {
                     intraFdrCut: "SELFCUT",
                     interFdrCut: "BTWNCUT",
                     fdrMode: "FDR",
@@ -486,7 +491,7 @@
                     searchGroups: "GROUPS",
                     multipleGroup: "MGRP",
                 };
-                var zeroFormatFields = d3.set(["intraFdrCut", "interFdrCut", "scores"]);
+                const zeroFormatFields = d3.set(["intraFdrCut", "interFdrCut", "scores"]);
                 if (this.get("fdrMode")) {
                     fields = ["fdrMode", "fdrThreshold", "ambig", "betweenLinks", "selfLinks", "aaApart", "pepLength"];
                     // no point listing inter/intra fdr cut if between/self links aren't active
@@ -497,7 +502,7 @@
                         fields.splice(1, 0, "intraFdrCut");
                     }
                 } else {
-                    var antiFields = ["fdrThreshold", "interFdrCut", "intraFdrCut", "fdrMode"];
+                    const antiFields = ["fdrThreshold", "interFdrCut", "intraFdrCut", "fdrMode"];
                     if (this.get("matchScoreCutoff")[1] == undefined) { // ignore matchscorecutoff if everything allowed
                         antiFields.push("matchScoreCutoff");
                     }
@@ -508,31 +513,25 @@
                     //console.log ("filter fieldset", this.attributes, fields);
                 }
 
-                var str = CLMSUI.utils.objectStateToAbbvString(this, fields, zeroFormatFields, abbvMap);
+                const str = CLMSUI.utils.objectStateToAbbvString(this, fields, zeroFormatFields, abbvMap);
                 return str;
-            },
+            }
 
-            getURLQueryPairs: function() {
-                // make url parts from current filter attributes
-                return CLMSUI.modelUtils.makeURLQueryPairs (this.attributes, "F");
-            },
-
-            getFilterUrlSettings: function(urlChunkMap) {
-                var urlChunkKeys = d3.keys(urlChunkMap).filter(function(key) {
+            getFilterUrlSettings (urlChunkMap) {
+                const urlChunkKeys = d3.keys(urlChunkMap).filter(function (key) {
                     return key[0] === "F";
                 });
-                var filterUrlSettingsMap = {};
+                const filterUrlSettingsMap = {};
                 urlChunkKeys.forEach(function(key) {
                     filterUrlSettingsMap[key.slice(1)] = urlChunkMap[key];
                 });
-                var allowableFilterKeys = d3.keys(this.defaults);
+                const allowableFilterKeys = d3.keys(this.defaults);
                 allowableFilterKeys.push("matchScoreCutoff", "searchGroups", "distanceCutoff", "pdb");
-                var intersectingKeys = _.intersection(d3.keys(filterUrlSettingsMap), allowableFilterKeys);
-                var filterChunkMap = _.pick(filterUrlSettingsMap, intersectingKeys);
+                const intersectingKeys = _.intersection(d3.keys(filterUrlSettingsMap), allowableFilterKeys);
+                const filterChunkMap = _.pick(filterUrlSettingsMap, intersectingKeys);
                 console.log("FCM", filterChunkMap);
                 return filterChunkMap;
-            },
+            }
 
-        });
+        }
 
-    // });

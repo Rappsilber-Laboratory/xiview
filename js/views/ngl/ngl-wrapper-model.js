@@ -1,22 +1,23 @@
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.BackboneModelTypes = CLMSUI.BackboneModelTypes || {};
-
-NGLModelWrapperBB = Backbone.Model.extend({
-    defaults: {
-        compositeModel: null,
-        structureComp: null,
-        chainMap: null,
-        linkList: null,
-        fullDistanceCalcCutoff: 1200,
-        allowInterModelDistances: false,
-        showShortestLinksOnly: true,
-    },
+class NGLModelWrapperBB extends Backbone.Model {
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+    defaults(){
+        return {
+            compositeModel: null,
+            structureComp: null,
+            chainMap: null,
+            linkList: null,
+            fullDistanceCalcCutoff: 1200,
+            allowInterModelDistances: false,
+            showShortestLinksOnly: true,
+        }
+    }
 
     // Most of the stuff in this file is dealing with the complications of a single protein possibly mapping to many different chains
     // in a PDB structure.
 
-    initialize: function () {
+    initialize () {
         // When compositeModel is declared, hang a listener on it that listens to change in alignment model as this
         // possibly changes links and distances in 3d model
         // this is in case 3d stuff has been set up before main model (used to happen that pdb's were autoloaded for some searches)
@@ -39,10 +40,10 @@ NGLModelWrapperBB = Backbone.Model.extend({
         });
 
         this.makeReverseChainMap(this.get("chainMap"));
-    },
+    }
 
     // make a map of chain indices to protein ids
-    makeReverseChainMap: function (chainMap) {
+    makeReverseChainMap (chainMap) {
         const reverseChainMap = d3.map();
         const entries = d3.entries(chainMap);
         entries.forEach(function (entry) {
@@ -52,20 +53,20 @@ NGLModelWrapperBB = Backbone.Model.extend({
         });
         this.set("reverseChainMap", reverseChainMap);
         return this;
-    },
+    }
 
-    getCompositeModel: function () {
+    getCompositeModel () {
         return this.get("compositeModel");
-    },
+    }
 
-    getStructureName: function () {
+    getStructureName () {
         return this.get("structureComp").structure.name;
-    },
+    }
 
     /**
      *   Call when new PDB file loaded
      */
-    setupLinks: function () {
+    setupLinks () {
         const chainInfo = this.getChainInfo();
         this.calculateAllCaAtomIndices(chainInfo.viableChainIndices);
         this.setFilteredLinkList();
@@ -84,17 +85,17 @@ NGLModelWrapperBB = Backbone.Model.extend({
         distancesObj.maxDistance = d3.max(this.getCompositeModel().getHomomDistances(this.getCompositeModel().getAllCrossLinks()));
         clmsModel.trigger("change:distancesObj", clmsModel, clmsModel.get("distancesObj"));
         return this;
-    },
+    }
 
     /**
      *   Call when set of filtered cross-links has changed
      */
-    setFilteredLinkList: function () {
+    setFilteredLinkList () {
         this.setLinkList(this.getCompositeModel().getFilteredCrossLinks());
         return this;
-    },
+    }
 
-    setLinkList: function (crossLinkArr) {
+    setLinkList (crossLinkArr) {
         const linkDataObj = this.makeLinkList(crossLinkArr);
         const distanceObj = this.getCompositeModel().get("clmsModel").get("distancesObj");
         if (this.get("showShortestLinksOnly") && distanceObj) { // filter to shortest links if showShortestLinksOnly set
@@ -102,9 +103,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }
         this.setLinkListWrapped(linkDataObj);
         return this;
-    },
+    }
 
-    makeLinkList: function (crossLinkArr) {
+    makeLinkList (crossLinkArr) {
         const structure = this.get("structureComp").structure;
         let nextResidueId = 0;
         const structureId = null;
@@ -348,9 +349,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         //console.log ("fullLinklist", fullLinkList.length, fullLinkList);
         //console.log ("halfLinkList", halfLinkList);
         return {fullLinkList: fullLinkList, halfLinkList: halfLinkList};
-    },
+    }
 
-    setLinkListWrapped: function (linkDataObj) {
+    setLinkListWrapped (linkDataObj) {
         const linkList = linkDataObj.fullLinkList;
         let halfLinkList = linkDataObj.halfLinkList;
         const residueIdToFullLinkIds = {};
@@ -414,57 +415,57 @@ NGLModelWrapperBB = Backbone.Model.extend({
         //console.log ("setLinkList", residueIdMap, this._residueList, residueIdToFullLinkIds, linkIdMap);
         this.set("linkList", linkList);
         this.set("halfLinkList", halfLinkList);
-    },
+    }
 
-    getFullLinkCount: function () {
+    getFullLinkCount () {
         return this._origFullLinkCount;
-    },
+    }
 
-    getFullLinks: function (residue) {
+    getFullLinks (residue) {
         return residue === undefined ? this.get("linkList") : this.getFullLinksByResidueID(residue.residueId);
-    },
+    }
 
-    getFullLinkCountByResidue: function (residue) {
+    getFullLinkCountByResidue (residue) {
         const linkIds = this._residueIdToFullLinkIds[residue.residueId];
         return linkIds ? linkIds.length : 0;
-    },
+    }
 
-    getFullLinksByResidueID: function (residueId) {
+    getFullLinksByResidueID (residueId) {
         const linkIds = this._residueIdToFullLinkIds[residueId];
         return linkIds ? linkIds.map(function (l) {
             return this._linkIdMap[l];
         }, this) : [];
-    },
+    }
 
-    getHalfLinkCount: function () {
+    getHalfLinkCount () {
         return this._origHalfLinkCount;
-    },
+    }
 
-    getHalfLinks: function (residue) {
+    getHalfLinks (residue) {
         return residue === undefined ? this.get("halfLinkList") : this.getHalfLinksByResidueID(residue.residueId);
-    },
+    }
 
-    getHalfLinkCountByResidue: function (residue) {
+    getHalfLinkCountByResidue (residue) {
         const linkIds = this._residueIdToHalfLinkIds[residue.residueId];
         return linkIds ? linkIds.length : 0;
-    },
+    }
 
-    getHalfLinksByResidueID: function (residueId) {
+    getHalfLinksByResidueID (residueId) {
         const linkIds = this._residueIdToHalfLinkIds[residueId];
         return linkIds ? linkIds.map(function (l) {
             return this._halfLinkIdMap[l];
         }, this) : [];
-    },
+    }
 
-    getFullLinkByNGLResIndices: function (NGLGlobalResIndex1, NGLGlobalResIndex2) {
+    getFullLinkByNGLResIndices (NGLGlobalResIndex1, NGLGlobalResIndex2) {
         return this._fullLinkNGLIndexMap[NGLGlobalResIndex1 + "-" + NGLGlobalResIndex2];
-    },
+    }
 
-    getHalfLinkByNGLResIndex: function (NGLGlobalResIndex1) {
+    getHalfLinkByNGLResIndex (NGLGlobalResIndex1) {
         return this._halfLinkNGLIndexMap[NGLGlobalResIndex1];
-    },
+    }
 
-    getResidues: function (fullLink) {
+    getResidues (fullLink) {
         if (fullLink === undefined) {
             return this._residueList;
         } else if (Array.isArray(fullLink)) {
@@ -476,10 +477,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         } else {
             return [fullLink.residueA, fullLink.residueB];
         }
-    },
+    }
 
-
-    getHalfLinkResidues: function (halfLink) {
+    getHalfLinkResidues (halfLink) {
         if (halfLink === undefined) {
             const halfLink = this.getHalfLinks();
             var residues = [];
@@ -496,57 +496,57 @@ NGLModelWrapperBB = Backbone.Model.extend({
         } else {
             return [halfLink.residue];
         }
-    },
+    }
 
-    getSharedLinks: function (residueA, residueB) {
+    getSharedLinks (residueA, residueB) {
         const aLinks = this.getFullLinks(residueA);
         const bLinks = this.getFullLinks(residueB);
         const sharedLinks = CLMSUI.modelUtils.intersectObjectArrays(aLinks, bLinks, function (l) {
             return l.linkId;
         });
         return sharedLinks.length ? sharedLinks : false;
-    },
+    }
 
-    getResidueByNGLGlobalIndex: function (nglGlobalResIndex) {
+    getResidueByNGLGlobalIndex (nglGlobalResIndex) {
         return this._residueNGLIndexMap[nglGlobalResIndex];
-    },
+    }
 
-    hasResidue: function (residue) {
+    hasResidue (residue) {
         return this._residueIdMap[residue.residueId] !== undefined;
-    },
+    }
 
-    hasLink: function (link) {
+    hasLink (link) {
         return this._linkIdMap[link.linkId] !== undefined;
-    },
+    }
 
     // Filter down a list of residue objects to those that are currently in the residueIdMap object
-    getAvailableResidues: function (residues) {
+    getAvailableResidues (residues) {
         return residues.filter(function (r) {
             return this.hasResidue(r);
         }, this);
-    },
+    }
 
     // Filter down a list of links to those that are currently in the linkIdMap object
-    getAvailableLinks: function (linkObjs) {
+    getAvailableLinks (linkObjs) {
         return linkObjs.filter(function (linkObj) {
             return this.hasLink(linkObj);
         }, this);
-    },
+    }
 
     // Return original crosslinks from this model's link objects using origId property value
-    getOriginalCrossLinks: function (linkObjs) {
+    getOriginalCrossLinks (linkObjs) {
         const xlinks = this.getCompositeModel().get("clmsModel").get("crossLinks");
         return linkObjs.map(function (linkObj) {
             return xlinks.get(linkObj.origId);
         });
-    },
+    }
 
-    getOriginalCrossLinkCount: function (linkObjs) {
+    getOriginalCrossLinkCount (linkObjs) {
         return d3.set(_.pluck(linkObjs, "origId")).size();
-    },
+    }
 
     // Return an array of atom pair indices (along with original link id) for a given array of crosslink objects
-    getAtomPairsFromLinkList: function (linkList) {
+    getAtomPairsFromLinkList (linkList) {
         const atomPairs = [];
 
         if (linkList) {
@@ -568,13 +568,13 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }
 
         return atomPairs;
-    },
+    }
 
-    getAtomPairsFromResidue: function (residue) {
+    getAtomPairsFromResidue (residue) {
         return this.getAtomPairsFromLinkList(this.getFullLinks(residue));
-    },
+    }
 
-    getChainInfo: function () {
+    getChainInfo () {
         let resCount = 0;
         const viableChainIndices = [];
         const self = this;
@@ -590,9 +590,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
             viableChainIndices: viableChainIndices,
             resCount: resCount
         };
-    },
+    }
 
-    calculateAllCaAtomIndices: function (chainIndices) {
+    calculateAllCaAtomIndices (chainIndices) {
         const structure = this.get("structureComp").structure;
         const chainProxy = structure.getChainProxy();
         const atomProxy = structure.getAtomProxy();
@@ -628,9 +628,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
 
         this.set("chainCAtomIndices", chainCAtomIndices); // store for later
         return chainCAtomIndices;
-    },
+    }
 
-    getChainDistances: function (linksOnly) {
+    getChainDistances (linksOnly) {
         const entries = d3.entries(this.get("chainCAtomIndices"));
         const matrixMap = {};
         const links = this.getFullLinks();
@@ -657,15 +657,14 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }, this);
 
         return matrixMap;
-    },
+    }
 
-    getChainLength: function (chainIndex) {
+    getChainLength (chainIndex) {
         const chain = this.get("chainCAtomIndices")[chainIndex];
         return chain ? chain.length : undefined;
-    },
+    }
 
-
-    getLinkDistancesBetween2Chains: function (chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2, links) {
+    getLinkDistancesBetween2Chains (chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2, links) {
 
         const notHomomultimeric = function (xlinkID, c1, c2) {
             const xlink = this.getCompositeModel().get("clmsModel").get("crossLinks").get(xlinkID);
@@ -700,9 +699,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }, this);
 
         return matrix;
-    },
+    }
 
-    getAllDistancesBetween2Chains: function (chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2) {
+    getAllDistancesBetween2Chains (chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2) {
         const matrix = [];
         const struc = this.get("structureComp").structure;
         const ap1 = struc.getAtomProxy();
@@ -725,26 +724,26 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }
 
         return matrix;
-    },
+    }
 
-    getAtomCoordinates: function (atomProxy) {
+    getAtomCoordinates (atomProxy) {
         return [atomProxy.x, atomProxy.y, atomProxy.z];
-    },
+    }
 
-    getAtomProxyDistance: function (ap1, ap2) {
+    getAtomProxyDistance (ap1, ap2) {
         return ap1.modelIndex === ap2.modelIndex || this.get("allowInterModelDistances") ? ap1.distanceTo(ap2) : undefined;
-    },
+    }
 
     // Residue indexes for this function start from zero per chain i.e. not global NGL index for residues
-    getAtomIndex: function (seqIndex, chainIndex, chainAtomIndices) {
+    getAtomIndex (seqIndex, chainIndex, chainAtomIndices) {
         const cai = chainAtomIndices || this.get("chainCAtomIndices");
         const ci = cai[chainIndex];
         const ai = ci[seqIndex];
         return ai;
-    },
+    }
 
     // seqIndex1 and 2 are 0-indexed, with zero being first residue in pdb chain
-    getSingleDistanceBetween2Residues: function (seqIndex1, seqIndex2, chainIndex1, chainIndex2) {
+    getSingleDistanceBetween2Residues (seqIndex1, seqIndex2, chainIndex1, chainIndex2) {
         const struc = this.get("structureComp").structure;
         const ap1 = struc.getAtomProxy();
         const ap2 = struc.getAtomProxy();
@@ -753,10 +752,10 @@ NGLModelWrapperBB = Backbone.Model.extend({
         ap2.index = this.getAtomIndex(seqIndex2, chainIndex2, cai);
 
         return this.getAtomProxyDistance(ap1, ap2);
-    },
+    }
 
     // make an array of pdb file compatible link entries for the supplied crosslink objects
-    getAtomPairsAndDistancesFromLinkList: function (links) {
+    getAtomPairsAndDistancesFromLinkList (links) {
         const struc = this.get("structureComp").structure;
         const ap1 = struc.getAtomProxy();
         const ap2 = struc.getAtomProxy();
@@ -771,9 +770,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }, this);
 
         return atomPairs;
-    },
+    }
 
-    getPDBLinkString: function (links) {
+    getPDBLinkString (links) {
         const pdbLinks = [];
         const struc = this.get("structureComp").structure;
         const ap = struc.getAtomProxy();
@@ -803,10 +802,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }, this);
 
         return pdbLinks.join("\n");
-    },
+    }
 
-
-    getPDBConectString: function (links) {  // Conect is spelt right
+    getPDBConectString (links) {  // Conect is spelt right
         const pdbConects = [];
         const atomPairs = this.getAtomPairsFromLinkList(links);
         const conectFormat = 'CONECT%5d%5d                                                                ';
@@ -819,10 +817,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }, this);
 
         return pdbConects.join("\n");
-    },
+    }
 
-
-    getSelectionFromResidueList: function (resnoList, options) { // set allAtoms to true to not restrict selection to alpha carbon atoms
+    getSelectionFromResidueList (resnoList, options) { // set allAtoms to true to not restrict selection to alpha carbon atoms
         // options are
         // allAtoms:true to not add on the AND .CA qualifier
         // chainsOnly:true when the resnoList only has chainIndices defined and no res
@@ -920,15 +917,15 @@ NGLModelWrapperBB = Backbone.Model.extend({
         }
 
         return sele;
-    },
+    }
 
 
-    getAtomIndexFromResidueObj: function (resObj) {
+    getAtomIndexFromResidueObj (resObj) {
         const resno = resObj.resno;
         return resno !== undefined ? this.getAtomIndex(resObj.seqIndex, resObj.chainIndex) : undefined;
-    },
+    }
 
-    makeFirstAtomPerChainSelectionString: function (chainIndexSet) {
+    makeFirstAtomPerChainSelectionString (chainIndexSet) {
         const comp = this.get("structureComp").structure;
         const sels = [];
         comp.eachChain(function (cp) {
@@ -938,10 +935,10 @@ NGLModelWrapperBB = Backbone.Model.extend({
             }
         });
         return "@" + sels.join(",");
-    },
+    }
 
     // Get a NGL selection for chains listing only the chainIndices passed in as a property of chainItems
-    makeChainSelectionString: function (chainItems) {
+    makeChainSelectionString (chainItems) {
         let selectionString = "all";
         const showAll = chainItems.showAll || false;
         const chainIndices = chainItems.chainIndices || [];
@@ -959,10 +956,10 @@ NGLModelWrapperBB = Backbone.Model.extend({
 
         //CLMSUI.utils.xilog ("CHAIN SELE", selectionString);
         return selectionString;
-    },
+    }
 
     // Return chain indices covered by currently visible proteins
-    getShowableChains: function (showAll) {
+    getShowableChains (showAll) {
         const protMap = Array.from(this.getCompositeModel().get("clmsModel").get("participants").values()); //todo -tidy
         const prots = Array.from(protMap).filter(function (prot) {
             return !prot.hidden;
@@ -987,9 +984,9 @@ NGLModelWrapperBB = Backbone.Model.extend({
             showAll: showAll,
             chainIndices: chainIndices
         };
-    },
+    }
 
-    getAllResidueCoordsForChain: function (chainIndex) {
+    getAllResidueCoordsForChain (chainIndex) {
         const structure = this.get("structureComp").structure;
         const atomProxy = structure.getAtomProxy();
         const nglAtomIndices = this.get("chainCAtomIndices")[chainIndex] || [];
@@ -999,5 +996,5 @@ NGLModelWrapperBB = Backbone.Model.extend({
             return coords;
         }, this);
         return atomCoords;
-    },
-});
+    }
+}

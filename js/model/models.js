@@ -40,8 +40,8 @@
         url: "R/blosums.json",
         parse: function(response) {
             // turn json object into array, add keys to value parts, then export just the values
-            var entries = d3.entries (response);
-            var values = entries.map(function (entry) {
+            const entries = d3.entries(response);
+            const values = entries.map(function (entry) {
                 entry.value.id = entry.key;
                 entry.value.name = entry.key;
                 return entry.value;

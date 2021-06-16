@@ -627,7 +627,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         overText += " - covers approx " + commaFormat(totalPDBLength) + " of " + commaFormat(totalProteinLength) + " AAs (" + pcent + ")";
         this.chartDiv.select("div.overlayInfo").html(overText);
 
-        this.xlRepr = new CLMSUI.CrosslinkRepresentation(stageModel,
+        this.xlRepr = new CrosslinkRepresentation(stageModel,
             {
                 chainRep: this.options.chainRep,
                 defaultAssembly: this.options.defaultAssembly,

@@ -1,31 +1,41 @@
 var CLMSUI = CLMSUI || {};
 CLMSUI.linkColour = CLMSUI.linkColour || {};
 
-DefaultLinkColourModel = ColourModel.extend({
-    initialize: function() {
+class DefaultLinkColourModel extends ColourModel {
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    initialize () {
         this
             .set("labels", this.get("colScale").copy().range(["Self", "Homomultimeric (Overlapping Peptides)", "Heteromeric"]))
             .set("type", "ordinal")
         ;
-    },
-    getValue: function(link) {
+    }
+
+    getValue (link) {
         // if (link.crossLinks) {
         //     return link.crossLinks[0].isSelfLink() || link.crossLinks[0].isLinearLink() ? (link.hd ? 1 : 0) : 2;
         // } else {
             return link.isSelfLink() || link.isLinearLink() ? (link.confirmedHomomultimer ? 1 : 0) : 2;
         // }
-    },
-    getColour: function(obj) {  // obj is generally a crosslink, but is non-specific at this point
+    }
+
+    getColour (obj) {  // obj is generally a crosslink, but is non-specific at this point
         if (obj.crossLinks) {
             return "#202020";
         }
         const val = this.getValue(obj);
         return val !== undefined ? this.get("colScale")(val) : this.get("undefinedColour");
-    },
-});
+    }
+}
 
-GroupColourModel = ColourModel.extend({
-    initialize: function(attrs, options) {
+class GroupColourModel extends ColourModel{
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    initialize (attrs, options) {
 
         this.searchMap = options.searchMap;
         // find the search to group mappings
@@ -70,8 +80,9 @@ GroupColourModel = ColourModel.extend({
             .set("labels", this.get("colScale").copy().range(labelRange))
             .set("type", "ordinal")
         ;
-    },
-    getValue: function(link) {
+    }
+
+    getValue (link) {
         if (link.isAggregateLink) {
             for (let crosslink of link.getCrosslinks()) {
                 const filteredMatchesAndPepPositions = crosslink.filteredMatches_pp;
@@ -109,8 +120,9 @@ GroupColourModel = ColourModel.extend({
             // choose value if link definitely belongs to just one group or set as undefined (-1)
             return value;
         }
-    },
-    getColourByValue: function(val) {
+    }
+
+    getColourByValue (val) {
         const scale = this.get("colScale");
         // the ordinal scales will have had a colour for undefined already added to their scales (in initialize)
         // if it's the linear scale [-1 = multiple, 0 = single] and value is undefined we change it to -1 so it then takes the [multiple] colour value
@@ -119,31 +131,41 @@ GroupColourModel = ColourModel.extend({
         }
         // now all 'undefined' values will get a colour so we don't have to check/set undefined colour here like we do in the default getColour function
         return scale(val);
-    },
-    getColour: function(crossLink) {
-        return this.getColourByValue (this.getValue (crossLink));
-    },
-});
+    }
 
-DistanceColourModel = ColourModel.extend({
-    initialize: function() {
+    getColour (crossLink) {
+        return this.getColourByValue (this.getValue (crossLink));
+    }
+}
+
+class DistanceColourModel extends ColourModel {
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    initialize () {
         this
             .set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Within Distance", "Borderline", "Overlong"]))
             .set("unit", "Å")
         ;
-    },
-    getValue: function(link) {
+    }
+
+    getValue (link) {
         if (link.crossLinks) {
             return undefined;
         }
         return link.getMeta("distance");
         //return CLMSUI.compositeModelInst.getSingleCrosslinkDistance(crossLink);
-    },
-});
+    }
+}
 
-InterProteinColourModel = ColourModel.extend({
-    initialize: function(properties, options) {
+class InterProteinColourModel extends ColourModel{
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    initialize (properties, options) {
         let colScale;
         let labels = ["Same Protein"];
         const proteinIDs = _.pluck(CLMSUI.modelUtils.filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
@@ -169,13 +191,13 @@ InterProteinColourModel = ColourModel.extend({
             .set("colScale", colScale)
             .set("labels", this.get("colScale").copy().range(labels))
         ;
-    },
+    }
 
-    makeProteinPairKey: function(pid1, pid2) {
+    makeProteinPairKey (pid1, pid2) {
         return pid1 < pid2 ? pid1 + "---" + pid2 : pid2 + "---" + pid1;
-    },
+    }
 
-    getValue: function(link) {
+    getValue (link) {
         let id1, id2;
         if (link.isAggregateLink) {
             const crosslink = link.getCrosslinks()[0];
@@ -186,15 +208,20 @@ InterProteinColourModel = ColourModel.extend({
             id2 = link.toProtein ? link.toProtein.id : undefined;
         }
         return (id2 === undefined || id1 === id2) ? "same" : (this.overload ? "other" : this.makeProteinPairKey(id1, id2));
-    },
-});
+    }
+}
 
-HighestScoreColourModel = ColourModel.extend({
-    initialize: function(properties, options) {
+class HighestScoreColourModel extends ColourModel {
+    constructor(attributes, options) {
+        super(attributes, options);
+    }
+
+    initialize (properties, options) {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low Score", "Mid Score", "High Score"]));
-    },
-    getValue: function (link) {
+    }
+
+    getValue  (link) {
         let scores = [];
         if (link.isAggregateLink) {
             for (let crosslink of link.getCrosslinks()) {
@@ -209,12 +236,13 @@ HighestScoreColourModel = ColourModel.extend({
             });
         }
         return Math.max.apply(Math, scores);
-    },
-    getLabelColourPairings: function () {
+    }
+
+    getLabelColourPairings  () {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength);//.concat(this.get("undefinedColour"));
        return d3.zip (labels, colScaleRange);
-    },
-});
+    }
+}

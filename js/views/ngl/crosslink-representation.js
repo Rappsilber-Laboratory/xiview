@@ -1,45 +1,42 @@
-var CLMSUI = CLMSUI || {};
+class CrosslinkRepresentation {
 
-CLMSUI.CrosslinkRepresentation = function (newNGLModelWrapper, params) {
+    constructor(newNGLModelWrapper, params) {
 
-    const defaults = {
-        sstrucColourScheme: "uniform",
-        chainRep: "cartoon",
-        displayedLabelColor: "black",
-        selectedLabelColor: "black",
-        highlightedLabelColor: "black",
-        displayedLabelVisible: false,
-        selectedLabelVisible: true,
-        highlightedLabelVisible: true,
-        labelSize: 6.0,
-        selectedResiduesColor: params.selectedColor || "lightgreen",
-        selectedLinksColor: "lightgreen",
-        highlightedLinksColor: params.highlightedColor || "orange",
-    };
-    this.options = _.extend({}, defaults, params);
-    //this.options = p;
-    //this.setParameters (p, true);
 
-    this.setup(newNGLModelWrapper);
+        const defaults = {
+            sstrucColourScheme: "uniform",
+            chainRep: "cartoon",
+            displayedLabelColor: "black",
+            selectedLabelColor: "black",
+            highlightedLabelColor: "black",
+            displayedLabelVisible: false,
+            selectedLabelVisible: true,
+            highlightedLabelVisible: true,
+            labelSize: 6.0,
+            selectedResiduesColor: params.selectedColor || "lightgreen",
+            selectedLinksColor: "lightgreen",
+            highlightedLinksColor: params.highlightedColor || "orange",
+        };
+        this.options = _.extend({}, defaults, params);
+        //this.options = p;
+        //this.setParameters (p, true);
 
-    this.stage.signals.clicked.add(this._selectionPicking, this);
-    this.stage.signals.hovered.add(this._highlightPicking, this);
-    this.stage.mouseControls.add('clickPick-left', function (stage, pickingProxy) {
-        // so calls that reach here are those left clicks without ctrl
-        if (!pickingProxy) { // and if no pickingProxy i.e. nothing was clicked on
-            // then blank the current selection
-            newNGLModelWrapper.getCompositeModel().setMarkedCrossLinks("selection", [], false, false);
-        }
-        return false;
-    });
-};
+        this.setup(newNGLModelWrapper);
 
-CLMSUI.CrosslinkRepresentation.prototype = {
-
-    constructor: CLMSUI.CrosslinkRepresentation,
+        this.stage.signals.clicked.add(this._selectionPicking, this);
+        this.stage.signals.hovered.add(this._highlightPicking, this);
+        this.stage.mouseControls.add('clickPick-left', function (stage, pickingProxy) {
+            // so calls that reach here are those left clicks without ctrl
+            if (!pickingProxy) { // and if no pickingProxy i.e. nothing was clicked on
+                // then blank the current selection
+                newNGLModelWrapper.getCompositeModel().setMarkedCrossLinks("selection", [], false, false);
+            }
+            return false;
+        });
+    }
 
     // just a way of accessing the main modelly bits more succintly
-    setup: function (newNGLModelWrapper) {
+    setup (newNGLModelWrapper) {
         this.stage = newNGLModelWrapper.get("structureComp").stage;
         this.chainMap = newNGLModelWrapper.get("chainMap");
         this.structureComp = newNGLModelWrapper.get("structureComp");
@@ -54,14 +51,14 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             .updateAssemblyType()
         ;
         this.stage.autoView();
-    },
+    }
 
-    updateAssemblyType: function (assemblyType) {
+    updateAssemblyType (assemblyType) {
         this.structureComp.setDefaultAssembly(assemblyType || this.options.defaultAssembly);
         return this;
-    },
+    }
 
-    replaceChainRepresentation: function (newType) {
+    replaceChainRepresentation (newType) {
         if (this.sstrucRepr) {
             this.structureComp.removeRepresentation(this.sstrucRepr);
         }
@@ -80,9 +77,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         });
 
         return this;
-    },
+    }
 
-    _initStructureRepr: function () {
+    _initStructureRepr () {
 
         const comp = this.structureComp;
         const resSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getResidues());
@@ -121,9 +118,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         // });
 
         return this;
-    },
+    }
 
-    _initLinkRepr: function () {
+    _initLinkRepr () {
 
         const comp = this.structureComp;
         const links = this.nglModelWrapper.getFullLinks();
@@ -184,9 +181,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         });
 
         return this;
-    },
+    }
 
-    getLabelTexts: function () {
+    getLabelTexts () {
         const comp = this.structureComp;
         const customText = {};
         const self = this;
@@ -211,9 +208,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         });
 
         return customText;
-    },
+    }
 
-    _initLabelRepr: function () {
+    _initLabelRepr () {
         const customText = this.getLabelTexts();
 
         const atomSelection = this.nglModelWrapper.makeFirstAtomPerChainSelectionString();
@@ -235,9 +232,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         });
 
         return this;
-    },
+    }
 
-    _initColourSchemes: function (greyness) {
+    _initColourSchemes (greyness) {
         const self = this;
 
         const linkColourScheme = function () {
@@ -315,9 +312,9 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         this.colorOptions.linkColourScheme = NGL.ColormakerRegistry.addScheme(linkColourScheme, "xlink");
 
         return this;
-    },
+    }
 
-    rerenderColourSchemes: function (repSchemePairs) {
+    rerenderColourSchemes (repSchemePairs) {
         repSchemePairs.forEach(function (repSchemePair) {
             // using update dodges setParameters not firing a redraw if param is the same (i.e. a colour entry has changed in the existing scheme)
             //console.log ("lssss", this.xlRepr.colorOptions.linkColourScheme);
@@ -327,26 +324,26 @@ CLMSUI.CrosslinkRepresentation.prototype = {
                 nglRep.repr.viewer.requestRender();
             }
         });
-    },
+    }
 
-    _highlightPicking: function (pickingData) {
+    _highlightPicking (pickingData) {
         this._handlePicking(pickingData, "highlights", true);
-    },
+    }
 
-    _selectionPicking: function (pickingData) {
+    _selectionPicking (pickingData) {
         this._handlePicking(pickingData, "selection");
-    },
+    }
 
-    makeTooltipCoords: function (nglMouseCoord) {
+    makeTooltipCoords (nglMouseCoord) {
         const canv = $("#nglPanel canvas");
         const coff = canv.offset();
         return {
             pageX: coff.left + nglMouseCoord.x,
             pageY: coff.top + (canv.height() - nglMouseCoord.y)
         }; // y is inverted in canvas
-    },
+    }
 
-    _handlePicking: function (pickingData, pickType, doEmpty) {
+    _handlePicking (pickingData, pickType, doEmpty) {
         const nglModelWrapper = this.nglModelWrapper;
         //CLMSUI.utils.xilog ("Picking Data", pickingData);
         const pdtrans = {
@@ -437,10 +434,10 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         //CLMSUI.utils.xilog ("pd and pdtrans", pickingData, pdtrans.xlinks);
 
         nglModelWrapper.getCompositeModel().setMarkedCrossLinks(pickType, pdtrans.xlinks, false, add);
-    },
+    }
 
     // fired when setLinkList called on representation's associated nglModelWrapper object
-    _handleDataChange: function () {
+    _handleDataChange () {
         CLMSUI.utils.xilog("HANDLE DATA CHANGE 3D");
         this.redisplayProteins();
 
@@ -462,16 +459,16 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             ]);
         }
 
-    },
+    }
 
-    makeVisibleChainsSelectionString: function (precalcedShowableChains) {  // precalced - if we already know which chains to show, so don't calculate twice
+    makeVisibleChainsSelectionString (precalcedShowableChains) {  // precalced - if we already know which chains to show, so don't calculate twice
         const showableChains = precalcedShowableChains || this.nglModelWrapper.getShowableChains(this.options.showAllProteins);
         const chainSele = this.nglModelWrapper.makeChainSelectionString(showableChains);
         CLMSUI.utils.xilog("showable chains", showableChains, chainSele);
         return chainSele;
-    },
+    }
 
-    redisplayProteins: function () {
+    redisplayProteins () {
         const showableChains = this.nglModelWrapper.getShowableChains(this.options.showAllProteins);
         const chainSele = this.makeVisibleChainsSelectionString(showableChains);
         CLMSUI.utils.xilog("showable chains", showableChains, chainSele);
@@ -482,51 +479,51 @@ CLMSUI.CrosslinkRepresentation.prototype = {
             this.labelRepr.setSelection(labelSele);
         }
         return this;
-    },
+    }
 
-    redisplayChainLabels: function () {
+    redisplayChainLabels () {
         this.labelRepr.setParameters({
             labelText: this.getLabelTexts()
         });
         return this;
-    },
+    }
 
     // Populate NGL representations with residues
 
     // Repopulate a residue representation with a set of residues
-    setResidues: function (residues, residueRepr) {
+    setResidues (residues, residueRepr) {
         const availableResidues = this.nglModelWrapper.getAvailableResidues(residues);
         residueRepr.setSelection(
             this.nglModelWrapper.getSelectionFromResidueList(availableResidues)
         );
         return this;
-    },
+    }
 
     // Shortcut functions for setting representations for currently filtered and selected residues
-    setDisplayedResidues: function (residues, halfLinkResidues) {
+    setDisplayedResidues (residues, halfLinkResidues) {
         const a = performance.now();
         this.setResidues(residues, this.resRepr);
         // this.setResidues(halfLinkResidues, this.halfLinkResRepr);
         CLMSUI.utils.xilog("set displayed residues, time", performance.now() - a);
         return this;
-    },
+    }
 
-    setSelectedResidues: function (residues) {
+    setSelectedResidues (residues) {
         this.setResidues(residues, this.halfLinkResEmphRepr);
         CLMSUI.utils.xilog("set selected residues");
         return this;
-    },
+    }
 
-    setSelectedRes: function (halfLinks) {
+    setSelectedRes (halfLinks) {
         // const filteredHalfLinks = this.filterByLinkState(halfLinks, "selection")
         // return this.setSelectedResidues(this.nglModelWrapper.getHalfLinkResidues(filteredHalfLinks));
         return this;
-    },
+    }
 
     // Populate NGL distance representations with crosslinks
 
     // Filter a link array by a link marking state e.g. highlighted / selected / none
-    filterByLinkState: function (links, linkState) {
+    filterByLinkState (links, linkState) {
         if (linkState === undefined) {  // return every current link if no linkState defined
             return links;
         }
@@ -534,31 +531,31 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         return links.filter(function (l) {
             return selectedSet.has(l.origId);
         });
-    },
+    }
 
     // Filter a link array by a link state and then set the atoms at each link end as pairs for a given distance representation
-    setLinkRep: function (links, aLinkRepr, linkState) {
+    setLinkRep (links, aLinkRepr, linkState) {
         const availableLinks = this.nglModelWrapper.getAvailableLinks(this.filterByLinkState(links, linkState));
         const availableAtomPairs = this.nglModelWrapper.getAtomPairsFromLinkList(availableLinks);
         aLinkRepr.setParameters({atomPair: availableAtomPairs});
         return this;
-    },
+    }
 
     // Shortcut functions for setting the distance representations for all / selected / highlighted links
-    setDisplayedLinks: function (links) {
+    setDisplayedLinks (links) {
         return this.setLinkRep(links, this.linkRepr, undefined);
-    },
+    }
 
-    setSelectedLinks: function (links) {
+    setSelectedLinks (links) {
         return this.setLinkRep(links, this.linkEmphRepr, "selection");
-    },
+    }
 
-    setHighlightedLinks: function (links) {
+    setHighlightedLinks (links) {
         return this.setLinkRep(links, this.linkHighRepr, "highlights");
-    },
+    }
 
     // Miscellaneous
-    dispose: function () {
+    dispose () {
         this.stage.signals.clicked.remove(this._selectionPicking, this);
         this.stage.signals.hovered.remove(this._highlightPicking, this);
         this.stage.mouseControls.remove('clickPick-left'); // added 14/01/2020 MJG to stop crosslinkrep object lingering in memory via mouseControl-NGL persistence
@@ -577,12 +574,12 @@ CLMSUI.CrosslinkRepresentation.prototype = {
         this.structureComp.viewer.dispose();
 
         return this;
-    },
+    }
 
-    updateOptions: function (options, changeThese) {
+    updateOptions (options, changeThese) {
         changeThese.forEach(function (changeThis) {
             this.options[changeThis] = options[changeThis];
         }, this);
         return this;
     }
-};
+}
