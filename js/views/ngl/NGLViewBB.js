@@ -470,10 +470,11 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                         nglRep: this.xlRepr.linkRepr,
                         colourScheme: this.xlRepr.colorOptions.linkColourScheme
                     }
-                    , {
-                        nglRep: this.xlRepr.halfLinkResRepr,
-                        colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
-                    }]);
+                //    , {
+                //        nglRep: this.xlRepr.halfLinkResRepr,
+                //        colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
+                //   }
+                    ]);
                 }
                 else {
                     this.rerenderColourSchemes([{nglRep: null, colourScheme: null}]);
@@ -754,11 +755,11 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                     colourScheme: self.xlRepr.colorOptions.residueColourScheme,
                     immediateUpdate: false
                 },
-                {
-                    nglRep: self.xlRepr.halfLinkResRepr,
-                    colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
-                    immediateUpdate: false
-                },
+                // {
+                //     nglRep: self.xlRepr.halfLinkResRepr,
+                //     colourScheme: self.xlRepr.colorOptions.halfLinkResidueColourScheme,
+                //     immediateUpdate: false
+                // },
                 {nglRep: self.xlRepr.sstrucRepr, colourScheme: self.xlRepr.colorOptions.residueColourScheme},
             ]);
         }
@@ -874,7 +875,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.options.showResidues = bool;
         if (this.xlRepr) {
             this.xlRepr.resRepr.setVisibility(bool);
-            this.xlRepr.halfLinkResRepr.setVisibility(bool);
+            // this.xlRepr.halfLinkResRepr.setVisibility(bool);
         }
         return this;
     },

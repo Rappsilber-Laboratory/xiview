@@ -20,28 +20,28 @@ CLMSUI.init.postDataLoaded = function () {
 
     //init annotation types
     let annotationTypes = [
-        new CLMSUI.BackboneModelTypes.AnnotationType({
+        new AnnotationType({
             category: "AA",
             type: "Digestible",
             tooltip: "Mark Digestible Residues",
             source: "Search",
             colour: "#1f78b4",
         }),
-        new CLMSUI.BackboneModelTypes.AnnotationType({
+        new AnnotationType({
             category: "AA",
             type: "Crosslinkable-1",
             tooltip: "Mark CrossLinkable residues (first or only reactive group)",
             source: "Search",
             colour: "#a6cee3",
         }),
-        new CLMSUI.BackboneModelTypes.AnnotationType({
+        new AnnotationType({
             category: "AA",
             type: "Cross-linkable-2",
             tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
             source: "Search",
             colour: "#a6cee3",
         }),
-        new CLMSUI.BackboneModelTypes.AnnotationType({
+        new AnnotationType({
             category: "Alignment",
             type: "PDB aligned region",
             tooltip: "Show regions that align to currently loaded PDB Data",
@@ -58,7 +58,7 @@ CLMSUI.init.postDataLoaded = function () {
             featureArray.forEach(function (feature) {
                 const key = feature.category + "-" + feature.type;
                 if (!uniprotFeatureTypes.has(key)) {
-                    const annotationType = new CLMSUI.BackboneModelTypes.AnnotationType(feature);
+                    const annotationType = new AnnotationType(feature);
                     annotationType
                         .set("source", "Uniprot")
                         .set("typeAlignmentID", "Canonical")
@@ -71,7 +71,7 @@ CLMSUI.init.postDataLoaded = function () {
 
     // add uniprot feature types
     annotationTypes = annotationTypes.concat(Array.from(uniprotFeatureTypes.values()));
-    const annotationTypeCollection = new CLMSUI.BackboneModelTypes.AnnotationTypeCollection(annotationTypes);
+    const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
     CLMSUI.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
     CLMSUI.vent.trigger("buildAsyncViews");
@@ -102,7 +102,7 @@ CLMSUI.init.blosumLoading = function (options) {
     options = options || {};
 
     // Collection of blosum matrices that will be fetched from a json file
-    CLMSUI.blosumCollInst = new CLMSUI.BackboneModelTypes.BlosumCollection(options); // options if we want to override defaults
+    CLMSUI.blosumCollInst = new BlosumCollection(options); // options if we want to override defaults
 
     // when the blosum Collection is fetched (an async process), we select one of its models as being selected
     CLMSUI.blosumCollInst.listenToOnce(CLMSUI.blosumCollInst, "sync", function () {
@@ -117,7 +117,7 @@ CLMSUI.init.blosumLoading = function (options) {
 CLMSUI.init.models = function (options) {
 
     // define alignment model and listeners first, so they're ready to pick up events from other models
-    const alignmentCollectionInst = new CLMSUI.BackboneModelTypes.ProtAlignCollection();
+    const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
     // HACK - does nothing at moment anyway because uniprot annotations aren't available //todo - this comment is wrong, right
@@ -264,22 +264,22 @@ CLMSUI.init.modelsEssential = function (options) {
         //distanceCutoff: [0, 250],
         searchGroups: CLMSUI.modelUtils.getSearchGroups(clmsModelInst),
     };
-    const urlFilterSettings = CLMSUI.BackboneModelTypes.FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
+    const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
     filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
     console.log("urlFilterSettings", urlFilterSettings, "progFilterSettings", filterSettings);
-    const filterModelInst = new CLMSUI.BackboneModelTypes.FilterModel(filterSettings, {
+    const filterModelInst = new FilterModel(filterSettings, {
         scoreExtent: scoreExtentInstance,
         //distanceExtent: [0, 250],
         possibleSearchGroups: CLMSUI.modelUtils.getSearchGroups(clmsModelInst),
     });
 
-    const tooltipModelInst = new CLMSUI.BackboneModelTypes.TooltipModel();
+    const tooltipModelInst = new TooltipModel();
 
 
     // Make score and distance minigram models, and add listeners to make sure they synchronise to attributes in filter model
     const minigramModels = ["matchScoreCutoff", "distanceCutoff"].map(function (filterAttrName) {
         const filterAttr = filterModelInst.get(filterAttrName);
-        const miniModel = new CLMSUI.BackboneModelTypes.MinigramModel({
+        const miniModel = new MinigramModel({
             domainStart: filterAttr[0],// || 0,
             domainEnd: filterAttr[1],// || 1,
         });
@@ -333,7 +333,7 @@ CLMSUI.init.modelsEssential = function (options) {
 
 
     // overarching model
-    CLMSUI.compositeModelInst = new CLMSUI.BackboneModelTypes.CompositeModelType({
+    CLMSUI.compositeModelInst = new CompositeModelType({
         clmsModel: clmsModelInst,
         filterModel: filterModelInst,
         tooltipModel: tooltipModelInst,
@@ -608,12 +608,12 @@ CLMSUI.init.views = function () {
         .setVis(!matchesFound) // open as default if empty search
     ;
 
-    new CLMSUI.URLSearchBoxViewBB({
-        el: "#urlSearchBox",
-        model: compModel,
-        displayEventName: "shareURLViewShow",
-        myOptions: {}
-    });
+    // new CLMSUI.URLSearchBoxViewBB({
+    //     el: "#urlSearchBox",
+    //     model: compModel,
+    //     displayEventName: "shareURLViewShow",
+    //     myOptions: {}
+    // });
 
     new CLMSUI.xiNetControlsViewBB({
         el: "#xiNetButtonBar",

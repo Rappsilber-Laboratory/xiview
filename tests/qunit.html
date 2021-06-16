@@ -30,18 +30,9 @@
   <script type="text/javascript" src="../../vendor/js/d3-octree.js"></script>
   <script type="text/javascript" src="../../vendor/js/jquery-ui.js"></script>
 
-  <script type="text/javascript" src="../../CLMS-model/src/SearchResultsModel.js"></script>
-  <script type="text/javascript" src="../../CLMS-model/src/SpectrumMatch.js"></script>
-  <script type="text/javascript" src="../../CLMS-model/src/CrossLink.js"></script>
+  <script type="text/javascript" src="../../dist/clmsModel.js"></script>
+  <script type="text/javascript" src="../../dist/xiNET.js"></script>
 
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/CrosslinkViewerBB.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/interactor/Interactor.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/interactor/RenderedProtein.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/interactor/Group.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/link/Link.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/link/RenderedCrosslink.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/link/P_PLink.js"></script>
-  <script type="text/javascript" src="../../crosslink-viewer/src/xiNET/interactor/Rotator.js"></script>
   <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
   <script type="text/javascript" src="../js/utils.js"></script>
   <script type="text/javascript" src="../js/views/circle/circleArrange.js"></script>
@@ -49,46 +40,58 @@
   <script type="text/javascript" src="../js/model/models.js"></script>
   <script type="text/javascript" src="../js/model/annotationTypeModel.js"></script>
   <script type="text/javascript" src="../js/model/compositeModelType.js"></script>
-  <script type="text/javascript" src="../js/model/modelUtils.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/NGLUtils.js"></script>
+  <script type="text/javascript" src="../js/modelUtils.js"></script>
   <script type="text/javascript" src="../js/file-choosers/stringUtils.js"></script>
   <script type="text/javascript" src="../js/filter/fdr.js"></script>
   <script type="text/javascript" src="../js/model/distancesObj.js"></script>
+
+  <script type="text/javascript" src="../js/ui-utils/section-table.js"></script>
+  <script type="text/javascript" src="../js/ui-utils/base-frame-view.js"></script>
+  <script type="text/javascript" src="../js/ui-utils/checkbox-view.js"></script>
+  <script type="text/javascript" src="../js/ui-utils/color-collection-option-view.js"></script>
+  <script type="text/javascript" src="../js/ui-utils/radio-button-filter-view.js"></script>
+
   <script type="text/javascript" src="../js/views/distogramViewBB.js"></script>
-  <script type="text/javascript" src="../js/key/threeColourSliderBB.js"></script>
+  <script type="text/javascript" src="../js/views/key/threeColourSliderBB.js"></script>
   <script type="text/javascript" src="../js/filter/filterViewBB.js"></script>
   <script type="text/javascript" src="../js/views/matrixViewBB.js"></script>
-  <script type="text/javascript" src="../js/tooltipViewBB.js"></script>
+  <script type="text/javascript" src="../js/views/tooltipViewBB.js"></script>
   <script type="text/javascript" src="../js/filter/minigramViewBB.js"></script>
   <script type="text/javascript" src="../js/ui-utils/ddMenuViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/NGLModelWrapperBB.js"></script>
   <script type="text/javascript" src="../js/file-choosers/PDBFileChooser.js"></script>
   <script type="text/javascript" src="../js/file-choosers/STRINGFileChooser.js"></script>
   <script type="text/javascript" src="../js/file-choosers/metaDataFileChoosers.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/NGLViewBB.js"></script>
   <script type="text/javascript" src="../js/align/bioseq32.js"></script>
-  <script type="text/javascript" src="../js/align/alignModelType.js"></script>
+  <script type="text/javascript" src="../js/align/sequence-model-collection.js"></script>
+  <script type="text/javascript" src="../js/align/protein-alignment-model-collection.js"></script>
   <script type="text/javascript" src="../js/align/alignViewBB3.js"></script>
   <script type="text/javascript" src="../js/align/alignSettingsViewBB.js"></script>
-  <script type="text/javascript" src="../js/selectionTableViewBB.js"></script>
+  <script type="text/javascript" src="../js/views/selectionTableViewBB.js"></script>
   <script type="text/javascript" src="../js/views/circle/circularViewBB.js"></script>
-  <script type="text/javascript" src="../js/color/color-model.js"></script>
-  <script type="text/javascript" src="../js/color/link-color-model.js"></script>
-  <script type="text/javascript" src="../js/color/protein-color-model.js"></script>
-  <script type="text/javascript" src="../js/spectrumViewWrapper.js"></script>
+  <script type="text/javascript" src="../js/model/color/color-model.js"></script>
+  <script type="text/javascript" src="../js/model/color/link-color-model.js"></script>
+  <script type="text/javascript" src="../js/model/color/protein-color-model.js"></script>
+  <script type="text/javascript" src="../js/views/spectrumViewWrapper.js"></script>
   <script type="text/javascript" src="../js/validate.js"></script>
   <script type="text/javascript" src="../js/loadSpectrum.js"></script>
   <script type="text/javascript" src="../js/views/proteinInfoViewBB.js"></script>
-  <script type="text/javascript" src="../js/key/keyViewBB.js"></script>
+  <script type="text/javascript" src="../js/views/key/keyViewBB.js"></script>
   <script type="text/javascript" src="../js/views/scatterplotViewBB.js"></script>
   <script type="text/javascript" src="../js/networkFrame.js"></script>
-  <script type="text/javascript" src="../js/xiNetControlsViewBB.js"></script>
   <script type="text/javascript" src="../js/downloads.js"></script>
   <script type="text/javascript" src="../js/views/searchSummaryViewBB.js"></script>
-  <script type="text/javascript" src="../js/urlSearchBoxViewBB.js"></script>
+  <script type="text/javascript" src="../js/views/xiNetControlsViewBB.js"></script>
+
   <script type="text/javascript" src="../js/views/go/goTermsSankeyViewBB.js"></script>
   <script type="text/javascript" src="../js/views/go/goTerm.js"></script>
   <script type="text/javascript" src="../js/views/go/sankey.js"></script>
+
+  <script type="text/javascript" src="../js/views/ngl/NGLUtils.js"></script>
+  <script type="text/javascript" src="../js/views/ngl/NGLExportUtils.js"></script>
+  <script type="text/javascript" src="../js/views/ngl/NGLModelWrapperBB.js"></script>
+  <script type="text/javascript" src="../js/views/ngl/CrosslinkRepresentation.js"></script>
+  <script type="text/javascript" src="../js/views/ngl/NGLViewBB.js"></script>
+
 
   <script type="text/javascript" src="../../userGUI/js/dialogs.js"></script>
 

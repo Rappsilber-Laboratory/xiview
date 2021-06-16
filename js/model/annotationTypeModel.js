@@ -1,6 +1,4 @@
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.BackboneModelTypes.AnnotationType = Backbone.Model.extend({
+AnnotationType = Backbone.Model.extend({
     defaults: {
         id: undefined,
         category: undefined,
@@ -20,7 +18,7 @@ CLMSUI.BackboneModelTypes.AnnotationType = Backbone.Model.extend({
 
 });
 
-CLMSUI.BackboneModelTypes.AnnotationTypeCollection = Backbone.Collection.extend({
+AnnotationTypeCollection = Backbone.Collection.extend({
     initialize: function (models, options) {
         this.listenTo(CLMSUI.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
@@ -29,7 +27,7 @@ CLMSUI.BackboneModelTypes.AnnotationTypeCollection = Backbone.Collection.extend(
             }
         });
     },
-    model: CLMSUI.BackboneModelTypes.AnnotationType,
+    model: AnnotationType,
     modelId: function (attrs) {
         return (attrs.category + "-" + attrs.type).toLocaleLowerCase();
     },

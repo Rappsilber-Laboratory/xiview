@@ -110,7 +110,7 @@
         <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/annotationTypeModel.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/compositeModelType.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/modelUtils.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/modelUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/file-choosers/stringUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/distancesObj.js<?php echo $cacheBuster ?>"></script>
@@ -122,35 +122,36 @@
         <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="./js/views/distogramViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/key/threeColourSliderBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/key/threeColourSliderBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/filterViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/matrixViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/minigramViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/ui-utils/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/file-choosers/PDBFileChooser.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/file-choosers/STRINGFileChooser.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/file-choosers/metaDataFileChoosers.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/align/bioseq32.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/align/alignModelType.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/align/sequence-model-collection.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/align/protein-alignment-model-collection.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/align/alignViewBB3.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/align/alignSettingsViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/circle/circularViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/color/color-model.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/color/link-color-model.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/color/protein-color-model.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/color/color-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/color/link-color-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/color/protein-color-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/validate.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/loadSpectrum.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/proteinInfoViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/key/keyViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/key/keyViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/scatterplotViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/networkFrame.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/downloads.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/searchSummaryViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/urlSearchBoxViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/xiNetControlsViewBB.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="./js/urlSearchBoxViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
+        <script type="text/javascript" src="./js/views/xiNetControlsViewBB.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="./js/views/go/goTermsSankeyViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/go/goTerm.js<?php echo $cacheBuster ?>"></script>
@@ -161,6 +162,8 @@
         <script type="text/javascript" src="./js/views/ngl/NGLModelWrapperBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/ngl/CrosslinkRepresentation.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/ngl/NGLViewBB.js<?php echo $cacheBuster ?>"></script>
+
+
 
         <script type="text/javascript" src="../userGUI/js/dialogs.js<?php echo $cacheBuster ?>"></script>
 

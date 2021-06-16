@@ -1,9 +1,9 @@
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {},
-
-    {
-        FilterModel: Backbone.Model.extend({
+// var CLMSUI = CLMSUI || {};
+//
+// CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {},
+//
+//     {
+        FilterModel = Backbone.Model.extend({
             defaults: {
                 manualMode: true,
                 fdrMode: false,
@@ -533,6 +533,6 @@ CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {},
                 return filterChunkMap;
             },
 
-        }),
+        });
 
-    });
+    // });

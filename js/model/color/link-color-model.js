@@ -1,7 +1,7 @@
 var CLMSUI = CLMSUI || {};
 CLMSUI.linkColour = CLMSUI.linkColour || {};
 
-CLMSUI.BackboneModelTypes.DefaultLinkColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+DefaultLinkColourModel = ColourModel.extend({
     initialize: function() {
         this
             .set("labels", this.get("colScale").copy().range(["Self", "Homomultimeric (Overlapping Peptides)", "Heteromeric"]))
@@ -24,7 +24,7 @@ CLMSUI.BackboneModelTypes.DefaultLinkColourModel = CLMSUI.BackboneModelTypes.Col
     },
 });
 
-CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+GroupColourModel = ColourModel.extend({
     initialize: function(attrs, options) {
 
         this.searchMap = options.searchMap;
@@ -125,7 +125,7 @@ CLMSUI.BackboneModelTypes.GroupColourModel = CLMSUI.BackboneModelTypes.ColourMod
     },
 });
 
-CLMSUI.BackboneModelTypes.DistanceColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+DistanceColourModel = ColourModel.extend({
     initialize: function() {
         this
             .set("type", "threshold")
@@ -142,7 +142,7 @@ CLMSUI.BackboneModelTypes.DistanceColourModel = CLMSUI.BackboneModelTypes.Colour
     },
 });
 
-CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+InterProteinColourModel = ColourModel.extend({
     initialize: function(properties, options) {
         let colScale;
         let labels = ["Same Protein"];
@@ -189,7 +189,7 @@ CLMSUI.BackboneModelTypes.InterProteinColourModel = CLMSUI.BackboneModelTypes.Co
     },
 });
 
-CLMSUI.BackboneModelTypes.HighestScoreColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+HighestScoreColourModel = ColourModel.extend({
     initialize: function(properties, options) {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low Score", "Mid Score", "High Score"]));

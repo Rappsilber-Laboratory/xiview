@@ -1,6 +1,4 @@
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.DistancesObj = function (matrices, chainMap, structureName, residueCoords) {
+DistancesObj = function (matrices, chainMap, structureName, residueCoords) {
     this.matrices = matrices;
     this.chainMap = chainMap;
     this.structureName = structureName;
@@ -8,9 +6,9 @@ CLMSUI.DistancesObj = function (matrices, chainMap, structureName, residueCoords
     this.setAllowedChainNameSet (undefined, true);
 };
 
-CLMSUI.DistancesObj.prototype = {
+DistancesObj.prototype = {
 
-    constructor: CLMSUI.DistancesObj,
+    constructor: DistancesObj,
 
     tieBreaker: function (link1resA, link1resB, link2resA, link2resB) {
         var d;

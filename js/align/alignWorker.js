@@ -4,7 +4,7 @@ if (importScripts) {
 
 function protAlignPar(protID, settings, compSeqArray, tempSemiLocal) {
     settings.aligner = CLMSUI.GotohAligner;
-    var protAlignModel = CLMSUI.BackboneModelTypes.ProtAlignModel.prototype;
+    var protAlignModel = ProtAlignModel.prototype;
     var fullResults = protAlignModel.alignWithoutStoringWithSettings(compSeqArray, tempSemiLocal, settings);
     return {
         fullResults: fullResults,

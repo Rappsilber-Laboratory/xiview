@@ -1,7 +1,7 @@
 var CLMSUI = CLMSUI || {};
 CLMSUI.BackboneModelTypes = CLMSUI.BackboneModelTypes || {};
 
-CLMSUI.BackboneModelTypes.CompositeModelType = Backbone.Model.extend({
+CompositeModelType = Backbone.Model.extend({
 
     initialize: function() {
         this.set({

@@ -105,7 +105,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                 .html("Current Manual Validation State: <span class='validatedState'></span></p>");
         }
 
-        this.alternativesModel = new CLMSUI.BackboneModelTypes.CompositeModelType({
+        this.alternativesModel = new CompositeModelType({
             //~ filterModel: filterModelInst,
             selection: [], //will contain cross-link objects
         });

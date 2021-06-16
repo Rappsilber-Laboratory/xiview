@@ -1,7 +1,7 @@
 var CLMSUI = CLMSUI || {};
 CLMSUI.linkColour = CLMSUI.linkColour || {};
 
-CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
+ColourModel = Backbone.Model.extend({
     defaults: {
         title: undefined,
         longDescription: undefined,
@@ -55,7 +55,7 @@ CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
     isCategorical: function() {
         return this.get("type") !== "linear";
     },
-    // over-ridden by CLMSUI.BackboneModelTypes.HighestScoreColourModel, called by CLMSUI.utils.updateColourKey & keyViewBB.render
+    // over-ridden by HighestScoreColourModel, called by CLMSUI.utils.updateColourKey & keyViewBB.render
     getLabelColourPairings: function () {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
@@ -65,8 +65,8 @@ CLMSUI.BackboneModelTypes.ColourModel = Backbone.Model.extend({
     },
 });
 
-CLMSUI.BackboneModelTypes.ColourModelCollection = Backbone.Collection.extend({
-    model: CLMSUI.BackboneModelTypes.ColourModel,
+ColourModelCollection = Backbone.Collection.extend({
+    model: ColourModel,
 });
 
 
@@ -77,7 +77,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     };
     const config = $.extend(true, {}, defaultConfig, userConfig);    // true = deep merging
 
-    CLMSUI.linkColour.defaultColoursBB = new CLMSUI.BackboneModelTypes.DefaultLinkColourModel({
+    CLMSUI.linkColour.defaultColoursBB = new DefaultLinkColourModel({
         colScale: d3.scale.ordinal().domain(config.default.domain).range(config.default.range),
         title: "Crosslink Type",
         longDescription: "Default colour scheme, differentiates self links with overlapping peptides.",
@@ -85,7 +85,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     });
 
     const makeGroupColourModel = function () {
-        return new CLMSUI.BackboneModelTypes.GroupColourModel({
+        return new GroupColourModel({
             title: "Group",
             longDescription: "Differentiate crosslinks by search group when multiple searches are viewed together.",
             id: "Group",
@@ -96,7 +96,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
 
     CLMSUI.linkColour.groupColoursBB = makeGroupColourModel();
 
-    CLMSUI.linkColour.interProteinColoursBB = new CLMSUI.BackboneModelTypes.InterProteinColourModel({
+    CLMSUI.linkColour.interProteinColoursBB = new InterProteinColourModel({
         title: "Protein-Protein Colouring",
         longDescription: "Differentiate crosslinks by the proteins they connect. Suitable for 3 to 5 proteins only.",
         id: "InterProtein",
@@ -105,7 +105,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
         proteins: CLMSUI.compositeModelInst.get("clmsModel").get("participants")
     });
 
-    CLMSUI.linkColour.distanceColoursBB = new CLMSUI.BackboneModelTypes.DistanceColourModel({
+    CLMSUI.linkColour.distanceColoursBB = new DistanceColourModel({
         colScale: d3.scale.threshold().domain(config.distance.domain).range(config.distance.range),
         title: "Distance (Å)",
         longDescription: "Colour crosslinks by adjustable distance category. Requires PDB file to be loaded (via Load -> PDB Data).",
@@ -135,7 +135,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     const range = [minScore, quantiles[0], quantiles[1], maxScore];
     console.log(quantiles, range);
 
-    CLMSUI.linkColour.highestScoreColoursBB = new CLMSUI.BackboneModelTypes.HighestScoreColourModel({
+    CLMSUI.linkColour.highestScoreColoursBB = new HighestScoreColourModel({
         colScale: d3.scale.threshold().domain(quantiles).range(colorbrewer.Dark2[3].reverse()),
         title: "Highest Score",
         longDescription: "Highest score from supporting matches that meet current filter.",
@@ -143,7 +143,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
         superDomain: [minScore, maxScore], // superdomain is used in conjunction with drawing sliders, it's the maximum that the values in the threshold can be
     });
 
-    const linkColourCollection = new CLMSUI.BackboneModelTypes.ColourModelCollection([
+    const linkColourCollection = new ColourModelCollection([
         CLMSUI.linkColour.defaultColoursBB,
         CLMSUI.linkColour.interProteinColoursBB,
         CLMSUI.linkColour.groupColoursBB,
@@ -184,7 +184,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
 
     // Protein colour schemes
 
-    CLMSUI.linkColour.defaultProteinColoursBB = new CLMSUI.BackboneModelTypes.DefaultProteinColourModel ({
+    CLMSUI.linkColour.defaultProteinColoursBB = new DefaultProteinColourModel ({
         colScale: d3.scale.ordinal().domain([0]).range(["#fff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
@@ -192,7 +192,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     });
 
     // Can add other metadata-based schemes to this collection later
-    const proteinColourCollection = new CLMSUI.BackboneModelTypes.ColourModelCollection([
+    const proteinColourCollection = new ColourModelCollection([
         CLMSUI.linkColour.defaultProteinColoursBB,
     ]);
 
@@ -258,7 +258,7 @@ CLMSUI.linkColour.makeColourModel = function(field, label, objs) {
         const range = [min, quantiles[0], quantiles[1], max];
         console.log(quantiles, range);
 
-        return new CLMSUI.BackboneModelTypes.ThresholdColourModel({
+        return new ThresholdColourModel({
             colScale: d3.scale.threshold().domain(quantiles).range(colorbrewer.Dark2[3]),
             title: label || field,
             longDescription: (label || field) + ", " + " data extracted from metadata.",
@@ -281,7 +281,7 @@ CLMSUI.linkColour.makeColourModel = function(field, label, objs) {
             }
         }
 
-        return new CLMSUI.BackboneModelTypes.MetaDataHexValuesColourModel({
+        return new MetaDataHexValuesColourModel({
             colScale: d3.scale.ordinal().domain(domain).range(range),
             id: label,
             title: label || field,
@@ -293,7 +293,7 @@ CLMSUI.linkColour.makeColourModel = function(field, label, objs) {
         // make normal categorical
         const range = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"];
 
-        return new CLMSUI.BackboneModelTypes.MetaDataColourModel({
+        return new MetaDataColourModel({
             colScale: d3.scale.ordinal().domain(Array.from(categories)).range(range),
             id: label,
             title: label || field,
@@ -304,7 +304,7 @@ CLMSUI.linkColour.makeColourModel = function(field, label, objs) {
     }
 };
 
-CLMSUI.BackboneModelTypes.MetaDataHexValuesColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+MetaDataHexValuesColourModel = ColourModel.extend({
     initialize: function () {
         this.set("labels", this.get("colScale").copy());
     },
@@ -316,7 +316,7 @@ CLMSUI.BackboneModelTypes.MetaDataHexValuesColourModel = CLMSUI.BackboneModelTyp
     },
 });
 
-CLMSUI.BackboneModelTypes.MetaDataColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({
+MetaDataColourModel = ColourModel.extend({
     initialize: function(properties, options) {
         const domain = this.get("colScale").domain();
         this.set("labels", this.get("colScale").copy().range(domain)); //
@@ -329,7 +329,7 @@ CLMSUI.BackboneModelTypes.MetaDataColourModel = CLMSUI.BackboneModelTypes.Colour
     },
 });
 
-CLMSUI.BackboneModelTypes.ThresholdColourModel = CLMSUI.BackboneModelTypes.ColourModel.extend({ // todo -code duplication with Highest score col model
+ThresholdColourModel = ColourModel.extend({ // todo -code duplication with Highest score col model
     initialize: function () {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low", "Mid", "High"]));

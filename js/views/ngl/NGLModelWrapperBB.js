@@ -2,7 +2,7 @@ var CLMSUI = CLMSUI || {};
 
 CLMSUI.BackboneModelTypes = CLMSUI.BackboneModelTypes || {};
 
-CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
+NGLModelWrapperBB = Backbone.Model.extend({
     defaults: {
         compositeModel: null,
         structureComp: null,
@@ -73,7 +73,7 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
         // The point of this is to build a cache for Ca-Ca distances so we don't have to keep asking the ngl components for them
         // For very large structures we just store the distances that map to crosslinks, so we have to get other distances by reverting to the ngl stuff
         const distances = this.getChainDistances(chainInfo.resCount > this.defaults.fullDistanceCalcCutoff);
-        const distancesObj = new CLMSUI.DistancesObj(distances, this.get("chainMap"), this.getStructureName());
+        const distancesObj = new DistancesObj(distances, this.get("chainMap"), this.getStructureName());
 
         const clmsModel = this.getCompositeModel().get("clmsModel");
         // silent change and trigger, as loading in the same pdb file doesn't trigger the change automatically (as it generates an identical distance matrix)
@@ -236,7 +236,7 @@ CLMSUI.BackboneModelTypes.NGLModelWrapperBB = Backbone.Model.extend({
                 return d.coords[2];
             },
         };
-        const tieBreakerFunc = CLMSUI.DistancesObj.prototype.tieBreaker;
+        const tieBreakerFunc = DistancesObj.prototype.tieBreaker;
 
         crossLinkArr.forEach(function (xlink) {
             // Check from chain - to chain pairings for valid crosslink possibilities.

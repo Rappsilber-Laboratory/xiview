@@ -121,7 +121,7 @@ CLMSUI.NGLUtils = {
                         // Now 3d sequence is added we can make a new NGL Model wrapper (as it needs aligning)
 
                         // Make a new model and set of data ready for the ngl viewer
-                        const newNGLModelWrapper = new CLMSUI.BackboneModelTypes.NGLModelWrapperBB();
+                        const newNGLModelWrapper = new NGLModelWrapperBB();
                         newNGLModelWrapper.set({
                             structureComp: structureComp,
                             chainMap: chainMap,
