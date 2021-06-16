@@ -992,7 +992,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
         label: "Protein Colour Scheme"
     });
 
-    new CrosslinkViewer({
+    new xiNET.CrosslinkViewer({
         el: "#networkDiv",
         model: compModel,
         //     myOptions: {layout: storedLayout}
