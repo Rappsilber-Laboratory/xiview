@@ -223,7 +223,7 @@ CLMSUI.init.modelsEssential = function (options) {
     );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = new window.CLMS.model.SearchResultsModel();
+    const clmsModelInst = new clmsModel.SearchResultsModel();
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -755,7 +755,7 @@ CLMSUI.init.viewsEssential = function (options) {
                         //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
                         if (returnedMatchID === self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-                            const altModel = new window.CLMS.model.SearchResultsModel();
+                            const altModel = new clmsModel.SearchResultsModel();
                             altModel.parseJSON(json);
                             const allCrossLinks = Array.from(altModel.get("crossLinks").values());
                             // empty selection first
@@ -992,7 +992,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
         label: "Protein Colour Scheme"
     });
 
-    new CLMSUI.CrosslinkViewer({
+    new CrosslinkViewer({
         el: "#networkDiv",
         model: compModel,
         //     myOptions: {layout: storedLayout}

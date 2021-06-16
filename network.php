@@ -1,6 +1,6 @@
 <?php
     session_start();
-    $cacheBuster = '?v='.microtime(true);
+    $cacheBuster = '';//'?v='.microtime(true);
 ?>
 
 <!DOCTYPE html>
@@ -85,9 +85,11 @@
         <script type="text/javascript" src="../vendor/js/d3-octree.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
 
-        <script type="text/javascript" src="../CLMS-model/src/search-results-model.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/crosslink.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="../CLMS-model/src/search-results-model.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../CLMS-model/src/crosslink.js--><?php //echo $cacheBuster ?><!--"></script>-->
+
+        <script type="text/javascript" src="../dist/clms-model.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/CrosslinkViewerBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../crosslink-viewer/src/xiNET/interactor/Interactor.js<?php echo $cacheBuster ?>"></script>

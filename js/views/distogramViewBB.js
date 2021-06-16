@@ -59,7 +59,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
             }
         };
 
-        this.options.attributeOptions = this.model.get("clmsModel").attributeOptions;
+        this.options.attributeOptions = clmsModel.SearchResultsModel.attributeOptions;
 
         this.precalcedDistributions = {
             Random: {

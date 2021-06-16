@@ -115,18 +115,3 @@ CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {}, {
         }
     }),
 });
-
-
-CLMS.model.CrossLink.prototype.getMeta = function(metaField) {
-    if (arguments.length === 0) {
-        return this.meta;
-    }
-    return this.meta ? this.meta[metaField] : undefined;
-};
-
-CLMS.model.CrossLink.prototype.setMeta = function(metaField, value) {
-    if (arguments.length === 2) {
-        this.meta = this.meta || {};
-        this.meta[metaField] = value;
-    }
-};

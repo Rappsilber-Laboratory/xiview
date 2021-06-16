@@ -402,8 +402,8 @@ function getLinksCSV() {
         const linear = crossLink.isLinearLink();
         const filteredMatchesAndPepPos = crossLink.filteredMatches_pp;
         row.push(
-            mostReadableId(crossLink.fromProtein), crossLink.fromResidue, crossLink.fromProtein.sequence[crossLink.fromResidue - 1],
-            (linear ? "" : mostReadableId(crossLink.toProtein)), crossLink.toResidue, !linear && crossLink.toResidue ? crossLink.toProtein.sequence[crossLink.toResidue - 1] : ""
+            mostReadableId(crossLink.fromProtein), crossLink.fromResidue, crossLink.fromProtein.sequence? crossLink.fromProtein.sequence[crossLink.fromResidue - 1] : "",
+            (linear ? "" : mostReadableId(crossLink.toProtein)), crossLink.toResidue, !linear && crossLink.toResidue && crossLink.toProtein.sequence? crossLink.toProtein.sequence[crossLink.toResidue - 1] : ""
         );
 
         let highestScore = null;

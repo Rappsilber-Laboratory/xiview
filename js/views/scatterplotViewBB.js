@@ -46,7 +46,7 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
     initialize: function(viewOptions) {
         CLMSUI.ScatterplotViewBB.__super__.initialize.apply(this, arguments);
 
-        this.options.attributeOptions = this.model.get("clmsModel").attributeOptions;
+        this.options.attributeOptions = clmsModel.SearchResultsModel.attributeOptions;
 
         var self = this;
 
