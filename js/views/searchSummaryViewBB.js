@@ -46,7 +46,7 @@ CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
         return this;
     },
 
-    searchDescriptionTemplate: "The identification of cross-links was performed with <%= version %> using the following parameters: MS accuracy, <%= ms1Value %> <%= ms1Units %>; MS/MS accuracy, <%= ms2Value %> <%= ms2Units %>; enzyme, <%= enzymeNames %>; maximum missed cleavages, <%= missedCleavages %>; maximum number of modifications, <%= maxModifications %>; fixed modification, <%= fixedModList %>; variable modifications, <%= varModList %>. Cross-linking was allowed to involve <%= crossLinkerDesc %>.",
+    searchDescriptionTemplate: "The identification of cross-links was performed with <%= version %> using the following parameters: MS accuracy, <%= ms1Value %> <%= ms1Units %>; MS/MS accuracy, <%= ms2Value %> <%= ms2Units %>; enzyme, <%= enzymeNames %>; maximum missed cleavages, <%= missedCleavages %>; maximum number of modifications, <%= maxModifications %>; fixed modification, <%= fixedModList %>; variable modifications, <%= varModList %>. Cross-linking was allowed to involve <%= crosslinkerDesc %>.",
 
     exportDescriptions: function() {
         var template = _.template(this.searchDescriptionTemplate);
@@ -73,7 +73,7 @@ CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
             };
             
             // crosslinker descriptions for each search
-            var crossLinkerDescs = search.crosslinkers ? search.crosslinkers.map(function(clink) {
+            var crosslinkerDescs = search.crosslinkers ? search.crosslinkers.map(function(clink) {
                 var linkerDatum = linkerData[clink.name];
                 var linkables = linkerDatum.linkables;
                 var obj = {
@@ -121,7 +121,7 @@ CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
                         return modDesc(mod);
                     })
                     .join(", ") : "",
-                crossLinkerDesc: crossLinkerDescs ? crossLinkerDescs
+                crosslinkerDesc: crosslinkerDescs ? crosslinkerDescs
                     .map(function(clinkDesc) {
                         return clinkDesc.name + " on " + clinkDesc.first + (clinkDesc.second ? " at one end of the cross-link to " + clinkDesc.second + " at the other" : "");
                     })

@@ -14,15 +14,15 @@ class DefaultLinkColourModel extends ColourModel {
     }
 
     getValue (link) {
-        // if (link.crossLinks) {
-        //     return link.crossLinks[0].isSelfLink() || link.crossLinks[0].isLinearLink() ? (link.hd ? 1 : 0) : 2;
+        // if (link.crosslinks) {
+        //     return link.crosslinks[0].isSelfLink() || link.crosslinks[0].isLinearLink() ? (link.hd ? 1 : 0) : 2;
         // } else {
             return link.isSelfLink() || link.isLinearLink() ? (link.confirmedHomomultimer ? 1 : 0) : 2;
         // }
     }
 
     getColour (obj) {  // obj is generally a crosslink, but is non-specific at this point
-        if (obj.crossLinks) {
+        if (obj.crosslinks) {
             return "#202020";
         }
         const val = this.getValue(obj);
@@ -133,8 +133,8 @@ class GroupColourModel extends ColourModel{
         return scale(val);
     }
 
-    getColour (crossLink) {
-        return this.getColourByValue (this.getValue (crossLink));
+    getColour (crosslink) {
+        return this.getColourByValue (this.getValue (crosslink));
     }
 }
 
@@ -152,11 +152,11 @@ class DistanceColourModel extends ColourModel {
     }
 
     getValue (link) {
-        if (link.crossLinks) {
+        if (link.crosslinks) {
             return undefined;
         }
         return link.getMeta("distance");
-        //return CLMSUI.compositeModelInst.getSingleCrosslinkDistance(crossLink);
+        //return CLMSUI.compositeModelInst.getSingleCrosslinkDistance(crosslink);
     }
 }
 

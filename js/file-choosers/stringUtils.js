@@ -10,7 +10,7 @@ CLMSUI.STRINGUtils = {
         var proteinMap = clmsModel.get("participants");
         var realProteins = CLMSUI.modelUtils.filterOutDecoyInteractors (Array.from (proteinMap.values()));
         var ppiProteins = realProteins.filter (function (prot) {
-            return prot.crossLinks.some (function (clink) {
+            return prot.crosslinks.some (function (clink) {
                 // is there a real crosslink going to another protein?
                 return !clink.isDecoyLink() && !clink.isSelfLink();
             });

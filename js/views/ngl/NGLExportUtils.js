@@ -28,8 +28,8 @@ CLMSUI.NGLExportUtils = {
     },
 
     exportPymolCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks) {
-        const crossLinks = nglModelWrapper.getFullLinks();
-        const pymolLinks = CLMSUI.NGLExportUtils.makePymolCrossLinkSyntax(structure, crossLinks, remarks);
+        const crosslinks = nglModelWrapper.getFullLinks();
+        const pymolLinks = CLMSUI.NGLExportUtils.makePymolCrossLinkSyntax(structure, crosslinks, remarks);
         const fileName = downloadFilename("pymol", "pml");
         download(pymolLinks.join("\r\n"), "plain/text", fileName);
     },
@@ -53,7 +53,7 @@ CLMSUI.NGLExportUtils = {
             return (localFile ? "load " : "fetch ") + pdb + (localFile ? "" : ", async=0");
         });
 
-        const crossLinkLines = links.map(function (link) {
+        const crosslinkLines = links.map(function (link) {
             cp.index = link.residueA.chainIndex;
             const chainA = cp.chainname;
             cp.index = link.residueB.chainIndex;
@@ -77,7 +77,7 @@ CLMSUI.NGLExportUtils = {
                 ;
         });
 
-        const lines = remarkLines.concat(pdbLines, crossLinkLines);
+        const lines = remarkLines.concat(pdbLines, crosslinkLines);
         return lines;
     },
 
@@ -92,7 +92,7 @@ CLMSUI.NGLExportUtils = {
         const pdbIds = structure.chainToOriginalStructureIDMap || {};
         const chainProxy = structure.getChainProxy();
         const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
 
         const header = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
         const crosslinkLines = [];
@@ -122,7 +122,7 @@ CLMSUI.NGLExportUtils = {
     exportChimeraPseudobonds: function (structure, nglModelWrapper, name, selectedOnly) {
         const chainProxy = structure.getChainProxy();
         const bondArray = [];
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
         const colorScheme = nglModelWrapper.get("compositeModel").get("linkColourAssignment");
 
         for (let link of nglModelWrapper.getFullLinks()) {
@@ -185,7 +185,7 @@ CLMSUI.NGLExportUtils = {
 
         const chainProxy = structure.getChainProxy();
         const subunits = new Map();
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crossLinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
 
         const header = ["Protein1,Protein2,AbsPos1,AbsPos2,score"];
         const crosslinkLines = [];
@@ -246,15 +246,15 @@ CLMSUI.NGLExportUtils = {
         download(JSON.stringify(json, null, 4), "json", jsonFileName);
     },
 
-    exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crossLinkerObj) {
-        const crossLinks = nglModelWrapper.getFullLinks();
-        const haddockLinks = CLMSUI.NGLExportUtils.makeHaddockCrossLinkSyntax(structure, crossLinks, remarks, crossLinkerObj);
+    exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crosslinkerObj) {
+        const crosslinks = nglModelWrapper.getFullLinks();
+        const haddockLinks = CLMSUI.NGLExportUtils.makeHaddockCrossLinkSyntax(structure, crosslinks, remarks, crosslinkerObj);
         const fileName = downloadFilename("haddock", "tbl");
         download(haddockLinks.join("\r\n"), "plain/text", fileName);
     },
 
-    makeHaddockCrossLinkSyntax: function (structure, links, remarks, crossLinkerObj) {
-        //console.log ("CLO", crossLinkerObj);
+    makeHaddockCrossLinkSyntax: function (structure, links, remarks, crosslinkerObj) {
+        //console.log ("CLO", crosslinkerObj);
         const str = ["zeroth", "first", "second", "third", "fourth", "fifth", "next"];
         const pdbids = structure.chainToOriginalStructureIDMap || {};
 
@@ -262,9 +262,9 @@ CLMSUI.NGLExportUtils = {
             return "! " + remark;
         });
 
-        const crossLinkers = d3.values(crossLinkerObj.crossLinkerInfo);
-        crossLinkers.push({id: "default", name: "default", restraints: "12.0 10.0 18.0"});
-        const restraints = d3.map(crossLinkers, function (d) {
+        const crosslinkers = d3.values(crosslinkerObj.crosslinkerInfo);
+        crosslinkers.push({id: "default", name: "default", restraints: "12.0 10.0 18.0"});
+        const restraints = d3.map(crosslinkers, function (d) {
             return d.id;
         });
 
@@ -280,15 +280,15 @@ CLMSUI.NGLExportUtils = {
             return link.residueA.modelIndex != link.residueB.modelIndex;
         });
 
-        const crossLinkLines = {};
-        crossLinkers.forEach(function (clinker) {
-            crossLinkLines[clinker.id] = ["! " + clinker.name + " based length restraints"];
+        const crosslinkLines = {};
+        crosslinkers.forEach(function (clinker) {
+            crosslinkLines[clinker.id] = ["! " + clinker.name + " based length restraints"];
         });
-        const origCrossLinks = crossLinkerObj.crossLinks;
+        const origCrossLinks = crosslinkerObj.crosslinks;
         interModelLinks.forEach(function (link) {
             const origLink = origCrossLinks.get(link.origId);
             // get crosslinkers used by this crosslink
-            let crossLinkerIDs =
+            let crosslinkerIDs =
                 (origLink ? d3.set(origLink.filteredMatches_pp.map(function (match) {
                     return match.match.crosslinker_id;
                 })).values() : [])
@@ -296,12 +296,12 @@ CLMSUI.NGLExportUtils = {
                         return clid === "undefined" ? "default" : clid;
                     })
             ;
-            if (_.isEmpty(crossLinkerIDs)) {
-                crossLinkerIDs = ["default"];
+            if (_.isEmpty(crosslinkerIDs)) {
+                crosslinkerIDs = ["default"];
             }
 
             // add a restraint line for each different crosslinker
-            crossLinkerIDs.forEach(function (clid) {
+            crosslinkerIDs.forEach(function (clid) {
                 //console.log ("clid", clid, restraints);
                 const clRestraints = restraints.get(clid).restraints || restraints.get("default").restraints;
                 const line = "assign" +
@@ -309,12 +309,12 @@ CLMSUI.NGLExportUtils = {
                     " (segid " + String.fromCharCode(65 + link.residueB.modelIndex) + " and name CA and resi " + link.residueB.resno + ")" +
                     " " + clRestraints
                 ;
-                crossLinkLines[clid].push(line);
+                crosslinkLines[clid].push(line);
             });
         });
 
         // merge all the lines together (this keeps them grouped by crosslinker, rather than crosslink)
-        const allCrossLinkLines = d3.merge(d3.values(crossLinkLines));
+        const allCrossLinkLines = d3.merge(d3.values(crosslinkLines));
 
         const lines = remarkLines.concat(pdbLines, allCrossLinkLines);
         return lines;

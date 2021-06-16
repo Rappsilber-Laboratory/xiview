@@ -11,7 +11,7 @@ function callback (model) {
     QUnit.test("JSON to Model Parsing", function (assert) {
         var expectedLinks = 162;
         var expectedMatches = 291;
-        assert.deepEqual(clmsModel.get("crossLinks").size, expectedLinks, "Expected "+JSON.stringify(expectedLinks)+" crosslinks, Passed!");
+        assert.deepEqual(clmsModel.get("crosslinks").size, expectedLinks, "Expected "+JSON.stringify(expectedLinks)+" crosslinks, Passed!");
         assert.deepEqual(clmsModel.get("matches").length, expectedMatches, "Expected "+JSON.stringify(expectedMatches)+" matches, Passed!");
     });
 
@@ -119,8 +119,8 @@ function callback (model) {
     QUnit.test("Cross-link Selection testing", function (assert) {
         var expectedLinks = 3;
         var expectedMatches = 18;
-        var crossLinks = clmsModel.get("crossLinks");
-        var selectedLinks = [crossLinks.get("P02768-A_1-P02768-A_11"), crossLinks.get("P02768-A_415-P02768-A_497"), crossLinks.get("P02768-A_190-P02768-A_425")];
+        var crosslinks = clmsModel.get("crosslinks");
+        var selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_415-P02768-A_497"), crosslinks.get("P02768-A_190-P02768-A_425")];
         model.setMarkedCrossLinks ("selection", selectedLinks, false, false, false);
 
         assert.deepEqual(model.getMarkedCrossLinks("selection").length, expectedLinks, "Expected "+JSON.stringify(expectedLinks)+" selected crosslinks on setting 3 crosslinks selection, Passed!");
@@ -130,8 +130,8 @@ function callback (model) {
     QUnit.test("Match Selection testing", function (assert) {
         var expectedLinks = 2;
         var expectedMatches = 3;
-        var crossLinks = clmsModel.get("crossLinks");
-        var selectedMatches = d3.merge ([crossLinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1), crossLinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(0,2)]);
+        var crosslinks = clmsModel.get("crosslinks");
+        var selectedMatches = d3.merge ([crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1), crosslinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(0,2)]);
         model.setMarkedMatches ("selection", selectedMatches, false, false, false);
 
         assert.deepEqual(model.getMarkedCrossLinks("selection").length, expectedLinks, "Expected "+JSON.stringify(expectedLinks)+" selected crosslinks on setting 3 matches selection, Passed!");
@@ -141,12 +141,12 @@ function callback (model) {
     QUnit.test("Adding Cross-link selection to prior Cross-link Selection testing", function (assert) {
         var expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         var expectedMatches = 17;
-        var crossLinks = clmsModel.get("crossLinks");
+        var crosslinks = clmsModel.get("crosslinks");
 
-        var selectedLinks = [crossLinks.get("P02768-A_1-P02768-A_11"), crossLinks.get("P02768-A_415-P02768-A_497")];
+        var selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_415-P02768-A_497")];
         model.setMarkedCrossLinks ("selection", selectedLinks, false, false, false);
 
-        selectedLinks = [crossLinks.get("P02768-A_1-P02768-A_11"), crossLinks.get("P02768-A_190-P02768-A_425")];
+        selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_190-P02768-A_425")];
         model.setMarkedCrossLinks ("selection", selectedLinks, false, true, false);	// add to existing selection
 
         assert.deepEqual(_.pluck(model.getMarkedCrossLinks("selection"), "id").sort(), expectedLinkIDs, "Expected "+JSON.stringify(expectedLinkIDs)+" selected crosslinks, Passed!");
@@ -157,15 +157,15 @@ function callback (model) {
     QUnit.test("Adding Match Selection to prior Match Selection testing", function (assert) {
         var expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         var expectedMatchIDs = [625825062, 625825067, 625825068, 625826126].sort();
-        var crossLinks = clmsModel.get("crossLinks");
+        var crosslinks = clmsModel.get("crosslinks");
 
-        var selectedMatches = d3.merge ([crossLinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1), crossLinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,2), crossLinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(0,2)]);
+        var selectedMatches = d3.merge ([crosslinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1), crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,2), crosslinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(0,2)]);
         model.setMarkedMatches ("selection", selectedMatches, false, false, false);
 
         selectedMatches = d3.merge ([
-            crossLinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1),
-            crossLinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1),
-            crossLinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(1,4)
+            crosslinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1),
+            crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1),
+            crosslinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(1,4)
         ]);
         model.setMarkedMatches ("selection", selectedMatches, false, true, false);	// add to existing selection
 
@@ -177,15 +177,15 @@ function callback (model) {
     QUnit.test("Adding Match Selection to prior Cross-link Selection testing", function (assert) {
         var expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         var expectedMatches = 4;	// Two of P02768-A_190-P02768-A_425 matches are marked rejected and don't pass filter
-        var crossLinks = clmsModel.get("crossLinks");
+        var crosslinks = clmsModel.get("crosslinks");
 
-        var selectedLinks = [crossLinks.get("P02768-A_1-P02768-A_11"), crossLinks.get("P02768-A_415-P02768-A_497")];
+        var selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_415-P02768-A_497")];
         model.setMarkedCrossLinks ("selection", selectedLinks, false, false, false);
 
         var selectedMatches = d3.merge ([
-            crossLinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1),
-            crossLinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1),
-            crossLinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(1,4)
+            crosslinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1),
+            crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1),
+            crosslinks.get("P02768-A_190-P02768-A_425").matches_pp.slice(1,4)
         ]);
         model.setMarkedMatches ("selection", selectedMatches, false, true, false);	// add to existing selection
 
@@ -196,12 +196,12 @@ function callback (model) {
     QUnit.test("Adding Cross-Link Selection to prior Match Selection testing", function (assert) {
         var expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         var expectedMatches = 17;
-        var crossLinks = clmsModel.get("crossLinks");
+        var crosslinks = clmsModel.get("crosslinks");
 
-        var selectedMatches = d3.merge ([crossLinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1), crossLinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,2)]);
+        var selectedMatches = d3.merge ([crosslinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1), crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,2)]);
         model.setMarkedMatches ("selection", selectedMatches, false, false, false);
 
-        var selectedLinks = [crossLinks.get("P02768-A_1-P02768-A_11"), crossLinks.get("P02768-A_190-P02768-A_425")];
+        var selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_190-P02768-A_425")];
         model.setMarkedCrossLinks ("selection", selectedLinks, false, true, false);	// add to existing selection
 
         assert.deepEqual (_.pluck(model.getMarkedCrossLinks("selection"), "id").sort(), expectedLinkIDs, "Expected "+JSON.stringify(expectedLinkIDs)+" selected crosslinks, Passed!");
@@ -209,8 +209,8 @@ function callback (model) {
     });
 
     QUnit.test("Adding no Cross-Links to prior Cross-link Selection testing", function (assert) {
-        var crossLinks = clmsModel.get("crossLinks");
-        var selectedLinks = [crossLinks.get("P02768-A_1-P02768-A_11"), crossLinks.get("P02768-A_415-P02768-A_497")];
+        var crosslinks = clmsModel.get("crosslinks");
+        var selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_415-P02768-A_497")];
         model.setMarkedCrossLinks ("selection", selectedLinks, false, false, false);
         var expectedLinkIDs = _.pluck (model.getMarkedCrossLinks("selection"), "id").sort();
         var expectedMatchIDs = _.pluck (model.getMarkedMatches("selection").values(), "id").sort();
@@ -222,8 +222,8 @@ function callback (model) {
     });
 
     QUnit.test("Adding no Matches to prior Match Selection testing", function (assert) {
-        var crossLinks = clmsModel.get("crossLinks");
-        var selectedMatches = d3.merge ([crossLinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1), crossLinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1)]);
+        var crosslinks = clmsModel.get("crosslinks");
+        var selectedMatches = d3.merge ([crosslinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0,1), crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0,1)]);
         model.setMarkedMatches ("selection", selectedMatches, false, false, false);
         var expectedLinkIDs = _.pluck (model.getMarkedCrossLinks("selection"), "id").sort();
         var expectedMatchIDs = _.pluck (model.getMarkedMatches("selection").values(), "id").sort();
@@ -466,8 +466,8 @@ function callback (model) {
     });
 
     QUnit.test ("Single Cross-Link Distance validated on NGLViewer", function (assert) {
-        var crossLinks = clmsModel.get("crossLinks");
-        var singleCrossLink = crossLinks.get("P02768-A_415-P02768-A_497");
+        var crosslinks = clmsModel.get("crosslinks");
+        var singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         var expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
 
         var stageModel = CLMSUI.compositeModelInst.get("stageModel");
@@ -479,8 +479,8 @@ function callback (model) {
     });
 
     QUnit.test ("Same Cross-Link Distance, different indexing methods 1", function (assert) {
-        var crossLinks = clmsModel.get("crossLinks");
-        var singleCrossLink = crossLinks.get("P02768-A_415-P02768-A_497");
+        var crosslinks = clmsModel.get("crosslinks");
+        var singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
@@ -495,8 +495,8 @@ function callback (model) {
 
 
     QUnit.test ("2 different functions for returning atom indices", function (assert) {
-        var crossLinks = clmsModel.get("crossLinks");
-        var singleCrossLink = crossLinks.get("P02768-A_415-P02768-A_497");
+        var crosslinks = clmsModel.get("crosslinks");
+        var singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
@@ -512,7 +512,7 @@ function callback (model) {
 
     QUnit.test ("Compare Link-Only Distance Generation with All Distance Generation", function (assert) {
         var stageModel = CLMSUI.compositeModelInst.get("stageModel");
-        var crossLinks = stageModel.get("linkList");
+        var crosslinks = stageModel.get("linkList");
 
         var matrices1 = stageModel.getChainDistances (true);
         var matrices2 = stageModel.getChainDistances (false);
@@ -520,10 +520,10 @@ function callback (model) {
         var list1 = [];
         var list2 = [];
 
-        crossLinks.forEach (function (crossLink) {
-            var chainIndex = crossLink.residueA.chainIndex + "-" + crossLink.residueB.chainIndex;
-            list1.push (matrices1[chainIndex].distanceMatrix[crossLink.residueA.seqIndex][crossLink.residueB.seqIndex]);
-            list2.push (matrices2[chainIndex].distanceMatrix[crossLink.residueA.seqIndex][crossLink.residueB.seqIndex]);
+        crosslinks.forEach (function (crosslink) {
+            var chainIndex = crosslink.residueA.chainIndex + "-" + crosslink.residueB.chainIndex;
+            list1.push (matrices1[chainIndex].distanceMatrix[crosslink.residueA.seqIndex][crosslink.residueB.seqIndex]);
+            list2.push (matrices2[chainIndex].distanceMatrix[crosslink.residueA.seqIndex][crosslink.residueB.seqIndex]);
         });
 
         list1 = list1.map (function (v) { return v.toFixed (2); });
@@ -535,7 +535,7 @@ function callback (model) {
 
     QUnit.test ("Compare Distances from Atom Coords with All Distance Generation", function (assert) {
         var stageModel = CLMSUI.compositeModelInst.get("stageModel");
-        var crossLinks = stageModel.get("linkList");
+        var crosslinks = stageModel.get("linkList");
 
         var matrices1 = stageModel.getChainDistances (true); //this test will fail if the defualt value for AUTO in filtermodel is true, to make it pass you need to change this call's param to true
         var list1 = [];
@@ -543,9 +543,9 @@ function callback (model) {
 
         var atoms = stageModel.getAllResidueCoordsForChain(0);
 
-        crossLinks.forEach (function (crossLink) {
-            var seqIndexA = crossLink.residueA.seqIndex;
-            var seqIndexB = crossLink.residueB.seqIndex;
+        crosslinks.forEach (function (crosslink) {
+            var seqIndexA = crosslink.residueA.seqIndex;
+            var seqIndexB = crosslink.residueB.seqIndex;
             list1.push (matrices1["0-0"].distanceMatrix[seqIndexA][seqIndexB]);
             var distanceSquared = CLMSUI.modelUtils.getDistanceSquared (atoms[seqIndexA], atoms[seqIndexB]);
             list2.push (Math.sqrt (distanceSquared));
@@ -992,14 +992,14 @@ function callback (model) {
 
 
     QUnit.test ("Crosslink count per protein pairing", function (assert) {
-        var crossLinks = model.getAllCrossLinks();
-        var expectedCrossLinkIDs = _.pluck (crossLinks, "id");
-        var expectedValue = {"P02768-A-P02768-A" : {crossLinks: expectedCrossLinkIDs, fromProtein: "P02768-A", toProtein: "P02768-A", label: "ALBU - ALBU"}};
-        var actualValue = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crossLinks);
+        var crosslinks = model.getAllCrossLinks();
+        var expectedCrossLinkIDs = _.pluck (crosslinks, "id");
+        var expectedValue = {"P02768-A-P02768-A" : {crosslinks: expectedCrossLinkIDs, fromProtein: "P02768-A", toProtein: "P02768-A", label: "ALBU - ALBU"}};
+        var actualValue = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crosslinks);
         d3.values(actualValue).forEach (function (pairing) {	// do this as otherwise stringify will kick off about circular structures, so just match ids
             pairing.fromProtein = pairing.fromProtein.id;
             pairing.toProtein = pairing.toProtein.id;
-            pairing.crossLinks = _.pluck (pairing.crossLinks, "id");
+            pairing.crosslinks = _.pluck (pairing.crosslinks, "id");
         });
 
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as crosslink protein pairing value, Passed!");
@@ -1171,7 +1171,7 @@ function callback (model) {
     //
     //     var testLinks = model.getAllCrossLinks().slice(0,2);
     //     var testZScores = [[1, 2],[3, 4]];
-    //     testLinks.forEach (function (crossLink, i) { testZScores[i].clink = crossLink; });
+    //     testLinks.forEach (function (crosslink, i) { testZScores[i].clink = crosslink; });
     //     var testColumnNameIndexPair = [{name: "cat", index: 0}, {name: "dog", index: 1}];
     //     CLMSUI.modelUtils.updateMetaDataWithTheseColumns (testZScores, testColumnNameIndexPair);
     //
@@ -1200,12 +1200,12 @@ function callback (model) {
 
 
     QUnit.test ("Update Crosslink Metadata", function (assert) {
-        var expectedValue = {columns: ["cat", "dog"], columnTypes: {cat: "numeric", dog: "numeric"}, items: clmsModel.get("crossLinks"), matchedItemCount: 2, ppiCount: 2};
+        var expectedValue = {columns: ["cat", "dog"], columnTypes: {cat: "numeric", dog: "numeric"}, items: clmsModel.get("crosslinks"), matchedItemCount: 2, ppiCount: 2};
         CLMSUI.vent.listenToOnce (CLMSUI.vent, "linkMetadataUpdated", function (actualValue) {
-            console.log ("CLLCC2", clmsModel, clmsModel.get("crossLinks"));
+            console.log ("CLLCC2", clmsModel, clmsModel.get("crosslinks"));
             assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as linkmetadata event data, Passed!");
 
-            var actualValue2 = $.extend ({}, clmsModel.get("crossLinks").get("P02768-A_415-P02768-A_497").getMeta());
+            var actualValue2 = $.extend ({}, clmsModel.get("crosslinks").get("P02768-A_415-P02768-A_497").getMeta());
             delete actualValue2.distance;
             var expectedValue2 = {cat: 2, dog: 4};
             assert.deepEqual (actualValue2, expectedValue2, "Expected "+JSON.stringify(expectedValue2)+" as link meta value, Passed!");

@@ -462,9 +462,9 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     getData: function(funcMeta, filteredFlag, optionalLinks) {
         var linkFunc = funcMeta ? (filteredFlag ? funcMeta.linkFunc : funcMeta.unfilteredLinkFunc) : undefined;
-        var crossLinks = optionalLinks ||
+        var crosslinks = optionalLinks ||
             (filteredFlag ? this.getFilteredCrossLinks() : this.model.getAllCrossLinks());
-        var data = crossLinks.map(function(c) {
+        var data = crosslinks.map(function(c) {
             return linkFunc ? linkFunc.call(this, c) : [undefined];
         }, this);
         return data;

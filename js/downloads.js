@@ -154,14 +154,14 @@ function getMatchesCSV() {
     const participants = clmsModel.get("participants");
     const distance2dp = d3.format(".2f");
 
-    const crossLinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all");
     const matchMap = d3.map();
 
     // do it like this so ambiguous matches (belonging to >1 crosslink) aren't repeated
     console.log("start map");
     let zz = performance.now();
-    crossLinks.forEach(function (crossLink) {
-        crossLink.filteredMatches_pp.forEach(function (match) {
+    crosslinks.forEach(function (crosslink) {
+        crosslink.filteredMatches_pp.forEach(function (match) {
             matchMap.set(match.match.id, match.match);
         });
     });
@@ -181,8 +181,8 @@ function getMatchesCSV() {
         const decoy2 = peptides2 ? participants.get(peptides2.prt[0]).is_decoy : "";
 
         // Work out distances for this match - ambiguous matches will have >1 crosslink
-        const crossLinks = match.crossLinks;
-        const distances = CLMSUI.compositeModelInst.getCrossLinkDistances(crossLinks, {
+        const crosslinks = match.crosslinks;
+        const distances = CLMSUI.compositeModelInst.getCrossLinkDistances(crosslinks, {
             includeUndefineds: true,
             returnChainInfo: true,
             calcDecoyProteinDistances: true
@@ -200,7 +200,7 @@ function getMatchesCSV() {
             linkType = "Ambig.";
         } else if (participants.get(match.matchedPeptides[0].prt[0]).accession === "___AMBIGUOUS___" || (match.matchedPeptides[1] && participants.get(match.matchedPeptides[1].prt[0]).accession === "___AMBIGUOUS___")) {
             linkType = "__AMBIG__";
-        } else if (match.crossLinks[0].isSelfLink()) {
+        } else if (match.crosslinks[0].isSelfLink()) {
             linkType = "Self";
         } else {
             linkType = "Between";
@@ -210,7 +210,7 @@ function getMatchesCSV() {
         const retentionTime = match.retentionTime !== undefined ? match.retentionTime : (match.elution_time_end === -1 ? match.elution_time_start : "");
 
         const data = [
-            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.autovalidated, match.validated, match.searchId, match.runName(), match.peakListFileName(), match.scanNumber, match.scanIndex, match.crossLinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, distancesJoined.join('","'), linkType, decoyType, retentionTime
+            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.autovalidated, match.validated, match.searchId, match.runName(), match.peakListFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, distancesJoined.join('","'), linkType, decoyType, retentionTime
         ];
         csv += '"' + data.join('","') + '"\r\n';
         /*
@@ -261,12 +261,12 @@ function getSSL() {
     console.log("modDeltas", modificationDeltasMap);
 
 
-    const crossLinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all");
     const matchMap = d3.map();
 
     // do it like this so ambiguous matches (belonging to >1 crosslink) aren't repeated
-    crossLinks.forEach(function (crossLink) {
-        crossLink.filteredMatches_pp.forEach(function (match) {
+    crosslinks.forEach(function (crosslink) {
+        crosslink.filteredMatches_pp.forEach(function (match) {
             matchMap.set(match.match.id, match.match);
         });
     });
@@ -313,7 +313,7 @@ function getSSL() {
         if (decoyType === "TT") {
             const pep1sslSeq = makeSslPepSeq(peptide1.seq_mods, match.linkPos1);
             const pep2sslSeq = makeSslPepSeq(peptide2.seq_mods, match.linkPos2);
-            const crosslinkerModMass = match.crossLinkerModMass();
+            const crosslinkerModMass = match.crosslinkerModMass();
             //var sequence = pep1sslSeq + "K[+" + (crosslinkerModMass - 112.099857) + "]" + pep2sslSeq;
             const joiningAAModMass = (crosslinkerModMass - 112.099857);
             let sequence = pep1sslSeq;
@@ -359,7 +359,7 @@ function getSSL() {
                 match.peakListFileName(),
                 match.scanNumber,
                 match.scanIndex,
-                match.crossLinkerModMass(),
+                match.crosslinkerModMass(),
                 match.fragmentToleranceString(),
                 match.ionTypesString()
             ];
@@ -382,14 +382,14 @@ function getLinksCSV() {
     });
     console.log("searchIds", searchIDs);
 
-    const metaColumns = (clmsModel.get("crossLinkMetaRegistry") || d3.set()).values();
+    const metaColumns = (clmsModel.get("crosslinkMetaRegistry") || d3.set()).values();
     headerArray = headerArray.concat(metaColumns);
 
     const headerRow = '"' + headerArray.join('","') + '"';
 
-    const crossLinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all");
 
-    const physicalDistances = CLMSUI.compositeModelInst.getCrossLinkDistances(crossLinks, {
+    const physicalDistances = CLMSUI.compositeModelInst.getCrossLinkDistances(crosslinks, {
         includeUndefineds: true,
         returnChainInfo: true,
         calcDecoyProteinDistances: true
@@ -397,13 +397,13 @@ function getLinksCSV() {
     //console.log ("pd", physicalDistances);
     const distance2dp = d3.format(".2f");
 
-    const rows = crossLinks.map(function (crossLink, i) {
+    const rows = crosslinks.map(function (crosslink, i) {
         const row = [];
-        const linear = crossLink.isLinearLink();
-        const filteredMatchesAndPepPos = crossLink.filteredMatches_pp;
+        const linear = crosslink.isLinearLink();
+        const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
         row.push(
-            mostReadableId(crossLink.fromProtein), crossLink.fromResidue, crossLink.fromProtein.sequence? crossLink.fromProtein.sequence[crossLink.fromResidue - 1] : "",
-            (linear ? "" : mostReadableId(crossLink.toProtein)), crossLink.toResidue, !linear && crossLink.toResidue && crossLink.toProtein.sequence? crossLink.toProtein.sequence[crossLink.toResidue - 1] : ""
+            mostReadableId(crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
+            (linear ? "" : mostReadableId(crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
         );
 
         let highestScore = null;
@@ -425,14 +425,14 @@ function getLinksCSV() {
 
         let decoyType;
         if (linear) {
-            if (crossLink.fromProtein.is_decoy) {
+            if (crosslink.fromProtein.is_decoy) {
                 decoyType = "D";
             } else {
                 decoyType = "T";
             }
         } else {
-            const decoy1 = crossLink.fromProtein.is_decoy;
-            const decoy2 = crossLink.toProtein.is_decoy;
+            const decoy1 = crosslink.fromProtein.is_decoy;
+            const decoy2 = crosslink.toProtein.is_decoy;
             if (decoy1 && decoy2) {
                 decoyType = "DD";
             } else if (decoy1 || decoy2) {
@@ -442,7 +442,7 @@ function getLinksCSV() {
             }
         }
 
-        row.push(highestScore, filteredMatchCount, decoyType, crossLink.isSelfLink(), linkAutovalidated, validationStats.toString(), crossLink.getMeta("fdr"));
+        row.push(highestScore, filteredMatchCount, decoyType, crosslink.isSelfLink(), linkAutovalidated, validationStats.toString(), crosslink.getMeta("fdr"));
 
         // Distance info
         const pDist = physicalDistances[i];
@@ -460,7 +460,7 @@ function getLinksCSV() {
 
         // Add metadata information
         for (let m = 0; m < metaColumns.length; m++) {
-            const mval = crossLink.getMeta(metaColumns[m]);
+            const mval = crosslink.getMeta(metaColumns[m]);
             row.push(mval === undefined ? "" : mval);
         }
 
@@ -524,7 +524,7 @@ function getPPIsCSV() {
         //
         // // Add metadata information
         // for (var m = 0; m < metaColumns.length; m++) {
-        //     var mval = crossLink.getMeta(metaColumns[m]);
+        //     var mval = crosslink.getMeta(metaColumns[m]);
         //     row.push(mval === undefined ? "" : mval);
         // }
 
@@ -564,8 +564,8 @@ function getResidueCount() {
     const residueCountMap = d3.map();
     const residuePairCountMap = d3.map();
 
-    const crossLinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all"); // already pre-filtered
-    crossLinks.forEach(function (residueLink) {
+    const crosslinks = CLMSUI.compositeModelInst.getFilteredCrossLinks("all"); // already pre-filtered
+    crosslinks.forEach(function (residueLink) {
         const linkedRes1 = residueLink.fromProtein.sequence[residueLink.fromResidue - 1] || "";
         const linkedRes2 = residueLink.isLinearLink() ? "" : residueLink.toProtein.sequence[residueLink.toResidue - 1];
         incrementCount(residueCountMap, linkedRes1);

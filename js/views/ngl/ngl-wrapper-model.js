@@ -95,8 +95,8 @@ class NGLModelWrapperBB extends Backbone.Model {
         return this;
     }
 
-    setLinkList (crossLinkArr) {
-        const linkDataObj = this.makeLinkList(crossLinkArr);
+    setLinkList (crosslinkArr) {
+        const linkDataObj = this.makeLinkList(crosslinkArr);
         const distanceObj = this.getCompositeModel().get("clmsModel").get("distancesObj");
         if (this.get("showShortestLinksOnly") && distanceObj) { // filter to shortest links if showShortestLinksOnly set
             linkDataObj.fullLinkList = distanceObj.getShortestLinkAlternatives(linkDataObj.fullLinkList);
@@ -105,7 +105,7 @@ class NGLModelWrapperBB extends Backbone.Model {
         return this;
     }
 
-    makeLinkList (crossLinkArr) {
+    makeLinkList (crosslinkArr) {
         const structure = this.get("structureComp").structure;
         let nextResidueId = 0;
         const structureId = null;
@@ -177,10 +177,10 @@ class NGLModelWrapperBB extends Backbone.Model {
             });
         }
 
-        function addToHalfLinkList(crossLink, residueObjList) {
+        function addToHalfLinkList(crosslink, residueObjList) {
             residueObjList.forEach(function (residueObj) {
                 halfLinkList.push({
-                    origId: crossLink.id,
+                    origId: crosslink.id,
                     linkId: halfLinkList.length,
                     residue: residueObj,
                 });
@@ -239,7 +239,7 @@ class NGLModelWrapperBB extends Backbone.Model {
         };
         const tieBreakerFunc = DistancesObj.prototype.tieBreaker;
 
-        crossLinkArr.forEach(function (xlink) {
+        crosslinkArr.forEach(function (xlink) {
             // Check from chain - to chain pairings for valid crosslink possibilities.
             // Where inter-model links barred, divide from and to chains into sets per model and
             // loop through the pairings in subsets.
@@ -535,7 +535,7 @@ class NGLModelWrapperBB extends Backbone.Model {
 
     // Return original crosslinks from this model's link objects using origId property value
     getOriginalCrossLinks (linkObjs) {
-        const xlinks = this.getCompositeModel().get("clmsModel").get("crossLinks");
+        const xlinks = this.getCompositeModel().get("clmsModel").get("crosslinks");
         return linkObjs.map(function (linkObj) {
             return xlinks.get(linkObj.origId);
         });
@@ -667,7 +667,7 @@ class NGLModelWrapperBB extends Backbone.Model {
     getLinkDistancesBetween2Chains (chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2, links) {
 
         const notHomomultimeric = function (xlinkID, c1, c2) {
-            const xlink = this.getCompositeModel().get("clmsModel").get("crossLinks").get(xlinkID);
+            const xlink = this.getCompositeModel().get("clmsModel").get("crosslinks").get(xlinkID);
             return CLMSUI.NGLUtils.not3DHomomultimeric(xlink, c1, c2);
         };
 

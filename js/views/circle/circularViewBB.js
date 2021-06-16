@@ -519,7 +519,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         };
 
         this.linkTip = function(d) {
-            var xlink = self.model.get("clmsModel").get("crossLinks").get(d.id);
+            var xlink = self.model.get("clmsModel").get("crosslinks").get(d.id);
             self.model.get("tooltipModel")
                 .set("header", CLMSUI.modelUtils.makeTooltipTitle.link())
                 .set("contents", CLMSUI.modelUtils.makeTooltipContents.link(xlink))
@@ -750,7 +750,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     convertLinks: function(links, rad1, rad2) {
-        var xlinks = this.model.get("clmsModel").get("crossLinks");
+        var xlinks = this.model.get("clmsModel").get("crosslinks");
         var intraOutside = this.options.intraOutside;
         var homomOpposite = this.options.homomOpposite;
         var bowOutMultiplier = 1.2;
@@ -873,7 +873,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             //CLMSUI.utils.xilog ("model", this.model);
 
             var filteredInteractors = this.filterInteractors(interactors);
-            var filteredCrossLinks = this.model.getFilteredCrossLinks(); //CLMSUI.modelUtils.getFilteredNonDecoyCrossLinks (crossLinks);
+            var filteredCrossLinks = this.model.getFilteredCrossLinks(); //CLMSUI.modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
             if (this.options.showSelectedOnly) {
                 var selectedIDs = d3.set (_.pluck (this.model.getMarkedCrossLinks("selection"), "id"));
                 filteredCrossLinks = filteredCrossLinks.filter(function(xlink) {
@@ -996,8 +996,8 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     drawLinks: function(g, links) {
         var self = this;
-        var crossLinks = this.model.get("clmsModel").get("crossLinks");
-        //CLMSUI.utils.xilog ("clinks", crossLinks);
+        var crosslinks = this.model.get("clmsModel").get("crosslinks");
+        //CLMSUI.utils.xilog ("clinks", crosslinks);
         var colourScheme = this.model.get("linkColourAssignment");
 
         var lineCopy = {}; // make cache as linkJoin and ghostLinkJoin will have same 'd' paths for the same link
@@ -1017,10 +1017,10 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
                 return path;
             })
             .style("stroke", function(d) {
-                return colourScheme.getColour(crossLinks.get(d.id));
+                return colourScheme.getColour(crosslinks.get(d.id));
             })
             .classed("ambiguous", function(d) {
-                return crossLinks.get(d.id).ambiguous;
+                return crosslinks.get(d.id).ambiguous;
             });
 
         // draw thick, invisible links (used for highlighting and mouse event capture)
@@ -1033,7 +1033,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             .attr("class", "circleGhostLink")
             .on("mouseenter", function(d) {
                 self.linkTip(d);
-                self.model.setMarkedCrossLinks("highlights", [crossLinks.get(d.id)], true, false);
+                self.model.setMarkedCrossLinks("highlights", [crosslinks.get(d.id)], true, false);
             })
             .on("mouseleave", function() {
                 self.clearTip();
@@ -1042,7 +1042,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             .on("click", function(d) {
                 d3.event.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
                 var add = d3.event.ctrlKey || d3.event.shiftKey;
-                self.model.setMarkedCrossLinks("selection", [crossLinks.get(d.id)], false, add);
+                self.model.setMarkedCrossLinks("selection", [crosslinks.get(d.id)], false, add);
             });
         ghostLinkJoin
             .attr("d", function(d) {
@@ -1307,10 +1307,10 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             links = [];
         }
 
-        var crossLinks = this.model.get("clmsModel").get("crossLinks");
+        var crosslinks = this.model.get("clmsModel").get("crosslinks");
         var resMap = d3.map();
         links.forEach(function(link) {
-            var xlink = crossLinks.get(link.id);
+            var xlink = crosslinks.get(link.id);
             resMap.set(xlink.fromProtein.id + "-" + xlink.fromResidue, {
                 polar: link.coords[0],
                 res: CLMSUI.modelUtils.getResidueType(xlink.fromProtein, xlink.fromResidue)

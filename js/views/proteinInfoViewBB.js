@@ -139,7 +139,7 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
                 if (Array.isArray(value)) {
                     cell2.textContent = value.length;
                 } else if (key === "sequence") {
-                    cell2.innerHTML = self.makeInteractiveSeqString(protein, protein.sequence, protein.crossLinks, true);
+                    cell2.innerHTML = self.makeInteractiveSeqString(protein, protein.sequence, protein.crosslinks, true);
                 } else {
                     cell2.textContent = value;
                 }
@@ -196,26 +196,26 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
             tabs.selectAll("span.hit")
                 .on("click", function () {
                     var idArray = self.splitDataAttr(d3.select(this), "data-linkids");
-                    var crossLinks = self.getCrossLinksFromIDs(idArray, true);
-                    self.model.setMarkedCrossLinks("selection", crossLinks, true, d3.event.ctrlKey);
+                    var crosslinks = self.getCrossLinksFromIDs(idArray, true);
+                    self.model.setMarkedCrossLinks("selection", crosslinks, true, d3.event.ctrlKey);
                 })
                 .on("mouseover", function () {
                     //console.log ("model", self.model);
                     var d3sel = d3.select(this);
                     var idArray = self.splitDataAttr(d3sel, "data-linkids");
-                    var crossLinks = self.getCrossLinksFromIDs(idArray, true);
+                    var crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     // following breaks things if proteins have underscores in name
                     // var posData = self.splitDataAttr(d3sel, "data-pos", "_");
                     // var interactor = self.model.get("clmsModel").get("participants").get(posData[0]);
                     //
                     // self.model.get("tooltipModel")
                     //     .set("header", "Cross-Linked with " + CLMSUI.modelUtils.makeTooltipTitle.residue(interactor, +posData[1]))
-                    //     .set("contents", CLMSUI.modelUtils.makeTooltipContents.multilinks(crossLinks, posData[0], +posData[1]))
+                    //     .set("contents", CLMSUI.modelUtils.makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
                     //     .set("location", {
                     //         pageX: d3.event.pageX,
                     //         pageY: d3.event.pageY
                     //     });
-                    self.model.setMarkedCrossLinks("highlights", crossLinks, true, false);
+                    self.model.setMarkedCrossLinks("highlights", crosslinks, true, false);
                 })
                 .on("mouseout", function () {
                     self.model.get("tooltipModel").set("contents", null);
@@ -240,20 +240,20 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
                 .each(function () {
                     var d3sel = d3.select(this);
                     var idArray = self.splitDataAttr(d3sel, "data-linkids");
-                    var crossLinks = self.getCrossLinksFromIDs(idArray, true);
-                    //d3sel.classed ("filteredOutResidue", crossLinks.length === 0);
-                    var selYes = crossLinks.some(function (xlink) {
+                    var crosslinks = self.getCrossLinksFromIDs(idArray, true);
+                    //d3sel.classed ("filteredOutResidue", crosslinks.length === 0);
+                    var selYes = crosslinks.some(function (xlink) {
                         return selidset.has(xlink.id);
                     });
                     //d3sel.classed ("selected", selYes);
-                    var highYes = crossLinks.some(function (xlink) {
+                    var highYes = crosslinks.some(function (xlink) {
                         return highidset.has(xlink.id);
                     });
                     //d3sel.classed ("highlighted", highYes);
 
                     // setting attr("class") once as a string is multiple times quicker than 3x .classed calls (roughly 5-6x quicker)
                     var classStr = ["hit"]; // maintain the span element's hit class state
-                    if (crossLinks.length === 0) {
+                    if (crosslinks.length === 0) {
                         classStr.push("filteredOutResidue");
                     }
                     if (selYes) {
@@ -296,17 +296,17 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
     getCrossLinksFromIDs: function (linkIDs, filter) {
         linkIDs = d3.set(linkIDs).values(); // strips out duplicates
 
-        var allLinks = this.model.get("clmsModel").get("crossLinks");
-        var crossLinks = linkIDs.map(function (linkId) {
+        var allLinks = this.model.get("clmsModel").get("crosslinks");
+        var crosslinks = linkIDs.map(function (linkId) {
             return allLinks.get(linkId);
         });
 
         if (filter) {
-            crossLinks = crossLinks.filter(function (xlink) {
+            crosslinks = crosslinks.filter(function (xlink) {
                 return xlink.filteredMatches_pp.length > 0;
             });
         }
-        return crossLinks;
+        return crosslinks;
     },
 
     makeInteractiveSeqString: function (protein, seq, xlinks, filterDecoys) {

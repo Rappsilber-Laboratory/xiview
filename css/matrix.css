@@ -68,6 +68,6 @@
     stroke-width: 1;
 }
 
-.matrixView .crossLinkPlot {
+.matrixView .crosslinkPlot {
     shape-rendering: auto;  /* so small circles look like circles */
 }

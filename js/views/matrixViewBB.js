@@ -208,7 +208,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.zoomGroup = this.clipGroup.append("g");
         this.zoomGroup.append("g").attr("class", "blockAreas");
         this.zoomGroup.append("g").attr("class", "backgroundImage").append("image");
-        this.zoomGroup.append("g").attr("class", "crossLinkPlot");
+        this.zoomGroup.append("g").attr("class", "crosslinkPlot");
         this.zoomGroup.append("g")
             .attr("class", "brush")
             .call(self.brush);
@@ -298,12 +298,12 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     makeProteinPairingOptions: function() {
-        var crossLinks = this.model.getAllTTCrossLinks();
-        var totals = CLMSUI.modelUtils.crosslinkCountPerProteinPairing(crossLinks);
+        var crosslinks = this.model.getAllTTCrossLinks();
+        var totals = CLMSUI.modelUtils.crosslinkCountPerProteinPairing(crosslinks);
         var entries = d3.entries(totals);
 
         var nonEmptyEntries = entries.filter(function(entry) {
-            return entry.value.crossLinks.length;
+            return entry.value.crosslinks.length;
         });
 
         // If there are selected proteins, reduce the choice to pairs within this set
@@ -317,7 +317,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
         }
 
         nonEmptyEntries.sort(function(a, b) {
-            return b.value.crossLinks.length - a.value.crossLinks.length;
+            return b.value.crosslinks.length - a.value.crosslinks.length;
         });
 
         var mainDivSel = d3.select(this.el);
@@ -338,7 +338,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 return d.key;
             })
             .text(function(d) {
-                return "[" + d.value.crossLinks.length + "] " + d.value.label;
+                return "[" + d.value.crosslinks.length + "] " + d.value.label;
             })
         ;
 
@@ -495,8 +495,8 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
     selectNeighbourhood: function(extent) {
         var add = d3.event.ctrlKey || d3.event.shiftKey; // should this be added to current selection?
         var linkWrappers = this.grabNeighbourhoodLinks(extent);
-        var crossLinks = _.pluck(linkWrappers, "crossLink");
-        this.model.setMarkedCrossLinks("selection", crossLinks, false, add);
+        var crosslinks = _.pluck(linkWrappers, "crosslink");
+        this.model.setMarkedCrossLinks("selection", crosslinks, false, add);
     },
 
 
@@ -508,11 +508,11 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
             return [xory - halfRange, xory + halfRange];
         })); // turn xy into extent equivalent
         var linkWrappers = this.grabNeighbourhoodLinks(highlightExtent);
-        var crossLinks = _.pluck(linkWrappers, "crossLink");
+        var crosslinks = _.pluck(linkWrappers, "crosslink");
 
         // invoke tooltip before setting highlights model change for quicker tooltip response
         this.invokeTooltip(evt, linkWrappers);
-        this.model.setMarkedCrossLinks("highlights", crossLinks, true, false);
+        this.model.setMarkedCrossLinks("highlights", crosslinks, true, false);
     },
 
     cancelHighlights: function() {
@@ -534,17 +534,17 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     invokeTooltip: function(evt, linkWrappers) {
         if (this.options.matrixObj) {
-            var crossLinks = _.pluck(linkWrappers, "crossLink");
-            crossLinks.sort (function (a, b) {
+            var crosslinks = _.pluck(linkWrappers, "crosslink");
+            crosslinks.sort (function (a, b) {
                 return a.getMeta("distance") - b.getMeta("distance");
             });
-            var linkDistances = crossLinks.map (function (crossLink) {
-                return crossLink.getMeta("distance");
+            var linkDistances = crosslinks.map (function (crosslink) {
+                return crosslink.getMeta("distance");
             });
 
             this.model.get("tooltipModel")
-                .set("header", CLMSUI.modelUtils.makeTooltipTitle.linkList(crossLinks.length))
-                .set("contents", CLMSUI.modelUtils.makeTooltipContents.linkList(crossLinks, {"Distance": linkDistances}))
+                .set("header", CLMSUI.modelUtils.makeTooltipTitle.linkList(crosslinks.length))
+                .set("contents", CLMSUI.modelUtils.makeTooltipContents.linkList(crosslinks, {"Distance": linkDistances}))
                 .set("location", evt)
             ;
             //this.trigger("change:location", this.model, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
@@ -840,8 +840,8 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 var selectedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
                 var highlightedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("highlights"), "id"));
 
-                var finalCrossLinks = Array.from(filteredCrossLinks).filter(function(crossLink) {
-                    return (crossLink.toProtein.id === proteinIDs[0].proteinID && crossLink.fromProtein.id === proteinIDs[1].proteinID) || (crossLink.toProtein.id === proteinIDs[1].proteinID && crossLink.fromProtein.id === proteinIDs[0].proteinID);
+                var finalCrossLinks = Array.from(filteredCrossLinks).filter(function(crosslink) {
+                    return (crosslink.toProtein.id === proteinIDs[0].proteinID && crosslink.fromProtein.id === proteinIDs[1].proteinID) || (crosslink.toProtein.id === proteinIDs[1].proteinID && crosslink.fromProtein.id === proteinIDs[0].proteinID);
                 }, this);
 
                 // sort so that selected links appear on top
@@ -855,8 +855,8 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 }
 
 
-                var fromToStore = sortedFinalCrossLinks.map(function(crossLink) {
-                    return [crossLink.fromResidue - 1, crossLink.toResidue - 1];
+                var fromToStore = sortedFinalCrossLinks.map(function(crosslink) {
+                    return [crosslink.fromResidue - 1, crosslink.toResidue - 1];
                 });
 
                 var indLinkPlot = function (d) {
@@ -864,7 +864,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                     var selected = high ? false : selectedCrossLinkIDs.has(d.id);
                     var ambig = d.ambiguous;
                     d3.select(this)
-                        .attr ("class", "crossLink" + (high ? " high" : ""))
+                        .attr ("class", "crosslink" + (high ? " high" : ""))
                         .style("fill-opacity", ambig ? 0.6 : null)
                         .style("fill", high ? self.options.highlightedColour : (selected ? self.options.selectedColour : colourScheme.getColour(d)))
                         .style("stroke-dasharray", ambig ? 3 : null)
@@ -876,7 +876,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 // if redoing highlights only, find previously highlighted links not part of current set and restore them
                 // to a non-highlighted state
                 if (highlightOnly) {
-                    var oldHighLinkSel = this.zoomGroup.select(".crossLinkPlot").selectAll(".high")
+                    var oldHighLinkSel = this.zoomGroup.select(".crosslinkPlot").selectAll(".high")
                         .filter (function (d) {
                             return ! highlightedCrossLinkIDs.has(d.id);
                         })
@@ -884,7 +884,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                     ;
                 }
 
-                var linkSel = this.zoomGroup.select(".crossLinkPlot").selectAll(".crossLink")
+                var linkSel = this.zoomGroup.select(".crosslinkPlot").selectAll(".crosslink")
                     .data(sortedFinalCrossLinks, function(d) {
                         return d.id;
                     })
@@ -898,7 +898,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 if (!highlightOnly) {
                     linkSel.exit().remove();
                     linkSel.enter().append("circle")    // replacing rect
-                        .attr("class", "crossLink")
+                        .attr("class", "crosslink")
                         .attr("r", xLinkWidth)
                         //.attr("width", xLinkWidth)
                         //.attr("height", yLinkWidth)

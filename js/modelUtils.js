@@ -186,12 +186,12 @@ CLMSUI.modelUtils = {
             var extraEntries = d3.entries(extras);
             var fromProtein, toProtein;
 
-            var details = linkList.map(function(crossLink, i) {
-                var from3LetterCode = CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(crossLink, false));
-                var to3LetterCode = CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(crossLink, true));
-                fromProtein = crossLink.fromProtein.name;
-                toProtein = crossLink.toProtein.name;
-                var row = [crossLink.fromResidue + " " + from3LetterCode, crossLink.toResidue + " " + to3LetterCode];
+            var details = linkList.map(function(crosslink, i) {
+                var from3LetterCode = CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(crosslink, false));
+                var to3LetterCode = CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(crosslink, true));
+                fromProtein = crosslink.fromProtein.name;
+                toProtein = crosslink.toProtein.name;
+                var row = [crosslink.fromResidue + " " + from3LetterCode, crosslink.toResidue + " " + to3LetterCode];
                 extraEntries.forEach(function(entry) {
                     var key = entry.key.toLocaleLowerCase();
                     var val = entry.value[i];
@@ -290,7 +290,7 @@ CLMSUI.modelUtils = {
         },
     },
 
-    findResiduesInSquare: function(convFunc, crossLinkMap, x1, y1, x2, y2, asymmetric) {
+    findResiduesInSquare: function(convFunc, crosslinkMap, x1, y1, x2, y2, asymmetric) {
         var a = [];
         var xmin = Math.max(0, Math.round(Math.min(x1, x2)));
         var xmax = Math.round(Math.max(x1, x2));
@@ -308,14 +308,14 @@ CLMSUI.modelUtils = {
 
                     if (!isNaN(convm) && convm > 0 && !excludeasym) {
                         var k = conv.proteinX + "_" + convn + "-" + conv.proteinY + "_" + convm;
-                        var crossLink = crossLinkMap.get(k);
-                        if (!crossLink && (conv.proteinX === conv.proteinY)) {
+                        var crosslink = crosslinkMap.get(k);
+                        if (!crosslink && (conv.proteinX === conv.proteinY)) {
                             k = conv.proteinY + "_" + convm + "-" + conv.proteinX + "_" + convn;
-                            crossLink = crossLinkMap.get(k);
+                            crosslink = crosslinkMap.get(k);
                         }
-                        if (crossLink) {
+                        if (crosslink) {
                             a.push({
-                                crossLink: crossLink,
+                                crosslink: crosslink,
                                 x: n,
                                 y: m
                             });
@@ -589,10 +589,10 @@ CLMSUI.modelUtils = {
     },
 
     updateLinkMetadata: function (metaDataFileContents, clmsModel) {
-        var crossLinks = clmsModel.get("crossLinks");
-        var crossLinksArr = Array.from (crossLinks.values());
+        var crosslinks = clmsModel.get("crosslinks");
+        var crosslinksArr = Array.from (crosslinks.values());
         var protMap = CLMSUI.modelUtils.makeMultiKeyProteinMap(clmsModel);
-        var crossLinksByProteinPairing = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crossLinksArr);
+        var crosslinksByProteinPairing = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crosslinksArr);
 
         var first = true;
         var columns = [];
@@ -614,7 +614,7 @@ CLMSUI.modelUtils = {
 
         d3.csv.parse(metaDataFileContents, function(d) {
             var linkID = d.linkID || d.LinkID;
-            var singleCrossLink = crossLinks.get(linkID);
+            var singleCrossLink = crosslinks.get(linkID);
             var rowCrossLinkArr;
 
             // Maybe need to generate key from several columns
@@ -626,15 +626,15 @@ CLMSUI.modelUtils = {
                 var spos2 = getValueN("SeqPos", 2, d);
                 var linkIDA = pkey1 + "_" + spos1 + "-" + pkey2 + "_" + spos2;
                 var linkIDB = pkey2 + "_" + spos2 + "-" + pkey1 + "_" + spos1;
-                singleCrossLink = crossLinks.get(linkIDA) || crossLinks.get(linkIDB);
+                singleCrossLink = crosslinks.get(linkIDA) || crosslinks.get(linkIDB);
 
                 //console.log ("spos", spos1, spos2, pkey1, pkey2, spos1 == null, spos2 == null);  //  "" != null?
                 if (singleCrossLink == null && ((spos1 == null && spos2 == null) || (spos1 == "" && spos2 == ""))) {   // PPI
                     // get crosslinks for this protein pairing (if any)
                     var proteinPair = [pkey1, pkey2].sort();
-                    var proteinPairing = crossLinksByProteinPairing[proteinPair.join("-")];
+                    var proteinPairing = crosslinksByProteinPairing[proteinPair.join("-")];
                     if (proteinPairing) {
-                        rowCrossLinkArr = proteinPairing.crossLinks;
+                        rowCrossLinkArr = proteinPairing.crosslinks;
                     }
                 }
             }
@@ -690,14 +690,14 @@ CLMSUI.modelUtils = {
             })
         ;
 
-        var registry = clmsModel.get("crossLinkMetaRegistry") || d3.set();
+        var registry = clmsModel.get("crosslinkMetaRegistry") || d3.set();
         columns.forEach (registry.add, registry);
-        clmsModel.set("crossLinkMetaRegistry", registry);
+        clmsModel.set("crosslinkMetaRegistry", registry);
 
         var result = {
                 columns: columns,
                 columnTypes: columnTypes,
-                items: crossLinks,
+                items: crosslinks,
             matchedItemCount: matchedCrossLinkCount,
             ppiCount: ppiCount
         };
@@ -791,7 +791,7 @@ CLMSUI.modelUtils = {
 
     },
 
-    // objectArr can be crossLinks or protein interactors (or a mix of)
+    // objectArr can be crosslinks or protein interactors (or a mix of)
     clearObjectMetaData: function (objectArr, metaFields) {
         objectArr.forEach (function (obj) {
             if (obj.getMeta()) {
@@ -974,27 +974,27 @@ CLMSUI.modelUtils = {
         return json;
     },
 
-    crosslinkCountPerProteinPairing: function (crossLinkArr, includeLinears) {
+    crosslinkCountPerProteinPairing: function (crosslinkArr, includeLinears) {
         var obj = {};
         var linearShim = {id: "*linear", name: "linear"};
-        crossLinkArr.forEach(function(crossLink) {
-            if (crossLink.toProtein || includeLinears) {
-            var fromProtein = crossLink.fromProtein;
-                var toProtein = crossLink.toProtein || linearShim;
+        crosslinkArr.forEach(function(crosslink) {
+            if (crosslink.toProtein || includeLinears) {
+            var fromProtein = crosslink.fromProtein;
+                var toProtein = crosslink.toProtein || linearShim;
                 var proteinA = fromProtein.id > toProtein.id ? toProtein : fromProtein;
                 var proteinB = toProtein.id >= fromProtein.id ? toProtein : fromProtein;
                 var key = proteinA.id + "-" + proteinB.id;
                 var pairing = obj[key];
                 if (!pairing) {
                     pairing = {
-                        crossLinks: [],
+                        crosslinks: [],
                         fromProtein: proteinA,
                         toProtein: proteinB,
                         label: proteinA.name.replace("_", " ") + " - " + proteinB.name.replace("_", " ")
                     };
                     obj[key] = pairing;
                 }
-                pairing.crossLinks.push(crossLink);
+                pairing.crosslinks.push(crosslink);
             }
         });
         return obj;

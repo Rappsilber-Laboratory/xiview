@@ -11,8 +11,8 @@ CLMSUI.utils.circleArrange = function(proteins, options) {
         };
         var edgeIds = d3.set();
 
-        if (protein.crossLinks) {
-            protein.crossLinks.forEach(function(clink) {
+        if (protein.crosslinks) {
+            protein.crosslinks.forEach(function(clink) {
                 // must have active matches, no intra-protein links, no repeated edges
                 if (clink.filteredMatches_pp.length && !clink.isLinearLink() // added this check to account for linears (they have no toProtein)
                     && clink.fromProtein.id !== clink.toProtein.id && !edgeIds.has(clink.id)) {

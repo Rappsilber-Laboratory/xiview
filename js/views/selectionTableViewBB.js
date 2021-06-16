@@ -14,7 +14,7 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
         const d3el = d3.select(this.el);
 
         const holdingDiv = d3el.append("DIV").attr("class", "selectView verticalFlexContainer");
-        holdingDiv.html("<div class='controlBar'><span class='pager'></span><span class='crossLinkTotal'></span><span class='rightSpan'></span><span class='rightSpan'></span></DIV><DIV class='scrollHolder'><TABLE><THEAD><TR></TR></THEAD></TABLE></DIV>");
+        holdingDiv.html("<div class='controlBar'><span class='pager'></span><span class='crosslinkTotal'></span><span class='rightSpan'></span><span class='rightSpan'></span></DIV><DIV class='scrollHolder'><TABLE><THEAD><TR></TR></THEAD></TABLE></DIV>");
 
         // redraw table on filter change if any of 1) filtering done, 2) match validation state updated, or 3) crosslinks selected (matches may have changed)
         this.listenTo(this.model, "filteringDone matchValidationStateUpdated selectionMatchesLinksChanged", function () {
@@ -469,7 +469,7 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
         }
         //console.log ("bisect", mci, lowerLink, upperLink, matchBounds);
 
-        const panelHeading = d3.select(this.el).select(".crossLinkTotal");
+        const panelHeading = d3.select(this.el).select(".crosslinkTotal");
         const commaFormat = d3.format(",");
         const selectedXLinkCount = this.matchCountIndices.length;
         const repeats = this.countRepeatedAmbiguousMatches(this.matchCountIndices);
@@ -498,8 +498,8 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
 
         arrayOfMatchLists.forEach(function (mci) {
             mci.matches.forEach(function (match) {
-                const crossLinks = match.crossLinks;
-                if (crossLinks.length > 1) {
+                const crosslinks = match.crosslinks;
+                if (crosslinks.length > 1) {
                     const mid = match.id;
                     if (ambigSet.has(mid)) {
                         repeatedAmbigCount++;

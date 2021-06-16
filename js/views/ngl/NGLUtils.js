@@ -451,7 +451,7 @@ CLMSUI.NGLUtils = {
         return chainToOriginalStructureIDMap;
     },
 
-    not3DHomomultimeric: function (crossLink, chain1ID, chain2ID) {
-        return chain1ID !== chain2ID || !crossLink.confirmedHomomultimer;
+    not3DHomomultimeric: function (crosslink, chain1ID, chain2ID) {
+        return chain1ID !== chain2ID || !crosslink.confirmedHomomultimer;
     },
 };

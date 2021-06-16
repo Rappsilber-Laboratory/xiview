@@ -322,7 +322,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         description.forEach(function (desc) {
             desc.value = desc.value || match[desc.field] || "null";
         });
-        //description.push(["crossLinks", match.crossLinks.map(function(xlink) { return xlink.id; }).join("&") ]);
+        //description.push(["crosslinks", match.crosslinks.map(function(xlink) { return xlink.id; }).join("&") ]);
         const description1 = description.map(function (desc) {
             return (desc.label || desc.field) + "=" + desc.value;
         });

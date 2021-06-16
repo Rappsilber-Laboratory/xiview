@@ -134,7 +134,7 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     const maxScore = clmsModel.get("maxScore");
 
     const hiScores = [];
-    for (let crosslink of clmsModel.get("crossLinks").values()){
+    for (let crosslink of clmsModel.get("crosslinks").values()){
         const scores = crosslink.filteredMatches_pp.map(function(m) {
             return m.match.score();
         });
@@ -185,9 +185,9 @@ CLMSUI.linkColour.setupColourModels = function (userConfig) {
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
     linkColourCollection.listenTo(CLMSUI.vent, "linkMetadataUpdated", function(metaMetaData) {
         const columns = metaMetaData.columns;
-        const crossLinks = metaMetaData.items;
+        const crosslinks = metaMetaData.items;
         const colMaps = columns.map(function (field) {
-            return CLMSUI.linkColour.makeColourModel(field, field, crossLinks);
+            return CLMSUI.linkColour.makeColourModel(field, field, crosslinks);
         });
         this.remove(columns);
         this.add(colMaps);
@@ -325,7 +325,7 @@ class MetaDataHexValuesColourModel extends ColourModel {
     }
 
     getValue (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
-        if (obj.isAggregateLink) { //} obj.crossLinks) {
+        if (obj.isAggregateLink) { //} obj.crosslinks) {
             return obj.getCrosslinks()[0].id;
         }
         return obj.id;
@@ -339,7 +339,7 @@ class MetaDataColourModel extends ColourModel{
     }
 
     getValue (obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
-        if (obj.isAggregateLink) { //} obj.crossLinks) {
+        if (obj.isAggregateLink) { //} obj.crosslinks) {
             return obj.getCrosslinks()[0].getMeta(this.get("field"));
         }
         return obj.getMeta(this.get("field"));

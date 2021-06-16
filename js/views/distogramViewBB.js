@@ -969,8 +969,8 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
                 var matches = _.pluck (bin, 2); // get the link data from every bin
                 this.model.setMarkedMatches(type, matches, false, ev.ctrlKey || ev.shiftKey); // set marked cross links according to type and modal keys
             } else {
-                var crossLinks = _.pluck (bin, 0); // get the link data from every bin
-                this.model.setMarkedCrossLinks(type, crossLinks, false, ev.ctrlKey || ev.shiftKey); // set marked cross links according to type and modal keys
+                var crosslinks = _.pluck (bin, 0); // get the link data from every bin
+                this.model.setMarkedCrossLinks(type, crosslinks, false, ev.ctrlKey || ev.shiftKey); // set marked cross links according to type and modal keys
             }
         }
         return this;

@@ -48,8 +48,8 @@ class CompositeModel extends Backbone.Model{
     // This means when we grab distances we get the worst-case distance (useful for setting ranges)
     // Another call to applyFilter will set them back to normal
     calcWorstCaseHomomultimerStates () {
-        const crossLinksArr = this.getAllCrossLinks();
-        crossLinksArr.forEach (function (clink) {
+        const crosslinksArr = this.getAllCrossLinks();
+        crosslinksArr.forEach (function (clink) {
             clink.confirmedHomomultimer = false;
             if (clink.isSelfLink()) {
                 clink.confirmedHomomultimer = _.any (clink.matches_pp, function (m) { return m.match.confirmedHomomultimer;});
@@ -59,19 +59,19 @@ class CompositeModel extends Backbone.Model{
     }
 
     // Get distances if links are made homomultimer if possible, needed to generate initial distance range
-    getHomomDistances (crossLinkArr) {
+    getHomomDistances (crosslinkArr) {
         // Store current homo states
-        const oldHom = _.pluck(crossLinkArr, "confirmedHomomultimer");
+        const oldHom = _.pluck(crosslinkArr, "confirmedHomomultimer");
 
         // Calculate
         this.calcWorstCaseHomomultimerStates();
-        const dists = this.getCrossLinkDistances(crossLinkArr);  // regenerate distances for all crosslinks
+        const dists = this.getCrossLinkDistances(crosslinkArr);  // regenerate distances for all crosslinks
 
         // Restore original homom states and distances
-        crossLinkArr.forEach (function (clink, i) {
+        crosslinkArr.forEach (function (clink, i) {
             clink.confirmedHomomultimer = oldHom[i];
         });
-        this.getCrossLinkDistances (crossLinkArr);
+        this.getCrossLinkDistances (crosslinkArr);
 
         return dists;
     }
@@ -79,8 +79,8 @@ class CompositeModel extends Backbone.Model{
     applyFilter () {
         const filterModel = this.get("filterModel");
         const clmsModel = this.get("clmsModel");
-        var crossLinksArr = this.getAllCrossLinks();
-        var clCount = crossLinksArr.length;
+        var crosslinksArr = this.getAllCrossLinks();
+        var clCount = crosslinksArr.length;
         const searches = Array.from(clmsModel.get("searches").values());
         let result;
 
@@ -94,7 +94,7 @@ class CompositeModel extends Backbone.Model{
             for (var m = 0; m < matches.length; ++m) {
                 matches[m].fdrPass = false;
             }
-            result = CLMSUI.fdr(crossLinksArr, {
+            result = CLMSUI.fdr(crosslinksArr, {
                 filterModel: filterModel,
                 CLMSModel: clmsModel,
                 threshold: filterModel.get("fdrThreshold"),
@@ -109,33 +109,33 @@ class CompositeModel extends Backbone.Model{
             });
         }
 
-        function filterCrossLink(crossLink) {
-            crossLink.filteredMatches_pp = [];
-            const isSelf = crossLink.isSelfLink();
+        function filterCrossLink(crosslink) {
+            crosslink.filteredMatches_pp = [];
+            const isSelf = crosslink.isSelfLink();
 
             if (filterModel.get("fdrMode")) {
                 // FDR mode
-                crossLink.confirmedHomomultimer = false;
+                crosslink.confirmedHomomultimer = false;
 
                 let linkPass = false;
-                const mms = crossLink.getMeta("meanMatchScore");
+                const mms = crosslink.getMeta("linkScore");
                 if (mms !== undefined) {
                     const cut = isSelf ? result[1].fdr : result[0].fdr;
                     linkPass = mms >= cut;
                 }
 
                 if (linkPass) {
-                    const filteredMatches_pp = crossLink.matches_pp.filter(
+                    const filteredMatches_pp = crosslink.matches_pp.filter(
                         function (value) {
                             return filterModel.subsetFilter(value.match);
                         }
                     );
 
-                    crossLink.ambiguous = !filteredMatches_pp.some(function(matchAndPepPos) {
-                        return matchAndPepPos.match.crossLinks.length === 1;
+                    crosslink.ambiguous = !filteredMatches_pp.some(function(matchAndPepPos) {
+                        return matchAndPepPos.match.crosslinks.length === 1;
                     });
-                    //~ var filteredMatches_pp = crossLink.filteredMatches_pp;
-                    crossLink.filteredMatches_pp = [];
+                    //~ var filteredMatches_pp = crosslink.filteredMatches_pp;
+                    crosslink.filteredMatches_pp = [];
                     const filteredMatchCount = filteredMatches_pp.length;
 
                     for (let fm_pp = 0; fm_pp < filteredMatchCount; fm_pp++) {
@@ -144,22 +144,22 @@ class CompositeModel extends Backbone.Model{
                         var match = fm.match;
                         //set its fdr pass att to true even though it may not be in final results
                         match.fdrPass = true;
-                        var pass = crossLink.fromProtein.manuallyHidden != true &&
-                            (!crossLink.toProtein || crossLink.toProtein.manuallyHidden != true) &&
+                        var pass = crosslink.fromProtein.manuallyHidden != true &&
+                            (!crosslink.toProtein || crosslink.toProtein.manuallyHidden != true) &&
                             filterModel.navigationFilter(match) &&
                             filterModel.groupFilter(match);
 
                         if (pass) {
-                            crossLink.filteredMatches_pp.push(fm);
+                            crosslink.filteredMatches_pp.push(fm);
                             // TODO: match reporting as homomultimer if ambiguous and one associated crosslink is homomultimeric
                             if (match.confirmedHomomultimer && isSelf) {
-                                crossLink.confirmedHomomultimer = true;
+                                crosslink.confirmedHomomultimer = true;
                             }
                         }
                     }
 
-                    if (!filterModel.distanceFilter (crossLink)) {
-                        crossLink.filteredMatches_pp = [];
+                    if (!filterModel.distanceFilter (crosslink)) {
+                        crosslink.filteredMatches_pp = [];
                     }
                 }
                 //~ else {
@@ -167,12 +167,12 @@ class CompositeModel extends Backbone.Model{
                 //~ }
             } else {
                 //not FDR mode
-                if (crossLink.fromProtein.manuallyHidden != true && (!crossLink.toProtein || crossLink.toProtein.manuallyHidden != true)) {
-                    crossLink.ambiguous = true;
-                    crossLink.confirmedHomomultimer = false;
+                if (crosslink.fromProtein.manuallyHidden != true && (!crosslink.toProtein || crosslink.toProtein.manuallyHidden != true)) {
+                    crosslink.ambiguous = true;
+                    crosslink.confirmedHomomultimer = false;
 
-                    //if (filterModel.distanceFilter (crossLink)) {
-                    const matches_pp = crossLink.matches_pp;
+                    //if (filterModel.distanceFilter (crosslink)) {
+                    const matches_pp = crosslink.matches_pp;
                     const matchCount = matches_pp.length;
                     for (let m = 0; m < matchCount; m++) {
                             var matchAndPepPos = matches_pp[m];
@@ -186,8 +186,8 @@ class CompositeModel extends Backbone.Model{
                             // this beforehand means navigation filters do affect ambiguous state of crosslinks
                             // pass = pass && filterModel.navigationFilter(match);
 
-                            if (pass && match.crossLinks.length === 1) {
-                                crossLink.ambiguous = false;
+                            if (pass && match.crosslinks.length === 1) {
+                                crosslink.ambiguous = false;
                             }
 
                             // Or 2.
@@ -195,17 +195,17 @@ class CompositeModel extends Backbone.Model{
                             pass = pass && filterModel.navigationFilter(match) && filterModel.groupFilter(match);
 
                             if (pass) {
-                                crossLink.filteredMatches_pp.push(matchAndPepPos);
+                                crosslink.filteredMatches_pp.push(matchAndPepPos);
                                 // TODO: match reporting as homomultimer if ambiguous and one associated crosslink is homomultimeric
                                 if (match.confirmedHomomultimer && isSelf) {
-                                    crossLink.confirmedHomomultimer = true;
+                                    crosslink.confirmedHomomultimer = true;
                                 }
                             }
                         }
                     //}
 
-                    if (!filterModel.distanceFilter (crossLink)) {
-                        crossLink.filteredMatches_pp = [];
+                    if (!filterModel.distanceFilter (crosslink)) {
+                        crosslink.filteredMatches_pp = [];
                     }
                 }
             }
@@ -216,17 +216,17 @@ class CompositeModel extends Backbone.Model{
 
         const homomultiSwitchers = [];
         for (var i = 0; i < clCount; ++i) {
-            var crossLink = crossLinksArr[i];
-            const oldHM = crossLink.confirmedHomomultimer;
+            var crosslink = crosslinksArr[i];
+            const oldHM = crosslink.confirmedHomomultimer;
             if (filterModel) {
-                filterCrossLink(crossLink);
+                filterCrossLink(crosslink);
             } else { // no filter model, let everything thru
-                crossLink.filteredMatches_pp = crossLink.matches_pp;
+                crosslink.filteredMatches_pp = crosslink.matches_pp;
             }
 
             // If homomultimer state changes, then sensible minimum distance will generally change
-            if (oldHM !== crossLink.confirmedHomomultimer) {
-                homomultiSwitchers.push (crossLink);
+            if (oldHM !== crosslink.confirmedHomomultimer) {
+                homomultiSwitchers.push (crosslink);
             }
         }
         this.getCrossLinkDistances (homomultiSwitchers);    // recalculate distances for crosslinks whose homomultimer status has changed
@@ -235,9 +235,9 @@ class CompositeModel extends Backbone.Model{
 
         // Remove crosslinks with matches in multiple groups if filterModel's multipleGroup setting set to false
         if (filterModel && !filterModel.get("multipleGroup")) {
-            crossLinksArr.forEach (function (crossLink) {
-                if (!filterModel.groupFilter2 (crossLink.filteredMatches_pp)) {
-                    crossLink.filteredMatches_pp = [];
+            crosslinksArr.forEach (function (crosslink) {
+                if (!filterModel.groupFilter2 (crosslink.filteredMatches_pp)) {
+                    crosslink.filteredMatches_pp = [];
                 }
             }, this);
         }
@@ -250,14 +250,14 @@ class CompositeModel extends Backbone.Model{
         if (filterModel) {
             const uniqueResiduePairsPerPPI = filterModel.get("urpPpi");
             if (uniqueResiduePairsPerPPI > 1) {
-                var value, key, crossLink;
+                var value, key, crosslink;
                 const ppiMap = new Map();
-                var crossLinksArr = this.getAllCrossLinks();
-                var clCount = crossLinksArr.length;
+                var crosslinksArr = this.getAllCrossLinks();
+                var clCount = crosslinksArr.length;
                 for (var c = 0; c < clCount; c++) {
-                    crossLink = crossLinksArr[c];
-                    if (crossLink.filteredMatches_pp.length) {
-                        var key = crossLink.toProtein.id + " - " + crossLink.fromProtein.id;
+                    crosslink = crosslinksArr[c];
+                    if (crosslink.filteredMatches_pp.length) {
+                        var key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
                         value = ppiMap.get(key);
                         if (typeof value == "undefined") {
                             value = 1;
@@ -268,11 +268,11 @@ class CompositeModel extends Backbone.Model{
                     }
                 }
                 for (c = 0; c < clCount; c++) {
-                    crossLink = crossLinksArr[c];
-                    key = crossLink.toProtein.id + " - " + crossLink.fromProtein.id;
+                    crosslink = crosslinksArr[c];
+                    key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
                     value = ppiMap.get(key);
                     if (value < uniqueResiduePairsPerPPI) {
-                        crossLink.filteredMatches_pp = [];
+                        crosslink.filteredMatches_pp = [];
                     }
                 }
             }
@@ -295,20 +295,20 @@ class CompositeModel extends Backbone.Model{
 
 
         for (var i = 0; i < clCount; ++i) {
-            var crossLink = crossLinksArr[i];
-            if (crossLink.filteredMatches_pp.length) {
-                this.filteredXLinks.all.push(crossLink);
-                const linear = crossLink.isLinearLink();
+            var crosslink = crosslinksArr[i];
+            if (crosslink.filteredMatches_pp.length) {
+                this.filteredXLinks.all.push(crosslink);
+                const linear = crosslink.isLinearLink();
                 if (linear) {
-                    this.filteredXLinks.linears.push(crossLink);
+                    this.filteredXLinks.linears.push(crosslink);
                 }
-                if (!crossLink.isDecoyLink()) {
+                if (!crosslink.isDecoyLink()) {
                     // is it a linear or normal target, stick it in the right sub-cache
-                    this.filteredXLinks[linear ? "linearTargets" : "targets"].push(crossLink);
+                    this.filteredXLinks[linear ? "linearTargets" : "targets"].push(crosslink);
                 } else {
                     // is it a TD or DD decoy, stick it in the right sub-cache
-                    const decoyLinkCache = crossLink.fromProtein.is_decoy && !linear && crossLink.toProtein.is_decoy ? "decoysDD" : "decoysTD";
-                    this.filteredXLinks[decoyLinkCache].push(crossLink);
+                    const decoyLinkCache = crosslink.fromProtein.is_decoy && !linear && crosslink.toProtein.is_decoy ? "decoysDD" : "decoysTD";
+                    this.filteredXLinks[decoyLinkCache].push(crosslink);
                 }
             }
         }
@@ -317,7 +317,7 @@ class CompositeModel extends Backbone.Model{
         //hiding linkless participants
         for (let participant of clmsModel.get("participants").values()) {
             participant.hidden = true;
-            for (let pCrossLink of participant.crossLinks) {
+            for (let pCrossLink of participant.crosslinks) {
                 if (pCrossLink.filteredMatches_pp.length &&
                     !pCrossLink.isDecoyLink() &&
                     !pCrossLink.isLinearLink()) {
@@ -350,7 +350,7 @@ class CompositeModel extends Backbone.Model{
     }
 
     getAllCrossLinks () {
-        return Array.from(this.get("clmsModel").get("crossLinks").values());
+        return Array.from(this.get("clmsModel").get("crosslinks").values());
     }
 
     getAllTTCrossLinks () {
@@ -406,17 +406,17 @@ class CompositeModel extends Backbone.Model{
                 const clinkMap = d3.map();
                 const dedupedMatches = map.values();
                 dedupedMatches.forEach(function(match) {
-                    const clinks = match.crossLinks;
+                    const clinks = match.crosslinks;
                     for (let c = 0; c < clinks.length; c++) {
                         const clink = clinks[c];
                         clinkMap.set(clink.id, clink);
                     }
                 });
-                const crossLinks = clinkMap.values();
+                const crosslinks = clinkMap.values();
 
                 const matchesChanged = this.changedAttributes();
                 // add = false on this call, 'cos crosslinks from existing marked matches will already be picked up in this routine if add is true
-                this.setMarkedCrossLinks(modelProperty, crossLinks, andAlternatives, false, true);
+                this.setMarkedCrossLinks(modelProperty, crosslinks, andAlternatives, false, true);
                 this.triggerFinalMatchLinksChange(modelProperty, matchesChanged);
             }
         }
@@ -424,46 +424,46 @@ class CompositeModel extends Backbone.Model{
 
     // modelProperty can be "highlights" or "selection" (or a new one) depending on what array you want
     // to fill in the model
-    setMarkedCrossLinks (modelProperty, crossLinks, andAlternatives, add, dontForward) {
-        if (crossLinks) { // if undefined nothing happens, to clear selection pass an empty array - []
+    setMarkedCrossLinks (modelProperty, crosslinks, andAlternatives, add, dontForward) {
+        if (crosslinks) { // if undefined nothing happens, to clear selection pass an empty array - []
             const removedLinks = d3.map();
             const newlyAddedLinks = d3.map();
 
-            // If adding to existing crosslinks, make crossLinkMap from the existing crosslinks and add or remove the new array of crosslinks from it.
-            // Otherwise just make crossLinkMap from the new array of crosslinks
-            const crossLinkMap = d3.map(add ? this.get(modelProperty) : crossLinks, function (d) {
+            // If adding to existing crosslinks, make crosslinkMap from the existing crosslinks and add or remove the new array of crosslinks from it.
+            // Otherwise just make crosslinkMap from the new array of crosslinks
+            const crosslinkMap = d3.map(add ? this.get(modelProperty) : crosslinks, function (d) {
                 return d.id;
             });
             if (add) {
                 const potentialToggle = (modelProperty === "selection");
 
                 // add new cross-links. If adding to pre-selected cross-links, toggle new cross-links depending on whether the cross-link is already selected or not
-                crossLinks.forEach(function(xlink) {
+                crosslinks.forEach(function(xlink) {
                     const id = xlink.id;
-                    if (potentialToggle && crossLinkMap.has(id)) {
-                        crossLinkMap.remove(id);
+                    if (potentialToggle && crosslinkMap.has(id)) {
+                        crosslinkMap.remove(id);
                         removedLinks.set(id, xlink);
                     } else {
-                        crossLinkMap.set(id, xlink);
+                        crosslinkMap.set(id, xlink);
                         newlyAddedLinks.set(id, xlink);
                     }
                 });
-                crossLinks = crossLinkMap.values();
+                crosslinks = crosslinkMap.values();
             }
 
             if (andAlternatives) {
-                crossLinks.forEach(function(crossLink) {
-                    if (crossLink.ambiguous) {
-                        //this.recurseAmbiguity (crossLink, crossLinkMap);
-                        const filteredMatchesAndPeptidePositions = crossLink.filteredMatches_pp;
+                crosslinks.forEach(function(crosslink) {
+                    if (crosslink.ambiguous) {
+                        //this.recurseAmbiguity (crosslink, crosslinkMap);
+                        const filteredMatchesAndPeptidePositions = crosslink.filteredMatches_pp;
                         const fm_ppCount = filteredMatchesAndPeptidePositions.length;
                         for (let fm_pp = 0; fm_pp < fm_ppCount; fm_pp++) {
-                            const crossLinks = filteredMatchesAndPeptidePositions[fm_pp].match.crossLinks;
-                            const clCount = crossLinks.length;
+                            const crosslinks = filteredMatchesAndPeptidePositions[fm_pp].match.crosslinks;
+                            const clCount = crosslinks.length;
 
                             for (let cl = 0; cl < clCount; cl++) {
-                                const mCrossLink = crossLinks[cl];
-                                crossLinkMap.set(mCrossLink.id, mCrossLink);
+                                const mCrossLink = crosslinks[cl];
+                                crosslinkMap.set(mCrossLink.id, mCrossLink);
                             }
                         }
                     }
@@ -471,7 +471,7 @@ class CompositeModel extends Backbone.Model{
             }
 
             // is d3 map, so .values always works, don't need to worry about whether ie11 supports Array.from (in fact ie11 gets keys/values wrong way round if we call CLMS.array...)
-            const dedupedCrossLinks = crossLinkMap.values(); // CLMS.arrayFromMapValues(crossLinkMap);
+            const dedupedCrossLinks = crosslinkMap.values(); // CLMS.arrayFromMapValues(crosslinkMap);
             this.set(modelProperty, dedupedCrossLinks);
 
             if (!dontForward) {
@@ -568,17 +568,17 @@ class CompositeModel extends Backbone.Model{
         const toSelect = new Set();
         for (let s = 0; s < selectedCount; s++) {
             const participant = selectedArr[s];
-            const crossLinks = participant.crossLinks;
-            const clCount = crossLinks.length;
+            const crosslinks = participant.crosslinks;
+            const clCount = crosslinks.length;
             for (let cl = 0; cl < clCount; cl++) {
-                const crossLink = crossLinks[cl];
-                const fromProtein = crossLink.fromProtein;
+                const crosslink = crosslinks[cl];
+                const fromProtein = crosslink.fromProtein;
                 if (fromProtein.is_decoy != true) {
                     fromProtein.manuallyHidden = false;
                     toSelect.add(fromProtein);
                 }
-                if (crossLink.toProtein && crossLink.toProtein.is_decoy != true) {
-                    const toProtein = crossLink.toProtein;
+                if (crosslink.toProtein && crosslink.toProtein.is_decoy != true) {
+                    const toProtein = crosslink.toProtein;
                     toProtein.manuallyHidden = false;
                     toSelect.add(toProtein);
                 }
@@ -732,13 +732,13 @@ class CompositeModel extends Backbone.Model{
     }
 
     // set includeUndefineds to true to preserve indexing of returned distances to input crosslinks
-    getCrossLinkDistances (crossLinks, options) {
+    getCrossLinkDistances (crosslinks, options) {
         options = options || {};
         const includeUndefineds = options.includeUndefineds || false;
 
         const distModel = this.get("clmsModel").get("distancesObj");
         const protAlignCollection = this.get("alignColl");
-        let distArr = crossLinks.map(function (cl) {
+        let distArr = crosslinks.map(function (cl) {
             const dist = this.getSingleCrosslinkDistance(cl, distModel, protAlignCollection, options);
             return options.returnChainInfo || dist == undefined ? dist : +dist; // + is to stop it being a string
         }, this);
@@ -784,14 +784,14 @@ class CompositeModel extends Backbone.Model{
         }
 
         if (featureFilterSet.has("Cross-linkable-1")) {
-            var crossLinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
-            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(crossLinkableFeatures);
+            var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
+            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-2")) {
-            var crossLinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
-            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(crossLinkableFeatures);
+            var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
+            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 

@@ -851,8 +851,8 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                 "Filter: " + CLMSUI.utils.filterStateToString()
             ],
             {
-                crossLinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"),
-                crossLinks: this.model.get("clmsModel").get("crossLinks")
+                crosslinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"),
+                crosslinks: this.model.get("clmsModel").get("crosslinks")
             }
         );
         return this;

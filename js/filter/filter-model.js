@@ -221,9 +221,9 @@ class FilterModel extends Backbone.Model{
                 const aaApart = +this.get("aaApart");
                 if (!isNaN(aaApart)) {
                     // if not homomultimer and not ambig and is a selfLink
-                    if ( /*!match.confirmedHomomultimer &&*/ !ambig && match.crossLinks[0].isSelfLink()) {
+                    if ( /*!match.confirmedHomomultimer &&*/ !ambig && match.crosslinks[0].isSelfLink()) {
                         // linears report false for isSelfLink so they never get to this bit (where toResidue would be null)
-                        const unambigCrossLink = match.crossLinks[0];
+                        const unambigCrossLink = match.crosslinks[0];
                         if (Math.abs(unambigCrossLink.toResidue - unambigCrossLink.fromResidue) < aaApart) {
                             return false;
                         }
@@ -256,8 +256,8 @@ class FilterModel extends Backbone.Model{
                 return !match.isDecoy() || this.get("decoys");
             }
 
-            distanceFilter (crossLink) {
-                const dist = crossLink.getMeta("distance");
+            distanceFilter (crosslink) {
+                const dist = crosslink.getMeta("distance");
                 if (dist === undefined) {   // show undefined distances if either no distances or specifically allowed (distanceUndef flag)
                     const noDistances = this.distanceExtent[0] === undefined;
                     return noDistances || this.get("distanceUndef");

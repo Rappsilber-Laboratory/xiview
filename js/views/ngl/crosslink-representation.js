@@ -247,7 +247,7 @@ class CrosslinkRepresentation {
                 }
                 const origLinkID = linkObj.origId;
                 const model = self.nglModelWrapper.getCompositeModel();
-                const link = model.get("clmsModel").get("crossLinks").get(origLinkID);
+                const link = model.get("clmsModel").get("crosslinks").get(origLinkID);
                 const colRGBString = model.get("linkColourAssignment").getColour(link); // returns an 'rgb(r,g,b)' string
                 let col24bit = colCache[colRGBString];
                 if (col24bit === undefined) {
@@ -290,7 +290,7 @@ class CrosslinkRepresentation {
                 }
                 const origLinkID = linkObj.origId;
                 const model = self.nglModelWrapper.getCompositeModel();
-                const link = model.get("clmsModel").get("crossLinks").get(origLinkID);
+                const link = model.get("clmsModel").get("crosslinks").get(origLinkID);
                 const colRGBString = model.get("linkColourAssignment").getColour(link); // returns an 'rgb(r,g,b)' string
                 let col24bit = colCache[colRGBString];
                 if (col24bit === undefined) {

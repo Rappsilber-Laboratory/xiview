@@ -169,14 +169,14 @@ CLMSUI.init.models = function (options) {
     });
 
     // Set up colour models, some (most) of which depend on data properties
-    const crossLinkerKeys = d3.keys(CLMSUI.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
-    const storedDistanceColourSettings = crossLinkerKeys.length === 1 ? _.propertyOf(CLMSUI.utils.getLocalStorage())(["distanceColours", crossLinkerKeys[0]]) : undefined;
+    const crosslinkerKeys = d3.keys(CLMSUI.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
+    const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(CLMSUI.utils.getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
     CLMSUI.linkColour.setupColourModels({distance: storedDistanceColourSettings});
 
-    if (crossLinkerKeys.length === 1) {
+    if (crosslinkerKeys.length === 1) {
         CLMSUI.compositeModelInst.listenTo(CLMSUI.linkColour.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
             const obj = {distanceColours: {}};
-            obj.distanceColours[crossLinkerKeys[0]] = attr;
+            obj.distanceColours[crosslinkerKeys[0]] = attr;
             CLMSUI.utils.setLocalStorage(obj);
         });
     }
@@ -305,8 +305,8 @@ CLMSUI.init.modelsEssential = function (options) {
         return CLMSUI.modelUtils.flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
     };
     minigramModels[1].data = function () {
-        const crossLinks = CLMSUI.compositeModelInst.getAllCrossLinks();
-        const distances = crossLinks
+        const crosslinks = CLMSUI.compositeModelInst.getAllCrossLinks();
+        const distances = crosslinks
             .map(function (clink) {
                 return clink.getMeta("distance");
             })
@@ -757,7 +757,7 @@ CLMSUI.init.viewsEssential = function (options) {
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
                             const altModel = new clmsModel.SearchResultsModel();
                             altModel.parseJSON(json);
-                            const allCrossLinks = Array.from(altModel.get("crossLinks").values());
+                            const allCrossLinks = Array.from(altModel.get("crosslinks").values());
                             // empty selection first
                             // (important or it will crash coz selection contains links to proteins not in clms model)
                             self.alternativesModel
