@@ -592,14 +592,14 @@ function align (query, target, myScores, isLocal, isSemiLocal, windowSize) {
     return alignment;
 }
 
-if (typeof module == 'object') {
-    module.exports = combine;
-} else {
-    this.CLMSUI = this.CLMSUI || {};
-    this.CLMSUI.GotohAligner = {
+// if (typeof module == 'object') {
+//     module.exports = combine;
+// } else {
+//     this.CLMSUI = this.CLMSUI || {};
+    export const GotohAligner = {
         align: align
     };
-}
+// }
 
 function combine() {
     return align.apply(this, arguments);

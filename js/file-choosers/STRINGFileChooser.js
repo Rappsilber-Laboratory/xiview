@@ -1,15 +1,14 @@
-//		STRING Loader Widget
-//
-//		Martin Graham
-//
-//		js/STRINGFileChooser.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {STRINGUtils} from "./stringUtils";
+import {utils} from "../utils";
 
-CLMSUI.STRINGFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
+export const STRINGFileChooserBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -19,7 +18,7 @@ CLMSUI.STRINGFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
-        CLMSUI.STRINGFileChooserBB.__super__.initialize.apply(this, arguments);
+        STRINGFileChooserBB.__super__.initialize.apply(this, arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
         var mainDivSel = d3.select(this.el).classed ("metaLoadPanel", true);
@@ -68,7 +67,7 @@ CLMSUI.STRINGFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
                 type: "text",
                 class: "inputTaxonID withSideMargins",
                 maxlength: 16,
-                pattern: CLMSUI.utils.commonRegexes.digitsOnly,
+                pattern: utils.commonRegexes.digitsOnly,
                 size: 16,
                 title: "Enter NCBI Taxon ID here for use in STRING search",
                 //placeholder: "eg 1AO6"
@@ -87,7 +86,7 @@ CLMSUI.STRINGFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             .attr ("title", "If local storage reports as full, you can purge cached STRING interactions by pressing this button.")
             .on ("click", function () {
                 if (localStorage) {
-                    CLMSUI.STRINGUtils.purgeCache();
+                    STRINGUtils.purgeCache();
                 }
             })
         ;
@@ -121,18 +120,18 @@ CLMSUI.STRINGFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             var statusText = "";
             if (!errorReason) {
                 //var t = performance.now();
-                var result = CLMSUI.modelUtils.updateLinkMetadata (csv, self.model.get("clmsModel"));
+                var result = modelUtils.updateLinkMetadata (csv, self.model.get("clmsModel"));
                 //t = performance.now() - t;
                 //console.log ("assignt to links took", t/1000, "s");
                 statusText = result.ppiCount + " STRING interactions matched to protein set.<br>";
                 if (result.ppiCount > 0) {
-                    self.model.set ("linkColourAssignment", CLMSUI.linkColour.Collection.get("STRING Score"));  // Switch to STRING colouring if any STRING scores available
+                    self.model.set ("linkColourAssignment", window.linkColor.Collection.get("STRING Score"));  // Switch to STRING colouring if any STRING scores available
                     statusText += "Colour Scheme switched to STRING Score - subscores via Legend View.";
                 }
             }
             self.setStatusText (errorReason || statusText, !errorReason);
         };
-        CLMSUI.STRINGUtils.loadStringDataFromModel (this.model.get("clmsModel"), taxonID, callback);
+        STRINGUtils.loadStringDataFromModel (this.model.get("clmsModel"), taxonID, callback);
     },
 
     isTaxaIDValid: function() {

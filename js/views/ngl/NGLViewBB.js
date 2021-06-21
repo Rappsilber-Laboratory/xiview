@@ -1,9 +1,17 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from 'jquery';
 
-CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
+import {BaseFrameView} from "../../ui-utils/base-frame-view";
+import {utils} from "../../utils";
+import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
+import {modelUtils} from "../../modelUtils";
+import {NGLExportUtils} from "./NGLExportUtils";
+
+export const NGLViewBB = BaseFrameView.extend({
 
     events: function () {
-        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -51,7 +59,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function (viewOptions) {
-        CLMSUI.NGLViewBB.__super__.initialize.apply(this, arguments);
+        NGLViewBB.__super__.initialize.apply(this, arguments);
         const self = this;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
@@ -61,7 +69,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             .attr("class", "verticalFlexContainer");
 
         const buttonData = [{
-            label: CLMSUI.utils.commonLabels.downloadImg + "PNG",
+            label: utils.commonLabels.downloadImg + "PNG",
             class: "downloadButton",
             type: "button",
             id: "download",
@@ -77,7 +85,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         ];
 
         const toolbar = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
 
         // Generate Export/Save cross-link data dropdown
         const saveExportButtonData = [{
@@ -135,12 +143,12 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                 d.value = d.value || d.label;
             }, this)
         ;
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, saveExportButtonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, saveExportButtonData);
 
         // ...then moved to a dropdown menu
         const optid = this.el.id + "Exports";
         toolbar.append("p").attr("id", optid);
-        new CLMSUI.DropDownMenuViewBB({
+        new DropDownMenuViewBB({
             el: "#" + optid,
             model: self.model.get("clmsModel"),
             myOptions: {
@@ -167,7 +175,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                     key: ass
                 };
             });
-            CLMSUI.utils.addMultipleSelectControls({
+            utils.addMultipleSelectControls({
                 addToElem: toolbar,
                 selectList: ["Assembly"],
                 optionList: labelPairs,
@@ -286,12 +294,12 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                     d.initialState = (d.value === this.options[d.group]);
                 }
             }, this);
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
 
         // ...then moved to a dropdown menu
         const optid2 = this.el.id + "Options";
         toolbar.append("p").attr("id", optid2);
-        new CLMSUI.DropDownMenuViewBB({
+        new DropDownMenuViewBB({
             el: "#" + optid2,
             model: self.model.get("clmsModel"),
             myOptions: {
@@ -310,7 +318,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         const allReps = NGL.RepresentationRegistry.names.slice().sort();
         const ignoreReps = ["axes", "base", "contact", "distance", "helixorient", "hyperball", "label", "rocket", "trace", "unitcell", "validation", "angle", "dihedral"];
         const mainReps = _.difference(allReps, ignoreReps);
-        CLMSUI.utils.addMultipleSelectControls({
+        utils.addMultipleSelectControls({
             addToElem: toolbar,
             selectList: ["Draw Proteins As"],
             optionList: mainReps,
@@ -431,7 +439,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             }
         };
 
-        CLMSUI.utils.addMultipleSelectControls({
+        utils.addMultipleSelectControls({
             addToElem: toolbar,
             selectList: ["Colour Proteins By"],
             optionList: mainColourSchemes,
@@ -493,8 +501,8 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         const disableHaddock = function (stageModel) {
             mainDivSel.select(".exportHaddockButton").property("disabled", !stageModel.get("allowInterModelDistances") || stageModel.get("structureComp").structure.modelStore.count == 1);
         };
-        // listen to CLMSUI.vent rather than directly to newStageModel's change:allowInterModelDistances as we needed to recalc distances before informing views
-        this.listenTo(CLMSUI.vent, "changeAllowInterModelDistances", function (stageModel, value) {
+        // listen to vent rather than directly to newStageModel's change:allowInterModelDistances as we needed to recalc distances before informing views
+        this.listenTo(vent, "changeAllowInterModelDistances", function (stageModel, value) {
             this.options.allowInterModelDistances = value;
             d3.select(this.el).selectAll(".allowInterModelDistancesCB input").property("checked", value);
             if (this.xlRepr) {
@@ -507,7 +515,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.listenTo(this.model, "change:stageModel", function (model, newStageModel) {
             // swap out stage models and listeners
             const prevStageModel = model.previous("stageModel");
-            CLMSUI.utils.xilog("STAGE MODEL CHANGED", arguments, this, prevStageModel);
+            utils.xilog("STAGE MODEL CHANGED", arguments, this, prevStageModel);
             if (prevStageModel) {
                 this.stopListening(prevStageModel); // remove old stagemodel linklist change listener;
             }
@@ -565,14 +573,14 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             disableHaddock(newStageModel);
         });
 
-        this.listenTo(CLMSUI.vent, "proteinMetadataUpdated", function () {
+        this.listenTo(vent, "proteinMetadataUpdated", function () {
             if (this.xlRepr) {
                 this.xlRepr.redisplayChainLabels();
             }
         });
 
         // if the assembly structure has changed the chain sets that can be used in distance calculations, recalc and redraw distances
-        this.listenTo(CLMSUI.vent, "PDBPermittedChainSetsUpdated", function () {
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated", function () {
             if (this.xlRepr) {
                 this.showFiltered().centerView();
             }
@@ -601,17 +609,17 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     repopulate: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.utils.xilog("REPOPULATE", this.model, stageModel);
+        utils.xilog("REPOPULATE", this.model, stageModel);
         const sname = stageModel.getStructureName();
         let overText = "PDB File: " + (sname.length === 4 ?
             "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
             " - " + stageModel.get("structureComp").structure.title;
 
-        const interactors = CLMSUI.modelUtils.filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
+        const interactors = modelUtils.filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
         const alignColl = this.model.get("alignColl");
         const pdbLengthsPerProtein = interactors.map(function (inter) {
             const pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);
-            const contigPDBFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(pdbFeatures);
+            const contigPDBFeatures = modelUtils.mergeContiguousFeatures(pdbFeatures);
 
             const totalLength = d3.sum(contigPDBFeatures, function (d) {
                 return d.end - d.begin + 1;
@@ -620,7 +628,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
             return totalLength;
         }, this);
         const totalPDBLength = d3.sum(pdbLengthsPerProtein);
-        const totalProteinLength = CLMSUI.modelUtils.totalProteinLength(interactors);
+        const totalProteinLength = modelUtils.totalProteinLength(interactors);
         const pcent = d3.format(".0%")(totalPDBLength / totalProteinLength);
         const commaFormat = d3.format(",");
 
@@ -646,7 +654,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     render: function () {
         if (this.isVisible()) {
             this.showFiltered();
-            CLMSUI.utils.xilog("re rendering NGL view");
+            utils.xilog("re rendering NGL view");
         }
         return this;
     },
@@ -684,7 +692,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                 // make fresh canvas
                 if (self.options.exportKey) {
                     const gap = 50;
-                    const canvasObj = CLMSUI.utils.makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
+                    const canvasObj = utils.makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
 
                     // draw blob as image to this canvas
                     const DOMURL = URL || webkitURL || window;
@@ -715,7 +723,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
                             // turn canvas to blob and download it as a png file
                             canvasObj.canvas.toBlob(function (newBlob) {
                                 if (newBlob) {
-                                    CLMSUI.utils.nullCanvasObj(canvasObj);
+                                    utils.nullCanvasObj(canvasObj);
                                     NGL.download(newBlob, self.filenameStateString() + ".png");
                                 }
                             }, 'image/png');
@@ -775,13 +783,13 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     savePDB: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.exportPDB(
+        NGLExportUtils.exportPDB(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
                 "Xi Crosslinks in CONECT and LINK records",
-                "Search ID: " + CLMSUI.utils.searchesToString(),
-                "Filter: " + CLMSUI.utils.filterStateToString()
+                "Search ID: " + utils.searchesToString(),
+                "Filter: " + utils.filterStateToString()
             ]
         );
         return this;
@@ -789,12 +797,12 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportPymol: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.exportPymolCrossLinkSyntax(
+        NGLExportUtils.exportPymolCrossLinkSyntax(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
-                "Search ID: " + CLMSUI.utils.searchesToString(),
-                "Filter: " + CLMSUI.utils.filterStateToString()
+                "Search ID: " + utils.searchesToString(),
+                "Filter: " + utils.filterStateToString()
             ]
         );
         return this;
@@ -802,7 +810,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     export3dLinksCSV: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.export3dLinksCSV(
+        NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -811,7 +819,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
     //todo - unnecessary duplication
     export3dLinksCSVSelected: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.export3dLinksCSV(
+        NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), true
         );
         return this;
@@ -819,7 +827,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportChimeraPB: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.exportChimeraPseudobonds(
+        NGLExportUtils.exportChimeraPseudobonds(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -827,7 +835,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportJWalk: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.exportJWalk(
+        NGLExportUtils.exportJWalk(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -835,7 +843,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportXlinkAnalyzer: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.exportXlinkAnalyzer(
+        NGLExportUtils.exportXlinkAnalyzer(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
@@ -843,12 +851,12 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     exportHaddock: function () {
         const stageModel = this.model.get("stageModel");
-        CLMSUI.NGLExportUtils.exportHaddockCrossLinkSyntax(
+        NGLExportUtils.exportHaddockCrossLinkSyntax(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
-                "Search ID: " + CLMSUI.utils.searchesToString(),
-                "Filter: " + CLMSUI.utils.filterStateToString()
+                "Search ID: " + utils.searchesToString(),
+                "Filter: " + utils.filterStateToString()
             ],
             {
                 crosslinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"),
@@ -936,7 +944,7 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     rerenderColourSchemes: function (repSchemePairs) {
         if (this.xlRepr && this.isVisible()) {
-            CLMSUI.utils.xilog("rerendering ngl");
+            utils.xilog("rerendering ngl");
             this.xlRepr.rerenderColourSchemes(repSchemePairs);
         }
         return this;
@@ -988,17 +996,17 @@ CLMSUI.NGLViewBB = CLMSUI.utils.BaseFrameView.extend({
         const optionsPlus = $.extend({}, this.options);
         optionsPlus.rep = this.xlRepr.options.chainRep;
 
-        return CLMSUI.utils.objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
+        return utils.objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
     },
 
     pdbFilenameStateString: function () {
         const stageModel = this.model.get("stageModel");
-        return CLMSUI.utils.makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + CLMSUI.utils.searchesToString() + "-" + CLMSUI.utils.filterStateToString());
+        return utils.makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + utils.searchesToString() + "-" + utils.filterStateToString());
     },
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
         const stageModel = this.model.get("stageModel");
-        return CLMSUI.utils.makeLegalFileName(CLMSUI.utils.searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + CLMSUI.utils.filterStateToString());
+        return utils.makeLegalFileName(utils.searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + utils.filterStateToString());
     },
 });

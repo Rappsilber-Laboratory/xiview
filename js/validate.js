@@ -1,6 +1,4 @@
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.validate = function (matchId, validationStatus, randId, successCallBack) {
+const validate = function (matchId, validationStatus, randId, successCallBack) {
     $.ajax({
         type: "POST",
         url: "./php/validateMatch.php",

@@ -1,6 +1,10 @@
-    var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
 
-    CLMSUI.AlignSettingsViewBB = Backbone.View.extend({
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+
+export const AlignSettingsViewBB = Backbone.View.extend({
         events: {
             "change input": "inputChanged",
             "keyup input": "inputKeyed",
@@ -108,7 +112,7 @@
         }
     });
 
-    CLMSUI.CollectionAsSelectViewBB = Backbone.View.extend({
+export const CollectionAsSelectViewBB = Backbone.View.extend({
         events: {
             "change select": "selectChanged",
         },

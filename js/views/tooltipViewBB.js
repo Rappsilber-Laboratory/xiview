@@ -1,6 +1,8 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
 
-CLMSUI.TooltipViewBB = Backbone.View.extend({
+export const TooltipViewBB = Backbone.View.extend({
     className: "CLMStooltip",
     initialize: function () {
         const tooltip = d3.select(this.el);

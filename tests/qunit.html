@@ -1,104 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>QUnit XiView Tests</title>
-  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.9.2.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>QUnit XiView Tests</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.9.2.css">
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture"></div>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
 
-  <script src="https://code.jquery.com/qunit/qunit-2.9.2.js"></script>
-  <script type="text/javascript" src="../../vendor/js/byrei-dyndiv_1.0rc1-src.js"></script>
-  <script type="text/javascript" src="../../vendor/js/d3.js"></script>
-  <script type="text/javascript" src="../../vendor/js/colorbrewer.js"></script>
-  <script type="text/javascript" src="../../vendor/js/ngl_verbose.js"></script>
-  <script type="text/javascript" src="../../vendor/js/c3.js"></script>
-  <script type="text/javascript" src="../../vendor/js/split.js"></script>
-  <script type="text/javascript" src="../../vendor/js/svgexp.js"></script>
-  <script type="text/javascript" src="../../vendor/js/underscore.js"></script>
-  <script type="text/javascript" src="../../vendor/js/spin.js"></script>
-  <script type="text/javascript" src="../../vendor/js/jquery-3.4.1.js"></script>
-  <script type="text/javascript" src="../../vendor/js/backbone.js"></script>
-  <script type="text/javascript" src="../../vendor/js/jquery.jsonview.js"></script>
-  <script type="text/javascript" src="../../vendor/js/d3table.js"></script>
-  <script type="text/javascript" src="../../vendor/js/cola.js"></script><!-- for xiNET layout -->
-  <script type="text/javascript" src="../../vendor/js/multiple-select.js"></script>
-  <script type="text/javascript" src="../../vendor/js/workerpool.js"></script>
-  <script type="text/javascript" src="../../vendor/js/d3-octree.js"></script>
-  <script type="text/javascript" src="../../vendor/js/jquery-ui.js"></script>
+<script src="https://code.jquery.com/qunit/qunit-2.9.2.js"></script>
+<script type="text/javascript" src="../../vendor/js/byrei-dyndiv_1.0rc1-src.js"></script>
+<script type="text/javascript" src="../../vendor/js/ngl.dev.js"></script>
+<script type="text/javascript" src="../../vendor/js/cola.js"></script>
+<script type="text/javascript" src="../../spectrum/vendor/jscolor.min.js"></script>
+<script type="text/javascript" src="../../dist/xiview.js"></script>
+<script type="text/javascript" src="../../vendor/js/d3-octree.js"></script>
 
-  <script type="text/javascript" src="../../dist/clms.js"></script>
-<!--  <script type="text/javascript" src="../../dist/xinet.js"></script>-->
+<script>
+    QUnit.config.autostart = false;
+    xiview.test();
+</script>
 
-  <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
-  <script type="text/javascript" src="../js/utils.js"></script>
-  <script type="text/javascript" src="../js/views/circle/circleArrange.js"></script>
-  <script type="text/javascript" src="../js/filter/filter-model.js"></script>
-  <script type="text/javascript" src="../js/model/models.js"></script>
-  <script type="text/javascript" src="../js/model/annotation-model-collection.js"></script>
-  <script type="text/javascript" src="../js/model/composite-model.js"></script>
-  <script type="text/javascript" src="../js/modelUtils.js"></script>
-  <script type="text/javascript" src="../js/file-choosers/stringUtils.js"></script>
-  <script type="text/javascript" src="../js/filter/fdr.js"></script>
-  <script type="text/javascript" src="../js/model/distances.js"></script>
-
-  <script type="text/javascript" src="../js/ui-utils/section-table.js"></script>
-  <script type="text/javascript" src="../js/ui-utils/base-frame-view.js"></script>
-  <script type="text/javascript" src="../js/ui-utils/checkbox-view.js"></script>
-  <script type="text/javascript" src="../js/ui-utils/color-collection-option-view.js"></script>
-  <script type="text/javascript" src="../js/ui-utils/radio-button-filter-view.js"></script>
-
-  <script type="text/javascript" src="../js/views/distogramViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/key/threeColourSliderBB.js"></script>
-  <script type="text/javascript" src="../js/filter/filterViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/matrixViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/tooltipViewBB.js"></script>
-  <script type="text/javascript" src="../js/filter/minigramViewBB.js"></script>
-  <script type="text/javascript" src="../js/ui-utils/ddMenuViewBB.js"></script>
-  <script type="text/javascript" src="../js/file-choosers/PDBFileChooser.js"></script>
-  <script type="text/javascript" src="../js/file-choosers/STRINGFileChooser.js"></script>
-  <script type="text/javascript" src="../js/file-choosers/metaDataFileChoosers.js"></script>
-  <script type="text/javascript" src="../js/align/bioseq32.js"></script>
-  <script type="text/javascript" src="../js/align/sequence-model-collection.js"></script>
-  <script type="text/javascript" src="../js/align/protein-alignment-model-collection.js"></script>
-  <script type="text/javascript" src="../js/align/alignViewBB3.js"></script>
-  <script type="text/javascript" src="../js/align/alignSettingsViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/selectionTableViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/circle/circularViewBB.js"></script>
-  <script type="text/javascript" src="../js/model/color/color-model.js"></script>
-  <script type="text/javascript" src="../js/model/color/link-color-model.js"></script>
-  <script type="text/javascript" src="../js/model/color/protein-color-model.js"></script>
-  <script type="text/javascript" src="../js/views/spectrumViewWrapper.js"></script>
-  <script type="text/javascript" src="../js/validate.js"></script>
-  <script type="text/javascript" src="../js/loadSpectrum.js"></script>
-  <script type="text/javascript" src="../js/views/proteinInfoViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/key/keyViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/scatterplotViewBB.js"></script>
-  <script type="text/javascript" src="../js/networkFrame.js"></script>
-  <script type="text/javascript" src="../js/downloads.js"></script>
-  <script type="text/javascript" src="../js/views/searchSummaryViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/xiNetControlsViewBB.js"></script>
-
-  <script type="text/javascript" src="../js/views/go/goTermsSankeyViewBB.js"></script>
-  <script type="text/javascript" src="../js/views/go/goTerm.js"></script>
-  <script type="text/javascript" src="../js/views/go/sankey.js"></script>
-
-  <script type="text/javascript" src="../js/views/ngl/NGLUtils.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/NGLExportUtils.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/ngl-wrapper-model.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/crosslink-representation.js"></script>
-  <script type="text/javascript" src="../js/views/ngl/NGLViewBB.js"></script>
-
-
-  <script type="text/javascript" src="../../userGUI/js/dialogs.js"></script>
-
-    <script>
-      QUnit.config.autostart = false;
-    </script>
-
-  <script src="tests.js"></script>
 </body>
 </html>

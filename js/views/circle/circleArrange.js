@@ -1,7 +1,4 @@
-var CLMSUI = CLMSUI || {};
-CLMSUI.utils = CLMSUI.utils || {};
-
-CLMSUI.utils.circleArrange = function(proteins, options) {
+export const circleArrange = function(proteins, options) {
 
     function makeNodeEdgeList(protein) {
         var node = {

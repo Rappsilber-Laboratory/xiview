@@ -1,6 +1,7 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-CLMSUI.ThreeColourSliderBB = Backbone.View.extend({
+export const ThreeColourSliderBB = Backbone.View.extend({
     events: {
         "change input.filterTypeNumber": "directInput",
         "keyup input.filterTypeNumber": "directInputIfReturn",

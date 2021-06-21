@@ -1,6 +1,10 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-CLMSUI.SelectionTableViewBB = Backbone.View.extend({
+import {checkBoxView} from "../ui-utils/checkbox-view";
+import {utils} from "../utils";
+
+export const SelectionTableViewBB = Backbone.View.extend({
     events: {
         "mouseenter tr.matchRow": "highlight",
         "mouseleave table": "highlight",
@@ -21,21 +25,21 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
             this.render();
             if (window.location.pathname.indexOf("validate.php") === -1) { //nice
                 if (this.model.get("selection").length > 0) {
-                    if (!CLMSUI.oldSplitterProportions || CLMSUI.oldSplitterProportions[1] === 0) {
-                        CLMSUI.oldSplitterProportions = [80, 20];
+                    if (!window.oldSplitterProportions || window.oldSplitterProportions[1] === 0) { //TODO
+                        window.oldSplitterProportions = [80, 20];
                     }
                     d3.select(".gutter").style("display", null);
-                    CLMSUI.split.setSizes(CLMSUI.oldSplitterProportions);
+                    window.split.setSizes(window.oldSplitterProportions);
                 } else {
                     d3.select(".gutter").style("display", "none");
-                    CLMSUI.oldSplitterProportions = CLMSUI.split.getSizes();
-                    CLMSUI.split.setSizes([100, 0]);
+                    window.oldSplitterProportions = window.split.getSizes();
+                    window.split.setSizes([100, 0]);
                 }
             }
         });
         this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", this.updateSwatchesOnly);
         // redraw datable on protein metadata change (possible protein name change)
-        this.listenTo(CLMSUI.vent, "proteinMetadataUpdated", this.render);
+        this.listenTo(vent, "proteinMetadataUpdated", this.render);
 
         // emphasise selected match table row (or not if nothing selected)
         this.listenTo(this.model, "change:lastSelectedMatch", function (model) {
@@ -113,7 +117,7 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
                 return false;
             },
             autovalidated: function () {
-                return CLMSUI.compositeModelInst.get("clmsModel").get("autoValidatedPresent");
+                return window.compositeModelInst.get("clmsModel").get("autoValidatedPresent");
             },
             validated: function () {
                 return true;
@@ -155,10 +159,10 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
                     ((d.matchedPeptides[1].prt.length !== 0) ? d.matchedPeptides[1].prt.length : 1);
             },
             protein1: function (d) {
-                return CLMSUI.utils.proteinConcat(d, 0, self.model.get("clmsModel"));
+                return utils.proteinConcat(d, 0, self.model.get("clmsModel"));
             },
             protein2: function (d) {
-                return CLMSUI.utils.proteinConcat(d, 1, self.model.get("clmsModel"));
+                return utils.proteinConcat(d, 1, self.model.get("clmsModel"));
             },
             runName: function (d) {
                 return d.runName();
@@ -173,16 +177,16 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
                 return d.searchId;
             },
             pos1: function (d) {
-                return CLMSUI.utils.fullPosConcat(d, 0);
+                return utils.fullPosConcat(d, 0);
             },
             pos2: function (d) {
-                return CLMSUI.utils.fullPosConcat(d, 1);
+                return utils.fullPosConcat(d, 1);
             },
             pepPos1: function (d) {
-                return CLMSUI.utils.pepPosConcat(d, 0);
+                return utils.pepPosConcat(d, 0);
             },
             pepPos2: function (d) {
-                return CLMSUI.utils.pepPosConcat(d, 1);
+                return utils.pepPosConcat(d, 1);
             },
             pepSeq1raw: function (d) {
                 const seqMods = d.matchedPeptides[0].seq_mods;
@@ -309,7 +313,7 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
                 this.listenTo(this, "change:hidden", function (model, val) {
                     d3.select(self.el).selectAll("table").style("display", val ? "none" : null);
                     if (self.options.mainModel) {
-                        CLMSUI.vent.trigger("resizeSpectrumSubViews", true);
+                        vent.trigger("resizeSpectrumSubViews", true);
                     }
                 });
             },
@@ -319,7 +323,7 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
             hidden: false
         });
 
-        new CLMSUI.utils.checkBoxView({
+        new checkBoxView({
             el: d3el.select(".rightSpan:last-child").node(),
             model: this.viewStateModel,
             myOptions: {
@@ -330,7 +334,7 @@ CLMSUI.SelectionTableViewBB = Backbone.View.extend({
         });
 
         d3el.select(".rightSpan").classed("selectionTableHideToggle", true);
-        new CLMSUI.utils.checkBoxView({
+        new checkBoxView({
             el: d3el.select(".rightSpan").node(),
             model: this.viewStateModel,
             myOptions: {

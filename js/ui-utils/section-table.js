@@ -1,8 +1,10 @@
 //has to be loaded after utils.js
 //only used by KeyViewBB.js
-CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
+import {utils} from "../utils";
+
+export const sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
     const self = this;
-    const legalDom = CLMSUI.utils.makeLegalDomID;
+    const legalDom = utils.makeLegalDomID;
     const setArrow = function (d) {
         const assocTable = d3.select("#" + idPrefix + legalDom(d.id));
         d3.select(this).classed("tableShown", assocTable.style("display") !== "none");

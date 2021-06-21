@@ -1,6 +1,12 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
 
-CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
+import {utils} from "../utils";
+import {checkBoxView} from "./checkbox-view";
+import {svgUtils} from "../svgexp";
+
+export const DropDownMenuViewBB = Backbone.View.extend({
     events: {
         "mouseenter .menuTitle": "switchVis",
         "click .menuTitle": "toggleVis",
@@ -102,7 +108,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
                 adata.push(cbdata);
                 lastCat = cat;
 
-                 if (d3.select("#"+CLMSUI.utils.makeLegalDomID(cbdata.id)).empty()) {
+                 if (d3.select("#"+utils.makeLegalDomID(cbdata.id)).empty()) {
                     var options = $.extend({
                         toggleAttribute: self.options.toggleAttribute,
                         labelFirst: self.options.labelFirst
@@ -111,7 +117,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
                         options.tooltipModel = self.options.tooltipModel;
                     }
 
-                    var cbView = new CLMSUI.utils.checkBoxView({
+                    var cbView = new checkBoxView({
                         model: model,
                         myOptions: options,
                     });
@@ -140,7 +146,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
         /*
         choices.each (function (d) {
             if (d.id) {
-                var targetSel = d3.select("#" + CLMSUI.utils.makeLegalDomID(d.id));
+                var targetSel = d3.select("#" + utils.makeLegalDomID(d.id));
                 if (!targetSel.empty()) {
                     targetSel.remove();
                 }
@@ -156,7 +162,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
                     ind.classed(d.class, true);
                 }
             } else if (d.id) {
-                var targetSel = d3.select("#" + CLMSUI.utils.makeLegalDomID(d.id));
+                var targetSel = d3.select("#" + utils.makeLegalDomID(d.id));
                 if (!targetSel.empty()) {
                     var targetNode = targetSel.node();
                     if (targetNode.parentElement) {
@@ -165,7 +171,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
                     ind.node().appendChild(targetNode);
 
                     if (targetSel.datum() == undefined) {
-                        ind.select("#" + CLMSUI.utils.makeLegalDomID(d.id)); // this pushes parent d3 datum onto this element
+                        ind.select("#" + utils.makeLegalDomID(d.id)); // this pushes parent d3 datum onto this element
                     }
                 }
             }
@@ -278,7 +284,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
 
     setVis: function(show) {
         if (!show || !d3.select(this.el).classed ("disabledMenu")) {
-            CLMSUI.DropDownMenuViewBB.anyOpen = show; // static var. Set to true if any menu clicked open.
+            DropDownMenuViewBB.anyOpen = show; // static var. Set to true if any menu clicked open.
             d3.select(this.el).select("div")
                 .style("display", show ? "block" : "none");
         }
@@ -286,7 +292,7 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
     },
 
     switchVis: function() {
-        if (CLMSUI.DropDownMenuViewBB.anyOpen && !this.isShown()) {
+        if (DropDownMenuViewBB.anyOpen && !this.isShown()) {
             this.toggleVis();
         }
         return this;
@@ -312,9 +318,9 @@ CLMSUI.DropDownMenuViewBB = Backbone.View.extend({
 });
 
 
-CLMSUI.AnnotationDropDownMenuViewBB = CLMSUI.DropDownMenuViewBB.extend({
+export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     events: function() {
-        var parentEvents = CLMSUI.DropDownMenuViewBB.prototype.events;
+        var parentEvents = DropDownMenuViewBB.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -324,7 +330,7 @@ CLMSUI.AnnotationDropDownMenuViewBB = CLMSUI.DropDownMenuViewBB.extend({
     },
 
     initialize: function() {
-        CLMSUI.AnnotationDropDownMenuViewBB.__super__.initialize.apply(this, arguments);
+        AnnotationDropDownMenuViewBB.__super__.initialize.apply(this, arguments);
 
         d3.select(this.el).select("div")
             .append("button")
@@ -345,7 +351,7 @@ CLMSUI.AnnotationDropDownMenuViewBB = CLMSUI.DropDownMenuViewBB.extend({
     },
 
     render: function () {
-        CLMSUI.AnnotationDropDownMenuViewBB.__super__.render.apply(this, arguments);
+        AnnotationDropDownMenuViewBB.__super__.render.apply(this, arguments);
 
         var self = this;
         var items = d3.select(this.el).selectAll("li");
@@ -426,7 +432,7 @@ CLMSUI.AnnotationDropDownMenuViewBB = CLMSUI.DropDownMenuViewBB.extend({
     downloadKey: function() {
         var tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey").style("text-transform", "capitalize");
         var self = this;
-        CLMSUI.utils.updateAnnotationColourKey(
+        utils.updateAnnotationColourKey(
             this.collection.where({
                 shown: true
             }),
@@ -452,8 +458,8 @@ CLMSUI.AnnotationDropDownMenuViewBB = CLMSUI.DropDownMenuViewBB.extend({
     downloadSVG: function(event, thisSVG) {
         var svgSel = thisSVG || d3.select(this.el).selectAll("svg");
         var svgArr = [svgSel.node()];
-        var svgStrings = CLMSUI.svgUtils.capture(svgArr);
-        var svgXML = CLMSUI.svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+        var svgStrings = svgUtils.capture(svgArr);
+        var svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
 
         var fileName = this.filenameStateString().substring(0, 240);
         download(svgXML, 'application/svg', fileName + ".svg");
@@ -468,6 +474,6 @@ CLMSUI.AnnotationDropDownMenuViewBB = CLMSUI.DropDownMenuViewBB.extend({
     identifier: "Sequence Annotations",
 
     filenameStateString: function() {
-        return CLMSUI.utils.makeLegalFileName(CLMSUI.utils.searchesToString() + "--" + this.identifier);
+        return utils.makeLegalFileName(utils.searchesToString() + "--" + this.identifier);
     },
 });

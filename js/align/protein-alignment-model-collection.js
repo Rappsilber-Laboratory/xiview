@@ -1,5 +1,12 @@
 // Model of sequence alignment settings for a protein (including the above collection as an attribute)
-class ProtAlignModel extends Backbone.Model {
+import Backbone from "backbone";
+
+import {modelUtils} from "../modelUtils";
+import {GotohAligner} from "./bioseq32";
+import {SeqCollection} from "./sequence-model-collection";
+import {vent} from "../networkFrame";
+
+export class ProtAlignModel extends Backbone.Model {
 
     constructor(attributes, options) {
         super(attributes, options);
@@ -19,7 +26,7 @@ class ProtAlignModel extends Backbone.Model {
             refSeq: "CHATTER",
             refID: "Example",
             maxAlignWindow: 1000,
-            sequenceAligner: CLMSUI.GotohAligner,
+            sequenceAligner: GotohAligner,
             seqCollection: new SeqCollection(),
         };
     }
@@ -47,7 +54,7 @@ class ProtAlignModel extends Backbone.Model {
         });
 
         // redo sequence name labels if protein metadata updates names
-        this.listenTo(CLMSUI.vent, "proteinMetadataUpdated", function (metaMetaData) {
+        this.listenTo(window.vent, "proteinMetadataUpdated", function (metaMetaData) {
             const columns = metaMetaData.columns;
             const interactors = metaMetaData.items;
             if (!columns || columns.indexOf("name") >= 0) {
@@ -216,38 +223,38 @@ class ProtAlignModel extends Backbone.Model {
 
 
 // A collection of the above protein level models
-class ProtAlignCollection extends Backbone.Collection {
+export class ProtAlignCollection extends Backbone.Collection {
     constructor(options) {
         super(options);
         this.model = ProtAlignModel;
+        this.comparator = "displayLabel";
+
+        this.possibleComparators = [{
+            label: "Name",
+            compFunc: "displayLabel"
+        },
+            {
+                label: "No. of Aligned Sequences",
+                compFunc: function (m) {
+                    return m.get("seqCollection").length;
+                },
+                reverse: true
+            },
+            {
+                label: "Total Alignment Score",
+                compFunc: function (m) {
+                    return d3.sum(m.get("seqCollection").pluck("compAlignment").map(function (ca) {
+                        return ca.score;
+                    }));
+                },
+                reverse: true
+            }
+        ];
+
+        this.nonTrivialChange = undefined;
     }
 
 
-    comparator = "displayLabel";
-
-    possibleComparators = [{
-        label: "Name",
-        compFunc: "displayLabel"
-    },
-        {
-            label: "No. of Aligned Sequences",
-            compFunc: function (m) {
-                return m.get("seqCollection").length;
-            },
-            reverse: true
-        },
-        {
-            label: "Total Alignment Score",
-            compFunc: function (m) {
-                return d3.sum(m.get("seqCollection").pluck("compAlignment").map(function (ca) {
-                    return ca.score;
-                }));
-            },
-            reverse: true
-        }
-    ];
-
-    nonTrivialChange = undefined;
 
 
     initialize() {
@@ -267,7 +274,7 @@ class ProtAlignCollection extends Backbone.Collection {
     }
 
     addNewProteins(proteinArray) {
-        const decoysOut = CLMSUI.modelUtils.filterOutDecoyInteractors(proteinArray);
+        const decoysOut = modelUtils.filterOutDecoyInteractors(proteinArray);
 
         decoysOut.forEach(function (prot) {
             //console.log ("entry", entry);

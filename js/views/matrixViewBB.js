@@ -1,14 +1,16 @@
-//		a matrix viewer
-//
-//		Colin Combe, Martin Graham
-//		Rappsilber Laboratory, 2015
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from 'jquery';
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {modelUtils} from "../modelUtils";
+import {NGLUtils} from "./ngl/NGLUtils";
+import {utils} from "../utils";
 
-CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
+export const DistanceMatrixViewBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -45,7 +47,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
-        CLMSUI.DistanceMatrixViewBB.__super__.initialize.apply(this, arguments);
+        DistanceMatrixViewBB.__super__.initialize.apply(this, arguments);
 
         var self = this;
 
@@ -70,7 +72,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         this.controlDiv.append("button")
             .attr("class", "downloadButton btn btn-1 btn-1a")
-            .text(CLMSUI.utils.commonLabels.downloadImg + "SVG");
+            .text(utils.commonLabels.downloadImg + "SVG");
 
         var buttonHolder = this.controlDiv.append("span").attr("class", "noBreak reducePadding");
         // Radio Button group to decide pan or select
@@ -102,7 +104,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                     d.initialState = (d.value === this.options[d.group]);
                 }
             }, this);
-        CLMSUI.utils.makeBackboneButtons(buttonHolder, self.el.id, toggleButtonData);
+        utils.makeBackboneButtons(buttonHolder, self.el.id, toggleButtonData);
 
 
         var setSelectTitleString = function() {
@@ -268,11 +270,11 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.listenTo (this.colourScaleModel, "colourModelChanged", function () { this.render({noResize: true}); }); // colourScaleModel is pointer to distance colour model, so this triggers even if not current colour model (redraws background)
         this.listenTo (this.model.get("clmsModel"), "change:distancesObj", this.distancesChanged); // Entire new set of distances
         this.listenTo (this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally)
-        this.listenTo (CLMSUI.vent, "proteinMetadataUpdated", function() {
+        this.listenTo (vent, "proteinMetadataUpdated", function() {
             this.makeProteinPairingOptions();
             this.updateAxisLabels();
         });
-        this.listenTo (CLMSUI.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
+        this.listenTo (vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
 
         var entries = this.makeProteinPairingOptions();
         var startPairing = _.isEmpty(entries) ? undefined : entries[0].value;
@@ -299,7 +301,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     makeProteinPairingOptions: function() {
         var crosslinks = this.model.getAllTTCrossLinks();
-        var totals = CLMSUI.modelUtils.crosslinkCountPerProteinPairing(crosslinks);
+        var totals = modelUtils.crosslinkCountPerProteinPairing(crosslinks);
         var entries = d3.entries(totals);
 
         var nonEmptyEntries = entries.filter(function(entry) {
@@ -431,8 +433,8 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
         proteinIDsObj.forEach(function(pid) {
             pid.alignID = null;
             if (pid.proteinID) {
-                var chainName = CLMSUI.NGLUtils.getChainNameFromChainIndex(distancesObj.chainMap, pid.chainID);
-                pid.alignID = CLMSUI.NGLUtils.make3DAlignID(distancesObj.structureName, chainName, pid.chainID);
+                var chainName = NGLUtils.getChainNameFromChainIndex(distancesObj.chainMap, pid.chainID);
+                pid.alignID = NGLUtils.make3DAlignID(distancesObj.structureName, chainName, pid.chainID);
             }
         }, this);
         return proteinIDsObj;
@@ -488,7 +490,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 proteinY: proteinIDs[1] ? proteinIDs[1].proteinID : undefined,
             };
         };
-        var neighbourhoodLinks = CLMSUI.modelUtils.findResiduesInSquare(convFunc, filteredCrossLinkMap, extent[0][0], extent[0][1], extent[1][0], extent[1][1], true);
+        var neighbourhoodLinks = modelUtils.findResiduesInSquare(convFunc, filteredCrossLinkMap, extent[0][0], extent[0][1], extent[1][0], extent[1][1], true);
         return neighbourhoodLinks;
     },
 
@@ -543,8 +545,8 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
             });
 
             this.model.get("tooltipModel")
-                .set("header", CLMSUI.modelUtils.makeTooltipTitle.linkList(crosslinks.length))
-                .set("contents", CLMSUI.modelUtils.makeTooltipContents.linkList(crosslinks, {"Distance": linkDistances}))
+                .set("header", modelUtils.makeTooltipTitle.linkList(crosslinks.length))
+                .set("contents", modelUtils.makeTooltipContents.linkList(crosslinks, {"Distance": linkDistances}))
                 .set("location", evt)
             ;
             //this.trigger("change:location", this.model, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
@@ -720,7 +722,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
 
                 var seqLengthB = seqLengths.lengthB - 1;
 
-                CLMSUI.times = CLMSUI.times || [];
+                // let times = window.times || [];
                 var start = performance.now();
 
                 // function to draw one matrix according to a pairing of two chains (called in loop later)
@@ -750,7 +752,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                         if (searchIndex1 >= 0) {
                             var row = distanceMatrix[i];
                             for (var j = 0; j < len; j++) { // was seqLength
-                                var distance2 = row && row[j] ? row[j] * row[j] : CLMSUI.modelUtils.getDistanceSquared (atoms1[i], atoms2[j]);
+                                var distance2 = row && row[j] ? row[j] * row[j] : modelUtils.getDistanceSquared (atoms1[i], atoms2[j]);
                                 if (distance2 < max2) {
                                     var searchIndex2 = preCalcRowIndices[j];
                                     if (searchIndex2 >= 0) {
@@ -791,8 +793,8 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 ctx.putImageData(canvasData, 0, 0);
 
                 var end = performance.now();
-                CLMSUI.times.push(Math.round(end - middle));
-                //console.log ("CLMSUI.times", CLMSUI.times);
+                // window.times.push(Math.round(end - middle));
+                //console.log ("window.times", window.times);
 
                 this.zoomGroup.select(".backgroundImage").select("image")
                     .style("display", null) // default value
@@ -849,7 +851,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
                 if (highlightOnly) {
                     sortedFinalCrossLinks = finalCrossLinks.filter (function (link) { return highlightedCrossLinkIDs.has(link.id); });
                 } else {
-                    sortedFinalCrossLinks = CLMSUI.modelUtils.radixSort (3, finalCrossLinks, function(link) {
+                    sortedFinalCrossLinks = modelUtils.radixSort (3, finalCrossLinks, function(link) {
                         return highlightedCrossLinkIDs.has(link.id) ? 2 : (selectedCrossLinkIDs.has(link.id) ? 1 : 0);
                     });
                 }
@@ -1117,7 +1119,7 @@ CLMSUI.DistanceMatrixViewBB = CLMSUI.utils.BaseFrameView.extend({
             .attr("transform", "translate(0," + bottom + ")")
             .call(self.xAxis);
 
-        CLMSUI.utils.declutterAxis(this.vis.select(".x"));
+        utils.declutterAxis(this.vis.select(".x"));
 
         sizeData.bottom = bottom;
         sizeData.right = right;

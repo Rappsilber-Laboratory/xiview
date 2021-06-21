@@ -1,4 +1,11 @@
-class CompositeModel extends Backbone.Model{
+import * as _ from 'underscore';
+
+import Backbone from "backbone";
+
+import {fdr, clearFDR, clearFdr} from "../filter/fdr";
+import {TEMP} from "../dialogs";
+
+export class CompositeModel extends Backbone.Model{
     constructor(attributes, options) {
         super(attributes, options);
     }
@@ -30,12 +37,12 @@ class CompositeModel extends Backbone.Model{
         this.listenTo(this.get("filterModel"), "change:fdrMode", function(filterModel) {
             if (!filterModel.get("fdrMode")) {
                 // Need to clear all crosslinks as they all get valued
-                CLMSUI.clearFdr(this.getAllCrossLinks());
+                clearFdr(this.getAllCrossLinks());
             }
         });
 
 
-        this.listenTo (CLMSUI.vent, "recalcLinkDistances", function () {
+        this.listenTo (window.vent, "recalcLinkDistances", function () {
             if (this.get("clmsModel")) {    // bar the alternative model from doing this because it has no crosslinks and will crash
                 this.getCrossLinkDistances (this.getAllCrossLinks());
             }
@@ -94,7 +101,7 @@ class CompositeModel extends Backbone.Model{
             for (var m = 0; m < matches.length; ++m) {
                 matches[m].fdrPass = false;
             }
-            result = CLMSUI.fdr(crosslinksArr, {
+            result = fdr(crosslinksArr, {
                 filterModel: filterModel,
                 CLMSModel: clmsModel,
                 threshold: filterModel.get("fdrThreshold"),
@@ -624,7 +631,7 @@ class CompositeModel extends Backbone.Model{
 
     clearGroups () {
         const self = this;
-        CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
+        TEMP.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
             self.set("groups", new Map());
             self.trigger("change:groups");
         });
@@ -632,7 +639,7 @@ class CompositeModel extends Backbone.Model{
 
     autoGroup () {
         const self = this;
-        CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
+        TEMP.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
             const groupMap = new Map();
             const go = self.get("go");
             for (let goTerm of go.values()) {
@@ -779,23 +786,23 @@ class CompositeModel extends Backbone.Model{
 
         if (featureFilterSet.has("Digestible")) {
             const digestFeatures = this.get("clmsModel").getDigestibleResiduesAsFeatures(participant);
-            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(digestFeatures);
+            var mergedFeatures = modelUtils.mergeContiguousFeatures(digestFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-1")) {
             var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
-            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
+            var mergedFeatures = modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-2")) {
             var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
-            var mergedFeatures = CLMSUI.modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
+            var mergedFeatures = modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
-        CLMSUI.utils.xilog("annots", annots, "f", features);
+        utils.xilog("annots", annots, "f", features);
         return features ? features.filter(function(f) {
             return featureFilterSet.has(f.type);
         }, this) : [];

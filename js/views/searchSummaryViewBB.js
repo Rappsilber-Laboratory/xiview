@@ -1,8 +1,12 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {modelUtils} from "../modelUtils";
+
+export const SearchSummaryViewBB = BaseFrameView.extend({
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -10,7 +14,7 @@ CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
-        CLMSUI.KeyViewBB.__super__.initialize.apply(this, arguments);
+        SearchSummaryViewBB.__super__.initialize.apply(this, arguments);
 
         this.listenTo(this.model, "change:matches", this.render);
         var self = this;
@@ -51,7 +55,7 @@ CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
     exportDescriptions: function() {
         var template = _.template(this.searchDescriptionTemplate);
         var searches = Array.from(this.model.get("searches").values());
-        var linkerData = CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searches);
+        var linkerData = modelUtils.crosslinkerSpecificityPerLinker(searches);
         //console.log ("LD", linkerData);
 
         var modRegex = /^.*;MODIFIED:([^;]*)/;
@@ -66,7 +70,7 @@ CLMSUI.SearchSummaryViewBB = CLMSUI.utils.BaseFrameView.extend({
             var codonsToNames = function (codonArray) {
                 return codonArray
                     .map(function(code) {
-                        var name = CLMSUI.modelUtils.amino1toNameMap[code];
+                        var name = modelUtils.amino1toNameMap[code];
                         return name ? name.replace("_", "-") : "(codon "+code+")";  // state codon if no long name
                     })
                 ;

@@ -1,21 +1,70 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
+
+import {BlosumCollection} from "./model/models";
+import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
+import {utils} from './utils';
+import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
+import {modelUtils} from "./modelUtils";
+import {FilterModel} from "./filter/filter-model";
+import {TooltipModel} from "./model/models";
+import {MinigramModel} from "./model/models";
+import {CompositeModel} from "./model/composite-model";
+import {FDRSummaryViewBB, FDRViewBB, FilterViewBB} from "./filter/filterViewBB";
+import {FilterSummaryViewBB} from "./filter/filterViewBB";
+import {MinigramViewBB} from "./filter/minigramViewBB";
+import {SelectionTableViewBB} from "./views/selectionTableViewBB";
+import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
+const colorbrewer = require('colorbrewer');
+import {xiSPEC_wrapper} from "../../spectrum/src/Wrapper";
+import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
+import {downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
+    downloadGroups, downloadPPIs, downloadModificationCount, downloadProteinAccessions} from "./downloads";
+import {TooltipViewBB} from "./views/tooltipViewBB";
+import {checkBoxView} from "./ui-utils/checkbox-view";
+import {xiNetControlsViewBB} from "./views/xiNetControlsViewBB";
+import {CrosslinkViewer} from "../../crosslink-viewer/src/crosslink-viewer-BB";
+import {AnnotationType} from "./model/annotation-model-collection";
+import {AnnotationTypeCollection} from "./model/annotation-model-collection";
+import {KeyViewBB} from "./views/key/keyViewBB";
+import {SearchSummaryViewBB} from "./views/searchSummaryViewBB";
+import {CircularViewBB} from "./views/circle/circularViewBB";
+import {AnnotationDropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
+import {ColourCollectionOptionViewBB} from "./ui-utils/color-collection-option-view";
+import {AlignCollectionViewBB} from "./align/alignViewBB3";
+import {DistogramBB} from "./views/distogramViewBB";
+import {NGLViewBB} from "./views/ngl/NGLViewBB";
+import {PDBFileChooserBB} from "./file-choosers/PDBFileChooser";
+import {STRINGFileChooserBB} from "./file-choosers/STRINGFileChooser";
+import {ScatterplotViewBB} from "./views/scatterplotViewBB";
+import {
+    LinkMetaDataFileChooserBB,
+    ProteinMetaDataFileChooserBB,
+    UserAnnotationsMetaDataFileChooserBB
+} from "./file-choosers/metaDataFileChoosers";
+import {GoTermsViewBB} from "./views/go/goTermsSankeyViewBB";
+import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
+
+import {setupColourModels} from "./model/color/setup-colors";
+import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
-CLMSUI.vent = {};
-_.extend(CLMSUI.vent, Backbone.Events);
+window.vent = {};
+_.extend(window.vent, Backbone.Events);
 
-CLMSUI.init = CLMSUI.init || {};
+export const init = {};
 
 // only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
-CLMSUI.init.postDataLoaded = function () {
+init.postDataLoaded = function () {
     console.log("DATA LOADED AND WINDOW LOADED");
 
-    CLMSUI.compositeModelInst.set("go", CLMSUI.go); // add pre-parsed go terms to compositeModel from placeholder
-    CLMSUI.go = null;
+    window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
+    window.go = null;//todo - get rid of use of window.*
 
     // Now we have blosum models and sequences, we can set blosum defaults for alignment models
-    CLMSUI.compositeModelInst.get("alignColl").models.forEach(function (protAlignModel) {
-        protAlignModel.set("scoreMatrix", CLMSUI.blosumCollInst.get("Blosum100"));
+    window.compositeModelInst.get("alignColl").models.forEach(function (protAlignModel) {
+        protAlignModel.set("scoreMatrix", window.blosumCollInst.get("Blosum100"));
     });
 
     //init annotation types
@@ -52,7 +101,7 @@ CLMSUI.init.postDataLoaded = function () {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of CLMSUI.compositeModelInst.get("clmsModel").get("participants")) { //todo - remove static ref?
+    for (let participant of window.compositeModelInst.get("clmsModel").get("participants")) { //todo - remove static ref?
         if (participant.uniprot) {
             const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
@@ -72,67 +121,66 @@ CLMSUI.init.postDataLoaded = function () {
     // add uniprot feature types
     annotationTypes = annotationTypes.concat(Array.from(uniprotFeatureTypes.values()));
     const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
-    CLMSUI.compositeModelInst.set("annotationTypes", annotationTypeCollection);
+    window.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
-    CLMSUI.vent.trigger("buildAsyncViews");
-    //CLMSUI.init.viewsThatNeedAsyncData();
+    vent.trigger("buildAsyncViews");
+    //init.viewsThatNeedAsyncData();
 
-    CLMSUI.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
+    window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
-    CLMSUI.vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
+    vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
-    if (CLMSUI.compositeModelInst.get("clmsModel").get("searches").size > 1) {
+    if (window.compositeModelInst.get("clmsModel").get("searches").size > 1) {
         d3.select("#linkColourSelect").property("value", "Group");
     }
 
 };
 
 // This bar function calls postDataLoaded on the 4th go, ensuring all data is in place from various data loading ops
-const allDataLoaded = _.after(4, CLMSUI.init.postDataLoaded);
+export const allDataLoaded = _.after(4, init.postDataLoaded);
 
 // for qunit testing
-CLMSUI.init.pretendLoad = function () {
+init.pretendLoad = function () {
     allDataLoaded();
     allDataLoaded();
 };
 
-
-CLMSUI.init.blosumLoading = function (options) {
+init.blosumLoading = function (options) {
     options = options || {};
 
     // Collection of blosum matrices that will be fetched from a json file
-    CLMSUI.blosumCollInst = new BlosumCollection(options); // options if we want to override defaults
+    window.blosumCollInst = new BlosumCollection(options); // options if we want to override defaults
 
     // when the blosum Collection is fetched (an async process), we select one of its models as being selected
-    CLMSUI.blosumCollInst.listenToOnce(CLMSUI.blosumCollInst, "sync", function () {
+    window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
         console.log("ASYNC. blosum models loaded");
         allDataLoaded();
     });
 
     // Start the asynchronous blosum fetching after the above events have been set up
-    CLMSUI.blosumCollInst.fetch(options);
+    window.blosumCollInst.fetch(options);
 };
 
-CLMSUI.init.models = function (options) {
+init.models = function (options) {
 
     // define alignment model and listeners first, so they're ready to pick up events from other models
     const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
     // HACK - does nothing at moment anyway because uniprot annotations aren't available //todo - this comment is wrong, right
-    alignmentCollectionInst.listenToOnce(CLMSUI.vent, "uniprotDataParsed", function (clmsModel) {
+    alignmentCollectionInst.listenToOnce(vent, "uniprotDataParsed", function (clmsModel) {
         this.addNewProteins(Array.from(clmsModel.get("participants").values()));
         // console.log("ASYNC. uniprot sequences poked to collection", this);
         allDataLoaded();
     });
 
-    CLMSUI.init.modelsEssential(options);
+    this.modelsEssential(options);
 
-    // following listeners require compositeModelInst etc to be set up in modelsEssential() so placed afterwards
+    // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
     // this listener adds new sequences obtained from pdb files to existing alignment sequence models
-    alignmentCollectionInst.listenTo(CLMSUI.compositeModelInst, "3dsync", function (sequences, removeThese) {
+    alignmentCollectionInst.listenTo(window.compositeModelInst, "3dsync", function (sequences, removeThese) {
         if (!_.isEmpty(sequences)) { // if sequences passed and it has a non-zero length...
             console.log("3dsync", arguments);
             // remove before add so if someone decides to reload the same file/code (why, but possible) we don't end up removing what we've just added
@@ -159,8 +207,8 @@ CLMSUI.init.models = function (options) {
 
     // this listener makes new alignment sequence models based on the current participant set (this usually gets called after a csv file is loaded)
     // it uses the same code as that used when a xi search is the source of data, see earlier in this code (roughly line 96'ish)
-    alignmentCollectionInst.listenTo(CLMSUI.compositeModelInst.get("clmsModel"), "change:matches", function () {
-        this.addNewProteins(Array.from(CLMSUI.compositeModelInst.get("clmsModel").get("participants").values()));
+    alignmentCollectionInst.listenTo(window.compositeModelInst.get("clmsModel"), "change:matches", function () {
+        this.addNewProteins(Array.from(window.compositeModelInst.get("clmsModel").get("participants").values()));
         // this triggers an event to say loads has changed in the alignment collection
         // more efficient to listen to that then redraw/recalc for every seq addition
         this.bulkAlignChangeFinished();
@@ -169,27 +217,27 @@ CLMSUI.init.models = function (options) {
     });
 
     // Set up colour models, some (most) of which depend on data properties
-    const crosslinkerKeys = d3.keys(CLMSUI.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
-    const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(CLMSUI.utils.getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
-    CLMSUI.linkColour.setupColourModels({distance: storedDistanceColourSettings});
+    const crosslinkerKeys = d3.keys(window.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
+    const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(utils.getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
+    setupColourModels({distance: storedDistanceColourSettings});
 
     if (crosslinkerKeys.length === 1) {
-        CLMSUI.compositeModelInst.listenTo(CLMSUI.linkColour.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
+        window.compositeModelInst.listenTo(window.linkColor.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
             const obj = {distanceColours: {}};
             obj.distanceColours[crosslinkerKeys[0]] = attr;
-            CLMSUI.utils.setLocalStorage(obj);
+            utils.setLocalStorage(obj);
         });
     }
 
     // A colour model's attributes have changed - is it the currently used model? If so, fire the currentColourModelChanged event
-    CLMSUI.compositeModelInst.listenTo(CLMSUI.linkColour.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
+    window.compositeModelInst.listenTo(window.linkColor.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("linkColourAssignment").id === colourModel.id) {
             this.trigger("currentColourModelChanged", colourModel, changedAttrs);
         }
     });
 
     // same for protein colour models
-    CLMSUI.compositeModelInst.listenTo(CLMSUI.linkColour.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
+    window.compositeModelInst.listenTo(window.linkColor.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("proteinColourAssignment").id === colourModel.id) {
             this.trigger("currentProteinColourModelChanged", colourModel, changedAttrs);
         }
@@ -197,24 +245,23 @@ CLMSUI.init.models = function (options) {
 
     // Set initial colour scheme choices
     // If more than one search, set group colour scheme to be default. https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/72
-    CLMSUI.compositeModelInst
+    window.compositeModelInst
         .set("linkColourAssignment",
-            CLMSUI.compositeModelInst.get("clmsModel").get("searches").size > 1 ? CLMSUI.linkColour.groupColoursBB : CLMSUI.linkColour.defaultColoursBB
+            window.compositeModelInst.get("clmsModel").get("searches").size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
         )
-        .set("proteinColourAssignment", CLMSUI.linkColour.defaultProteinColoursBB)
+        .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB)
     ;
 };
 
-
 //only inits stuff required by validation page
-CLMSUI.init.modelsEssential = function (options) {
-    CLMSUI.oldDB = options.oldDB || false;
+init.modelsEssential = function (options) {
+    // window.oldDB = options.oldDB || false;
 
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
     const hasNoMatches = _.isEmpty(options.rawMatches);
 
-    CLMSUI.utils.displayError(function () {
+    utils.displayError(function () {
             return hasMissing || hasIncorrect || hasNoMatches;
         },
         (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
@@ -223,7 +270,7 @@ CLMSUI.init.modelsEssential = function (options) {
     );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = new clms.SearchResultsModel();
+    const clmsModelInst = new SearchResultsModel();
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -232,20 +279,20 @@ CLMSUI.init.modelsEssential = function (options) {
         prot.size = prot.size || 1;
     });
 
-    const urlChunkMap = CLMSUI.modelUtils.parseURLQueryString(window.location.search.slice(1));
-
-    // Anonymiser for screen shots / videos. MJG 17/05/17, add &anon to url for this
-    if (urlChunkMap.anon) {
-        clmsModelInst.get("participants").forEach(function (prot, i) {
-            prot.name = "Protein " + (i + 1);
-            prot.description = "Protein " + (i + 1) + " Description";
-        });
-    }
+    // const urlChunkMap = modelUtils.parseURLQueryString(window.location.search.slice(1));
+    //
+    // // Anonymiser for screen shots / videos. MJG 17/05/17, add &anon to url for this
+    // if (urlChunkMap.anon) {
+    //     clmsModelInst.get("participants").forEach(function (prot, i) {
+    //         prot.name = "Protein " + (i + 1);
+    //         prot.description = "Protein " + (i + 1) + " Description";
+    //     });
+    // }
 
     // Add c- and n-term positions to searchresultsmodel on a per protein basis // MJG 29/05/17
-    //~ clmsModelInst.set("terminiPositions", CLMSUI.modelUtils.getTerminiPositions (options.peptides));
+    //~ clmsModelInst.set("terminiPositions", modelUtils.getTerminiPositions (options.peptides));
 
-    const scoreExtentInstance = CLMSUI.modelUtils.matchScoreRange(clmsModelInst.get("matches"), true);
+    const scoreExtentInstance = modelUtils.matchScoreRange(clmsModelInst.get("matches"), true);
     if (scoreExtentInstance[0]) {
         scoreExtentInstance[0] = Math.min(0, scoreExtentInstance[0]); // make scoreExtent min zero, if existing min isn't negative
     }
@@ -262,15 +309,15 @@ CLMSUI.init.modelsEssential = function (options) {
         //matchScoreCutoff: [undefined, undefined],
         matchScoreCutoff: scoreExtentInstance.slice(),
         //distanceCutoff: [0, 250],
-        searchGroups: CLMSUI.modelUtils.getSearchGroups(clmsModelInst),
+        searchGroups: modelUtils.getSearchGroups(clmsModelInst),
     };
-    const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
-    filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
-    console.log("urlFilterSettings", urlFilterSettings, "progFilterSettings", filterSettings);
+    // const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
+    // filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
+    // console.log("urlFilterSettings", urlFilterSettings, "progFilterSettings", filterSettings);
     const filterModelInst = new FilterModel(filterSettings, {
         scoreExtent: scoreExtentInstance,
         //distanceExtent: [0, 250],
-        possibleSearchGroups: CLMSUI.modelUtils.getSearchGroups(clmsModelInst),
+        possibleSearchGroups: modelUtils.getSearchGroups(clmsModelInst),
     });
 
     const tooltipModelInst = new TooltipModel();
@@ -302,10 +349,10 @@ CLMSUI.init.modelsEssential = function (options) {
 
     // Data generation routines for minigram models
     minigramModels[0].data = function () {
-        return CLMSUI.modelUtils.flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
+        return modelUtils.flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
     };
     minigramModels[1].data = function () {
-        const crosslinks = CLMSUI.compositeModelInst.getAllCrossLinks();
+        const crosslinks = window.compositeModelInst.getAllCrossLinks();
         const distances = crosslinks
             .map(function (clink) {
                 return clink.getMeta("distance");
@@ -333,7 +380,7 @@ CLMSUI.init.modelsEssential = function (options) {
 
 
     // overarching model
-    CLMSUI.compositeModelInst = new CompositeModel({
+    window.compositeModelInst = new CompositeModel({
         clmsModel: clmsModelInst,
         filterModel: filterModelInst,
         tooltipModel: tooltipModelInst,
@@ -342,21 +389,21 @@ CLMSUI.init.modelsEssential = function (options) {
     });
 
     //moving this to end of allDataLoaded - think validation page needs this, TODO, check
-    CLMSUI.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
+    window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
     // instead of views listening to changes in filter directly, we listen to any changes here, update filtered stuff
     // and then tell the views that filtering has occurred via a custom event ("filtering Done") in applyFilter().
     // This ordering means the views are only notified once the changed data is ready.
-    CLMSUI.compositeModelInst.listenTo(filterModelInst, "change", function () {
+    window.compositeModelInst.listenTo(filterModelInst, "change", function () {
         // console.log("filterChange");
         this.applyFilter();
     });
 
 };
 
-CLMSUI.init.views = function () {
+init.views = function () {
 
-    const compModel = CLMSUI.compositeModelInst;
+    const compModel = window.compositeModelInst;
     const matchesFound = !_.isEmpty(compModel.get("clmsModel").get("matches"));
     //console.log("MODEL", compModel);
 
@@ -373,7 +420,7 @@ CLMSUI.init.views = function () {
             .attr("class", "dynDiv dynDiv_bodyLimit");
     });
 
-    CLMSUI.init.viewsEssential({
+    init.viewsEssential({
         "specWrapperDiv": "#spectrumPanelWrapper"
     });
 
@@ -452,7 +499,7 @@ CLMSUI.init.views = function () {
         const options = $.extend({
             labelFirst: false
         }, cbdata);
-        const cbView = new CLMSUI.utils.checkBoxView({
+        const cbView = new checkBoxView({
             myOptions: options
         });
         $("#viewDropdownPlaceholder").append(cbView.$el);
@@ -465,7 +512,7 @@ CLMSUI.init.views = function () {
     }).filter(function (id) {
         return id !== "#keyChkBxPlaceholder" && id !== "#nglChkBxPlaceholder";
     });
-    new CLMSUI.DropDownMenuViewBB({
+    new DropDownMenuViewBB({
         el: "#viewDropdownPlaceholder",
         model: compModel.get("clmsModel"),
         myOptions: {
@@ -493,7 +540,7 @@ CLMSUI.init.views = function () {
         .attr("type", "text")
         .attr("id", "groupSelected");
 
-    new CLMSUI.DropDownMenuViewBB({
+    new DropDownMenuViewBB({
         el: "#proteinSelectionDropdownPlaceholder",
         model: compModel.get("clmsModel"),
         myOptions: {
@@ -589,10 +636,10 @@ CLMSUI.init.views = function () {
     ];
     loadButtonData.forEach(function (bdata) {
         bdata.func = function () {
-            CLMSUI.vent.trigger(bdata.eventName, true);
+            vent.trigger(bdata.eventName, true);
         };
     });
-    new CLMSUI.DropDownMenuViewBB({
+    new DropDownMenuViewBB({
         el: "#loadDropdownPlaceholder",
         model: compModel.get("clmsModel"),
         myOptions: {
@@ -608,14 +655,14 @@ CLMSUI.init.views = function () {
         .setVis(!matchesFound) // open as default if empty search
     ;
 
-    // new CLMSUI.URLSearchBoxViewBB({
+    // new URLSearchBoxViewBB({
     //     el: "#urlSearchBox",
     //     model: compModel,
     //     displayEventName: "shareURLViewShow",
     //     myOptions: {}
     // });
 
-    new CLMSUI.xiNetControlsViewBB({
+    new xiNetControlsViewBB({
         el: "#xiNetButtonBar",
         model: compModel
     });
@@ -623,20 +670,18 @@ CLMSUI.init.views = function () {
     // Set up a one-time event listener that is then called from allDataLoaded
     // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
     // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
-    compModel.listenToOnce(CLMSUI.vent, "buildAsyncViews", function () {
-        CLMSUI.init.viewsThatNeedAsyncData();
+    compModel.listenToOnce(vent, "buildAsyncViews", function () {
+        init.viewsThatNeedAsyncData();
     });
 };
 
+init.viewsEssential = function (options) {
 
-CLMSUI.init.viewsEssential = function (options) {
-
-    const compModel = CLMSUI.compositeModelInst;
+    const compModel = window.compositeModelInst;
     const filterModel = compModel.get("filterModel");
 
-
     // var singleTargetProtein = compModel.get("clmsModel").targetProteinCount < 2;
-    new CLMSUI.FilterViewBB({
+    new FilterViewBB({
         el: "#filterPlaceholder",
         model: filterModel,
         myOptions: {
@@ -656,7 +701,7 @@ CLMSUI.init.viewsEssential = function (options) {
         }
     });
 
-    new CLMSUI.FilterSummaryViewBB({
+    new FilterSummaryViewBB({
         el: "#filterReportPlaceholder",
         model: compModel,
     });
@@ -684,7 +729,7 @@ CLMSUI.init.viewsEssential = function (options) {
         },
     ];
     const minigramViews = minigramViewConfig.map(function (config) {
-        return new CLMSUI.MinigramViewBB({
+        return new MinigramViewBB({
             el: config.el,
             model: compModel.get("minigramModels")[config.id],
             myOptions: {
@@ -718,7 +763,7 @@ CLMSUI.init.viewsEssential = function (options) {
     // 2. Event A in spectrumWrapper fires event B
     // 3. selectionViewer listens for event B to highlight row in table - which means it must have built the table
     // 4. Thus selectionViewer must do its routine for event A before spectrumWrapper, so we initialise it first
-    const selectionViewer = new CLMSUI.SelectionTableViewBB({
+    const selectionViewer = new SelectionTableViewBB({
         el: "#bottomDiv",
         model: compModel,
     });
@@ -735,7 +780,7 @@ CLMSUI.init.viewsEssential = function (options) {
             canBringToTop: options.spectrumToTop
         }
     })
-        .listenTo(CLMSUI.vent, "individualMatchSelected", function (match) {
+        .listenTo(vent, "individualMatchSelected", function (match) {
             if (match) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
@@ -771,7 +816,7 @@ CLMSUI.init.viewsEssential = function (options) {
                             d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
                             //self.alternativesModel.set("selection", allCrossLinks);
                             self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
-                            CLMSUI.vent.trigger("resizeSpectrumSubViews", true);
+                            vent.trigger("resizeSpectrumSubViews", true);
                         }
                     }
                 });
@@ -782,34 +827,34 @@ CLMSUI.init.viewsEssential = function (options) {
 
     const xiSPEC_options = {
         targetDiv: 'modular_xispec',
-        baseDir: CLMSUI.xiSpecBaseDir,
-        xiAnnotatorBaseURL: CLMSUI.xiAnnotRoot,
-        knownModificationsURL: CLMSUI.xiAnnotRoot + "annotate/knownModifications",
+        baseDir: "/spectrum/",//xiSpecBaseDir,
+        xiAnnotatorBaseURL: "",//xiAnnotRoot,
+        knownModificationsURL: false, // xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: true,
         showQualityControl: "min",
         colorScheme: colorbrewer.PRGn[8],
     };
 
-    xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
+    const xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
 
     // Update spectrum view when external resize event called
-    xiSPEC.activeSpectrum.listenTo(CLMSUI.vent, "resizeSpectrumSubViews", function () {
-        xiSPECUI.vent.trigger('resize:spectrum');
+    xiSPEC.activeSpectrum.listenTo(vent, "resizeSpectrumSubViews", function () {
+        window.xispecVent.trigger('resize:spectrum');
     });
 
-    // "individualMatchSelected" in CLMSUI.vent is link event between selection table view and spectrum view
+    // "individualMatchSelected" in vent is link event between selection table view and spectrum view
     // used to transport one Match between views
-    xiSPEC.activeSpectrum.listenTo(CLMSUI.vent, "individualMatchSelected", function (match) {
+    xiSPEC.activeSpectrum.listenTo(vent, "individualMatchSelected", function (match) {
         if (match) {
-            const randId = CLMSUI.compositeModelInst.get("clmsModel").getSearchRandomId(match);
-            CLMSUI.loadSpectrum(match, randId, this.model);
+            const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
+            loadSpectrum(match, randId, this.model);
         } else {
             // xiSPEC.clear(); //todo - maybe it is better to clear it, but xiSPEC currently has no clear function
         }
     });
 
     // Generate data export drop down
-    new CLMSUI.DropDownMenuViewBB({
+    new DropDownMenuViewBB({
         el: "#expDropdownPlaceholder",
         model: compModel.get("clmsModel"),
         myOptions: {
@@ -863,7 +908,7 @@ CLMSUI.init.viewsEssential = function (options) {
                 {
                     name: "Make Filtered XI URL",
                     func: function () {
-                        CLMSUI.vent.trigger("shareURLViewShow", true);
+                        vent.trigger("shareURLViewShow", true);
                     },
                     tooltip: "Produces a URL that embeds the current filter state within it for later reproducibility",
                     categoryTitle: "As a URL",
@@ -882,7 +927,7 @@ CLMSUI.init.viewsEssential = function (options) {
         });
 
     // Generate help drop down
-    new CLMSUI.DropDownMenuViewBB({
+    new DropDownMenuViewBB({
         el: "#helpDropdownPlaceholder",
         model: compModel.get("clmsModel"),
         myOptions: {
@@ -916,34 +961,34 @@ CLMSUI.init.viewsEssential = function (options) {
         id: "tooltip2",
         class: "CLMStooltip"
     });
-    new CLMSUI.TooltipViewBB({
+    new TooltipViewBB({
         el: "#tooltip2",
         model: compModel.get("tooltipModel")
     });
 };
 
-CLMSUI.init.viewsThatNeedAsyncData = function () {
+init.viewsThatNeedAsyncData = function () {
 
-    const compModel = CLMSUI.compositeModelInst;
+    const compModel = window.compositeModelInst;
 
     // This generates the legend div, we don't keep a handle to it - the event object has one
-    new CLMSUI.KeyViewBB({
+    new KeyViewBB({
         el: "#keyPanel",
         displayEventName: "keyViewShow",
         model: compModel,
     });
-    //if (CLMSUI.compositeModelInst.get("clmsModel").get("searches").size > 1) {
+    //if (window.compositeModelInst.get("clmsModel").get("searches").size > 1) {
     //     d3.select("#linkColourSelect").property("value","Group");
     //}
 
-    new CLMSUI.SearchSummaryViewBB({
+    new SearchSummaryViewBB({
         el: "#searchSummaryPanel",
         displayEventName: "searchesViewShow",
         model: compModel.get("clmsModel"),
     });
 
     /* 'cos circle listens to annotation model which is formed from uniprot async data */
-    new CLMSUI.CircularViewBB({
+    new CircularViewBB({
         el: "#circularPanel",
         displayEventName: "circularViewShow",
         model: compModel,
@@ -951,7 +996,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
 
 
     // Make a drop down menu constructed from the annotations collection
-    new CLMSUI.AnnotationDropDownMenuViewBB({
+    new AnnotationDropDownMenuViewBB({
         el: "#annotationsDropdownPlaceholder",
         collection: compModel.get("annotationTypes"),
         myOptions: {
@@ -973,18 +1018,18 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
         });
 
 
-    new CLMSUI.utils.ColourCollectionOptionViewBB({
+    new ColourCollectionOptionViewBB({
         el: "#linkColourDropdownPlaceholder",
-        model: CLMSUI.linkColour.Collection,
+        model: window.linkColor.Collection,
         storeSelectedAt: {
             model: compModel,
             attr: "linkColourAssignment"
         },
     });
 
-    new CLMSUI.utils.ColourCollectionOptionViewBB({
+    new ColourCollectionOptionViewBB({
         el: "#proteinColourDropdownPlaceholder",
-        model: CLMSUI.linkColour.ProteinCollection,
+        model: window.linkColor.ProteinCollection,
         storeSelectedAt: {
             model: compModel,
             attr: "proteinColourAssignment"
@@ -992,7 +1037,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
         label: "Protein Colour Scheme"
     });
 
-    new xinet.CrosslinkViewer({
+    new CrosslinkViewer({
         el: "#networkDiv",
         model: compModel,
         //     myOptions: {layout: storedLayout}
@@ -1000,7 +1045,7 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
 
 
     // Alignment View
-    new CLMSUI.AlignCollectionViewBB({
+    new AlignCollectionViewBB({
         el: "#alignPanel",
         collection: compModel.get("alignColl"),
         displayEventName: "alignViewShow",
@@ -1008,12 +1053,12 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
     });
 
 
-    new CLMSUI.DistogramBB({
+    new DistogramBB({
         el: "#distoPanel",
         model: compModel,
-        //colourScaleModel: CLMSUI.linkColour.distanceColoursBB,
-        //colourScaleModel: CLMSUI.linkColour.defaultColoursBB,
-        colourScaleModel: CLMSUI.linkColour.groupColoursBB,
+        //colourScaleModel: window.linkColor.distanceColoursBB,
+        //colourScaleModel: window.linkColor.defaultColoursBB,
+        colourScaleModel: window.linkColor.groupColoursBB,
         displayEventName: "distoViewShow",
         myOptions: {
             chartTitle: "Histogram",
@@ -1022,88 +1067,80 @@ CLMSUI.init.viewsThatNeedAsyncData = function () {
     });
 
     // This makes a matrix viewer
-    new CLMSUI.DistanceMatrixViewBB({
+    new DistanceMatrixViewBB({
         el: "#matrixPanel",
         model: compModel,
-        colourScaleModel: CLMSUI.linkColour.distanceColoursBB,
+        colourScaleModel: window.linkColor.distanceColoursBB,
         displayEventName: "matrixViewShow",
     });
-
-    // This makes a list viewer
-    // new CLMSUI.ListViewBB({
-    //     el: "#listPanel",
-    //     model: compModel,
-    //     colourScaleModel: CLMSUI.linkColour.distanceColoursBB,
-    //     displayEventName: "listViewShow",
-    // });
 
     // Make new ngl view with pdb dataset
     // In a horrific misuse of the MVC pattern, this view actually generates the 3dsync
     // event that other views are waiting for.
-    new CLMSUI.NGLViewBB({
+    new NGLViewBB({
         el: "#nglPanel",
         model: compModel,
         displayEventName: "nglViewShow",
     });
 
-    const urlChunkMap = CLMSUI.modelUtils.parseURLQueryString(window.location.search.slice(1));
-    new CLMSUI.PDBFileChooserBB({
+    const urlChunkMap = modelUtils.parseURLQueryString(window.location.search.slice(1));
+    new PDBFileChooserBB({
         el: "#pdbPanel",
         model: compModel,
         displayEventName: "pdbFileChooserShow",
         initPDBs: urlChunkMap.pdb,
     });
 
-    new CLMSUI.STRINGFileChooserBB({
+    new STRINGFileChooserBB({
         el: "#stringPanel",
         model: compModel,
         displayEventName: "stringDataChooserShow",
         //initPDBs: urlChunkMap.pdb,
     });
 
-    new CLMSUI.ScatterplotViewBB({
+    new ScatterplotViewBB({
         el: "#scatterplotPanel",
         model: compModel,
         displayEventName: "scatterplotViewShow",
     });
 
-    new CLMSUI.LinkMetaDataFileChooserBB({
+    new LinkMetaDataFileChooserBB({
         el: "#linkMetaLoadPanel",
         model: compModel,
         displayEventName: "linkMetaDataFileChooserShow",
     });
 
-    new CLMSUI.ProteinMetaDataFileChooserBB({
+    new ProteinMetaDataFileChooserBB({
         el: "#proteinMetaLoadPanel",
         model: compModel,
         displayEventName: "proteinMetaDataFileChooserShow",
     });
 
-    new CLMSUI.UserAnnotationsMetaDataFileChooserBB({
+    new UserAnnotationsMetaDataFileChooserBB({
         el: "#userAnnotationsMetaLoadPanel",
         model: compModel,
         displayEventName: "userAnnotationsMetaDataFileChooserShow",
     });
 
-    new CLMSUI.GoTermsViewBB({
+    new GoTermsViewBB({
         el: "#goTermsPanel",
         model: compModel,
         displayEventName: "goTermsViewShow",
     });
 
-    new CLMSUI.ProteinInfoViewBB({
+    new ProteinInfoViewBB({
         el: "#proteinInfoPanel",
         displayEventName: "proteinInfoViewShow",
         model: compModel,
     });
 
-    new CLMSUI.FDRViewBB({
+    new FDRViewBB({
         el: "#fdrPanel",
         //displayEventName: "fdrShow",
         model: compModel.get("filterModel"),
     });
 
-    new CLMSUI.FDRSummaryViewBB({
+    new FDRSummaryViewBB({
         el: "#fdrSummaryPlaceholder",
         //displayEventName: "fdrShow",
         model: compModel,

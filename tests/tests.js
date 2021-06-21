@@ -1,7 +1,18 @@
-function callback (model) {
+import * as _ from 'underscore';
+import * as $ from "jquery";
+
+import {mostReadableMultipleId, } from "../js/downloads";
+import {GotohAligner} from "../js/align/bioseq32";
+import {modelUtils} from "../js/modelUtils";
+import {NGLUtils} from "../js/views/ngl/NGLUtils";
+import {utils} from "../js/utils";
+import {STRINGUtils} from "../js/file-choosers/stringUtils";
+import {getLinksCSV, getMatchesCSV, getResidueCount} from "../js/downloads";
+
+export function testCallback (model) {
     console.log ("model", model);
     var clmsModel = model.get("clmsModel");
-    CLMSUI.utils.debug = true;
+    utils.debug = true;
 
     var dseq1AO6 = "SEVAHRFKDLGEENFKALVLIAFAQYLQQCPFEDHVKLVNEVTEFAKTCVADESAENCDKSLHTLFGDKLCTVATLRETYGEMADCCAKQEPERNECFLQHKDDNPNLPRLVRPEVDVMCTAFHDNEETFLKKYLYEIARRHPYFYAPELLFFAKRYKAAFTECCQAADKAACLLPKLDELRDEGKASSAKQRLKCASLQKFGERAFKAWAVARLSQRFPKAEFAEVSKLVTDLTKVHTECCHGDLLECADDRADLAKYICENQDSISSKLKECCEKPLLEKSHCIAEVENDEMPADLPSLAADFVESKDVCKNYAEAKDVFLGMFLYEYARRHPDYSVVLLLRLAKTYETTLEKCCAAADPHECYAKVFDEFKPLVEEPQNLIKQNCELFEQLGEYKFQNALLVRYTKKVPQVSTPTLVEVSRNLGKVGSKCCKHPEAKRMPCAEDYLSVVLNQLCVLHEKTPVSDRVTKCCTESLVNRRPCFSALEVDETYVPKEFNAETFTFHADICTLSEKERQIKKQTALVELVKHKPKATKEQLKAVMDDFAAFVEKCCKADDKETCFAEEGKKLVAASQAA";
 
@@ -240,7 +251,7 @@ function callback (model) {
 
     QUnit.test ("Scoring", function (assert) {
         var scoringSystem = {
-            matrix: CLMSUI.blosumCollInst.get("Blosum100").attributes,
+            matrix: window.blosumCollInst.get("Blosum100").attributes,
             match: 10,
             mis: -6,
             gapOpen: 10,
@@ -265,9 +276,9 @@ function callback (model) {
             {seq: "BY", expScore: 12},   // aligner inserts B (no penalty as at start) and matches Y-Y
         ];
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var actual = tests.map (function (test) {
-            return this.CLMSUI.GotohAligner.align (test.seq, refSeq, scoringSystem, false, true, 1000);
+            return GotohAligner.align (test.seq, refSeq, scoringSystem, false, true, 1000);
         });
         var actualScores = actual.map (function (v) { return v.res[0]; });
         var expectedScores = _.pluck (tests, "expScore");
@@ -282,8 +293,8 @@ function callback (model) {
             {chainName: "B", chainIndex: 1, modelIndex: 0, residueOffset: 578, data: dseq1AO6, structureID: "1ao6"},
         ];
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
-        var actual = CLMSUI.NGLUtils.getChainSequencesFromNGLStage (stageModel.get("structureComp").stage);
+        var stageModel = window.compositeModelInst.get("stageModel");
+        var actual = NGLUtils.getChainSequencesFromNGLStage (stageModel.get("structureComp").stage);
         assert.deepEqual (actual, expected, "Expected "+JSON.stringify(expected)+" when generating sequences from `1AO6`");
     });
 
@@ -303,7 +314,7 @@ function callback (model) {
             {id: "1AO8", seqObj: {data: "EFGH"}},
             {id: "1AO6", seqObj: {data: "IJKL"}},
         ];
-        var actualValue = CLMSUI.modelUtils.matrixPairings (testMatrix, testSeqs);
+        var actualValue = modelUtils.matrixPairings (testMatrix, testSeqs);
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as matrix pairing, Passed!");
@@ -311,9 +322,9 @@ function callback (model) {
 
 
     QUnit.test ("Align test", function (assert) {
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
-        var chainSequences = CLMSUI.NGLUtils.getChainSequencesFromNGLStage (stageModel.get("structureComp").stage);
-        var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
+        var stageModel = window.compositeModelInst.get("stageModel");
+        var chainSequences = NGLUtils.getChainSequencesFromNGLStage (stageModel.get("structureComp").stage);
+        var alignCollection = window.compositeModelInst.get("alignColl");
         var protAlignModel = alignCollection.get ("P02768-A");
         var actualValue = protAlignModel.alignWithoutStoring (
             _.pluck (chainSequences, "data"),
@@ -337,8 +348,8 @@ function callback (model) {
             10002: [{key: "1", values: [{modelIndex:1, chain: "4"}]}]
         };
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
-        var actualValue = CLMSUI.modelUtils.makeSubIndexedMap (data, "modelIndex");
+        var stageModel = window.compositeModelInst.get("stageModel");
+        var actualValue = modelUtils.makeSubIndexedMap (data, "modelIndex");
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" when mapping from "+JSON.stringify(data));
     });
 
@@ -359,7 +370,7 @@ function callback (model) {
         ];
 
         examples.forEach (function (example) {
-            var actualValue = CLMSUI.modelUtils.joinConsecutiveNumbersIntoRanges (example.data);
+            var actualValue = modelUtils.joinConsecutiveNumbersIntoRanges (example.data);
             assert.deepEqual (actualValue, example.expected, "Expected "+example.expected+" when concatenating "+example.data);
         })
     });
@@ -376,7 +387,7 @@ function callback (model) {
         var expectedValue4 = "(( /0 AND (:A OR :B) ) )";
         var data2 = [data[0], data[2]];
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
 
         var actualValue = stageModel.getSelectionFromResidueList (data);
         assert.deepEqual (actualValue, expectedValue, "Expected "+expectedValue+" when mapping from "+JSON.stringify(data));
@@ -392,7 +403,7 @@ function callback (model) {
     });
 
     QUnit.test ("Get Chain Start Positions as Atom Indices (for label representation)", function (assert) {
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var chainStartSele = stageModel.makeFirstAtomPerChainSelectionString (d3.set([0,1 ]));
         var expectedValue = "@0,4599";
         assert.deepEqual (chainStartSele, expectedValue, "Expected "+expectedValue+" for chain start atom NGL selection, Passed!");
@@ -400,7 +411,7 @@ function callback (model) {
 
 
     QUnit.test ("Get Just Chain Selection", function (assert) {
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var chainSele = stageModel.makeChainSelectionString ({showAll: false, chainIndices: [0,1]});
         var expectedValue = "(( /0 AND (:A OR :B) ) )";
         assert.deepEqual (chainSele, expectedValue, "Expected "+expectedValue+" for just chain selection, Passed!");
@@ -412,7 +423,7 @@ function callback (model) {
     QUnit.test ("Mapping to PDB", function (assert) {
         var expectedMapping = [411, 493];
 
-        var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
+        var alignCollection = window.compositeModelInst.get("alignColl");
         var alignModel = alignCollection.get("P02768-A");
         var actualMapping = alignModel.bulkMapFromSearch ("1AO6:A:0", [415, 497]);
 
@@ -422,7 +433,7 @@ function callback (model) {
     QUnit.test ("Mapping from PDB", function (assert) {
         var expectedMapping = [415, 497];
 
-        var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
+        var alignCollection = window.compositeModelInst.get("alignColl");
         var alignModel = alignCollection.get("P02768-A");
         var actualMapping = alignModel.bulkMapToSearch ("1AO6:A:0", [411, 493]);
 
@@ -432,7 +443,7 @@ function callback (model) {
     QUnit.test ("Chain Info", function (assert) {
         var expectedMapping = {viableChainIndices: [0,1], resCount: 1156};
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var actualMapping = stageModel.getChainInfo ();
 
         assert.deepEqual (actualMapping, expectedMapping, "Expected "+JSON.stringify(expectedMapping)+" chain info, Passed!");
@@ -441,10 +452,10 @@ function callback (model) {
     QUnit.test ("C-Alpha Atom Selection String", function (assert) {
         var expectedMapping = ":A/0 AND 5-582.CA";
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var chainProxy = stageModel.get("structureComp").structure.getChainProxy();
         chainProxy.index = 0;
-        var actualMapping = CLMSUI.NGLUtils.getRangedCAlphaResidueSelectionForChain (chainProxy);
+        var actualMapping = NGLUtils.getRangedCAlphaResidueSelectionForChain (chainProxy);
 
         assert.deepEqual (actualMapping, expectedMapping, "Expected "+expectedMapping+" NGL Selection String generated, Passed!");
     });
@@ -455,7 +466,7 @@ function callback (model) {
             1: [9054, 9062, 9071, 9080, 9087, 9093, 9104, 9109, 9118, 9127, 9131, 9140, 9149, 9157, 9164, 9169, 9174, 9180, 9189, 9194]
         };	// last 20 in each
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var shortenThese = [0, 1];
         var actualMapping = $.extend({}, stageModel.calculateAllCaAtomIndices (shortenThese));	// copy object so as not to affect original (causes error)
         shortenThese.forEach (function (index) {
@@ -470,7 +481,7 @@ function callback (model) {
         var singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         var expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         // -5 cos 4 difference in pdb / search alignments, and another 1 because this function is 0-indexed.
         var actualDistance = stageModel.getSingleDistanceBetween2Residues (415 - 5 , 497 - 5, 0, 0);	// 0 chain has slightly longer distance
         actualDistance = +(actualDistance.toFixed(2));
@@ -481,12 +492,12 @@ function callback (model) {
     QUnit.test ("Same Cross-Link Distance, different indexing methods 1", function (assert) {
         var crosslinks = clmsModel.get("crosslinks");
         var singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
-        var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
+        var alignCollection = window.compositeModelInst.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
         var actualDistance = clmsModel.get("distancesObj").getXLinkDistance (singleCrossLink, alignCollection);
 
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         // -5 cos 4 difference in pdb / search alignments, and another 1 because this function is 0-indexed.
         var actualDistance2 = stageModel.getSingleDistanceBetween2Residues (415 - 5 , 497 - 5, 1, 1);	// 1 appears to be shortest distance
 
@@ -497,10 +508,10 @@ function callback (model) {
     QUnit.test ("2 different functions for returning atom indices", function (assert) {
         var crosslinks = clmsModel.get("crosslinks");
         var singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
-        var alignCollection = CLMSUI.compositeModelInst.get("alignColl");
+        var alignCollection = window.compositeModelInst.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var cproxy = stageModel.get("structureComp").structure.getChainProxy();
         var atomIndexA = stageModel.getAtomIndex (0, 0); // residue 0-indexed here
         var resObj = {resno: 5, seqIndex: 0, chainIndex: 0};
@@ -511,7 +522,7 @@ function callback (model) {
 
 
     QUnit.test ("Compare Link-Only Distance Generation with All Distance Generation", function (assert) {
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var crosslinks = stageModel.get("linkList");
 
         var matrices1 = stageModel.getChainDistances (true);
@@ -534,7 +545,7 @@ function callback (model) {
 
 
     QUnit.test ("Compare Distances from Atom Coords with All Distance Generation", function (assert) {
-        var stageModel = CLMSUI.compositeModelInst.get("stageModel");
+        var stageModel = window.compositeModelInst.get("stageModel");
         var crosslinks = stageModel.get("linkList");
 
         var matrices1 = stageModel.getChainDistances (true); //this test will fail if the defualt value for AUTO in filtermodel is true, to make it pass you need to change this call's param to true
@@ -547,7 +558,7 @@ function callback (model) {
             var seqIndexA = crosslink.residueA.seqIndex;
             var seqIndexB = crosslink.residueB.seqIndex;
             list1.push (matrices1["0-0"].distanceMatrix[seqIndexA][seqIndexB]);
-            var distanceSquared = CLMSUI.modelUtils.getDistanceSquared (atoms[seqIndexA], atoms[seqIndexB]);
+            var distanceSquared = modelUtils.getDistanceSquared (atoms[seqIndexA], atoms[seqIndexB]);
             list2.push (Math.sqrt (distanceSquared));
         });
 
@@ -581,11 +592,11 @@ function callback (model) {
         }
 
         var octreeIgnoreFunc = function (point1, point2) {
-            return CLMSUI.NGLUtils.not3DHomomultimeric ({confirmedHomomultimer: true}, point1.chainIndex, point2.chainIndex);
+            return NGLUtils.not3DHomomultimeric ({confirmedHomomultimer: true}, point1.chainIndex, point2.chainIndex);
         };
 
-        var cdist = CLMSUI.utils.toNearest ((0.25 * 0.25) + (0.4 * 0.4) + (0.4 * 0.4), 0.25);
-        var odddist = CLMSUI.utils.toNearest ((2.25 * 2.25) + (0.4 * 0.4) + (1.6 * 1.6), 0.25);
+        var cdist = utils.toNearest ((0.25 * 0.25) + (0.4 * 0.4) + (0.4 * 0.4), 0.25);
+        var odddist = utils.toNearest ((2.25 * 2.25) + (0.4 * 0.4) + (1.6 * 1.6), 0.25);
         var expected = [
             [pointsA[parseInt(112, 4)], pointsB[0], cdist],
             [pointsA[parseInt(113, 4)], pointsB[1], cdist],
@@ -597,8 +608,8 @@ function callback (model) {
             [pointsA[parseInt(223, 4)], pointsB[7], cdist],
         ];
 
-        var actual = CLMSUI.modelUtils.getMinimumDistance (pointsA, pointsB, octAccessorObj, 200, octreeIgnoreFunc);
-        actual.forEach (function (indRes) { indRes[2] = CLMSUI.utils.toNearest (indRes[2], 0.25); });
+        var actual = modelUtils.getMinimumDistance (pointsA, pointsB, octAccessorObj, 200, octreeIgnoreFunc);
+        actual.forEach (function (indRes) { indRes[2] = utils.toNearest (indRes[2], 0.25); });
 
         assert.deepEqual (actual, expected, "Expected "+expected.join(", ")+" distance (2 d.p.) for both link-only and all distance matrix link distances, Passed!");
     });
@@ -648,11 +659,11 @@ function callback (model) {
         var pointsB = pointsA.slice();
 
         var octreeIgnoreFunc = function (point1, point2) {
-            return CLMSUI.NGLUtils.not3DHomomultimeric ({confirmedHomomultimer: true}, point1.chainIndex, point2.chainIndex);
+            return NGLUtils.not3DHomomultimeric ({confirmedHomomultimer: true}, point1.chainIndex, point2.chainIndex);
         };
 
-        var cdist = CLMSUI.utils.toNearest ((0.25 * 0.25) + (0.4 * 0.4) + (0.4 * 0.4), 0.25);
-        var odddist = CLMSUI.utils.toNearest ((2.25 * 2.25) + (0.4 * 0.4) + (1.6 * 1.6), 0.25);
+        var cdist = utils.toNearest ((0.25 * 0.25) + (0.4 * 0.4) + (0.4 * 0.4), 0.25);
+        var odddist = utils.toNearest ((2.25 * 2.25) + (0.4 * 0.4) + (1.6 * 1.6), 0.25);
         var expected = [
             [pointsB[0], undefined, NaN],
             [pointsB[1], undefined, NaN],
@@ -662,8 +673,8 @@ function callback (model) {
             [pointsB[5], pointsA[3], 32979.5],
         ];
 
-        var actual = CLMSUI.modelUtils.getMinimumDistance (pointsA, pointsB, octAccessorObj, 200, octreeIgnoreFunc);
-        actual.forEach (function (indRes) { indRes[2] = CLMSUI.utils.toNearest (indRes[2], 0.25); });
+        var actual = modelUtils.getMinimumDistance (pointsA, pointsB, octAccessorObj, 200, octreeIgnoreFunc);
+        actual.forEach (function (indRes) { indRes[2] = utils.toNearest (indRes[2], 0.25); });
 
         assert.deepEqual (actual, expected, "Expected "+expected.join(", ")+" distance (2 d.p.) for both link-only and all distance matrix link distances, Passed!");
     });
@@ -687,8 +698,8 @@ function callback (model) {
     QUnit.test ("Include Terminal Indices", function (assert) {
         var expected = {ntermList: [], ctermList: []};	// because pdb for 1ao6 is within the larger sequence so neither cterm nor nterm match
 
-        var alignCollBB = CLMSUI.compositeModelInst.get("alignColl");
-        var alignID = CLMSUI.NGLUtils.make3DAlignID ("1AO6", "A", 0);
+        var alignCollBB = window.compositeModelInst.get("alignColl");
+        var alignID = NGLUtils.make3DAlignID ("1AO6", "A", 0);
         var seqRange = alignCollBB.getRangeAsSearchSeq ("P02768-A", alignID);
         $.extend (seqRange, {alignID: alignID, chainIndex: 0, protID: "P02768-A"});
         var seqMap = d3.map ();
@@ -699,7 +710,7 @@ function callback (model) {
 
     QUnit.test ("Filter Sequence By Residue Set = I and W", function (assert) {
         var expectedValue = [20, 137, 209, 259, 266, 285, 383, 508, 518];
-        var actualValue = CLMSUI.modelUtils.filterSequenceByResidueSet (dseq1AO6, new d3.set(["I", "W"]));
+        var actualValue = modelUtils.filterSequenceByResidueSet (dseq1AO6, new d3.set(["I", "W"]));
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as filtered residue indices, Passed!");
@@ -707,7 +718,7 @@ function callback (model) {
 
     QUnit.test ("Filter Sequence By Residue Set = All", function (assert) {
         var expectedValue = d3.range (0, dseq1AO6.length);
-        var actualValue = CLMSUI.modelUtils.filterSequenceByResidueSet (dseq1AO6, null, true);
+        var actualValue = modelUtils.filterSequenceByResidueSet (dseq1AO6, null, true);
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as filtered residue indices, Passed!");
@@ -719,19 +730,19 @@ function callback (model) {
         var expected2 = d3.range (0, dseq1AO6.length);	// everything
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var residueSets = CLMSUI.modelUtils.crosslinkerSpecificityPerLinker (searchArray);
+        var residueSets = modelUtils.crosslinkerSpecificityPerLinker (searchArray);
         var linkableResidues = residueSets["wrong mass SDA "].linkables;
 
-        var alignCollBB = CLMSUI.compositeModelInst.get("alignColl");
-        var alignID = CLMSUI.NGLUtils.make3DAlignID ("1AO6", "A", 0);
+        var alignCollBB = window.compositeModelInst.get("alignColl");
+        var alignID = NGLUtils.make3DAlignID ("1AO6", "A", 0);
         var seqRange = alignCollBB.getRangeAsSearchSeq ("P02768-A", alignID);
-        var actualFilteredSubSeqIndices = CLMSUI.modelUtils.filterSequenceByResidueSet (seqRange.subSeq, linkableResidues[1], false);	// 1 is KSTY
+        var actualFilteredSubSeqIndices = modelUtils.filterSequenceByResidueSet (seqRange.subSeq, linkableResidues[1], false);	// 1 is KSTY
         actualFilteredSubSeqIndices = actualFilteredSubSeqIndices.slice(-10);	// last 10
 
         assert.deepEqual (actualFilteredSubSeqIndices, expected, "Expected "+expected.join(", ")+" as last 10 KSTY cross-linkable filtered sequence indices, Passed!");
 
 
-        actualFilteredSubSeqIndices = CLMSUI.modelUtils.filterSequenceByResidueSet (seqRange.subSeq, linkableResidues[0], false);	// 0 is everything
+        actualFilteredSubSeqIndices = modelUtils.filterSequenceByResidueSet (seqRange.subSeq, linkableResidues[0], false);	// 0 is everything
 
         assert.deepEqual (actualFilteredSubSeqIndices, expected2, "Expected "+expected2.join(", ")+" as everything cross-linkable filtered sequence indices, Passed!");
     });
@@ -744,7 +755,7 @@ function callback (model) {
         });
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distanceableSequences = [
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 0, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:A:0"},
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 1, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:B:1"}
@@ -765,7 +776,7 @@ function callback (model) {
         var expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distanceableSequences = [
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 0, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:A:0"},
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 1, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:B:1"}
@@ -786,7 +797,7 @@ function callback (model) {
         var expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distanceableSequences = [
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 0, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:A:0"},
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 1, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:B:1"}
@@ -809,7 +820,7 @@ function callback (model) {
         var expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distanceableSequences = [
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 0, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:A:0"},
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 1, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:B:1"}
@@ -832,7 +843,7 @@ function callback (model) {
         var expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distanceableSequences = [
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 0, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:A:0"},
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 1, modelIndex: 1, protID: "P02768-A", alignID: "1AO6:B:1"}
@@ -856,7 +867,7 @@ function callback (model) {
         var expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distanceableSequences = [
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 0, modelIndex: 0, protID: "P02768-A", alignID: "1AO6:A:0"},
             {first: 5, last: 582, subSeq: dseq1AO6, chainIndex: 1, modelIndex: 1, protID: "P02768-A", alignID: "1AO6:B:1"}
@@ -880,7 +891,7 @@ function callback (model) {
         var expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker(searchArray));
         var distObj = clmsModel.get("distancesObj");
 
         var sampleDists = distObj.getSampleDistances (100, crosslinkerSpecificityList, {withinProtein: true, withinChain: true});
@@ -896,7 +907,7 @@ function callback (model) {
         var crossSpec = clmsModel.get("crosslinkerSpecificity");
         clmsModel.set ("crosslinkerSpecificity", null);	// null crosslink specificity for this test
         var searchArray = Array.from(clmsModel.get("searches").values());
-        var crosslinkerSpecificityList = d3.values (CLMSUI.modelUtils.crosslinkerSpecificityPerLinker (searchArray));
+        var crosslinkerSpecificityList = d3.values (modelUtils.crosslinkerSpecificityPerLinker (searchArray));
         var distObj = clmsModel.get("distancesObj");
 
         var sampleDists = distObj.getSampleDistances (100, crosslinkerSpecificityList, {withinProtein: true, withinChain: true});
@@ -919,7 +930,7 @@ function callback (model) {
             ]
         };
         var expectedValue = 12.04;
-        var actualValue = CLMSUI.modelUtils.highestScore (testCrossLink);
+        var actualValue = modelUtils.highestScore (testCrossLink);
 
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as highest score, Passed!");
     });
@@ -936,7 +947,7 @@ function callback (model) {
             "FACE"
         ];
         var expectedValue = [undefined, undefined, 0, undefined, 1, undefined, 5];
-        var actualValue = CLMSUI.modelUtils.indexSameSequencesToFirstOccurrence (testSeqs);
+        var actualValue = modelUtils.indexSameSequencesToFirstOccurrence (testSeqs);
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as index array, Passed!");
@@ -958,7 +969,7 @@ function callback (model) {
             uniqSeqIndices: [0, 1, 3, 5],
             uniqSeqReverseIndex: {"0": "0", "1": "1", "3": "2", "5": "3"}
         };
-        var actualValue = CLMSUI.modelUtils.filterRepeatedSequences (testSeqs);
+        var actualValue = modelUtils.filterRepeatedSequences (testSeqs);
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as repeated sequence result, Passed!");
@@ -984,7 +995,7 @@ function callback (model) {
         };
 
         var expectedValue = {Prot1: [1, 2, 1, 3, 2, 4, 4], Prot2: [2, 4, 2, 6, 4, 8, 8]};
-        var actualValue = CLMSUI.modelUtils.reinflateSequenceMap (matchMatrix, testSeqs, filteredSeqInfo);
+        var actualValue = modelUtils.reinflateSequenceMap (matchMatrix, testSeqs, filteredSeqInfo);
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as reinflated sequence result, Passed!");
@@ -995,7 +1006,7 @@ function callback (model) {
         var crosslinks = model.getAllCrossLinks();
         var expectedCrossLinkIDs = _.pluck (crosslinks, "id");
         var expectedValue = {"P02768-A-P02768-A" : {crosslinks: expectedCrossLinkIDs, fromProtein: "P02768-A", toProtein: "P02768-A", label: "ALBU - ALBU"}};
-        var actualValue = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crosslinks);
+        var actualValue = modelUtils.crosslinkCountPerProteinPairing (crosslinks);
         d3.values(actualValue).forEach (function (pairing) {	// do this as otherwise stringify will kick off about circular structures, so just match ids
             pairing.fromProtein = pairing.fromProtein.id;
             pairing.toProtein = pairing.toProtein.id;
@@ -1015,7 +1026,7 @@ function callback (model) {
             {is_decoy: false, accession: "WH&T"},   // bad accession
         ];
         var expectedValue = ["P12345", "A0A022YWF9"];
-        var actualValue = CLMSUI.modelUtils.getLegalAccessionIDs (interactors);
+        var actualValue = modelUtils.getLegalAccessionIDs (interactors);
 
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as crosslink protein pairing value, Passed!");
     });
@@ -1056,7 +1067,7 @@ function callback (model) {
         ];
 
         var actualValue = testArrs.map (function (testArr, i) {
-            return CLMSUI.modelUtils.mergeContiguousFeatures (testArr);
+            return modelUtils.mergeContiguousFeatures (testArr);
         });
 
         // stringify turns undefined to null for printout, but it's a match
@@ -1067,7 +1078,7 @@ function callback (model) {
     QUnit.test ("Radix sort", function (assert) {
         var testArr = [2, 4, 6, 6, 3, 2, 1, 4, 2, 4, 6, 8, 1, 2, 4, 6, 9, 0];
         var expectedValue = [0, 1, 1, 2, 2, 2, 2, 3, 4, 4, 4, 4, 6, 6, 6, 6, 8, 9];
-        var actualValue = CLMSUI.modelUtils.radixSort (10, testArr, function(d) { return d; });
+        var actualValue = modelUtils.radixSort (10, testArr, function(d) { return d; });
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as sorted by radix, Passed!");
@@ -1077,7 +1088,7 @@ function callback (model) {
     QUnit.test ("Parse URL Query String", function (assert) {
         var testString = "sid=10003-secret&decoys=1&unval=1&linear=1&cats=true&anon=";
         var expectedValue = {sid: "10003-secret", decoys: 1, unval: 1, linear: 1, cats: true, anon: ""};
-        var actualValue = CLMSUI.modelUtils.parseURLQueryString (testString);
+        var actualValue = modelUtils.parseURLQueryString (testString);
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as parsed URL query string, Passed!");
@@ -1087,7 +1098,7 @@ function callback (model) {
     QUnit.test ("Make URL Query String", function (assert) {
         var testObj = {sid: "10003-secret", decoys: 1, unval: 1, linear: 1, cats: true, anon: ""};
         var expectedValue = ["sid=10003-secret", "decoys=1", "unval=1", "linear=1", "cats=1", "anon="];	// true gets turned to 1, false to 0
-        var actualValue = CLMSUI.modelUtils.makeURLQueryPairs (testObj, "");
+        var actualValue = modelUtils.makeURLQueryPairs (testObj, "");
 
         // stringify turns undefined to null for printout, but it's a match
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as constructed URL query string, Passed!");
@@ -1097,7 +1108,7 @@ function callback (model) {
     // QUnit.test ("ZScore array of values", function (assert) {
     //     var expectedValue = [-1.49, -1.16, -0.83, -0.5, -0.17, 0.17, 0.5, 0.83, 1.16, 1.49];
     //     var testNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    //     var actualValue = CLMSUI.modelUtils.zscore(testNumbers).map(function (num) {
+    //     var actualValue = modelUtils.zscore(testNumbers).map(function (num) {
     //         return +(num).toFixed(2);
     //     });
     //
@@ -1108,7 +1119,7 @@ function callback (model) {
     // QUnit.test ("Compact 2D array", function (assert) {
     //     var expectedValue = [[1, 2, undefined, 3], [4, 5, 6, 7]];
     //     var testNumbers = [[1, 2, undefined, 3], [undefined, undefined, undefined, undefined], [4, 5, 6, 7]];
-    //     var actualValue = CLMSUI.modelUtils.compact2DArray (testNumbers);
+    //     var actualValue = modelUtils.compact2DArray (testNumbers);
     //
     //     assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as compacted 2D array, Passed!");
     // });
@@ -1119,7 +1130,7 @@ function callback (model) {
     //     var options = {groups: d3.map({a: "cat", b: "cat", c: "dog"})};
     //     var testNumbers = [[1, 1, 1, 1, 1],[3, 3, 3, 3, 3],[5, 5, 5, 5, 5]];
     //     ["a", "b", "c"].forEach (function (val, i) { testNumbers[i].colName = val; });
-    //     var actualValue = CLMSUI.modelUtils.makeColumnGroupIndices(testNumbers, options);
+    //     var actualValue = modelUtils.makeColumnGroupIndices(testNumbers, options);
     //
     //     assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as groups, Passed!");
     //
@@ -1136,7 +1147,7 @@ function callback (model) {
     //     var testNumbers = [[1, 1, 1, 1, 1],[3, 3, 3, 3, 3],[5, 5, 5, 5, 5],[7, 7, 7, 7, 7]];
     //     var columnGroupNames = [["a", "b"], ["c"]];
     //     [0,0,1].forEach (function (val, i) { testNumbers[i].groupIndex = val; });	// 7's not given groupIndex
-    //     var actualValue = CLMSUI.modelUtils.averageGroups(testNumbers, columnGroupNames);
+    //     var actualValue = modelUtils.averageGroups(testNumbers, columnGroupNames);
     //
     //     assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as z-value output, Passed!");
     // });
@@ -1159,7 +1170,7 @@ function callback (model) {
     //         [undefined, 0, 1]	// normalise undefined value to known value = that value stays undefined
     //     ];
     //
-    //     var actualValue = CLMSUI.modelUtils.normalize2DArrayToColumn (testArr, 1);	// normalise to column 1
+    //     var actualValue = modelUtils.normalize2DArrayToColumn (testArr, 1);	// normalise to column 1
     //
     //     // stringify turns undefined to null for printout, but it's a match
     //     assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as normalised array, Passed!");
@@ -1173,7 +1184,7 @@ function callback (model) {
     //     var testZScores = [[1, 2],[3, 4]];
     //     testLinks.forEach (function (crosslink, i) { testZScores[i].clink = crosslink; });
     //     var testColumnNameIndexPair = [{name: "cat", index: 0}, {name: "dog", index: 1}];
-    //     CLMSUI.modelUtils.updateMetaDataWithTheseColumns (testZScores, testColumnNameIndexPair);
+    //     modelUtils.updateMetaDataWithTheseColumns (testZScores, testColumnNameIndexPair);
     //
     //     var actualValue = testLinks.map (function (testLink) { return $.extend({}, testLink.getMeta()); });
     //     actualValue.forEach (function (val) { delete val.distance; });
@@ -1185,23 +1196,23 @@ function callback (model) {
 
 
     QUnit.test ("Update Protein Metadata", function (assert) {
-        var expectedValue = {columns: ["cat", "dog"], items: clmsModel.get("participants"), matchedItemCount: 1};
-        CLMSUI.vent.listenToOnce (CLMSUI.vent, "proteinMetadataUpdated", function (actualValue) {
+        var expectedValue = {columns: ["proteinid","cat", "dog"], items: clmsModel.get("participants"), matchedItemCount: 1};
+        window.vent.listenToOnce (window.vent, "proteinMetadataUpdated", function (actualValue) {
             assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as proteinmetadata event data, Passed!");
 
             var actualValue2 = clmsModel.get("participants").get("P02768-A").getMeta();
-            var expectedValue2 = {cat: 2, dog: 4};
+            var expectedValue2 = {proteinid: 'P02768-A', cat: 2, dog: 4};
             assert.deepEqual (actualValue2, expectedValue2, "Expected "+JSON.stringify(expectedValue2)+" as protein meta value, Passed!");
         });
 
         var fileContents = "ProteinID,cat,dog\nP02768-A,2,4\n";
-        CLMSUI.modelUtils.updateProteinMetadata (fileContents, clmsModel);
+        modelUtils.updateProteinMetadata (fileContents, clmsModel);
     });
 
 
     QUnit.test ("Update Crosslink Metadata", function (assert) {
         var expectedValue = {columns: ["cat", "dog"], columnTypes: {cat: "numeric", dog: "numeric"}, items: clmsModel.get("crosslinks"), matchedItemCount: 2, ppiCount: 2};
-        CLMSUI.vent.listenToOnce (CLMSUI.vent, "linkMetadataUpdated", function (actualValue) {
+        window.vent.listenToOnce (window.vent, "linkMetadataUpdated", function (actualValue) {
             console.log ("CLLCC2", clmsModel, clmsModel.get("crosslinks"));
             assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as linkmetadata event data, Passed!");
 
@@ -1215,7 +1226,7 @@ function callback (model) {
             +"ALBU,415,ALBU,497,2,4\n"
             +"ALBU,190,ALBU,425,3,5\n"
         ;
-        CLMSUI.modelUtils.updateLinkMetadata (fileContents, clmsModel);
+        modelUtils.updateLinkMetadata (fileContents, clmsModel);
     });
 
 
@@ -1224,7 +1235,7 @@ function callback (model) {
             .resetFilter()
         ;
 
-        CLMSUI.vent.listenToOnce (CLMSUI.vent, "userAnnotationsUpdated", function (actualValue) {
+        window.vent.listenToOnce (window.vent, "userAnnotationsUpdated", function (actualValue) {
             var expectedAnnotationTypes = [
                 {category: "User Defined", type: "Helix", source: "Search", colour: "blue"},
                 {category: "User Defined", type: "Strand", source: "Search", colour: "yellow"},
@@ -1267,7 +1278,7 @@ function callback (model) {
         });
 
         var input = "ProteinID,AnnotName,StartRes,EndRes,Color\r\nP02768-A,Helix,10,20,blue\r\nP02768-A,Strand,20,30,yellow\r\nP02768-A,Helix,40,70,red\r\nP02768-A,Sheet,100,120,red\r\n";
-        CLMSUI.modelUtils.updateUserAnnotationsMetadata (input, clmsModel);
+        modelUtils.updateUserAnnotationsMetadata (input, clmsModel);
     });
 
 
@@ -1278,7 +1289,7 @@ function callback (model) {
         var str = "\"Protein1\",\"SeqPos1\",\"LinkedRes1\",\"Protein2\",\"SeqPos2\",\"LinkedRes2\",\"Highest Score\",\"Match Count\",\"DecoyType\",\"AutoValidated\",\"Validated\",\"Link FDR\",\"3D Distance\",\"From Chain\",\"To Chain\",\"PDB SeqPos 1\",\"PDB SeqPos 2\",\"Search_10003\",\"cat\",\"dog\"\r\n\"sp|P02768-A|ALBU\",\"415\",\"V\",\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"19.0000\",\"2\",\"TT\",\"true\",\"B,B\",\"\",\"8.79\",\"B\",\"B\",\"411\",\"493\",\"X\",\"2\",\"4\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"425\",\"E\",\"17.3400\",\"4\",\"TT\",\"true\",\"A,C,A,A\",\"\",\"12.07\",\"B\",\"B\",\"186\",\"421\",\"X\",\"3\",\"5\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"17.3200\",\"1\",\"TT\",\"true\",\"C\",\"\",\"15.26\",\"A\",\"A\",\"121\",\"157\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"131\",\"E\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"17.0300\",\"1\",\"TT\",\"true\",\"?\",\"\",\"8.30\",\"A\",\"A\",\"127\",\"158\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"107\",\"D\",\"sp|P02768-A|ALBU\",\"466\",\"K\",\"13.9400\",\"1\",\"TT\",\"true\",\"B\",\"\",\"8.37\",\"B\",\"B\",\"103\",\"462\",\"X\",\"\",\"\"\r\n";
 
         var expectedValue = str;
-        var actualValue = CLMSUI.STRINGUtils.lzw_decode (CLMSUI.STRINGUtils.lzw_encode (str));
+        var actualValue = STRINGUtils.lzw_decode (STRINGUtils.lzw_encode (str));
 
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as compressed then decompressed small string, Passed!");
     });
@@ -1288,13 +1299,13 @@ function callback (model) {
 
 
         var animals = ["ant", "bat", "cat", "dog", "eel", "fox", "gnu", "hen", "iguana", "jay", "kestrel", "llama"];
-        str = "";
+        var str = "";
         for (var n = 0; n < 600000; n++) {
             str += animals[n % animals.length] + String.fromCharCode (n % 256);
         };
 
         var expectedValue = str;
-        var actualValue = CLMSUI.STRINGUtils.lzw_decode (CLMSUI.STRINGUtils.lzw_encode (str));
+        var actualValue = STRINGUtils.lzw_decode (STRINGUtils.lzw_encode (str));
 
         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue.slice(-200))+" as compressed then decompressed large string, Passed!");
     });
@@ -1326,7 +1337,7 @@ function callback (model) {
             +"ALBU,415,ALBU,497,2,4\n"
             +"ALBU,190,ALBU,425,3,5\n"
         ;
-        CLMSUI.modelUtils.updateLinkMetadata (fileContents, clmsModel);
+        modelUtils.updateLinkMetadata (fileContents, clmsModel);
 
         var actualValue = getLinksCSV();
 
@@ -1352,6 +1363,8 @@ function callback (model) {
 
 }
 
+
+/*
 function testSetupNew (cbfunc) {
     d3.json ("10003.json", function (options) {
         CLMSUI.vent.listenToOnce (CLMSUI.vent, "initialSetupDone", function () {
@@ -1370,7 +1383,7 @@ function testSetupNew (cbfunc) {
                 return {id: code, pdbCode: code, uri:"rcsb://"+code, local: false, params: {calphaOnly: this.cAlphaOnly}};
             }, this);
 
-            CLMSUI.NGLUtils.repopulateNGL({
+            NGLUtils.repopulateNGL({
                 pdbSettings: pdbSettings,
                 stage: stage,
                 compositeModel: CLMSUI.compositeModelInst
@@ -1392,5 +1405,4 @@ function testSetup (cbfunc) {
         cbfunc (CLMSUI.compositeModelInst);
     });
 }
-
-testSetupNew (callback);
+*/

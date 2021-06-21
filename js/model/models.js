@@ -1,10 +1,5 @@
-// var CLMSUI = CLMSUI || {};
-//
-// CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {},
-//
-//     {
-        // I want MinigramBB to be model agnostic so I can re-use it in other places
-        MinigramModel = Backbone.Model.extend({
+// I want MinigramBB to be model agnostic so I can re-use it in other places
+export const MinigramModel = Backbone.Model.extend({
             defaults: {
                 //domainStart: 0,
                 //domainEnd: 100,
@@ -15,7 +10,7 @@
             extent: [0,4],
         });
 
-        TooltipModel = Backbone.Model.extend({
+export const  TooltipModel = Backbone.Model.extend({
             defaults: {
                 location: null,
                 header: "Tooltip",
@@ -26,7 +21,7 @@
             }
         });
 
-        BlosumModel = Backbone.Model.extend({
+const BlosumModel = Backbone.Model.extend({
             initialize: function() {
                 //console.log ("Blosum model initialised", this);
             },
@@ -34,8 +29,7 @@
 
 
 // this is separate to get round the fact BlosumModel won't be available within the same declaration
-// CLMSUI.BackboneModelTypes = _.extend(CLMSUI.BackboneModelTypes || {}, {
-    BlosumCollection = Backbone.Collection.extend({
+    export const BlosumCollection = Backbone.Collection.extend({
         model: BlosumModel,
         url: "R/blosums.json",
         parse: function(response) {
@@ -51,4 +45,3 @@
             return values;
         }
     });
-// });

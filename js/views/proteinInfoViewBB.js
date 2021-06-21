@@ -1,12 +1,12 @@
-//  protein info view
-//
-//  Martin Graham, Rappsilber Laboratory, 2015
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {utils} from "../utils";
 
-CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
+export const ProteinInfoViewBB = BaseFrameView.extend({
     events: function () {
-        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -23,7 +23,7 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function (viewOptions) {
-        CLMSUI.ProteinInfoViewBB.__super__.initialize.apply(this, arguments);
+        ProteinInfoViewBB.__super__.initialize.apply(this, arguments);
 
         const flexContainer = d3.select(this.el)
             .append("div")
@@ -66,7 +66,7 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
             // d3 data bind
             const protJoin = d3.select(this.el).select("div.proteinTabs").selectAll(".protTab").data(prots,
                 function (d) {
-                    return CLMSUI.utils.makeLegalDomID(d.id);
+                    return utils.makeLegalDomID(d.id);
                 });
             const self = this;
             protJoin.enter().append("span")
@@ -113,7 +113,7 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
             let tBody = table.createTBody();
 
             const self = this;
-            const goTermsMap = CLMSUI.compositeModelInst.get("go");
+            const goTermsMap = window.compositeModelInst.get("go");
 
             for (let key of this.options.orderedKeys) {
                 addRow(key);
@@ -209,8 +209,8 @@ CLMSUI.ProteinInfoViewBB = CLMSUI.utils.BaseFrameView.extend({
                     // var interactor = self.model.get("clmsModel").get("participants").get(posData[0]);
                     //
                     // self.model.get("tooltipModel")
-                    //     .set("header", "Cross-Linked with " + CLMSUI.modelUtils.makeTooltipTitle.residue(interactor, +posData[1]))
-                    //     .set("contents", CLMSUI.modelUtils.makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
+                    //     .set("header", "Cross-Linked with " + modelUtils.makeTooltipTitle.residue(interactor, +posData[1]))
+                    //     .set("contents", modelUtils.makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
                     //     .set("location", {
                     //         pageX: d3.event.pageX,
                     //         pageY: d3.event.pageY

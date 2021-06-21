@@ -1,14 +1,14 @@
-//		GO terms viewer
-//
-//		Colin Combe, Martin Graham
-//		Rappsilber Laboratory, 2019
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../../ui-utils/base-frame-view";
+import {GoTerm} from "./goTerm";
 
-CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
+
+export const GoTermsViewBB = BaseFrameView.extend({
 
     events: function () {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -31,7 +31,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function (viewOptions) {
-        CLMSUI.GoTermsViewBB.__super__.initialize.apply(this, arguments);
+        GoTermsViewBB.__super__.initialize.apply(this, arguments);
 
         var self = this;
 
@@ -243,7 +243,7 @@ CLMSUI.GoTermsViewBB = CLMSUI.utils.BaseFrameView.extend({
         var nodes = new Map();
         var linksMap = new Map();
 
-        CLMSUI.GoTerm.prototype.getCount = 0;
+        GoTerm.prototype.getCount = 0; // what?
         if (termType == "biological_process") {
             go.get("GO0008150").getInteractors(true);
             sankeyNode("GO0008150");

@@ -1,6 +1,6 @@
-var CLMSUI = CLMSUI || {};
+import {utils} from "../utils";
 
-CLMSUI.STRINGUtils = {
+export const STRINGUtils = {
 
     // Maximum number of proteins we can POST to STRING's network interaction API (found by trial and error)
     stringAPIMaxProteins: 2000,
@@ -8,7 +8,7 @@ CLMSUI.STRINGUtils = {
     // Filter the CLMS model's participants down to just those that have non-decoy inter-protein links
     filterProteinsToPPISet: function (clmsModel) {
         var proteinMap = clmsModel.get("participants");
-        var realProteins = CLMSUI.modelUtils.filterOutDecoyInteractors (Array.from (proteinMap.values()));
+        var realProteins = modelUtils.filterOutDecoyInteractors (Array.from (proteinMap.values()));
         var ppiProteins = realProteins.filter (function (prot) {
             return prot.crosslinks.some (function (clink) {
                 // is there a real crosslink going to another protein?
@@ -37,7 +37,7 @@ CLMSUI.STRINGUtils = {
     },
 
     getStringIdentifiers: function (proteinIDs, taxonID) {
-        var stringIDCache = CLMSUI.utils.getLocalStorage("StringIds")
+        var stringIDCache = utils.getLocalStorage("StringIds")
         var identifiersBySpecies = stringIDCache[taxonID] || {};
         var split = _.partition (proteinIDs, function (pid) { return identifiersBySpecies[pid]; }); // which IDs are cached?
         var alreadyKnown = split[0];
@@ -61,14 +61,14 @@ CLMSUI.STRINGUtils = {
                     }
                 })
                 .done (function (data, textStatus, xhr) {
-                    var stringCache = CLMSUI.utils.getLocalStorage ("StringIds");   // get stored data
+                    var stringCache = utils.getLocalStorage ("StringIds");   // get stored data
                     var identifiersBySpecies = stringCache[taxonID] || {};  // get or make object for species
                     data.forEach (function (record) {   // add new data to this species object
                         identifiersBySpecies[record.queryItem] = record.stringId;
                     });
                     stringCache[taxonID] = identifiersBySpecies;    // (re)attach species object to stored data
                     try {
-                        CLMSUI.utils.setLocalStorage (stringCache, "StringIds");    // re-store the data
+                        utils.setLocalStorage (stringCache, "StringIds");    // re-store the data
                     } catch (err) {
                         alert ("Local Storage Full. Cannot Cache STRING IDs.");
                     }
@@ -96,7 +96,7 @@ CLMSUI.STRINGUtils = {
             stringIDs.sort(); // sort string ids
             var networkKey = stringIDs.join("%0d");     // id/key made of string IDs joined together
 
-            var stringNetworkScoreCache = CLMSUI.utils.getLocalStorage("StringNetworkScores");
+            var stringNetworkScoreCache = utils.getLocalStorage("StringNetworkScores");
             var idBySpecies = stringNetworkScoreCache[taxonID] || {};
             var cachedNetwork = idBySpecies[networkKey];    // exact key match in cache?
 
@@ -112,8 +112,8 @@ CLMSUI.STRINGUtils = {
 
             // If no cached network, go to STRING
             if (!cachedNetwork) {
-                if (stringIDs.length >= CLMSUI.STRINGUtils.stringAPIMaxProteins) {
-                    return Promise.reject ("Too Large. More than "+d3.format(",")(CLMSUI.STRINGUtils.stringAPIMaxProteins)+" proteins in requested network. Consider filtering first.")
+                if (stringIDs.length >= STRINGUtils.stringAPIMaxProteins) {
+                    return Promise.reject ("Too Large. More than "+d3.format(",")(STRINGUtils.stringAPIMaxProteins)+" proteins in requested network. Consider filtering first.")
                 }
                 var promiseObj = new Promise (function (resolve, reject) {
                     $.ajax ({
@@ -127,9 +127,9 @@ CLMSUI.STRINGUtils = {
                     })
                     .done (function (retrievedNetwork, textStatus, xhr) {
                         stringNetworkScoreCache[taxonID] = idBySpecies;
-                        idBySpecies[networkKey] = CLMSUI.STRINGUtils.lzw_encode (retrievedNetwork);
+                        idBySpecies[networkKey] = STRINGUtils.lzw_encode (retrievedNetwork);
                         try {
-                            CLMSUI.utils.setLocalStorage (stringNetworkScoreCache, "StringNetworkScores");
+                            utils.setLocalStorage (stringNetworkScoreCache, "StringNetworkScores");
                         } catch (err) {
                             alert ("Local Storage Full. Cannot cache returned STRING network.");
                         }
@@ -142,7 +142,7 @@ CLMSUI.STRINGUtils = {
                 return promiseObj;
             } else {
                 console.log ("Using cached network");
-                return Promise.resolve ({idMap: idMap, networkTsv: CLMSUI.STRINGUtils.lzw_decode(cachedNetwork)});
+                return Promise.resolve ({idMap: idMap, networkTsv: STRINGUtils.lzw_decode(cachedNetwork)});
             }
         }
         return Promise.resolve ({idMap: idMap, networkTsv: ""});    // empty network for 1 protein
@@ -205,10 +205,10 @@ CLMSUI.STRINGUtils = {
     },
 
     loadStringDataFromModel: function (clmsModel, taxonID, callback) {
-        var viableProteinIDs = _.pluck (CLMSUI.STRINGUtils.filterProteinsToPPISet(clmsModel), "id");
+        var viableProteinIDs = _.pluck (STRINGUtils.filterProteinsToPPISet(clmsModel), "id");
         console.log ("vids", viableProteinIDs.length);
 
-        if (viableProteinIDs.length >= CLMSUI.STRINGUtils.stringAPIMaxProteins) {
+        if (viableProteinIDs.length >= STRINGUtils.stringAPIMaxProteins) {
             var proteins = clmsModel.get("participants");
             viableProteinIDs = viableProteinIDs.filter (function (pid) {
                 return !proteins.get(pid).hidden;
@@ -216,18 +216,18 @@ CLMSUI.STRINGUtils = {
             console.log ("vids2", viableProteinIDs.length);
         }
 
-        CLMSUI.STRINGUtils.loadStringData (viableProteinIDs, taxonID, callback);
+        STRINGUtils.loadStringData (viableProteinIDs, taxonID, callback);
     },
 
     loadStringData: function (pids, taxonID, callback) {
         function chainError (err) { return Promise.reject (err); }
 
-        CLMSUI.STRINGUtils.getStringIdentifiers (pids, taxonID)
+        STRINGUtils.getStringIdentifiers (pids, taxonID)
             .then (function (identifiersBySpecies) {
-                return CLMSUI.STRINGUtils.queryStringInteractions (identifiersBySpecies, taxonID);
+                return STRINGUtils.queryStringInteractions (identifiersBySpecies, taxonID);
             }, chainError)
             .then (function (networkAndIDObj) {
-                var csv = networkAndIDObj && networkAndIDObj.networkTsv ? CLMSUI.STRINGUtils.translateToCSV (networkAndIDObj.idMap, networkAndIDObj.networkTsv) : null;
+                var csv = networkAndIDObj && networkAndIDObj.networkTsv ? STRINGUtils.translateToCSV (networkAndIDObj.idMap, networkAndIDObj.networkTsv) : null;
                 if (!csv || csv.length === 0) {
                     return chainError ("No meaningful STRING interactions found for protein set.");
                 }

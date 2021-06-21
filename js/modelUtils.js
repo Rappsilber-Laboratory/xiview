@@ -1,6 +1,11 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import * as $ from 'jquery';
+// require('d3-octree');
 
-CLMSUI.modelUtils = {
+import {utils} from "./utils";
+import {GoTerm} from "./views/go/goTerm";
+
+export const modelUtils = {
     flattenMatches: function(matchesArr) {
         var arrs = [
             [],
@@ -33,7 +38,7 @@ CLMSUI.modelUtils = {
     },
 
     getDirectionalResidueType: function(xlink, getTo, seqAlignFunc) {
-        return CLMSUI.modelUtils.getResidueType(getTo ? xlink.toProtein : xlink.fromProtein, getTo ? xlink.toResidue : xlink.fromResidue, seqAlignFunc);
+        return modelUtils.getResidueType(getTo ? xlink.toProtein : xlink.fromProtein, getTo ? xlink.toResidue : xlink.fromResidue, seqAlignFunc);
     },
 
     filterOutDecoyInteractors: function (interactorArr) {
@@ -46,7 +51,7 @@ CLMSUI.modelUtils = {
         maxRows: 25,
 
         residueString: function(singleLetterCode) {
-            return singleLetterCode + " (" + CLMSUI.modelUtils.amino1to3Map[singleLetterCode] + ")";
+            return singleLetterCode + " (" + modelUtils.amino1to3Map[singleLetterCode] + ")";
         },
 
         formatDictionary: {
@@ -56,7 +61,7 @@ CLMSUI.modelUtils = {
         },
 
         niceFormat: function (key, value) {
-            var fd = CLMSUI.modelUtils.makeTooltipContents.formatDictionary;
+            var fd = modelUtils.makeTooltipContents.formatDictionary;
             var noFormat = function (v) { return v; };
 
             var format = fd.formats[key] || noFormat;
@@ -70,10 +75,11 @@ CLMSUI.modelUtils = {
             var linear = xlink.isLinearLink();
             var mono = xlink.isMonoLink();
             var info = [
-                ["From", xlink.fromProtein.name, xlink.fromResidue, CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(xlink, false))],
-                linear ? ["To", "Linear", "---", "---"] : mono ? ["To", "Monolink", "---", "---"] : ["To", xlink.toProtein.name, xlink.toResidue, CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(xlink, true))],
+                ["From", xlink.fromProtein.name, xlink.fromResidue, modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, false))],
+                linear ? ["To", "Linear", "---", "---"] : mono ? ["To", "Monolink", "---", "---"]
+                    : ["To", xlink.toProtein.name, xlink.toResidue, modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, true))],
                 ["Matches", xlink.filteredMatches_pp.length],
-                ["Highest Score", CLMSUI.modelUtils.highestScore(xlink)]
+                ["Highest Score", modelUtils.highestScore(xlink)]
             ];
 
             var extraEntries = _.pairs (extras);    // turn {a:1, b:2} into [["a",1],["b",2]]
@@ -83,7 +89,7 @@ CLMSUI.modelUtils = {
                 var val = entry.value;
                 var key = entry.key.toLocaleLowerCase();
                 if (val !== undefined && !_.isObject(val)) {
-                    info.push ([key, CLMSUI.modelUtils.makeTooltipContents.niceFormat (key, val)]);
+                    info.push ([key, modelUtils.makeTooltipContents.niceFormat (key, val)]);
                 }
             });
             return info;
@@ -105,7 +111,7 @@ CLMSUI.modelUtils = {
                 var val = entry.value;
                 var key = entry.key.toLocaleLowerCase();
                 if (val !== undefined && !_.isObject(val)) {
-                    contents.push ([key, CLMSUI.modelUtils.makeTooltipContents.niceFormat (key, val)]);
+                    contents.push ([key, modelUtils.makeTooltipContents.niceFormat (key, val)]);
                 }
             });
 
@@ -116,7 +122,7 @@ CLMSUI.modelUtils = {
             var ttinfo = xlinks.map(function(xlink) {
                 var linear = xlink.isLinearLink();
                 var startIsTo = !linear && (xlink.toProtein.id === interactorId && xlink.toResidue === residueIndex);
-                var residueCode = linear ? "---" : CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(xlink, !startIsTo));
+                var residueCode = linear ? "---" : modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, !startIsTo));
                 if (startIsTo) {
                     return [xlink.fromProtein.name, xlink.fromResidue, residueCode, xlink.filteredMatches_pp.length];
                 } else {
@@ -129,7 +135,7 @@ CLMSUI.modelUtils = {
                 var key = extraEntry.key.toLocaleLowerCase();
 
                 extraEntry.value.forEach(function(val, i) {
-                    ttinfo[i].push (CLMSUI.modelUtils.makeTooltipContents.niceFormat (key, val));
+                    ttinfo[i].push (modelUtils.makeTooltipContents.niceFormat (key, val));
                 });
             });
 
@@ -156,7 +162,7 @@ CLMSUI.modelUtils = {
             ttinfo.unshift(headers);
             ttinfo.tableHasHeaders = true;
             var length = ttinfo.length;
-            var limit = CLMSUI.modelUtils.makeTooltipContents.maxRows;
+            var limit = modelUtils.makeTooltipContents.maxRows;
             if (length > limit) {
                 ttinfo = ttinfo.slice(0, limit);
                 ttinfo.push(["+ " + (length - limit) + " More"]);
@@ -187,15 +193,15 @@ CLMSUI.modelUtils = {
             var fromProtein, toProtein;
 
             var details = linkList.map(function(crosslink, i) {
-                var from3LetterCode = CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(crosslink, false));
-                var to3LetterCode = CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getDirectionalResidueType(crosslink, true));
+                var from3LetterCode = modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(crosslink, false));
+                var to3LetterCode = modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(crosslink, true));
                 fromProtein = crosslink.fromProtein.name;
                 toProtein = crosslink.toProtein.name;
                 var row = [crosslink.fromResidue + " " + from3LetterCode, crosslink.toResidue + " " + to3LetterCode];
                 extraEntries.forEach(function(entry) {
                     var key = entry.key.toLocaleLowerCase();
                     var val = entry.value[i];
-                    row.push (CLMSUI.modelUtils.makeTooltipContents.niceFormat (key, val));
+                    row.push (modelUtils.makeTooltipContents.niceFormat (key, val));
                 });
                 return row;
             });
@@ -245,12 +251,12 @@ CLMSUI.modelUtils = {
             //     var val = entry.value;
             //     var key = entry.key.toLocaleLowerCase();
             //     if (val !== undefined && !_.isObject(val)) {
-            //         contents.push ([key, CLMSUI.modelUtils.makeTooltipContents.niceFormat (key, val)]);
+            //         contents.push ([key, modelUtils.makeTooltipContents.niceFormat (key, val)]);
             //     }
             // });
             //
             // if (interactor.go) {
-            //     var goTermsMap = CLMSUI.compositeModelInst.get("go");
+            //     var goTermsMap = window.compositeModelInst.get("go");
             //     var goTermsText = "";
             //     for (var goId of interactor.go) {
             //         var goTerm = goTermsMap.get(goId);
@@ -277,7 +283,7 @@ CLMSUI.modelUtils = {
         },
         residue: function(interactor, residueIndex, residueExtraInfo) {
             return interactor.name + ":" + residueIndex + "" + (residueExtraInfo ? residueExtraInfo : "") + " " +
-                CLMSUI.modelUtils.makeTooltipContents.residueString(CLMSUI.modelUtils.getResidueType(interactor, residueIndex));
+                modelUtils.makeTooltipContents.residueString(modelUtils.getResidueType(interactor, residueIndex));
         },
         feature: function() {
             return "Feature";
@@ -421,7 +427,7 @@ CLMSUI.modelUtils = {
 
     filterRepeatedSequences: function(sequences) {
         // Filter out repeated sequences to avoid costly realignment calculation of the same sequences
-        var sameSeqIndices = CLMSUI.modelUtils.indexSameSequencesToFirstOccurrence(sequences);
+        var sameSeqIndices = modelUtils.indexSameSequencesToFirstOccurrence(sequences);
         var uniqSeqs = sequences.filter(function(seq, i) {
             return sameSeqIndices[i] === undefined;
         }); // get unique sequences...
@@ -503,9 +509,9 @@ CLMSUI.modelUtils = {
             if (interactorCollection.length === undefined) {    // obj to array if necessary
                 interactorCollection = Array.from(interactorCollection.values());
             }
-            ids = _.pluck (CLMSUI.modelUtils.filterOutDecoyInteractors(interactorCollection), "accession")
+            ids = _.pluck (modelUtils.filterOutDecoyInteractors(interactorCollection), "accession")
                 .filter(function(accession) {
-                    return accession.match(CLMSUI.utils.commonRegexes.uniprotAccession);
+                    return accession.match(utils.commonRegexes.uniprotAccession);
                 })
             ;
         }
@@ -547,7 +553,7 @@ CLMSUI.modelUtils = {
     },
 
     crosslinkerSpecificityPerLinker: function (searchArray) {
-        return CLMSUI.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity") || {
+        return window.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity") || {
             default: {
                 name: "all",
                 searches: new Set(_.pluck (searchArray, "id")),
@@ -591,8 +597,8 @@ CLMSUI.modelUtils = {
     updateLinkMetadata: function (metaDataFileContents, clmsModel) {
         var crosslinks = clmsModel.get("crosslinks");
         var crosslinksArr = Array.from (crosslinks.values());
-        var protMap = CLMSUI.modelUtils.makeMultiKeyProteinMap(clmsModel);
-        var crosslinksByProteinPairing = CLMSUI.modelUtils.crosslinkCountPerProteinPairing (crosslinksArr);
+        var protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
+        var crosslinksByProteinPairing = modelUtils.crosslinkCountPerProteinPairing (crosslinksArr);
 
         var first = true;
         var columns = [];
@@ -606,7 +612,7 @@ CLMSUI.modelUtils = {
 
         function parseProteinID2(i, d) {
             var p = getValueN("Protein", i, d) || "";
-            return CLMSUI.modelUtils.parseProteinID(protMap, p);
+            return modelUtils.parseProteinID(protMap, p);
         }
 
         var matchedCrossLinks = [];
@@ -703,7 +709,7 @@ CLMSUI.modelUtils = {
         };
 
         if (columns) {
-            CLMSUI.vent.trigger("linkMetadataUpdated", result, {source: "file"});
+            vent.trigger("linkMetadataUpdated", result, {source: "file"});
         }
 
         return result;
@@ -719,7 +725,7 @@ CLMSUI.modelUtils = {
         // var dontStoreSet = d3.set(dontStoreArray);
         var matchedProteinCount = 0;
 
-        var protMap = CLMSUI.modelUtils.makeMultiKeyProteinMap(clmsModel);
+        var protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
         let groupsFound = false;
 
         d3.csv.parse(metaDataFileContents, function(d) {
@@ -732,7 +738,7 @@ CLMSUI.modelUtils = {
             }
 
             var proteinIDValue = d.proteinID || d.ProteinID || d.Accession || d.accession;
-            var proteinID = protMap.get(CLMSUI.modelUtils.parseProteinID(protMap, proteinIDValue));
+            var proteinID = protMap.get(modelUtils.parseProteinID(protMap, proteinIDValue));
             if (proteinID !== undefined) {
                 var protein = proteins.get(proteinID);
 
@@ -761,7 +767,7 @@ CLMSUI.modelUtils = {
         });
 
         if (columns) {
-          CLMSUI.vent.trigger("proteinMetadataUpdated", {
+          vent.trigger("proteinMetadataUpdated", {
                 columns: columns,//_.difference (columns, ["name", "Name"]),
                 items: proteins,
                 matchedItemCount: matchedProteinCount
@@ -785,8 +791,8 @@ CLMSUI.modelUtils = {
                     }
                 }
             }
-            CLMSUI.compositeModelInst.set("groups", groupMap);
-            CLMSUI.compositeModelInst.trigger("change:groups");
+            window.compositeModelInst.set("groups", groupMap);
+            window.compositeModelInst.trigger("change:groups");
         }
 
     },
@@ -809,7 +815,7 @@ CLMSUI.modelUtils = {
         var first = true;
         var columns = [];
 
-        var protMap = CLMSUI.modelUtils.makeMultiKeyProteinMap(clmsModel);
+        var protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
         var newAnnotations = [];
         var annotationMap = d3.map();
         var proteinSet = d3.set();
@@ -828,7 +834,7 @@ CLMSUI.modelUtils = {
                 dl[key.toLocaleLowerCase()] = d[key];
             });
 
-            var proteinID = protMap.get(CLMSUI.modelUtils.parseProteinID(protMap, dl.proteinid));
+            var proteinID = protMap.get(modelUtils.parseProteinID(protMap, dl.proteinid));
             if (proteinID !== undefined) {
                 var protein = proteins.get(proteinID);
 
@@ -857,7 +863,7 @@ CLMSUI.modelUtils = {
             }
         });
 
-        CLMSUI.vent.trigger("userAnnotationsUpdated", {
+        vent.trigger("userAnnotationsUpdated", {
             types: annotationMap.values(),
             columns: annotationMap.values(),
             items: newAnnotations,
@@ -867,18 +873,18 @@ CLMSUI.modelUtils = {
         });
     },
 
-
+/*
     convertGO_OBOtoJson: function (url) {
         d3.text (url, function(error, txt) {
             if (error) {
                 console.log("error", error, "for", url, arguments);
             } else {
-                CLMSUI.go = CLMSUI.modelUtils.loadGOAnnotations (txt);  // temp store until CLMS model is built
-                CLMSUI.jsongo = CLMSUI.modelUtils.jsonifyGoMap (CLMSUI.go);
+                go = modelUtils.loadGOAnnotations (txt);  // temp store until CLMS model is built
+                jsongo = modelUtils.jsonifyGoMap (go);
             }
         });
     },
-
+*/
 
     loadGOAnnotations: function (txt) {
         console.log ("parsing go obo");
@@ -903,7 +909,7 @@ CLMSUI.modelUtils = {
                     if (term) {
                         go.set(term.id, term);
                     }
-                    term = new CLMSUI.GoTerm();
+                    term = new GoTerm();
                 } else if (term) {
                     //var parts = line.split(" ");  // speed up by avoiding split if humanly possible as free text lines are space heavy
                     var tag = line.slice (0, line.indexOf(" "));
@@ -1071,7 +1077,7 @@ CLMSUI.modelUtils = {
                 last = v; // make last value the current value for next iteration of loop
             }
 
-            //CLMSUI.utils.xilog ("vals", vals, "joinedVals", newVals);
+            //utils.xilog ("vals", vals, "joinedVals", newVals);
             vals = newVals;
         }
         return vals;
@@ -1106,7 +1112,7 @@ CLMSUI.modelUtils = {
             return octree.find(octree.x()(point), octree.y()(point), octree.z()(point), maxDistance, point, ignoreFunc);
         });
         var dist = smallPointArr.map(function(point, i) {
-            return nearest[i] ? CLMSUI.modelUtils.getDistanceSquared(point.coords, nearest[i].coords) : undefined;
+            return nearest[i] ? modelUtils.getDistanceSquared(point.coords, nearest[i].coords) : undefined;
         });
 
         return d3.zip(points1Bigger ? nearest : smallPointArr, points1Bigger ? smallPointArr : nearest, dist);
@@ -1149,7 +1155,7 @@ CLMSUI.modelUtils = {
             var keyValuePair = part.split("=");
             var val = keyValuePair[1];
             //console.log ("kvp", keyValuePair);
-            var jsonVal = CLMSUI.modelUtils.tryParseJSON(val);
+            var jsonVal = modelUtils.tryParseJSON(val);
             urlChunkMap[keyValuePair[0]] = val !== "" ? (Number.isNaN(Number(val)) ? (val == "true" ? true : (val == "false" ? false : (jsonVal ? jsonVal : val))) : Number(val)) : val;
         });
         //console.log ("ucm", urlChunkMap);
@@ -1193,8 +1199,9 @@ CLMSUI.modelUtils = {
     },
 };
 
-CLMSUI.modelUtils.amino1to3Map = _.invert(CLMSUI.modelUtils.amino3to1Map);
-CLMSUI.modelUtils.amino1toNameMap = _.invert(CLMSUI.modelUtils.aminoNameto1Map);
-d3.entries(CLMSUI.modelUtils.amino3to1Map).forEach (function (entry) {
-    CLMSUI.modelUtils.amino3to1Map[entry.key.toUpperCase()] = entry.value;
+modelUtils.amino1to3Map = _.invert(modelUtils.amino3to1Map);
+modelUtils.amino1toNameMap = _.invert(modelUtils.aminoNameto1Map);
+
+d3.entries(modelUtils.amino3to1Map).forEach (function (entry) {
+    modelUtils.amino3to1Map[entry.key.toUpperCase()] = entry.value;
 });

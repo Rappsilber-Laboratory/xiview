@@ -1,7 +1,4 @@
-var CLMSUI = CLMSUI || {};
-var xiSPEC = xiSPEC || {};
-
-CLMSUI.loadSpectrum = function (match, randId, spectrumModel) {
+export const loadSpectrum = function (match, randId, spectrumModel) {
 
     const formatted_data = {};
 
@@ -16,7 +13,7 @@ CLMSUI.loadSpectrum = function (match, randId, spectrumModel) {
     formatted_data.precursorCharge = match.precursorCharge;
     formatted_data.fragmentTolerance = match.fragmentTolerance();
 
-    const search = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId);
+    const search = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId);
     formatted_data.customConfig = search.customsettings.split('\n');
 
 
@@ -53,7 +50,7 @@ CLMSUI.loadSpectrum = function (match, randId, spectrumModel) {
             console.log("error getting peak list", error);
         } else {
             if (text === "false") {
-                const xiVersion = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).version;
+                const xiVersion = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).version;
                 const message = "Missing peak list for spectrum " + match.spectrumId + ". xiSearch v" + xiVersion;
                 alert(message);
                 // xiSPEC.clear();

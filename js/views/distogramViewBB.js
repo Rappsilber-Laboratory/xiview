@@ -1,16 +1,17 @@
-/*jslint nomen: true, vars: true*/
-//		a distance histogram
-//
-//		Martin Graham, Colin Combe, Rappsilber Laboratory, 2015
-//
-//		distogram/Distogram.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
+import c3 from "c3/src";
 
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
+import {utils} from "../utils";
+import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
+import {modelUtils} from "../modelUtils";
 
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
+export const DistogramBB = BaseFrameView.extend({
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -28,7 +29,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
         scaleOthersTo: {
             Random: "Cross-Links"
         },
-        chartTitle: this.identifier,
+        chartTitle: "DISTO",// this.identifier,
         maxX: 90,
         attributeOptions: null,
         xStandardTickFormat: d3.format(","),
@@ -41,8 +42,11 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
+
+        this.identifier = "Histogram View";
+
         //this.defaultOptions.chartTitle = this.identifier;
-        CLMSUI.DistogramBB.__super__.initialize.apply(this, arguments);
+        DistogramBB.__super__.initialize.apply(this, arguments);
 
         this.attrExtraOptions = {
             "Distance": {
@@ -59,7 +63,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
             }
         };
 
-        this.options.attributeOptions = clms.SearchResultsModel.attributeOptions;
+        this.options.attributeOptions = SearchResultsModel.attributeOptions;
 
         this.precalcedDistributions = {
             Random: {
@@ -80,12 +84,12 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
 
         var buttonData = [{
             class: "downloadButton",
-            label: CLMSUI.utils.commonLabels.downloadImg + "SVG",
+            label: utils.commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
         }, ];
         var toolbar = mainDivSel.select("div.toolbar");
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
 
         // Various view options set up, then put in a dropdown menu
         var toggleButtonData = [{
@@ -119,11 +123,11 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
                     d.initialState = (d.value === this.options[d.group]);
                 }
             }, this);
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
 
         var optid = this.el.id + "RandomOptions";
         toolbar.append("p").attr("id", optid);
-        new CLMSUI.DropDownMenuViewBB({
+        new DropDownMenuViewBB({
             el: "#" + optid,
             model: self.model.get("clmsModel"),
             myOptions: {
@@ -350,7 +354,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
                 var userMax = +mainDivSel.select(".xAxisMax").property("value");    // user defined value from widget
                 var distObj = this.model.get("clmsModel").get("distancesObj");
                 if (!userMax) {
-                    distAttr[0].maxVal = CLMSUI.utils.niceRound (distObj.maxDistance * 1.3) + 1;
+                    distAttr[0].maxVal = utils.niceRound (distObj.maxDistance * 1.3) + 1;
                 }
             }
 
@@ -378,8 +382,8 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
             });
         }); // update selection series
         this.listenTo(this.model.get("clmsModel"), "change:distancesObj", distancesAvailable); // new distanceObj for new pdb
-        this.listenTo(CLMSUI.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
-        this.listenTo(CLMSUI.vent, "linkMetadataUpdated", function(metaMetaData) {
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
+        this.listenTo(vent, "linkMetadataUpdated", function(metaMetaData) {
             var columns = metaMetaData.columns;
             //console.log ("HELLO", arguments);
             var newOptions = columns.map(function(column) {
@@ -409,7 +413,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
 
     setMultipleSelectControls: function(elem, options, keepOld) {
         var self = this;
-        CLMSUI.utils.addMultipleSelectControls({
+        utils.addMultipleSelectControls({
             addToElem: elem,
             selectList: ["X"],
             optionList: options,
@@ -458,7 +462,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
             // Get colour model. If chosen colour model is non-categorical, default to distance colours.
             var colModel = this.model.get("linkColourAssignment");
             if (!colModel.isCategorical()) {
-                colModel = CLMSUI.linkColour.defaultColoursBB; // make default colour choice for histogram if current colour model is continuous
+                colModel = window.linkColor.defaultColoursBB; // make default colour choice for histogram if current colour model is continuous
             }
             this.colourScaleModel = colModel;
 
@@ -659,8 +663,8 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
     tidyXAxis: function () {
         var xaxis = d3.select(this.el).select(".c3-axis-x");
         if (this.chart) {
-            CLMSUI.utils.niceValueAxis (xaxis, this.getAxisRange());
-            CLMSUI.utils.declutterAxis (xaxis, true);
+            utils.niceValueAxis (xaxis, this.getAxisRange());
+            utils.declutterAxis (xaxis, true);
         }
         return this;
     },
@@ -707,7 +711,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
 
     recalcRandomBinning: function(linkCount) {
         var searchArray = Array.from(this.model.get("clmsModel").get("searches").values());
-        var crosslinkerSpecificityMap = CLMSUI.modelUtils.crosslinkerSpecificityPerLinker(searchArray);
+        var crosslinkerSpecificityMap = modelUtils.crosslinkerSpecificityPerLinker(searchArray);
         var distObj = this.model.get("clmsModel").get("distancesObj");
         var rscope = this.options.randomScope;
         var randArr = distObj ? distObj.getSampleDistances(
@@ -828,7 +832,7 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
         })));
         var min = d3.min([0, Math.floor(extent[0])]);
         var max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
-        var step = Math.max(1, CLMSUI.utils.niceRound((max - min) / 100));
+        var step = Math.max(1, utils.niceRound((max - min) / 100));
         var thresholds = d3.range(min, max + (step * 2), step);
         //console.log ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
 
@@ -979,13 +983,13 @@ CLMSUI.DistogramBB = CLMSUI.utils.BaseFrameView.extend({
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy c3 view just to be sure)
     remove: function() {
-        CLMSUI.DistogramBB.__super__.remove.apply(this, arguments);
+        DistogramBB.__super__.remove.apply(this, arguments);
         // this line destroys the c3 chart and it's events and points the this.chart reference to a dead end
         this.chart = this.chart.destroy();
         return this;
     },
 
-    identifier: "Histogram View",
+    //identifier: "Histogram View",
 
     optionsToString: function() {
         var seriesIDs = _.pluck(this.chart.data.shown(), "id");

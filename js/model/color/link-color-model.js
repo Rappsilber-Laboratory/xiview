@@ -1,7 +1,11 @@
-var CLMSUI = CLMSUI || {};
-CLMSUI.linkColour = CLMSUI.linkColour || {};
+import {ColourModel} from "./color-model";
 
-class DefaultLinkColourModel extends ColourModel {
+import * as _ from 'underscore';
+import {modelUtils} from "../../modelUtils";
+
+const colorbrewer = require('colorbrewer');
+
+export class DefaultLinkColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
@@ -30,7 +34,7 @@ class DefaultLinkColourModel extends ColourModel {
     }
 }
 
-class GroupColourModel extends ColourModel{
+export class GroupColourModel extends ColourModel{
     constructor(attributes, options) {
         super(attributes, options);
     }
@@ -138,7 +142,7 @@ class GroupColourModel extends ColourModel{
     }
 }
 
-class DistanceColourModel extends ColourModel {
+export class DistanceColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
@@ -156,11 +160,11 @@ class DistanceColourModel extends ColourModel {
             return undefined;
         }
         return link.getMeta("distance");
-        //return CLMSUI.compositeModelInst.getSingleCrosslinkDistance(crosslink);
+        //return window.compositeModelInst.getSingleCrosslinkDistance(crosslink);
     }
 }
 
-class InterProteinColourModel extends ColourModel{
+export class InterProteinColourModel extends ColourModel{
     constructor(attributes, options) {
         super(attributes, options);
     }
@@ -168,7 +172,7 @@ class InterProteinColourModel extends ColourModel{
     initialize (properties, options) {
         let colScale;
         let labels = ["Same Protein"];
-        const proteinIDs = _.pluck(CLMSUI.modelUtils.filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
+        const proteinIDs = _.pluck(modelUtils.filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
 
         if (proteinIDs && proteinIDs.length > 2 && proteinIDs.length < 6) {
             const groupDomain = ["same"];
@@ -211,7 +215,7 @@ class InterProteinColourModel extends ColourModel{
     }
 }
 
-class HighestScoreColourModel extends ColourModel {
+export class HighestScoreColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }

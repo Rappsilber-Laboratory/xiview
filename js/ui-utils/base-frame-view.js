@@ -1,5 +1,11 @@
+import * as _ from 'underscore';
+import Backbone from "backbone";
+
+import {svgUtils} from "../svgexp";
+import {utils} from "../utils";
+
 // https://stackoverflow.com/questions/32065257/having-a-static-variable-in-backbone-js-views#32820288
-CLMSUI.utils.BaseFrameView = Backbone.View.extend({
+export const BaseFrameView = Backbone.View.extend({
 
     events: {
         // following line commented out, mouseup sometimes not called on element if pointer drifts outside element
@@ -109,7 +115,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
             .call(drag);
 
         if (this.displayEventName) {
-            this.listenTo(CLMSUI.vent, this.displayEventName, this.setVisible);
+            this.listenTo(window.vent, this.displayEventName, this.setVisible);
         }
 
         return this;
@@ -138,7 +144,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
 
         const svgSel = thisSVG || d3.select(this.el).selectAll("svg");
         const svgArr = [svgSel.node()];
-        const svgStrings = CLMSUI.svgUtils.capture(svgArr);
+        const svgStrings = svgUtils.capture(svgArr);
         const detachedSVG = svgStrings[0];
         const detachedSVGD3 = d3.select(detachedSVG);
         const height = parseFloat(detachedSVGD3.attr("height"));
@@ -165,7 +171,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
         // const detachedSVGD3 = detachedSVG.detachedSVGD3;
         const svgStrings = detachedSVG.allSVGs;
 
-        const svgXML = CLMSUI.svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+        const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
         //console.log ("xml", svgXML);
 
         const fileName = this.filenameStateString().substring(0, 240);
@@ -192,7 +198,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
         const fileName = this.filenameStateString().substring(0, 240);
         // _.after means finalDownload only gets called after all canvases finished converting to svg images
         const finalDownload = _.after(d3canvases.size(), function () {
-            const svgXML = CLMSUI.svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+            const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
             download(svgXML, "application/svg", fileName + ".svg");
             self.removeKey();
         });
@@ -212,7 +218,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
             style.text(style.text() + "\n" + extraRule);
 
             // Now convert the canvas and its data to the image element we just added and download the whole svg when done
-            CLMSUI.utils.drawCanvasToSVGImage(d3canvas, img, finalDownload);
+            utils.drawCanvasToSVGImage(d3canvas, img, finalDownload);
         });
 
         return this;
@@ -221,7 +227,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
     addKey: function (options) {
         options = options || {};
         const tempSVG = (options.addToSelection || d3.select(this.el).select("svg")).append("svg").attr("class", "tempKey");
-        CLMSUI.utils.updateColourKey(CLMSUI.compositeModelInst.get("linkColourAssignment"), tempSVG);
+        utils.updateColourKey(window.compositeModelInst.get("linkColourAssignment"), tempSVG);
         if (options.addOrigin) {
             tempSVG.select("g.key").attr("transform", "translate(0,20)");
             const link = this.model.get("filterModel") ?
@@ -241,7 +247,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
     },
 
     hideView: function () {
-        CLMSUI.vent.trigger(this.displayEventName, false);
+        window.vent.trigger(this.displayEventName, false);
         return this;
     },
 
@@ -282,10 +288,10 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
     // find z-indexes of all visible, movable divs, and make the current one a higher z-index
     // then a bit of maths to reset the lowest z-index so they don't run off to infinity
     bringToTop: function () {
-        if (this.options.canBringToTop !== false && this.el.id !== CLMSUI.utils.BaseFrameView.staticLastTopID) {
+        if (this.options.canBringToTop !== false && this.el.id !== utils.BaseFrameView.staticLastTopID) {
             const sortArr = [];
             const activeDivs = d3.selectAll(".dynDiv").filter(function () {
-                return CLMSUI.utils.isZeptoDOMElemVisible($(this));
+                return utils.isZeptoDOMElemVisible($(this));
             });
             //console.log("this view", this);
 
@@ -313,7 +319,7 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
             d3.select(this.el)
                 .style("z-index", sortArr.length + 1);
 
-            CLMSUI.utils.BaseFrameView.staticLastTopID = this.el.id; // store current top view as property of 'class' BaseFrameView (not instance of view)
+            utils.BaseFrameView.staticLastTopID = this.el.id; // store current top view as property of 'class' BaseFrameView (not instance of view)
             //console.log ("sortArr", sortArr);
         }
         return this;
@@ -338,10 +344,10 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
     // Ask if view is currently visible in the DOM (use boolean for performance, querying dom for visibility often took ages)
     isVisible: function () {
         const start = window.performance.now();
-        CLMSUI.utils.xilog(this.$el.toString(), "isVis start:", start);
-        //var answer = CLMSUI.utils.isZeptoDOMElemVisible (this.$el);
+        utils.xilog(this.$el.toString(), "isVis start:", start);
+        //var answer = utils.isZeptoDOMElemVisible (this.$el);
         const answer = this.visible;
-        CLMSUI.utils.xilog(this.$el, "isVis time:" + answer, (window.performance.now() - start));
+        utils.xilog(this.$el, "isVis time:" + answer, (window.performance.now() - start));
         return answer;
     },
 
@@ -395,12 +401,13 @@ CLMSUI.utils.BaseFrameView = Backbone.View.extend({
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
-        return CLMSUI.utils.makeLegalFileName(CLMSUI.utils.searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "--" + CLMSUI.utils.filterStateToString());
+        return utils.makeLegalFileName(utils.searchesToString() + "--" + this.identifier
+            + "-" + this.optionsToString() + "--" + utils.filterStateToString());
     },
 
     // Returns a useful image title string - omit type of view as user will see it
     imageOriginString: function () {
-        return CLMSUI.utils.makeLegalFileName(CLMSUI.utils.searchesToString() + "--" + CLMSUI.utils.filterStateToString());
+        return utils.makeLegalFileName(utils.searchesToString() + "--" + utils.filterStateToString());
     },
 
     /* Following used in PDBFileChooser and StringFileChooser, though any of the views could take advantage of them */

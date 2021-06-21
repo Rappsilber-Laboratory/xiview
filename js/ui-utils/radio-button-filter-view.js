@@ -1,4 +1,9 @@
-CLMSUI.utils.RadioButtonFilterViewBB = Backbone.View.extend({
+import * as _ from 'underscore';
+import Backbone from "backbone";
+
+import {BaseFrameView} from "./base-frame-view";
+
+export const RadioButtonFilterViewBB = Backbone.View.extend({
     tagName: "div",
     events: {
         "click .singleRadioButton": "changeFilter"
@@ -13,7 +18,7 @@ CLMSUI.utils.RadioButtonFilterViewBB = Backbone.View.extend({
         };
         this.options = _.extend(defaultOptions, initData.myOptions);
         if (this.options.eventName) {
-            this.listenTo(CLMSUI.vent, this.options.eventName, this.showState);
+            this.listenTo(vent, this.options.eventName, this.showState);
         }
         this.render();
     },
@@ -54,7 +59,7 @@ CLMSUI.utils.RadioButtonFilterViewBB = Backbone.View.extend({
 
     changeFilter: function (evt) {
         if (this.options.eventName) {
-            CLMSUI.vent.trigger(this.options.eventName, +evt.currentTarget.value);
+            vent.trigger(this.options.eventName, +evt.currentTarget.value);
         }
     }
 });

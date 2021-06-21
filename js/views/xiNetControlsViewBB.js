@@ -1,19 +1,24 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
+import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {utils} from "../utils";
+
+export const xiNetControlsViewBB = Backbone.View.extend({
 
     events: function () {
-        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
         return _.extend({}, parentEvents, {
             "click .xinetSvgDownload": function () {
-                CLMSUI.vent.trigger("xinetSvgDownload", true);
+                window.vent.trigger("xinetSvgDownload", true);
             },
             "click .autoLayoutButton": function () {
                 const fixSelected = d3.select("input.fixSelected").property("checked");
-                CLMSUI.vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : [])
+                window.vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : [])
             },
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
@@ -49,14 +54,14 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
                                 alert("Layout Saved");
                             }
                         };
-                        const sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
+                        const sid = window.compositeModelInst.get("clmsModel").get("sid");
                         const params = "sid=" + sid +
                             "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
                             "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
                         xmlhttp.send(params);
                     };
 
-                    CLMSUI.vent.trigger("xinetSaveLayout", callback);
+                    window.vent.trigger("xinetSaveLayout", callback);
                 }
             }
         };
@@ -66,7 +71,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
     initialize: function (viewOptions) {
 
         this.options = _.extend(this.defaultOptions, viewOptions.myOptions);
-        CLMSUI.xiNetControlsViewBB.__super__.initialize.apply(this, arguments);
+        xiNetControlsViewBB.__super__.initialize.apply(this, arguments);
 
         const mainDivSel = d3.select(this.el);
 
@@ -77,7 +82,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
             "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
             "<span class='noBreak sectionDividerLeft' ></span>" +
-            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + CLMSUI.utils.commonLabels.downloadImg + "SVG" + "</button>";
+            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + utils.commonLabels.downloadImg + "SVG" + "</button>";
 
         mainDivSel.html(
             buttonHtml
@@ -103,9 +108,9 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
         }, this);
 
         // Generate load layout drop down
-        new CLMSUI.xiNetLayoutListViewBB({
+        new xiNetLayoutListViewBB({
             el: "#loadLayoutButton",
-            model: CLMSUI.compositeModelInst,
+            model: window.compositeModelInst,
             myOptions: {
                 title: "Load ▼",
             }
@@ -194,9 +199,9 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 
         const self = this;
 
-        CLMSUI.utils.makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
+        utils.makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
         // toggleButtonData.splice(0, 0, {
-        //     name: CLMSUI.utils.commonLabels.downloadImg + "SVG",
+        //     name: utils.commonLabels.downloadImg + "SVG",
         //     tooltip: "Download image from xiNET as SVG; a vector format that can be edited in InkScape or Illustrator",
         //     class: "xinetSvgDownload",
         //     sectionEnd: true,
@@ -210,7 +215,7 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
             id: "ppiStep2",
         });
         // ...then moved to a dropdown menu
-        new CLMSUI.DropDownMenuViewBB({
+        new DropDownMenuViewBB({
             el: "#displayOptionsPlaceholder",
             model: this.model,
             myOptions: {
@@ -259,9 +264,9 @@ CLMSUI.xiNetControlsViewBB = Backbone.View.extend({
 });
 
 
-CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
+const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
     events: function () {
-        let parentEvents = CLMSUI.DropDownMenuViewBB.prototype.events;
+        let parentEvents = DropDownMenuViewBB.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -269,12 +274,12 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
     },
 
     initialize: function () {
-        CLMSUI.xiNetLayoutListViewBB.__super__.initialize.apply(this, arguments);
+        xiNetLayoutListViewBB.__super__.initialize.apply(this, arguments);
     },
 
     setVis: function (show) {
         const self = this;
-        CLMSUI.xiNetLayoutListViewBB.__super__.setVis.call(self, show);
+        xiNetLayoutListViewBB.__super__.setVis.call(self, show);
         if (show) {
             const xmlhttp = new XMLHttpRequest();
             const url = "./php/loadLayout.php";
@@ -289,17 +294,17 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
                         menu.push(menuItem(layouts, key));
                     }
                     self.options.menu = menu;
-                    CLMSUI.xiNetLayoutListViewBB.__super__.render.call(self);
+                    xiNetLayoutListViewBB.__super__.render.call(self);
                 }
-                // CLMSUI.xiNetLayoutListViewBB.__super__.setVis.call(self, show);
+                // xiNetLayoutListViewBB.__super__.setVis.call(self, show);
             };
-            const sid = CLMSUI.compositeModelInst.get("clmsModel").get("sid");
+            const sid = window.compositeModelInst.get("clmsModel").get("sid");
             const params = "sid=" + sid;
             xmlhttp.send(params);
             return this;
         }
         // else {
-        //     CLMSUI.xiNetLayoutListViewBB.__super__.setVis.call(this, show);
+        //     xiNetLayoutListViewBB.__super__.setVis.call(this, show);
         // }
 
         function menuItem(layouts, selectedKey) {
@@ -307,15 +312,15 @@ CLMSUI.xiNetLayoutListViewBB = CLMSUI.DropDownMenuViewBB.extend({
                 name: selectedKey,
                 func: function () {
                     d3.select(".savedLayoutName").property("value", selectedKey);
-                    // CLMSUI.compositeModelInst.clearGroups();
+                    // window.compositeModelInst.clearGroups();
                     // const self = this;
-                    // CLMSUI.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear current groups before adding groups from saved layout?", "Clear Groups", "Combine current and saved", "Clear current, only groups from saved layout", function () {
+                    // jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear current groups before adding groups from saved layout?", "Clear Groups", "Combine current and saved", "Clear current, only groups from saved layout", function () {
                     //     self.set("groups", new Map());
                     //     self.trigger("change:groups");
                     // });
-                    CLMSUI.vent.trigger("xinetLoadLayout", layouts[selectedKey]);
+                    vent.trigger("xinetLoadLayout", layouts[selectedKey]);
                 },
-                context: CLMSUI.compositeModelInst
+                context: window.compositeModelInst
             };
         }
     },

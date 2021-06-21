@@ -1,12 +1,10 @@
-//      a view of the filter model state
-//
-//      Martin Graham, Colin Combe, Rappsilber Laboratory, 2015
-//
-//      js/filterViewBB.js
+import Backbone from "backbone";
+import * as _ from 'underscore';
+import {checkBoxView} from "../ui-utils/checkbox-view";
+// import {utils} from './utils';
 
-var CLMSUI = CLMSUI || {};
 
-CLMSUI.FilterViewBB = Backbone.View.extend({
+export const FilterViewBB = Backbone.View.extend({
     tagName: "span",
     className: "filterGroup",
     events: {
@@ -318,7 +316,7 @@ CLMSUI.FilterViewBB = Backbone.View.extend({
                 ;
 
                 if (config.undefAttr) {
-                    var cbox = new CLMSUI.utils.checkBoxView({
+                    var cbox = new checkBoxView({
                         el: sliderSection.select("div.undef").node(),
                         model: self.model,
                         myOptions: {
@@ -604,7 +602,7 @@ CLMSUI.FilterViewBB = Backbone.View.extend({
 });
 
 
-CLMSUI.FDRViewBB = Backbone.View.extend({
+export const FDRViewBB = Backbone.View.extend({
     initialize: function() {
 
         var chartDiv = d3.select(this.el);
@@ -670,7 +668,7 @@ CLMSUI.FDRViewBB = Backbone.View.extend({
     }
 });
 
-CLMSUI.FilterSummaryViewBB = Backbone.View.extend({
+export const FilterSummaryViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function() {
@@ -699,7 +697,7 @@ CLMSUI.FilterSummaryViewBB = Backbone.View.extend({
     },
 });
 
-CLMSUI.FDRSummaryViewBB = Backbone.View.extend({
+export const FDRSummaryViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function() {

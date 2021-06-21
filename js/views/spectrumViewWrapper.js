@@ -1,9 +1,12 @@
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import * as _ from 'underscore';
+import {CompositeModel} from "../model/composite-model";
+import {SelectionTableViewBB} from "./selectionTableViewBB";
 
-const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
+export const SpectrumViewWrapper = BaseFrameView.extend({
 
     events: function () {
-        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -50,7 +53,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         d3.select(this.el).selectAll("label")
             .classed("btn", true);
 
-        if (CLMSUI.loggedIn) {
+/*        if (loggedIn) {
             this.validationMap = {
                 A: "A",
                 B: "B",
@@ -88,10 +91,10 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                 .on("click", function (d) {
                     const lsm = self.model.get("lastSelectedMatch");
                     if (lsm && lsm.match) {
-                        //ar randId = CLMSUI.modelUtils.getRandomSearchId (self.model.get("clmsModel"), lsm.match);
+                        //ar randId = modelUtils.getRandomSearchId (self.model.get("clmsModel"), lsm.match);
                         const randId = self.model.get("clmsModel").getSearchRandomId(lsm.match);
                         //console.log ("randId", randId);
-                        CLMSUI.validate(lsm.match.id, d.label, randId, function () {
+                        validate(lsm.match.id, d.label, randId, function () {
                             lsm.match.validated = d.label;
                             self.setButtonValidationState(lsm.match);
                             self.model.trigger("matchValidationStateUpdated");
@@ -99,11 +102,11 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                         });
                     }
                 });
-        } else {
+        } else { */
             d3.select(this.el).select("div.validationControls")
                 .append("p")
                 .html("Current Manual Validation State: <span class='validatedState'></span></p>");
-        }
+/*        }*/
 
         this.alternativesModel = new CompositeModel({
             //~ filterModel: filterModelInst,
@@ -116,7 +119,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         // 2. Event A in spectrumWrapper fires event B
         // 3. selectionViewer listens for event B to highlight row in table - which means it must have built the table
         // 4. Thus selectionViewer must do it's routine for event A before spectrumWrapper, so we initialise it first
-        const altsSelectionViewer = new CLMSUI.SelectionTableViewBB({
+        const altsSelectionViewer = new SelectionTableViewBB({
             el: "#alternatives",
             model: this.alternativesModel,
             mainModel: this.model
@@ -124,7 +127,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
 
         //~ var split = Split (["#spectrum", "#alternatives"],
         //~ { direction: "vertical", sizes: [60,40], minSize: [200,10],
-        //~ onDragEnd: function () {CLMSUI.vent.trigger ("resizeSpectrumSubViews", true); }
+        //~ onDragEnd: function () {vent.trigger ("resizeSpectrumSubViews", true); }
         //~ }
         //~ );
 
@@ -206,13 +209,13 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
             const visible = !!match;
             if (this.isVisible() !== visible) {
                 //console.log ("CHANGE VISIBILITY");
-                CLMSUI.vent.trigger("spectrumShow", visible);
+                vent.trigger("spectrumShow", visible);
             }
-            CLMSUI.vent.trigger("individualMatchSelected", match);
+            vent.trigger("individualMatchSelected", match);
             this.enableControls(match);
-            if (CLMSUI.loggedIn) {
-                this.setButtonValidationState(match);
-            } else {
+            // if (loggedIn) {
+            //     this.setButtonValidationState(match);
+            // } else {
                 if (match) {
                     d3.select(this.el).select("span.validatedState")
                         .text(match.validated ? match.validated : "Undefined")
@@ -223,7 +226,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
                         .text("")
                         .attr("class", "validatedState");
                 }
-            }
+            // }
         } else {
             this.newestSelectionShown = false;
         }
@@ -240,7 +243,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
             this.triggerSpectrumViewer(selectedMatch.match, true);
         }
         // resize the spectrum on drag
-        CLMSUI.vent.trigger("resizeSpectrumSubViews", true);
+        vent.trigger("resizeSpectrumSubViews", true);
 
         const altModel = this.alternativesModel.get("clmsModel");
         const keepDisplayNone = (altModel && altModel.get("matches").length === 1); // altModel check as sometime clmsModel isn't populated (undefined)
@@ -266,7 +269,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         },
             {
                 label: "prot1",
-                value: CLMSUI.utils.proteinConcat(match, 0, this.model.get("clmsModel"))
+                value: utils.proteinConcat(match, 0, this.model.get("clmsModel"))
             },
             {
                 label: "pep1",
@@ -284,7 +287,7 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
         if (match.matchedPeptides[1]) {
             description.push({
                 label: "prot2",
-                value: CLMSUI.utils.proteinConcat(match, 1, this.model.get("clmsModel"))
+                value: utils.proteinConcat(match, 1, this.model.get("clmsModel"))
             }, {
                 label: "pep2",
                 value: match.matchedPeptides[1].sequence
@@ -332,10 +335,10 @@ const SpectrumViewWrapper = CLMSUI.utils.BaseFrameView.extend({
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
-        return CLMSUI.utils.makeLegalFileName(this.identifier + "-" + this.optionsToString());
+        return utils.makeLegalFileName(this.identifier + "-" + this.optionsToString());
     },
 
     clearSpectrumHighlights: function () {
-        xiSPEC.vent.trigger('clearSpectrumHighlights');
+        xiSPEC.vent.trigger('clearSpectrumHighlights'); //todo -looks like error? is normally called window.xispecVent - cc
     }
 });

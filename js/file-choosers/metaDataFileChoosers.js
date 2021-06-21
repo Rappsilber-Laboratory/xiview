@@ -1,15 +1,14 @@
-//		Backbone view and controller for NGL 3D viewer
-//
-//		Martin Graham, Colin Combe, Rappsilber Laboratory, Alex Rose, PDB
-//
-//		js/PDBFileChooser.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {utils} from "../utils";
+import {modelUtils} from "../modelUtils";
 
-CLMSUI.AbstractMetaDataFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
+const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -24,7 +23,7 @@ CLMSUI.AbstractMetaDataFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
-        CLMSUI.AbstractMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
+        AbstractMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
 
         var self = this;
 
@@ -62,7 +61,7 @@ CLMSUI.AbstractMetaDataFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
 
     setUpCompletionListener: function () {
         var self = this;
-        this.listenToOnce (CLMSUI.vent, self.options.loadedEventName, function(metaMetaData, sourceData) {
+        this.listenToOnce (vent, self.options.loadedEventName, function(metaMetaData, sourceData) {
             if (sourceData && sourceData.source === "file") {
                 var columns = metaMetaData.columns;
                 var matchedItemCount = metaMetaData.matchedItemCount;
@@ -89,14 +88,13 @@ CLMSUI.AbstractMetaDataFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         this.setStatusText("Please Wait...");
         this.lastFileName = fileObj.name;
         var onLoadFunc = this.onLoadFunction.bind(this);
-        CLMSUI.modelUtils.loadUserFile(fileObj, onLoadFunc);
+        modelUtils.loadUserFile(fileObj, onLoadFunc);
     },
 
     identifier: "An Abstract MetaData File Chooser",
 });
 
-
-CLMSUI.ProteinMetaDataFileChooserBB = CLMSUI.AbstractMetaDataFileChooserBB.extend({
+export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function(viewOptions) {
         var myDefaults = {
@@ -106,19 +104,19 @@ CLMSUI.ProteinMetaDataFileChooserBB = CLMSUI.AbstractMetaDataFileChooserBB.exten
             docUrl: "../xidocs/html/import/proteinmeta.html",
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
-        CLMSUI.ProteinMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
+        ProteinMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
     },
 
     onLoadFunction: function(fileContents) {
         this.setUpCompletionListener ();
-        CLMSUI.modelUtils.updateProteinMetadata (fileContents, this.model.get("clmsModel"));
+        modelUtils.updateProteinMetadata (fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "Protein MetaData File Chooser",
 });
 
 
-CLMSUI.LinkMetaDataFileChooserBB = CLMSUI.AbstractMetaDataFileChooserBB.extend({
+export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function(viewOptions) {
         var myDefaults = {
@@ -128,19 +126,19 @@ CLMSUI.LinkMetaDataFileChooserBB = CLMSUI.AbstractMetaDataFileChooserBB.extend({
             docUrl: "../xidocs/html/import/crossmeta.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
-        CLMSUI.LinkMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
+        LinkMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
     },
 
     onLoadFunction: function(fileContents) {
         this.setUpCompletionListener ();
-        CLMSUI.modelUtils.updateLinkMetadata (fileContents, this.model.get("clmsModel"));
+        modelUtils.updateLinkMetadata (fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "Cross-Link MetaData File Chooser",
 });
 
 
-CLMSUI.UserAnnotationsMetaDataFileChooserBB = CLMSUI.AbstractMetaDataFileChooserBB.extend({
+export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function(viewOptions) {
         var myDefaults = {
@@ -150,15 +148,15 @@ CLMSUI.UserAnnotationsMetaDataFileChooserBB = CLMSUI.AbstractMetaDataFileChooser
             docUrl: "../xidocs/html/import/userannotations.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
-        CLMSUI.UserAnnotationsMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
+        UserAnnotationsMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
     },
 
     onLoadFunction: function(fileContents) {
         this.setUpCompletionListener ();
-        CLMSUI.modelUtils.updateUserAnnotationsMetadata (fileContents, this.model.get("clmsModel"));
+        modelUtils.updateUserAnnotationsMetadata (fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "User Annotations File Chooser",
 });
 
-CLMSUI.MetaLoaderViewRegistry = [CLMSUI.ProteinMetaDataFileChooserBB, CLMSUI.LinkMetaDataFileChooserBB, CLMSUI.UserAnnotationsMetaDataFileChooserBB];
+const MetaLoaderViewRegistry = [ProteinMetaDataFileChooserBB, LinkMetaDataFileChooserBB, UserAnnotationsMetaDataFileChooserBB];

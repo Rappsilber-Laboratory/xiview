@@ -1,6 +1,6 @@
-var CLMSUI = CLMSUI || {};
+import {downloadFilename} from "../../downloads";
 
-CLMSUI.NGLExportUtils = {
+export const NGLExportUtils = {
 
     exportPDB: function (structure, nglModelWrapper, name, remarks) {
         const PDBLinks = nglModelWrapper.getPDBLinkString(nglModelWrapper.getFullLinks());
@@ -29,7 +29,7 @@ CLMSUI.NGLExportUtils = {
 
     exportPymolCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks) {
         const crosslinks = nglModelWrapper.getFullLinks();
-        const pymolLinks = CLMSUI.NGLExportUtils.makePymolCrossLinkSyntax(structure, crosslinks, remarks);
+        const pymolLinks = NGLExportUtils.makePymolCrossLinkSyntax(structure, crosslinks, remarks);
         const fileName = downloadFilename("pymol", "pml");
         download(pymolLinks.join("\r\n"), "plain/text", fileName);
     },
@@ -83,7 +83,7 @@ CLMSUI.NGLExportUtils = {
 
     export3dLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
         const crosslinks = nglModelWrapper.getFullLinks();
-        const linkExportArray = CLMSUI.NGLExportUtils.make3dLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
+        const linkExportArray = NGLExportUtils.make3dLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
         const fileName = downloadFilename("CSV_NGL", "csv");
         download(linkExportArray.join("\r\n"), "plain/text", fileName);
     },
@@ -103,7 +103,7 @@ CLMSUI.NGLExportUtils = {
                 chainProxy.index = link.residueB.chainIndex;
                 const chainB = chainProxy.chainname;
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
-                const distObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
+                const distObj = window.compositeModelInst.get("clmsModel").get("distancesObj");
 
                 const xiviewLink = crosslinkMap.get(link.origId);
                 const p1 = xiviewLink.fromProtein.accession;
@@ -248,7 +248,7 @@ CLMSUI.NGLExportUtils = {
 
     exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crosslinkerObj) {
         const crosslinks = nglModelWrapper.getFullLinks();
-        const haddockLinks = CLMSUI.NGLExportUtils.makeHaddockCrossLinkSyntax(structure, crosslinks, remarks, crosslinkerObj);
+        const haddockLinks = NGLExportUtils.makeHaddockCrossLinkSyntax(structure, crosslinks, remarks, crosslinkerObj);
         const fileName = downloadFilename("haddock", "tbl");
         download(haddockLinks.join("\r\n"), "plain/text", fileName);
     },

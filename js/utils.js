@@ -1,6 +1,6 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
 
-CLMSUI.utils = {
+export const utils = {
 
     debug: false,
 
@@ -90,7 +90,7 @@ CLMSUI.utils = {
         const log = Math.floor(Math.log(val) / Math.log(10)); //no log10 func in IE
         const pow = Math.pow(10, log);
         val = Math.ceil(val / pow); // will now be a number 1-10
-        let roundVal = CLMSUI.utils.niceRoundMap[val];
+        let roundVal = utils.niceRoundMap[val];
         roundVal *= pow;
         return roundVal;
     },
@@ -179,7 +179,7 @@ CLMSUI.utils = {
 
         svgImage.on("load", function () {
             // tidy up canvas and url
-            CLMSUI.utils.nullCanvasObj(destinationCanvasObj);
+            utils.nullCanvasObj(destinationCanvasObj);
             const DOMURL = URL || webkitURL || this;
             DOMURL.revokeObjectURL(url);
 
@@ -193,7 +193,7 @@ CLMSUI.utils = {
                 // from https://stackoverflow.com/a/19539048/368214
                 // use dummy canvas and fill with background colour so exported png is not transparent
 
-                destinationCanvasObj = CLMSUI.utils.makeCanvas(width, height);
+                destinationCanvasObj = utils.makeCanvas(width, height);
                 const destinationCanvas = destinationCanvasObj.canvas;
 
                 //create a rectangle with the desired color
@@ -267,7 +267,7 @@ CLMSUI.utils = {
     },
 
     makeLegalDomID: function (id) {
-        return id.replace(CLMSUI.utils.commonRegexes.validDomID, "");
+        return id.replace(utils.commonRegexes.validDomID, "");
     },
 
     // Routine assumes on click methods are added via backbone definitions, though they could be added later with d3
@@ -277,7 +277,7 @@ CLMSUI.utils = {
     // initialState: true|false, group: "sort", tooltip: "tooltipText", noBreak: true|false},
     makeBackboneButtons: function (targetDiv, baseID, buttonData) {
         const makeID = function (d) {
-            return CLMSUI.utils.makeLegalDomID(baseID + d.id);
+            return utils.makeLegalDomID(baseID + d.id);
         };
 
         // Don't make buttons whose id already exists
@@ -412,19 +412,19 @@ CLMSUI.utils = {
     },
 
     filterStateToString: function () {
-        const filterStr = CLMSUI.compositeModelInst.get("filterModel").stateString();
+        const filterStr = window.compositeModelInst.get("filterModel").stateString();
         return filterStr.substring(0, 160);
     },
 
     searchesToString: function () {
-        const searches = Array.from(CLMSUI.compositeModelInst.get("clmsModel").get("searches"));
+        const searches = Array.from(window.compositeModelInst.get("clmsModel").get("searches"));
         const searchKeys = _.pluck(searches, 0); // just the keys
         const searchStr = ("SRCH=" + searchKeys.join("-")).substring(0, 40);
         return searchStr;
     },
 
     makeLegalFileName: function (fileNameStr) {
-        let newStr = fileNameStr.replace(CLMSUI.utils.commonRegexes.invalidFilenameChars, "");
+        let newStr = fileNameStr.replace(utils.commonRegexes.invalidFilenameChars, "");
         newStr = newStr.substring(0, 240);
         return newStr;
     },

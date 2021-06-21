@@ -1,5 +1,7 @@
-//gonna have to be loaded after utils.js
-CLMSUI.utils.ColourCollectionOptionViewBB = Backbone.View.extend({
+import * as _ from 'underscore';
+import Backbone from "backbone";
+
+export const ColourCollectionOptionViewBB = Backbone.View.extend({
     initialize: function (options) {
         const self = this;
         d3.select(this.el).attr("class", "btn selectHolder")
@@ -33,7 +35,7 @@ CLMSUI.utils.ColourCollectionOptionViewBB = Backbone.View.extend({
             .on("change", function () {
                 if (options.storeSelectedAt) {
                     const colourModel = self.model.at(d3.event.target.selectedIndex);
-                    //CLMSUI.compositeModelInst.set("linkColourAssignment", colourModel);
+                    //window.compositeModelInst.set("linkColourAssignment", colourModel);
                     options.storeSelectedAt.model.set(options.storeSelectedAt.attr, colourModel);
                 }
             })

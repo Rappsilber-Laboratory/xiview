@@ -180,11 +180,11 @@ header('Content-type: text/html; charset=utf-8');
                 var json = JSON.parse (text);
                 CLMSUI.init.modelsEssential(json);
 
-                var searches = CLMSUI.compositeModelInst.get("clmsModel").get("searches");
+                var searches = window.compositeModelInst.get("clmsModel").get("searches");
                 document.title = "Validate " + Array.from(searches.keys()).join();
                 Split (["#topDiv", "#bottomDiv"], { direction: "vertical",
                         sizes: [60,40], minSize: [200,10],
-                            onDragEnd: function () {CLMSUI.vent.trigger ("resizeSpectrumSubViews", true);
+                            onDragEnd: function () {vent.trigger ("resizeSpectrumSubViews", true);
                 } });
 
                 // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
@@ -194,17 +194,17 @@ header('Content-type: text/html; charset=utf-8');
                 ;
                 CLMSUI.init.viewsEssential({"specWrapperDiv":"#topDiv", spectrumToTop: false});
 
-                CLMSUI.vent.trigger ("spectrumShow", true);
+                vent.trigger ("spectrumShow", true);
 
-        var allMatches = CLMSUI.compositeModelInst.get("clmsModel").get("matches")
-        CLMSUI.compositeModelInst.setMarkedMatches ("selection", allMatches);
+        var allMatches = window.compositeModelInst.get("clmsModel").get("matches")
+        window.compositeModelInst.setMarkedMatches ("selection", allMatches);
 
                 // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
                 // so we run it again here, doesn't do any harm
                 ByRei_dynDiv.init.main();
 
                 var resize = function(event) {
-                    CLMSUI.vent.trigger ("resizeSpectrumSubViews", true);
+                    vent.trigger ("resizeSpectrumSubViews", true);
                     var alts = d3.select("#alternatives");
                     var w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
                     alts.attr("style", "width:"+w+"px;"); //dont know why d3 style() aint working

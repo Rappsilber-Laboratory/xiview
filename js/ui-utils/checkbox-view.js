@@ -1,4 +1,10 @@
-CLMSUI.utils.checkBoxView = Backbone.View.extend({
+import Backbone from "backbone";
+import * as _ from 'underscore';
+import {utils} from '../utils';
+
+import {vent} from "../networkFrame";
+
+export const checkBoxView = Backbone.View.extend({
     tagName: "span",
     className: "buttonPlaceholder",
     events: {
@@ -16,7 +22,7 @@ CLMSUI.utils.checkBoxView = Backbone.View.extend({
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const sel = d3.select(this.el);
         if (!sel.attr("id")) {
-            sel.attr("id", CLMSUI.utils.makeLegalDomID(this.options.id));
+            sel.attr("id", utils.makeLegalDomID(this.options.id));
         }
 
         const labs = sel.append("label")
@@ -34,7 +40,7 @@ CLMSUI.utils.checkBoxView = Backbone.View.extend({
             this.showState(this.model.get(this.options.toggleAttribute)); // initial state
             this.listenTo(this.model, "change:" + this.options.toggleAttribute, this.showState);
         } else if (this.options.eventName) {
-            this.listenTo(CLMSUI.vent, this.options.eventName, this.showState);
+            this.listenTo(window.vent, this.options.eventName, this.showState);
         }
     },
 
@@ -48,7 +54,7 @@ CLMSUI.utils.checkBoxView = Backbone.View.extend({
         if (this.model && this.options.toggleAttribute) {
             this.model.set(this.options.toggleAttribute, checked);
         } else if (this.options.eventName) {
-            CLMSUI.vent.trigger(this.options.eventName, checked);
+            window.vent.trigger(this.options.eventName, checked);
         }
     }
 });

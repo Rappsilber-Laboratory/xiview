@@ -1,12 +1,9 @@
-//		a distance histogram
-//
-//		Martin Graham, Colin Combe, Rappsilber Laboratory, 2015
-//
-//		distogram/Distogram.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import c3 from "c3/src";
+import {utils} from '../utils';
 
-var CLMSUI = CLMSUI || {};
-
-CLMSUI.MinigramViewBB = Backbone.View.extend({
+export const MinigramViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function(viewOptions) {
@@ -93,14 +90,14 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
                     // eventually do snapping: http://bl.ocks.org/mbostock/6232620
 
                     // the below fires one change:domainStart event, one change:domainEnd event and one change event (if we want to process both changes together)
-                    //CLMSUI.utils.xilog ("minigram domain", domain[0], domain[1]);
+                    //utils.xilog ("minigram domain", domain[0], domain[1]);
                     var interval = 0.1;
                     var roundDomain = domain.map(function(v) {
                         return +((Math.round(v / interval) * interval).toFixed(1));
                     });
 
-                    CLMSUI.utils.xilog("domain", domain);
-                    //CLMSUI.utils.xilog ("roundDomain", roundDomain[0], roundDomain[1]);
+                    utils.xilog("domain", domain);
+                    //utils.xilog ("roundDomain", roundDomain[0], roundDomain[1]);
 
                     // We want these rounded values to be communicated to the model and onwards,
                     // but we don't want them bouncing back to the brush (which it should if the model values are obtained from elsewhere)
@@ -187,7 +184,7 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
         });
         thresholds.unshift("x");
         countArrays.push(thresholds);
-        //CLMSUI.utils.xilog ("thresholds", thresholds);
+        //utils.xilog ("thresholds", thresholds);
 
         var curMaxY = this.chart.axis.max().y;
         if (curMaxY === undefined || curMaxY < maxY || curMaxY / maxY >= 2) { // only reset maxY if necessary as it causes redundant repaint (given we load and repaint straight after)
@@ -207,7 +204,7 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
             self.tidyXAxis();   // i think I'm having to wait for c3 to finish setting up before the size calculates properly
         }, 500);
 
-        //CLMSUI.utils.xilog ("data", distArr, binnedData);
+        //utils.xilog ("data", distArr, binnedData);
         return this;
     },
     
@@ -219,8 +216,8 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
     // make x tick text values the rounder numbers, and remove any that overlap afterwards
     tidyXAxis: function () {
         var xaxis = d3.select (d3.select(this.el).selectAll(".c3-axis-x").filter(function(d,i) { return i === 1; }).node());
-        CLMSUI.utils.niceValueAxis (xaxis, this.getAxisRange());
-        CLMSUI.utils.declutterAxis (xaxis, true);
+        utils.niceValueAxis (xaxis, this.getAxisRange());
+        utils.declutterAxis (xaxis, true);
         return this;
     },
     
@@ -247,11 +244,11 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
         })));
         var min = d3.min([0, Math.floor(extent[0])]);
         var max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
-        var step = Math.max(1, CLMSUI.utils.niceRound((max - min) / this.options.maxBars));
+        var step = Math.max(1, utils.niceRound((max - min) / this.options.maxBars));
         var thresholds = d3.range(min, max + (step * 2), step);
-        //CLMSUI.utils.xilog ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
+        //utils.xilog ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
 
-        //CLMSUI.utils.xilog ("Extent", extent, min, max);
+        //utils.xilog ("Extent", extent, min, max);
         if (thresholds.length === 0) {
             thresholds = [0, 1]; // need at least 1 so empty data gets represented as 1 empty bin
         }
@@ -273,7 +270,7 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
             });
         }, this);
 
-        CLMSUI.utils.xilog("ca", countArrays);
+        utils.xilog("ca", countArrays);
 
         return {
             counts: countArrays,
@@ -282,7 +279,7 @@ CLMSUI.MinigramViewBB = Backbone.View.extend({
     },
 
     brushRecalc: function() {
-        //CLMSUI.utils.xilog ("changed brushExtent", this.model.get("domainStart"), this.model.get("domainEnd"));
+        //utils.xilog ("changed brushExtent", this.model.get("domainStart"), this.model.get("domainEnd"));
         // Have to go via c3 chart internal properties as it isn't exposed via API
 
         if (this.model.get("domainStart") !== undefined) {

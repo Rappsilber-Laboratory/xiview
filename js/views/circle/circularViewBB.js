@@ -1,12 +1,12 @@
-//      circular protein cross-link view
-//
-//      Martin Graham, Colin Combe, Rappsilber Laboratory, 2015
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
+import {BaseFrameView} from "../../ui-utils/base-frame-view";
+import {modelUtils} from "../../modelUtils";
+import {utils} from "../../utils";
+import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 
-var CLMSUI = CLMSUI || {};
-
-
-CLMSUI.circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
+const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
 
     var defaults = {
         gap: 5,
@@ -56,7 +56,7 @@ CLMSUI.circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
             size: size
         });
         total += size + dgap;
-        //CLMSUI.utils.xilog ("prot", nodeCoordMap.get(node.id));
+        //utils.xilog ("prot", nodeCoordMap.get(node.id));
     });
 
     var featureCoords = [];
@@ -66,7 +66,7 @@ CLMSUI.circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
         var nodeCoord = nodeCoordMap.get(nodeID);
         farr.forEach(function(feature) {
             var tofrom = _options.featureParse(feature, nodeID);
-            //CLMSUI.utils.xilog (nodeArr[i].name, "nc", nodeCoord, farr, tofrom, "ORIG FEATURE", feature);
+            //utils.xilog (nodeArr[i].name, "nc", nodeCoord, farr, tofrom, "ORIG FEATURE", feature);
             if (tofrom) {
                 featureCoords.push({
                     id: feature.category + fid.toString(),
@@ -84,7 +84,7 @@ CLMSUI.circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
             }
         });
     });
-    //CLMSUI.utils.xilog ("CONV FEATURES", featureCoords);
+    //utils.xilog ("CONV FEATURES", featureCoords);
 
     var linkCoords = linkArr.map (function(link) {
         var tofrom = _options.linkParse(link);
@@ -107,9 +107,9 @@ CLMSUI.circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
     };
 };
 
-CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
+export const CircularViewBB = BaseFrameView.extend({
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -192,7 +192,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             //convEnd--;    // commented out as convEnd must extend by 1 so length of displayed range is (end-start) + 1
             // e.g. a feature that starts/stops at some point has length of 1, not 0
 
-            CLMSUI.utils.xilog(feature, "convStart", +feature.start, convStart, "convEnd", +feature.end, convEnd, protAlignModel);
+            utils.xilog(feature, "convStart", +feature.start, convStart, "convEnd", +feature.end, convEnd, protAlignModel);
             return {
                 fromPos: convStart,
                 toPos: convEnd
@@ -204,7 +204,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             getColour: function () { return "#dde"; }
         };
 
-        CLMSUI.CircularViewBB.__super__.initialize.apply(this, arguments);
+        CircularViewBB.__super__.initialize.apply(this, arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
         var mainDivSel = d3.select(this.el);
@@ -227,13 +227,13 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         var buttonData = [{
             class: "downloadButton",
-            label: CLMSUI.utils.commonLabels.downloadImg + "SVG",
+            label: utils.commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
         }, ];
 
         var toolbar = mainDivSel.select("div.toolbar");
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
 
 
         // DROPDOWN STARTS
@@ -286,11 +286,11 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
                     });
                 };
             }, this);
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, orderOptionsButtonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, orderOptionsButtonData);
 
         var orderoptid = this.el.id + "OrderOptions";
         toolbar.append("p").attr("id", orderoptid);
-        new CLMSUI.DropDownMenuViewBB({
+        new DropDownMenuViewBB({
             el: "#" + orderoptid,
             model: self.model.get("clmsModel"),
             myOptions: {
@@ -347,11 +347,11 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
                 d.type = "checkbox";
                 d.inputFirst = true;
             });
-        CLMSUI.utils.makeBackboneButtons(toolbar, self.el.id, showOptionsButtonData);
+        utils.makeBackboneButtons(toolbar, self.el.id, showOptionsButtonData);
 
         var showoptid = this.el.id + "ShowOptions";
         toolbar.append("p").attr("id", showoptid);
-        new CLMSUI.DropDownMenuViewBB({
+        new DropDownMenuViewBB({
             el: "#" + showoptid,
             model: self.model.get("clmsModel"),
             myOptions: {
@@ -510,8 +510,8 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.nodeTip = function(d) {
             var interactor = self.model.get("clmsModel").get("participants").get(d.id);
             self.model.get("tooltipModel")
-                .set("header", CLMSUI.modelUtils.makeTooltipTitle.interactor(interactor))
-                .set("contents", CLMSUI.modelUtils.makeTooltipContents.interactor(interactor))
+                .set("header", modelUtils.makeTooltipTitle.interactor(interactor))
+                .set("contents", modelUtils.makeTooltipContents.interactor(interactor))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -521,8 +521,8 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.linkTip = function(d) {
             var xlink = self.model.get("clmsModel").get("crosslinks").get(d.id);
             self.model.get("tooltipModel")
-                .set("header", CLMSUI.modelUtils.makeTooltipTitle.link())
-                .set("contents", CLMSUI.modelUtils.makeTooltipContents.link(xlink))
+                .set("header", modelUtils.makeTooltipTitle.link())
+                .set("contents", modelUtils.makeTooltipContents.link(xlink))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -531,8 +531,8 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         this.featureTip = function(d) {
             self.model.get("tooltipModel")
-                .set("header", CLMSUI.modelUtils.makeTooltipTitle.feature())
-                .set("contents", CLMSUI.modelUtils.makeTooltipContents.feature(d))
+                .set("header", modelUtils.makeTooltipTitle.feature())
+                .set("contents", modelUtils.makeTooltipContents.feature(d))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -566,7 +566,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             this.showAccentedNodes("highlights");
         });
         this.listenTo(this.model.get("alignColl"), "bulkAlignChange", function() {
-            CLMSUI.utils.xilog(++alignCall, ". CIRCULAR VIEW AWARE OF ALIGN CHANGES", arguments);
+            utils.xilog(++alignCall, ". CIRCULAR VIEW AWARE OF ALIGN CHANGES", arguments);
             self.renderPartial(["features"]);
         });
         this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function() {
@@ -575,7 +575,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function() {
             self.renderPartial(["nodes"]);
         }); // either colour change or new colour model
-        this.listenTo(CLMSUI.vent, "proteinMetadataUpdated", function() {   // generally a name change
+        this.listenTo(vent, "proteinMetadataUpdated", function() {   // generally a name change
             self.renderPartial(["nodes"]);
         });
         this.listenTo(this.model.get("annotationTypes"), "change:shown", function() {
@@ -589,7 +589,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     reOrder: function(orderOptions) {
         orderOptions = orderOptions || {};
-        //CLMSUI.utils.xilog ("this", this, this.options);
+        //utils.xilog ("this", this, this.options);
         if (orderOptions.reverseConsecutive) {
             this.options.sortDir = -this.options.sortDir; // reverse direction of consecutive resorts
         }
@@ -606,7 +606,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         var self = this;
         var sortFuncs = {
             best: function() {
-                return CLMSUI.utils.circleArrange(self.filterInteractors(this.model.get("clmsModel").get("participants")));
+                return utils.circleArrange(self.filterInteractors(this.model.get("clmsModel").get("participants")));
             },
             size: function() {
                 return proteinSort.call(this, "size");
@@ -767,7 +767,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             var a2 = Math.max(link.start, link.end);
             var midang = (a1 + a2) / 2; //(a2 - a1 < 180) ? (a1 + a2) / 2 : ((a1 + a2 + 360) / 2) % 360; // mid-angle (bearing in mind it might be shorter to wrap round the circle)
             var degSep = a2 - a1; // Math.min (a2 - a1, a1 - a2 + 360); // angle of separation, 2nd one works for doing long outside links the other way round. See next comment.
-            //CLMSUI.utils.xilog ("angs", link.start, link.end, degSep);
+            //utils.xilog ("angs", link.start, link.end, degSep);
             var coords;
 
             if (out && degSep > 70) {
@@ -860,20 +860,20 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
     render: function (renderOptions) {
 
         renderOptions = renderOptions || {};
-        //CLMSUI.utils.xilog ("render options", renderOptions);
+        //utils.xilog ("render options", renderOptions);
         var changed = renderOptions.changed;
 
         if (this.isVisible()) {
-            //CLMSUI.utils.xilog ("re-rendering circular view");
+            //utils.xilog ("re-rendering circular view");
             var svg = d3.select(this.el).select("svg");
             this.radius = this.getMaxRadius(svg);
 
             var interactors = this.model.get("clmsModel").get("participants");
-            //CLMSUI.utils.xilog ("interactorOrder", this.interactorOrder);
-            //CLMSUI.utils.xilog ("model", this.model);
+            //utils.xilog ("interactorOrder", this.interactorOrder);
+            //utils.xilog ("model", this.model);
 
             var filteredInteractors = this.filterInteractors(interactors);
-            var filteredCrossLinks = this.model.getFilteredCrossLinks(); //CLMSUI.modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
+            var filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
             if (this.options.showSelectedOnly) {
                 var selectedIDs = d3.set (_.pluck (this.model.getMarkedCrossLinks("selection"), "id"));
                 filteredCrossLinks = filteredCrossLinks.filter(function(xlink) {
@@ -890,7 +890,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             if (filteredInteractors.length < 2) {
                 this.options.intraOutside = false;
             }
-            //CLMSUI.utils.xilog ("fi", filteredInteractors, interactors);
+            //utils.xilog ("fi", filteredInteractors, interactors);
 
             var fmap = d3.map(filteredInteractors, function(d) {
                 return d.id;
@@ -916,10 +916,10 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             var filteredFeatures = filteredInteractors.map(function(inter) {
                 return this.model.getFilteredFeatures (inter);
             }, this);
-            //CLMSUI.utils.xilog ("filteredFeatures", filteredFeatures);
+            //utils.xilog ("filteredFeatures", filteredFeatures);
 
-            var layout = CLMSUI.circleLayout(filteredInteractors, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
-            //CLMSUI.utils.xilog ("layout", layout);
+            var layout = circleLayout(filteredInteractors, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
+            //utils.xilog ("layout", layout);
 
             var tickRadius = (this.radius - this.options.tickWidth) * (this.options.intraOutside ? 0.8 : 1.0); // shrink radius if some links drawn on outside
             var innerNodeRadius = tickRadius * ((100 - this.options.nodeWidth) / 100);
@@ -956,7 +956,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             var features = layout.features;
             // turns link end & start angles into something d3.svg.arc can use
             var linkCoords = this.convertLinks(links, innerNodeRadius, tickRadius);
-            //CLMSUI.utils.xilog ("linkCoords", linkCoords);
+            //utils.xilog ("linkCoords", linkCoords);
 
             var gTrans = svg.select("g");
             gTrans.attr("transform", "translate(" + this.radius + "," + this.radius + ")");
@@ -997,7 +997,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
     drawLinks: function(g, links) {
         var self = this;
         var crosslinks = this.model.get("clmsModel").get("crosslinks");
-        //CLMSUI.utils.xilog ("clinks", crosslinks);
+        //utils.xilog ("clinks", crosslinks);
         var colourScheme = this.model.get("linkColourAssignment");
 
         var lineCopy = {}; // make cache as linkJoin and ghostLinkJoin will have same 'd' paths for the same link
@@ -1118,7 +1118,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         }, 0);
 
         var tickValGap = (tot / 360) * 5;
-        var tickGap = CLMSUI.utils.niceRound(tickValGap);
+        var tickGap = utils.niceRound(tickValGap);
 
         var groupTicks = function(d) {
             var k = (d.end - d.start) / (d.size || 1);
@@ -1133,7 +1133,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
 
             var labelCycle = self.options.tickLabelCycle;
             return tRange.map(function(v, i) {
-                //CLMSUI.utils.xilog ("d.start", d);
+                //utils.xilog ("d.start", d);
                 return {
                     angle: (((v - 1) + 0.5) * k) + d.start, // v-1 cos we want 1 to be at the zero pos angle, +0.5 cos we want it to be a tick in the middle
                     // show label every labelCycle'th tick starting with first.
@@ -1214,7 +1214,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
         pathJoin
             .attr("d", function(d) {
                 var pathd = self.textArc(d);
-                // CLMSUI.utils.xilog ("pathd", pathd);
+                // utils.xilog ("pathd", pathd);
                 // only want one curve, not solid arc shape, so chop path string
                 var cutoff = pathd.indexOf("L");
                 if (cutoff >= 0) {
@@ -1284,7 +1284,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
                 self.actionNodeLinks(d.nodeID, "selection", add, d.fstart, d.fend);
             });
 
-        //CLMSUI.utils.xilog ("FEATURES", features);
+        //utils.xilog ("FEATURES", features);
 
         var annotColl = this.model.get("annotationTypes");
 
@@ -1302,7 +1302,7 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
     drawResidueLetters: function(g, links) {
 
         var circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
-        //CLMSUI.utils.xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
+        //utils.xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
         if (circumference / links.length < 30 || !this.options.showResLabels) { // arbitrary cutoff decided by me (mjg)
             links = [];
         }
@@ -1313,11 +1313,11 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             var xlink = crosslinks.get(link.id);
             resMap.set(xlink.fromProtein.id + "-" + xlink.fromResidue, {
                 polar: link.coords[0],
-                res: CLMSUI.modelUtils.getResidueType(xlink.fromProtein, xlink.fromResidue)
+                res: modelUtils.getResidueType(xlink.fromProtein, xlink.fromResidue)
             });
             resMap.set(xlink.toProtein.id + "-" + xlink.toResidue, {
                 polar: _.last(link.coords),
-                res: CLMSUI.modelUtils.getResidueType(xlink.toProtein, xlink.toResidue)
+                res: modelUtils.getResidueType(xlink.toProtein, xlink.toResidue)
             });
         });
         var degToRad = Math.PI / 180;
@@ -1374,13 +1374,13 @@ CLMSUI.CircularViewBB = CLMSUI.utils.BaseFrameView.extend({
             fields.push("intraOutside", "showLinkLess", "sort");
         }
 
-        var str = CLMSUI.utils.objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
+        var str = utils.objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
         return str;
     },
 
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy c3 view just to be sure)
     remove: function() {
-        CLMSUI.CircularViewBB.__super__.remove.apply(this, arguments);
+        CircularViewBB.__super__.remove.apply(this, arguments);
     }
 });

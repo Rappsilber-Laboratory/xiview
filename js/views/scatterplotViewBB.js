@@ -1,15 +1,15 @@
-/*jslint white: true, sloppy: true, vars: true*/
-//		a matrix viewer
-//
-//		Colin Combe, Martin Graham
-//		Rappsilber Laboratory, 2015
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
+import {utils} from "../utils";
+import {modelUtils} from "../modelUtils";
 
-CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
+export const ScatterplotViewBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -44,9 +44,9 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
-        CLMSUI.ScatterplotViewBB.__super__.initialize.apply(this, arguments);
+        ScatterplotViewBB.__super__.initialize.apply(this, arguments);
 
-        this.options.attributeOptions = clms.SearchResultsModel.attributeOptions;
+        this.options.attributeOptions = SearchResultsModel.attributeOptions;
 
         var self = this;
 
@@ -70,11 +70,11 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
         // Add download button
         var buttonData = [{
             class: "downloadButton2",
-            label: CLMSUI.utils.commonLabels.downloadImg + "SVG",
+            label: utils.commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
         }, ];
-        CLMSUI.utils.makeBackboneButtons(this.controlDiv, self.el.id, buttonData);
+        utils.makeBackboneButtons(this.controlDiv, self.el.id, buttonData);
 
         // Add two select widgets for picking axes data types
         this.setMultipleSelectControls(this.controlDiv, this.options.attributeOptions, false);
@@ -105,7 +105,7 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
                 initialState: this.options.logY
             }
         ];
-        CLMSUI.utils.makeBackboneButtons(this.controlDiv, self.el.id, toggleButtonData);
+        utils.makeBackboneButtons(this.controlDiv, self.el.id, toggleButtonData);
 
 
         // Add the scatterplot and axes
@@ -279,8 +279,8 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
         this.listenTo(this.model, "highlightsMatchesLinksChanged", this.rehighlightCrossLinks);
         this.listenTo(this.model, "filteringDone", function() { this.renderCrossLinks({isFiltering: true}); });
         this.listenTo(this.model.get("clmsModel"), "change:distancesObj", this.ifADistanceAxisRerender);
-        this.listenTo(CLMSUI.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
-        this.listenTo(CLMSUI.vent, "linkMetadataUpdated", function(metaMetaData) {
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
+        this.listenTo(vent, "linkMetadataUpdated", function(metaMetaData) {
             //console.log ("HELLO", arguments);
             var columns = metaMetaData.columns;
             var newOptions = columns.map(function(column) {
@@ -322,7 +322,7 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
 
     setMultipleSelectControls: function(elem, options, keepOld) {
         var self = this;
-        CLMSUI.utils.addMultipleSelectControls({
+        utils.addMultipleSelectControls({
             addToElem: elem,
             selectList: ["X", "Y"],
             optionList: options,
@@ -626,8 +626,8 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
     getHighlightRange: function(evt, squarius) {
         var background = d3.select(this.el).select(".background").node();
         var margin = this.options.chartMargin;
-        var x = CLMSUI.utils.crossBrowserElementX(evt, background) + margin;
-        var y = CLMSUI.utils.crossBrowserElementY(evt, background) + margin;
+        var x = utils.crossBrowserElementX(evt, background) + margin;
+        var y = utils.crossBrowserElementY(evt, background) + margin;
         var sortFunc = function(a, b) {
             return a - b;
         };
@@ -652,7 +652,7 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
         var tooltipData = axesMetaData.map(function(axisMetaData, i) {
             var commaFormat = d3.format(",." + axisMetaData.decimalPlaces + "f");
             var rvals = ["ceil", "floor"].map(function(func, ii) {
-                var v = CLMSUI.utils[func](vals[i][ii], axisMetaData.decimalPlaces);
+                var v = utils[func](vals[i][ii], axisMetaData.decimalPlaces);
                 if (v === 0) {
                     v = 0;
                 } // gets rid of negative zero
@@ -674,8 +674,8 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
         var levelText = isMatchLevel ? (size === 1 ? "Match" : "Matches") : (size === 1 ? "Cross-Link" : "Cross-Links");
 
         if (this.nearest && this.nearest.link) {
-            var tipExtra = isMatchLevel ? CLMSUI.modelUtils.makeTooltipContents.match(this.nearest.match) :
-                CLMSUI.modelUtils.makeTooltipContents.link(this.nearest.link);
+            var tipExtra = isMatchLevel ? modelUtils.makeTooltipContents.match(this.nearest.match) :
+                modelUtils.makeTooltipContents.link(this.nearest.link);
             tooltipData = tooltipData.concat([
                 ["&nbsp;"],
                 ["Nearest " + (isMatchLevel ? "Match" : "Cross-Link")]
@@ -772,7 +772,7 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
                 sortedFilteredCrossLinks = filteredCrossLinks.filter (function (link) { return highlightedCrossLinkIDs.has(link.id); });
             } else {
                 selectedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
-                sortedFilteredCrossLinks = CLMSUI.modelUtils.radixSort (4, filteredCrossLinks, function(link) {
+                sortedFilteredCrossLinks = modelUtils.radixSort (4, filteredCrossLinks, function(link) {
                     return highlightedCrossLinkIDs.has(link.id) ? 3 : (selectedCrossLinkIDs.has(link.id) ? 2 : (link.isDecoyLink() ? 0 : 1));
                 });
             }
@@ -1037,8 +1037,8 @@ CLMSUI.ScatterplotViewBB = CLMSUI.utils.BaseFrameView.extend({
             .call(this.yAxis)
         ;
 
-        CLMSUI.utils.declutterAxis(this.vis.select(".x"));
-        CLMSUI.utils.declutterAxis(this.vis.select(".y"));
+        utils.declutterAxis(this.vis.select(".x"));
+        utils.declutterAxis(this.vis.select(".y"));
 
         return this;
     },

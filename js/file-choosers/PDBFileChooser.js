@@ -1,15 +1,15 @@
-//		Backbone view and controller for NGL 3D viewer
-//
-//		Martin Graham, Colin Combe, Rappsilber Laboratory, Alex Rose, PDB
-//
-//		js/PDBFileChooser.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-var CLMSUI = CLMSUI || {};
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {modelUtils} from "../modelUtils";
+import {utils} from "../utils";
+import {NGLUtils} from "../views/ngl/NGLUtils";
 
-CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
+export const PDBFileChooserBB = BaseFrameView.extend({
 
     events: function () {
-        var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        var parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -24,7 +24,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function (viewOptions) {
-        CLMSUI.PDBFileChooserBB.__super__.initialize.apply(this, arguments);
+        PDBFileChooserBB.__super__.initialize.apply(this, arguments);
         this.cAlphaOnly = false;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
@@ -48,7 +48,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
                 value: this.cAlphaOnly,
             },
         ];
-        CLMSUI.utils.makeBackboneButtons (box.append("div"), this.el.id, buttonData);
+        utils.makeBackboneButtons (box.append("div"), this.el.id, buttonData);
         */
 
 
@@ -83,9 +83,9 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
                 type: "text",
                 class: "inputPDBCode withSideMargins",
                 //maxlength: 4,
-                //pattern: CLMSUI.utils.commonRegexes.pdbPattern,
+                //pattern: utils.commonRegexes.pdbPattern,
                 maxlength: 100,
-                pattern: CLMSUI.utils.commonRegexes.multiPdbPattern,
+                pattern: utils.commonRegexes.multiPdbPattern,
                 size: 8,
                 title: "Enter PDB IDs here e.g. 1AO6 for one structure, 1YSX 1BKE to merge two",
                 //placeholder: "eg 1AO6"
@@ -156,7 +156,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
 
         // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
         this.listenTo(this.model, "change:selectedProteins", updatePD);
-        this.listenTo(CLMSUI.vent, "proteinMetadataUpdated", updatePD);
+        this.listenTo(vent, "proteinMetadataUpdated", updatePD);
 
         this.listenTo(this.model, "3dsync", function (newSequences) {
             var count = _.isEmpty(newSequences) ? 0 : newSequences.length;
@@ -181,7 +181,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             this.setStatusText(msg, success);
         });
 
-        this.listenTo(CLMSUI.vent, "alignmentProgress", this.setStatusText);
+        this.listenTo(vent, "alignmentProgress", this.setStatusText);
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {
@@ -200,10 +200,10 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
     updateProteinDropdown: function (parentElem) {
         var proteins = this.getSelectedProteins();
 
-        CLMSUI.utils.addMultipleSelectControls({
+        utils.addMultipleSelectControls({
             addToElem: parentElem,
             selectList: ["Proteins"],
-            optionList: CLMSUI.modelUtils.filterOutDecoyInteractors(proteins),
+            optionList: modelUtils.filterOutDecoyInteractors(proteins),
             keepOldOptions: false,
             selectLabelFunc: function () {
                 return "Select Protein for EBI Sequence Search ►";
@@ -231,7 +231,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         // Basically chrome has this point in this function as being traceable back to a user click event but the
         // callback from the ajax isn't.
         var newtab = window.open("", "_blank");
-        var accessionIDs = CLMSUI.modelUtils.getLegalAccessionIDs(this.getSelectedProteins());
+        var accessionIDs = modelUtils.getLegalAccessionIDs(this.getSelectedProteins());
         if (accessionIDs.length) {
             // https://search.rcsb.org/#search-example-8
             const query = {
@@ -337,7 +337,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         var fileCount = evt.target.files.length;
 
         var onLastLoad = _.after(fileCount, function () {
-                CLMSUI.NGLUtils.repopulateNGL({
+                NGLUtils.repopulateNGL({
                     pdbSettings: pdbSettings,
                     stage: self.stage,
                     compositeModel: self.model
@@ -348,7 +348,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         for (var n = 0; n < fileCount; n++) {
             var fileObj = evt.target.files[n];
 
-            CLMSUI.modelUtils.loadUserFile(
+            modelUtils.loadUserFile(
                 fileObj,
                 function (fileContents, associatedData) {
                     var blob = new Blob([fileContents], {
@@ -386,7 +386,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
         this.loadRoute = "pdb";
         this.setWaitingEffect();
 
-        var pdbSettings = pdbCode.match(CLMSUI.utils.commonRegexes.multiPdbSplitter).map(function (code) {
+        var pdbSettings = pdbCode.match(utils.commonRegexes.multiPdbSplitter).map(function (code) {
             return {
                 id: code,
                 pdbCode: code,
@@ -396,7 +396,7 @@ CLMSUI.PDBFileChooserBB = CLMSUI.utils.BaseFrameView.extend({
             };
         }, this);
 
-        CLMSUI.NGLUtils.repopulateNGL({
+        NGLUtils.repopulateNGL({
             pdbSettings: pdbSettings,
             stage: this.stage,
             compositeModel: this.model

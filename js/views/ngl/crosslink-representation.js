@@ -1,3 +1,6 @@
+const {modelUtils} = require("../../modelUtils");
+const {NGLUtils} = require("./NGLUtils");
+
 class CrosslinkRepresentation {
 
     constructor(newNGLModelWrapper, params) {
@@ -200,7 +203,7 @@ class CrosslinkRepresentation {
             const description = chainProxy.entity ? chainProxy.entity.description : "";
             const pid = chainIndexToProteinMap.get(chainProxy.index);
             //console.log ("chain label", chainProxy.index, chainProxy.chainname, chainProxy.residueCount, chainProxy.entity.description, pid);
-            if (pid && CLMSUI.NGLUtils.isViableChain(chainProxy)) {
+            if (pid && NGLUtils.isViableChain(chainProxy)) {
                 const protein = self.nglModelWrapper.getCompositeModel().get("clmsModel").get("participants").get(pid);
                 const pname = protein ? protein.name : "none";
                 customText[chainProxy.atomOffset] = (verboseSetting === "None" ? "" : (pname + ":" + chainProxy.chainname + "(" + chainProxy.index + ")" + (verboseSetting === "Verbose" ? " " + description : "")));
@@ -214,7 +217,7 @@ class CrosslinkRepresentation {
         const customText = this.getLabelTexts();
 
         const atomSelection = this.nglModelWrapper.makeFirstAtomPerChainSelectionString();
-        //CLMSUI.utils.xilog ("LABEL SELE", atomSelection);
+        //utils.xilog ("LABEL SELE", atomSelection);
         this.labelRepr = this.structureComp.addRepresentation("label", {
             radiusScale: 3,
             color: "#222",
@@ -345,7 +348,7 @@ class CrosslinkRepresentation {
 
     _handlePicking (pickingData, pickType, doEmpty) {
         const nglModelWrapper = this.nglModelWrapper;
-        //CLMSUI.utils.xilog ("Picking Data", pickingData);
+        //utils.xilog ("Picking Data", pickingData);
         const pdtrans = {
             residue: undefined,
             links: undefined,
@@ -368,15 +371,15 @@ class CrosslinkRepresentation {
 
             if (atom !== undefined && link3d === undefined) {
                 //console.log (atom.atomname);
-                CLMSUI.utils.xilog("picked atom", atom, atom.residueIndex, atom.resno, atom.chainIndex);
+                utils.xilog("picked atom", atom, atom.residueIndex, atom.resno, atom.chainIndex);
                 const residue = nglModelWrapper.getResidueByNGLGlobalIndex(atom.residueIndex);
                 if (residue) {
                     // this is to find the index of the residue in searchindex (crosslink) terms
                     // thought I could rely on residue.seqIndex + chain.residueOffset but nooooo.....
                     const proteinId = nglModelWrapper.get("reverseChainMap").get(residue.chainIndex);
-                    const alignId = CLMSUI.NGLUtils.make3DAlignID(nglModelWrapper.getStructureName(), atom.chainname, atom.chainIndex);
+                    const alignId = NGLUtils.make3DAlignID(nglModelWrapper.getStructureName(), atom.chainname, atom.chainIndex);
                     // align from 3d to search index. seqIndex is 0-indexed so +1 before querying
-                    //CLMSUI.utils.xilog ("alignid", alignId, proteinId);
+                    //utils.xilog ("alignid", alignId, proteinId);
                     const srindex = nglModelWrapper.getCompositeModel().get("alignColl").getAlignedIndex(residue.seqIndex + 1, proteinId, true, alignId);
 
                     pdtrans.links = nglModelWrapper.getFullLinksByResidueID(residue.residueId);
@@ -393,21 +396,21 @@ class CrosslinkRepresentation {
                     const protein = nglModelWrapper.getCompositeModel().get("clmsModel").get("participants").get(proteinId);
                     //console.log ("cp", cp, pdtrans, this, this.structureComp);
                     nglModelWrapper.getCompositeModel().get("tooltipModel")
-                        .set("header", "Cross-Linked with " + CLMSUI.modelUtils.makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))
-                        .set("contents", CLMSUI.modelUtils.makeTooltipContents.multilinks(pdtrans.xlinks, protein.id, srindex, {"Distance": distances}))
+                        .set("header", "Cross-Linked with " + modelUtils.makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))
+                        .set("contents", modelUtils.makeTooltipContents.multilinks(pdtrans.xlinks, protein.id, srindex, {"Distance": distances}))
                         .set("location", this.makeTooltipCoords(pickingData.canvasPosition))
                     ;
                 }
             } else if (link3d !== undefined) {
                 // atomIndex / resno’s output here are wrong, usually sequential (indices) or the same (resno’s)
-                CLMSUI.utils.xilog("picked bond", link3d, link3d.index, link3d.atom1.resno, link3d.atom2.resno, link3d.atomIndex1, link3d.atomIndex2);
+                utils.xilog("picked bond", link3d, link3d.index, link3d.atom1.resno, link3d.atom2.resno, link3d.atomIndex1, link3d.atomIndex2);
 
                 const residueA = nglModelWrapper.getResidueByNGLGlobalIndex(link3d.atom1.residueIndex);
                 const residueB = nglModelWrapper.getResidueByNGLGlobalIndex(link3d.atom2.residueIndex);
-                CLMSUI.utils.xilog("res", link3d.atom1.residueIndex, link3d.atom2.residueIndex);
+                utils.xilog("res", link3d.atom1.residueIndex, link3d.atom2.residueIndex);
                 if (pickType === "selection") {
                     const selectionSelection = this.nglModelWrapper.getSelectionFromResidueList([residueA, residueB]);
-                    CLMSUI.utils.xilog("seleSele", selectionSelection);
+                    utils.xilog("seleSele", selectionSelection);
                     this.structureComp.autoView(selectionSelection, 1000);
                 }
 
@@ -418,8 +421,8 @@ class CrosslinkRepresentation {
                         pdtrans.xlinks = nglModelWrapper.getOriginalCrossLinks(pdtrans.links);
 
                         nglModelWrapper.getCompositeModel().get("tooltipModel")
-                            .set("header", CLMSUI.modelUtils.makeTooltipTitle.link())
-                            .set("contents", CLMSUI.modelUtils.makeTooltipContents.link(pdtrans.xlinks[0]))
+                            .set("header", modelUtils.makeTooltipTitle.link())
+                            .set("contents", modelUtils.makeTooltipContents.link(pdtrans.xlinks[0]))
                             .set("location", this.makeTooltipCoords(pickingData.canvasPosition))
                         ;
                     }
@@ -431,14 +434,14 @@ class CrosslinkRepresentation {
             pdtrans.xlinks = [];
             nglModelWrapper.getCompositeModel().get("tooltipModel").set("contents", null); // Clear tooltip
         }
-        //CLMSUI.utils.xilog ("pd and pdtrans", pickingData, pdtrans.xlinks);
+        //utils.xilog ("pd and pdtrans", pickingData, pdtrans.xlinks);
 
         nglModelWrapper.getCompositeModel().setMarkedCrossLinks(pickType, pdtrans.xlinks, false, add);
     }
 
     // fired when setLinkList called on representation's associated nglModelWrapper object
     _handleDataChange () {
-        CLMSUI.utils.xilog("HANDLE DATA CHANGE 3D");
+        utils.xilog("HANDLE DATA CHANGE 3D");
         this.redisplayProteins();
 
         const links = this.nglModelWrapper.getFullLinks();
@@ -464,18 +467,18 @@ class CrosslinkRepresentation {
     makeVisibleChainsSelectionString (precalcedShowableChains) {  // precalced - if we already know which chains to show, so don't calculate twice
         const showableChains = precalcedShowableChains || this.nglModelWrapper.getShowableChains(this.options.showAllProteins);
         const chainSele = this.nglModelWrapper.makeChainSelectionString(showableChains);
-        CLMSUI.utils.xilog("showable chains", showableChains, chainSele);
+        utils.xilog("showable chains", showableChains, chainSele);
         return chainSele;
     }
 
     redisplayProteins () {
         const showableChains = this.nglModelWrapper.getShowableChains(this.options.showAllProteins);
         const chainSele = this.makeVisibleChainsSelectionString(showableChains);
-        CLMSUI.utils.xilog("showable chains", showableChains, chainSele);
+        utils.xilog("showable chains", showableChains, chainSele);
         this.sstrucRepr.setSelection(chainSele);
         if (this.labelRepr) {
             const labelSele = this.nglModelWrapper.makeFirstAtomPerChainSelectionString(d3.set(showableChains.chainIndices));
-            //CLMSUI.utils.xilog ("LABEL SELE", labelSele);
+            //utils.xilog ("LABEL SELE", labelSele);
             this.labelRepr.setSelection(labelSele);
         }
         return this;
@@ -504,13 +507,13 @@ class CrosslinkRepresentation {
         const a = performance.now();
         this.setResidues(residues, this.resRepr);
         // this.setResidues(halfLinkResidues, this.halfLinkResRepr);
-        CLMSUI.utils.xilog("set displayed residues, time", performance.now() - a);
+        utils.xilog("set displayed residues, time", performance.now() - a);
         return this;
     }
 
     setSelectedResidues (residues) {
         this.setResidues(residues, this.halfLinkResEmphRepr);
-        CLMSUI.utils.xilog("set selected residues");
+        utils.xilog("set selected residues");
         return this;
     }
 

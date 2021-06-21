@@ -1,6 +1,70 @@
-class FilterModel extends Backbone.Model{
+import {utils} from "../utils";
+
+export class FilterModel extends Backbone.Model{
     constructor(attributes, options) {
         super(attributes, options);
+
+        this.extents = {
+            aaApart: {
+                min: 0,
+                max: 999
+            },
+            pepLength: {
+                min: 1,
+                max: 99
+            },
+            urpPpi: {
+                min: 1,
+                max: 99
+            },
+            fdrThreshold: {
+                min: 0,
+                max: 100
+            }
+        };
+
+        this.patterns = {
+            pepSeq: "[A-Za-z]+-?[A-Za-z]*",
+        };
+
+        this.types = {
+            manualMode: "boolean",
+            fdrMode: "boolean",
+            //subset
+            linears: "boolean",
+            monolinks: "boolean",
+            crosslinks: "boolean",
+            betweenLinks: "boolean",
+            selfLinks: "boolean",
+            homomultimericLinks: "boolean",
+            ambig: "boolean",
+            aaApart: "number",
+            pepLength: "number",
+            //validation status
+            A: "boolean",
+            B: "boolean",
+            C: "boolean",
+            Q: "boolean",
+            unval: "boolean",
+            AUTO: "boolean",
+            decoys: "boolean",
+            //distance
+            distanceUndef: "boolean",
+            //fdr
+            fdrThreshold: "number",
+            interFdrCut: "number",
+            intraFdrCut: "number",
+            //groups,
+            multipleGroup: "boolean",
+            //navigation
+            pepSeq: "text",
+            protNames: "text",
+            protDesc: "text",
+            protPDB: "boolean",
+            runName: "text",
+            scanNumber: "number",
+            urpPpi: "number",
+        };
     }
 
     defaults() {
@@ -23,7 +87,7 @@ class FilterModel extends Backbone.Model{
             C: true,
             Q: true,
             unval: false,
-            AUTO: true, // if u change this to true one of the unit tests will fail
+            AUTO: false, // if u change this to true one of the unit tests will fail
             decoys: true,
             //distance
             distanceUndef: true,
@@ -45,68 +109,6 @@ class FilterModel extends Backbone.Model{
     }
 
 
-
-    extents = {
-                aaApart: {
-                    min: 0,
-                    max: 999
-                },
-                pepLength: {
-                    min: 1,
-                    max: 99
-                },
-                urpPpi: {
-                    min: 1,
-                    max: 99
-                },
-                fdrThreshold: {
-                    min: 0,
-                    max: 100
-                }
-            };
-
-    patterns = {
-                pepSeq: "[A-Za-z]+-?[A-Za-z]*",
-            };
-
-    types = {
-                manualMode: "boolean",
-                fdrMode: "boolean",
-                //subset
-                linears: "boolean",
-                monolinks: "boolean",
-                crosslinks: "boolean",
-                betweenLinks: "boolean",
-                selfLinks: "boolean",
-                homomultimericLinks: "boolean",
-                ambig: "boolean",
-                aaApart: "number",
-                pepLength: "number",
-                //validation status
-                A: "boolean",
-                B: "boolean",
-                C: "boolean",
-                Q: "boolean",
-                unval: "boolean",
-                AUTO: "boolean",
-                decoys: "boolean",
-                //distance
-                distanceUndef: "boolean",
-                //fdr
-                fdrThreshold: "number",
-                interFdrCut: "number",
-                intraFdrCut: "number",
-                //groups,
-                multipleGroup: "boolean",
-                //navigation
-                pepSeq: "text",
-                protNames: "text",
-                protDesc: "text",
-                protPDB: "boolean",
-                runName: "text",
-                scanNumber: "number",
-                urpPpi: "number",
-            };
 
             initialize (options, secondarySettings) {
                 if (!this.get("matchScoreCutoff")) {
@@ -280,7 +282,7 @@ class FilterModel extends Backbone.Model{
             // Test if there are proteins at both ends of a match that are in the current pdb file.
             pdbProteinFilter (match) {
                 if (this.get("protPDB")) {
-                    const dObj = CLMSUI.compositeModelInst.get("clmsModel").get("distancesObj");
+                    const dObj = window.compositeModelInst.get("clmsModel").get("distancesObj");
                     if (dObj) {
                         const chainMap = dObj.chainMap;
                         if (chainMap) {
@@ -302,7 +304,7 @@ class FilterModel extends Backbone.Model{
                 if (searchString) {
                     //protein name check
                     const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
-                    const participants = CLMSUI.compositeModelInst.get("clmsModel").get("participants");
+                    const participants = window.compositeModelInst.get("clmsModel").get("participants");
                     const matchedPeptides = match.matchedPeptides;
                     const matchedPepCount = matchedPeptides.length;
 
@@ -513,7 +515,7 @@ class FilterModel extends Backbone.Model{
                     //console.log ("filter fieldset", this.attributes, fields);
                 }
 
-                const str = CLMSUI.utils.objectStateToAbbvString(this, fields, zeroFormatFields, abbvMap);
+                const str = utils.objectStateToAbbvString(this, fields, zeroFormatFields, abbvMap);
                 return str;
             }
 

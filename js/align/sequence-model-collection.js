@@ -1,4 +1,10 @@
+import * as _ from 'underscore';
+
 // Model for one sequence pairing
+import Backbone from "backbone";
+
+import {modelUtils} from "../modelUtils";
+
 class SeqModel extends Backbone.Model {
     constructor(attributes, options) {
         super(attributes, options);//{
@@ -128,7 +134,7 @@ class SeqModel extends Backbone.Model {
             }
             blocks.push({begin: start + 1, end: _.last(index) + 1});
 
-            this.blocks = CLMSUI.modelUtils.mergeContiguousFeatures(blocks);
+            this.blocks = modelUtils.mergeContiguousFeatures(blocks);
             this.dirtyBlocks = false;
         }
 
@@ -191,7 +197,7 @@ class SeqModel extends Backbone.Model {
 
 
 // Collection of multiple single sequence pairing models from above
-class SeqCollection extends Backbone.Collection {
+export class SeqCollection extends Backbone.Collection {
     constructor(attributes, options) {
         super(attributes, options);
         this.model = SeqModel;

@@ -1,4 +1,8 @@
-class AnnotationType extends Backbone.Model{
+import * as _ from 'underscore';
+import Backbone from "backbone";
+const colorbrewer = require('colorbrewer');
+
+export class AnnotationType extends Backbone.Model{
     constructor(attributes, options) {
         super(attributes, options);
     }
@@ -25,15 +29,30 @@ class AnnotationType extends Backbone.Model{
 
 }
 
-class AnnotationTypeCollection extends Backbone.Collection {
+export class AnnotationTypeCollection extends Backbone.Collection {
 
     constructor(attributes, options) {
         super(attributes, options);
         this.model = AnnotationType;
+
+        //todo - make these static?
+        this.dict = {
+            "domains and sites": "sites",
+            "structural": "secondary structure",
+            "variants": "natural variations",
+            "ptm": "amino acid modifications",
+            "mutagenesis": "experimental info",
+            "sequence information": "experimental info",
+        };
+
+        this.baseScale = d3.scale.ordinal()
+            .range(colorbrewer.Set3[11])
+            .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"])
+        ;
     }
 
     initialize (models, options) {
-        this.listenTo(CLMSUI.vent, "userAnnotationsUpdated", function (details) {
+        this.listenTo(vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
                 this.add(details.types);
@@ -80,21 +99,8 @@ class AnnotationTypeCollection extends Backbone.Collection {
         return "#888888";
     }
 
-    dict = {
-        "domains and sites": "sites",
-        "structural": "secondary structure",
-        "variants": "natural variations",
-        "ptm": "amino acid modifications",
-        "mutagenesis": "experimental info",
-        "sequence information": "experimental info",
-    };
-
-    baseScale = d3.scale.ordinal()
-        .range(colorbrewer.Set3[11])
-        .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"])
-    ;
     /*
-    CLMSUI.domainColours.cols = {
+    window.domainColours.cols = {
         "aa-cross-linkable": "#a6cee3",
         "aa-digestible": "#1f78b4",
         "alignment-pdb aligned region": "#b2df8a",

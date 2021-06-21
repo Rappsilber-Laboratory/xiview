@@ -1,8 +1,14 @@
-var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
+import {ThreeColourSliderBB} from "./threeColourSliderBB";
+import {BaseFrameView} from "../../ui-utils/base-frame-view";
+import {sectionTable} from "../../ui-utils/section-table";
+import {utils} from "../../utils";
+
+export const KeyViewBB = BaseFrameView.extend({
     events: function () {
-        let parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -29,7 +35,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
     },
 
     initialize: function (viewOptions) {
-        CLMSUI.KeyViewBB.__super__.initialize.apply(this, arguments);
+        KeyViewBB.__super__.initialize.apply(this, arguments);
 
         const topDiv = d3.select(this.el).append("div")
             .attr("class", "verticalFlexContainer keyPanel")
@@ -52,7 +58,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
 
         // update is only triggered once when adding/removing multiple models to/from a collection
         this.options.colourConfigs.forEach(function (config) {
-            this.listenTo(CLMSUI.linkColour[config.collectionID], "update", this.render);
+            this.listenTo(window.linkColor[config.collectionID], "update", this.render);
         }, this);
 
         return this;
@@ -94,7 +100,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
             }
         };
 
-        CLMSUI.utils.sectionTable.call(this, sectionDiv, sectionData, "colourInfo", ["Colour (Editable)", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], clickFunc);
+        sectionTable.call(this, sectionDiv, sectionData, "colourInfo", ["Colour (Editable)", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], clickFunc);
 
         // add colour scheme selection placeholders (added in networkFrame.js)
         sectionDiv.selectAll("section")
@@ -240,9 +246,9 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
         };
 
 
-        CLMSUI.utils.sectionTable.call(this, sectionDiv, viewLegendSectionData, "keyInfo", ["Mark", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], null);
+        sectionTable.call(this, sectionDiv, viewLegendSectionData, "keyInfo", ["Mark", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], null);
 
-        const colScheme = CLMSUI.linkColour.defaultColoursBB;
+        const colScheme = window.linkColor.defaultColoursBB;
         const notLinear = function () {
             return false;
         };
@@ -415,7 +421,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
                             .attr("class", "threecs");
                     }
 
-                    this.sliderSubViews[i] = new CLMSUI.ThreeColourSliderBB({
+                    this.sliderSubViews[i] = new ThreeColourSliderBB({
                         el: "#" + pid + "3cs" + i,
                         model: colourAssign,
                         unitText: " " + colourAssign.get("unit"),
@@ -438,7 +444,7 @@ CLMSUI.KeyViewBB = CLMSUI.utils.BaseFrameView.extend({
     downloadKey: function (evt) {
         const d = d3.select(evt.target).datum();  // d3 datum for this button
         const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey");
-        CLMSUI.utils.updateColourKey(this.model.get(d.colourModelKey), tempSVG);
+        utils.updateColourKey(this.model.get(d.colourModelKey), tempSVG);
         this.downloadSVG(null, tempSVG);
         tempSVG.remove();
     },

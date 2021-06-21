@@ -1,11 +1,11 @@
-var CLMSUI = CLMSUI || {};
+import {modelUtils} from "../modelUtils";
 
-CLMSUI.clearFdr = function (crosslinksArr) {
+export const clearFdr = function (crosslinksArr) {
     // clear fdr information from crosslinks (usually because we've gone into none-fdr mode and don't want it showing in tooltips)
-    CLMSUI.modelUtils.clearObjectMetaData (crosslinksArr, ["fdr", "linkScore"]);
+    modelUtils.clearObjectMetaData (crosslinksArr, ["fdr", "linkScore"]);
 };
 
-CLMSUI.fdr = function(crosslinksArr, options) {
+export const fdr = function(crosslinksArr, options) {
 
     var defaultScoreCalcFunc = function(crosslink) { // default function is based on quadratic mean (rms)
         var filtered = crosslink.matches_pp

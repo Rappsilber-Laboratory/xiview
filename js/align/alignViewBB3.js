@@ -1,9 +1,14 @@
-    var CLMSUI = CLMSUI || {};
+import * as _ from 'underscore';
+import Backbone from "backbone";
 
-    CLMSUI.AlignCollectionViewBB = CLMSUI.utils.BaseFrameView.extend({
+import {BaseFrameView} from "../ui-utils/base-frame-view";
+import {utils} from "../utils";
+import {AlignSettingsViewBB, CollectionAsSelectViewBB} from "./alignSettingsViewBB";
+
+export const AlignCollectionViewBB = BaseFrameView.extend({
 
         events: function() {
-            var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
+            var parentEvents = BaseFrameView.prototype.events;
             if (_.isFunction(parentEvents)) {
                 parentEvents = parentEvents();
             }
@@ -14,7 +19,7 @@
         },
 
         initialize: function(viewOptions) {
-            CLMSUI.AlignCollectionViewBB.__super__.initialize.apply(this, arguments);
+            AlignCollectionViewBB.__super__.initialize.apply(this, arguments);
 
             var topElem = d3.select(this.el);
             var modelViewID = topElem.attr("id") + "IndView";
@@ -29,7 +34,7 @@
 
             // Sort dropdown
             var self = this;
-            CLMSUI.utils.addMultipleSelectControls({
+            utils.addMultipleSelectControls({
                 addToElem: topElem.select(".alignSortWidget"),
                 selectList: ["Sort Tabs By"],
                 optionList: this.collection.possibleComparators,
@@ -63,9 +68,9 @@
 
             this.tooltipModel = viewOptions.tooltipModel;
 
-            this.alignViewBlosumSelector = new CLMSUI.CollectionAsSelectViewBB({
+            this.alignViewBlosumSelector = new CollectionAsSelectViewBB({
                 el: "#" + modelViewID + "Controls2",
-                collection: CLMSUI.blosumCollInst,
+                collection: window.blosumCollInst,
                 label: "Set <a href='https://en.wikipedia.org/wiki/BLOSUM' target='_blank'>BLOSUM</a> Matrix",
                 name: "BlosumSelector",
                 optionLabelField: "id",
@@ -194,13 +199,13 @@
                 //console.log("model", model);
                 var modelViewID = d3.select(this.el).attr("id") + "IndView";
 
-                this.modelView = new CLMSUI.ProtAlignViewBB({
+                this.modelView = new ProtAlignViewBB({
                     el: "#" + modelViewID,
                     model: model,
                     tooltipModel: this.tooltipModel,
                 });
 
-                this.alignViewSettings = new CLMSUI.AlignSettingsViewBB({
+                this.alignViewSettings = new AlignSettingsViewBB({
                     el: "#" + modelViewID + "Controls",
                     model: model,
                 });
@@ -221,7 +226,7 @@
         identifier: "Alignment View",
     });
 
-    CLMSUI.ProtAlignViewBB = Backbone.View.extend({
+export const ProtAlignViewBB = Backbone.View.extend({
         defaults: {
             defaultSeqShowSetting: 3,
         },
@@ -279,7 +284,7 @@
             });
 
             // Listen for change in blosum selection and pass it to model
-            this.listenTo(CLMSUI.blosumCollInst, "blosumModelSelected", function(blosumMatrix) {
+            this.listenTo(window.blosumCollInst, "blosumModelSelected", function(blosumMatrix) {
                 console.log("BLOSUM", this, arguments);
                 this.model.set("scoreMatrix", blosumMatrix);
                 this.model.collection.bulkAlignChangeFinished();
