@@ -86,17 +86,14 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="../vendor/js/backbone.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/spin.js<?php echo $cacheBuster ?>"></script>
 
-        <script type="text/javascript" src="../CLMS-model/src/search-results-model.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/crosslink.js<?php echo $cacheBuster ?>"></script>
-
+        <script type="text/javascript" src="../dist/clms.js<?php echo $cacheBuster ?>"></script>
 
         <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
         <script type="text/javascript" src="./js/utils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filter/filterModel.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/filter/filter-model.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/compositeModelType.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/modelUtils.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/model/composite-model.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/modelUtils.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/minigramViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/filterViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
@@ -107,9 +104,9 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="./js/ui-utils/color-collection-option-view.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js<?php echo $cacheBuster ?>"></script>
 
-        <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/views/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/validate.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/loadSpectrum.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/networkFrame.js<?php echo $cacheBuster ?>"></script>
