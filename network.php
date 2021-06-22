@@ -125,6 +125,7 @@
         <script type="text/javascript" src="./js/align/protein-alignment-model-collection.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/align/alignViewBB3.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/align/alignSettingsViewBB.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./js/align/alignWorker.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/circle/circularViewBB.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/model/color/color-model.js<?php echo $cacheBuster ?>"></script>
