@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
+import * as $ from "jquery";
 
 import {svgUtils} from "../svgexp";
 import {utils} from "../utils";
@@ -288,7 +289,7 @@ export const BaseFrameView = Backbone.View.extend({
     // find z-indexes of all visible, movable divs, and make the current one a higher z-index
     // then a bit of maths to reset the lowest z-index so they don't run off to infinity
     bringToTop: function () {
-        if (this.options.canBringToTop !== false && this.el.id !== utils.BaseFrameView.staticLastTopID) {
+        if (this.options.canBringToTop !== false && this.el.id !== BaseFrameView.staticLastTopID) {
             const sortArr = [];
             const activeDivs = d3.selectAll(".dynDiv").filter(function () {
                 return utils.isZeptoDOMElemVisible($(this));
@@ -319,7 +320,7 @@ export const BaseFrameView = Backbone.View.extend({
             d3.select(this.el)
                 .style("z-index", sortArr.length + 1);
 
-            utils.BaseFrameView.staticLastTopID = this.el.id; // store current top view as property of 'class' BaseFrameView (not instance of view)
+            BaseFrameView.staticLastTopID = this.el.id; // store current top view as property of 'class' BaseFrameView (not instance of view)
             //console.log ("sortArr", sortArr);
         }
         return this;
@@ -446,6 +447,7 @@ export const BaseFrameView = Backbone.View.extend({
         }
         return this;
     },
-}, {
-    staticLastTopID: 1, // stores id of last view which was 'brought to top' as class property. So I don't need to do expensive DOM operations sometimes.
 });
+
+// stores id of last view which was 'brought to top' as class property. So I don't need to do expensive DOM operations sometimes.
+BaseFrameView.staticLastTopID = 1;

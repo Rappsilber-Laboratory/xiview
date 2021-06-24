@@ -339,6 +339,6 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
     },
 
     clearSpectrumHighlights: function () {
-        xiSPEC.vent.trigger('clearSpectrumHighlights'); //todo -looks like error? is normally called window.xispecVent - cc
+        xiSPEC.vent.trigger('clearSpectrumHighlights'); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
     }
 });

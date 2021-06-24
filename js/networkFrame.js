@@ -48,6 +48,7 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
+import {loadSpectrum} from "./loadSpectrum";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
@@ -827,24 +828,24 @@ init.viewsEssential = function (options) {
 
     const xiSPEC_options = {
         targetDiv: 'modular_xispec',
-        baseDir: "/spectrum/",//xiSpecBaseDir,
-        xiAnnotatorBaseURL: "",//xiAnnotRoot,
-        knownModificationsURL: false, // xiAnnotRoot + "annotate/knownModifications",
+        baseDir: window.xiSpecBaseDir,
+        xiAnnotatorBaseURL: window.xiAnnotRoot,
+        knownModificationsURL: window.xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: true,
         showQualityControl: "min",
         colorScheme: colorbrewer.PRGn[8],
     };
 
-    const xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
+    window.xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
 
     // Update spectrum view when external resize event called
-    xiSPEC.activeSpectrum.listenTo(vent, "resizeSpectrumSubViews", function () {
-        window.xispecVent.trigger('resize:spectrum');
+    window.xiSPEC.activeSpectrum.listenTo(vent, "resizeSpectrumSubViews", function () {
+        window.xiSPECUI.vent.trigger('resize:spectrum');
     });
 
     // "individualMatchSelected" in vent is link event between selection table view and spectrum view
     // used to transport one Match between views
-    xiSPEC.activeSpectrum.listenTo(vent, "individualMatchSelected", function (match) {
+    window.xiSPEC.activeSpectrum.listenTo(vent, "individualMatchSelected", function (match) {
         if (match) {
             const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
             loadSpectrum(match, randId, this.model);

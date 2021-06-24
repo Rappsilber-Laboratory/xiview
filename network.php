@@ -226,13 +226,13 @@
 
         //var CLMSUI = CLMSUI || {};
         <?php
-        //    if (isset($_SESSION['session_name'])) {
-        //        echo "CLMSUI.loggedIn = true;";
-        //    }
-        //    if (file_exists('../xiSpecConfig.php')) {
-        //        include('../xiSpecConfig.php');
-        //    }
-        //?>
+            if (isset($_SESSION['session_name'])) {
+                echo "window.loggedIn = true;";
+            }
+            if (file_exists('../xiSpecConfig.php')) {
+                include('../xiSpecConfig.php');
+            }
+        ?>
 
         xiview.main();
 

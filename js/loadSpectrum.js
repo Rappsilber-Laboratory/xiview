@@ -8,8 +8,8 @@ export const loadSpectrum = function (match, randId, spectrumModel) {
         formatted_data.sequence2 = match.matchedPeptides[1].seq_mods;
         formatted_data.linkPos2 = match.linkPos2 - 1;
     }
-    formatted_data.crosslinkerModMass = match.crosslinkerModMass()
-    formatted_data.modifications = xiSPEC.activeSpectrum.models.Spectrum.knownModifications;
+    formatted_data.crossLinkerModMass = match.crosslinkerModMass()
+    formatted_data.modifications = window.xiSPEC.activeSpectrum.models.Spectrum.knownModifications;
     formatted_data.precursorCharge = match.precursorCharge;
     formatted_data.fragmentTolerance = match.fragmentTolerance();
 
