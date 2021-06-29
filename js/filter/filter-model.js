@@ -517,6 +517,11 @@ class FilterModel extends Backbone.Model{
                 return str;
             }
 
+    getURLQueryPairs () {
+        // make url parts from current filter attributes
+        return CLMSUI.modelUtils.makeURLQueryPairs (this.attributes, "F");
+    }
+
             getFilterUrlSettings (urlChunkMap) {
                 const urlChunkKeys = d3.keys(urlChunkMap).filter(function (key) {
                     return key[0] === "F";
