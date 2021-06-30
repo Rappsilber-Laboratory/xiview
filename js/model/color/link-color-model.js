@@ -14,11 +14,12 @@ class DefaultLinkColourModel extends ColourModel {
     }
 
     getValue (link) {
-        // if (link.crosslinks) {
-        //     return link.crosslinks[0].isSelfLink() || link.crosslinks[0].isLinearLink() ? (link.hd ? 1 : 0) : 2;
-        // } else {
+        if (link.isAggregateLink) {
+            const crosslinks = link.getCrosslinks();
+            return crosslinks[0].isSelfLink() || crosslinks[0].isLinearLink() ? (link.hd ? 1 : 0) : 2;
+        } else {
             return link.isSelfLink() || link.isLinearLink() ? (link.confirmedHomomultimer ? 1 : 0) : 2;
-        // }
+        }
     }
 
     getColour (obj) {  // obj is generally a crosslink, but is non-specific at this point
@@ -152,7 +153,7 @@ class DistanceColourModel extends ColourModel {
     }
 
     getValue (link) {
-        if (link.crosslinks) {
+        if (link.isAggregateLink) {
             return undefined;
         }
         return link.getMeta("distance");
