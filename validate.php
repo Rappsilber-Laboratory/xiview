@@ -166,7 +166,7 @@ header('Content-type: text/html; charset=utf-8');
         //     var CLMSUI = CLMSUI || {};
             <?php
                 if (isset($_SESSION['session_name'])) {
-                    echo "CLMSUI.loggedIn = true;";
+                    echo "window.loggedIn = true;";
                 }
                 if (file_exists('../xiSpecConfig.php')) {
                     include('../xiSpecConfig.php');
