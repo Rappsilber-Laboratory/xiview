@@ -7,6 +7,7 @@ import {utils} from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 import {modelUtils} from "../../modelUtils";
 import {NGLExportUtils} from "./NGLExportUtils";
+import {CrosslinkRepresentation} from "./crosslink-representation";
 
 export const NGLViewBB = BaseFrameView.extend({
 

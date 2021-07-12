@@ -48,7 +48,7 @@ export const NGLExportUtils = {
             pdbs = [structure.name];
         }
 
-        const localFile = typeof (this.pdbSettings[0].pdbCode) === "undefined";
+        const localFile = typeof (CLMSUI.NGLUtils.pdbSettings[0].pdbCode) === "undefined";
         const pdbLines = pdbs.map(function (pdb) {
             return (localFile ? "load " : "fetch ") + pdb + (localFile ? "" : ", async=0");
         });

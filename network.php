@@ -151,24 +151,6 @@
         <!-- Spectrum view files -->
 <!--        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js--><?php //echo $cacheBuster ?><!--"></script>-->
         <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
-<!--        <script type="text/javascript" src="../spectrum/src/Wrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SpectrumWrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/AnnotatedSpectrumModel.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SpectrumControlsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SpectrumView2.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/FragmentationKeyView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/PrecursorInfoView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/QCwrapperView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/ErrorPlotView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/AppearanceSettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/DataSettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/PepInputView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/FragKey/KeyFragment.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/graph/Graph.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/graph/Peak.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/graph/Fragment.js--><?php //echo $cacheBuster ?><!--"></script>-->
-
         <script type="text/javascript" src="../dist/xiview.js"></script>
         <script type="text/javascript" src="./js/views/go/sankey.js<?php echo $cacheBuster ?>"></script>
         <!---->

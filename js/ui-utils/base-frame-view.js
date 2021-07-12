@@ -4,6 +4,7 @@ import * as $ from "jquery";
 
 import {svgUtils} from "../svgexp";
 import {utils} from "../utils";
+import {Spinner} from "spin.js";
 
 // https://stackoverflow.com/questions/32065257/having-a-static-variable-in-backbone-js-views#32820288
 export const BaseFrameView = Backbone.View.extend({
@@ -67,7 +68,7 @@ export const BaseFrameView = Backbone.View.extend({
             ;
 
             return parentBar;
-        };
+        }
 
         function addFourCorners(d3DivSelection) {
             const classNames = ["dynDiv_resizeDiv_tl", "dynDiv_resizeDiv_tr", "dynDiv_resizeDiv_bl", "dynDiv_resizeDiv_br"];
@@ -84,7 +85,7 @@ export const BaseFrameView = Backbone.View.extend({
                 .classed("draggableCorner", true);
 
             return fourCorners;
-        };
+        }
 
         if (this.options.canMaximise) {
             mainDivSel.select(".dynDiv_moveParentDiv").append("i")

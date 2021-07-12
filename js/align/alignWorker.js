@@ -1,6 +1,6 @@
 const {GotohAligner} = require("./bioseq32");
 if (importScripts) {
-    importScripts("bioseq32.js", "../../../vendor/js/workerpool.js", "../../../vendor/js/underscore.js", "../../../vendor/js/backbone.js", "alignModelType.js?v=2");
+    importScripts("bioseq32.js", "../../../vendor/js/workerpool.js", "../../../vendor/js/underscore.js", "../../../vendor/js/backbone.js", "sequence-model-collection.js", "protein-alignment-model-collection.js");
 }
 
 function protAlignPar(protID, settings, compSeqArray, tempSemiLocal) {

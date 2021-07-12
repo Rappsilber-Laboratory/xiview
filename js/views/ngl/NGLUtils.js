@@ -320,39 +320,39 @@ export const NGLUtils = {
 
         const start = performance.now();
         // webworker way, only do if enough proteins and cores to make it worthwhile
-        if ((!window || !!window.Worker) && proteins.length > 20 && workerpool.cpus > 2) {
-            let count = proteins.length;
-            const pool = workerpool.pool("js/align/alignWorker.js");
-
-            proteins.forEach(function (prot, i) {
-                const protAlignModel = protAlignCollection.get(prot.id);
-                const settings = protAlignModel.getSettings();
-                settings.aligner = undefined;
-                pool.exec('protAlignPar', [prot.id, settings, filteredSeqInfo.uniqSeqs, {
-                    semiLocal: true
-                }])
-                    .then(function (alignResultsObj) {
-                        // be careful this is async, so protID better obtained from returned object - might not be prot.id
-                        updateMatchMatrix(alignResultsObj.protID, alignResultsObj.fullResults)
-                    })
-                    .catch(function (err) {
-                        console.log(err);
-                    })
-                    .then(function () {
-                        count--;
-                        if (count % 10 === 0) {
-                            vent.trigger("alignmentProgress", count + " proteins remaining to align.");
-                            if (count === 0) {
-                                pool.terminate(); // terminate all workers when done
-                                console.log("tidy pool. TIME PAR", performance.now() - start);
-                                finished(matchMatrix);
-                            }
-                        }
-                    });
-            });
-        }
-        // else do it on main thread
-        else {
+        // if ((!window || !!window.Worker) && proteins.length > 20 && workerpool.cpus > 2) {
+        //     let count = proteins.length;
+        //     const pool = workerpool.pool("js/align/alignWorker.js");
+        //
+        //     proteins.forEach(function (prot, i) {
+        //         const protAlignModel = protAlignCollection.get(prot.id);
+        //         const settings = protAlignModel.getSettings();
+        //         settings.aligner = undefined;
+        //         pool.exec('protAlignPar', [prot.id, settings, filteredSeqInfo.uniqSeqs, {
+        //             semiLocal: true
+        //         }])
+        //             .then(function (alignResultsObj) {
+        //                 // be careful this is async, so protID better obtained from returned object - might not be prot.id
+        //                 updateMatchMatrix(alignResultsObj.protID, alignResultsObj.fullResults)
+        //             })
+        //             .catch(function (err) {
+        //                 console.log(err);
+        //             })
+        //             .then(function () {
+        //                 count--;
+        //                 if (count % 10 === 0) {
+        //                     CLMSUI.vent.trigger("alignmentProgress", count + " proteins remaining to align.");
+        //                     if (count === 0) {
+        //                         pool.terminate(); // terminate all workers when done
+        //                         console.log("tidy pool. TIME PAR", performance.now() - start);
+        //                         finished(matchMatrix);
+        //                     }
+        //                 }
+        //             });
+        //     });
+        // }
+        // // else do it on main thread
+        // else {
             // Do alignments
             proteins.forEach(function (prot) {
                 const protAlignModel = protAlignCollection.get(prot.id);
@@ -365,7 +365,7 @@ export const NGLUtils = {
             });
 
             finished(matchMatrix);
-        }
+        // }
     },
 
     make3DAlignID: function (baseID, chainName, chainIndex) {

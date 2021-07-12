@@ -74,69 +74,69 @@ header('Content-type: text/html; charset=utf-8');
         <link rel="stylesheet" href="./css/xiView.css<?php echo $cacheBuster ?>">
 
         <script type="text/javascript" src="../vendor/js/byrei-dyndiv_1.0rc1-src.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/d3.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/colorbrewer.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="../vendor/js/d3.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/colorbrewer.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!---->
+<!--        <script type="text/javascript" src="../vendor/js/c3.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/split.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/svgexp.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/underscore.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <!-- <script type="text/javascript" src="../vendor/js/zepto.js"></script> -->-->
+<!--        <script type="text/javascript" src="../vendor/js/backbone.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/spin.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!---->
+<!--        <script type="text/javascript" src="../dist/clms.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!---->
+<!--        <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->-->
+<!--        <script type="text/javascript" src="./js/utils.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/filter/filter-model.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/model/models.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/model/composite-model.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/modelUtils.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/filter/minigramViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/filter/filterViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/filter/fdr.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/ui-utils/ddMenuViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!---->
+<!--        <script type="text/javascript" src="./js/ui-utils/base-frame-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/ui-utils/checkbox-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/ui-utils/color-collection-option-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!---->
+<!--        <script type="text/javascript" src="./js/views/tooltipViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/views/selectionTableViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/views/spectrumViewWrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/validate.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/loadSpectrum.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/networkFrame.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="./js/downloads.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!---->
+<!---->
+<!---->
+<!--        <!-- Spectrum view .js files -->-->
+<!--        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/Wrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/SpectrumWrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/AnnotatedSpectrumModel.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/SpectrumControlsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/SpectrumView2.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/FragmentationKeyView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/PrecursorInfoView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/QCwrapperView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/ErrorPlotView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/SettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/AppearanceSettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/DataSettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/PepInputView.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/FragKey/KeyFragment.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/graph/Graph.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/graph/Peak.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/src/graph/Fragment.js--><?php //echo $cacheBuster ?><!--"></script>-->
 
-        <script type="text/javascript" src="../vendor/js/c3.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/split.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/svgexp.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/underscore.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js<?php echo $cacheBuster ?>"></script>
-        <!-- <script type="text/javascript" src="../vendor/js/zepto.js"></script> -->
-        <script type="text/javascript" src="../vendor/js/backbone.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/spin.js<?php echo $cacheBuster ?>"></script>
-
-        <script type="text/javascript" src="../CLMS-model/src/search-results-model.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/spectrum-match.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../CLMS-model/src/crosslink.js<?php echo $cacheBuster ?>"></script>
-
-
-        <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->
-        <script type="text/javascript" src="./js/utils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filter/filterModel.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/models.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/compositeModelType.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/model/modelUtils.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filter/minigramViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filter/filterViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/filter/fdr.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/ui-utils/ddMenuViewBB.js<?php echo $cacheBuster ?>"></script>
-
-        <script type="text/javascript" src="./js/ui-utils/base-frame-view.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/ui-utils/checkbox-view.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/ui-utils/color-collection-option-view.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js<?php echo $cacheBuster ?>"></script>
-
-        <script type="text/javascript" src="./js/tooltipViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/selectionTableViewBB.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/spectrumViewWrapper.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/validate.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/loadSpectrum.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/networkFrame.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./js/downloads.js<?php echo $cacheBuster ?>"></script>
-
-
-
-        <!-- Spectrum view .js files -->
-        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/Wrapper.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/SpectrumWrapper.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/AnnotatedSpectrumModel.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/SpectrumControlsView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/SpectrumView2.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/FragmentationKeyView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/PrecursorInfoView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/QCwrapperView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/ErrorPlotView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/SettingsView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/AppearanceSettingsView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/DataSettingsView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/PepInputView.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/FragKey/KeyFragment.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/graph/Graph.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/graph/Peak.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/src/graph/Fragment.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../dist/xiview.js"></script>
     </head>
 
     <body>
@@ -161,68 +161,68 @@ header('Content-type: text/html; charset=utf-8');
 
         <script>
         //<![CDATA[
-
+            xiview.validationPage();
         //~ var windowLoaded = function () {
-            var CLMSUI = CLMSUI || {};
+        //     var CLMSUI = CLMSUI || {};
             <?php
-                if (isset($_SESSION['session_name'])) {
-                    echo "CLMSUI.loggedIn = true;";
-                }
-                if (file_exists('../xiSpecConfig.php')) {
-                    include('../xiSpecConfig.php');
-                }
+//                if (isset($_SESSION['session_name'])) {
+//                    echo "CLMSUI.loggedIn = true;";
+//                }
+//                if (file_exists('../xiSpecConfig.php')) {
+//                    include('../xiSpecConfig.php');
+//                }
             ?>
-
-            var spinner = new Spinner({scale: 5}).spin (d3.select("#topDiv").node());
-
-            var success = function (text) {
-                spinner.stop(); // stop spinner on request returning
-                var json = JSON.parse (text);
-                CLMSUI.init.modelsEssential(json);
-
-                var searches = window.compositeModelInst.get("clmsModel").get("searches");
-                document.title = "Validate " + Array.from(searches.keys()).join();
-                Split (["#topDiv", "#bottomDiv"], { direction: "vertical",
-                        sizes: [60,40], minSize: [200,10],
-                            onDragEnd: function () {vent.trigger ("resizeSpectrumSubViews", true);
-                } });
-
-                // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
-                d3.select("body").append("div")
-                    .attr("id", "spectrumSettingsWrapper")
-                    .attr("class", "dynDiv")
-                ;
-                CLMSUI.init.viewsEssential({"specWrapperDiv":"#topDiv", spectrumToTop: false});
-
-                vent.trigger ("spectrumShow", true);
-
-        var allMatches = window.compositeModelInst.get("clmsModel").get("matches")
-        window.compositeModelInst.setMarkedMatches ("selection", allMatches);
-
-                // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
-                // so we run it again here, doesn't do any harm
-                ByRei_dynDiv.init.main();
-
-                var resize = function(event) {
-                    vent.trigger ("resizeSpectrumSubViews", true);
-                    var alts = d3.select("#alternatives");
-                    var w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
-                    alts.attr("style", "width:"+w+"px;"); //dont know why d3 style() aint working
-                };
-
-                window.onresize = resize;
-
-                resize();
-            };
-
-            var url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
-
-
-            d3.text (url, function (error, text) {
-                if (!error) {
-                    success (text);
-                }
-            });
+//
+//            var spinner = new Spinner({scale: 5}).spin (d3.select("#topDiv").node());
+//
+//            var success = function (text) {
+//                spinner.stop(); // stop spinner on request returning
+//                var json = JSON.parse (text);
+//                CLMSUI.init.modelsEssential(json);
+//
+//                var searches = window.compositeModelInst.get("clmsModel").get("searches");
+//                document.title = "Validate " + Array.from(searches.keys()).join();
+//                Split (["#topDiv", "#bottomDiv"], { direction: "vertical",
+//                        sizes: [60,40], minSize: [200,10],
+//                            onDragEnd: function () {vent.trigger ("resizeSpectrumSubViews", true);
+//                } });
+//
+//                // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
+//                d3.select("body").append("div")
+//                    .attr("id", "spectrumSettingsWrapper")
+//                    .attr("class", "dynDiv")
+//                ;
+//                CLMSUI.init.viewsEssential({"specWrapperDiv":"#topDiv", spectrumToTop: false});
+//
+//                vent.trigger ("spectrumShow", true);
+//
+//        var allMatches = window.compositeModelInst.get("clmsModel").get("matches")
+//        window.compositeModelInst.setMarkedMatches ("selection", allMatches);
+//
+//                // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
+//                // so we run it again here, doesn't do any harm
+//                ByRei_dynDiv.init.main();
+//
+//                var resize = function(event) {
+//                    vent.trigger ("resizeSpectrumSubViews", true);
+//                    var alts = d3.select("#alternatives");
+//                    var w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
+//                    alts.attr("style", "width:"+w+"px;"); //dont know why d3 style() aint working
+//                };
+//
+//                window.onresize = resize;
+//
+//                resize();
+//            };
+//
+//            var url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
+//
+//
+//            d3.text (url, function (error, text) {
+//                if (!error) {
+//                    success (text);
+//                }
+//            });
 
 
         //]]>

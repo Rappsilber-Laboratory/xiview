@@ -1,7 +1,12 @@
+import * as _ from 'underscore';
+import * as $ from 'jquery';
+
+import {utils} from "../../utils";
+
 const {modelUtils} = require("../../modelUtils");
 const {NGLUtils} = require("./NGLUtils");
 
-class CrosslinkRepresentation {
+export class CrosslinkRepresentation {
 
     constructor(newNGLModelWrapper, params) {
 

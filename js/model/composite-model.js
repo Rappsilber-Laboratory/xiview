@@ -2,8 +2,10 @@ import * as _ from 'underscore';
 
 import Backbone from "backbone";
 
-import {fdr, clearFDR, clearFdr} from "../filter/fdr";
+import {fdr, clearFdr} from "../filter/fdr";
 import {TEMP} from "../dialogs";
+import {modelUtils} from "../modelUtils";
+import {utils} from "../utils";
 
 export class CompositeModel extends Backbone.Model{
     constructor(attributes, options) {
@@ -821,5 +823,25 @@ export class CompositeModel extends Backbone.Model{
         const extent = d3.extent(d3.merge(vals));
         //console.log (vals, extent);
         return extent;
+    }
+
+    generateUrlString () {
+        // make url parts from current filter attributes
+        var parts = this.get("filterModel").getURLQueryPairs();
+        if (this.get("pdbCode")) {
+            var pdbParts = CLMSUI.modelUtils.makeURLQueryPairs ({pdb: this.get("pdbCode")});
+            parts = pdbParts.concat(parts);
+        }
+
+        // return parts of current url query string that aren't filter flags or values
+        var search = window.location.search.slice(1);
+        var nonFilterKeys = d3.set(["sid", "upload", "decoys", "unval", "lowestScore", "anon"]);
+        var nonFilterParts = search.split("&").filter(function(nfpart) {
+            return nonFilterKeys.has(nfpart.split("=",1)[0]);
+        });
+        // and queue them to be at the start of new url query string (before filter attributes)
+        parts = nonFilterParts.concat(parts);
+
+        return window.location.origin + window.location.pathname + "?" + parts.join("&");
     }
 }
