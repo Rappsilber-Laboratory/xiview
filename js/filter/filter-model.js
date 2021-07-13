@@ -1,3 +1,4 @@
+import * as _ from 'underscore';
 import {utils} from "../utils";
 
 export class FilterModel extends Backbone.Model{
