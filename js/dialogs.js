@@ -1,6 +1,13 @@
-export const TEMP = (function (mod) {
-    
-    mod.jqdialogs = {
+// import $ from "jquery";
+// window.jQuery = $
+// import 'jquery-ui';
+
+// import $ from 'webpack-jquery-ui';
+//
+// require('webpack-jquery-ui');
+// require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+
+export const jqdialogs = {
         constructDialogMessage: function (dialogID, msg, title) {
             var dialogParas = d3.select("body").select("#"+dialogID);
             if (dialogParas.empty()) {
@@ -20,7 +27,7 @@ export const TEMP = (function (mod) {
 
         errorDialog: function (dialogID, msg, title) {
             msg = msg.concat("<br><A href='https://github.com/Rappsilber-Laboratory/' target='_blank'>Rappsilber Lab GitHub</A>");
-            TEMP.jqdialogs.constructDialogMessage (dialogID, msg, title || "Database Error");
+            jqdialogs.constructDialogMessage (dialogID, msg, title || "Database Error");
 
             $("#"+dialogID).dialog({
                 modal:true,
@@ -28,7 +35,7 @@ export const TEMP = (function (mod) {
         },
 
         areYouSureDialog: function (dialogID, msg, title, yesText, noText, yesFunc) {
-            TEMP.jqdialogs.constructDialogMessage (dialogID, msg, title || "Confirm");
+            jqdialogs.constructDialogMessage (dialogID, msg, title || "Confirm");
 
             function hardClose () {
                  $(this).dialog("close").dialog("destroy").remove();
@@ -51,7 +58,3 @@ export const TEMP = (function (mod) {
             });
         }
     };
-    
-    return mod;
-    
-}({})); //wtf

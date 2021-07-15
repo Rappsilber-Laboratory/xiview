@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import * as $ from 'jquery';
+// import * as $ from 'jquery';
 // require('d3-octree');
 
 import {utils} from "./utils";

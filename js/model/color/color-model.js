@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+// import * as $ from 'jquery';
 import Backbone from "backbone";
 
 export class ColourModel extends Backbone.Model {

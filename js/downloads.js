@@ -54,7 +54,7 @@ export function downloadGroups() {
     download(getGroups(), 'text/csv', downloadFilename("groups"));
 }
 
-function download(content, contentType, fileName) {
+export function download(content, contentType, fileName) {
     const oldToNewTypes = {
         "application/svg": "image/svg+xml;charset=utf-8",
         "plain/text": "plain/text;charset=utf-8",

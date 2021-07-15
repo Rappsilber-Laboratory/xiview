@@ -73,68 +73,6 @@ header('Content-type: text/html; charset=utf-8');
         <link rel="stylesheet" href="./css/validationPage.css<?php echo $cacheBuster ?>">
         <link rel="stylesheet" href="./css/xiView.css<?php echo $cacheBuster ?>">
 
-        <script type="text/javascript" src="../vendor/js/byrei-dyndiv_1.0rc1-src.js<?php echo $cacheBuster ?>"></script>
-<!--        <script type="text/javascript" src="../vendor/js/d3.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../vendor/js/colorbrewer.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!---->
-<!--        <script type="text/javascript" src="../vendor/js/c3.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../vendor/js/split.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../vendor/js/svgexp.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../vendor/js/underscore.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <!-- <script type="text/javascript" src="../vendor/js/zepto.js"></script> -->-->
-<!--        <script type="text/javascript" src="../vendor/js/backbone.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../vendor/js/spin.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!---->
-<!--        <script type="text/javascript" src="../dist/clms.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!---->
-<!--        <!-- Backbone models/views loaded after Backbone itself, otherwise need to delay their instantiation somehow -->-->
-<!--        <script type="text/javascript" src="./js/utils.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/filter/filter-model.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/model/models.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/model/composite-model.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/modelUtils.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/filter/minigramViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/filter/filterViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/filter/fdr.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/ui-utils/ddMenuViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!---->
-<!--        <script type="text/javascript" src="./js/ui-utils/base-frame-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/ui-utils/checkbox-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/ui-utils/color-collection-option-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/ui-utils/radio-button-filter-view.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!---->
-<!--        <script type="text/javascript" src="./js/views/tooltipViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/views/selectionTableViewBB.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/views/spectrumViewWrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/validate.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/loadSpectrum.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/networkFrame.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="./js/downloads.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!---->
-<!---->
-<!---->
-<!--        <!-- Spectrum view .js files -->-->
-<!--        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/Wrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SpectrumWrapper.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/AnnotatedSpectrumModel.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SpectrumControlsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SpectrumView2.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/FragmentationKeyView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/PrecursorInfoView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/QCwrapperView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/ErrorPlotView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/SettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/AppearanceSettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/DataSettingsView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/PepInputView.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/FragKey/KeyFragment.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/graph/Graph.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/graph/Peak.js--><?php //echo $cacheBuster ?><!--"></script>-->
-<!--        <script type="text/javascript" src="../spectrum/src/graph/Fragment.js--><?php //echo $cacheBuster ?><!--"></script>-->
-
         <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../dist/xiview.js"></script>
     </head>

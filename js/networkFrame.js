@@ -1,6 +1,7 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as $ from "jquery";
+import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
@@ -16,11 +17,14 @@ import {FilterSummaryViewBB} from "./filter/filterViewBB";
 import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
+
 const colorbrewer = require('colorbrewer');
 import {xiSPEC_wrapper} from "../../spectrum/src/Wrapper";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
-import {downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
-    downloadGroups, downloadPPIs, downloadModificationCount, downloadProteinAccessions} from "./downloads";
+import {
+    downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
+    downloadGroups, downloadPPIs, downloadModificationCount, downloadProteinAccessions
+} from "./downloads";
 import {TooltipViewBB} from "./views/tooltipViewBB";
 import {checkBoxView} from "./ui-utils/checkbox-view";
 import {xiNetControlsViewBB} from "./views/xiNetControlsViewBB";

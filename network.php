@@ -65,12 +65,16 @@
 
        <link rel="stylesheet" href="./css/xiView.css<?php echo $cacheBuster ?>">
 
-        <script type="text/javascript" src="../vendor/js/byrei-dyndiv_1.0rc1-src.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/ngl.dev.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../vendor/js/cola.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/jquery.jsonview.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
 
+        <script type="text/javascript" src="./vendor/ngl.dev.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="./vendor/cola.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
+
         <script type="text/javascript" src="../dist/xiview.js"></script>
+
         <script type="text/javascript" src="./js/views/go/sankey.js<?php echo $cacheBuster ?>"></script>
     </head>
 

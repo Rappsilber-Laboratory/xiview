@@ -1,8 +1,10 @@
 import * as _ from 'underscore';
-import Backbone from "backbone";
+// import $ from 'jquery';
+// import Backbone from "backbone";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {modelUtils} from "../modelUtils";
+import {download} from "../downloads";
 
 export const SearchSummaryViewBB = BaseFrameView.extend({
     events: function() {

@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 
 import {fdr, clearFdr} from "../filter/fdr";
-import {TEMP} from "../dialogs";
+import {jqdialogs} from "../dialogs";
 import {modelUtils} from "../modelUtils";
 import {utils} from "../utils";
 
@@ -633,7 +633,7 @@ export class CompositeModel extends Backbone.Model{
 
     clearGroups () {
         const self = this;
-        TEMP.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
+        jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
             self.set("groups", new Map());
             self.trigger("change:groups");
         });
@@ -641,7 +641,7 @@ export class CompositeModel extends Backbone.Model{
 
     autoGroup () {
         const self = this;
-        TEMP.jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
+        jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
             const groupMap = new Map();
             const go = self.get("go");
             for (let goTerm of go.values()) {

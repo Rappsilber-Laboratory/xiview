@@ -1,3 +1,5 @@
+// import {DistancesObj} from "../../model/distances";
+//
 // const {NGLUtils} = require("./NGLUtils");
 //
 // export class NGLModelWrapperBB extends Backbone.Model {
