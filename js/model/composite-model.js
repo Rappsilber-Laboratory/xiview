@@ -829,7 +829,7 @@ export class CompositeModel extends Backbone.Model{
         // make url parts from current filter attributes
         var parts = this.get("filterModel").getURLQueryPairs();
         if (this.get("pdbCode")) {
-            var pdbParts = CLMSUI.modelUtils.makeURLQueryPairs ({pdb: this.get("pdbCode")});
+            var pdbParts = modelUtils.makeURLQueryPairs ({pdb: this.get("pdbCode")});
             parts = pdbParts.concat(parts);
         }
 

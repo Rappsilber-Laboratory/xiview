@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import {utils} from "../utils";
+import {modelUtils} from "../modelUtils";
 
 export class FilterModel extends Backbone.Model{
     constructor(attributes, options) {
@@ -522,7 +523,7 @@ export class FilterModel extends Backbone.Model{
 
     getURLQueryPairs () {
         // make url parts from current filter attributes
-        return CLMSUI.modelUtils.makeURLQueryPairs (this.attributes, "F");
+        return modelUtils.makeURLQueryPairs (this.attributes, "F");
     }
 
             getFilterUrlSettings (urlChunkMap) {
