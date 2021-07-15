@@ -1,8 +1,8 @@
 import * as _ from 'underscore';
-import Backbone from "backbone";
+// import Backbone from "backbone";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {utils} from "../utils";
+// import {utils} from "../utils";
 import {modelUtils} from "../modelUtils";
 
 const AbstractMetaDataFileChooserBB = BaseFrameView.extend({

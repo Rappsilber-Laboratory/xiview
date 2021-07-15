@@ -735,8 +735,6 @@ export class CompositeModel extends Backbone.Model{
             xlink.setMeta ("distance", distance ? distance.distance || distance : distance);
 
             return distance;
-        } else {
-            return;
         }
     }
 

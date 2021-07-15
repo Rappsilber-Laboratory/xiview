@@ -2,8 +2,6 @@ import Backbone from "backbone";
 import * as _ from 'underscore';
 import {utils} from '../utils';
 
-import {vent} from "../networkFrame";
-
 export const checkBoxView = Backbone.View.extend({
     tagName: "span",
     className: "buttonPlaceholder",

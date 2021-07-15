@@ -1,4 +1,6 @@
 // I want MinigramBB to be model agnostic so I can re-use it in other places
+import Backbone from "backbone";
+
 export const MinigramModel = Backbone.Model.extend({
             defaults: {
                 //domainStart: 0,

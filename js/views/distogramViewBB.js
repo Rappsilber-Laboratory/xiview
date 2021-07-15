@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
-import Backbone from "backbone";
-import * as $ from "jquery";
+// import Backbone from "backbone";
+// import * as $ from "jquery";
 import c3 from "c3/src";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -604,7 +604,7 @@ export const DistogramBB = BaseFrameView.extend({
                     withDimension: false,
                     withEventRect: false,
                     withTheseAxes: [],
-                    withLegend: seriesChanges.newloads.length ? true : false
+                    withLegend: !!seriesChanges.newloads.length
                 });
                 // Quicker way to just update c3 chart legend colours
                 chartInternal.svg.selectAll("." + chartInternal.CLASS.legendItemTile).style("stroke", chartInternal.color);

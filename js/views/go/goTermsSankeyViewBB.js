@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import Backbone from "backbone";
+// import Backbone from "backbone";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {GoTerm} from "./goTerm";

@@ -1,8 +1,8 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
-import * as $ from "jquery";
+// import * as $ from "jquery";
 
-import {BaseFrameView} from "../ui-utils/base-frame-view";
+// import {BaseFrameView} from "../ui-utils/base-frame-view";
 
 export const AlignSettingsViewBB = Backbone.View.extend({
         events: {

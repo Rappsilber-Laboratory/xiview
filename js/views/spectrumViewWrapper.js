@@ -2,6 +2,7 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import * as _ from 'underscore';
 import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
+import {utils} from "../utils";
 
 export const SpectrumViewWrapper = BaseFrameView.extend({
 

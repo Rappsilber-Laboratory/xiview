@@ -1,4 +1,5 @@
 import {downloadFilename} from "../../downloads";
+import {NGLUtils} from "./NGLUtils";
 
 export const NGLExportUtils = {
 
@@ -48,7 +49,7 @@ export const NGLExportUtils = {
             pdbs = [structure.name];
         }
 
-        const localFile = typeof (CLMSUI.NGLUtils.pdbSettings[0].pdbCode) === "undefined";
+        const localFile = typeof (NGLUtils.pdbSettings[0].pdbCode) === "undefined";
         const pdbLines = pdbs.map(function (pdb) {
             return (localFile ? "load " : "fetch ") + pdb + (localFile ? "" : ", async=0");
         });

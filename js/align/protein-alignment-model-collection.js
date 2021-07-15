@@ -4,7 +4,6 @@ import Backbone from "backbone";
 import {modelUtils} from "../modelUtils";
 import {GotohAligner} from "./bioseq32";
 import {SeqCollection} from "./sequence-model-collection";
-import {vent} from "../networkFrame";
 
 export class ProtAlignModel extends Backbone.Model {
 

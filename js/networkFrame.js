@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
-import * as $ from "jquery";
+// import * as $ from "jquery";
 import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
@@ -805,7 +805,7 @@ init.viewsEssential = function (options) {
                         //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
                         if (returnedMatchID === self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-                            const altModel = new clmsModel.SearchResultsModel();
+                            const altModel = new SearchResultsModel();
                             altModel.parseJSON(json);
                             const allCrossLinks = Array.from(altModel.get("crosslinks").values());
                             // empty selection first

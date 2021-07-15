@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
 
-import {BaseFrameView} from "./base-frame-view";
+// import {BaseFrameView} from "./base-frame-view";
 
 export const RadioButtonFilterViewBB = Backbone.View.extend({
     tagName: "div",
