@@ -1,4 +1,4 @@
-import {downloadFilename} from "../../downloads";
+import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./NGLUtils";
 
 export const NGLExportUtils = {
