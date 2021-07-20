@@ -7,9 +7,11 @@
 // require('webpack-jquery-ui');
 // require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
+import d3 from "d3";
+
 export const jqdialogs = {
         constructDialogMessage: function (dialogID, msg, title) {
-            var dialogParas = d3.select("body").select("#"+dialogID);
+            let dialogParas = d3.select("body").select("#" + dialogID);
             if (dialogParas.empty()) {
                 dialogParas = d3.select("body").append("div").attr("id", dialogID);
             }

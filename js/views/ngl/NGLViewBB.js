@@ -8,6 +8,7 @@ import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 import {modelUtils} from "../../modelUtils";
 import {NGLExportUtils} from "./NGLExportUtils";
 import {CrosslinkRepresentation} from "./crosslink-representation";
+import d3 from "d3";
 
 export const NGLViewBB = BaseFrameView.extend({
 
@@ -343,16 +344,16 @@ export const NGLViewBB = BaseFrameView.extend({
             this.lastColour = null;
             this.dontGrey = true;
             this.atomColor = function (atom) {
-                var arindex = atom.residueIndex;
+                const arindex = atom.residueIndex;
                 if (this.lastResidueIndex === arindex) {    // saves recalculating, as colour is per residue
                     return this.lastColour;
                 }
                 this.lastResidueIndex = arindex;
 
-                var residue = self.model.get("stageModel").getResidueByNGLGlobalIndex(arindex);
+                const residue = self.model.get("stageModel").getResidueByNGLGlobalIndex(arindex);
 
                 if (residue !== undefined) {
-                    var linkCount = self.xlRepr ? self.xlRepr.nglModelWrapper.getHalfLinkCountByResidue(residue) : 0;
+                    const linkCount = self.xlRepr ? self.xlRepr.nglModelWrapper.getHalfLinkCountByResidue(residue) : 0;
                     this.lastColour = (linkCount > 0 ? 0x000077 : 0xcccccc);
                 } else {
                     this.lastColour = 0xcccccc;

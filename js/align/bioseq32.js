@@ -1,12 +1,9 @@
 /**************************
  *** Common data tables ***
  **************************/
+const cani8 = typeof Int8Array !== "undefined";
 
-// https://github.com/lh3/bioseq-js
-
-var cani8 = typeof Int8Array !== "undefined";
-
-var intBitMap = [];
+const intBitMap = [];
 for (var n = 0; n <= 8; n++) {
     intBitMap[n] = Int8Array;
 }
@@ -21,7 +18,7 @@ function makeIntArray(length, bitSize, fillValue) {
     //bitSize = Math.max (bitSize || 32, 32);
     //var arr = (cani8 ? new intBitMap[bitSize](length) : []);
 
-    var arr = (cani8 ?
+    const arr = (cani8 ?
         ((bitSize > 16) ? new Int32Array(length) :
             (bitSize <= 8 ? new Int8Array(length) : new Int16Array(length))) :
         []);
@@ -30,7 +27,7 @@ function makeIntArray(length, bitSize, fillValue) {
         if (arr.fill) {
             arr.fill(fillValue);
         } else {
-            for (var n = 0; n < length; n++) {
+            for (let n = 0; n < length; n++) {
                 arr[n] = fillValue;
             }
         }
@@ -40,13 +37,13 @@ function makeIntArray(length, bitSize, fillValue) {
 }
 
 function makeAlphabetMap(str, defaultVal) {
-    var lstr = str.toLowerCase();
+    const lstr = str.toLowerCase();
     if (defaultVal === undefined) {
         defaultVal = lstr.indexOf("x") || str.length;
     }
-    var aMap = makeIntArray(256, 8, defaultVal);
+    const aMap = makeIntArray(256, 8, defaultVal);
 
-    for (var n = 0; n < str.length; n++) {
+    for (let n = 0; n < str.length; n++) {
         aMap[str.charCodeAt(n)] = n;
         aMap[lstr.charCodeAt(n)] = n;
     }
@@ -54,7 +51,7 @@ function makeAlphabetMap(str, defaultVal) {
 }
 
 
-var bst_nt5 = makeAlphabetMap("ACGT", 4);
+const bst_nt5 = makeAlphabetMap("ACGT", 4);
 
 
 /* 
@@ -85,13 +82,13 @@ var bst_nt5 = makeAlphabetMap("ACGT", 4);
 
     not in alphabet : JOU
 */
-var aminos = makeAlphabetMap("ARNDCQEGHILKMFPSTWYVBZX");
+const aminos = makeAlphabetMap("ARNDCQEGHILKMFPSTWYVBZX");
 
 /*
     See R/blosumJsonise.R for details
     */
 
-var Blosum80Map = {
+const Blosum80Map = {
     alphabetInOrder: "ARNDCQEGHILKMFPSTWYVBZX*",
     scoreMatrix: [
         [7, -3, -3, -3, -1, -2, -2, 0, -3, -3, -3, -1, -2, -4, -1, 2, 0, -5, -4, -1, -3, -2, -1, -8],
@@ -137,9 +134,9 @@ var Blosum80Map = {
 
 function bsg_enc_seq(seq, table) {
     if (table == null) return null;
-    var s = makeIntArray(seq.length, 8);
+    const s = makeIntArray(seq.length, 8);
     //s.length = seq.length;
-    for (var i = 0; i < seq.length; ++i) {
+    for (let i = 0; i < seq.length; ++i) {
         s[i] = table[seq.charCodeAt(i)];
     }
     return s;
@@ -207,10 +204,10 @@ function bsg_enc_seq(seq, table) {
  * matching an ambiguous residue.
  */
 function bsa_gen_score_matrix(n, a, b) {
-    var m = [],
-        mrow;
+    const m = [];
+    let mrow;
     b = -Math.abs(b); // mismatch score b should be non-positive
-    for (var i = 0; i < n - 1; ++i) {
+    for (let i = 0; i < n - 1; ++i) {
         mrow = m[i] = makeIntArray(n, 32);
         for (var j = 0; j < n - 1; ++j) {
             mrow[j] = i === j ? a : b;
@@ -232,20 +229,21 @@ function bsa_gen_score_matrix(n, a, b) {
  * @return query profile. It is a two-dimensional integer matrix.
  */
 function bsa_gen_query_profile(_s, _m, table) {
-    var s = typeof _s == 'string' ? bsg_enc_seq(_s, table) : _s;
-    var qp = [],
-        matrix;
+    const s = typeof _s == 'string' ? bsg_enc_seq(_s, table) : _s;
+    const qp = [];
+    let matrix;
     if (_m.length >= 2 && typeof _m[0] == 'number' && typeof _m[1] == 'number') { // match/mismatch score
         if (table == null) return null;
-        var n = typeof table == 'number' ? table : table[table.length - 1] + 1;
+        const n = typeof table == 'number' ? table : table[table.length - 1] + 1;
         matrix = bsa_gen_score_matrix(n, _m[0], _m[1]);
         //console.log ("matrix", matrix);
     } else matrix = _m; // _m is already a matrix; FIXME: check if it is really a square matrix!
-    var slen = s.length;
-    for (var j = 0; j < matrix.length; ++j) {
-        var qpj, mj = matrix[j];
+    const slen = s.length;
+    for (let j = 0; j < matrix.length; ++j) {
+        let qpj;
+        const mj = matrix[j];
         qpj = qp[j] = makeIntArray(slen, 32); //[];
-        for (var i = 0; i < slen; ++i)
+        for (let i = 0; i < slen; ++i)
             qpj[i] = mj[s[i]];
     }
     return qp;
@@ -270,34 +268,34 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
 
     // convert bases to integers
     if (table == null) table = bst_nt5;
-    var t = bsg_enc_seq(target, table);
-    var qp = bsa_gen_query_profile(query, matrix, table);
-    var qlen = qp[0].length;
+    const t = bsg_enc_seq(target, table);
+    const qp = bsa_gen_query_profile(query, matrix, table);
+    const qlen = qp[0].length;
 
     // adjust band width
     //console.log ("orig w", w);
-    var max_len = Math.max(qlen, t.length);
+    const max_len = Math.max(qlen, t.length);
     w = w == null || w < 0 ? max_len : w;
-    var len_diff = Math.abs(t.length - qlen); // MJG - think t.target was a mistake, replace with t.length
+    const len_diff = Math.abs(t.length - qlen); // MJG - think t.target was a mistake, replace with t.length
     w = Math.max(w, len_diff); // mjg - dunno why this needs to be done, would just make w massive for small target and big query  
     //console.log ("w", w, qlen, t.length, len_diff);
 
     // set gap score
-    var gapo, gape; // these are penalties which should be non-negative
+    let gapo, gape; // these are penalties which should be non-negative
     if (typeof gapsc == 'number') {
         gapo = 0, gape = Math.abs(gapsc);
     } else {
         gapo = Math.abs(gapsc[0]), gape = Math.abs(gapsc[1]);
     }
-    var gapoe = gapo + gape; // penalty for opening the first gap
+    const gapoe = gapo + gape; // penalty for opening the first gap
 
     // initial values
-    var NEG_INF = -0x40000000;
-    var H = []; //makeIntArray (qlen+1, 32, is_local ? 0 : undefined); // [];
-    var E = []; //makeIntArray (qlen+1, 32, is_local ? 0 : undefined); // [];
-    var C = []; // holds last column scores, added by mjg for semi-global alignment
-    var z = [],
-        score, max = 0,
+    const NEG_INF = -0x40000000;
+    const H = []; //makeIntArray (qlen+1, 32, is_local ? 0 : undefined); // [];
+    const E = []; //makeIntArray (qlen+1, 32, is_local ? 0 : undefined); // [];
+    const C = []; // holds last column scores, added by mjg for semi-global alignment
+    const z = [];
+    let score, max = 0,
         end_i = -1,
         end_j = -1;
     if (is_local || is_semi_local) {
@@ -313,13 +311,14 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
 
     // the DP loop
     for (var i = 0; i < t.length; ++i) {
-        var h1 = 0,
+        let h1 = 0,
             f = 0,
             m = 0,
             mj = -1;
-        var zi, qpi = qp[t[i]];
-        var beg = Math.max(i - w, 0);
-        var end = Math.min(i + w + 1, qlen); // only loop through [beg,end) of the query sequence
+        let zi;
+        const qpi = qp[t[i]];
+        const beg = Math.max(i - w, 0);
+        const end = Math.min(i + w + 1, qlen); // only loop through [beg,end) of the query sequence
         if (!is_local) {
             // changed so don't have to penalise a start gap (is_semi_local) (hopefully)
             h1 = beg > 0 ? NEG_INF : (is_semi_local ? 0 : -gapoe - gape * i);
@@ -331,7 +330,7 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
         for (var j = beg; j < end; ++j) {
             // At the beginning of the loop: h=H[j]=H(i-1,j-1), e=E[j]=E(i,j), f=F(i,j) and h1=H(i,j-1)
             // If we only want to compute the max score, delete all lines involving direction "d".
-            var e = E[j],
+            let e = E[j],
                 h = H[j],
                 d = 0;
             H[j] = h1; // set H(i,j-1) for the next row
@@ -402,12 +401,12 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
         if (end_j != qlen - 1) // then add soft clipping
             push_cigar(cigar, 4, qlen - 1 - end_j);
     } else if (is_semi_local) { // mjg
-        var qlonger = (t.length < qlen);
-        var hmax = indexOfMax(H);
-        var cmax = indexOfMax(C);
+        const qlonger = (t.length < qlen);
+        const hmax = indexOfMax(H);
+        const cmax = indexOfMax(C);
         i = qlonger ? t.length - 1 : cmax.index;
         var roff = (Math.max(0, qlen - w) + (qlonger ? hmax.index : w));
-        var trailIndelCount = qlonger ? H.length - roff - 1 : C.length - cmax.index - 1;
+        const trailIndelCount = qlonger ? H.length - roff - 1 : C.length - cmax.index - 1;
         if (trailIndelCount > 0) { // add the trailing info of the longer sequence to the cigar
             push_cigar(cigar, qlonger ? 1 : 2, trailIndelCount);
         }
@@ -451,9 +450,9 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
 }
 
 function indexOfMax(arr) { // mjg
-    var max = -0x40000000;
-    var index = arr.length;
-    for (var n = arr.length; --n >= 0;) {
+    let max = -0x40000000;
+    let index = arr.length;
+    for (let n = arr.length; --n >= 0;) {
         if (arr[n] > max) {
             max = arr[n];
             index = n;
@@ -466,12 +465,12 @@ function indexOfMax(arr) { // mjg
 }
 
 function bsa_cigar2gaps(target, query, start, cigar) {
-    var oq = '',
+    let oq = '',
         ot = '',
         lq = 0,
         lt = start;
-    for (var k = 0; k < cigar.length; ++k) {
-        var op = cigar[k] & 0xf,
+    for (let k = 0; k < cigar.length; ++k) {
+        const op = cigar[k] & 0xf,
             len = cigar[k] >> 4;
         if (op === 0) { // match
             oq += query.substr(lq, len);
@@ -494,14 +493,14 @@ function bsa_cigar2gaps(target, query, start, cigar) {
 }
 
 function bsa_cigar2indexArrays(target, query, start, cigar) {
-    var oq = [],
-        ot = [],
-        lq = 0,
+    const oq = [],
+        ot = [];
+    let lq = 0,
         lt = start,
         qi = 0,
         qt = 0;
-    for (var k = 0; k < cigar.length; ++k) {
-        var op = cigar[k] & 0xf,
+    for (let k = 0; k < cigar.length; ++k) {
+        const op = cigar[k] & 0xf,
             len = cigar[k] >> 4;
         if (op === 0) { // match
             //oq += query.substr(lq, len);
@@ -545,14 +544,14 @@ function bsa_cigar2indexArrays(target, query, start, cigar) {
 }
 
 function bsa_cigar2str(cigar) {
-    var s = [];
-    for (var k = 0; k < cigar.length; ++k)
+    const s = [];
+    for (let k = 0; k < cigar.length; ++k)
         s.push((cigar[k] >> 4).toString() + "MIDNSHP=XB".charAt(cigar[k] & 0xf));
     return s.join("");
 }
 
 function arrayMax(arr) {
-    var max = arr.reduce(function(a, b) {
+    const max = arr.reduce(function (a, b) {
         return Math.max(a, b);
     });
     return max;
@@ -562,32 +561,34 @@ function align (query, target, myScores, isLocal, isSemiLocal, windowSize) {
     var target = target || 'ATAGCTAGCTAGCATAAGC';
     var query  = query || 'AGCTAcCGCAT';
     var isLocal = isLocal || false;
-    var defaults = {match: 1, mis: -1, gapOpen: -1, gapExt: -1};
-    var scores = myScores || {};
+    const defaults = {match: 1, mis: -1, gapOpen: -1, gapExt: -1};
+    let scores = myScores || {};
     Object.keys(scores).forEach (function (key) {
         defaults[key] = scores[key];
     });
     scores = defaults;
     //var scores = _.extend ({match: 1, mis: -1, gapOpen: -1, gapExt: -1}, scores || {});
-    var matrix = scores.matrix || Blosum80Map;
+    const matrix = scores.matrix || Blosum80Map;
 
-    var rst;
-    var table = matrix ? makeAlphabetMap (matrix.alphabetInOrder) : aminos;
+    let rst;
+    const table = matrix ? makeAlphabetMap(matrix.alphabetInOrder) : aminos;
     if (target === query) {
-        var maxValues = matrix.scoreMatrix.map (function (row) { return arrayMax (row); });
-        var score = 0;
-        for (var n = 0; n < target.length; n++) {
+        const maxValues = matrix.scoreMatrix.map(function (row) {
+            return arrayMax(row);
+        });
+        let score = 0;
+        for (let n = 0; n < target.length; n++) {
             score += maxValues[table[target.charCodeAt(n)]];
         }
         rst = [score, 0, [target.length << 4]];  // completely equal
     } else {
         rst = bsa_align (isLocal, isSemiLocal, target, query, matrix.scoreMatrix || [scores.match,scores.mis], [scores.gapOpen,scores.gapExt], windowSize, table);
     }
-    var cigarString = bsa_cigar2str(rst[2]);
-    var str = 'score='+rst[0]+'; pos='+rst[1]+'; cigar='+cigarString+"\n";
-    var fmt = bsa_cigar2gaps (target, query, rst[1], rst[2]);
-    var indx = bsa_cigar2indexArrays (target, query, rst[1], rst[2]);
-    var alignment = {res: rst, fmt: fmt, str: str, indx: indx, cigar: cigarString};
+    const cigarString = bsa_cigar2str(rst[2]);
+    const str = 'score=' + rst[0] + '; pos=' + rst[1] + '; cigar=' + cigarString + "\n";
+    const fmt = bsa_cigar2gaps(target, query, rst[1], rst[2]);
+    const indx = bsa_cigar2indexArrays(target, query, rst[1], rst[2]);
+    const alignment = {res: rst, fmt: fmt, str: str, indx: indx, cigar: cigarString};
     //console.log ("ALIGNMENT", alignment);
     return alignment;
 }

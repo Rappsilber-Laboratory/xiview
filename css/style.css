@@ -2,9 +2,9 @@
 
 /*span, */label {
     -webkit-user-select: none;
-    -khtml-user-select: none;
+    /*-khtml-user-select: none;*/
     -moz-user-select: none;
-    -o-user-select: none;
+    /*-o-user-select: none;*/
     user-select: none;
 }
 
@@ -15,7 +15,7 @@
 /* class not named .background as that clashes with d3 brush stuff */
 .backdrop {
 	background: #eee;
-	background-color: #eee;
+	/*background-color: #eee;*/
 }
 
 #xiNetButtonBar p div ul li label{
@@ -122,7 +122,7 @@
     bottom: 65px;
     position: absolute;
     width: 100%;
-    overflow: none;
+    overflow: hidden;
 }
 
 .page-header p {
@@ -289,9 +289,9 @@
     padding-left: 10px;
     padding-right: 10px;
     -webkit-user-select: none;
-    -khtml-user-select: none;
+    /*-khtml-user-select: none;*/
     -moz-user-select: none;
-    -o-user-select: none;
+    /*-o-user-select: none;*/
     user-select: none;
 }
 
@@ -439,7 +439,7 @@ label.horizontalFlow input[type=number] {
 
 /* See http://jsfiddle.net/7jx02upg/1/ */
 label.horizontalFlow input[type=radio], label.horizontalFlow input[type=checkbox] {
-    vertical-align: normal;
+    /*vertical-align: normal;*/
 }
 
 /* <label class='horizontalFlow'><span class='noBreak'>stuff you dont want split over multiple lines</span></label><more labels n spans...>
@@ -588,7 +588,7 @@ A.btn {
     background: inherit;
     -webkit-transition: none;
     -moz-transition: none;
-    -ms-transition: none;
+    /*-ms-transition: none;*/
     -o-transition: none;
     transition: none;
     /*border-top-color: #444;

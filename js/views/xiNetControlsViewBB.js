@@ -4,6 +4,7 @@ import Backbone from "backbone";
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {utils} from "../utils";
+import d3 from "d3";
 
 export const xiNetControlsViewBB = Backbone.View.extend({
 
@@ -288,9 +289,9 @@ const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    var layouts = JSON.parse(xmlhttp.responseText);
-                    var menu = [];
-                    for (var key in layouts) {
+                    const layouts = JSON.parse(xmlhttp.responseText);
+                    const menu = [];
+                    for (let key in layouts) {
                         menu.push(menuItem(layouts, key));
                     }
                     self.options.menu = menu;

@@ -53,6 +53,7 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {loadSpectrum} from "./loadSpectrum";
+import d3 from "d3";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
@@ -260,8 +261,6 @@ init.models = function (options) {
 
 //only inits stuff required by validation page
 init.modelsEssential = function (options) {
-    // window.oldDB = options.oldDB || false;
-
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
     const hasNoMatches = _.isEmpty(options.rawMatches);
@@ -278,24 +277,6 @@ init.modelsEssential = function (options) {
     const clmsModelInst = new SearchResultsModel();
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
-
-    // some proteins have no size, i.e. ambiguous placeholders, and lack of size property is breaking things later on. MJG 17/05/17
-    clmsModelInst.get("participants").forEach(function (prot) {
-        prot.size = prot.size || 1;
-    });
-
-    // const urlChunkMap = modelUtils.parseURLQueryString(window.location.search.slice(1));
-    //
-    // // Anonymiser for screen shots / videos. MJG 17/05/17, add &anon to url for this
-    // if (urlChunkMap.anon) {
-    //     clmsModelInst.get("participants").forEach(function (prot, i) {
-    //         prot.name = "Protein " + (i + 1);
-    //         prot.description = "Protein " + (i + 1) + " Description";
-    //     });
-    // }
-
-    // Add c- and n-term positions to searchresultsmodel on a per protein basis // MJG 29/05/17
-    //~ clmsModelInst.set("terminiPositions", modelUtils.getTerminiPositions (options.peptides));
 
     const scoreExtentInstance = modelUtils.matchScoreRange(clmsModelInst.get("matches"), true);
     if (scoreExtentInstance[0]) {
@@ -579,6 +560,74 @@ init.views = function () {
                     tooltip: "Select proteins whose descriptions include input text",
                     sectionEnd: true
                 },
+                // {
+                //     sectionBegin: true,
+                //     categoryTitle: "Group Selected",
+                //     id: "groupSelected",
+                //     func: compModel.groupSelectedProteins,
+                //     closeOnClick: false,
+                //     context: compModel,
+                //     tooltip: "Enter group name",
+                // },
+                // {
+                //     name: "Clear Groups",
+                //     func: compModel.clearGroups,
+                //     context: compModel,
+                //     tooltip: "Clears all groups"
+                // },
+                // {
+                //     name: "Auto Group",
+                //     func: compModel.autoGroup,
+                //     context: compModel,
+                //     tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)"
+                // }
+            ],
+            //tooltipModel: compModel.get("tooltipModel")
+            sectionHeader: function (d) {
+                return (d.categoryTitle ? d.categoryTitle.replace(/_/g, " ") : "");
+            },
+        }
+    })
+        .wholeMenuEnabled(matchesFound)
+        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
+            this.wholeMenuEnabled(true);
+        });
+
+
+    new DropDownMenuViewBB({
+        el: "#groupsDropdownPlaceholder",
+        model: compModel.get("clmsModel"),
+        myOptions: {
+            title: "Groups",
+            menu: [//{
+            //     name: "Hide Selected",
+            //     func: compModel.hideSelectedProteins,
+            //     context: compModel,
+            //     tooltip: "Hide selected proteins",
+            // },
+            //     {
+            //         name: "Hide Unselected",
+            //         func: compModel.hideUnselectedProteins,
+            //         context: compModel,
+            //         tooltip: "Hide unselected proteins",
+            //         sectionEnd: true
+            //     },
+            //     {
+            //         name: "+Neighbours",
+            //         func: compModel.stepOutSelectedProteins,
+            //         context: compModel,
+            //         tooltip: "Select proteins which are crosslinked to already selected proteins",
+            //         categoryTitle: "Change Selection",
+            //         sectionBegin: true
+            //     },
+            //     {
+            //         id: "proteinSelectionFilter",
+            //         func: compModel.proteinSelectionTextFilter,
+            //         closeOnClick: false,
+            //         context: compModel,
+            //         tooltip: "Select proteins whose descriptions include input text",
+            //         sectionEnd: true
+            //     },
                 {
                     sectionBegin: true,
                     categoryTitle: "Group Selected",

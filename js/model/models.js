@@ -1,5 +1,6 @@
 // I want MinigramBB to be model agnostic so I can re-use it in other places
 import Backbone from "backbone";
+import d3 from "d3";
 
 export const MinigramModel = Backbone.Model.extend({
             defaults: {

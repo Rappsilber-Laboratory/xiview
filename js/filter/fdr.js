@@ -1,4 +1,5 @@
 import {modelUtils} from "../modelUtils";
+import d3 from "d3";
 
 export const clearFdr = function (crosslinksArr) {
     // clear fdr information from crosslinks (usually because we've gone into none-fdr mode and don't want it showing in tooltips)
@@ -7,13 +8,13 @@ export const clearFdr = function (crosslinksArr) {
 
 export const fdr = function(crosslinksArr, options) {
 
-    var defaultScoreCalcFunc = function(crosslink) { // default function is based on quadratic mean (rms)
-        var filtered = crosslink.matches_pp
-            .filter(function(match_pp) {
+    const defaultScoreCalcFunc = function (crosslink) { // default function is based on quadratic mean (rms)
+        const filtered = crosslink.matches_pp
+            .filter(function (match_pp) {
                 // filter out matches which don't pass current subset filter (used to be just peptide length we considered here)
                 return filterModel.subsetFilter(match_pp.match);
             });
-        return Math.sqrt(d3.sum(filtered, function(match_pp) {
+        return Math.sqrt(d3.sum(filtered, function (match_pp) {
             return match_pp.match.score() * match_pp.match.score();
         }) || 0);
     };
@@ -26,14 +27,14 @@ export const fdr = function(crosslinksArr, options) {
     }, options);
 
     var filterModel = options.filterModel;
-    var clmsModel = options.CLMSModel;
+    const clmsModel = options.CLMSModel;
     if (!filterModel || !clmsModel) {
         return null;
     }
 
     // Work out link score based on a function of the related match scores
-    var clCount = crosslinksArr.length;
-    for (var i = 0; i < clCount; ++i) {
+    const clCount = crosslinksArr.length;
+    for (let i = 0; i < clCount; ++i) {
         var crosslink = crosslinksArr[i];
         crosslink.setMeta("linkScore", options.scoreCalcFunc(crosslink));
     }
@@ -46,8 +47,8 @@ export const fdr = function(crosslinksArr, options) {
     }
 
     // Divide crosslinks into inter and intra-protein groups, and sort them by the scores just calculated
-    var arrLabels = ["Inter", "Intra"];
-    var linkArrs = _.partition(crosslinksArr, function(xLink) {
+    const arrLabels = ["Inter", "Intra"];
+    const linkArrs = _.partition(crosslinksArr, function (xLink) {
         return !xLink.isSelfLink();
     });
     linkArrs.forEach(function(linkArr) {
@@ -63,17 +64,17 @@ export const fdr = function(crosslinksArr, options) {
     }
 
     // Loop through both groups and work out the fdr
-    var fdrResult = linkArrs.map(function(linkArr, index) {
-        
-        var fdr = 1,
-            t = [0, 0, 0, 0],
-            cutoffIndex = 0,
-            runningFdr = [],
-            fdrScoreCutoff;
+    const fdrResult = linkArrs.map(function (linkArr, index) {
+
+        let fdr = 1;
+        const t = [0, 0, 0, 0];
+        let cutoffIndex = 0;
+        const runningFdr = [];
+        let fdrScoreCutoff;
 
         if (linkArr.length && options.threshold !== undefined) {
             // first run, count tt, td, and dd
-            linkArr.forEach(function(link) {
+            linkArr.forEach(function (link) {
                 if (link.getMeta("linkScore") > 0) {
                     t[decoyClass(link)]++;
                 } else {
@@ -82,11 +83,11 @@ export const fdr = function(crosslinksArr, options) {
             });
 
             //console.log ("totals tt td dd", t, linkArr);
-            var nonzero = d3.sum(t) > 0;
-            var runningMin = Number.POSITIVE_INFINITY;
+            const nonzero = d3.sum(t) > 0;
+            let runningMin = Number.POSITIVE_INFINITY;
 
             // decrement the counters on second run
-            linkArr.forEach(function(link, i) {
+            linkArr.forEach(function (link, i) {
                 // A. Apply score first
                 fdr = (t[1] - t[2]) / (t[0] || 1);
                 runningMin = Math.min(fdr, runningMin);
@@ -111,7 +112,7 @@ export const fdr = function(crosslinksArr, options) {
             }
 
             cutoffIndex = Math.max(cutoffIndex - 1, 0);
-            var lastLink = linkArr[cutoffIndex];
+            const lastLink = linkArr[cutoffIndex];
             fdrScoreCutoff = nonzero ? lastLink.getMeta("linkScore") : 0.001;
 
             if (false) {

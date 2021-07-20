@@ -5,11 +5,12 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {STRINGUtils} from "./stringUtils";
 import {utils} from "../utils";
 import {modelUtils} from "../modelUtils";
+import d3 from "d3";
 
 export const STRINGFileChooserBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -22,16 +23,16 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         STRINGFileChooserBB.__super__.initialize.apply(this, arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el).classed ("metaLoadPanel", true);
-        var self = this;
+        const mainDivSel = d3.select(this.el).classed("metaLoadPanel", true);
+        const self = this;
 
-        var wrapperPanel = mainDivSel.append("div").attr("class", "panelInner");
+        const wrapperPanel = mainDivSel.append("div").attr("class", "panelInner");
 
-        var box = wrapperPanel.append("div").attr("class", "columnbar");
+        const box = wrapperPanel.append("div").attr("class", "columnbar");
 
         box.append("p").attr("class", "smallHeading").text("Set NCBI Taxon ID");
 
-        var common = [
+        const common = [
             {name: "No Selection", value: "-"},
             {name: "Human", value: 9606},
             {name: "E. Coli str. K-12 / MG1655", value: 511145},
@@ -44,8 +45,8 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             .attr ("title", "Select an organism to search STRING scores on")
             .append("select").attr("class", "selectTaxonID withSideMargins")
                 .on ("change", function () {
-                    var optionSelected = $("option:selected", this);
-                    var valueSelected = this.value;
+                    const optionSelected = $("option:selected", this);
+                    const valueSelected = this.value;
                     d3.select(self.el).select(".inputTaxonID").property ("value", valueSelected);
                     self.enteringTaxonID({keyCode: 13});
                 })
@@ -58,7 +59,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         ;
 
 
-        var taxonSpan = box.append("div")
+        const taxonSpan = box.append("div")
             .attr("class", "btn nopadLeft")
             .html("or Enter <a href='https://www.ncbi.nlm.nih.gov/taxonomy' target='_blank'>NCBI Taxon ID</a>")
         ;
@@ -112,31 +113,31 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
     },
 
     loadSTRINGData: function() {
-        var taxonID = d3.select(this.el).select(".inputTaxonID").property("value");
+        const taxonID = d3.select(this.el).select(".inputTaxonID").property("value");
 
         this.setWaitingEffect();
-        var self = this;
-        var callback = function (csv, errorReason) {
-            self.setCompletedEffect ();
-            var statusText = "";
+        const self = this;
+        const callback = function (csv, errorReason) {
+            self.setCompletedEffect();
+            let statusText = "";
             if (!errorReason) {
                 //var t = performance.now();
-                var result = modelUtils.updateLinkMetadata (csv, self.model.get("clmsModel"));
+                const result = modelUtils.updateLinkMetadata(csv, self.model.get("clmsModel"));
                 //t = performance.now() - t;
                 //console.log ("assignt to links took", t/1000, "s");
                 statusText = result.ppiCount + " STRING interactions matched to protein set.<br>";
                 if (result.ppiCount > 0) {
-                    self.model.set ("linkColourAssignment", window.linkColor.Collection.get("STRING Score"));  // Switch to STRING colouring if any STRING scores available
+                    self.model.set("linkColourAssignment", window.linkColor.Collection.get("STRING Score"));  // Switch to STRING colouring if any STRING scores available
                     statusText += "Colour Scheme switched to STRING Score - subscores via Legend View.";
                 }
             }
-            self.setStatusText (errorReason || statusText, !errorReason);
+            self.setStatusText(errorReason || statusText, !errorReason);
         };
         STRINGUtils.loadStringDataFromModel (this.model.get("clmsModel"), taxonID, callback);
     },
 
     isTaxaIDValid: function() {
-        var elem = d3.select(this.el).select(".inputTaxonID");
+        const elem = d3.select(this.el).select(".inputTaxonID");
         return elem.node().checkValidity();
     },
 

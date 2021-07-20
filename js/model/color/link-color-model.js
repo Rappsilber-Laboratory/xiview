@@ -2,6 +2,7 @@ import {ColourModel} from "./color-model";
 
 import * as _ from 'underscore';
 import {modelUtils} from "../../modelUtils";
+import d3 from "d3";
 
 const colorbrewer = require('colorbrewer');
 

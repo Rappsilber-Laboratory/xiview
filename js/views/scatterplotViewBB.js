@@ -5,11 +5,12 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
 import {utils} from "../utils";
 import {modelUtils} from "../modelUtils";
+import d3 from "d3";
 
 export const ScatterplotViewBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -48,7 +49,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
         this.options.attributeOptions = SearchResultsModel.attributeOptions;
 
-        var self = this;
+        const self = this;
 
         this.margin = {
             top: this.options.chartTitle ? 30 : 0,
@@ -60,34 +61,34 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         // targetDiv could be div itself or id of div - lets deal with that
         // Backbone handles the above problem now - element is now found in this.el
         //avoids prob with 'save - web page complete'
-        var mainDivSel = d3.select(this.el).classed("scatterplotView", true);
+        const mainDivSel = d3.select(this.el).classed("scatterplotView", true);
 
-        var flexWrapperPanel = mainDivSel.append("div")
+        const flexWrapperPanel = mainDivSel.append("div")
             .attr("class", "verticalFlexContainer");
 
         this.controlDiv = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
 
         // Add download button
-        var buttonData = [{
+        const buttonData = [{
             class: "downloadButton2",
             label: utils.commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
-        }, ];
+        },];
         utils.makeBackboneButtons(this.controlDiv, self.el.id, buttonData);
 
         // Add two select widgets for picking axes data types
         this.setMultipleSelectControls(this.controlDiv, this.options.attributeOptions, false);
 
         // Add jitter toggle checkbox
-        var toggleButtonData = [{
-                class: "jitter",
-                label: "Add Jitter",
-                id: "jitter",
-                type: "checkbox",
-                inputFirst: true,
-                initialState: this.options.jitter
-            },
+        const toggleButtonData = [{
+            class: "jitter",
+            label: "Add Jitter",
+            id: "jitter",
+            type: "checkbox",
+            inputFirst: true,
+            initialState: this.options.jitter
+        },
             {
                 class: "logX",
                 label: "Log X Axis",
@@ -109,17 +110,17 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
 
         // Add the scatterplot and axes
-        var chartDiv = flexWrapperPanel.append("div")
+        const chartDiv = flexWrapperPanel.append("div")
             .attr("class", "panelInner")
             .attr("flex-grow", 1)
             .style("position", "relative");
 
-        var viewDiv = chartDiv.append("div")
+        const viewDiv = chartDiv.append("div")
             .attr("class", "viewDiv");
 
 
         // Canvas
-        var canvasDiv = viewDiv.append("div")
+        const canvasDiv = viewDiv.append("div")
             .style("position", "absolute")
             .style("transform", "translate(" + this.margin.left + "px," + this.margin.top + "px)")
         ;
@@ -159,11 +160,11 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
 
         // Add labels
-        var labelInfo = [{
-                class: "axis",
-                text: this.options.xlabel,
-                dy: "0em"
-            },
+        const labelInfo = [{
+            class: "axis",
+            text: this.options.xlabel,
+            dy: "0em"
+        },
             {
                 class: "axis",
                 text: this.options.ylabel,
@@ -193,38 +194,38 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             });
 
         // Brush
-        var brushEnded = function (options) {
+        const brushEnded = function (options) {
             options = options || {};
             options.extent = self.brush.extent();
             options.add = d3.event.ctrlKey || d3.event.shiftKey || (d3.event.sourceEvent ? d3.event.sourceEvent.ctrlKey || d3.event.sourceEvent.shiftKey : false);
             self.selectPoints(options);
         };
 
-        var brushSnap = function () {
+        const brushSnap = function () {
             if (d3.event.sourceEvent.type === "brush") {
                 return;
             }
-            var meta = self.getBothAxesMetaData();
-            var selection = self.brush.extent();
+            const meta = self.getBothAxesMetaData();
+            const selection = self.brush.extent();
 
-            var adjs = meta.map(function(m) {
+            const adjs = meta.map(function (m) {
                 return Math.pow(10, -m.decimalPlaces) / 2;
             });
 
-            var expandOrShrink = function(selection, shrink) {
-                var sign = shrink ? 1 : -1;
-                return selection.map(function(corner, i) {
-                    var gCorner = corner.slice();
+            const expandOrShrink = function (selection, shrink) {
+                const sign = shrink ? 1 : -1;
+                return selection.map(function (corner, i) {
+                    const gCorner = corner.slice();
                     gCorner[0] -= (adjs[0] * sign * (i === 0 ? -1 : 1));
                     gCorner[1] -= (adjs[1] * sign * (i === 0 ? -1 : 1));
                     return gCorner;
                 });
             };
 
-            var shrunkSelection = expandOrShrink(selection, true);
+            const shrunkSelection = expandOrShrink(selection, true);
 
-            var newSelection = shrunkSelection.map(function(corner) {
-                return corner.map(function(v, axisIndex) {
+            const newSelection = shrunkSelection.map(function (corner) {
+                return corner.map(function (v, axisIndex) {
                     return d3.round(d3.round(v, 10), meta[axisIndex].decimalPlaces);
                 });
                 // sometimes numbers like 3.5 get rounded to 3.499999999999996 in javascript
@@ -232,14 +233,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 // so doing d3.round (3.49999999996, 10) return 3.5, then d3.round (3.5, 0) returns 4 which is what we want
             });
 
-            var generousSelection = expandOrShrink(newSelection, false);
+            const generousSelection = expandOrShrink(newSelection, false);
 
             //console.log ("d1", selection[0][0], selection[1][0], "old", shrunkSelection[0][0], shrunkSelection[1][0], "new", newSelection[0][0], newSelection[1][0], "generous", generousSelection[0][0], generousSelection[1][0], self.brush.extent(), d3.event);
 
             if (!_.isEqual(selection, generousSelection)) {
                 self.brush.extent(generousSelection);
                 self.scatg.select(".brush").call(self.brush); // recall brush binding so background rect is resized and brush redrawn
-                ["n", "e"].forEach(function(orient, i) {
+                ["n", "e"].forEach(function (orient, i) {
                     self.scatg.select(".resize." + orient + " text").text("[" + newSelection[0][i] + " to " + newSelection[1][i] + "]"); // for brush extent labelling
                 });
             }
@@ -282,24 +283,24 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
         this.listenTo(vent, "linkMetadataUpdated", function(metaMetaData) {
             //console.log ("HELLO", arguments);
-            var columns = metaMetaData.columns;
-            var newOptions = columns.map(function(column) {
+            const columns = metaMetaData.columns;
+            const newOptions = columns.map(function (column) {
                 return {
                     id: column,
                     label: column,
                     decimalPlaces: 2,
                     matchLevel: false,
-                    linkFunc: function(c) {
+                    linkFunc: function (c) {
                         return c.getMeta() ? [c.getMeta(column)] : [];
                     },
-                    unfilteredLinkFunc: function(c) {
+                    unfilteredLinkFunc: function (c) {
                         return c.getMeta() ? [c.getMeta(column)] : [];
                     },
                 };
             });
             //console.log ("NEW OPTIONS", newOptions);
 
-            var toolbar = mainDivSel.select("div.toolbar");
+            const toolbar = mainDivSel.select("div.toolbar");
             self.setMultipleSelectControls(toolbar, newOptions, true);
         });
 
@@ -311,7 +312,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     ifADistanceAxisRerender: function () {
-        var distanceAxes = this.getBothAxesMetaData().filter(function (axis) {
+        const distanceAxes = this.getBothAxesMetaData().filter(function (axis) {
             return axis.id === "Distance";
         });
         if (distanceAxes.length) {
@@ -321,7 +322,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     setMultipleSelectControls: function(elem, options, keepOld) {
-        var self = this;
+        const self = this;
         utils.addMultipleSelectControls({
             addToElem: elem,
             selectList: ["X", "Y"],
@@ -350,36 +351,36 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     // options.select = true for selections, false for highlight
     selectPoints: function(options) {
         options = options || {};
-        var xAxisData = this.getAxisData("X", true);
-        var yAxisData = this.getAxisData("Y", true);
-        var xData = xAxisData.data;
-        var yData = yAxisData.data;
-        var filteredCrossLinks = this.getFilteredCrossLinks();
-        var extent = options.extent || this.brush.extent();
-        var matchLevel = xAxisData.matchLevel || yAxisData.matchLevel;
-        var exmin = extent[0][0],
+        const xAxisData = this.getAxisData("X", true);
+        const yAxisData = this.getAxisData("Y", true);
+        const xData = xAxisData.data;
+        const yData = yAxisData.data;
+        const filteredCrossLinks = this.getFilteredCrossLinks();
+        const extent = options.extent || this.brush.extent();
+        const matchLevel = xAxisData.matchLevel || yAxisData.matchLevel;
+        const exmin = extent[0][0],
             exmax = extent[1][0],
             eymin = extent[0][1],
             eymax = extent[1][1];
 
-        var add = options.add || false;
-        var type = options.select ? "selection" : "highlights";
+        const add = options.add || false;
+        const type = options.select ? "selection" : "highlights";
         //console.log ("type", options, type, matchLevel, xAxisData);
 
         // set up for calculating nearest datum to mouse position
-        var nearest = {
+        const nearest = {
             link: undefined,
             match: undefined,
             distance: Number.POSITIVE_INFINITY
         };
-        var jitterOn = this.options.jitter;
+        const jitterOn = this.options.jitter;
 
         function testNearest(link, match, xd, yd) {
-            var xjr = jitterOn ? this.getXJitter(link) : 0;
-            var yjr = jitterOn ? this.getYJitter(link) : 0;
-            var px = this.getXPosition(xd, xjr) - options.mousePosition.px;
-            var py = this.getYPosition(yd, yjr) - options.mousePosition.py;
-            var pd = (px * px) + (py * py);
+            const xjr = jitterOn ? this.getXJitter(link) : 0;
+            const yjr = jitterOn ? this.getYJitter(link) : 0;
+            const px = this.getXPosition(xd, xjr) - options.mousePosition.px;
+            const py = this.getYPosition(yd, yjr) - options.mousePosition.py;
+            const pd = (px * px) + (py * py);
             if (pd < nearest.distance) {
                 nearest.distance = pd;
                 nearest.match = match;
@@ -388,14 +389,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         }
 
         if (matchLevel) {
-            var matchingMatches = filteredCrossLinks.map(function(link, i) {
-                var xDatum = xData[i];
-                var yDatum = yData[i];
+            const matchingMatches = filteredCrossLinks.map(function (link, i) {
+                const xDatum = xData[i];
+                const yDatum = yData[i];
 
-                var passMatches = (xDatum && yDatum) ? link.filteredMatches_pp.filter(function(match, ii) {
-                    var xd = xDatum.length === 1 ? xDatum[0] : xDatum[ii];
-                    var yd = yDatum.length === 1 ? yDatum[0] : yDatum[ii];
-                    var within = (xd >= exmin && xd <= exmax && yd >= eymin && yd <= eymax);
+                const passMatches = (xDatum && yDatum) ? link.filteredMatches_pp.filter(function (match, ii) {
+                    const xd = xDatum.length === 1 ? xDatum[0] : xDatum[ii];
+                    const yd = yDatum.length === 1 ? yDatum[0] : yDatum[ii];
+                    const within = (xd >= exmin && xd <= exmax && yd >= eymin && yd <= eymax);
                     if (within && options.calcNearest) {
                         testNearest.call(this, link, match, xd, yd);
                     }
@@ -404,17 +405,17 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
                 return passMatches;
             }, this);
-            var allMatchingMatches = d3.merge(matchingMatches);
+            const allMatchingMatches = d3.merge(matchingMatches);
             this.selectSize = allMatchingMatches.length;
             this.model.setMarkedMatches(type, allMatchingMatches, true, add);
         } else {
-            var matchingLinks = filteredCrossLinks.filter(function(link, i) {
-                var xDatum = xData[i];
-                var yDatum = yData[i];
-                var within = xDatum && xDatum.some(function(xd) {
+            const matchingLinks = filteredCrossLinks.filter(function (link, i) {
+                const xDatum = xData[i];
+                const yDatum = yData[i];
+                let within = xDatum && xDatum.some(function (xd) {
                     return xd >= exmin && xd <= exmax;
                 });
-                within = within && yDatum && yDatum.some(function(yd) {
+                within = within && yDatum && yDatum.some(function (yd) {
                     return yd >= eymin && yd <= eymax;
                 });
 
@@ -445,7 +446,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     toggleLogX: function(evt) {
-        var checked = d3.select(evt.target).property("checked");
+        const checked = d3.select(evt.target).property("checked");
         this.options.logX = checked;
         return this
             .axisChosen() // redo all axis information
@@ -453,7 +454,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     toggleLogY: function(evt) {
-        var checked = d3.select(evt.target).property("checked");
+        const checked = d3.select(evt.target).property("checked");
         this.options.logY = checked;
         return this
             .axisChosen() // redo all axis information
@@ -461,17 +462,17 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     getData: function(funcMeta, filteredFlag, optionalLinks) {
-        var linkFunc = funcMeta ? (filteredFlag ? funcMeta.linkFunc : funcMeta.unfilteredLinkFunc) : undefined;
-        var crosslinks = optionalLinks ||
+        const linkFunc = funcMeta ? (filteredFlag ? funcMeta.linkFunc : funcMeta.unfilteredLinkFunc) : undefined;
+        const crosslinks = optionalLinks ||
             (filteredFlag ? this.getFilteredCrossLinks() : this.model.getAllCrossLinks());
-        var data = crosslinks.map(function(c) {
+        const data = crosslinks.map(function (c) {
             return linkFunc ? linkFunc.call(this, c) : [undefined];
         }, this);
         return data;
     },
 
     getSelectedOption: function(axisLetter) {
-        var funcMeta;
+        let funcMeta;
 
         this.controlDiv
             .selectAll("select")
@@ -495,8 +496,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     getAxisData: function(axisLetter, filteredFlag, optionalLinks) {
-        var funcMeta = this.getSelectedOption(axisLetter);
-        var data = this.getData(funcMeta, filteredFlag, optionalLinks);
+        const funcMeta = this.getSelectedOption(axisLetter);
+        const data = this.getData(funcMeta, filteredFlag, optionalLinks);
         return {
             label: funcMeta ? funcMeta.label : "?",
             data: data,
@@ -513,10 +514,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     isLinearScale: function(scale) {
-        var domain = scale.domain();
-        var bottomVal = scale(domain[0]);
-        var fullRange = Math.abs(scale(domain[1]) - bottomVal);
-        var halfRange = Math.abs(scale(d3.mean(domain)) - bottomVal);
+        const domain = scale.domain();
+        const bottomVal = scale(domain[0]);
+        const fullRange = Math.abs(scale(domain[1]) - bottomVal);
+        const halfRange = Math.abs(scale(d3.mean(domain)) - bottomVal);
         return (fullRange / halfRange) >= (2 - 0.001); // -0.0001 for rounding
     },
 
@@ -546,8 +547,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     axisChosen: function() {
-        var dataX = this.getAxisData("X", false);
-        var dataY = this.getAxisData("Y", false);
+        const dataX = this.getAxisData("X", false);
+        const dataY = this.getAxisData("Y", false);
 
         this.xAxis.tickFormat(dataX.tickFormat);
         this.yAxis.tickFormat(dataY.tickFormat);
@@ -556,7 +557,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.makeXAxisType(dataX.canLogAxis && this.options.logX);
         this.makeYAxisType(dataY.canLogAxis && this.options.logY);
 
-        var rootid = "#" + d3.select(this.el).attr("id");
+        const rootid = "#" + d3.select(this.el).attr("id");
         d3.select(this.el).select(rootid + "logx").style("display", dataX.canLogAxis ? null : "none");
         d3.select(this.el).select(rootid + "logy").style("display", dataY.canLogAxis ? null : "none");
 
@@ -566,7 +567,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.scaleAxes(dataX, dataY);
 
         // Update x/y labels and axes tick formats
-        var self = this;
+        const self = this;
         this.vis.selectAll("g.label text").data([dataX, dataY])
             .text(function(d, i) {
                 return (d.canLogAxis && self.options[i === 0 ? "logX" : "logY"] ? "Log " : "") + d.label;
@@ -581,10 +582,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     scaleAxes: function(datax, datay) {
-        var directions = [{
-                dataDetails: datax,
-                scale: this.x
-            },
+        const directions = [{
+            dataDetails: datax,
+            scale: this.x
+        },
             {
                 dataDetails: datay,
                 scale: this.y
@@ -592,7 +593,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         ];
 
         directions.forEach(function(direction) {
-            var dom = d3.extent(d3.merge(direction.dataDetails.data));
+            let dom = d3.extent(d3.merge(direction.dataDetails.data));
             if (dom[0] === undefined || !_.isNumber(dom[0])) {
                 dom = [0, 0];
             }
@@ -603,7 +604,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 return _.isNumber(v) ? Math[i === 0 ? "floor" : "ceil"](v) : v;
             });
 
-            var log = direction.dataDetails.canLogAxis;
+            const log = direction.dataDetails.canLogAxis;
             if (log) {
                 dom[0] = direction.dataDetails.logStart;
             }
@@ -624,15 +625,15 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     getHighlightRange: function(evt, squarius) {
-        var background = d3.select(this.el).select(".background").node();
-        var margin = this.options.chartMargin;
-        var x = utils.crossBrowserElementX(evt, background) + margin;
-        var y = utils.crossBrowserElementY(evt, background) + margin;
-        var sortFunc = function(a, b) {
+        const background = d3.select(this.el).select(".background").node();
+        const margin = this.options.chartMargin;
+        const x = utils.crossBrowserElementX(evt, background) + margin;
+        const y = utils.crossBrowserElementY(evt, background) + margin;
+        const sortFunc = function (a, b) {
             return a - b;
         };
-        var xrange = [this.x.invert(x - squarius), this.x.invert(x + squarius)].sort(sortFunc);
-        var yrange = [this.y.invert(y - squarius), this.y.invert(y + squarius)].sort(sortFunc);
+        const xrange = [this.x.invert(x - squarius), this.x.invert(x + squarius)].sort(sortFunc);
+        const yrange = [this.y.invert(y - squarius), this.y.invert(y + squarius)].sort(sortFunc);
         return {
             xrange: xrange,
             yrange: yrange,
@@ -644,21 +645,21 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     doTooltip: function(evt) {
-        var axesMetaData = this.getBothAxesMetaData();
-        var highlightRange = this.getHighlightRange(evt, 20);
-        var vals = [highlightRange.xrange, highlightRange.yrange];
-        var inBetweenValidValues = false;
+        const axesMetaData = this.getBothAxesMetaData();
+        const highlightRange = this.getHighlightRange(evt, 20);
+        const vals = [highlightRange.xrange, highlightRange.yrange];
+        let inBetweenValidValues = false;
 
-        var tooltipData = axesMetaData.map(function(axisMetaData, i) {
-            var commaFormat = d3.format(",." + axisMetaData.decimalPlaces + "f");
-            var rvals = ["ceil", "floor"].map(function(func, ii) {
-                var v = utils[func](vals[i][ii], axisMetaData.decimalPlaces);
+        let tooltipData = axesMetaData.map(function (axisMetaData, i) {
+            const commaFormat = d3.format(",." + axisMetaData.decimalPlaces + "f");
+            const rvals = ["ceil", "floor"].map(function (func, ii) {
+                let v = utils[func](vals[i][ii], axisMetaData.decimalPlaces);
                 if (v === 0) {
                     v = 0;
                 } // gets rid of negative zero
                 return v;
             });
-            var fvals = rvals.map (commaFormat);
+            const fvals = rvals.map(commaFormat);
             inBetweenValidValues |= (rvals[0] > rvals[1]);
             return [axisMetaData.label, rvals[0] > rvals[1] ? "---" : fvals[0] + (fvals[0] === fvals[1] ? "" : " to " + fvals[1])];
         });
@@ -667,14 +668,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             tooltipData = [];
         }
 
-        var isMatchLevel = axesMetaData.some(function(axmd) {
+        const isMatchLevel = axesMetaData.some(function (axmd) {
             return axmd.matchLevel;
         });
-        var size = this.selectSize;
-        var levelText = isMatchLevel ? (size === 1 ? "Match" : "Matches") : (size === 1 ? "Cross-Link" : "Cross-Links");
+        const size = this.selectSize;
+        const levelText = isMatchLevel ? (size === 1 ? "Match" : "Matches") : (size === 1 ? "Cross-Link" : "Cross-Links");
 
         if (this.nearest && this.nearest.link) {
-            var tipExtra = isMatchLevel ? modelUtils.makeTooltipContents.match(this.nearest.match) :
+            const tipExtra = isMatchLevel ? modelUtils.makeTooltipContents.match(this.nearest.match) :
                 modelUtils.makeTooltipContents.link(this.nearest.link);
             tooltipData = tooltipData.concat([
                 ["&nbsp;"],
@@ -695,8 +696,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     doHighlight: function(evt) {
-        var highlightRange = this.getHighlightRange(evt, 20);
-        var extent = [
+        const highlightRange = this.getHighlightRange(evt, 20);
+        const extent = [
             [highlightRange.xrange[0], highlightRange.yrange[0]],
             [highlightRange.xrange[1], highlightRange.yrange[1]],
         ];
@@ -753,21 +754,21 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
             //console.log ("renderOptions", renderOptions);
 
-            var highlightsOnly = renderOptions.rehighlightOnly;
-            var pointSize = this.options.pointSize;
-            var halfPointSize = pointSize / 2;
+            const highlightsOnly = renderOptions.rehighlightOnly;
+            const pointSize = this.options.pointSize;
+            const halfPointSize = pointSize / 2;
 
             //var self = this;
-            var colourScheme = this.model.get("linkColourAssignment");
+            const colourScheme = this.model.get("linkColourAssignment");
 
-            var filteredCrossLinks = this.getFilteredCrossLinks();
-            var highlightedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("highlights"), "id"));
-            var selectedCrossLinkIDs = d3.set();
+            const filteredCrossLinks = this.getFilteredCrossLinks();
+            const highlightedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("highlights"), "id"));
+            let selectedCrossLinkIDs = d3.set();
 
-            var selectedMatchMap = this.model.getMarkedMatches("selection");
-            var highlightedMatchMap = this.model.getMarkedMatches("highlights");
+            const selectedMatchMap = this.model.getMarkedMatches("selection");
+            const highlightedMatchMap = this.model.getMarkedMatches("highlights");
 
-            var sortedFilteredCrossLinks;
+            let sortedFilteredCrossLinks;
             if (highlightsOnly) {
                 sortedFilteredCrossLinks = filteredCrossLinks.filter (function (link) { return highlightedCrossLinkIDs.has(link.id); });
             } else {
@@ -778,26 +779,26 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             }
 
 
-            var makeCoords = function(datax, datay) {
-                return datax.data.map(function(xd, i) {
-                    var yd = datay.data[i];
-                    var pairs;
+            const makeCoords = function (datax, datay) {
+                return datax.data.map(function (xd, i) {
+                    const yd = datay.data[i];
+                    let pairs;
                     if (xd.length === 1) {
-                        pairs = yd.map(function(d) {
+                        pairs = yd.map(function (d) {
                             return [xd[0], d];
                         });
                     } else if (yd.length === 1) {
-                        pairs = xd.map(function(d) {
+                        pairs = xd.map(function (d) {
                             return [d, yd[0]];
                         });
                     } else {
-                        pairs = xd.map(function(d, i) {
+                        pairs = xd.map(function (d, i) {
                             return [d, yd[i]];
                         });
                     }
 
                     // get rid of pairings where one of the values is undefined
-                    pairs = pairs.filter(function(pair) {
+                    pairs = pairs.filter(function (pair) {
                         return pair[0] !== undefined && pair[1] !== undefined;
                     });
 
@@ -805,23 +806,23 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 });
             };
 
-            var p = performance.now();
+            const p = performance.now();
 
-            var contexts = [
+            const contexts = [
                 {d3canvas: this.filteredCanvas, clear: !highlightsOnly},
                 {d3canvas: this.highlightedCanvas, clear: true}
-            ].map (function (canvasInfo) {
-                var canvasNode = canvasInfo.d3canvas.node();
-                var context = canvasNode.getContext("2d");
+            ].map(function (canvasInfo) {
+                const canvasNode = canvasInfo.d3canvas.node();
+                const context = canvasNode.getContext("2d");
                 //context.fillStyle = this.options.background;
                 if (canvasInfo.clear) {
-                    context.clearRect (0, 0, canvasNode.width, canvasNode.height);
+                    context.clearRect(0, 0, canvasNode.width, canvasNode.height);
                 }
                 context.imageSmoothingEnabled = false;
                 return context;
             }, this);
-            var ctx = contexts[0];
-            var hctx = contexts[1];
+            const ctx = contexts[0];
+            const hctx = contexts[1];
 
             // set constant styles for highlighted canvas
             hctx.fillStyle = this.options.highlightedColour;
@@ -830,23 +831,23 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             var datax = this.getAxisData("X", true, sortedFilteredCrossLinks);
             var datay = this.getAxisData("Y", true, sortedFilteredCrossLinks);
 
-            var matchLevel = datax.matchLevel || datay.matchLevel;
-            var coords = makeCoords(datax, datay);
-            var jitterOn = this.options.jitter;
+            const matchLevel = datax.matchLevel || datay.matchLevel;
+            const coords = makeCoords(datax, datay);
+            const jitterOn = this.options.jitter;
             //console.log ("ddd", datax, datay, filteredCrossLinks, coords, colourScheme);
 
-            var countable = colourScheme.isCategorical();
-            var counts = countable ? d3.range(0, colourScheme.getDomainCount() + 1).map(function() {
+            const countable = colourScheme.isCategorical();
+            const counts = countable ? d3.range(0, colourScheme.getDomainCount() + 1).map(function () {
                 return 0;
             }) : [];
 
             sortedFilteredCrossLinks.forEach(function(link, i) {
-                var decoy = link.isDecoyLink();
-                var linkValue = colourScheme.getValue(link);
-                var linkDomainInd = colourScheme.getDomainIndex(link);
-                var colour = colourScheme.getColourByValue(linkValue);
+                const decoy = link.isDecoyLink();
+                const linkValue = colourScheme.getValue(link);
+                let linkDomainInd = colourScheme.getDomainIndex(link);
+                const colour = colourScheme.getColourByValue(linkValue);
 
-                var high, selected, ambig;
+                let high, selected, ambig;
                 if (!matchLevel) {
                     high = highlightedCrossLinkIDs.has(link.id);
                     ambig = link.ambiguous;
@@ -858,14 +859,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 }
 
                 // try to make jitter deterministic so points don't jump on filtering, recolouring etc
-                var xjr = jitterOn ? this.getXJitter(link) : 0;
-                var yjr = jitterOn ? this.getYJitter(link) : 0;
+                const xjr = jitterOn ? this.getXJitter(link) : 0;
+                const yjr = jitterOn ? this.getYJitter(link) : 0;
 
                 coords[i].forEach(function(coord, ii) {
                     //var xr = (Math.random() - 0.5);
                     //var yr = (Math.random() - 0.5);
                     if (matchLevel) {
-                        var match = link.filteredMatches_pp[ii].match;
+                        const match = link.filteredMatches_pp[ii].match;
                         high = highlightedMatchMap.has(match.id);
                         ambig = match.isAmbig();
                         if (!highlightsOnly) {  // skip setting non-highlighted canvas styles if this is a highlighted match
@@ -875,12 +876,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                         }
                     }
 
-                    var x = this.x(coord[0]) + xjr - halfPointSize;
-                    var y = this.y(coord[1]) + yjr - halfPointSize;
+                    let x = this.x(coord[0]) + xjr - halfPointSize;
+                    let y = this.y(coord[1]) + yjr - halfPointSize;
                     if (x === x && y === y) { // Quick test for either of x or y being a NaN
 
                         if (high || !highlightsOnly) {
-                            var context = (high && highlightsOnly) ? hctx : ctx;
+                            const context = (high && highlightsOnly) ? hctx : ctx;
                             x = Math.round(x); // the rounding and 0.5s are to make fills and strokes crisp (i.e. not anti-aliasing)
                             y = Math.round(y);
 
@@ -953,13 +954,13 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
     getSizeData: function() {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
-        var jqElem = $(this.svg.node());
-        var cx = jqElem.width(); //this.svg.node().clientWidth;
-        var cy = jqElem.height(); //this.svg.node().clientHeight;
-        var width = Math.max(0, cx - this.margin.left - this.margin.right);
-        var height = Math.max(0, cy - this.margin.top - this.margin.bottom);
+        const jqElem = $(this.svg.node());
+        const cx = jqElem.width(); //this.svg.node().clientWidth;
+        const cy = jqElem.height(); //this.svg.node().clientHeight;
+        const width = Math.max(0, cx - this.margin.left - this.margin.right);
+        const height = Math.max(0, cy - this.margin.top - this.margin.bottom);
         // if it's going to be square and fit in containing div
-        var minDim = Math.min(width, height);
+        const minDim = Math.min(width, height);
 
         return {
             cx: cx,
@@ -972,9 +973,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
     calcJitterRanges: function() {
         this.jitterRanges = this.jitterRanges || {};
-        var xunit = Math.abs(this.x(this.x.domain()[0]) - this.x(this.x.domain()[0] + 1));
+        const xunit = Math.abs(this.x(this.x.domain()[0]) - this.x(this.x.domain()[0] + 1));
         this.jitterRanges.x = Math.max(2, xunit / 3);
-        var yunit = Math.abs(this.y(this.y.domain()[0]) - this.y(this.y.domain()[0] + 1));
+        const yunit = Math.abs(this.y(this.y.domain()[0]) - this.y(this.y.domain()[0] + 1));
         this.jitterRanges.y = Math.max(2, yunit / 3);
         return this;
     },
@@ -982,7 +983,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     // called when things need repositioned, but not re-rendered from data
     resize: function() {
 
-        var sizeData = this.getSizeData();
+        const sizeData = this.getSizeData();
 
         this.vis
             .style("width", sizeData.width + "px")
@@ -1003,8 +1004,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .attr("height", sizeData.height)
         ;
 
-        var extent = this.brush.extent(); // extent saved before x and y ranges updated
-        var chartMargin = this.options.chartMargin;
+        const extent = this.brush.extent(); // extent saved before x and y ranges updated
+        const chartMargin = this.options.chartMargin;
 
         this.x.range([chartMargin, sizeData.width - chartMargin]);
         this.y.range([sizeData.height - chartMargin, chartMargin]); // y-scale (inverted domain)
@@ -1046,11 +1047,11 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     // Used to do this just on resize, but rectangular areas mean labels often need re-centred on panning
     repositionLabels: function(sizeData) {
         // reposition labels
-        var labelCoords = [{
-                x: sizeData.width / 2,
-                y: sizeData.height + this.margin.bottom - 5,
-                rot: 0
-            },
+        const labelCoords = [{
+            x: sizeData.width / 2,
+            y: sizeData.height + this.margin.bottom - 5,
+            rot: 0
+        },
             {
                 x: -this.margin.left,
                 y: sizeData.height / 2,
@@ -1075,11 +1076,11 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     identifier: "Scatterplot",
 
     optionsToString: function() {
-        var meta = this.getBothAxesMetaData();
-        var axisLabels = _.pluck(meta, "label");
+        const meta = this.getBothAxesMetaData();
+        let axisLabels = _.pluck(meta, "label");
 
         if (!this.brush.empty()) {
-            var axisExtents = [];
+            const axisExtents = [];
             d3.select(this.el).selectAll(".brush text")
                 .each(function() {
                     axisExtents.push(d3.select(this).text());

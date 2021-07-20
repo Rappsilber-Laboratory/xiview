@@ -2,18 +2,18 @@ import {GoTerm} from "./views/go/goTerm";
 
 export function loadGOAnnotations (txt) {
     console.log ("parsing go obo");
-    var z = performance.now();
-    var go = new Map();
+    const z = performance.now();
+    const go = new Map();
     //var lines = txt.split('\n');
-    var term;
-    var i = 0, l = 0;
-    var first = true;
+    let term;
+    let i = 0, l = 0;
+    let first = true;
 
     //for (var l = 0; l < lines.length; l++) {
     while (i !== 0 || first) {
         first = false;
-        var endi = txt.indexOf("\n", i);
-        var line = txt.slice(i, endi !== -1 ? endi : undefined);
+        const endi = txt.indexOf("\n", i);
+        let line = txt.slice(i, endi !== -1 ? endi : undefined);
         //not having ':' in go ids, so valid html id later, maybe a mistake, (do trim here to get rid of '/r's too - mjg)
         line = line.trim().replace (/:/g, '');
         //var line = lines[l].trim().replace (/:/g, '');
@@ -26,15 +26,15 @@ export function loadGOAnnotations (txt) {
                 term = new GoTerm();
             } else if (term) {
                 //var parts = line.split(" ");  // speed up by avoiding split if humanly possible as free text lines are space heavy
-                var tag = line.slice (0, line.indexOf(" "));
-                var value = line.slice (tag.length + 1);
+                const tag = line.slice(0, line.indexOf(" "));
+                const value = line.slice(tag.length + 1);
                 if (tag === "is_a") {
-                    var vi = value.indexOf(" ");
-                    var valuewc = vi >= 0 ? value.slice(0, vi) : value; // remove comment portion
+                    const vi = value.indexOf(" ");
+                    const valuewc = vi >= 0 ? value.slice(0, vi) : value; // remove comment portion
                     term.is_a = term.is_a || new Set();
                     term.is_a.add (valuewc);
                 } else if (tag === "intersection_of" || tag === "relationship") {
-                    var parts = value.split(" ", 2);    // split to first 2 only, avoid parsing comments
+                    const parts = value.split(" ", 2);    // split to first 2 only, avoid parsing comments
                     if (parts[0] === "part_of") {
                         // console.log(term.namespace, line);
                         term.part_of = term.part_of || new Set();
@@ -50,7 +50,7 @@ export function loadGOAnnotations (txt) {
     }
     go.set(term.id, term); // last one left over
 
-    var zz = performance.now();
+    const zz = performance.now();
     //populate subclasses and parts
     for (term of go.values()) {
         if (term.is_a) {

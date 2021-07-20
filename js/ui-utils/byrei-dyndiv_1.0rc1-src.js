@@ -131,11 +131,10 @@ export const ByRei_dynDiv = {
 
   /* Check an Array for certain values and return the result */
   value: function (obj,value,ncs) {
-   var
-    i,
-    result='',
-    il = obj.length;
-   if (obj && value) {
+      let i,
+          result = '';
+      const il = obj.length;
+      if (obj && value) {
        for (i=0;i<il;i++) {
             if (ncs && obj[i].indexOf(value) >= 0) {
                 result=obj[i].split(value)[1];
@@ -166,8 +165,8 @@ export const ByRei_dynDiv = {
    }
   },
   px: function(obj) {
-   var result = "";
-   if (obj) {
+      let result = "";
+      if (obj) {
        if (obj.match(ByRei_dynDiv.config.regExp.px)) {
            if (typeof obj.match(ByRei_dynDiv.config.regExp.px)[1] !== 'undefined') {
                result = obj.match(ByRei_dynDiv.config.regExp.px)[1];
@@ -196,9 +195,8 @@ export const ByRei_dynDiv = {
   offset: {
    /* Calculate the absolute offset for a object */
    absolute: function(obj) {
-    var
-     left = 0, top = 0;
-    if (obj) {
+       let left = 0, top = 0;
+       if (obj) {
         left = ByRei_dynDiv.get.offset.relative(obj).left;
         top = ByRei_dynDiv.get.offset.relative(obj).top;
         while (obj.offsetParent) {
@@ -211,17 +209,16 @@ export const ByRei_dynDiv = {
    },
    /* Calculate the relative offset for a object (with browser bug checking) */
    relative: function(obj) {
-    var result = false;
-    if (obj) {
-        var
-         borderLeft = 0,
-         borderTop = 0,
-         marginLeft = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj,'marginLeft')),
-         marginTop = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj,'marginTop')),
-         left = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj,'left')),
-         top = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj,'top')),
-         offsetLeft = obj.offsetLeft,
-         offsetTop = obj.offsetTop;
+       let result = false;
+       if (obj) {
+        let borderLeft = 0,
+            borderTop = 0;
+        const marginLeft = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj, 'marginLeft')),
+            marginTop = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj, 'marginTop')),
+            left = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj, 'left')),
+            top = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj, 'top')),
+            offsetLeft = obj.offsetLeft,
+            offsetTop = obj.offsetTop;
 
         if (left !== "" && top !== "" && (offsetLeft > left + marginLeft || offsetTop > top + marginTop)) {
             borderLeft = ByRei_dynDiv.get.px(ByRei_dynDiv._style(obj.parentNode,'borderLeft'));
@@ -239,7 +236,7 @@ export const ByRei_dynDiv = {
   /* Try to found the real parent of an object with the help of RegExp */
   parent: function(obj,value,mode) {
    if (obj) {
-       for (var i=0;i<5;i++) {
+       for (let i=0; i<5; i++) {
             if (value.test(obj.className)) {
                 if (mode) {
                     obj = obj.parentNode;
@@ -260,14 +257,13 @@ export const ByRei_dynDiv = {
   /* Search for things in the db */
   db: {
    id: function(obj) {
-    var 
-     i,
-     result = {
-      found : false, data  : ""
-     },
-     il = ByRei_dynDiv.divList.length;
-     
-    if (obj) {
+       let i;
+       const result = {
+               found: false, data: ""
+           },
+           il = ByRei_dynDiv.divList.length;
+
+       if (obj) {
         for (i=0;i<il;i++) {
              if (obj === 'zIndex') {
                  if (ByRei_dynDiv.divList[i][3] !== 'auto') {
@@ -290,27 +286,26 @@ export const ByRei_dynDiv = {
   },
   /* Check Hit from between two Objects */
   hit: function(elem1, elem2, modus) {
-   var result=false;
-   if (elem1 && elem2) {
-    var
-     obj1 = {
-      offset : ByRei_dynDiv.get.offset.absolute(elem1),
-      width  : elem1.clientWidth,
-      height : elem1.clientHeight
-     },
-     obj2 = {
-      offset : ByRei_dynDiv.get.offset.absolute(elem2),
-      width  : elem2.clientWidth,
-      height : elem2.clientHeight
-     },
-     cache = {
-      o1t_o1h : obj1.offset.top + obj1.height,
-      o2t_o2h : obj2.offset.top + obj2.height,
-      o1l_o1w : obj1.offset.left + obj1.width,
-      o2l_o2w : obj2.offset.left + obj2.width
-     };
+      let result = false;
+      if (elem1 && elem2) {
+       const obj1 = {
+               offset: ByRei_dynDiv.get.offset.absolute(elem1),
+               width: elem1.clientWidth,
+               height: elem1.clientHeight
+           },
+           obj2 = {
+               offset: ByRei_dynDiv.get.offset.absolute(elem2),
+               width: elem2.clientWidth,
+               height: elem2.clientHeight
+           },
+           cache = {
+               o1t_o1h: obj1.offset.top + obj1.height,
+               o2t_o2h: obj2.offset.top + obj2.height,
+               o1l_o1w: obj1.offset.left + obj1.width,
+               o2l_o2w: obj2.offset.left + obj2.width
+           };
 
-    // Check Hit
+       // Check Hit
     switch (modus) {
      case "fit": case "center":
       if (((obj1.offset.left > obj2.offset.left && obj1.offset.left < cache.o2l_o2w) && ((obj1.offset.top > obj2.offset.top && obj1.offset.top < cache.o2t_o2h) || (cache.o1t_o1h > obj2.offset.top && cache.o1t_o1h < cache.o2t_o2h))) || ((cache.o1l_o1w > obj2.offset.left && cache.o1l_o1w < cache.o2l_o2w) && ((obj1.offset.top > obj2.offset.top && obj1.offset.top < cache.o2t_o2h) || (cache.o1t_o1h > obj2.offset.top && cache.o1t_o1h < cache.o2t_o2h)))) {
@@ -362,12 +357,11 @@ export const ByRei_dynDiv = {
   stop: function() {
    if (ByRei_dynDiv.db(0)) { // DB Functions
        if (ByRei_dynDiv.db(6)) { // Drop Area Support
-           var 
-            i,
-            dropArea = {
-            obj: false
-           },
-           il = ByRei_dynDiv.dropArea.length;
+           let i;
+           const dropArea = {
+                   obj: false
+               },
+               il = ByRei_dynDiv.dropArea.length;
 
            for (i=0;i<il;i++) {
                 if (ByRei_dynDiv.dropArea[i][1] === ByRei_dynDiv.db(6)) {
@@ -438,24 +432,22 @@ export const ByRei_dynDiv = {
   /* Init min max Div function */
   minmax: function(evt) {
    if (evt) {
-       var
-        evt_src = (evt.target) ? evt.target : evt.srcElement,
-        minmax_src = ByRei_dynDiv.get.parent(evt_src,ByRei_dynDiv.config.regExp.minmax,0),
-        minmaxHeight = (ByRei_dynDiv.get.prefix.value(minmax_src.className.split(' '),"minmax_Height-",1)||20);
+       let evt_src = (evt.target) ? evt.target : evt.srcElement;
+       const minmax_src = ByRei_dynDiv.get.parent(evt_src, ByRei_dynDiv.config.regExp.minmax, 0),
+           minmaxHeight = (ByRei_dynDiv.get.prefix.value(minmax_src.className.split(' '), "minmax_Height-", 1) || 20);
        evt_src = ByRei_dynDiv.get.parent(evt_src,ByRei_dynDiv.config.regExp.minmax,1);
        ByRei_dynDiv._style(evt_src,'clip', (new RegExp (minmaxHeight + "\\w+,?\\s?auto","i").test(ByRei_dynDiv._style(evt_src,'clip'))) ?  'rect(auto auto auto auto)' : 'rect(auto auto ' +  (minmaxHeight) +'px auto)');
    }
   },
   /* Resize Handler */
   resize: function(evt,value) {
-   var
-    i,
-    evt_src = (evt.target || evt.srcElement) ? (evt.target ? evt.target : evt.srcElement) : (evt),
-    classNames = evt_src.className.split(' '),
-    resize_list = (ByRei_dynDiv.get.prefix.value(classNames,"moveParentDiv") && evt_src.parentNode) ? evt_src.parentNode.getElementsByTagName('div')  : evt_src.getElementsByTagName('div'),
-    il = resize_list.length; 
+      let i;
+      const evt_src = (evt.target || evt.srcElement) ? (evt.target ? evt.target : evt.srcElement) : (evt),
+          classNames = evt_src.className.split(' '),
+          resize_list = (ByRei_dynDiv.get.prefix.value(classNames, "moveParentDiv") && evt_src.parentNode) ? evt_src.parentNode.getElementsByTagName('div') : evt_src.getElementsByTagName('div'),
+          il = resize_list.length;
 
-    for (i=0;i<il;i++) {
+      for (i=0;i<il;i++) {
          if (ByRei_dynDiv.get.prefix.value(resize_list[i].className.split(' '),"resizeDiv_",1)) {
              ByRei_dynDiv._style(resize_list[i],'visibility', (value) ? 'visible' : 'hidden');
         }
@@ -469,11 +461,10 @@ export const ByRei_dynDiv = {
  init: {
   /* Init Events for all div with dynDiv_ as className */
   main: function() {
-   var
-    i = 0,
-    div_list = document.getElementsByTagName('div'),
-    il = div_list.length;
-   for (var obj=0;obj<il;obj++) {
+      let i = 0;
+      const div_list = document.getElementsByTagName('div'),
+          il = div_list.length;
+      for (let obj=0; obj<il; obj++) {
         if (ByRei_dynDiv.get.prefix.value(div_list[obj].className.split(' '),"",1)) {
             if (ByRei_dynDiv.get.prefix.value(div_list[obj].className.split(' '),"resizeDiv_",1) && ByRei_dynDiv.get.prefix.value(div_list[obj].parentNode.className.split(' '),"move",1) === '') {
                 ByRei_dynDiv.add(div_list[obj].parentNode,i++,1);
@@ -488,8 +479,8 @@ export const ByRei_dynDiv = {
       if (evt.preventDefault) {evt.preventDefault();} 
       if (ByRei_dynDiv.cache.ie) {evt.cancelBubble=true;}
       if (evt.stopPropagation) {evt.stopPropagation();}
-      var evt_src = evt.target ? evt.target : evt.srcElement;
-	  
+      const evt_src = evt.target ? evt.target : evt.srcElement;
+
       // Avoid Issues with minmax
       if (evt_src.className.indexOf('dynDiv_minmaxDiv') === -1) {
           ByRei_dynDiv.get.mouse(evt);
@@ -515,10 +506,10 @@ export const ByRei_dynDiv = {
           ByRei_dynDiv.cache.modus = m_modus; // Cache Modus
            
              if (ByRei_dynDiv.db(1) && ByRei_dynDiv.cache.obj) {
-                 var
-               obj = {offset :  ByRei_dynDiv.get.offset.absolute(ByRei_dynDiv.cache.obj)}, limit = {offset : ByRei_dynDiv.get.offset.absolute(ByRei_dynDiv.db(1))};
+                 const obj = {offset: ByRei_dynDiv.get.offset.absolute(ByRei_dynDiv.cache.obj)},
+                     limit = {offset: ByRei_dynDiv.get.offset.absolute(ByRei_dynDiv.db(1))};
 
-               ByRei_dynDiv.limit.min.left = limit.offset.left - obj.offset.left;
+                 ByRei_dynDiv.limit.min.left = limit.offset.left - obj.offset.left;
                  ByRei_dynDiv.limit.max.left = (ByRei_dynDiv.db(1).clientWidth + limit.offset.left) - (ByRei_dynDiv.cache.obj.offsetWidth + obj.offset.left);
                  ByRei_dynDiv.limit.min.top = limit.offset.top - obj.offset.top;
                  ByRei_dynDiv.limit.max.top = (ByRei_dynDiv.db(1).clientHeight + limit.offset.top) - (ByRei_dynDiv.cache.obj.offsetHeight + obj.offset.top);
@@ -554,16 +545,14 @@ export const ByRei_dynDiv = {
   /* Save Settings */
   save: function() {
    if (ByRei_dynDiv.divList) {
-       var 
-       i,
-       il = ByRei_dynDiv.divList.length;
+       let i;
+       const il = ByRei_dynDiv.divList.length;
        for (i=0;i<il;i++) {
             if (ByRei_dynDiv.divList[i][12] !== false && ByRei_dynDiv.divList[i][0].id) {
-                var 
-                 left='',
-                 top='',
-                 width='', 
-                 height='';
+                let left = '',
+                    top = '',
+                    width = '',
+                    height = '';
 
                 switch(ByRei_dynDiv.divList[i][12]) {
                  case "position":
@@ -584,7 +573,7 @@ export const ByRei_dynDiv = {
 
                 if ((Number(left) !== 'NaN' && Number(top) !== 'NaN') || (width > 0 && height > 0)) {
                     if (navigator.cookieEnabled) {
-                        var expireTime = new Date();
+                        const expireTime = new Date();
                         expireTime.setSeconds((new Date()).setTime(expireTime.getSeconds()) + Number(ByRei_dynDiv.config.cookie.expire));
                         document.cookie = "ByRei_dynDiv_" + ByRei_dynDiv.divList[i][0].id + "=" + left + '_' + top + '_' + width + '_' + height +  "; expires=" + expireTime.toGMTString();
                     }
@@ -595,17 +584,18 @@ export const ByRei_dynDiv = {
   },
   /* Load Settings */
   load: function(id) {
-   var result = false;
-   if (navigator.cookieEnabled && id) {
-       var savedata = document.cookie;
+      let result = false;
+      if (navigator.cookieEnabled && id) {
+       let savedata = document.cookie;
        if (/; /.test(savedata)) {savedata = savedata.split("; ");} 
        else if (/, /.test(savedata)) {savedata = savedata.split(", ");}
        if (savedata) {
-           var i, il = savedata.length;
+           let i;
+           const il = savedata.length;
            for (i=0;i<il;i++) {
                 if (savedata[i]) {
                     if ((/ByRei_dynDiv/).test(savedata[i])) {
-                        var data = (/ByRei_dynDiv_(\w+)=(\d*)\_(\d*)\_(\d*)\_(\d*)/).exec(savedata[i]);
+                        const data = (/ByRei_dynDiv_(\w+)=(\d*)\_(\d*)\_(\d*)\_(\d*)/).exec(savedata[i]);
                         if (typeof data !== 'undefined' && data !== null) {
                             if (typeof data[1] !== 'undefined') {
                                 if (data[1] === id) {
@@ -629,10 +619,9 @@ export const ByRei_dynDiv = {
  set: {
   /* Set visible / invisible */
   visible: function(value) {
-   var 
-    i,
-    il = ByRei_dynDiv.divList.length;
-   for (i=0;i<il;i++) {
+      let i;
+      const il = ByRei_dynDiv.divList.length;
+      for (i=0;i<il;i++) {
         if (ByRei_dynDiv.divList[i] !== ByRei_dynDiv.divList[ByRei_dynDiv.cache.elem]) {
             ByRei_dynDiv._style(ByRei_dynDiv.divList[i][0],'visibility',(value) ? 'visible' : 'hidden');
         }
@@ -659,16 +648,15 @@ export const ByRei_dynDiv = {
  */
  resize: function() {
   if (ByRei_dynDiv.cache.obj && ByRei_dynDiv.cache.modus) {
-      var
-       default_padding = 20,
-       new_size_x = 0,
-       new_size_y = 0,
-       new_left = ByRei_dynDiv.db(4),
-       new_top = ByRei_dynDiv.db(5),
-       keepAspect = ByRei_dynDiv.db(11),
-       reachLimit = false,
-       mouse_diff_left = (ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left || 0),
-       mouse_diff_top = (ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top || 0);
+      const default_padding = 20;
+      let new_size_x = 0,
+          new_size_y = 0,
+          new_left = ByRei_dynDiv.db(4),
+          new_top = ByRei_dynDiv.db(5);
+      const keepAspect = ByRei_dynDiv.db(11);
+      let reachLimit = false,
+          mouse_diff_left = (ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left || 0);
+      const mouse_diff_top = (ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top || 0);
 
       // Try to keep Aspect Ratio 
       /* Maus so abfragen das Mouse nicht grφίers als Offset von Object sein kann ! */
@@ -709,9 +697,8 @@ export const ByRei_dynDiv = {
 
       /* Check if Limit is reached (normal, keep aspect) */
       if (ByRei_dynDiv.db(1)) {
-          var 
-           pos_left = ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left,
-           pos_top = ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top;
+          const pos_left = ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left,
+              pos_top = ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top;
 
           switch(ByRei_dynDiv.cache.modus) {
            case "tl": case "bl":
@@ -782,18 +769,16 @@ export const ByRei_dynDiv = {
  */
  move: function() {
   if (ByRei_dynDiv.cache.obj) {
-      var
-       new_left = ByRei_dynDiv.cache.pos.left - (ByRei_dynDiv.cache.init.pos.left - ByRei_dynDiv.db(4)),
-       new_top  = ByRei_dynDiv.cache.pos.top - (ByRei_dynDiv.cache.init.pos.top - ByRei_dynDiv.db(5));
-       
-       // hack to stop panel going behind top bar - cc
+      let new_left = ByRei_dynDiv.cache.pos.left - (ByRei_dynDiv.cache.init.pos.left - ByRei_dynDiv.db(4)),
+          new_top = ByRei_dynDiv.cache.pos.top - (ByRei_dynDiv.cache.init.pos.top - ByRei_dynDiv.db(5));
+
+      // hack to stop panel going behind top bar - cc
        if (new_top < 39) {new_top = 39;}
 
       // Check for Div Limit
       if (ByRei_dynDiv.db(1)) {
-          var
-           pos_x  = ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left,
-           pos_y  = ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top;
+          const pos_x = ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left,
+              pos_y = ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top;
 
           if (pos_x < ByRei_dynDiv.limit.min.left) {new_left = ByRei_dynDiv.db(4) + ByRei_dynDiv.limit.min.left;}
           else if (pos_x > ByRei_dynDiv.limit.max.left) {new_left = ByRei_dynDiv.db(4) + ByRei_dynDiv.limit.max.left;}
@@ -801,9 +786,9 @@ export const ByRei_dynDiv = {
           if (pos_y < ByRei_dynDiv.limit.min.top)  {new_top  = ByRei_dynDiv.db(5) + ByRei_dynDiv.limit.min.top;}
           else if (pos_y > ByRei_dynDiv.limit.max.top)  {new_top  = ByRei_dynDiv.db(5) + ByRei_dynDiv.limit.max.top;}
       }
-	  var height = window.innerHeight
-		|| document.documentElement.clientHeight
-		|| document.body.clientHeight;
+      const height = window.innerHeight
+          || document.documentElement.clientHeight
+          || document.body.clientHeight;
       if (!isNaN(new_left)) {ByRei_dynDiv.set.left(ByRei_dynDiv.cache.obj,new_left);}
       if (!isNaN(new_top) && new_top > 0 && (new_top - 30) < height)  {ByRei_dynDiv.set.top(ByRei_dynDiv.cache.obj,new_top);}
   }
@@ -813,8 +798,8 @@ export const ByRei_dynDiv = {
   Small DB System 
  */
  db: function(i,value) { // db(1) return value / db(1,1) set value
-  var result=false;
-  if (ByRei_dynDiv.cache.elem >= 0) {
+     let result = false;
+     if (ByRei_dynDiv.cache.elem >= 0) {
       if (ByRei_dynDiv.divList[ByRei_dynDiv.cache.elem]) {
           if (typeof ByRei_dynDiv.divList[ByRei_dynDiv.cache.elem][i] !== 'undefined') {
               if (typeof value !== 'undefined') {
@@ -834,23 +819,23 @@ export const ByRei_dynDiv = {
  */
  add: function(elem,i,mode) {
   if (elem) {
-      var
-       zIndex = 'auto',
-       classNames = elem.className.split(' '),
-       func_z_index = function(obj,i) {return (ByRei_dynDiv._style(obj,'zIndex')||ByRei_dynDiv._style(obj,'zIndex', i));};
+      let zIndex = 'auto';
+      const classNames = elem.className.split(' '),
+          func_z_index = function (obj, i) {
+              return (ByRei_dynDiv._style(obj, 'zIndex') || ByRei_dynDiv._style(obj, 'zIndex', i));
+          };
 
       if (ByRei_dynDiv.get.prefix.value(classNames,"",1) || mode) {
-          var
-           limiter = null,
-           droplimiter = false,
-           dropmode = false,
-           hideaction = false,
-           showresize = false,
-           keepAspect = false,
-           saveSettings = false,
-           parent = elem,
-           modus = ByRei_dynDiv.get.prefix.value(classNames,"",1),
-           l_parent = parent.parentNode;
+          let limiter = null,
+              droplimiter = false,
+              dropmode = false,
+              hideaction = false,
+              showresize = false,
+              keepAspect = false,
+              saveSettings = false,
+              parent = elem;
+          const modus = ByRei_dynDiv.get.prefix.value(classNames, "", 1);
+          let l_parent = parent.parentNode;
 
           // Set Event Handler for Moveing and Resizing and other handlers
           if (modus) {
@@ -964,7 +949,7 @@ export const ByRei_dynDiv = {
 
           // Load Position and/or Size
           if (ByRei_dynDiv.get.prefix.value(classNames,"loadSettings")) {
-              var data = ByRei_dynDiv.settings.load(parent.id);
+              const data = ByRei_dynDiv.settings.load(parent.id);
               if (data) {
                   if (Number(data.left) !== 'NaN' && Number(data.top) !== 'NaN') {
                       ByRei_dynDiv.set.left(parent, data.left);

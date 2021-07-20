@@ -1,5 +1,6 @@
 import {modelUtils} from "./modelUtils";
 import {utils} from "./utils";
+import d3 from "d3";
 
 export function downloadFilename(type, suffix) {
     suffix = suffix || "csv";
@@ -158,6 +159,7 @@ export function getMatchesCSV() {
     const distance2dp = d3.format(".2f");
 
     const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
+    //todo get rid d3 map
     const matchMap = d3.map();
 
     // do it like this so ambiguous matches (belonging to >1 crosslink) aren't repeated

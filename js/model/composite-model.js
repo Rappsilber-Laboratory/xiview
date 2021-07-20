@@ -6,6 +6,7 @@ import {fdr, clearFdr} from "../filter/fdr";
 import {jqdialogs} from "../dialogs";
 import {modelUtils} from "../modelUtils";
 import {utils} from "../utils";
+import d3 from "d3";
 
 export class CompositeModel extends Backbone.Model{
     constructor(attributes, options) {
@@ -16,6 +17,7 @@ export class CompositeModel extends Backbone.Model{
         this.set({
             highlights: [], // listen to these two for differences in highlighted selected links
             selection: [],
+            //todo get rid d3 Map
             match_highlights: d3.map(), // listen to these two for differences in highlighted selects matches (more fine grained)
             match_selection: d3.map(), // listen to event selection/highlights+"MatchesLinksChanged" to run when both have been fully updated
             annotationTypes: null,
@@ -825,17 +827,17 @@ export class CompositeModel extends Backbone.Model{
 
     generateUrlString () {
         // make url parts from current filter attributes
-        var parts = this.get("filterModel").getURLQueryPairs();
+        let parts = this.get("filterModel").getURLQueryPairs();
         if (this.get("pdbCode")) {
-            var pdbParts = modelUtils.makeURLQueryPairs ({pdb: this.get("pdbCode")});
+            const pdbParts = modelUtils.makeURLQueryPairs({pdb: this.get("pdbCode")});
             parts = pdbParts.concat(parts);
         }
 
         // return parts of current url query string that aren't filter flags or values
-        var search = window.location.search.slice(1);
-        var nonFilterKeys = d3.set(["sid", "upload", "decoys", "unval", "lowestScore", "anon"]);
-        var nonFilterParts = search.split("&").filter(function(nfpart) {
-            return nonFilterKeys.has(nfpart.split("=",1)[0]);
+        const search = window.location.search.slice(1);
+        const nonFilterKeys = d3.set(["sid", "upload", "decoys", "unval", "lowestScore", "anon"]);
+        const nonFilterParts = search.split("&").filter(function (nfpart) {
+            return nonFilterKeys.has(nfpart.split("=", 1)[0]);
         });
         // and queue them to be at the start of new url query string (before filter attributes)
         parts = nonFilterParts.concat(parts);

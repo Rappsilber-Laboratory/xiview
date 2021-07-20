@@ -1,6 +1,7 @@
 import * as _ from 'underscore';
 import {utils} from "../utils";
 import {modelUtils} from "../modelUtils";
+import d3 from "d3";
 
 export class FilterModel extends Backbone.Model{
     constructor(attributes, options) {

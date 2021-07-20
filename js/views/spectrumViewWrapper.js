@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {utils} from "../utils";
+import d3 from "d3";
 
 export const SpectrumViewWrapper = BaseFrameView.extend({
 

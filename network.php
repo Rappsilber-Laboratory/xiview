@@ -60,7 +60,7 @@
         <link rel="stylesheet" href="../vendor/css/jquery.jsonview.css<?php echo $cacheBuster ?>">
         <link rel="stylesheet" href="../vendor/css/d3table.css<?php echo $cacheBuster ?>">
       	<link rel="stylesheet" href="../vendor/css/multiple-select.css<?php echo $cacheBuster ?>">
-      	<link rel="stylesheet" href="./css/list.css<?php echo $cacheBuster ?>">
+<!--      	<link rel="stylesheet" href="./css/list.css--><?php //echo $cacheBuster ?><!--">-->
       	<link rel="stylesheet" href="./css/goTermsView.css<?php echo $cacheBuster ?>">
 
        <link rel="stylesheet" href="./css/xiView.css<?php echo $cacheBuster ?>">
@@ -69,12 +69,15 @@
         <script type="text/javascript" src="../vendor/js/jquery.jsonview.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
 
+        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
+
         <script type="text/javascript" src="./vendor/ngl.dev.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./vendor/cola.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="../dist/xiview.js"></script>
 
+        <script type="text/javascript" src="../vendor/js/d3-octree.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/go/sankey.js<?php echo $cacheBuster ?>"></script>
     </head>
 
@@ -97,6 +100,7 @@
                     <p id="loadDropdownPlaceholder"></p>
                     <p id="viewDropdownPlaceholder"></p>
                     <p id="proteinSelectionDropdownPlaceholder"></p>
+                    <p id="groupsDropdownPlaceholder"></p>
                     <p id="annotationsDropdownPlaceholder"></p>
                     <p id="expDropdownPlaceholder"></p>
                     <p id="helpDropdownPlaceholder"></p>

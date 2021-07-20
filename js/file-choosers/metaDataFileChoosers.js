@@ -4,11 +4,12 @@ import * as _ from 'underscore';
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 // import {utils} from "../utils";
 import {modelUtils} from "../modelUtils";
+import d3 from "d3";
 
 const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 
     events: function() {
-        var parentEvents = BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -25,17 +26,17 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
     initialize: function(viewOptions) {
         AbstractMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
 
-        var self = this;
+        const self = this;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el);
+        const mainDivSel = d3.select(this.el);
 
         mainDivSel.classed ("metaLoadPanel", true);
 
-        var wrapperPanel = mainDivSel.append("div")
+        const wrapperPanel = mainDivSel.append("div")
             .attr("class", "panelInner");
 
-        var toolbar = wrapperPanel.append("div").attr("class", "toolbar");
+        const toolbar = wrapperPanel.append("div").attr("class", "toolbar");
 
         toolbar.append("label")
             .attr("class", "btn btn-1 btn-1a fakeButton")
@@ -50,7 +51,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 
         wrapperPanel.append("div").attr("class", "messagebar").style("display", "none");
 
-        var formatPanel = wrapperPanel.append("div").attr("class", "expectedFormatPanel");
+        const formatPanel = wrapperPanel.append("div").attr("class", "expectedFormatPanel");
 
         formatPanel.append("a")
             .text ("Click to open XiDocs for CSV format details")
@@ -60,13 +61,13 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
     },
 
     setUpCompletionListener: function () {
-        var self = this;
+        const self = this;
         this.listenToOnce (vent, self.options.loadedEventName, function(metaMetaData, sourceData) {
             if (sourceData && sourceData.source === "file") {
-                var columns = metaMetaData.columns;
-                var matchedItemCount = metaMetaData.matchedItemCount;
-                var success = !_.isEmpty(columns) && matchedItemCount ? true : false;
-                var msg1 = _.template(this.options.parseMsgTemplate)({
+                const columns = metaMetaData.columns;
+                const matchedItemCount = metaMetaData.matchedItemCount;
+                const success = !!(!_.isEmpty(columns) && matchedItemCount);
+                const msg1 = _.template(this.options.parseMsgTemplate)({
                     attrCount: columns ? columns.length : 0,
                     itemCount: matchedItemCount
                 });
@@ -76,18 +77,18 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
     },
 
     setStatusText: function(msg, success) {
-        var mbar = d3.select(this.el).select(".messagebar").style("display", null);
-        var t = mbar.html(msg).transition().delay(0).duration(1000).style("color", (success === false ? "red" : (success ? "blue" : null)));
+        const mbar = d3.select(this.el).select(".messagebar").style("display", null);
+        const t = mbar.html(msg).transition().delay(0).duration(1000).style("color", (success === false ? "red" : (success ? "blue" : null)));
         if (success !== undefined) {
             t.transition().duration(5000).style("color", "#091d42");
         }
     },
 
     selectMetaDataFile: function(evt) {
-        var fileObj = evt.target.files[0];
+        const fileObj = evt.target.files[0];
         this.setStatusText("Please Wait...");
         this.lastFileName = fileObj.name;
-        var onLoadFunc = this.onLoadFunction.bind(this);
+        const onLoadFunc = this.onLoadFunction.bind(this);
         modelUtils.loadUserFile(fileObj, onLoadFunc);
     },
 
@@ -97,7 +98,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function(viewOptions) {
-        var myDefaults = {
+        const myDefaults = {
             buttonText: "Select Protein MetaData CSV File",
             loadedEventName: "proteinMetadataUpdated",
             parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Proteins",
@@ -119,7 +120,7 @@ export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend
 export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function(viewOptions) {
-        var myDefaults = {
+        const myDefaults = {
             buttonText: "Select Cross-Link or PPI MetaData CSV File",
             loadedEventName: "linkMetadataUpdated",
             parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Cross-Links",
@@ -141,7 +142,7 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function(viewOptions) {
-        var myDefaults = {
+        const myDefaults = {
             buttonText: "Select User-Defined Annotations CSV File",
             loadedEventName: "userAnnotationsUpdated",
             parseMsgTemplate: "Parsed <%= attrCount %> Annotation Types across <%= itemCount %> Annotations",

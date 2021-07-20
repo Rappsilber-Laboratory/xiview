@@ -2,6 +2,7 @@ import * as _ from 'underscore';
 // import * as $ from 'jquery';
 
 import {utils} from "../../utils";
+import d3 from "d3";
 
 const {modelUtils} = require("../../modelUtils");
 const {NGLUtils} = require("./NGLUtils");
@@ -197,6 +198,7 @@ export class CrosslinkRepresentation {
         const self = this;
         const verboseSetting = this.options.chainLabelSetting;
 
+        //todo get rid d3 Map
         const chainIndexToProteinMap = d3.map();
         d3.entries(self.nglModelWrapper.get("chainMap")).forEach(function (cmapEntry) {
             cmapEntry.value.forEach(function (chainData) {

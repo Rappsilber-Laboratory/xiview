@@ -1,5 +1,6 @@
 // import * as $ from 'jquery';
 import Backbone from "backbone";
+import d3 from "d3";
 
 export class ColourModel extends Backbone.Model {
     constructor(attributes, options) {

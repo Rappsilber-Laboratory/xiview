@@ -5,6 +5,7 @@ import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
 import {utils} from "../../utils";
+import d3 from "d3";
 
 export const KeyViewBB = BaseFrameView.extend({
     events: function () {

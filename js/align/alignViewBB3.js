@@ -4,11 +4,12 @@ import Backbone from "backbone";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {utils} from "../utils";
 import {AlignSettingsViewBB, CollectionAsSelectViewBB} from "./alignSettingsViewBB";
+import d3 from "d3";
 
 export const AlignCollectionViewBB = BaseFrameView.extend({
 
         events: function() {
-            var parentEvents = BaseFrameView.prototype.events;
+            let parentEvents = BaseFrameView.prototype.events;
             if (_.isFunction(parentEvents)) {
                 parentEvents = parentEvents();
             }
@@ -21,10 +22,10 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         initialize: function(viewOptions) {
             AlignCollectionViewBB.__super__.initialize.apply(this, arguments);
 
-            var topElem = d3.select(this.el);
-            var modelViewID = topElem.attr("id") + "IndView";
-            var holdingDiv = topElem.append("DIV").attr("class", "alignView");
-            var template = _.template("<P><span><%= headerText %></span><span class='alignSortWidget'></span></P><DIV class='checkHolder'></DIV><DIV id='<%= alignModelViewID %>'></DIV><DIV><P class='smallHeading'>Per Protein Settings</P><DIV id='<%= alignControlID %>'></DIV></DIV><DIV><DIV id='<%= alignControlID2 %>'></DIV></DIV>");
+            const topElem = d3.select(this.el);
+            const modelViewID = topElem.attr("id") + "IndView";
+            const holdingDiv = topElem.append("DIV").attr("class", "alignView");
+            const template = _.template("<P><span><%= headerText %></span><span class='alignSortWidget'></span></P><DIV class='checkHolder'></DIV><DIV id='<%= alignModelViewID %>'></DIV><DIV><P class='smallHeading'>Per Protein Settings</P><DIV id='<%= alignControlID %>'></DIV></DIV><DIV><DIV id='<%= alignControlID2 %>'></DIV></DIV>");
             holdingDiv.html(template({
                 headerText: "Select Protein Name in Tab for Details",
                 alignModelViewID: modelViewID,
@@ -33,7 +34,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
             }));
 
             // Sort dropdown
-            var self = this;
+            const self = this;
             utils.addMultipleSelectControls({
                 addToElem: topElem.select(".alignSortWidget"),
                 selectList: ["Sort Tabs By"],
@@ -45,7 +46,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
                     return d.compFunc;
                 },
                 changeFunc: function() {
-                    var compFunc, reverse;
+                    let compFunc, reverse;
                     // cant rely on event.target.value as it returns functions as a string
                     d3.select(d3.event.target)
                         .selectAll("option")
@@ -76,7 +77,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
                 optionLabelField: "id",
             });
 
-            var firstModel = this.collection.models[0];
+            const firstModel = this.collection.models[0];
             this.setFocusModel(firstModel);
 
             this.listenTo(this.collection, "bulkAlignChange", function() {
@@ -91,7 +92,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         hollowElement: function(view) {
             view.stopListening(); // remove backbone events bound with listenTo etc 
             $(view.el).off(); // remove dom events
-            var a = d3.select(view.el);
+            const a = d3.select(view.el);
             a.selectAll("*").remove(); // remove all elements underneath el
         },
 
@@ -103,32 +104,32 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         },
 
         setTabContents: function(d) {
-            var seqCount = d.get("seqCollection") ? d.get("seqCollection").length : 0;
+            const seqCount = d.get("seqCollection") ? d.get("seqCollection").length : 0;
             return d.get("displayLabel") + (seqCount ? "<span class='alignSeqCount'>" + seqCount + "</span>" : "");
         },
 
         renderTab: function(indAlignModel) {
-            var list = d3.select(this.el).select("DIV.checkHolder");
-            var indTab = list.selectAll("span.alignTab").filter(function(d) {
+            const list = d3.select(this.el).select("DIV.checkHolder");
+            const indTab = list.selectAll("span.alignTab").filter(function (d) {
                 return (d.id = indAlignModel.get("id"));
             });
-            var self = this;
+            const self = this;
             indTab.select("label").html(self.setTabContents);
         },
 
         render: function() {
-            var models = this.collection.models;
+            const models = this.collection.models;
 
-            var topElem = d3.select(this.el);
-            var list = topElem.select("DIV.checkHolder");
-            var proteins = list.selectAll("span.alignTab").data(models, function(d) {
+            const topElem = d3.select(this.el);
+            const list = topElem.select("DIV.checkHolder");
+            const proteins = list.selectAll("span.alignTab").data(models, function (d) {
                 return d.id;
             });
-            var self = this;
+            const self = this;
 
             proteins.exit().remove();
 
-            var pspans = proteins.enter().append("span").attr("class", "alignTab");
+            const pspans = proteins.enter().append("span").attr("class", "alignTab");
 
             pspans.append("input")
                 .attr("class", "alignRadio")
@@ -150,7 +151,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
                     return topElem.attr("id") + "pgroup" + i;
                 })
                 .on("mouseenter", function(d) {
-                    var nformat = d3.format(",d");
+                    const nformat = d3.format(",d");
                     self.tooltipModel
                         .set("header", d.get("displayLabel"))
                         .set("contents",
@@ -175,12 +176,12 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         },
 
         radioClicked: function(evt) {
-            var model = this.collection.get(evt.target.value);
+            const model = this.collection.get(evt.target.value);
             this.setFocusModel(model);
         },
 
         setFocusModel: function(model) {
-            var prevModel = this.modelView ? this.modelView.model : undefined;
+            const prevModel = this.modelView ? this.modelView.model : undefined;
             if (prevModel) {
                 console.log("old modelView", this.modelView);
                 this.alignViewBlosumSelector.stopListening(prevModel);
@@ -197,7 +198,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
 
             if (model) {
                 //console.log("model", model);
-                var modelViewID = d3.select(this.el).attr("id") + "IndView";
+                const modelViewID = d3.select(this.el).attr("id") + "IndView";
 
                 this.modelView = new ProtAlignViewBB({
                     el: "#" + modelViewID,
@@ -240,18 +241,18 @@ export const ProtAlignViewBB = Backbone.View.extend({
         initialize: function(viewOptions) {
             this.tooltipModel = viewOptions.tooltipModel;
 
-            var topElem = d3.select(this.el);
-            var holdingDiv = topElem.append("DIV").attr("class", "alignView");
-            var template = _.template("<P class='proteinName'><%= proteinDescriptor %></P><DIV class='tableWrapper'><TABLE><THEAD><TR><TH><%= firstColHeader %></TH><TH><%= secondColHeader %></TH></TR></THEAD></TABLE><DIV class='seqDiv'><TABLE class='seqTable'></TABLE></DIV></DIV><div class='alignChoiceGroup'></div>");
+            const topElem = d3.select(this.el);
+            const holdingDiv = topElem.append("DIV").attr("class", "alignView");
+            const template = _.template("<P class='proteinName'><%= proteinDescriptor %></P><DIV class='tableWrapper'><TABLE><THEAD><TR><TH><%= firstColHeader %></TH><TH><%= secondColHeader %></TH></TR></THEAD></TABLE><DIV class='seqDiv'><TABLE class='seqTable'></TABLE></DIV></DIV><div class='alignChoiceGroup'></div>");
             holdingDiv.html(template({
                 proteinDescriptor: this.model.get("displayLabel"),
                 firstColHeader: "Name",
                 secondColHeader: "Sequence",
             }));
-            var labelData = [{
-                    label: "Show differences only",
-                    value: 1
-                },
+            const labelData = [{
+                label: "Show differences only",
+                value: 1
+            },
                 {
                     label: "Show all",
                     value: 3
@@ -297,20 +298,20 @@ export const ProtAlignViewBB = Backbone.View.extend({
         },
 
         ellipFill: function(length) {
-            var sigfigs = length ? Math.floor(Math.log(length) / Math.LN10) + 1 : 0; // cos Math.log10 non-existent in IE11
+            const sigfigs = length ? Math.floor(Math.log(length) / Math.LN10) + 1 : 0; // cos Math.log10 non-existent in IE11
             return this.ellipStr.substring(0, sigfigs);
         },
 
         makeIndexString: function(length, unit) {
             unit = unit || 10;
 
-            var iFillStr = new Array(unit).join(" ");
+            let iFillStr = new Array(unit).join(" ");
             iFillStr += "\u2022";
-            var segs = [iFillStr];
+            const segs = [iFillStr];
 
-            for (var n = 1; n < length / unit; n++) {
-                var iStr = ((n * unit)).toString();
-                var gStr = iFillStr.substr(-(unit - iStr.length));
+            for (let n = 1; n < length / unit; n++) {
+                const iStr = ((n * unit)).toString();
+                const gStr = iFillStr.substr(-(unit - iStr.length));
                 segs.push(iStr);
                 segs.push(gStr);
             }
@@ -319,37 +320,37 @@ export const ProtAlignViewBB = Backbone.View.extend({
         
         // generate other sequence strings from comp object
         stringGeneration: function (seq, showSimilar, showDiff) {
-            
-            var ellipsisInsert = this.ellipFill.bind(this);
 
-            var MATCH = 0,
+            const ellipsisInsert = this.ellipFill.bind(this);
+
+            const MATCH = 0,
                 DELETE = 1,
                 INSERT = 2,
                 VARIATION = 3;
-            var classes = ["seqMatch", "seqDelete", "seqInsert", "seqVar"];
-            
-            var rstr = seq.refStr;
-            var str = seq.str;
+            const classes = ["seqMatch", "seqDelete", "seqInsert", "seqVar"];
+
+            const rstr = seq.refStr;
+            const str = seq.str;
             //var rstr = "ABC----HIJKLMNOPQR-TUVWXYZABC";
             //var str =  "ABCDEFGHIAKLM-OPQRS-UV----ABC";
-            var segments = [];
-            var rf = [];
-            var streak = MATCH;
-            var i = 0,
+            const segments = [];
+            const rf = [];
+            let streak = MATCH;
+            let i = 0,
                 ri = 0,
                 ci = 0;
 
             function addSequenceSegment(streakType) {
                 if (n) { // don't add zero-length match at start of sequence
-                    var oldri = ri;
-                    var insert = streakType === INSERT;
+                    const oldri = ri;
+                    const insert = streakType === INSERT;
                     ri += (insert ? 0 : n - i);
 
-                    var oldci = ci;
-                    var deleted = streakType === DELETE;
+                    const oldci = ci;
+                    const deleted = streakType === DELETE;
                     ci += (deleted ? 0 : n - i);
 
-                    var newSegment = {
+                    const newSegment = {
                         klass: classes[streakType],
                         rstart: oldri,
                         rend: ri + (insert ? 1 : 0),
@@ -362,7 +363,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
                         rf.push(rstr.substring(i, n));
                         newSegment.segment = str.substring(i, n);
                     } else if (n > i) { // or add ellipses as showDiff / showSimilar flags dictate
-                        var ellip = ellipsisInsert(n - i);
+                        const ellip = ellipsisInsert(n - i);
                         rf.push(ellip);
                         newSegment.segment = ellip;
                     }
@@ -370,13 +371,13 @@ export const ProtAlignViewBB = Backbone.View.extend({
                     segments.push(newSegment);
                     i = n;
                 }
-            };
+            }
 
             for (var n = 0; n < str.length; n++) {
-                var c = str[n];
-                var r = rstr[n];
-                var rhyphen = (r === "-");
-                var chyphen = (c === "-");
+                const c = str[n];
+                const r = rstr[n];
+                const rhyphen = (r === "-");
+                const chyphen = (c === "-");
 
                 // if AA's are the same, but not currently on a match streak
                 if (c === r && streak !== MATCH) {
@@ -410,41 +411,43 @@ export const ProtAlignViewBB = Backbone.View.extend({
 
             seq.decoratedRStr = showSimilar && showDiff ? rstr : rf.join('');
             seq.segments = segments;
-            var max = Math.max(seq.str.length, seq.refStr.length);
+            const max = Math.max(seq.str.length, seq.refStr.length);
             seq.indexStr = this.makeIndexString(max, 20).substring(0, max);
         },
 
         render: function(obj) {
             //console.log ("ALIGNVIEWMODEL RENDER", obj);
-            var affectedSeqModel = obj ? obj.affectedSeqModel : undefined;
-            var affectedAction = obj ? obj.affectedAction : undefined;  // set to 'remove' if you want to remove this particular sequence from the view
-            
-            var place = d3.select(this.el).select("table.seqTable"); //.select("tbody");
-            var self = this;
+            const affectedSeqModel = obj ? obj.affectedSeqModel : undefined;
+            const affectedAction = obj ? obj.affectedAction : undefined;  // set to 'remove' if you want to remove this particular sequence from the view
 
-            var selectedRadioValue = d3.select(this.el).select("input[name='alignChoice']:checked").property("value");
+            const place = d3.select(this.el).select("table.seqTable"); //.select("tbody");
+            const self = this;
+
+            const selectedRadioValue = d3.select(this.el).select("input[name='alignChoice']:checked").property("value");
             // keep this value and set it as a default for this view. Seems OK as this only affects visual output, not the model
             // that is supplying the information. Plus there is only 1 of these views at a time, so changing the defaults doesn't bother any other views.
             this.defaults.defaultSeqShowSetting = +selectedRadioValue;
-            var showSimilar = (selectedRadioValue & 2) > 0;
-            var showDiff = (selectedRadioValue & 1) > 0;
+            const showSimilar = (selectedRadioValue & 2) > 0;
+            const showDiff = (selectedRadioValue & 1) > 0;
 
             // I suppose I could do a view per model rather than this, but it fits the d3 way of doing things
             // remove treated special, because it will be missing from the collection by this point
-            var seqModels = (affectedAction === "remove") ? [affectedSeqModel] : this.model.get("seqCollection").filter(function(m) {
+            const seqModels = (affectedAction === "remove") ? [affectedSeqModel] : this.model.get("seqCollection").filter(function (m) {
                 return !affectedSeqModel || (affectedSeqModel.id === m.id);
             });
             //var seqModels = affectedSeqModel ? [affectedSeqModel] : this.model.get("seqCollection").models;
-            var comps = seqModels.map (function(seqModel) { return seqModel.get("compAlignment"); });
+            const comps = seqModels.map(function (seqModel) {
+                return seqModel.get("compAlignment");
+            });
 
-            var nformat = d3.format(",d");
-            var rformat = d3.format(",.2f");
-            var scoreFormat = function(val) {
+            const nformat = d3.format(",d");
+            const rformat = d3.format(",.2f");
+            const scoreFormat = function (val) {
                 return val === Number.MAX_VALUE ? "Exact" : nformat(val);
             };
 
             // add one tbody per alignment
-            var tbodybind = place.selectAll("tbody").data(comps, function(d) {
+            const tbodybind = place.selectAll("tbody").data(comps, function (d) {
                 return d.label;
             });
             if (!affectedSeqModel) { tbodybind.exit().remove(); }   // don't remove other tbodies if only 1 affectedSeqModel passed in.
@@ -456,17 +459,17 @@ export const ProtAlignViewBB = Backbone.View.extend({
             });
 
             // add 2 rows to each tbody
-            var rowBind = tbodybind.selectAll("tr")
-                .data(function(d) {
+            const rowBind = tbodybind.selectAll("tr")
+                .data(function (d) {
                     return [{
-                            seqInfo: d,
-                            str: d.decoratedRStr,
-                            rowLabel: self.model.get("refID"),
-                            segments: [{
-                                klass: undefined,
-                                segment: d.decoratedRStr
-                            }]
-                        },
+                        seqInfo: d,
+                        str: d.decoratedRStr,
+                        rowLabel: self.model.get("refID"),
+                        segments: [{
+                            klass: undefined,
+                            segment: d.decoratedRStr
+                        }]
+                    },
                         {
                             seqInfo: d,
                             str: d.decoratedStr,
@@ -476,14 +479,14 @@ export const ProtAlignViewBB = Backbone.View.extend({
                     ];
                 });
 
-            var newRows = rowBind.enter()
+            const newRows = rowBind.enter()
                 .append("tr");
 
             // add a th element to each of these rows with sequence name and a tooltip
             newRows.append("th")
                 .attr("class", "seqLabel")
                 .on("mouseenter", function(d) {
-                    var seqInfo = d.seqInfo;
+                    const seqInfo = d.seqInfo;
                     self.tooltipModel
                         .set("header", self.model.get("displayLabel"))
                         .set("contents", [
@@ -510,7 +513,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
                     return d.rowLabel;
                 });
 
-            var seqTypeLabelMap = {
+            const seqTypeLabelMap = {
                 "seqMatch": "Matching",
                 "seqDelete": "Missing",
                 "seqInsert": "Extra",
@@ -518,9 +521,9 @@ export const ProtAlignViewBB = Backbone.View.extend({
             };
 
             // add number of segment spans to each td element according to d.segments
-            var segmentSpans = rowBind.select("td > span")
+            const segmentSpans = rowBind.select("td > span")
                 .selectAll("span")
-                .data(function(d) {
+                .data(function (d) {
                     return d.segments;
                 });
             segmentSpans.exit().remove();
@@ -529,13 +532,13 @@ export const ProtAlignViewBB = Backbone.View.extend({
                 .append("span")
                 .on("mouseenter", function(d) {
                     if (self.tooltipModel && d.klass) {
-                        var parent = d3.select(this.parentNode);
-                        var parentDatum = parent.datum();
-                        var rds = +d.rstart;
-                        var rde = +d.rend;
-                        var cds = +d.cstart;
-                        var cde = +d.cend;
-                        var refID = self.model.get("refID");
+                        const parent = d3.select(this.parentNode);
+                        const parentDatum = parent.datum();
+                        const rds = +d.rstart;
+                        const rde = +d.rend;
+                        const cds = +d.cstart;
+                        const cde = +d.cend;
+                        const refID = self.model.get("refID");
                         self.tooltipModel
                             .set("header", "Alignment to " + refID)
                             .set("contents", [

@@ -35,10 +35,10 @@ export class GoTerm {
 // }
 
     getInteractors (storeCount) {
-        var go = window.compositeModelInst.get("go");
+        const go = window.compositeModelInst.get("go");
         GoTerm.prototype.getCount++;
 
-        var subTreeSet; // = new Set();
+        let subTreeSet; // = new Set();
 
         if (this.parts || this.subclasses || this.interactors) {
             subTreeSet = new Set();
@@ -81,7 +81,7 @@ export class GoTerm {
     }
 
     isDirectRelation(anotherGoTerm) {
-        var agoid = anotherGoTerm.id;
+        const agoid = anotherGoTerm.id;
         return (
             (this == anotherGoTerm) ||
             (this.is_a && this.is_a.has(agoid)) ||
@@ -93,13 +93,13 @@ export class GoTerm {
 
 
     isDescendantOf(anotherGoTermId) {
-        var go = window.compositeModelInst.get("go");
+        const go = window.compositeModelInst.get("go");
         if (anotherGoTermId == this.id) {
             return true;
         }
         if (this.part_of) {
             for (let part_ofId of this.part_of) {
-                var partOf = go.get(part_ofId);
+                const partOf = go.get(part_ofId);
                 if (partOf.isDescendantOf(anotherGoTermId)) {
                     return true;
                 }
@@ -107,7 +107,7 @@ export class GoTerm {
         }
         if (this.is_a) {
             for (let superclassId of this.is_a) {
-                var sup = go.get(superclassId);
+                const sup = go.get(superclassId);
                 if (sup.isDescendantOf(anotherGoTermId)) {
                     return true;
                 }

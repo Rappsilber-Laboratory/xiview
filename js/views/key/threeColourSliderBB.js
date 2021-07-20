@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
+import d3 from "d3";
 
 export const ThreeColourSliderBB = Backbone.View.extend({
     events: {

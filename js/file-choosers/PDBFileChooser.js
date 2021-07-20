@@ -5,11 +5,12 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {modelUtils} from "../modelUtils";
 import {utils} from "../utils";
 import {NGLUtils} from "../views/ngl/NGLUtils";
+import d3 from "d3";
 
 export const PDBFileChooserBB = BaseFrameView.extend({
 
     events: function () {
-        var parentEvents = BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -28,13 +29,13 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         this.cAlphaOnly = false;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el);
+        const mainDivSel = d3.select(this.el);
         mainDivSel.classed("metaLoadPanel", true);
 
-        var wrapperPanel = mainDivSel.append("div")
+        const wrapperPanel = mainDivSel.append("div")
             .attr("class", "panelInner");
 
-        var box = wrapperPanel.append("div").attr("class", "columnbar");
+        const box = wrapperPanel.append("div").attr("class", "columnbar");
 
         /*
         box.append("p").attr("class", "smallHeading").text("Pre-Load Options");
@@ -72,7 +73,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             .property("multiple", true)
         ;
 
-        var pdbCodeSpan = box.append("span")
+        const pdbCodeSpan = box.append("span")
                 .attr("class", "btn nopadLeft")
                 .text("or Enter 4-character PDB IDs")
             //.append("div")
@@ -95,11 +96,11 @@ export const PDBFileChooserBB = BaseFrameView.extend({
 
         pdbCodeSpan.append("span").text("& Press Enter");
 
-        var queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
+        const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
 
         queryBox.append("p").attr("class", "smallHeading").text("PDB Query Services");
 
-        var qButtonData = [
+        const qButtonData = [
             {
                 class: "pdbWindowButton",
                 text: "Show PDBs Matching UniProt Accessions @ RCSB.org",
@@ -159,19 +160,19 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         this.listenTo(vent, "proteinMetadataUpdated", updatePD);
 
         this.listenTo(this.model, "3dsync", function (newSequences) {
-            var count = _.isEmpty(newSequences) ? 0 : newSequences.length;
-            var success = count > 0;
+            const count = _.isEmpty(newSequences) ? 0 : newSequences.length;
+            const success = count > 0;
             this.setCompletedEffect();
-            var nameArr = _.pluck(newSequences, "name");
+            const nameArr = _.pluck(newSequences, "name");
             // list pdb's these sequences derive from
             //console.log ("seq", newSequences);
-            var pdbString = nameArr ?
+            const pdbString = nameArr ?
                 d3.set(nameArr.map(function (name) {
                     return name.substr(0, _./*last*/indexOf(name, ":"));
                 })).values().join(", ") : "?"
             ;
 
-            var msg = newSequences.failureReason ? "" : "Completed Loading " + sanitise(pdbString) + ".<br>";
+            let msg = newSequences.failureReason ? "" : "Completed Loading " + sanitise(pdbString) + ".<br>";
             msg += success ? "✓ Success! " + count + " sequence" + (count > 1 ? "s" : "") + " mapped between this search and the PDB file." :
                 sanitise((newSequences.failureReason || "No sequence matches found between this search and the PDB file") +
                     ". Please check the PDB file or code is correct.");
@@ -193,12 +194,12 @@ export const PDBFileChooserBB = BaseFrameView.extend({
 
     // Return selected proteins, or all proteins if nothing selected
     getSelectedProteins: function () {
-        var selectedProteins = this.model.get("selectedProteins");
+        const selectedProteins = this.model.get("selectedProteins");
         return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
     },
 
     updateProteinDropdown: function (parentElem) {
-        var proteins = this.getSelectedProteins();
+        const proteins = this.getSelectedProteins();
 
         utils.addMultipleSelectControls({
             addToElem: parentElem,
@@ -230,8 +231,8 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         // otherwise chrome/pop-up blockers think it is some spammy popup rather than something the user wants.
         // Basically chrome has this point in this function as being traceable back to a user click event but the
         // callback from the ajax isn't.
-        var newtab = window.open("", "_blank");
-        var accessionIDs = modelUtils.getLegalAccessionIDs(this.getSelectedProteins());
+        const newtab = window.open("", "_blank");
+        const accessionIDs = modelUtils.getLegalAccessionIDs(this.getSelectedProteins());
         if (accessionIDs.length) {
             // https://search.rcsb.org/#search-example-8
             const query = {
@@ -301,7 +302,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     },
 
     getSelectedOption: function (higherElem, selectName) {
-        var funcMeta;
+        let funcMeta;
 
         //this.controlDiv
         higherElem
@@ -322,7 +323,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     },
 
     launchExternalEBIPDBWindow: function () {
-        var chosenSeq = (this.getSelectedOption(d3.select(this.el).select(".columnbar"), "Proteins") || {
+        const chosenSeq = (this.getSelectedOption(d3.select(this.el).select(".columnbar"), "Proteins") || {
             sequence: ""
         }).sequence;
         window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
@@ -331,12 +332,12 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     selectPDBFile: function (evt) {
         this.setWaitingEffect();
         this.loadRoute = "file";
-        var self = this;
+        const self = this;
         //console.log ("target files", evt.target.files, evt.target.value);
-        var pdbSettings = [];
-        var fileCount = evt.target.files.length;
+        const pdbSettings = [];
+        const fileCount = evt.target.files.length;
 
-        var onLastLoad = _.after(fileCount, function () {
+        const onLastLoad = _.after(fileCount, function () {
                 NGLUtils.repopulateNGL({
                     pdbSettings: pdbSettings,
                     stage: self.stage,
@@ -345,16 +346,16 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             }
         );
 
-        for (var n = 0; n < fileCount; n++) {
-            var fileObj = evt.target.files[n];
+        for (let n = 0; n < fileCount; n++) {
+            const fileObj = evt.target.files[n];
 
             modelUtils.loadUserFile(
                 fileObj,
                 function (fileContents, associatedData) {
-                    var blob = new Blob([fileContents], {
+                    const blob = new Blob([fileContents], {
                         type: 'application/text'
                     });
-                    var name = associatedData.name;
+                    const name = associatedData.name;
                     pdbSettings.push({
                         id: name,
                         uri: blob,
@@ -374,7 +375,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     },
 
     enteringPDBCode: function (evt) {
-        var valid = this.isPDBCodeValid();
+        const valid = this.isPDBCodeValid();
         d3.select(this.el).select(".PDBSubmit").property("disabled", !valid);
         if (valid && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
             this.loadPDBCode();
@@ -382,11 +383,11 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     },
 
     loadPDBCode: function () {
-        var pdbCode = d3.select(this.el).select(".inputPDBCode").property("value");
+        const pdbCode = d3.select(this.el).select(".inputPDBCode").property("value");
         this.loadRoute = "pdb";
         this.setWaitingEffect();
 
-        var pdbSettings = pdbCode.match(utils.commonRegexes.multiPdbSplitter).map(function (code) {
+        const pdbSettings = pdbCode.match(utils.commonRegexes.multiPdbSplitter).map(function (code) {
             return {
                 id: code,
                 pdbCode: code,
@@ -404,7 +405,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     },
 
     isPDBCodeValid: function () {
-        var elem = d3.select(this.el).select(".inputPDBCode");
+        const elem = d3.select(this.el).select(".inputPDBCode");
         return elem.node().checkValidity();
     },
 

@@ -1,12 +1,12 @@
 d3.sankey = function() {
-  var sankey = {},
-      nodeWidth = 24,
-      nodePadding = 8,
-      size = [1, 1],
-      nodes = [],
-      links = [];
+    const sankey = {};
+    let nodeWidth = 24,
+        nodePadding = 8,
+        size = [1, 1],
+        nodes = [],
+        links = [];
 
-  sankey.nodeWidth = function(_) {
+    sankey.nodeWidth = function(_) {
     if (!arguments.length) return nodeWidth;
     nodeWidth = +_;
     return sankey;
@@ -51,19 +51,19 @@ d3.sankey = function() {
   };
 
   sankey.link = function() {
-      var curvature = 0.7;//1;//.9;
+      let curvature = 0.7;//1;//.9;
 
       function link(d) {
           // if (d.target.term.getInteractors().size < 30) {
           //     return "M" + 0 + "," + 0;
           // } else {
-              var x0 = d.source.x + d.source.dx,
-                  x1 = d.target.x,
-                  xi = d3.interpolateNumber(x0, x1),
-                  x2 = xi(curvature),
-                  x3 = xi(1 - curvature),
-                  y0 = d.source.y + (d.source.dy / 2), // + /*+ d.sy*/ + d.dy / 2,
-                  y1 = d.target.y + (d.target.dy / 2); // +  /*+ d.ty*/ + d.dy / 2;
+          const x0 = d.source.x + d.source.dx,
+              x1 = d.target.x,
+              xi = d3.interpolateNumber(x0, x1),
+              x2 = xi(curvature),
+              x3 = xi(1 - curvature);
+          let y0 = d.source.y + (d.source.dy / 2), // + /*+ d.sy*/ + d.dy / 2,
+              y1 = d.target.y + (d.target.dy / 2); // +  /*+ d.ty*/ + d.dy / 2;
 
                 /*  y0 = d.source.y + (d.source.dy / 2) - d.dy / 2,
                   y1 = d.target.y + (d.target.dy / 2) - d.dy / 2,
@@ -106,7 +106,7 @@ d3.sankey = function() {
                   // + " Z"
                   ;
           // }
-      };
+      }
 
       link.curvature = function(_) {
           if (!arguments.length) return curvature;
@@ -124,9 +124,9 @@ d3.sankey = function() {
       node.targetLinks = [];
     });
     links.forEach(function(link) {
-      var source = link.source,
-          target = link.target;
-      if (typeof source === "number") source = link.source = nodes[link.source];
+        let source = link.source,
+            target = link.target;
+        if (typeof source === "number") source = link.source = nodes[link.source];
       if (typeof target === "number") target = link.target = nodes[link.target];
       source.sourceLinks.push(link);
       target.targetLinks.push(link);
@@ -153,11 +153,11 @@ d3.sankey = function() {
   // nodes with no incoming links are assigned breadth zero, while
   // nodes with no outgoing links are assigned the maximum breadth.
   function computeNodeBreadths() {
-    var remainingNodes = nodes,
-        nextNodes,
-        x = 0;
+      let remainingNodes = nodes,
+          nextNodes,
+          x = 0;
 
-    while (remainingNodes.length) {
+      while (remainingNodes.length) {
       nextNodes = [];
       remainingNodes.forEach(function(node) {
         node.x = x;
@@ -201,13 +201,17 @@ d3.sankey = function() {
   }
 
   function computeNodeDepths(iterations) {
-    var nodesByBreadth = d3.nest()
-        .key(function(d) { return d.x; })
-        .sortKeys(d3.ascending)
-        .entries(nodes)
-        .map(function(d) { return d.values; });
+      const nodesByBreadth = d3.nest()
+          .key(function (d) {
+              return d.x;
+          })
+          .sortKeys(d3.ascending)
+          .entries(nodes)
+          .map(function (d) {
+              return d.values;
+          });
 
-    //
+      //
     initializeNodeDepth();
     resolveCollisions();
     for (var alpha = 1; iterations > 0; --iterations) {
@@ -218,10 +222,10 @@ d3.sankey = function() {
     }
 
     function initializeNodeDepth() {
-      var ky = d3.min(nodesByBreadth, function(nodes) {
-        return (size[1] - (nodes.length - 1) * nodePadding) / d3.sum(nodes, value);
-      });
-        
+        let ky = d3.min(nodesByBreadth, function (nodes) {
+            return (size[1] - (nodes.length - 1) * nodePadding) / d3.sum(nodes, value);
+        });
+
         ky = Math.max (ky, 0.1);  // mjg
 
       nodesByBreadth.forEach(function(nodes) {
@@ -240,8 +244,8 @@ d3.sankey = function() {
       nodesByBreadth.forEach(function(nodes, breadth) {
         nodes.forEach(function(node) {
           if (node.targetLinks.length) {
-            var y = d3.sum(node.targetLinks, weightedSource) / d3.sum(node.targetLinks, value);
-            node.y += (y - center(node)) * alpha;
+              const y = d3.sum(node.targetLinks, weightedSource) / d3.sum(node.targetLinks, value);
+              node.y += (y - center(node)) * alpha;
           }
         });
       });
@@ -255,8 +259,8 @@ d3.sankey = function() {
       nodesByBreadth.slice().reverse().forEach(function(nodes) {
         nodes.forEach(function(node) {
           if (node.sourceLinks.length) {
-            var y = d3.sum(node.sourceLinks, weightedTarget) / d3.sum(node.sourceLinks, value);
-            node.y += (y - center(node)) * alpha;
+              const y = d3.sum(node.sourceLinks, weightedTarget) / d3.sum(node.sourceLinks, value);
+              node.y += (y - center(node)) * alpha;
           }
         });
       });
@@ -268,13 +272,13 @@ d3.sankey = function() {
 
     function resolveCollisions() {
       nodesByBreadth.forEach(function(nodes) {
-        var node,
-            dy,
-            y0 = 0,
-            n = nodes.length,
-            i;
+          let node,
+              dy,
+              y0 = 0;
+          const n = nodes.length;
+          let i;
 
-        // Push any overlapping nodes down.
+          // Push any overlapping nodes down.
         nodes.sort(ascendingDepth);
         for (i = 0; i < n; ++i) {
           node = nodes[i];
@@ -310,8 +314,8 @@ d3.sankey = function() {
       node.targetLinks.sort(ascendingSourceDepth);
     });
     nodes.forEach(function(node) {
-      var sy = 0, ty = 0;
-      node.sourceLinks.forEach(function(link) {
+        let sy = 0, ty = 0;
+        node.sourceLinks.forEach(function(link) {
         link.sy = sy;
         sy += link.dy;
       });

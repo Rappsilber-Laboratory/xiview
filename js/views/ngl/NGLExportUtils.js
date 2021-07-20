@@ -1,5 +1,6 @@
 import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./NGLUtils";
+import d3 from "d3";
 
 export const NGLExportUtils = {
 

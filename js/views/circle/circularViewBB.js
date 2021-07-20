@@ -6,12 +6,14 @@ import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {modelUtils} from "../../modelUtils";
 import {utils} from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
+import d3 from "d3";
+import {circleArrange} from "./circleArrange";
 
 const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
 
-    var defaults = {
+    const defaults = {
         gap: 5,
-        linkParse: function(link) {
+        linkParse: function (link) {
             return {
                 fromPos: link.fromPos,
                 fromNodeID: link.fromNodeID,
@@ -19,34 +21,34 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
                 toNodeID: link.toNodeID
             };
         },
-        featureParse: function(feature, node) {
+        featureParse: function (feature, node) {
             return {
                 fromPos: feature.start - 1,
                 toPos: feature.end // - 1
             };
         },
     };
-    var _options = _.extend(defaults, options);
+    const _options = _.extend(defaults, options);
 
-    var totalLength = nodeArr.reduce(function(total, interactor) {
+    let totalLength = nodeArr.reduce(function (total, interactor) {
         return total + (interactor.size || 1); // for some reason, some people use an ambiguous protein with no size declared, which causes NaN's
     }, 0);
 
-    var realRange = range[1] - range[0];
-    var noOfGaps = nodeArr.length;
+    const realRange = range[1] - range[0];
+    const noOfGaps = nodeArr.length;
     // Fix so gaps never take more than a quarter the display circle in total
     _options.gap = Math.min((realRange / 4) / noOfGaps, _options.gap);
 
     // work out the length a gap needs to be in the domain to make a _options.gap length in the range
-    var ratio = totalLength / (realRange - (_options.gap * noOfGaps));
-    var dgap = _options.gap * ratio;
+    const ratio = totalLength / (realRange - (_options.gap * noOfGaps));
+    const dgap = _options.gap * ratio;
     totalLength += dgap * noOfGaps;
-    var scale = d3.scale.linear().domain([0, totalLength]).range(range);
+    const scale = d3.scale.linear().domain([0, totalLength]).range(range);
     var total = dgap / 2; // start with half gap, so gap at top is symmetrical (like a double top)
 
-    var nodeCoordMap = d3.map();
+    const nodeCoordMap = d3.map();
     nodeArr.forEach(function(node) {
-        var size = node.size || 1; // again size is sometimes not there for some artificial protein (usually an ambiguous placeholder)
+        const size = node.size || 1; // again size is sometimes not there for some artificial protein (usually an ambiguous placeholder)
         // start ... end goes from scale (0 ... size), 1 bigger than 1-indexed size
         nodeCoordMap.set(node.id, {
             id: node.id,
@@ -60,13 +62,13 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
         //utils.xilog ("prot", nodeCoordMap.get(node.id));
     });
 
-    var featureCoords = [];
-    var fid = 0;
+    const featureCoords = [];
+    let fid = 0;
     featureArrs.forEach(function(farr, i) {
-        var nodeID = nodeArr[i].id;
-        var nodeCoord = nodeCoordMap.get(nodeID);
+        const nodeID = nodeArr[i].id;
+        const nodeCoord = nodeCoordMap.get(nodeID);
         farr.forEach(function(feature) {
-            var tofrom = _options.featureParse(feature, nodeID);
+            const tofrom = _options.featureParse(feature, nodeID);
             //utils.xilog (nodeArr[i].name, "nc", nodeCoord, farr, tofrom, "ORIG FEATURE", feature);
             if (tofrom) {
                 featureCoords.push({
@@ -87,8 +89,8 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
     });
     //utils.xilog ("CONV FEATURES", featureCoords);
 
-    var linkCoords = linkArr.map (function(link) {
-        var tofrom = _options.linkParse(link);
+    const linkCoords = linkArr.map(function (link) {
+        const tofrom = _options.linkParse(link);
         return {
             id: link.id,
             start: scale(0.5 + tofrom.fromPos + nodeCoordMap.get(tofrom.fromNodeID).rawStart),
@@ -110,7 +112,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
 
 export const CircularViewBB = BaseFrameView.extend({
     events: function() {
-        var parentEvents = BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -153,24 +155,24 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     initialize: function(viewOptions) {
-        var self = this;
+        const self = this;
 
         this.defaultOptions.featureParse = function(feature, nodeid) {
             // feature.start and .end are 1-indexed, and so are the returned convStart and convEnd values
             if (feature.start == undefined) {
                 feature.start = +feature.begin;
             }
-            var convStart = +feature.start;
-            var convEnd = +feature.end;
-            var type = feature.type.toLowerCase();
-            var protAlignModel = self.model.get("alignColl").get(nodeid);
+            let convStart = +feature.start;
+            let convEnd = +feature.end;
+            const type = feature.type.toLowerCase();
+            const protAlignModel = self.model.get("alignColl").get(nodeid);
 
-            var annotationColl = self.model.get ("annotationTypes");
-            var annotationTypeModel = annotationColl.get (annotationColl.modelId (feature));
-            var annotationTypeModelAlignmentID = annotationTypeModel ? annotationTypeModel.get("typeAlignmentID") : undefined;
+            const annotationColl = self.model.get("annotationTypes");
+            const annotationTypeModel = annotationColl.get(annotationColl.modelId(feature));
+            const annotationTypeModelAlignmentID = annotationTypeModel ? annotationTypeModel.get("typeAlignmentID") : undefined;
 
             if (protAlignModel) {
-                var alignmentID = feature.alignmentID || annotationTypeModelAlignmentID; // individual feature alignment ids trump feature type alignment ids
+                const alignmentID = feature.alignmentID || annotationTypeModelAlignmentID; // individual feature alignment ids trump feature type alignment ids
                 /*
                 convStart = protAlignModel.mapToSearch (alignmentID, +feature.start);
                 convEnd = protAlignModel.mapToSearch (alignmentID, +feature.end);
@@ -178,7 +180,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 if (convEnd <= 0) { convEnd = -convEnd; }         // <= 0 indicates no equal index match, do the - to find nearest index
                 */
                 if (alignmentID) {
-                    var convertedRange = protAlignModel.rangeToSearch(alignmentID, convStart, convEnd);
+                    const convertedRange = protAlignModel.rangeToSearch(alignmentID, convStart, convEnd);
                     if (!convertedRange) {
                         return null;
                     }
@@ -208,9 +210,9 @@ export const CircularViewBB = BaseFrameView.extend({
         CircularViewBB.__super__.initialize.apply(this, arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el);
+        const mainDivSel = d3.select(this.el);
         // defs to store path definitions for curved text, two nested g's, one for translating, then one for rotating
-        var template = _.template("<DIV class='toolbar toolbarArea'></DIV><DIV class='panelInner backdrop' flex-grow='1'><svg class='<%= svgClass %>'><defs></defs><g><g></g></g></svg></DIV>");
+        const template = _.template("<DIV class='toolbar toolbarArea'></DIV><DIV class='panelInner backdrop' flex-grow='1'><svg class='<%= svgClass %>'><defs></defs><g><g></g></g></svg></DIV>");
         mainDivSel.append("div")
             .attr("class", "verticalFlexContainer")
             .html(
@@ -226,27 +228,27 @@ export const CircularViewBB = BaseFrameView.extend({
         ;
 
 
-        var buttonData = [{
+        const buttonData = [{
             class: "downloadButton",
             label: utils.commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
-        }, ];
+        },];
 
-        var toolbar = mainDivSel.select("div.toolbar");
+        const toolbar = mainDivSel.select("div.toolbar");
         utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
 
 
         // DROPDOWN STARTS
         // Various view options set up, then put in a dropdown menu
-        var orderOptionsButtonData = [{
-                class: "circRadio",
-                label: "Alphabetically",
-                id: "alpha",
-                raw_id: "alpha",
-                type: "radio",
-                group: "sort"
-            },
+        const orderOptionsButtonData = [{
+            class: "circRadio",
+            label: "Alphabetically",
+            id: "alpha",
+            raw_id: "alpha",
+            type: "radio",
+            group: "sort"
+        },
             {
                 class: "circRadio",
                 label: "By Length",
@@ -289,7 +291,7 @@ export const CircularViewBB = BaseFrameView.extend({
             }, this);
         utils.makeBackboneButtons(toolbar, self.el.id, orderOptionsButtonData);
 
-        var orderoptid = this.el.id + "OrderOptions";
+        const orderoptid = this.el.id + "OrderOptions";
         toolbar.append("p").attr("id", orderoptid);
         new DropDownMenuViewBB({
             el: "#" + orderoptid,
@@ -307,13 +309,13 @@ export const CircularViewBB = BaseFrameView.extend({
         });
 
 
-        var showOptionsButtonData = [{
-                class: "showLinkless",
-                label: "All Proteins",
-                id: "showLinkless",
-                initialState: this.options.showLinkless,
-                d3tooltip: "Keep showing proteins with no current crosslinks for a steadier layout"
-            },
+        const showOptionsButtonData = [{
+            class: "showLinkless",
+            label: "All Proteins",
+            id: "showLinkless",
+            initialState: this.options.showLinkless,
+            d3tooltip: "Keep showing proteins with no current crosslinks for a steadier layout"
+        },
             {
                 class: "showResLabelsButton",
                 label: "Residue Labels (If Few Links)",
@@ -350,7 +352,7 @@ export const CircularViewBB = BaseFrameView.extend({
             });
         utils.makeBackboneButtons(toolbar, self.el.id, showOptionsButtonData);
 
-        var showoptid = this.el.id + "ShowOptions";
+        const showoptid = this.el.id + "ShowOptions";
         toolbar.append("p").attr("id", showoptid);
         new DropDownMenuViewBB({
             el: "#" + showoptid,
@@ -370,22 +372,22 @@ export const CircularViewBB = BaseFrameView.extend({
 
         // DROPDOWN ENDS
 
-        var degToRad = Math.PI / 180;
+        const degToRad = Math.PI / 180;
 
         // Lets user rotate diagram
-        var backgroundDrag = d3.behavior.drag();
+        const backgroundDrag = d3.behavior.drag();
         backgroundDrag.on("dragstart", function() {
                 d3.event.sourceEvent.stopPropagation();
                 d3.event.sourceEvent.stopImmediatePropagation();
                 d3.event.sourceEvent.preventDefault();
-                var curTheta = d3.transform(svg.select("g g").attr("transform")).rotate * degToRad;
-                var mc = d3.mouse(this);
-                var dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
-                backgroundDrag.offTheta = curTheta - dragStartTheta;
+            const curTheta = d3.transform(svg.select("g g").attr("transform")).rotate * degToRad;
+            const mc = d3.mouse(this);
+            const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
+            backgroundDrag.offTheta = curTheta - dragStartTheta;
             })
             .on("drag", function() {
-                var dmc = d3.mouse(this);
-                var theta = Math.atan2(dmc[1] - self.radius, dmc[0] - self.radius);
+                const dmc = d3.mouse(this);
+                let theta = Math.atan2(dmc[1] - self.radius, dmc[0] - self.radius);
                 theta += backgroundDrag.offTheta;
                 svg.select("g g").attr("transform", "rotate(" + (theta / degToRad) + ")");
             })
@@ -395,35 +397,35 @@ export const CircularViewBB = BaseFrameView.extend({
 
         this.nodeDrag = d3.behavior.drag();
         this.nodeDrag.reOrder = function(d) {
-            var mc = d3.mouse(svg.node());
-            var dragTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
-            var deg = (((dragTheta / degToRad) + 90) + 360) % 360;
-            var offsetDeg = deg - self.nodeDrag.startDeg;
+            const mc = d3.mouse(svg.node());
+            const dragTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
+            const deg = (((dragTheta / degToRad) + 90) + 360) % 360;
+            const offsetDeg = deg - self.nodeDrag.startDeg;
 
-            var newStart = (d.start + offsetDeg + 360) % 360;
-            var newEnd = (d.end + offsetDeg + 360) % 360;
+            const newStart = (d.start + offsetDeg + 360) % 360;
+            const newEnd = (d.end + offsetDeg + 360) % 360;
 
-            var nodeData = d3.select(self.el).select(".nodeLayer").selectAll(".circleNode").data()
-                .map(function(nd) {
+            const nodeData = d3.select(self.el).select(".nodeLayer").selectAll(".circleNode").data()
+                .map(function (nd) {
                     return {
                         id: nd.id,
                         start: nd.start,
                         end: nd.end
                     };
                 });
-            var thisNode = nodeData.filter(function(nd) {
+            const thisNode = nodeData.filter(function (nd) {
                 return nd.id === d.id;
             })[0];
             thisNode.start = newStart;
             thisNode.end = newEnd;
 
             nodeData.sort(function(a, b) {
-                var aMid = (a.start + a.end + (a.end < a.start ? 360 : 0)) % 720; // add 360 to end values smaller than start (zero wraparound)
-                var bMid = (b.start + b.end + (b.end < b.start ? 360 : 0)) % 720;
+                const aMid = (a.start + a.end + (a.end < a.start ? 360 : 0)) % 720; // add 360 to end values smaller than start (zero wraparound)
+                const bMid = (b.start + b.end + (b.end < b.start ? 360 : 0)) % 720;
                 return aMid - bMid;
             });
-            var bespokeOrder = _.object(
-                _.pluck (nodeData, "id"),
+            const bespokeOrder = _.object(
+                _.pluck(nodeData, "id"),
                 _.range(0, nodeData.length)
             ); // generate {7890: 0, 1234: 1, 2345: 2} etc
 
@@ -438,10 +440,10 @@ export const CircularViewBB = BaseFrameView.extend({
         this.nodeDrag.on("dragstart", function() {
                 d3.event.sourceEvent.stopPropagation();
                 d3.event.sourceEvent.preventDefault();
-                var mc = d3.mouse(svg.node());
-                self.nodeDrag.startClick = mc;
-                var dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
-                self.nodeDrag.startDeg = (((dragStartTheta / degToRad) + 90) + 360) % 360;
+            const mc = d3.mouse(svg.node());
+            self.nodeDrag.startClick = mc;
+            const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
+            self.nodeDrag.startDeg = (((dragStartTheta / degToRad) + 90) + 360) % 360;
                 // draw drag representation if >1 protein displayed
                 if (self.filterInteractors(self.model.get("clmsModel").get("participants")).length > 1) {
                     d3.select(this).classed("draggedNode", true);
@@ -458,8 +460,8 @@ export const CircularViewBB = BaseFrameView.extend({
                 d3.event.sourceEvent.preventDefault();
                 d3.select(this).classed("draggedNode", false);
                 self.nodeDrag.reOrder(d);
-                var mc = d3.mouse(svg.node());
-                var movementSq = Math.pow (mc[0] - self.nodeDrag.startClick[0], 2) + Math.pow (mc[1] - self.nodeDrag.startClick[1], 2);
+                const mc = d3.mouse(svg.node());
+                const movementSq = Math.pow(mc[0] - self.nodeDrag.startClick[0], 2) + Math.pow(mc[1] - self.nodeDrag.startClick[1], 2);
                 if (movementSq < 9) {
                     self.selectNode.call (self, d);
                 }
@@ -491,7 +493,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 return d.ang * degToRad;
             });
 
-        var arcs = ["arc", "textArc", "featureArc", "resLabelArc"];
+        const arcs = ["arc", "textArc", "featureArc", "resLabelArc"];
         arcs.forEach(function(arc) {
             this[arc] = d3.svg.arc()
                 .innerRadius(90)
@@ -509,7 +511,7 @@ export const CircularViewBB = BaseFrameView.extend({
         };
 
         this.nodeTip = function(d) {
-            var interactor = self.model.get("clmsModel").get("participants").get(d.id);
+            const interactor = self.model.get("clmsModel").get("participants").get(d.id);
             self.model.get("tooltipModel")
                 .set("header", modelUtils.makeTooltipTitle.interactor(interactor))
                 .set("contents", modelUtils.makeTooltipContents.interactor(interactor))
@@ -520,7 +522,7 @@ export const CircularViewBB = BaseFrameView.extend({
         };
 
         this.linkTip = function(d) {
-            var xlink = self.model.get("clmsModel").get("crosslinks").get(d.id);
+            const xlink = self.model.get("clmsModel").get("crosslinks").get(d.id);
             self.model.get("tooltipModel")
                 .set("header", modelUtils.makeTooltipTitle.link())
                 .set("contents", modelUtils.makeTooltipContents.link(xlink))
@@ -543,7 +545,7 @@ export const CircularViewBB = BaseFrameView.extend({
         // return order as is
         this.interactorOrder = _.pluck(Array.from(this.model.get("clmsModel").get("participants").values()), "id");
 
-        var alignCall = 0;
+        let alignCall = 0;
 
         // listen to custom filteringDone event from model
         this.listenTo(this.model, "filteringDone", function() {
@@ -594,30 +596,30 @@ export const CircularViewBB = BaseFrameView.extend({
         if (orderOptions.reverseConsecutive) {
             this.options.sortDir = -this.options.sortDir; // reverse direction of consecutive resorts
         }
-        var prots = this.filterInteractors(this.model.get("clmsModel").get("participants"));
-        var proteinSort = function(field) {
-            var numberSort = prots.length ? !isNaN(prots[0][field]) : false; // stop undefined 'prots[0].field' bug when no prots
-            var sortDir = this.options.sortDir;
-            prots.sort(function(a, b) {
+        const prots = this.filterInteractors(this.model.get("clmsModel").get("participants"));
+        const proteinSort = function (field) {
+            const numberSort = prots.length ? !isNaN(prots[0][field]) : false; // stop undefined 'prots[0].field' bug when no prots
+            const sortDir = this.options.sortDir;
+            prots.sort(function (a, b) {
                 return (numberSort ? (+a[field]) - (+b[field]) : a[field].localeCompare(b[field])) * sortDir;
             });
             return _.pluck(prots, "id");
         };
 
-        var self = this;
-        var sortFuncs = {
-            best: function() {
-                return utils.circleArrange(self.filterInteractors(this.model.get("clmsModel").get("participants")));
+        const self = this;
+        const sortFuncs = {
+            best: function () {
+                return circleArrange(self.filterInteractors(this.model.get("clmsModel").get("participants")));
             },
-            size: function() {
+            size: function () {
                 return proteinSort.call(this, "size");
             },
-            alpha: function() {
+            alpha: function () {
                 return proteinSort.call(this, "name");
             },
-            bespoke: function() {
-                var bespokeOrder = orderOptions.bespokeOrder || self.bespokeOrder;
-                prots.sort(function(a, b) {
+            bespoke: function () {
+                const bespokeOrder = orderOptions.bespokeOrder || self.bespokeOrder;
+                prots.sort(function (a, b) {
                     return bespokeOrder[a.id] - bespokeOrder[b.id];
                 });
                 return _.pluck(prots, "id");
@@ -673,18 +675,18 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     showAccentOnTheseLinks: function(d3Selection, accentType) {
-        var accentedLinkList = this.model.getMarkedCrossLinks(accentType);
+        let accentedLinkList = this.model.getMarkedCrossLinks(accentType);
         if (accentType === "selection" && this.options.showSelectedOnly) {
             accentedLinkList = [];
         }
         if (accentedLinkList) {
-            var linkTypes = {
+            const linkTypes = {
                 selection: "selectedCircleLink",
                 highlights: "highlightedCircleLink"
             };
-            var linkType = linkTypes[accentType] || "link";
-            var accentedLinkIDs = _.pluck(accentedLinkList, "id");
-            var idset = d3.set(accentedLinkIDs);
+            const linkType = linkTypes[accentType] || "link";
+            const accentedLinkIDs = _.pluck(accentedLinkList, "id");
+            const idset = d3.set(accentedLinkIDs);
             d3Selection.filter("."+linkType)
                 .filter(function(d) { return !idset.has(d.id); })
                 .classed(linkType, false)
@@ -705,14 +707,14 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     showAccentOnTheseNodes: function(d3Selection, accentType) {
-        var accentedNodeList = this.model.get(accentType === "selection" ? "selectedProteins" : "highlightedProteins");
+        const accentedNodeList = this.model.get(accentType === "selection" ? "selectedProteins" : "highlightedProteins");
         if (accentedNodeList) {
-            var linkType = {
+            const linkType = {
                 selection: "selected",
                 highlights: "highlighted"
             };
-            var accentedLinkIDs = _.pluck(accentedNodeList, "id");
-            var idset = d3.set(accentedLinkIDs);
+            const accentedLinkIDs = _.pluck(accentedNodeList, "id");
+            const idset = d3.set(accentedLinkIDs);
             d3Selection.classed(linkType[accentType], function(d) {
                 return idset.has(d.id);
             });
@@ -722,11 +724,11 @@ export const CircularViewBB = BaseFrameView.extend({
 
 
     actionNodeLinks: function(nodeId, actionType, add, startPos, endPos) {
-        var filteredCrossLinks = this.model.getFilteredCrossLinks();
-        var anyPos = startPos == undefined && endPos == undefined;
+        const filteredCrossLinks = this.model.getFilteredCrossLinks();
+        const anyPos = startPos == undefined && endPos == undefined;
         startPos = startPos || 0;
         endPos = endPos || 100000;
-        var matchLinks = filteredCrossLinks.filter(function(link) {
+        const matchLinks = filteredCrossLinks.filter(function (link) {
             return (link.fromProtein.id === nodeId && (anyPos || (link.fromResidue >= startPos && endPos >= link.fromResidue))) ||
                 (link.toProtein.id === nodeId && (anyPos || (link.toResidue >= startPos && endPos >= link.toResidue)));
         });
@@ -751,30 +753,30 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     convertLinks: function(links, rad1, rad2) {
-        var xlinks = this.model.get("clmsModel").get("crosslinks");
-        var intraOutside = this.options.intraOutside;
-        var homomOpposite = this.options.homomOpposite;
-        var bowOutMultiplier = 1.2;
+        const xlinks = this.model.get("clmsModel").get("crosslinks");
+        const intraOutside = this.options.intraOutside;
+        const homomOpposite = this.options.homomOpposite;
+        const bowOutMultiplier = 1.2;
 
-        var newLinks = links.map(function(link) {
-            var xlink = xlinks.get(link.id);
-            var homom = xlink.confirmedHomomultimer; // TODO: need to deal with this changing
-            var intra = xlink.toProtein.id === xlink.fromProtein.id;
-            var out = intraOutside ? intra && (homomOpposite ? !homom : true) : (homomOpposite ? homom : false);
-            var rad = out ? rad2 : rad1;
-            var bowRadius = out ? rad2 * bowOutMultiplier : 0;
+        const newLinks = links.map(function (link) {
+            const xlink = xlinks.get(link.id);
+            const homom = xlink.confirmedHomomultimer; // TODO: need to deal with this changing
+            const intra = xlink.toProtein.id === xlink.fromProtein.id;
+            const out = intraOutside ? intra && (homomOpposite ? !homom : true) : (homomOpposite ? homom : false);
+            const rad = out ? rad2 : rad1;
+            const bowRadius = out ? rad2 * bowOutMultiplier : 0;
 
-            var a1 = Math.min(link.start, link.end);
-            var a2 = Math.max(link.start, link.end);
-            var midang = (a1 + a2) / 2; //(a2 - a1 < 180) ? (a1 + a2) / 2 : ((a1 + a2 + 360) / 2) % 360; // mid-angle (bearing in mind it might be shorter to wrap round the circle)
-            var degSep = a2 - a1; // Math.min (a2 - a1, a1 - a2 + 360); // angle of separation, 2nd one works for doing long outside links the other way round. See next comment.
+            const a1 = Math.min(link.start, link.end);
+            const a2 = Math.max(link.start, link.end);
+            const midang = (a1 + a2) / 2; //(a2 - a1 < 180) ? (a1 + a2) / 2 : ((a1 + a2 + 360) / 2) % 360; // mid-angle (bearing in mind it might be shorter to wrap round the circle)
+            const degSep = a2 - a1; // Math.min (a2 - a1, a1 - a2 + 360); // angle of separation, 2nd one works for doing long outside links the other way round. See next comment.
             //utils.xilog ("angs", link.start, link.end, degSep);
-            var coords;
+            let coords;
 
             if (out && degSep > 70) {
-                var controlPointAngleSep = 60;
-                var counterClockwise = false; //(degSep === a1 - a2 + 360) ^ (link.start > link.end); // odd occassion when not intra and homom (is an error)
-                var furtherBowRadius = bowRadius * (1 + (0.25 * ((degSep - 70) / 180)));
+                const controlPointAngleSep = 60;
+                const counterClockwise = false; //(degSep === a1 - a2 + 360) ^ (link.start > link.end); // odd occassion when not intra and homom (is an error)
+                const furtherBowRadius = bowRadius * (1 + (0.25 * ((degSep - 70) / 180)));
                 coords = [{
                     ang: link.start,
                     rad: rad
@@ -782,10 +784,10 @@ export const CircularViewBB = BaseFrameView.extend({
                     ang: link.start,
                     rad: bowRadius
                 }];
-                var holdPoints = Math.floor(degSep / controlPointAngleSep) + 1;
-                var deltaAng = (degSep % controlPointAngleSep) / 2;
-                var offsetAng = link.start + deltaAng;
-                for (var n = 0; n < holdPoints; n++) {
+                const holdPoints = Math.floor(degSep / controlPointAngleSep) + 1;
+                const deltaAng = (degSep % controlPointAngleSep) / 2;
+                const offsetAng = link.start + deltaAng;
+                for (let n = 0; n < holdPoints; n++) {
                     coords.push({
                         ang: ((offsetAng + (counterClockwise ? -n : n) * controlPointAngleSep) + 360) % 360,
                         rad: furtherBowRadius
@@ -799,8 +801,8 @@ export const CircularViewBB = BaseFrameView.extend({
                     rad: rad
                 });
             } else if (homom && intra) {
-                var homomBowRadius = out ? rad + this.options.tickWidth : rad * 0.65;
-                var homomAngDelta = out ? 2 : 10;
+                const homomBowRadius = out ? rad + this.options.tickWidth : rad * 0.65;
+                const homomAngDelta = out ? 2 : 10;
                 coords = [{
                     ang: link.start,
                     rad: rad
@@ -836,13 +838,13 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     getMaxRadius: function(d3sel) {
-        var zelem = $(d3sel.node());
+        const zelem = $(d3sel.node());
         return Math.min(zelem.width(), zelem.height()) / 2;
     },
 
     filterInteractors: function(interactors) {  // interactors is a native map
-        var filteredInteractors = [];
-        var showLinkless = this.options.showLinkless;
+        const filteredInteractors = [];
+        const showLinkless = this.options.showLinkless;
         interactors.forEach(function(value) {
             if (!value.is_decoy && (showLinkless || !value.hidden)) {
                 filteredInteractors.push(value);
@@ -862,21 +864,21 @@ export const CircularViewBB = BaseFrameView.extend({
 
         renderOptions = renderOptions || {};
         //utils.xilog ("render options", renderOptions);
-        var changed = renderOptions.changed;
+        const changed = renderOptions.changed;
 
         if (this.isVisible()) {
             //utils.xilog ("re-rendering circular view");
-            var svg = d3.select(this.el).select("svg");
+            const svg = d3.select(this.el).select("svg");
             this.radius = this.getMaxRadius(svg);
 
-            var interactors = this.model.get("clmsModel").get("participants");
+            const interactors = this.model.get("clmsModel").get("participants");
             //utils.xilog ("interactorOrder", this.interactorOrder);
             //utils.xilog ("model", this.model);
 
-            var filteredInteractors = this.filterInteractors(interactors);
-            var filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
+            let filteredInteractors = this.filterInteractors(interactors);
+            let filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
             if (this.options.showSelectedOnly) {
-                var selectedIDs = d3.set (_.pluck (this.model.getMarkedCrossLinks("selection"), "id"));
+                const selectedIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
                 filteredCrossLinks = filteredCrossLinks.filter(function(xlink) {
                     return selectedIDs.has(xlink.id);
                 });
@@ -893,7 +895,7 @@ export const CircularViewBB = BaseFrameView.extend({
             }
             //utils.xilog ("fi", filteredInteractors, interactors);
 
-            var fmap = d3.map(filteredInteractors, function(d) {
+            const fmap = d3.map(filteredInteractors, function (d) {
                 return d.id;
             });
 
@@ -913,25 +915,25 @@ export const CircularViewBB = BaseFrameView.extend({
                 });
 
             // After rearrange interactors, because filtered features depends on the interactor order
-            var alignColl = this.model.get("alignColl");
-            var filteredFeatures = filteredInteractors.map(function(inter) {
-                return this.model.getFilteredFeatures (inter);
+            const alignColl = this.model.get("alignColl");
+            const filteredFeatures = filteredInteractors.map(function (inter) {
+                return this.model.getFilteredFeatures(inter);
             }, this);
             //utils.xilog ("filteredFeatures", filteredFeatures);
 
-            var layout = circleLayout(filteredInteractors, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
+            const layout = circleLayout(filteredInteractors, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
             //utils.xilog ("layout", layout);
 
-            var tickRadius = (this.radius - this.options.tickWidth) * (this.options.intraOutside ? 0.8 : 1.0); // shrink radius if some links drawn on outside
-            var innerNodeRadius = tickRadius * ((100 - this.options.nodeWidth) / 100);
-            var innerFeatureRadius = tickRadius * ((100 - (this.options.nodeWidth * 0.7)) / 100);
-            var textRadius = (tickRadius + innerNodeRadius) / 2;
+            const tickRadius = (this.radius - this.options.tickWidth) * (this.options.intraOutside ? 0.8 : 1.0); // shrink radius if some links drawn on outside
+            const innerNodeRadius = tickRadius * ((100 - this.options.nodeWidth) / 100);
+            const innerFeatureRadius = tickRadius * ((100 - (this.options.nodeWidth * 0.7)) / 100);
+            const textRadius = (tickRadius + innerNodeRadius) / 2;
 
-            var arcRadii = [{
-                    arc: "arc",
-                    inner: innerNodeRadius,
-                    outer: tickRadius
-                },
+            const arcRadii = [{
+                arc: "arc",
+                inner: innerNodeRadius,
+                outer: tickRadius
+            },
                 {
                     arc: "featureArc",
                     inner: innerFeatureRadius,
@@ -952,16 +954,16 @@ export const CircularViewBB = BaseFrameView.extend({
                 this[arcData.arc].innerRadius(arcData.inner).outerRadius(arcData.outer);
             }, this);
 
-            var nodes = layout.nodes;
-            var links = layout.links;
-            var features = layout.features;
+            const nodes = layout.nodes;
+            const links = layout.links;
+            const features = layout.features;
             // turns link end & start angles into something d3.svg.arc can use
-            var linkCoords = this.convertLinks(links, innerNodeRadius, tickRadius);
+            const linkCoords = this.convertLinks(links, innerNodeRadius, tickRadius);
             //utils.xilog ("linkCoords", linkCoords);
 
-            var gTrans = svg.select("g");
+            const gTrans = svg.select("g");
             gTrans.attr("transform", "translate(" + this.radius + "," + this.radius + ")");
-            var gRot = gTrans.select("g");
+            const gRot = gTrans.select("g");
             //gRot.attr("transform", "rotate(0)");
 
             if (!changed || changed.has("links")) {
@@ -988,7 +990,7 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     addOrGetGroupLayer: function(g, layerClass) {
-        var groupLayer = g.select("g." + layerClass);
+        let groupLayer = g.select("g." + layerClass);
         if (groupLayer.empty()) {
             groupLayer = g.append("g").attr("class", layerClass);
         }
@@ -996,16 +998,16 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     drawLinks: function(g, links) {
-        var self = this;
-        var crosslinks = this.model.get("clmsModel").get("crosslinks");
+        const self = this;
+        const crosslinks = this.model.get("clmsModel").get("crosslinks");
         //utils.xilog ("clinks", crosslinks);
-        var colourScheme = this.model.get("linkColourAssignment");
+        const colourScheme = this.model.get("linkColourAssignment");
 
-        var lineCopy = {}; // make cache as linkJoin and ghostLinkJoin will have same 'd' paths for the same link
+        const lineCopy = {}; // make cache as linkJoin and ghostLinkJoin will have same 'd' paths for the same link
 
         // draw thin links
-        var thinLayer = this.addOrGetGroupLayer(g, "thinLayer");
-        var linkJoin = thinLayer.selectAll(".circleLink").data(links, self.idFunc);
+        const thinLayer = this.addOrGetGroupLayer(g, "thinLayer");
+        const linkJoin = thinLayer.selectAll(".circleLink").data(links, self.idFunc);
         //var hasNew = linkJoin.enter().size() > 0;
         linkJoin.exit().remove();
         linkJoin.enter()
@@ -1013,7 +1015,7 @@ export const CircularViewBB = BaseFrameView.extend({
             .attr("class", "circleLink");
         linkJoin
             .attr("d", function(d) {
-                var path = (d.outside ? self.outsideLine : self.line)(d.coords);
+                const path = (d.outside ? self.outsideLine : self.line)(d.coords);
                 lineCopy[d.id] = path;
                 return path;
             })
@@ -1025,8 +1027,8 @@ export const CircularViewBB = BaseFrameView.extend({
             });
 
         // draw thick, invisible links (used for highlighting and mouse event capture)
-        var ghostLayer = this.addOrGetGroupLayer(g, "ghostLayer");
-        var ghostLinkJoin = ghostLayer.selectAll(".circleGhostLink").data(links, self.idFunc);
+        const ghostLayer = this.addOrGetGroupLayer(g, "ghostLayer");
+        const ghostLinkJoin = ghostLayer.selectAll(".circleGhostLink").data(links, self.idFunc);
 
         ghostLinkJoin.exit().remove();
         ghostLinkJoin.enter()
@@ -1042,12 +1044,12 @@ export const CircularViewBB = BaseFrameView.extend({
             })
             .on("click", function(d) {
                 d3.event.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
-                var add = d3.event.ctrlKey || d3.event.shiftKey;
+                const add = d3.event.ctrlKey || d3.event.shiftKey;
                 self.model.setMarkedCrossLinks("selection", [crosslinks.get(d.id)], false, add);
             });
         ghostLinkJoin
             .attr("d", function(d) {
-                var path = lineCopy[d.id] || (d.outside ? self.outsideLine : self.line)(d.coords);
+                const path = lineCopy[d.id] || (d.outside ? self.outsideLine : self.line)(d.coords);
                 return path;
             })
             .call(function() {
@@ -1059,25 +1061,25 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     selectNode: function (d) {
-        var add = d3.event.ctrlKey || d3.event.shiftKey;
+        const add = d3.event.ctrlKey || d3.event.shiftKey;
         this.actionNodeLinks(d.id, "selection", add);
-        var interactor = this.model.get("clmsModel").get("participants").get(d.id);
+        const interactor = this.model.get("clmsModel").get("participants").get(d.id);
         this.model.setSelectedProteins([interactor], add);
         return this;
     },
 
     drawNodes: function(g, nodes) {
-        var self = this;
+        const self = this;
 
-        var multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").get("participants")).length > 1;
-        var colourScheme = this.model.get("proteinColourAssignment");
+        const multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").get("participants")).length > 1;
+        let colourScheme = this.model.get("proteinColourAssignment");
         if (colourScheme.id === "Default Protein") {
             colourScheme = this.replacementDefaultNodeColourModel;
         }
-        var interactors = this.model.get("clmsModel").get("participants");
+        const interactors = this.model.get("clmsModel").get("participants");
 
-        var nodeLayer = this.addOrGetGroupLayer(g, "nodeLayer");
-        var nodeJoin = nodeLayer.selectAll(".circleNode").data(nodes, self.idFunc);
+        const nodeLayer = this.addOrGetGroupLayer(g, "nodeLayer");
+        const nodeJoin = nodeLayer.selectAll(".circleNode").data(nodes, self.idFunc);
 
         nodeJoin.exit().remove();
 
@@ -1087,7 +1089,7 @@ export const CircularViewBB = BaseFrameView.extend({
             .on("mouseenter", function(d) {
                 self.nodeTip(d);
                 self.actionNodeLinks(d.id, "highlights", false);
-                var interactor = self.model.get("clmsModel").get("participants").get(d.id);
+                const interactor = self.model.get("clmsModel").get("participants").get(d.id);
                 self.model.setHighlightedProteins([interactor]);
             })
             .on("mouseleave", function() {
@@ -1113,27 +1115,27 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     drawNodeTicks: function(g, nodes, radius) {
-        var self = this;
-        var tot = nodes.reduce(function(total, node) {
+        const self = this;
+        const tot = nodes.reduce(function (total, node) {
             return total + (node.size || 1);
         }, 0);
 
-        var tickValGap = (tot / 360) * 5;
-        var tickGap = utils.niceRound(tickValGap);
+        const tickValGap = (tot / 360) * 5;
+        const tickGap = utils.niceRound(tickValGap);
 
-        var groupTicks = function(d) {
-            var k = (d.end - d.start) / (d.size || 1);
-            var tRange = d3.range(0, d.size, tickGap);
+        const groupTicks = function (d) {
+            const k = (d.end - d.start) / (d.size || 1);
+            const tRange = d3.range(0, d.size, tickGap);
             // make first tick at 1, not 0 (as protein indices are 1-based)
             tRange[0] = 1;
             // decide whether to add extra tick for last value (d.size) or replace last tick if close enough
-            var tlen = tRange.length;
-            var lastIndex = tlen - (d.size - tRange[tlen - 1] <= tickGap / 3 ? 1 : 0);
+            let tlen = tRange.length;
+            const lastIndex = tlen - (d.size - tRange[tlen - 1] <= tickGap / 3 ? 1 : 0);
             tRange[lastIndex] = d.size;
             tlen = tRange.length;
 
-            var labelCycle = self.options.tickLabelCycle;
-            return tRange.map(function(v, i) {
+            const labelCycle = self.options.tickLabelCycle;
+            return tRange.map(function (v, i) {
                 //utils.xilog ("d.start", d);
                 return {
                     angle: (((v - 1) + 0.5) * k) + d.start, // v-1 cos we want 1 to be at the zero pos angle, +0.5 cos we want it to be a tick in the middle
@@ -1144,8 +1146,8 @@ export const CircularViewBB = BaseFrameView.extend({
             });
         };
 
-        var tickLayer = this.addOrGetGroupLayer(g, "tickLayer");
-        var groupTickJoin = tickLayer.selectAll("g.tickGroups")
+        const tickLayer = this.addOrGetGroupLayer(g, "tickLayer");
+        const groupTickJoin = tickLayer.selectAll("g.tickGroups")
             .data(nodes, self.idFunc);
 
         groupTickJoin.exit().remove();
@@ -1155,16 +1157,16 @@ export const CircularViewBB = BaseFrameView.extend({
             .attr("class", "tickGroups");
 
 
-        var indTickJoin = groupTickJoin.selectAll("g.tick")
+        const indTickJoin = groupTickJoin.selectAll("g.tick")
             .data(groupTicks);
 
         indTickJoin.exit().remove();
 
-        var newTicks = indTickJoin.enter()
+        const newTicks = indTickJoin.enter()
             .append("g")
             .attr("class", "tick");
 
-        var llength = Math.min(this.options.tickWidth, 5);
+        const llength = Math.min(this.options.tickWidth, 5);
         newTicks.append("line")
             .attr("x1", 1)
             .attr("y1", 0)
@@ -1196,30 +1198,30 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     drawNodeText: function(g, nodes) {
-        var self = this;
+        const self = this;
 
-        var defs = d3.select(this.el).select("svg defs");
-        var pathId = function(d) {
+        const defs = d3.select(this.el).select("svg defs");
+        const pathId = function (d) {
             return self.el.id + d.id;
         };
 
         // only add names to nodes with 10 degrees of display or more
-        var tNodes = nodes.filter(function(d) {
+        const tNodes = nodes.filter(function (d) {
             return (d.end - d.start) > 10;
         });
 
-        var pathJoin = defs.selectAll("path").data(tNodes, self.idFunc);
+        const pathJoin = defs.selectAll("path").data(tNodes, self.idFunc);
         pathJoin.exit().remove();
         pathJoin.enter().append("path")
             .attr("id", pathId);
         pathJoin
             .attr("d", function(d) {
-                var pathd = self.textArc(d);
+                let pathd = self.textArc(d);
                 // utils.xilog ("pathd", pathd);
                 // only want one curve, not solid arc shape, so chop path string
-                var cutoff = pathd.indexOf("L");
+                const cutoff = pathd.indexOf("L");
                 if (cutoff >= 0) {
-                    var midAng = (d.start + d.end) / 2;
+                    const midAng = (d.start + d.end) / 2;
                     // use second curve in arc for labels on bottom of circle to make sure text is left-to-right + chop off end 'Z',
                     // use first curve otherwise
                     pathd = (midAng > 90 && midAng < 270) ?
@@ -1229,8 +1231,8 @@ export const CircularViewBB = BaseFrameView.extend({
             });
 
         // add labels to layer, to ensure they 'float' above feature elements added directly to g
-        var nodeLabelLayer = this.addOrGetGroupLayer(g, "nodeLabelLayer");
-        var textJoin = nodeLabelLayer.selectAll("text.circularNodeLabel")
+        const nodeLabelLayer = this.addOrGetGroupLayer(g, "nodeLabelLayer");
+        const textJoin = nodeLabelLayer.selectAll("text.circularNodeLabel")
             .data(tNodes, self.idFunc);
 
         textJoin.exit().remove();
@@ -1255,16 +1257,16 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
     drawFeatures: function(g, features) {
-        var self = this;
+        const self = this;
 
         // Sort so features are drawn biggest first, smallest last (trying to avoid small features being occluded)
         features.sort(function(a, b) {
-            var diff = (b.end - b.start) - (a.end - a.start);
+            const diff = (b.end - b.start) - (a.end - a.start);
             return (diff < 0 ? -1 : (diff > 0 ? 1 : 0));
         });
 
-        var featureLayer = this.addOrGetGroupLayer(g, "featureLayer");
-        var featureJoin = featureLayer.selectAll(".circleFeature").data(features, self.idFunc);
+        const featureLayer = this.addOrGetGroupLayer(g, "featureLayer");
+        const featureJoin = featureLayer.selectAll(".circleFeature").data(features, self.idFunc);
 
         featureJoin.exit().remove();
 
@@ -1281,13 +1283,13 @@ export const CircularViewBB = BaseFrameView.extend({
             })
             .on("click", function(d) {
                 d3.event.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
-                var add = d3.event.ctrlKey || d3.event.shiftKey;
+                const add = d3.event.ctrlKey || d3.event.shiftKey;
                 self.actionNodeLinks(d.nodeID, "selection", add, d.fstart, d.fend);
             });
 
         //utils.xilog ("FEATURES", features);
 
-        var annotColl = this.model.get("annotationTypes");
+        const annotColl = this.model.get("annotationTypes");
 
         featureJoin
             .order()
@@ -1302,16 +1304,16 @@ export const CircularViewBB = BaseFrameView.extend({
 
     drawResidueLetters: function(g, links) {
 
-        var circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
+        const circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
         //utils.xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
         if (circumference / links.length < 30 || !this.options.showResLabels) { // arbitrary cutoff decided by me (mjg)
             links = [];
         }
 
-        var crosslinks = this.model.get("clmsModel").get("crosslinks");
-        var resMap = d3.map();
+        const crosslinks = this.model.get("clmsModel").get("crosslinks");
+        const resMap = d3.map();
         links.forEach(function(link) {
-            var xlink = crosslinks.get(link.id);
+            const xlink = crosslinks.get(link.id);
             resMap.set(xlink.fromProtein.id + "-" + xlink.fromResidue, {
                 polar: link.coords[0],
                 res: modelUtils.getResidueType(xlink.fromProtein, xlink.fromResidue)
@@ -1321,10 +1323,10 @@ export const CircularViewBB = BaseFrameView.extend({
                 res: modelUtils.getResidueType(xlink.toProtein, xlink.toResidue)
             });
         });
-        var degToRad = Math.PI / 180;
+        const degToRad = Math.PI / 180;
 
-        var letterLayer = this.addOrGetGroupLayer(g, "letterLayer");
-        var resJoin = letterLayer.selectAll(".residueLetter").data(resMap.entries(), function(d) {
+        const letterLayer = this.addOrGetGroupLayer(g, "letterLayer");
+        const resJoin = letterLayer.selectAll(".residueLetter").data(resMap.entries(), function (d) {
             return d.key;
         });
 
@@ -1339,15 +1341,15 @@ export const CircularViewBB = BaseFrameView.extend({
 
         resJoin
             .attr("transform", function(d) {
-                var polar = d.value.polar;
-                var rang = (polar.ang - 90) * degToRad;
-                var x = polar.rad * Math.cos(rang);
-                var y = polar.rad * Math.sin(rang);
-                var rot = (polar.ang < 90 || polar.ang > 270) ? polar.ang : polar.ang + 180;
+                const polar = d.value.polar;
+                const rang = (polar.ang - 90) * degToRad;
+                const x = polar.rad * Math.cos(rang);
+                const y = polar.rad * Math.sin(rang);
+                const rot = (polar.ang < 90 || polar.ang > 270) ? polar.ang : polar.ang + 180;
                 return "rotate (" + rot + " " + x + " " + y + ") translate(" + x + " " + y + ")";
             })
             .attr("dy", function(d) {
-                var polar = d.value.polar;
+                const polar = d.value.polar;
                 return (polar.ang < 90 || polar.ang > 270) ? "0.8em" : "-0.1em";
             });
 
@@ -1364,18 +1366,18 @@ export const CircularViewBB = BaseFrameView.extend({
     identifier: "Circular View",
 
     optionsToString: function() {
-        var abbvMap = {
+        const abbvMap = {
             showResLabels: "RESLBLS",
             intraOutside: "SELFOUTER",
             showLinkless: "SHOWIFNOLINKS",
             showSelectedOnly: "SELONLY",
         };
-        var fields = ["showResLabels", "showSelectedOnly"];
+        const fields = ["showResLabels", "showSelectedOnly"];
         if (this.model.get("clmsModel").targetProteinCount > 1) {
             fields.push("intraOutside", "showLinkLess", "sort");
         }
 
-        var str = utils.objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
+        const str = utils.objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
         return str;
     },
 

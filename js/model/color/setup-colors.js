@@ -14,6 +14,7 @@ import {
 } from "./color-model";
 import {DefaultProteinColourModel} from "./protein-color-model";
 import {utils} from "../../utils";
+import d3 from "d3";
 
 window.linkColor = {};//todo - get rid
 

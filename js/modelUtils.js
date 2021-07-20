@@ -1,26 +1,30 @@
 import * as _ from 'underscore';
 // import * as $ from 'jquery';
-// require('d3-octree');
+// require('d3');
+// require('d3-octree'); //not working
 
 import {utils} from "./utils";
 import {GoTerm} from "./views/go/goTerm";
+import d3 from "d3";
 
 export const modelUtils = {
     flattenMatches: function(matchesArr) {
-        var arrs = [
+        const arrs = [
             [],
             []
         ];
-        var matchesLen = matchesArr.length;
-        for (var m = 0; m < matchesLen; ++m) {
-            var match = matchesArr[m];
+        const matchesLen = matchesArr.length;
+        for (let m = 0; m < matchesLen; ++m) {
+            const match = matchesArr[m];
             arrs[match.isDecoy() ? 1 : 0].push(match.score());
         }
         return arrs;
     },
 
     matchScoreRange: function(matches, integerise) {
-        var extent = d3.extent (matches, function(m) { return m.score(); });
+        let extent = d3.extent(matches, function (m) {
+            return m.score();
+        });
         if (integerise) {
             extent = extent.map(function(val, i) {
                 return val !== undefined ? Math[i === 0 ? "floor" : "ceil"](val) : val;
@@ -61,20 +65,22 @@ export const modelUtils = {
         },
 
         niceFormat: function (key, value) {
-            var fd = modelUtils.makeTooltipContents.formatDictionary;
-            var noFormat = function (v) { return v; };
+            const fd = modelUtils.makeTooltipContents.formatDictionary;
+            const noFormat = function (v) {
+                return v;
+            };
 
-            var format = fd.formats[key] || noFormat;
-            var unit = fd.units[key] || "";
-            var unknown = fd.unknownText[key] || "";
+            const format = fd.formats[key] || noFormat;
+            const unit = fd.units[key] || "";
+            const unknown = fd.unknownText[key] || "";
 
             return value !== undefined ? (format (value) + (unit || "")) : unknown;
         },
 
         link: function(xlink, extras) {
-            var linear = xlink.isLinearLink();
-            var mono = xlink.isMonoLink();
-            var info = [
+            const linear = xlink.isLinearLink();
+            const mono = xlink.isMonoLink();
+            const info = [
                 ["From", xlink.fromProtein.name, xlink.fromResidue, modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, false))],
                 linear ? ["To", "Linear", "---", "---"] : mono ? ["To", "Monolink", "---", "---"]
                     : ["To", xlink.toProtein.name, xlink.toResidue, modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, true))],
@@ -82,12 +88,12 @@ export const modelUtils = {
                 ["Highest Score", modelUtils.highestScore(xlink)]
             ];
 
-            var extraEntries = _.pairs (extras);    // turn {a:1, b:2} into [["a",1],["b",2]]
+            const extraEntries = _.pairs(extras);    // turn {a:1, b:2} into [["a",1],["b",2]]
             info.push.apply (info, extraEntries);
 
             d3.entries(xlink.getMeta()).forEach(function(entry) {
-                var val = entry.value;
-                var key = entry.key.toLocaleLowerCase();
+                const val = entry.value;
+                const key = entry.key.toLocaleLowerCase();
                 if (val !== undefined && !_.isObject(val)) {
                     info.push ([key, modelUtils.makeTooltipContents.niceFormat (key, val)]);
                 }
@@ -96,7 +102,7 @@ export const modelUtils = {
         },
 
         interactor: function(interactor) {
-            var contents = [
+            const contents = [
                 ["ID", interactor.id],
                 ["Accession", interactor.accession],
                 ["Size", interactor.size],
@@ -108,8 +114,8 @@ export const modelUtils = {
             }
 
             d3.entries(interactor.getMeta()).forEach(function(entry) {
-                var val = entry.value;
-                var key = entry.key.toLocaleLowerCase();
+                const val = entry.value;
+                const key = entry.key.toLocaleLowerCase();
                 if (val !== undefined && !_.isObject(val)) {
                     contents.push ([key, modelUtils.makeTooltipContents.niceFormat (key, val)]);
                 }
@@ -119,10 +125,10 @@ export const modelUtils = {
         },
 
         multilinks: function(xlinks, interactorId, residueIndex, extras) {
-            var ttinfo = xlinks.map(function(xlink) {
-                var linear = xlink.isLinearLink();
-                var startIsTo = !linear && (xlink.toProtein.id === interactorId && xlink.toResidue === residueIndex);
-                var residueCode = linear ? "---" : modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, !startIsTo));
+            let ttinfo = xlinks.map(function (xlink) {
+                const linear = xlink.isLinearLink();
+                const startIsTo = !linear && (xlink.toProtein.id === interactorId && xlink.toResidue === residueIndex);
+                const residueCode = linear ? "---" : modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(xlink, !startIsTo));
                 if (startIsTo) {
                     return [xlink.fromProtein.name, xlink.fromResidue, residueCode, xlink.filteredMatches_pp.length];
                 } else {
@@ -130,21 +136,21 @@ export const modelUtils = {
                 }
             });
 
-            var extraEntries = d3.entries(extras);
+            const extraEntries = d3.entries(extras);
             extraEntries.forEach(function(extraEntry) {
-                var key = extraEntry.key.toLocaleLowerCase();
+                const key = extraEntry.key.toLocaleLowerCase();
 
                 extraEntry.value.forEach(function(val, i) {
                     ttinfo[i].push (modelUtils.makeTooltipContents.niceFormat (key, val));
                 });
             });
 
-            var sortFields = [3, 0, 1]; // sort by matches, then protein name, then res index
-            var sortDirs = [1, -1, -1];
+            const sortFields = [3, 0, 1]; // sort by matches, then protein name, then res index
+            const sortDirs = [1, -1, -1];
             ttinfo.sort(function(a, b) {
-                var diff = 0;
-                for (var s = 0; s < sortFields.length && diff === 0; s++) {
-                    var field = sortFields[s];
+                let diff = 0;
+                for (let s = 0; s < sortFields.length && diff === 0; s++) {
+                    const field = sortFields[s];
                     diff = (b[field] - a[field]) * sortDirs[s];
                     if (isNaN(diff)) {
                         diff = b[field].localeCompare(a[field]) * sortDirs[s];
@@ -154,15 +160,15 @@ export const modelUtils = {
             });
 
 
-            var headers = ["Protein", "Pos", "Residue", "Matches"];
+            const headers = ["Protein", "Pos", "Residue", "Matches"];
             extraEntries.forEach(function(extraEntry) {
                 headers.push(extraEntry.key);
             });
 
             ttinfo.unshift(headers);
             ttinfo.tableHasHeaders = true;
-            var length = ttinfo.length;
-            var limit = modelUtils.makeTooltipContents.maxRows;
+            const length = ttinfo.length;
+            const limit = modelUtils.makeTooltipContents.maxRows;
             if (length > limit) {
                 ttinfo = ttinfo.slice(0, limit);
                 ttinfo.push(["+ " + (length - limit) + " More"]);
@@ -171,42 +177,42 @@ export const modelUtils = {
         },
 
         feature: function(feature) {
-            var possFields = [
+            const possFields = [
                 ["description"],
                 ["type"],
                 ["category"],
                 ["fstart", "start"],
                 ["fend", "end"]
             ];
-            var data = possFields
-                .filter(function(field) {
+            const data = possFields
+                .filter(function (field) {
                     return feature[field[0]] != undefined;
                 })
-                .map(function(field) {
+                .map(function (field) {
                     return [field.length > 1 ? field[1] : field[0], feature[field[0]]];
                 });
             return data;
         },
 
         linkList: function(linkList, extras) {
-            var extraEntries = d3.entries(extras);
-            var fromProtein, toProtein;
+            const extraEntries = d3.entries(extras);
+            let fromProtein, toProtein;
 
-            var details = linkList.map(function(crosslink, i) {
-                var from3LetterCode = modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(crosslink, false));
-                var to3LetterCode = modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(crosslink, true));
+            let details = linkList.map(function (crosslink, i) {
+                const from3LetterCode = modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(crosslink, false));
+                const to3LetterCode = modelUtils.makeTooltipContents.residueString(modelUtils.getDirectionalResidueType(crosslink, true));
                 fromProtein = crosslink.fromProtein.name;
                 toProtein = crosslink.toProtein.name;
-                var row = [crosslink.fromResidue + " " + from3LetterCode, crosslink.toResidue + " " + to3LetterCode];
-                extraEntries.forEach(function(entry) {
-                    var key = entry.key.toLocaleLowerCase();
-                    var val = entry.value[i];
-                    row.push (modelUtils.makeTooltipContents.niceFormat (key, val));
+                const row = [crosslink.fromResidue + " " + from3LetterCode, crosslink.toResidue + " " + to3LetterCode];
+                extraEntries.forEach(function (entry) {
+                    const key = entry.key.toLocaleLowerCase();
+                    const val = entry.value[i];
+                    row.push(modelUtils.makeTooltipContents.niceFormat(key, val));
                 });
                 return row;
             });
             if (details.length) {
-                var header = [fromProtein.replace("_", " "), toProtein.replace("_", " ")];
+                const header = [fromProtein.replace("_", " "), toProtein.replace("_", " ")];
                 extraEntries.forEach(function(entry) {
                     header.push(entry.key);
                 });
@@ -239,9 +245,9 @@ export const modelUtils = {
         },
 
         complex: function(interactor) {
-            var contents = [
+            const contents = [
                 ["Complex", interactor.id],
-              //  ["Members", Array.from(goTerm.relationship.values()).join(", ")]
+                //  ["Members", Array.from(goTerm.relationship.values()).join(", ")]
                 // ["Accession", interactor.accession],
                 // ["Size", interactor.size],
                 // ["Desc.", interactor.description]
@@ -297,24 +303,24 @@ export const modelUtils = {
     },
 
     findResiduesInSquare: function(convFunc, crosslinkMap, x1, y1, x2, y2, asymmetric) {
-        var a = [];
-        var xmin = Math.max(0, Math.round(Math.min(x1, x2)));
-        var xmax = Math.round(Math.max(x1, x2));
-        var ymin = Math.max(0, Math.round(Math.min(y1, y2)));
-        var ymax = Math.round(Math.max(y1, y2));
+        const a = [];
+        const xmin = Math.max(0, Math.round(Math.min(x1, x2)));
+        const xmax = Math.round(Math.max(x1, x2));
+        const ymin = Math.max(0, Math.round(Math.min(y1, y2)));
+        const ymax = Math.round(Math.max(y1, y2));
         //console.log ("x", xmin, xmax, "y", ymin, ymax);
 
-        for (var n = xmin; n <= xmax; n++) {
-            var convn = convFunc(n, 0).convX;
+        for (let n = xmin; n <= xmax; n++) {
+            const convn = convFunc(n, 0).convX;
             if (!isNaN(convn) && convn > 0) {
-                for (var m = ymin; m <= ymax; m++) {
-                    var conv = convFunc(n, m);
-                    var convm = conv.convY;
-                    var excludeasym = asymmetric && (conv.proteinX === conv.proteinY) && (convn > convm);
+                for (let m = ymin; m <= ymax; m++) {
+                    const conv = convFunc(n, m);
+                    const convm = conv.convY;
+                    const excludeasym = asymmetric && (conv.proteinX === conv.proteinY) && (convn > convm);
 
                     if (!isNaN(convm) && convm > 0 && !excludeasym) {
-                        var k = conv.proteinX + "_" + convn + "-" + conv.proteinY + "_" + convm;
-                        var crosslink = crosslinkMap.get(k);
+                        let k = conv.proteinX + "_" + convn + "-" + conv.proteinY + "_" + convm;
+                        let crosslink = crosslinkMap.get(k);
                         if (!crosslink && (conv.proteinX === conv.proteinY)) {
                             k = conv.proteinY + "_" + convm + "-" + conv.proteinX + "_" + convn;
                             crosslink = crosslinkMap.get(k);
@@ -414,8 +420,8 @@ export const modelUtils = {
     // e.g. ["CAT", "DOG", "CAT", "DOG"] -> [undefined, undefined, 0, 1];
     indexSameSequencesToFirstOccurrence: function(sequences) {
         return sequences.map (function(seq, i) {
-            var val = undefined;
-            for (var j = 0; j < i; j++) {
+            let val = undefined;
+            for (let j = 0; j < i; j++) {
                 if (seq === sequences[j]) {
                     val = j;
                     break;
@@ -427,14 +433,14 @@ export const modelUtils = {
 
     filterRepeatedSequences: function(sequences) {
         // Filter out repeated sequences to avoid costly realignment calculation of the same sequences
-        var sameSeqIndices = modelUtils.indexSameSequencesToFirstOccurrence(sequences);
-        var uniqSeqs = sequences.filter(function(seq, i) {
+        const sameSeqIndices = modelUtils.indexSameSequencesToFirstOccurrence(sequences);
+        const uniqSeqs = sequences.filter(function (seq, i) {
             return sameSeqIndices[i] === undefined;
         }); // get unique sequences...
-        var uniqSeqIndices = d3.range(0, sequences.length).filter(function(i) {
+        const uniqSeqIndices = d3.range(0, sequences.length).filter(function (i) {
             return sameSeqIndices[i] === undefined;
         }); // ...and their original indices in 'seqs'...
-        var uniqSeqReverseIndex = _.invert(uniqSeqIndices); // ...and a reverse mapping of their index in 'seqs' to their place in 'uniqSeqs'
+        const uniqSeqReverseIndex = _.invert(uniqSeqIndices); // ...and a reverse mapping of their index in 'seqs' to their place in 'uniqSeqs'
         return {
             sameSeqIndices: sameSeqIndices,
             uniqSeqs: uniqSeqs,
@@ -445,11 +451,11 @@ export const modelUtils = {
 
     reinflateSequenceMap: function(matchMatrix, sequences, filteredSeqInfo) {
         d3.keys(matchMatrix).forEach(function(protID) {
-            var matchMatrixProt = matchMatrix[protID];
+            const matchMatrixProt = matchMatrix[protID];
             matchMatrix[protID] = d3.range(0, sequences.length).map(function(i) {
-                var sameSeqIndex = filteredSeqInfo.sameSeqIndices[i];
-                var seqIndex = sameSeqIndex === undefined ? i : sameSeqIndex;
-                var uniqSeqIndex = +filteredSeqInfo.uniqSeqReverseIndex[seqIndex]; // + 'cos invert above turns numbers into strings
+                const sameSeqIndex = filteredSeqInfo.sameSeqIndices[i];
+                const seqIndex = sameSeqIndex === undefined ? i : sameSeqIndex;
+                const uniqSeqIndex = +filteredSeqInfo.uniqSeqReverseIndex[seqIndex]; // + 'cos invert above turns numbers into strings
                 return matchMatrixProt[uniqSeqIndex];
             });
         });
@@ -458,19 +464,19 @@ export const modelUtils = {
     },
 
     matrixPairings: function(matrix, sequenceObjs) {
-        var entries = d3.entries(matrix);
-        var pairings = [];
+        const entries = d3.entries(matrix);
+        const pairings = [];
 
-        for (var n = 0; n < sequenceObjs.length; n++) {
-            var max = {
+        for (let n = 0; n < sequenceObjs.length; n++) {
+            const max = {
                 key: undefined,
                 seqObj: undefined,
                 bestScore: 2 //1e-25
             };
-            var seqObj = sequenceObjs[n];
+            const seqObj = sequenceObjs[n];
             entries.forEach(function(entry) {
                 //var eScore = entry.value[n];
-                var avgBitScore = entry.value[n];
+                const avgBitScore = entry.value[n];
 
                 //if (eScore < max.eScore) { // lower eScore is better
                 if (avgBitScore > max.bestScore) { // higher avgBitScore is better
@@ -493,8 +499,8 @@ export const modelUtils = {
 
     intersectObjectArrays: function(a, b, compFunc) {
         if (!_.isEmpty(a) && !_.isEmpty(b) && compFunc) {
-            var map = d3.map(a, compFunc);
-            var result = b.filter(function(elem) {
+            const map = d3.map(a, compFunc);
+            const result = b.filter(function (elem) {
                 return map.has(compFunc(elem));
             });
             return result;
@@ -504,7 +510,7 @@ export const modelUtils = {
 
     // interactorCollection can be map or array
     getLegalAccessionIDs: function(interactorCollection) {
-        var ids = [];
+        let ids = [];
         if (interactorCollection) {
             if (interactorCollection.length === undefined) {    // obj to array if necessary
                 interactorCollection = Array.from(interactorCollection.values());
@@ -520,7 +526,7 @@ export const modelUtils = {
 
     loadUserFile: function (fileObj, successFunc, associatedData) {
         if (window.File && window.FileReader && window.FileList && window.Blob) {
-            var reader = new FileReader();
+            const reader = new FileReader();
 
             // Closure to capture the file information.
             reader.onload = (function() {
@@ -541,7 +547,7 @@ export const modelUtils = {
 
 
     makeSubIndexedMap: function(mmap, subIndexingProperty) {
-        var subIndexedMap = {};
+        const subIndexedMap = {};
         d3.entries(mmap).forEach(function(entry) {
             subIndexedMap[entry.key] = d3.nest()
                 .key(function(d) {
@@ -564,9 +570,9 @@ export const modelUtils = {
 
     // return indices of sequence where letters match ones in the residue set. Index is to the array, not to any external factor
     filterSequenceByResidueSet: function(seq, residueSet, all) {
-        var resIndices = all ? d3.range(0, seq.length) : [];
+        const resIndices = all ? d3.range(0, seq.length) : [];
         if (!all) {
-            for (var m = 0; m < seq.length; m++) {
+            for (let m = 0; m < seq.length; m++) {
                 if (residueSet.has(seq[m])) {
                     resIndices.push(m);
                 }
@@ -576,7 +582,7 @@ export const modelUtils = {
     },
 
     makeMultiKeyProteinMap: function(clmsModel) {
-        var protMap = d3.map();
+        const protMap = d3.map();
         clmsModel.get("participants").forEach (function(value, key) {
             protMap.set(value.accession, key);
             protMap.set(value.name, key);
@@ -586,8 +592,8 @@ export const modelUtils = {
     },
 
     parseProteinID: function(protMap, pid) {
-        var parts = pid.split("|");
-        var pkey;
+        const parts = pid.split("|");
+        let pkey;
         parts.forEach (function (part) {
             pkey = pkey || protMap.get(part);
         });
@@ -595,50 +601,50 @@ export const modelUtils = {
     },
 
     updateLinkMetadata: function (metaDataFileContents, clmsModel) {
-        var crosslinks = clmsModel.get("crosslinks");
-        var crosslinksArr = Array.from (crosslinks.values());
-        var protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
-        var crosslinksByProteinPairing = modelUtils.crosslinkCountPerProteinPairing (crosslinksArr);
+        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinksArr = Array.from(crosslinks.values());
+        const protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
+        const crosslinksByProteinPairing = modelUtils.crosslinkCountPerProteinPairing(crosslinksArr);
 
-        var first = true;
-        var columns = [];
-        var columnTypes = {};
-        var dontStoreArray = ["linkID", "LinkID", "Protein 1", "SeqPos 1", "Protein 2", "SeqPos 2", "Protein1", "Protein2", "SeqPos1", "SeqPos2"];
-        var dontStoreSet = d3.set(dontStoreArray);
+        let first = true;
+        let columns = [];
+        const columnTypes = {};
+        const dontStoreArray = ["linkID", "LinkID", "Protein 1", "SeqPos 1", "Protein 2", "SeqPos 2", "Protein1", "Protein2", "SeqPos1", "SeqPos2"];
+        const dontStoreSet = d3.set(dontStoreArray);
 
         function getValueN(ref, n, d) {
             return d[ref + " " + n] || d[ref + n];
         }
 
         function parseProteinID2(i, d) {
-            var p = getValueN("Protein", i, d) || "";
+            const p = getValueN("Protein", i, d) || "";
             return modelUtils.parseProteinID(protMap, p);
         }
 
-        var matchedCrossLinks = [];
-        var ppiCount = 0;
+        const matchedCrossLinks = [];
+        let ppiCount = 0;
 
         d3.csv.parse(metaDataFileContents, function(d) {
-            var linkID = d.linkID || d.LinkID;
-            var singleCrossLink = crosslinks.get(linkID);
-            var rowCrossLinkArr;
+            const linkID = d.linkID || d.LinkID;
+            let singleCrossLink = crosslinks.get(linkID);
+            let rowCrossLinkArr;
 
             // Maybe need to generate key from several columns
-            var pkey1, pkey2;
+            let pkey1, pkey2;
             if (!singleCrossLink) {
                 pkey1 = parseProteinID2(1, d);
                 pkey2 = parseProteinID2(2, d);
-                var spos1 = getValueN("SeqPos", 1, d);
-                var spos2 = getValueN("SeqPos", 2, d);
-                var linkIDA = pkey1 + "_" + spos1 + "-" + pkey2 + "_" + spos2;
-                var linkIDB = pkey2 + "_" + spos2 + "-" + pkey1 + "_" + spos1;
+                const spos1 = getValueN("SeqPos", 1, d);
+                const spos2 = getValueN("SeqPos", 2, d);
+                const linkIDA = pkey1 + "_" + spos1 + "-" + pkey2 + "_" + spos2;
+                const linkIDB = pkey2 + "_" + spos2 + "-" + pkey1 + "_" + spos1;
                 singleCrossLink = crosslinks.get(linkIDA) || crosslinks.get(linkIDB);
 
                 //console.log ("spos", spos1, spos2, pkey1, pkey2, spos1 == null, spos2 == null);  //  "" != null?
                 if (singleCrossLink == null && ((spos1 == null && spos2 == null) || (spos1 == "" && spos2 == ""))) {   // PPI
                     // get crosslinks for this protein pairing (if any)
-                    var proteinPair = [pkey1, pkey2].sort();
-                    var proteinPairing = crosslinksByProteinPairing[proteinPair.join("-")];
+                    const proteinPair = [pkey1, pkey2].sort();
+                    const proteinPairing = crosslinksByProteinPairing[proteinPair.join("-")];
                     if (proteinPairing) {
                         rowCrossLinkArr = proteinPairing.crosslinks;
                     }
@@ -652,7 +658,7 @@ export const modelUtils = {
             if (rowCrossLinkArr && rowCrossLinkArr.length > 0) {
                 ppiCount++;
                 matchedCrossLinks.push.apply (matchedCrossLinks, rowCrossLinkArr);
-                var keys = d3.keys(d);
+                const keys = d3.keys(d);
 
                 if (first) {
                     columns = _.difference(keys, dontStoreArray);
@@ -663,7 +669,7 @@ export const modelUtils = {
                 }
 
                 keys.forEach(function(key) {
-                    var val = d[key];
+                    let val = d[key];
                     if (val && !dontStoreSet.has(key)) {
                         if (!isNaN(val)) {
                             val = +val;
@@ -678,7 +684,7 @@ export const modelUtils = {
             }
         });
 
-        var matchedCrossLinkCount = matchedCrossLinks.length;
+        const matchedCrossLinkCount = matchedCrossLinks.length;
 
         // If any data types have been detected as non-numeric, go through the links and maked sure they're all non-numeric
         // or sorting etc will throw errors
@@ -688,7 +694,7 @@ export const modelUtils = {
             })
             .forEach(function(entry) {
                 matchedCrossLinks.forEach(function(matchedCrossLink) {
-                    var val = matchedCrossLink.getMeta(entry.key);
+                    const val = matchedCrossLink.getMeta(entry.key);
                     if (val !== undefined) {
                         matchedCrossLink.setMeta(entry.key, val.toString());
                     }
@@ -696,14 +702,14 @@ export const modelUtils = {
             })
         ;
 
-        var registry = clmsModel.get("crosslinkMetaRegistry") || d3.set();
+        const registry = clmsModel.get("crosslinkMetaRegistry") || d3.set();
         columns.forEach (registry.add, registry);
         clmsModel.set("crosslinkMetaRegistry", registry);
 
-        var result = {
-                columns: columns,
-                columnTypes: columnTypes,
-                items: crosslinks,
+        const result = {
+            columns: columns,
+            columnTypes: columnTypes,
+            items: crosslinks,
             matchedItemCount: matchedCrossLinkCount,
             ppiCount: ppiCount
         };
@@ -716,31 +722,31 @@ export const modelUtils = {
     },
 
     updateProteinMetadata: function(metaDataFileContents, clmsModel) {
-        var proteins = clmsModel.get("participants");
-        var first = true;
-        var columns = [];
+        const proteins = clmsModel.get("participants");
+        let first = true;
+        let columns = [];
         // var dontStoreArray = ["proteinID", "Accession"].map(function(str) {
         //     return str.toLocaleLowerCase();
         // });
         // var dontStoreSet = d3.set(dontStoreArray);
-        var matchedProteinCount = 0;
+        let matchedProteinCount = 0;
 
-        var protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
+        const protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
         let groupsFound = false;
 
         d3.csv.parse(metaDataFileContents, function(d) {
             if (first) {
-                var keys = d3.keys(d).map(function(key) {
+                const keys = d3.keys(d).map(function (key) {
                     return key.toLocaleLowerCase();
                 });
                 columns = keys;//_.difference(keys, dontStoreArray);
                 first = false;
             }
 
-            var proteinIDValue = d.proteinID || d.ProteinID || d.Accession || d.accession;
-            var proteinID = protMap.get(modelUtils.parseProteinID(protMap, proteinIDValue));
+            const proteinIDValue = d.proteinID || d.ProteinID || d.Accession || d.accession;
+            const proteinID = protMap.get(modelUtils.parseProteinID(protMap, proteinIDValue));
             if (proteinID !== undefined) {
-                var protein = proteins.get(proteinID);
+                const protein = proteins.get(proteinID);
 
                 if (protein) {
                     matchedProteinCount++;
@@ -749,9 +755,9 @@ export const modelUtils = {
                     //protein.meta = protein.meta || {};
                     //var meta = protein.meta;
                     d3.entries(d).forEach(function(entry) {
-                        var key = entry.key;
-                        var val = entry.value;
-                        var column = key.toLocaleLowerCase();
+                        const key = entry.key;
+                        let val = entry.value;
+                        const column = key.toLocaleLowerCase();
                         // if (!dontStoreSet.has(column) && column !== "name") {
                             if (column == "complex") {
                                 groupsFound = true;
@@ -811,36 +817,36 @@ export const modelUtils = {
     },
 
     updateUserAnnotationsMetadata: function(userAnnotationsFileContents, clmsModel) {
-        var proteins = clmsModel.get("participants");
-        var first = true;
-        var columns = [];
+        const proteins = clmsModel.get("participants");
+        let first = true;
+        let columns = [];
 
-        var protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
-        var newAnnotations = [];
-        var annotationMap = d3.map();
-        var proteinSet = d3.set();
+        const protMap = modelUtils.makeMultiKeyProteinMap(clmsModel);
+        const newAnnotations = [];
+        const annotationMap = d3.map();
+        const proteinSet = d3.set();
 
         d3.csv.parse(userAnnotationsFileContents, function(d) {
             if (first) {
-                var keys = d3.keys(d).map(function(key) {
+                const keys = d3.keys(d).map(function (key) {
                     return key.toLocaleLowerCase();
                 });
                 first = false;
                 columns = keys;
             }
 
-            var dl = {};
+            const dl = {};
             d3.keys(d).forEach(function(key) {
                 dl[key.toLocaleLowerCase()] = d[key];
             });
 
-            var proteinID = protMap.get(modelUtils.parseProteinID(protMap, dl.proteinid));
+            const proteinID = protMap.get(modelUtils.parseProteinID(protMap, dl.proteinid));
             if (proteinID !== undefined) {
-                var protein = proteins.get(proteinID);
+                const protein = proteins.get(proteinID);
 
                 if (protein) {
                     protein.userAnnotations = protein.userAnnotations || [];
-                    var newAnno = {
+                    const newAnno = {
                         type: dl.annotname,
                         description: dl.description,
                         category: "User Defined",
@@ -888,18 +894,18 @@ export const modelUtils = {
 
     loadGOAnnotations: function (txt) {
         console.log ("parsing go obo");
-        var z = performance.now();
-        var go = new Map();
+        const z = performance.now();
+        const go = new Map();
         //var lines = txt.split('\n');
-        var term;
-        var i = 0, l = 0;
-        var first = true;
+        let term;
+        let i = 0, l = 0;
+        let first = true;
 
         //for (var l = 0; l < lines.length; l++) {
         while (i !== 0 || first) {
             first = false;
-            var endi = txt.indexOf("\n", i);
-            var line = txt.slice(i, endi !== -1 ? endi : undefined);
+            const endi = txt.indexOf("\n", i);
+            let line = txt.slice(i, endi !== -1 ? endi : undefined);
             //not having ':' in go ids, so valid html id later, maybe a mistake, (do trim here to get rid of '/r's too - mjg)
             line = line.trim().replace (/:/g, '');
             //var line = lines[l].trim().replace (/:/g, '');
@@ -912,15 +918,15 @@ export const modelUtils = {
                     term = new GoTerm();
                 } else if (term) {
                     //var parts = line.split(" ");  // speed up by avoiding split if humanly possible as free text lines are space heavy
-                    var tag = line.slice (0, line.indexOf(" "));
-                    var value = line.slice (tag.length + 1);
+                    const tag = line.slice(0, line.indexOf(" "));
+                    const value = line.slice(tag.length + 1);
                     if (tag === "is_a") {
-                        var vi = value.indexOf(" ");
-                        var valuewc = vi >= 0 ? value.slice(0, vi) : value; // remove comment portion
+                        const vi = value.indexOf(" ");
+                        const valuewc = vi >= 0 ? value.slice(0, vi) : value; // remove comment portion
                         term.is_a = term.is_a || new Set();
                         term.is_a.add (valuewc);
                     } else if (tag === "intersection_of" || tag === "relationship") {
-                        var parts = value.split(" ", 2);    // split to first 2 only, avoid parsing comments
+                        const parts = value.split(" ", 2);    // split to first 2 only, avoid parsing comments
                         if (parts[0] === "part_of") {
                             // console.log(term.namespace, line);
                             term.part_of = term.part_of || new Set();
@@ -936,7 +942,7 @@ export const modelUtils = {
         }
         go.set(term.id, term); // last one left over
 
-        var zz = performance.now();
+        const zz = performance.now();
         //populate subclasses and parts
         for (term of go.values()) {
             if (term.is_a) {
@@ -962,9 +968,9 @@ export const modelUtils = {
     },
 
     jsonifyGoMap (goMap) {
-        var json = {};
+        const json = {};
         goMap.forEach (function (v, k) {
-            var newv = $.extend({}, v);
+            const newv = $.extend({}, v);
             Object.keys(newv).forEach (function (key) {
                 if (newv[key] instanceof Set) {
                     if (newv[key].size === 0) {
@@ -981,16 +987,16 @@ export const modelUtils = {
     },
 
     crosslinkCountPerProteinPairing: function (crosslinkArr, includeLinears) {
-        var obj = {};
-        var linearShim = {id: "*linear", name: "linear"};
+        const obj = {};
+        const linearShim = {id: "*linear", name: "linear"};
         crosslinkArr.forEach(function(crosslink) {
             if (crosslink.toProtein || includeLinears) {
-            var fromProtein = crosslink.fromProtein;
-                var toProtein = crosslink.toProtein || linearShim;
-                var proteinA = fromProtein.id > toProtein.id ? toProtein : fromProtein;
-                var proteinB = toProtein.id >= fromProtein.id ? toProtein : fromProtein;
-                var key = proteinA.id + "-" + proteinB.id;
-                var pairing = obj[key];
+                const fromProtein = crosslink.fromProtein;
+                const toProtein = crosslink.toProtein || linearShim;
+                const proteinA = fromProtein.id > toProtein.id ? toProtein : fromProtein;
+                const proteinB = toProtein.id >= fromProtein.id ? toProtein : fromProtein;
+                const key = proteinA.id + "-" + proteinB.id;
+                let pairing = obj[key];
                 if (!pairing) {
                     pairing = {
                         crosslinks: [],
@@ -1013,11 +1019,11 @@ export const modelUtils = {
         features.sort(function(f1, f2) {
             return +f1.begin - +f2.begin;
         });
-        var mergedRanges = [],
-            furthestEnd, mergeBegin;
+        const mergedRanges = [];
+        let furthestEnd, mergeBegin;
         features.forEach(function(f) {
-            var b = +f.begin;
-            var e = +f.end;
+            const b = +f.begin;
+            const e = +f.end;
 
             if (furthestEnd === undefined) { // first feature, initialise mergeBegin and furthestEnd
                 mergeBegin = b;
@@ -1040,8 +1046,8 @@ export const modelUtils = {
             }); // add hanging range
         }
 
-        var merged = mergedRanges.length < features.length ? // if merged ranges less than original feature count
-            mergedRanges.map(function(coords) { // make new features based on the new merged ranges
+        const merged = mergedRanges.length < features.length ? // if merged ranges less than original feature count
+            mergedRanges.map(function (coords) { // make new features based on the new merged ranges
                 return $.extend({}, features[0], coords); // features[0] is used to get other fields
             }) :
             features // otherwise just use originals
@@ -1057,15 +1063,15 @@ export const modelUtils = {
         joinString = joinString || "-";
 
         if (vals && vals.length > 1) {
-            var newVals = [];
-            var last = +vals[0],
+            const newVals = [];
+            let last = +vals[0],
                 start = +vals[0],
                 run = 1; // initialise variables to first value
 
-            for (var n = 1; n < vals.length + 1; n++) { // note + 1
+            for (let n = 1; n < vals.length + 1; n++) { // note + 1
                 // add extra loop iteration using MAX_SAFE_INTEGER as last value.
                 // loop will thus detect non-consecutive numbers on last iteration and output the last proper value in some form.
-                var v = (n < vals.length ? +vals[n] : Number.MAX_SAFE_INTEGER);
+                const v = (n < vals.length ? +vals[n] : Number.MAX_SAFE_INTEGER);
                 if (v - last === 1) { // if consecutive to last number just increase the run length
                     run++;
                 } else { // but if not consecutive to last number...
@@ -1084,9 +1090,9 @@ export const modelUtils = {
     },
 
     getDistanceSquared: function (coords1, coords2) {
-        var d2 = 0;
-        for (var n = 0; n < coords1.length; n++) {
-            var diff = coords1[n] - coords2[n];
+        let d2 = 0;
+        for (let n = 0; n < coords1.length; n++) {
+            const diff = coords1[n] - coords2[n];
             d2 += diff * diff;
         }
         return d2;
@@ -1095,11 +1101,11 @@ export const modelUtils = {
     getMinimumDistance: function(points1, points2, accessorObj, maxDistance, ignoreFunc) {
 
         accessorObj = accessorObj || {};
-        var points1Bigger = points1.length > points2.length;
+        const points1Bigger = points1.length > points2.length;
 
-        var bigPointArr = points1Bigger ? points1 : points2;
-        var smallPointArr = points1Bigger ? points2 : points1;
-        var octree = d3.octree();
+        const bigPointArr = points1Bigger ? points1 : points2;
+        const smallPointArr = points1Bigger ? points2 : points1;
+        const octree = d3.octree();
         octree
             .x(accessorObj.x || octree.x())
             .y(accessorObj.y || octree.y())
@@ -1108,10 +1114,10 @@ export const modelUtils = {
 
         maxDistance = maxDistance || 200;
 
-        var nearest = smallPointArr.map(function(point) {
+        const nearest = smallPointArr.map(function (point) {
             return octree.find(octree.x()(point), octree.y()(point), octree.z()(point), maxDistance, point, ignoreFunc);
         });
-        var dist = smallPointArr.map(function(point, i) {
+        const dist = smallPointArr.map(function (point, i) {
             return nearest[i] ? modelUtils.getDistanceSquared(point.coords, nearest[i].coords) : undefined;
         });
 
@@ -1120,11 +1126,11 @@ export const modelUtils = {
 
 
     radixSort: function(categoryCount, data, bucketFunction) {
-        var radixSortBuckets = Array.apply(null, Array(categoryCount)).map(function() {
+        const radixSortBuckets = Array.apply(null, Array(categoryCount)).map(function () {
             return [];
         });
         data.forEach(function(d) {
-            var bucketIndex = bucketFunction(d);
+            const bucketIndex = bucketFunction(d);
             radixSortBuckets[bucketIndex].push(d);
         });
         //console.log ("buckets", radixSortBuckets);
@@ -1135,7 +1141,7 @@ export const modelUtils = {
     // https://stackoverflow.com/questions/3710204/how-to-check-if-a-string-is-a-valid-json-string-in-javascript-without-using-try
     tryParseJSON: function(jsonString) {
         try {
-            var o = JSON.parse(decodeURI(jsonString)); // decodeURI in case square brackets have been escaped in url transmission
+            const o = JSON.parse(decodeURI(jsonString)); // decodeURI in case square brackets have been escaped in url transmission
 
             // Handle non-exception-throwing cases:
             // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
@@ -1150,12 +1156,12 @@ export const modelUtils = {
     },
 
     parseURLQueryString: function(str) {
-        var urlChunkMap = {};
+        const urlChunkMap = {};
         str.split("&").forEach(function(part) {
-            var keyValuePair = part.split("=");
-            var val = keyValuePair[1];
+            const keyValuePair = part.split("=");
+            const val = keyValuePair[1];
             //console.log ("kvp", keyValuePair);
-            var jsonVal = modelUtils.tryParseJSON(val);
+            const jsonVal = modelUtils.tryParseJSON(val);
             urlChunkMap[keyValuePair[0]] = val !== "" ? (Number.isNaN(Number(val)) ? (val == "true" ? true : (val == "false" ? false : (jsonVal ? jsonVal : val))) : Number(val)) : val;
         });
         //console.log ("ucm", urlChunkMap);
@@ -1163,9 +1169,9 @@ export const modelUtils = {
     },
 
     makeURLQueryPairs: function (obj, commonKeyPrefix) {
-        var attrEntries = d3.entries(obj);
-        var parts = attrEntries.map(function(attrEntry) {
-            var val = attrEntry.value;
+        const attrEntries = d3.entries(obj);
+        const parts = attrEntries.map(function (attrEntry) {
+            let val = attrEntry.value;
             if (typeof val === "boolean") {
                 val = +val; // turn true/false to 1/0
             } else if (typeof val === "string") {
@@ -1188,11 +1194,11 @@ export const modelUtils = {
 
     getSearchGroups: function(clmsModel) {
         const searchArr = Array.from(clmsModel.get("searches").values());
-        var uniqueGroups = _.uniq(_.pluck(searchArr, "group"));
+        const uniqueGroups = _.uniq(_.pluck(searchArr, "group"));
         //console.log ("SSS", searchArr, uniqueGroups);
         uniqueGroups.sort(function(a, b) {
-            var an = Number.parseFloat(a);
-            var bn = Number.parseFloat(b);
+            const an = Number.parseFloat(a);
+            const bn = Number.parseFloat(b);
             return !Number.isNaN(an) && !Number.isNaN(bn) ? an - bn : a.localeCompare(b);
         });
         return uniqueGroups;

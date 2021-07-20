@@ -5,6 +5,8 @@ import Backbone from "backbone";
 import {utils} from "../utils";
 import {checkBoxView} from "./checkbox-view";
 import {svgUtils} from "../svgexp";
+import d3 from "d3";
+import {download} from "../downloads";
 
 export const DropDownMenuViewBB = Backbone.View.extend({
     events: {
@@ -17,28 +19,29 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     initialize: function(viewOptions) {
-        var emptyFunc = function() {};
-        var defaultOptions = {
+        const emptyFunc = function () {
+        };
+        const defaultOptions = {
             title: "A DD Menu",
             closeOnClick: true,
             menu: [ // emptying this coz you may now breifly see it in load layout menu
-            //   {
-            //     name: "Wazzup",
-            //     func: emptyFunc
-            // }, {
-            //     name: "Buddy",
-            //     func: emptyFunc
-            // }
+                //   {
+                //     name: "Wazzup",
+                //     func: emptyFunc
+                // }, {
+                //     name: "Buddy",
+                //     func: emptyFunc
+                // }
             ],
             groupByAttribute: "group",
             labelByAttribute: "name",
             toggleAttribute: "state",
-            sectionHeader: function() {
+            sectionHeader: function () {
                 return "";
             },
         };
         this.options = _.extend(defaultOptions, viewOptions.myOptions);
-        var self = this;
+        const self = this;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
         d3.select(this.el)
@@ -69,7 +72,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
 
     updateTooltip: function(tooltipObj) {
         if (tooltipObj && this.options.tooltipModel) {
-            var self = this;
+            const self = this;
             d3.select(this.el).select("span.menuTitle")
                 .on("mouseenter", function() {
                     self.options.tooltipModel
@@ -86,19 +89,19 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     update: function() {
-        var self = this;
+        const self = this;
         if (this.collection) {
-            var lastCat = null;
-            var adata = [];
+            let lastCat = null;
+            const adata = [];
             this.collection.each(function(model) {
-                var cbdata = model.toJSON(); // doesn't actually make json, just copies model attributes to object that can then be jsonified (or overwritten safely)
+                const cbdata = model.toJSON(); // doesn't actually make json, just copies model attributes to object that can then be jsonified (or overwritten safely)
                 $.extend(cbdata, {
                     id: model.get("id") || (model.get(self.options.labelByAttribute) + "Placeholder"), // ids may not contain spaces
                     label: model.get(self.options.labelByAttribute),
                     tooltip: model.get("tooltip"),
                 });
 
-                var cat = model.get(self.options.groupByAttribute);
+                const cat = model.get(self.options.groupByAttribute);
                 if (lastCat !== cat) { // have to access last datum to say it's the last in its category
                     if (adata.length) { // ignore sectionEnd for first item
                         _.last(adata).sectionEnd = true;
@@ -109,19 +112,19 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                 lastCat = cat;
 
                  if (d3.select("#"+utils.makeLegalDomID(cbdata.id)).empty()) {
-                    var options = $.extend({
-                        toggleAttribute: self.options.toggleAttribute,
-                        labelFirst: self.options.labelFirst
-                    }, cbdata);
-                    if (self.options.tooltipModel) {
+                     const options = $.extend({
+                         toggleAttribute: self.options.toggleAttribute,
+                         labelFirst: self.options.labelFirst
+                     }, cbdata);
+                     if (self.options.tooltipModel) {
                         options.tooltipModel = self.options.tooltipModel;
                     }
 
-                    var cbView = new checkBoxView({
-                        model: model,
-                        myOptions: options,
-                    });
-                    self.$el.append(cbView.$el);
+                     const cbView = new checkBoxView({
+                         model: model,
+                         myOptions: options,
+                     });
+                     self.$el.append(cbView.$el);
                 }
             });
 
@@ -131,17 +134,17 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     render: function() {
-        var listHolder = d3.select(this.el).select("div ul");
-        var choices = listHolder.selectAll("li")
-            .data(this.options.menu, function(d) {
+        const listHolder = d3.select(this.el).select("div ul");
+        const choices = listHolder.selectAll("li")
+            .data(this.options.menu, function (d) {
                 return d.name || d.id;
             })
         ;
 
         choices.exit().remove();
 
-        var ttm = this.options.tooltipModel;
-        var self = this;
+        const ttm = this.options.tooltipModel;
+        const self = this;
 
         /*
         choices.each (function (d) {
@@ -154,17 +157,17 @@ export const DropDownMenuViewBB = Backbone.View.extend({
         });
         */
 
-        var items = choices.enter().append("li").each(function(d) {
-            var ind = d3.select(this);
+        const items = choices.enter().append("li").each(function (d) {
+            const ind = d3.select(this);
             if (d.name) {
                 ind.append("span").text(d.name);
                 if (d.class) {
                     ind.classed(d.class, true);
                 }
             } else if (d.id) {
-                var targetSel = d3.select("#" + utils.makeLegalDomID(d.id));
+                const targetSel = d3.select("#" + utils.makeLegalDomID(d.id));
                 if (!targetSel.empty()) {
-                    var targetNode = targetSel.node();
+                    const targetNode = targetSel.node();
                     if (targetNode.parentElement) {
                         targetNode.parentElement.removeChild(targetNode);
                     }
@@ -179,13 +182,13 @@ export const DropDownMenuViewBB = Backbone.View.extend({
             // if tooltip data provided, add either as title attribute or if the tooltipmodel passed as an option, use that
             if (d.tooltip) {
                 if (ttm) {
-                    ind.on("mouseenter", function() {
+                    ind.on("mouseenter", function () {
                         ttm
                             .set("header", d.name || d.label)
                             .set("contents", d.tooltip + ".")
                             .set("location", d3.event);
                         ttm.trigger("change:location");
-                    }).on("mouseleave", function() {
+                    }).on("mouseleave", function () {
                         ttm.set("contents", null);
                     });
                 } else {
@@ -225,10 +228,10 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     enableItemsByID: function (idArr, enable) {
-        var selection = d3.select(this.el).selectAll("li").selectAll(idArr.join(","));
+        const selection = d3.select(this.el).selectAll("li").selectAll(idArr.join(","));
         selection.forEach (function (nestedSel) {
             if (nestedSel.length) {
-                var li = d3.select(nestedSel.parentNode);
+                const li = d3.select(nestedSel.parentNode);
                 li.classed ("disabledItem", !enable)
                     .selectAll("input")
                     .property("disabled", !enable)
@@ -239,12 +242,12 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     enableItemsByIndex: function (indices, enable) {
-        var indexSet = d3.set(indices);
+        const indexSet = d3.set(indices);
 
         d3.select(this.el).selectAll("li")
             .each (function (d,i) {
                 if (indexSet.has(i)) {
-                    var li = d3.select(this);
+                    const li = d3.select(this);
                     li.classed ("disabledItem", !enable)
                         .selectAll("input")
                         .property("disabled", !enable)
@@ -269,7 +272,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     toggleVis: function() {
-        var show = this.isShown();
+        const show = this.isShown();
         // if showing then hide all other menus, really should do it via an event but...
         if (!show) {
             d3.selectAll(".dropdown div").style("display", "none");
@@ -299,16 +302,16 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     menuSelection: function(evt) {
-        var d3target = d3.select(evt.target);
+        const d3target = d3.select(evt.target);
         if (d3target && !d3target.classed("disabledItem")) {    // if enabled item
-            var datum = d3target.datum();
+            const datum = d3target.datum();
             if (datum && datum.func) {
-                var context = datum.context || this;
+                const context = datum.context || this;
                 (datum.func).call(context, d3target, evt); // as value holds function reference
             }
 
             if (this.options.closeOnClick) {
-                var definitelyClose = datum && datum.closeOnClick !== false;
+                const definitelyClose = datum && datum.closeOnClick !== false;
                 if (definitelyClose) {
                     this.hideVis();
                 }
@@ -320,7 +323,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
 
 export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     events: function() {
-        var parentEvents = DropDownMenuViewBB.prototype.events;
+        let parentEvents = DropDownMenuViewBB.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -353,26 +356,26 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     render: function () {
         AnnotationDropDownMenuViewBB.__super__.render.apply(this, arguments);
 
-        var self = this;
-        var items = d3.select(this.el).selectAll("li");
+        const self = this;
+        const items = d3.select(this.el).selectAll("li");
 
         console.log ("render hello", items);
 
         function colourChange(d) {
-            var value = d3.select(this).property("value");
-            var model = self.collection.get(d.id); // d3 id's are same as model id's ('cos ddmenu generates the d3 elements using the collection)
+            const value = d3.select(this).property("value");
+            const model = self.collection.get(d.id); // d3 id's are same as model id's ('cos ddmenu generates the d3 elements using the collection)
             model.set ("colour", value);
             self.collection.trigger("change:shown", model, model.get("shown"));
         }
 
         items.each (function (d, i) {
-            var d3this = d3.select(this);
+            const d3this = d3.select(this);
 
             if (d3this.select(".colourSwatchLabel").empty()) {
-                var colourControl = d3this
+                const colourControl = d3this
                     .insert("label", ":nth-last-child(1)") // insert pushes data to label
                     .attr("class", "colourSwatchLabel")
-                    .style("visibility", function(d) {
+                    .style("visibility", function (d) {
                         return self.collection.get(d.id).get("shown") ? null : "hidden";
                     })
                 ;
@@ -403,7 +406,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     },
 
     decideSVGButtonEnabled: function() {
-        var shownCount = this.collection.where({
+        const shownCount = this.collection.where({
             shown: true
         }).length;
         d3.select(this.el).select("Button.downloadAnnotationKey").property("disabled", shownCount === 0);
@@ -411,7 +414,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     },
 
     setColour: function(featureTypeModel, shown) {
-        var self = this;
+        const self = this;
         d3.select(this.el).selectAll("li")
             .filter(function(d) {
                 return d.id === featureTypeModel.id;
@@ -420,8 +423,8 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
             .style("visibility", shown ? null : "hidden")
             .select(".colourSwatchSquare")
             .style("background", function(d) {
-                var col = self.collection.getColour (d.category, d.type);
-                var scale = d3.scale.linear().domain([0, 1]).range(["white", col]);
+                const col = self.collection.getColour(d.category, d.type);
+                const scale = d3.scale.linear().domain([0, 1]).range(["white", col]);
                 return shown ? scale(0.5) : "none";
             });
 
@@ -430,8 +433,8 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     },
 
     downloadKey: function() {
-        var tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey").style("text-transform", "capitalize");
-        var self = this;
+        const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey").style("text-transform", "capitalize");
+        const self = this;
         utils.updateAnnotationColourKey(
             this.collection.where({
                 shown: true
@@ -447,7 +450,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
                 title: this.identifier,
             }
         );
-        var contentsSize = tempSVG.select("g").node().getBoundingClientRect();
+        const contentsSize = tempSVG.select("g").node().getBoundingClientRect();
         tempSVG.attr("width", contentsSize.width).attr("height", contentsSize.height); // make svg adjust to contents
         this.downloadSVG(null, tempSVG);
         tempSVG.remove();
@@ -456,12 +459,12 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
 
     // use thisSVG d3 selection to set a specific svg element to download, otherwise take first in the view
     downloadSVG: function(event, thisSVG) {
-        var svgSel = thisSVG || d3.select(this.el).selectAll("svg");
-        var svgArr = [svgSel.node()];
-        var svgStrings = svgUtils.capture(svgArr);
-        var svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+        const svgSel = thisSVG || d3.select(this.el).selectAll("svg");
+        const svgArr = [svgSel.node()];
+        const svgStrings = svgUtils.capture(svgArr);
+        const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
 
-        var fileName = this.filenameStateString().substring(0, 240);
+        const fileName = this.filenameStateString().substring(0, 240);
         download(svgXML, 'application/svg', fileName + ".svg");
         return this;
     },

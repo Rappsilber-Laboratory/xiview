@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
+import d3 from "d3";
 const colorbrewer = require('colorbrewer');
 
 export class AnnotationType extends Backbone.Model{

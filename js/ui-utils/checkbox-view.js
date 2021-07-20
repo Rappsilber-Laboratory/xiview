@@ -1,6 +1,7 @@
 import Backbone from "backbone";
 import * as _ from 'underscore';
 import {utils} from '../utils';
+import d3 from "d3";
 
 export const checkBoxView = Backbone.View.extend({
     tagName: "span",

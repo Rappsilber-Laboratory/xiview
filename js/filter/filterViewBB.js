@@ -1,6 +1,7 @@
 import Backbone from "backbone";
 import * as _ from 'underscore';
 import {checkBoxView} from "../ui-utils/checkbox-view";
+import d3 from "d3";
 // import {utils} from './utils';
 
 
@@ -20,7 +21,7 @@ export const FilterViewBB = Backbone.View.extend({
     },
 
     initialize: function(viewOptions) {
-        var defaultOptions = {
+        const defaultOptions = {
             config: [
                 {
                     label: "Manual",
@@ -154,7 +155,7 @@ export const FilterViewBB = Backbone.View.extend({
                     label: "Residue Pairs per PPI",
                     id: "urpPpi",
                     inequality: "&ge;",
-                tooltip: "Filter out protein-protein interactions with less than * supporting unique residue pairs"
+                    tooltip: "Filter out protein-protein interactions with less than * supporting unique residue pairs"
                 }
             ]
         };
@@ -170,10 +171,11 @@ export const FilterViewBB = Backbone.View.extend({
         defaultOptions.config.push.apply (defaultOptions.config, defaultOptions.searchGroupToggles);
 
         // Make options into a map referenced by filter attribute id
+        //todo get rid d3 Map
         this.configMap = d3.map (defaultOptions.config, function(d) { return d.id; });
 
         ["manualMode", "fdrMode"].forEach (function (item) {
-            var entry = this.configMap.get(item);
+            const entry = this.configMap.get(item);
             entry.overrideType = "radio";
             entry.inputClass = "modeToggle";
             entry.name = "modeSelect";
@@ -181,34 +183,34 @@ export const FilterViewBB = Backbone.View.extend({
 
         this.options = _.extend(defaultOptions, viewOptions.myOptions || {});
 
-        var self = this;
+        const self = this;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el);
+        const mainDivSel = d3.select(this.el);
 
 
         function makeFilterControlDiv (options) {
             options = options || {};
-            var div = mainDivSel.append("div").attr("class", "filterControlGroup").style("display", options.hide ? "none" : null);
+            const div = mainDivSel.append("div").attr("class", "filterControlGroup").style("display", options.hide ? "none" : null);
             if (options.id) { div.attr("id", options.id); }
 
             if (options.expandable !== false) {
-                var setPanelState = function (divSel, collapsed) {
-                    divSel.select(".filterControlSpan").style ("display", collapsed ? "none" : null);
+                const setPanelState = function (divSel, collapsed) {
+                    divSel.select(".filterControlSpan").style("display", collapsed ? "none" : null);
                     divSel
                         .select(".verticalTextContainer")
                         .attr("title", (collapsed ? "Expand" : "Collapse") + " this filter section")
                         .select(".verticalText")
-                        .text ((collapsed ? "+ " : "- ") + options.groupName)
+                        .text((collapsed ? "+ " : "- ") + options.groupName)
                     ;
                 };
 
                 div.append("div")
                     .attr ("class", "verticalTextContainer btn-1a")
                     .on("click", function() {
-                        var div = d3.select(this.parentNode);
-                        var panel = div.select(".filterControlSpan");
-                        var collapse = panel.style("display") !== "none";
+                        const div = d3.select(this.parentNode);
+                        const panel = div.select(".filterControlSpan");
+                        const collapse = panel.style("display") !== "none";
                         div.call (setPanelState, collapse);
                     })
                     .append ("div")
@@ -218,7 +220,7 @@ export const FilterViewBB = Backbone.View.extend({
                 div.call (setPanelState, false);
             }
 
-            var nestedDiv = div.append ("div").attr("class", "filterControlSpan");
+            const nestedDiv = div.append("div").attr("class", "filterControlSpan");
             if (options.class) { nestedDiv.classed (options.class, true); }
             return nestedDiv;
         }
@@ -226,7 +228,7 @@ export const FilterViewBB = Backbone.View.extend({
 
 
         function initResetGroup() {
-            var resetDivSel = makeFilterControlDiv ({class: "verticalFlexContainer", expandable: false});
+            const resetDivSel = makeFilterControlDiv({class: "verticalFlexContainer", expandable: false});
             resetDivSel.append("p").attr("class", "smallHeading").text("Filter Bar");
             resetDivSel.append("button")
                 .attr("class", "filterReset btn btn-1a btn-tight")
@@ -237,9 +239,11 @@ export const FilterViewBB = Backbone.View.extend({
 
 
         function addFilterGroup (config, filterIDs) {
-            var divSel = makeFilterControlDiv (config);
-            var filters = filterIDs.map (function (id) { return this.configMap.get(id); }, this);
-            var self = this;
+            const divSel = makeFilterControlDiv(config);
+            const filters = filterIDs.map(function (id) {
+                return this.configMap.get(id);
+            }, this);
+            const self = this;
             divSel.selectAll("div.filterItem")
                 .data(filters, function(d) {
                     return d.id;
@@ -248,7 +252,7 @@ export const FilterViewBB = Backbone.View.extend({
                 .append("div")
                 .attr ("class", "filterItem")
                 .each (function (d) {
-                    var type = d.type || self.model.types[d.id];
+                    const type = d.type || self.model.types[d.id];
                     if (type === "boolean") {
                         self.addBooleanFilter (d3.select(this));
                     }
@@ -265,19 +269,19 @@ export const FilterViewBB = Backbone.View.extend({
 
         function initMinigramFilterGroup (config) {
             if (config && config.attr) {
-                var cutoffDivSel = makeFilterControlDiv (config);
+                const cutoffDivSel = makeFilterControlDiv(config);
 
-                var sliderSection = cutoffDivSel.append("div").attr("class", "scoreSlider");
+                const sliderSection = cutoffDivSel.append("div").attr("class", "scoreSlider");
                 // Can validate template output at http://validator.w3.org/#validate_by_input+with_options
-                var tpl = _.template("<div><p>"+config.label+"</p><P class='vmin cutoffLabel'><span>&gt;</span></P><P>Min</P></div><div id='<%= eid %>'></div><div><p>"+config.label+"</p><P class='cutoffLabel vmax'><span>&lt;</span></P><P>Max</P></div><div class='undef'></div>");
+                const tpl = _.template("<div><p>" + config.label + "</p><P class='vmin cutoffLabel'><span>&gt;</span></P><P>Min</P></div><div id='<%= eid %>'></div><div><p>" + config.label + "</p><P class='cutoffLabel vmax'><span>&lt;</span></P><P>Max</P></div><div class='undef'></div>");
                 sliderSection.html(tpl({
                     eid: self.el.id + config.id + "SliderHolder"
             }));
             // sliderSection.style('display', (self.model.get("scores") === null) ? 'none' : null);
             sliderSection.selectAll("p.cutoffLabel")
                 .attr("title", function() {
-                    var isMinInput = d3.select(this).classed("vmin");
-                        return config.tooltipIntro+" " + (isMinInput ? "less than" : "greater than") + " X e.g. " + (isMinInput ? "8.0" : "20.0");
+                    const isMinInput = d3.select(this).classed("vmin");
+                    return config.tooltipIntro+" " + (isMinInput ? "less than" : "greater than") + " X e.g. " + (isMinInput ? "8.0" : "20.0");
                 })
                 .append("input")
                 .attr({
@@ -286,26 +290,26 @@ export const FilterViewBB = Backbone.View.extend({
                     //min: 0,
                 })
                 .property("value", function() {
-                    var isMinInput = d3.select(this.parentNode).classed("vmin");
-                        var cutoff = self.model.get(config.attr);
-                    var val = cutoff[isMinInput ? 0 : 1];
+                    const isMinInput = d3.select(this.parentNode).classed("vmin");
+                    const cutoff = self.model.get(config.attr);
+                    const val = cutoff[isMinInput ? 0 : 1];
                     return val !== undefined ? val : "";
                 })
                 .on("change", function() { // "input" activates per keypress which knackers typing in anything >1 digit
                     //console.log ("model", self.model);
-                    var val = +this.value;
-                    var isMinInput = d3.select(this.parentNode).classed("vmin");
-                        var cutoff = self.model.get(config.attr);
-                        var extent = self.model[config.extentProperty];
+                    const val = +this.value;
+                    const isMinInput = d3.select(this.parentNode).classed("vmin");
+                    const cutoff = self.model.get(config.attr);
+                    const extent = self.model[config.extentProperty];
                     // take new values, along with score extents, sort them and discard extremes for new cutoff settings
-                        var newVals = [isMinInput ? val : (cutoff[0] !== undefined ? cutoff[0] : extent[0]),
-                                isMinInput ? (cutoff[1] !== undefined ? cutoff[1] : extent[1]) : val,
-                                extent[0], extent[1]
-                        ]
-                        .filter(function(v) {
+                    let newVals = [isMinInput ? val : (cutoff[0] !== undefined ? cutoff[0] : extent[0]),
+                        isMinInput ? (cutoff[1] !== undefined ? cutoff[1] : extent[1]) : val,
+                        extent[0], extent[1]
+                    ]
+                        .filter(function (v) {
                             return v !== undefined;
                         })
-                        .sort(function(a, b) {
+                        .sort(function (a, b) {
                             return a - b;
                         });
                     //console.log ("newVals", newVals);
@@ -316,7 +320,7 @@ export const FilterViewBB = Backbone.View.extend({
                 ;
 
                 if (config.undefAttr) {
-                    var cbox = new checkBoxView({
+                    const cbox = new checkBoxView({
                         el: sliderSection.select("div.undef").node(),
                         model: self.model,
                         myOptions: {
@@ -341,23 +345,23 @@ export const FilterViewBB = Backbone.View.extend({
 
         function initFDRPlaceholder() {
             //following may not be best practice, its here to get the placeholder divs in the right place in the filter div (the grey bar at bottom)
-            var fdrPanel = makeFilterControlDiv ({id: "fdrPanelHolder", groupName: "FDR"});
+            const fdrPanel = makeFilterControlDiv({id: "fdrPanelHolder", groupName: "FDR"});
             fdrPanel.attr("id", "fdrPanel");
         }
 
 
         function addScrollRightButton() {
-            var fixedBox = mainDivSel
+            const fixedBox = mainDivSel
                 .append("div")
                 .attr("class", "fixedBottomRight");
 
-            var button = fixedBox
+            const button = fixedBox
                 .append("button")
                 .attr("class", "tallButton btn btn-1a btn-tight")
                 .attr("title", "Press to show currently off-screen filter controls")
-                .on("click", function() {
-                    var right = mainDivSel.style("right");
-                    var rightSet = right === "20px";
+                .on("click", function () {
+                    const right = mainDivSel.style("right");
+                    const rightSet = right === "20px";
                     mainDivSel.style("right", rightSet ? "auto" : "20px");
 
                     d3.select(this).select("i").attr("class", rightSet ? "fa fa-angle-double-right" : "fa fa-angle-double-left");
@@ -368,7 +372,7 @@ export const FilterViewBB = Backbone.View.extend({
                 .attr("class", "fa fa-angle-double-right");
         }
 
-        var groupIDs = _.pluck(defaultOptions.searchGroupToggles, "id");
+        const groupIDs = _.pluck(defaultOptions.searchGroupToggles, "id");
         groupIDs.push ("multipleGroup");
 
         initResetGroup.call(this);
@@ -387,11 +391,11 @@ export const FilterViewBB = Backbone.View.extend({
 
         // hide toggle options if no point in them being there (i.e. no between / self link toggle if only 1 protein)
         if (this.options.hide) {
-            var entries = d3.entries(this.options.hide);
-            var hideEntries = entries.filter(function(entry) {
+            const entries = d3.entries(this.options.hide);
+            const hideEntries = entries.filter(function (entry) {
                 return entry.value;
             });
-            var hideEntrySet = d3.set(_.pluck(hideEntries, "key"));
+            const hideEntrySet = d3.set(_.pluck(hideEntries, "key"));
             mainDivSel.selectAll(".filterItem")
                 .filter(function(d) {
                     return hideEntrySet.has(d.id);
@@ -413,8 +417,8 @@ export const FilterViewBB = Backbone.View.extend({
 
     // Add a text-based filter widget to a d3 selection, using the attached data
     addTextFilter: function (d3sel) {
-        var textFilter = d3sel
-            .attr("title", function(d) {
+        const textFilter = d3sel
+            .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
             })
             .append("label")
@@ -424,16 +428,18 @@ export const FilterViewBB = Backbone.View.extend({
                 return d.label;
             })
         ;
-        var tfilters = textFilter.append("input")
+        const tfilters = textFilter.append("input")
             .attr("class", "filterTypeText")
-            .attr("type", function (d) { return d.overrideType || "text"; })
-            .attr("size", function(d) {
+            .attr("type", function (d) {
+                return d.overrideType || "text";
+            })
+            .attr("size", function (d) {
                 return d.chars;
             })
         ;
 
         // add patterns to inputs that have them
-        var patterns = this.model.patterns;
+        const patterns = this.model.patterns;
         tfilters.filter(function(d) {
                 return patterns[d.id];
             })
@@ -444,8 +450,8 @@ export const FilterViewBB = Backbone.View.extend({
     },
 
     addNumberFilter: function (d3sel) {
-        var numberFilter = d3sel
-            .attr("title", function(d) {
+        const numberFilter = d3sel
+            .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
             })
             .append("label")
@@ -458,7 +464,7 @@ export const FilterViewBB = Backbone.View.extend({
 
         numberFilter.append("p").classed("cutoffLabel", true).append("span").html(function(d) { return d.inequality; });
 
-        var self = this;
+        const self = this;
         numberFilter.append("input")
             .attr({
                 class: "filterTypeNumber",
@@ -476,11 +482,11 @@ export const FilterViewBB = Backbone.View.extend({
 
     // toggle filter
     addBooleanFilter: function (d3sel) {
-        var toggle = d3sel
-            .attr("id", function(d) {
+        const toggle = d3sel
+            .attr("id", function (d) {
                 return "toggles_" + d.id;
             })
-            .attr("title", function(d) {
+            .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
             })
             .append("label")
@@ -505,9 +511,9 @@ export const FilterViewBB = Backbone.View.extend({
     },
 
     processBooleanFilter: function (evt) {
-        var target = evt.target;
-        var data = this.datumFromTarget (target);
-        var id = data.id;
+        const target = evt.target;
+        const data = this.datumFromTarget(target);
+        const id = data.id;
         if (id == "selfLinks") {
             d3.select("#aaApart").attr("disabled", target.checked ? null : "disabled");
         }
@@ -515,38 +521,38 @@ export const FilterViewBB = Backbone.View.extend({
     },
 
     processTextFilter: function (evt) {
-        var target = evt.target;
+        const target = evt.target;
         if (evt.target.checkValidity()) {
-            var data = this.datumFromTarget (target);
+            const data = this.datumFromTarget(target);
             this.model.set (data.id, target.value);
         }
     },
 
     processGroupToggleFilter: function (evt) {
-        var target = evt.target;
-        var data = this.datumFromTarget (target);
+        const target = evt.target;
+        const data = this.datumFromTarget(target);
 
         if (data) {
-            var current = d3.set(this.model.get("searchGroups"));
+            const current = d3.set(this.model.get("searchGroups"));
             current[target.checked ? "add" : "remove"](data.id);
             this.model.set("searchGroups", current.values());
         }
     },
 
     processNumberFilter: function (evt) {
-        var target = evt.target;
-        var data = this.datumFromTarget (target);
-        var id = data.id;
-        var value = target.value;
+        const target = evt.target;
+        const data = this.datumFromTarget(target);
+        const id = data.id;
+        const value = target.value;
         if (this.model.get(id) != value) {
             this.model.set(id, value);
         }
     },
 
     processModeChanged: function() {
-        var checked = d3.select(this.el).selectAll("input[name='modeSelect']").filter(":checked");
+        const checked = d3.select(this.el).selectAll("input[name='modeSelect']").filter(":checked");
         if (checked.size() === 1) {
-            var fdrMode = checked.datum().id ===  "fdrMode";
+            const fdrMode = checked.datum().id === "fdrMode";
             this.model.set({
                 fdrMode: fdrMode,
                 manualMode: !fdrMode
@@ -558,7 +564,7 @@ export const FilterViewBB = Backbone.View.extend({
         options = options || {};
         model = model || this.model;
 
-        var mainDiv = d3.select(this.el);
+        const mainDiv = d3.select(this.el);
 
         mainDiv.selectAll("input.filterTypeText, input.filterTypeNumber")
             .property("value", function(d) {
@@ -572,7 +578,7 @@ export const FilterViewBB = Backbone.View.extend({
             })
         ;
 
-        var groupSet = d3.set (model.get("searchGroups"));
+        const groupSet = d3.set(model.get("searchGroups"));
         mainDiv.selectAll("input.groupToggleFilter")
             .property("checked", function(d) {
                 return Boolean(groupSet.has(d.id));
@@ -581,8 +587,8 @@ export const FilterViewBB = Backbone.View.extend({
 
         // hide parts of the filter panel if mode (manual/fdr) setting has changed, or if setInputValuesFromModelcalled directly (change is empty)
         if (options.showHide || model.changed.manualMode !== undefined || model.changed.fdrMode !== undefined) {
-            var fdrMode = model.get("fdrMode");
-            var d3el = d3.select(this.el);
+            const fdrMode = model.get("fdrMode");
+            const d3el = d3.select(this.el);
             d3el.selectAll("#validationStatus, #matchScore").style("display", fdrMode ? "none" : null);
             d3el.selectAll("#fdrPanelHolder").style("display", fdrMode ? null : "none");
             if (fdrMode == true) {
@@ -605,11 +611,11 @@ export const FilterViewBB = Backbone.View.extend({
 export const FDRViewBB = Backbone.View.extend({
     initialize: function() {
 
-        var chartDiv = d3.select(this.el);
+        const chartDiv = d3.select(this.el);
         chartDiv.html("<div class='fdrCalculation'><p>Basic link-level FDR calculation</p><span></span></div>");
-        var self = this;
-        var options = [0.01, 0.05, 0.1, 0.2, 0.5 /*, undefined*/ ];
-        var labelFunc = function(d) {
+        const self = this;
+        const options = [0.01, 0.05, 0.1, 0.2, 0.5 /*, undefined*/];
+        const labelFunc = function (d) {
             return d === undefined ? "Off" : d3.format("%")(d);
         };
 
@@ -656,8 +662,8 @@ export const FDRViewBB = Backbone.View.extend({
 
     setInputValuesFromModel: function(model) {
         model = model || this.model;
-        var fdrThreshold = model.get("fdrThreshold");
-        var d3el = d3.select(this.el);
+        const fdrThreshold = model.get("fdrThreshold");
+        const d3el = d3.select(this.el);
         //d3el.style("display", model.get("fdrMode") ? null : "none");
         d3el.selectAll("input[name='fdrPercent']").property("checked", function(d) {
             return d === fdrThreshold;
@@ -672,7 +678,7 @@ export const FilterSummaryViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function() {
-        var targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Cross-Links";
+        const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Cross-Links";
         this.targetTemplate = _.template(targetTemplateString);
         this.allTemplate = _.template(targetTemplateString + " ( + <%= decoysTD %> TD; <%= decoysDD %> DD Decoys)");
 
@@ -682,10 +688,10 @@ export const FilterSummaryViewBB = Backbone.View.extend({
     },
 
     render: function() {
-        var commaFormat = d3.format(",");
-        var model = this.model;
-        var decoysPresent = model.get("clmsModel").get("decoysPresent");
-        var variables = {
+        const commaFormat = d3.format(",");
+        const model = this.model;
+        const decoysPresent = model.get("clmsModel").get("decoysPresent");
+        const variables = {
             targets: commaFormat(model.getFilteredCrossLinks().length),
             decoysTD: commaFormat(model.getFilteredCrossLinks("decoysTD").length),
             decoysDD: commaFormat(model.getFilteredCrossLinks("decoysDD").length),
@@ -701,7 +707,7 @@ export const FDRSummaryViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function() {
-        var fdrTypes = ["interFdrCut", "intraFdrCut"];
+        const fdrTypes = ["interFdrCut", "intraFdrCut"];
         d3.select(this.el).selectAll("p").data(fdrTypes)
             .enter()
             .append("p")
@@ -717,29 +723,29 @@ export const FDRSummaryViewBB = Backbone.View.extend({
     },
 
     render: function() {
-        var fdrTypes = {
+        const fdrTypes = {
             "interFdrCut": "Between",
             "intraFdrCut": "Within"
         };
 
-        var filterModel = this.model.get("filterModel");
-        var threshold = filterModel.get("fdrThreshold");
-        var fdrMode = filterModel.get("fdrMode");
+        const filterModel = this.model.get("filterModel");
+        const threshold = filterModel.get("fdrThreshold");
+        const fdrMode = filterModel.get("fdrMode");
 
-        var clmsModel = this.model.get("clmsModel");
-        var singleTargetProtein = clmsModel.targetProteinCount < 2;
-        var decoysPresent = clmsModel.get("decoysPresent");
+        const clmsModel = this.model.get("clmsModel");
+        const singleTargetProtein = clmsModel.targetProteinCount < 2;
+        const decoysPresent = clmsModel.get("decoysPresent");
 
-        var self = this;
+        const self = this;
 
         d3.select(this.el).selectAll("p")
             .text(function(d, i) {
                 if (fdrMode) {
-                    var cut = filterModel.get(d);
+                    const cut = filterModel.get(d);
                     return "• " + fdrTypes[d] + " score cutoff for " + self.pctFormat(threshold) + " is " + (cut ? cut.toFixed(2) : cut);
                 } else {
                     if (i === 0 && decoysPresent) {
-                        var roughFDR = (self.model.getFilteredCrossLinks("decoysTD").length - self.model.getFilteredCrossLinks("decoysDD").length) / (self.model.getFilteredCrossLinks().length || 1);
+                        const roughFDR = (self.model.getFilteredCrossLinks("decoysTD").length - self.model.getFilteredCrossLinks("decoysDD").length) / (self.model.getFilteredCrossLinks().length || 1);
                         return "• Apparent link-level FDR: " + self.pctFormat(roughFDR);
                     }
                     return "";

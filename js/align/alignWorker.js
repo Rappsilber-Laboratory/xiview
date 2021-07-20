@@ -5,8 +5,8 @@ if (importScripts) {
 
 function protAlignPar(protID, settings, compSeqArray, tempSemiLocal) {
     settings.aligner = GotohAligner;
-    var protAlignModel = ProtAlignModel.prototype;
-    var fullResults = protAlignModel.alignWithoutStoringWithSettings(compSeqArray, tempSemiLocal, settings);
+    const protAlignModel = ProtAlignModel.prototype;
+    const fullResults = protAlignModel.alignWithoutStoringWithSettings(compSeqArray, tempSemiLocal, settings);
     return {
         fullResults: fullResults,
         protID: protID

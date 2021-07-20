@@ -3,12 +3,13 @@ import * as _ from 'underscore';
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {GoTerm} from "./goTerm";
+import d3 from "d3";
 
 
 export const GoTermsViewBB = BaseFrameView.extend({
 
     events: function () {
-        var parentEvents = BaseFrameView.prototype.events;
+        let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -33,17 +34,17 @@ export const GoTermsViewBB = BaseFrameView.extend({
     initialize: function (viewOptions) {
         GoTermsViewBB.__super__.initialize.apply(this, arguments);
 
-        var self = this;
+        const self = this;
 
         // targetDiv could be div itself or id of div - lets deal with that
         // Backbone handles the above problem now - element is now found in this.el
         //avoids prob with 'save - web page complete'
-        var mainDivSel = d3.select(this.el).classed("goTermsView", true);
+        const mainDivSel = d3.select(this.el).classed("goTermsView", true);
 
-        var flexWrapperPanel = mainDivSel.append("div")
+        const flexWrapperPanel = mainDivSel.append("div")
             .attr("class", "verticalFlexContainer");
 
-        var controlDiv = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
+        const controlDiv = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
         this.termSelect = controlDiv.append("label")
             .attr("class", "btn selectHolder")
             .append("span")
@@ -55,9 +56,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 self.updateThenRender();
             });
 
-        var termSelectData = ["cellular_component", "biological_process", "molecular_function"];
+        const termSelectData = ["cellular_component", "biological_process", "molecular_function"];
 
-        var options = this.termSelect.selectAll("option")
+        const options = this.termSelect.selectAll("option")
             .data(termSelectData)
             .enter()
             .append("option");
@@ -96,7 +97,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 //self.fixed = [];
                 //self.render();
             });
-        var margin = this.options.margin;
+        const margin = this.options.margin;
         this.vis = this.svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         this.backgroundGroup = this.vis.append("g");
         // this.linkGroup = vis.append("g");
@@ -108,7 +109,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         //this.fixed = [];
 
         //markers
-        var data = [{
+        const data = [{
             id: 1,
             name: 'diamond',
             path: 'M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z',
@@ -124,8 +125,8 @@ export const GoTermsViewBB = BaseFrameView.extend({
             color: this.options.subclassColour
         }];
 
-        var defs = this.svg.append('svg:defs');
-        var marker = defs.selectAll('marker')
+        const defs = this.svg.append('svg:defs');
+        const marker = defs.selectAll('marker')
             .data(data)
             .enter()
             .append('svg:marker')
@@ -159,20 +160,20 @@ export const GoTermsViewBB = BaseFrameView.extend({
 
 
     goTextMatch: function (evt) {
-        var self = this;
-        var val = evt.target.value;
-        var regex = new RegExp(val, "i");
+        const self = this;
+        const val = evt.target.value;
+        const regex = new RegExp(val, "i");
         //var textPos = this.textPos.bind(this);
 
-        var allInteractorSet = new Set();
-        var goMatchCount = 0;
+        const allInteractorSet = new Set();
+        let goMatchCount = 0;
 
-        var nodes = this.foregroundGroup.selectAll(".node")
+        const nodes = this.foregroundGroup.selectAll(".node")
             .each(function (d) {
                 d.strMatch = val && val.length > 1 && d.name.match(regex);
                 if (d.strMatch) {
                     goMatchCount++;
-                    var interactorSet = d.term.getInteractors();
+                    const interactorSet = d.term.getInteractors();
                     if (interactorSet) {
                         interactorSet.forEach(allInteractorSet.add, allInteractorSet);
                     }
@@ -201,14 +202,14 @@ export const GoTermsViewBB = BaseFrameView.extend({
             })
         ;
 
-        var interactors = Array.from(allInteractorSet.values());
-        var msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
+        const interactors = Array.from(allInteractorSet.values());
+        const msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
         d3.select(this.el).select(".goTextResult").text(msg);
         this.model[evt.key === "Enter" || evt.keyCode === 13 || evt.which === 13 ? "setSelectedProteins" : "setHighlightedProteins"](interactors, false);
     },
 
     update: function () {
-        var termType = d3.select("#goTermsPanelgoTermSelect")
+        const termType = d3.select("#goTermsPanelgoTermSelect")
             .selectAll("option")
             .filter(function () {
                 return d3.select(this).property("selected");
@@ -217,18 +218,18 @@ export const GoTermsViewBB = BaseFrameView.extend({
             .trim()
         ;
 
-        var go = this.model.get("go");
+        const go = this.model.get("go");
         //associate go terms with proteins (clear them first)
-        for (var g of go.values()) {
-            var gints = g.interactors;
+        for (let g of go.values()) {
+            const gints = g.interactors;
             if (gints && gints.size > 0) {
                 gints.clear();
             }
             g.filtInteractorCount = 0;
         }
 
-        var proteins = this.model.get("clmsModel").get("participants").values();
-        for (var protein of proteins) {
+        const proteins = this.model.get("clmsModel").get("participants").values();
+        for (let protein of proteins) {
             if (protein.uniprot) {
                 for (var goId of protein.uniprot.go) {
                     var goTerm = go.get(goId);
@@ -240,8 +241,8 @@ export const GoTermsViewBB = BaseFrameView.extend({
             }
         }
 
-        var nodes = new Map();
-        var linksMap = new Map();
+        const nodes = new Map();
+        const linksMap = new Map();
 
         GoTerm.prototype.getCount = 0; // what?
         if (termType == "biological_process") {
@@ -366,12 +367,12 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 renderOptions = renderOptions || {iterations: 32};
 
                 //console.log("RENDERING GO TERMS");
-                var jqElem = $(this.svg.node());
-                var cx = jqElem.width(); //this.svg.node().clientWidth;
-                var cy = jqElem.height(); //this.svg.node().clientHeight;
-                var margin = this.options.margin;
-                var width = Math.max(0, cx - margin.left - margin.right);
-                var height = Math.max(0, cy - margin.top - margin.bottom);
+                const jqElem = $(this.svg.node());
+                const cx = jqElem.width(); //this.svg.node().clientWidth;
+                const cy = jqElem.height(); //this.svg.node().clientHeight;
+                const margin = this.options.margin;
+                const width = Math.max(0, cx - margin.left - margin.right);
+                const height = Math.max(0, cy - margin.top - margin.bottom);
 
                 this.sankey
                     .nodes(this.data.nodes)
@@ -381,10 +382,10 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 ;
 
                 //console.log ("res", this.sankey);
-                var maxDepth = d3.max(this.data.nodes, function (d) {
+                const maxDepth = d3.max(this.data.nodes, function (d) {
                     return d.depth;
                 });
-                var colWidth = (width - this.sankey.nodePadding() - this.sankey.nodeWidth()) / maxDepth;
+                const colWidth = (width - this.sankey.nodePadding() - this.sankey.nodeWidth()) / maxDepth;
                 this.colWidth = colWidth;
                 //console.log ("data", this.data, maxDepth, colWidth);
 
@@ -412,15 +413,15 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 //     })
                 // ;
 
-                var color = d3.scale.category20();
+                const color = d3.scale.category20();
 
-                var path = this.sankey.link();
-                var self = this;
+                const path = this.sankey.link();
+                const self = this;
 
                 // var textPos = self.textPos.bind(self);
 
 
-                var linkSel = self.backgroundGroup.selectAll(".goLink")
+                const linkSel = self.backgroundGroup.selectAll(".goLink")
                     .data(this.data.links,
                         function (d) {
                             return d.id;
@@ -439,13 +440,13 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     })
                 ;
 
-                var nodeSel = this.foregroundGroup.selectAll(".node")
+                const nodeSel = this.foregroundGroup.selectAll(".node")
                     .data(this.data.nodes, function (d) {
                         return d.id;
                     })
                 ;
 
-                var nodeEnter = nodeSel.enter().append("g")
+                const nodeEnter = nodeSel.enter().append("g")
                     .attr("class", "node")
                     .on("click", function (d) {
                         self.model.setSelectedProteins([], false);

@@ -2,12 +2,13 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 import c3 from "c3/src";
 import {utils} from '../utils';
+import d3 from "d3";
 
 export const MinigramViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function(viewOptions) {
-        var defaultOptions = {
+        const defaultOptions = {
             maxX: 80,
             height: 60,
             width: 180,
@@ -16,17 +17,17 @@ export const MinigramViewBB = Backbone.View.extend({
         };
         this.options = _.extend(defaultOptions, viewOptions.myOptions);
 
-        var self = this;
+        const self = this;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
-        var mainDivSel = d3.select(this.el).attr("class", "minigram");
+        const mainDivSel = d3.select(this.el).attr("class", "minigram");
 
-        var chartDiv = mainDivSel.append("div")
+        const chartDiv = mainDivSel.append("div")
             .attr("id", this.el.id + "c3Chart")
             .attr("class", "c3minigram");
 
         // Generate the C3 Chart
-        var bid = "#" + chartDiv.attr("id");
+        const bid = "#" + chartDiv.attr("id");
 
         this.chart = c3.generate({
             bindto: bid,
@@ -91,8 +92,8 @@ export const MinigramViewBB = Backbone.View.extend({
 
                     // the below fires one change:domainStart event, one change:domainEnd event and one change event (if we want to process both changes together)
                     //utils.xilog ("minigram domain", domain[0], domain[1]);
-                    var interval = 0.1;
-                    var roundDomain = domain.map(function(v) {
+                    const interval = 0.1;
+                    const roundDomain = domain.map(function (v) {
                         return +((Math.round(v / interval) * interval).toFixed(1));
                     });
 
@@ -124,7 +125,7 @@ export const MinigramViewBB = Backbone.View.extend({
                         self.brushRecalc();
                     }
 
-                    var svg = d3.select(this.api.element).select("svg");
+                    const svg = d3.select(this.api.element).select("svg");
                     svg.append("text")
                         .attr("class", "legendToggler")
                         .attr("y", svg.attr("height") / 2)
@@ -146,8 +147,8 @@ export const MinigramViewBB = Backbone.View.extend({
 
         this.chart.internal.main.style("display", "none");  // hide main chart (the one that normally gets zoomed in and out of)
 
-        var brush = d3.select(this.el).selectAll("svg .c3-brush");
-        var flip = {e: 1, w: -1};
+        const brush = d3.select(this.el).selectAll("svg .c3-brush");
+        const flip = {e: 1, w: -1};
         brush.selectAll(".resize").append("path")
             .attr("transform", function(d) {
                 return "translate(0,0) scale(" + (flip[d]) + ",1)";
@@ -162,15 +163,15 @@ export const MinigramViewBB = Backbone.View.extend({
     },
 
     render: function() {
-        var self = this;
-        var seriesData = this.model.data();
+        const self = this;
+        const seriesData = this.model.data();
 
         // aggregate data into bar chart friendly form
-        var aggregates = this.aggregate (seriesData);
-        var countArrays = aggregates.counts;
-        var thresholds = aggregates.thresholds;
+        const aggregates = this.aggregate(seriesData);
+        const countArrays = aggregates.counts;
+        const thresholds = aggregates.thresholds;
 
-        var maxY = d3.max(countArrays[0]) || 1; // max calced on real data only (a-ha, why decoys sometimes exceed height)
+        const maxY = d3.max(countArrays[0]) || 1; // max calced on real data only (a-ha, why decoys sometimes exceed height)
         // if max y needs to be calculated across all series
         /*
             var maxY = d3.max(countArrays, function(array) {
@@ -186,7 +187,7 @@ export const MinigramViewBB = Backbone.View.extend({
         countArrays.push(thresholds);
         //utils.xilog ("thresholds", thresholds);
 
-        var curMaxY = this.chart.axis.max().y;
+        const curMaxY = this.chart.axis.max().y;
         if (curMaxY === undefined || curMaxY < maxY || curMaxY / maxY >= 2) { // only reset maxY if necessary as it causes redundant repaint (given we load and repaint straight after)
             this.chart.axis.max({
                 y: maxY
@@ -209,13 +210,15 @@ export const MinigramViewBB = Backbone.View.extend({
     },
     
     getAxisRange: function () {
-        var extent = d3.extent (this.chart.internal.orgXDomain);
+        const extent = d3.extent(this.chart.internal.orgXDomain);
         return Math.abs (extent[1] - extent[0]);
     },
     
     // make x tick text values the rounder numbers, and remove any that overlap afterwards
     tidyXAxis: function () {
-        var xaxis = d3.select (d3.select(this.el).selectAll(".c3-axis-x").filter(function(d,i) { return i === 1; }).node());
+        const xaxis = d3.select(d3.select(this.el).selectAll(".c3-axis-x").filter(function (d, i) {
+            return i === 1;
+        }).node());
         utils.niceValueAxis (xaxis, this.getAxisRange());
         utils.declutterAxis (xaxis, true);
         return this;
@@ -223,8 +226,8 @@ export const MinigramViewBB = Backbone.View.extend({
     
     // Hack to move bars right by half a bar width so they sit between correct values rather than over the start of an interval
     makeBarsSitBetweenTicks: function (chartObj, whichXAxis) {  // can be xAxis or subXAxis
-        var internal = chartObj || this.chart.internal;
-        var halfBarW = internal.getBarW (internal[whichXAxis], 1) / 2 || 0;
+        const internal = chartObj || this.chart.internal;
+        const halfBarW = internal.getBarW(internal[whichXAxis], 1) / 2 || 0;
         d3.select(this.el).selectAll(".c3-event-rects,.c3-chart-bars").attr("transform", "translate(" + halfBarW + ",0)");
         return this;
     },
@@ -233,19 +236,19 @@ export const MinigramViewBB = Backbone.View.extend({
         accessor = accessor || function(d) {
             return d;
         }; // return object/variable/number as is as standard accessor
-        
-        var seriesCopy = series.slice();
+
+        const seriesCopy = series.slice();
         if (this.model.get("extent")) {
             seriesCopy.push (this.model.get("extent"));
         }
         // get extents of all arrays, concatenate them, then get extent of that array
-        var extent = d3.extent([].concat.apply([], seriesCopy.map(function(singleSeries) {
+        const extent = d3.extent([].concat.apply([], seriesCopy.map(function (singleSeries) {
             return singleSeries ? d3.extent(singleSeries, accessor) : [0, 1];
         })));
-        var min = d3.min([0, Math.floor(extent[0])]);
-        var max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
-        var step = Math.max(1, utils.niceRound((max - min) / this.options.maxBars));
-        var thresholds = d3.range(min, max + (step * 2), step);
+        const min = d3.min([0, Math.floor(extent[0])]);
+        const max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
+        const step = Math.max(1, utils.niceRound((max - min) / this.options.maxBars));
+        let thresholds = d3.range(min, max + (step * 2), step);
         //utils.xilog ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
 
         //utils.xilog ("Extent", extent, min, max);
@@ -256,16 +259,16 @@ export const MinigramViewBB = Backbone.View.extend({
     },
 
     aggregate: function (seriesData) {
-        var seriesLengths = _.pluck (seriesData, "length");
-        var thresholds = this.getBinThresholds (seriesData);
+        const seriesLengths = _.pluck(seriesData, "length");
+        const thresholds = this.getBinThresholds(seriesData);
 
-        var sIndex = this.options.seriesNames.indexOf(this.options.scaleOthersTo);
-        var targetLength = sIndex >= 0 ? seriesLengths[sIndex] : 1;
+        const sIndex = this.options.seriesNames.indexOf(this.options.scaleOthersTo);
+        const targetLength = sIndex >= 0 ? seriesLengths[sIndex] : 1;
 
-        var countArrays = seriesData.map(function(aseries, i) {
-            var binnedData = d3.layout.histogram().bins(thresholds)(aseries);
-            var scale = sIndex >= 0 ? targetLength / (seriesLengths[i] || targetLength) : 1;
-            return binnedData.map(function(nestedArr) {
+        const countArrays = seriesData.map(function (aseries, i) {
+            const binnedData = d3.layout.histogram().bins(thresholds)(aseries);
+            const scale = sIndex >= 0 ? targetLength / (seriesLengths[i] || targetLength) : 1;
+            return binnedData.map(function (nestedArr) {
                 return nestedArr.y * scale;
             });
         }, this);
@@ -311,9 +314,9 @@ export const MinigramViewBB = Backbone.View.extend({
     },
 
     toggleLegend: function() {
-        var legendBackground = d3.select(this.el).select(".c3-legend-background");
+        const legendBackground = d3.select(this.el).select(".c3-legend-background");
         if (legendBackground.node()) {
-            var curState = legendBackground.style("visibility");
+            const curState = legendBackground.style("visibility");
             if (curState === "hidden") {
                 this.chart.legend.show();
             } else {

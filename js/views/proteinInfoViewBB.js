@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {utils} from "../utils";
+import d3 from "d3";
 
 export const ProteinInfoViewBB = BaseFrameView.extend({
     events: function () {
@@ -191,19 +192,19 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
 
             div.appendChild(table);
 
-            var tabs = d3.select(this.el).select("div.panelInner");
+            const tabs = d3.select(this.el).select("div.panelInner");
 
             tabs.selectAll("span.hit")
                 .on("click", function () {
-                    var idArray = self.splitDataAttr(d3.select(this), "data-linkids");
-                    var crosslinks = self.getCrossLinksFromIDs(idArray, true);
+                    const idArray = self.splitDataAttr(d3.select(this), "data-linkids");
+                    const crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     self.model.setMarkedCrossLinks("selection", crosslinks, true, d3.event.ctrlKey);
                 })
                 .on("mouseover", function () {
                     //console.log ("model", self.model);
-                    var d3sel = d3.select(this);
-                    var idArray = self.splitDataAttr(d3sel, "data-linkids");
-                    var crosslinks = self.getCrossLinksFromIDs(idArray, true);
+                    const d3sel = d3.select(this);
+                    const idArray = self.splitDataAttr(d3sel, "data-linkids");
+                    const crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     // following breaks things if proteins have underscores in name
                     // var posData = self.splitDataAttr(d3sel, "data-pos", "_");
                     // var interactor = self.model.get("clmsModel").get("participants").get(posData[0]);
@@ -228,31 +229,31 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
     },
 
     showCrossLinksState: function () {
-        var self = this;
+        const self = this;
         //console.log ("in prot info filter");
         if (this.isVisible()) {
-            var selectedLinks = self.model.getMarkedCrossLinks("selection");
-            var selidset = d3.set(_.pluck(selectedLinks, "id"));
-            var highlightedLinks = self.model.getMarkedCrossLinks("highlights");
-            var highidset = d3.set(_.pluck(highlightedLinks, "id"));
+            const selectedLinks = self.model.getMarkedCrossLinks("selection");
+            const selidset = d3.set(_.pluck(selectedLinks, "id"));
+            const highlightedLinks = self.model.getMarkedCrossLinks("highlights");
+            const highidset = d3.set(_.pluck(highlightedLinks, "id"));
 
             d3.select(this.el).selectAll("span.hit")
                 .each(function () {
-                    var d3sel = d3.select(this);
-                    var idArray = self.splitDataAttr(d3sel, "data-linkids");
-                    var crosslinks = self.getCrossLinksFromIDs(idArray, true);
+                    const d3sel = d3.select(this);
+                    const idArray = self.splitDataAttr(d3sel, "data-linkids");
+                    const crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     //d3sel.classed ("filteredOutResidue", crosslinks.length === 0);
-                    var selYes = crosslinks.some(function (xlink) {
+                    const selYes = crosslinks.some(function (xlink) {
                         return selidset.has(xlink.id);
                     });
                     //d3sel.classed ("selected", selYes);
-                    var highYes = crosslinks.some(function (xlink) {
+                    const highYes = crosslinks.some(function (xlink) {
                         return highidset.has(xlink.id);
                     });
                     //d3sel.classed ("highlighted", highYes);
 
                     // setting attr("class") once as a string is multiple times quicker than 3x .classed calls (roughly 5-6x quicker)
-                    var classStr = ["hit"]; // maintain the span element's hit class state
+                    const classStr = ["hit"]; // maintain the span element's hit class state
                     if (crosslinks.length === 0) {
                         classStr.push("filteredOutResidue");
                     }
@@ -269,7 +270,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
     },
 
     showProteinHighlightsState: function () {
-        var highlightSet = d3.set(_.pluck(this.model.get("highlightedProteins"), "id"));
+        const highlightSet = d3.set(_.pluck(this.model.get("highlightedProteins"), "id"));
         //d3.select(this.el).selectAll(".sectionTable h2")
         d3.select(this.el).selectAll(".protTab")
             .classed("highlighted", function (d) {
@@ -289,15 +290,15 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
     },
 
     splitDataAttr: function (d3sel, dataAttrName, splitChar) {
-        var ids = d3sel.attr(dataAttrName);
+        const ids = d3sel.attr(dataAttrName);
         return ids ? ids.split(splitChar || ",") : [];
     },
 
     getCrossLinksFromIDs: function (linkIDs, filter) {
         linkIDs = d3.set(linkIDs).values(); // strips out duplicates
 
-        var allLinks = this.model.get("clmsModel").get("crosslinks");
-        var crosslinks = linkIDs.map(function (linkId) {
+        const allLinks = this.model.get("clmsModel").get("crosslinks");
+        let crosslinks = linkIDs.map(function (linkId) {
             return allLinks.get(linkId);
         });
 
@@ -310,26 +311,26 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
     },
 
     makeInteractiveSeqString: function (protein, seq, xlinks, filterDecoys) {
-        var proteinId = protein.id;
+        const proteinId = protein.id;
         if (filterDecoys) {
             xlinks = xlinks.filter(function (xlink) {
                 return !xlink.isDecoyLink();
             });
         }
-        var map = d3.map(xlinks, function (d) {
+        const map = d3.map(xlinks, function (d) {
             return d.id;
         });
-        var endPoints = {};
+        const endPoints = {};
         map.forEach(function (id, xlink) { // saves calculating values() - map.values().forEach (function (xlink)
             if (proteinId === xlink.fromProtein.id) {
-                var fromRes = xlink.fromResidue;
+                const fromRes = xlink.fromResidue;
                 endPoints[fromRes] = endPoints[fromRes] || [];
                 endPoints[fromRes].push(xlink);
             }
             //added check for no toProtein (for linears)
             //if ( /*!xlink.isLinearLink() &&*/ xlink.isSelfLink()) { // if linear then will fail for selflink anyways
             if (!xlink.isLinearLink() && proteinId === xlink.toProtein.id) { // if linear then will fail for selflink anyways
-                var toRes = xlink.toResidue;
+                const toRes = xlink.toResidue;
                 // In cases of homomultimers linking same residue indices, don't add twice
                 if (toRes !== xlink.fromResidue || proteinId !== xlink.fromProtein.id) {
                     endPoints[toRes] = endPoints[toRes] || [];
@@ -337,22 +338,22 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 }
             }
         });
-        var endPointEntries = d3.entries(endPoints);
+        const endPointEntries = d3.entries(endPoints);
         endPointEntries.sort(function (a, b) {
             return a.key - b.key;
         });
 
-        var strSegs = [];
-        var last = 0;
+        const strSegs = [];
+        let last = 0;
         endPointEntries.forEach(function (ep) {
-            var pos = +ep.key;
-            var linkIds = _.pluck(ep.value, "id");
+            const pos = +ep.key;
+            const linkIds = _.pluck(ep.value, "id");
             strSegs.push(seq.slice(last, pos - 1));
             strSegs.push("<span class='hit' data-pos='" + (proteinId + "_" + pos) + "' data-linkids='" + linkIds.join(",") + "'>" + seq.charAt(pos - 1) + "</span>");
             last = pos;
         });
         strSegs.push(seq.slice(last, seq.length));
-        var iStr = strSegs.join("");
+        const iStr = strSegs.join("");
         //console.log("iStr", iStr);
 
         return iStr;

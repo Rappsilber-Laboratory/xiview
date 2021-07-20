@@ -4,6 +4,7 @@ import * as _ from 'underscore';
 import {utils} from "../../utils";
 import {modelUtils} from "../../modelUtils";
 import Backbone from "backbone";
+import d3 from "d3";
 // import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
 // import {NGLModelWrapperBB} from "./ngl-wrapper-model"; // cyclic dependency, hack it into bottom of this file
 
@@ -207,6 +208,7 @@ export const NGLUtils = {
         */
 
         function dealWithReturnedData(data) {
+            //todo get rid d3 Map
             const map = d3.map();
 
             $(data).find("block").each(function (i, b) {

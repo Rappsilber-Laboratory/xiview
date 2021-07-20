@@ -1,3 +1,5 @@
+import d3 from "d3";
+
 export const loadSpectrum = function (match, randId, spectrumModel) {
 
     const formatted_data = {};
