@@ -24,7 +24,6 @@ export class CompositeModel extends Backbone.Model{
             selectedProteins: [],
             highlightedProteins: [],
             TTCrossLinkCount: 0,
-            xinetDragToPan: true,
             xinetShowLabels: true,
             xinetShowExpandedGroupLabels: true,
             xinetFixedSize: true,
@@ -712,6 +711,16 @@ export class CompositeModel extends Backbone.Model{
 
         });
     }
+
+
+    collapseGroups () {
+        window.vent.trigger("collapseGroups", true);
+    }
+
+    expandGroups () {
+        window.vent.trigger("expandGroups", true);
+    }
+
 
     // Things that can cause a cross-link's minimum distance to change:
     // 1. New PDB File loaded

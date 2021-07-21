@@ -559,28 +559,7 @@ init.views = function () {
                     context: compModel,
                     tooltip: "Select proteins whose descriptions include input text",
                     sectionEnd: true
-                },
-                // {
-                //     sectionBegin: true,
-                //     categoryTitle: "Group Selected",
-                //     id: "groupSelected",
-                //     func: compModel.groupSelectedProteins,
-                //     closeOnClick: false,
-                //     context: compModel,
-                //     tooltip: "Enter group name",
-                // },
-                // {
-                //     name: "Clear Groups",
-                //     func: compModel.clearGroups,
-                //     context: compModel,
-                //     tooltip: "Clears all groups"
-                // },
-                // {
-                //     name: "Auto Group",
-                //     func: compModel.autoGroup,
-                //     context: compModel,
-                //     tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)"
-                // }
+                }
             ],
             //tooltipModel: compModel.get("tooltipModel")
             sectionHeader: function (d) {
@@ -599,37 +578,8 @@ init.views = function () {
         model: compModel.get("clmsModel"),
         myOptions: {
             title: "Groups",
-            menu: [//{
-            //     name: "Hide Selected",
-            //     func: compModel.hideSelectedProteins,
-            //     context: compModel,
-            //     tooltip: "Hide selected proteins",
-            // },
-            //     {
-            //         name: "Hide Unselected",
-            //         func: compModel.hideUnselectedProteins,
-            //         context: compModel,
-            //         tooltip: "Hide unselected proteins",
-            //         sectionEnd: true
-            //     },
-            //     {
-            //         name: "+Neighbours",
-            //         func: compModel.stepOutSelectedProteins,
-            //         context: compModel,
-            //         tooltip: "Select proteins which are crosslinked to already selected proteins",
-            //         categoryTitle: "Change Selection",
-            //         sectionBegin: true
-            //     },
-            //     {
-            //         id: "proteinSelectionFilter",
-            //         func: compModel.proteinSelectionTextFilter,
-            //         closeOnClick: false,
-            //         context: compModel,
-            //         tooltip: "Select proteins whose descriptions include input text",
-            //         sectionEnd: true
-            //     },
+            menu: [
                 {
-                    sectionBegin: true,
                     categoryTitle: "Group Selected",
                     id: "groupSelected",
                     func: compModel.groupSelectedProteins,
@@ -647,7 +597,20 @@ init.views = function () {
                     name: "Auto Group",
                     func: compModel.autoGroup,
                     context: compModel,
-                    tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)"
+                    tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)",
+                    sectionEnd: true
+                },
+                {
+                    name: "Collapse All",
+                    func: compModel.collapseGroups,
+                    context: compModel,
+                    tooltip: "Collapse all groups",
+                },
+                {
+                    name: "Expand All",
+                    func: compModel.expandGroups,
+                    context: compModel,
+                    tooltip: "Expand all groups",
                 }
             ],
             //tooltipModel: compModel.get("tooltipModel")
