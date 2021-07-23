@@ -1,3 +1,4 @@
+import _ from "underscore";
 import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./NGLUtils";
 import d3 from "d3";
