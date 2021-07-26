@@ -73,7 +73,12 @@ header('Content-type: text/html; charset=utf-8');
         <link rel="stylesheet" href="./css/validationPage.css<?php echo $cacheBuster ?>">
         <link rel="stylesheet" href="./css/xiView.css<?php echo $cacheBuster ?>">
 
+        <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/jquery.jsonview.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
+        
         <script type="text/javascript" src="../dist/xiview.js"></script>
     </head>
 
