@@ -33,6 +33,7 @@ export const PepInputView = Backbone.View.extend({
 
             // linkSite
             let cl_re = /#([0-9]+)?/g;
+            let match;
             while ((match = cl_re.exec(pep_noMods)) != null) {
                 let clIndex = match[1] === undefined ? 0 : match[1];
                 let linkSite = {'id': clIndex, 'peptideId': i, 'linkSite': match.index - 1};
