@@ -78,7 +78,8 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/datatables.min.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
-        
+        <script type="text/javascript" src="../vendor/js/spin.js<?php echo $cacheBuster ?>"></script>
+
         <script type="text/javascript" src="../dist/xiview.js"></script>
     </head>
 

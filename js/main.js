@@ -7,7 +7,7 @@
 // require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
 import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
-import {Spinner} from 'spin.js';
+// import {Spinner} from 'spin';
 import * as d3 from 'd3';
 import {init} from './networkFrame';
 import {allDataLoaded} from "./networkFrame";

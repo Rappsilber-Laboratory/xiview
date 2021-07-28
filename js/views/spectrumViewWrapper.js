@@ -4,6 +4,7 @@ import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {utils} from "../utils";
 import d3 from "d3";
+import {validate} from "../validate";
 
 export const SpectrumViewWrapper = BaseFrameView.extend({
 
@@ -55,7 +56,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         d3.select(this.el).selectAll("label")
             .classed("btn", true);
 
-/*        if (loggedIn) {
+        if (window.loggedIn) {
             this.validationMap = {
                 A: "A",
                 B: "B",
@@ -104,11 +105,11 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
                         });
                     }
                 });
-        } else { */
+        } else {
             d3.select(this.el).select("div.validationControls")
                 .append("p")
                 .html("Current Manual Validation State: <span class='validatedState'></span></p>");
-/*        }*/
+        }
 
         this.alternativesModel = new CompositeModel({
             //~ filterModel: filterModelInst,
@@ -215,9 +216,9 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             }
             vent.trigger("individualMatchSelected", match);
             this.enableControls(match);
-            // if (loggedIn) {
-            //     this.setButtonValidationState(match);
-            // } else {
+            if (window.loggedIn) {
+                this.setButtonValidationState(match);
+            } else {
                 if (match) {
                     d3.select(this.el).select("span.validatedState")
                         .text(match.validated ? match.validated : "Undefined")
@@ -228,7 +229,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
                         .text("")
                         .attr("class", "validatedState");
                 }
-            // }
+            }
         } else {
             this.newestSelectionShown = false;
         }

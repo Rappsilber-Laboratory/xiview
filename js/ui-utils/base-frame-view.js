@@ -4,7 +4,7 @@ import Backbone from "backbone";
 
 import {svgUtils} from "../svgexp";
 import {utils} from "../utils";
-import {Spinner} from "spin.js";
+// import {Spin}
 import {download} from  "../downloads";
 import d3 from "d3";
 

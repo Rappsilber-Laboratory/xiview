@@ -1,4 +1,4 @@
-const validate = function (matchId, validationStatus, randId, successCallBack) {
+export const validate = function (matchId, validationStatus, randId, successCallBack) {
     $.ajax({
         type: "POST",
         url: "./php/validateMatch.php",
