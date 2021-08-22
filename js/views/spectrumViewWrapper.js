@@ -56,60 +56,10 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         d3.select(this.el).selectAll("label")
             .classed("btn", true);
 
-        if (window.loggedIn) {
-            this.validationMap = {
-                A: "A",
-                B: "B",
-                C: "C",
-                "?": "Q",
-                R: "R"
-            };
-            const buttonData = d3.entries(this.validationMap).map(function (entry) {
-                return {
-                    label: entry.key,
-                    klass: entry.value
-                };
-            });
 
-            // Add validation buttons
-            const self = this;
-            d3.select(this.el).select("div.validationControls")
-                .append("table")
-                .append("tr")
-                .selectAll("td")
-                .data(buttonData)
-                .enter()
-                .append("td")
-                .append("button")
-                .attr("class", function (d) {
-                    return "validationButton " + d.klass;
-                })
-                .text(function (d) {
-                    return d.label;
-                })
-                .attr("title", function (d) {
-                    const alreadySet = d3.select(this).classed("validatedState");
-                    return (alreadySet ? "Validation State is currently Set to " : "Set Validation State to ") + d.label;
-                })
-                .on("click", function (d) {
-                    const lsm = self.model.get("lastSelectedMatch");
-                    if (lsm && lsm.match) {
-                        //ar randId = modelUtils.getRandomSearchId (self.model.get("clmsModel"), lsm.match);
-                        const randId = self.model.get("clmsModel").getSearchRandomId(lsm.match);
-                        //console.log ("randId", randId);
-                        validate(lsm.match.id, d.label, randId, function () {
-                            lsm.match.validated = d.label;
-                            self.setButtonValidationState(lsm.match);
-                            self.model.trigger("matchValidationStateUpdated");
-                            self.model.applyFilter();
-                        });
-                    }
-                });
-        } else {
-            d3.select(this.el).select("div.validationControls")
-                .append("p")
-                .html("Current Manual Validation State: <span class='validatedState'></span></p>");
-        }
+        d3.select(this.el).select("div.validationControls")
+            .append("p")
+            .html("Current Manual Validation State: <span class='validatedState'></span></p>");
 
         this.alternativesModel = new CompositeModel({
             //~ filterModel: filterModelInst,
@@ -195,16 +145,6 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             .classed("spectrumDisabled", !state);
     },
 
-    setButtonValidationState: function (match) {
-        d3.select(this.el).selectAll("button.validationButton").classed("validatedState", false);
-        if (match && match.validated) {
-            const klass = this.validationMap[match.validated];
-            if (klass) {
-                d3.select(this.el).select("." + klass).classed("validatedState", true);
-            }
-        }
-    },
-
     triggerSpectrumViewer: function (match, forceShow) {
         //console.log ("MATCH selected", match, forceShow);
         if (this.isVisible() || forceShow) {
@@ -216,19 +156,15 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             }
             vent.trigger("individualMatchSelected", match);
             this.enableControls(match);
-            if (window.loggedIn) {
-                this.setButtonValidationState(match);
+            if (match) {
+                d3.select(this.el).select("span.validatedState")
+                    .text(match.validated ? match.validated : "Undefined")
+                    .attr("class", "validatedState")
+                    .classed(match.validated, true);
             } else {
-                if (match) {
-                    d3.select(this.el).select("span.validatedState")
-                        .text(match.validated ? match.validated : "Undefined")
-                        .attr("class", "validatedState")
-                        .classed(match.validated, true);
-                } else {
-                    d3.select(this.el).select("span.validatedState")
-                        .text("")
-                        .attr("class", "validatedState");
-                }
+                d3.select(this.el).select("span.validatedState")
+                    .text("")
+                    .attr("class", "validatedState");
             }
         } else {
             this.newestSelectionShown = false;

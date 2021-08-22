@@ -105,69 +105,13 @@ header('Content-type: text/html; charset=utf-8');
 
         <script>
         //<![CDATA[
+
             xiview.validationPage();
-        //~ var windowLoaded = function () {
-        //     var CLMSUI = CLMSUI || {};
             <?php
-                if (isset($_SESSION['session_name'])) {
-                    echo "window.loggedIn = true;";
-                }
                 if (file_exists('../xiSpecConfig.php')) {
                     include('../xiSpecConfig.php');
                 }
             ?>
-//
-//            var spinner = new Spinner({scale: 5}).spin (d3.select("#topDiv").node());
-//
-//            var success = function (text) {
-//                spinner.stop(); // stop spinner on request returning
-//                var json = JSON.parse (text);
-//                CLMSUI.init.modelsEssential(json);
-//
-//                var searches = window.compositeModelInst.get("clmsModel").get("searches");
-//                document.title = "Validate " + Array.from(searches.keys()).join();
-//                Split (["#topDiv", "#bottomDiv"], { direction: "vertical",
-//                        sizes: [60,40], minSize: [200,10],
-//                            onDragEnd: function () {vent.trigger ("resizeSpectrumSubViews", true);
-//                } });
-//
-//                // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
-//                d3.select("body").append("div")
-//                    .attr("id", "spectrumSettingsWrapper")
-//                    .attr("class", "dynDiv")
-//                ;
-//                CLMSUI.init.viewsEssential({"specWrapperDiv":"#topDiv", spectrumToTop: false});
-//
-//                vent.trigger ("spectrumShow", true);
-//
-//        var allMatches = window.compositeModelInst.get("clmsModel").get("matches")
-//        window.compositeModelInst.setMarkedMatches ("selection", allMatches);
-//
-//                // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
-//                // so we run it again here, doesn't do any harm
-//                ByRei_dynDiv.init.main();
-//
-//                var resize = function(event) {
-//                    vent.trigger ("resizeSpectrumSubViews", true);
-//                    var alts = d3.select("#alternatives");
-//                    var w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
-//                    alts.attr("style", "width:"+w+"px;"); //dont know why d3 style() aint working
-//                };
-//
-//                window.onresize = resize;
-//
-//                resize();
-//            };
-//
-//            var url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
-//
-//
-//            d3.text (url, function (error, text) {
-//                if (!error) {
-//                    success (text);
-//                }
-//            });
-
 
         //]]>
         </script>

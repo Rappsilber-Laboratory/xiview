@@ -4,7 +4,7 @@
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta charset="utf-8">
@@ -79,6 +79,7 @@
 
         <script type="text/javascript" src="../vendor/js/d3-octree.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="./js/views/go/sankey.js<?php echo $cacheBuster ?>"></script>
+        <title>network</title>
     </head>
 
     <body>
@@ -133,9 +134,6 @@
     //<![CDATA[
 
         <?php
-            if (isset($_SESSION['session_name'])) {
-                echo "window.loggedIn = true;";
-            }
             if (file_exists('../xiSpecConfig.php')) {
                 include('../xiSpecConfig.php');
             }
