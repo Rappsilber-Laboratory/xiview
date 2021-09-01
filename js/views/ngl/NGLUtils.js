@@ -84,22 +84,22 @@ export const NGLUtils = {
 
                     // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                     // between ngl protein chains and clms proteins. This is asynchronous so we use a callback
-                    // if (self.pdbSettings[0].pdbCode && modelUtils.getLegalAccessionIDs(interactorMap).length) {
-                    //     console.log("WEB SERVICE CALLED");
-                    //     NGLUtils.matchPDBChainsToUniprot(self.pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
-                    //         utils.xilog ("UniprotMapRes", uniprotMappingResults, nglSequences);
-                    //         if (uniprotMappingResults.remaining.length) { // Some PDB sequences don't have unicode protein matches in this search
-                    //             var remainingSequences = _.pluck (uniprotMappingResults.remaining, "seqObj");   // strip the remaining ones back to just sequence objects
-                    //             //console.log ("rem", remainingSequences, uniprotMappingResults);
-                    //             matchByXiAlignment (remainingSequences, uniprotMappingResults.uniprotMapped);   // fire them into xi alignment routine
-                    //             //returnFailure ("No valid uniprot data returned");
-                    //         } else {
-                    //             sequenceMapsAvailable (uniprotMappingResults.uniprotMapped);
-                    //         }
-                    //     });
-                    // } else { // without access to pdb codes have to match comparing all proteins against all chains
-                    matchByXiAlignment(nglSequences, []);
-                    // }
+                    if (self.pdbSettings[0].pdbCode && modelUtils.getLegalAccessionIDs(interactorMap).length) {
+                        console.log("WEB SERVICE CALLED");
+                        NGLUtils.matchPDBChainsToUniprot(self.pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
+                            utils.xilog ("UniprotMapRes", uniprotMappingResults, nglSequences);
+                            if (uniprotMappingResults.remaining.length) { // Some PDB sequences don't have unicode protein matches in this search
+                                var remainingSequences = _.pluck (uniprotMappingResults.remaining, "seqObj");   // strip the remaining ones back to just sequence objects
+                                //console.log ("rem", remainingSequences, uniprotMappingResults);
+                                matchByXiAlignment (remainingSequences, uniprotMappingResults.uniprotMapped);   // fire them into xi alignment routine
+                                //returnFailure ("No valid uniprot data returned");
+                            } else {
+                                sequenceMapsAvailable (uniprotMappingResults.uniprotMapped);
+                            }
+                        });
+                    } else { // without access to pdb codes have to match comparing all proteins against all chains
+                        matchByXiAlignment(nglSequences, []);
+                    }
 
                     // bit to continue onto after ngl protein chain to clms protein matching has been done
                     function sequenceMapsAvailable(sequenceMap) {
@@ -195,7 +195,7 @@ export const NGLUtils = {
     // Therefore, we need to return umatched sequences so we can fallback to using our own pairing algorithm if necessary
     matchPDBChainsToUniprot: function (pdbUris, nglSequences, interactorArr, callback) {
 
-        let count = pdbUris.length;
+        let count = nglSequences.length;//pdbUris.length;
         const dataArr = [];
         let requireXiAlign = [];
 
@@ -210,27 +210,30 @@ export const NGLUtils = {
 
         function dealWithReturnedData(data) {
             //todo get rid d3 Map
-            const map = d3.map();
+            // const map = d3.map();
 
-            $(data).find("block").each(function (i, b) {
-                const segArr = $(this).find("segment[intObjectId]");
-                for (let n = 0; n < segArr.length; n += 2) {
-                    const id1 = $(segArr[n]).attr("intObjectId");
-                    const id2 = $(segArr[n + 1]).attr("intObjectId");
-                    const pdbis1 = _.includes(id1, ".") || !id1.match(utils.commonRegexes.uniprotAccession);
-                    const unipdb = pdbis1 ? {
-                        pdb: id1,
-                        uniprot: id2
-                    } : {
-                        pdb: id2,
-                        uniprot: id1
-                    };
-                    map.set(unipdb.pdb + "-" + unipdb.uniprot, unipdb);
-                }
-            });
+            // $(data).find("block").each(function (i, b) {
+            //     const segArr = $(this).find("segment[intObjectId]");
+            //     for (let n = 0; n < segArr.length; n += 2) {
+            //         const id1 = $(segArr[n]).attr("intObjectId");
+            //         const id2 = $(segArr[n + 1]).attr("intObjectId");
+            //         const pdbis1 = _.includes(id1, ".") || !id1.match(utils.commonRegexes.uniprotAccession);
+            //         const unipdb = pdbis1 ? {
+            //             pdb: id1,
+            //             uniprot: id2
+            //         } : {
+            //             pdb: id2,
+            //             uniprot: id1
+            //         };
+            //         map.set(unipdb.pdb + "-" + unipdb.uniprot, unipdb);
+            //     }
+            // });
             // sometimes there are several blocks for the same uniprot/pdb combination so had to map then take the values to remove duplicate pairings i.e. 3C2I
             // we calculate the alignment later on, this routine is purely to pair pdb chains to our proteins via uniprot accession numbers
-            let mapArr = Array.from(map.values());
+
+            console.log("**", data);
+
+            let mapArr = data;//Array.from(map.values());
             utils.xilog("PDB Service Map All", mapArr);
 
             if (callback) {
@@ -241,7 +244,7 @@ export const NGLUtils = {
                     const pdbName = (dotIndex >= 0 ? mapping.pdb.slice(0, dotIndex) : mapping.pdb.slice(-1)).toLocaleLowerCase();
                     const chainName = dotIndex >= 0 ? mapping.pdb.slice(dotIndex + 1) : mapping.pdb.slice(-1); // bug fix 27/01/17
                     const matchSeqs = nglSequences.filter(function (seqObj) {
-                        return seqObj.chainName === chainName && seqObj.structureID === pdbName;
+                        return seqObj.chainName == chainName //&& seqObj.structureID === pdbName;
                     });
                     //console.log ("SEQOBJS", matchSeqs);
                     mapping.seqObj = matchSeqs[0];
@@ -264,18 +267,30 @@ export const NGLUtils = {
         }
 
 
-        pdbUris.forEach(function (pdbUri) {
-            alert(pdbUri.id);
-            // https://1d-coordinates.rcsb.org/#1d-coordinates-api
-            const url = 'https://1d-coordinates.rcsb.org/graphql?query=' + encodeURI('{ alignment(from:PDB_ENTITY, to:UNIPROT, queryId:"' + pdbUri.id.toString().toUpperCase() + '_1") { target_alignment { target_id aligned_regions { query_begin query_end target_begin target_end } } } }');
-            // const query = "{alignment(from:NCBI_PROTEIN,to:PDB_ENTITY,queryId:"XP_642496"){target_alignment{target_id}}}"
-            // https://1d-coordinates.rcsb.org/graphql?query=%7Balignment(from:PDB_ENTITY,to:UNIPROT,queryId:%225lzv%22)%7Btarget_alignment%7Btarget_id%20aligned_regions%7Bquery_begin%20query_end%20target_begin%20target_end%7D%7D%7D%7D
+        // pdbUris.forEach(function (pdbUri) {
+        for (let nglSequence of nglSequences) {
+            // alert(pdbUri.id);
+            const pdbId = nglSequence.structureID.toUpperCase() + '.' + nglSequence.chainName;
+            const url = 'https://1d-coordinates.rcsb.org/graphql?query=' + encodeURI('{ alignment(from:PDB_INSTANCE, to:UNIPROT, queryId:"'
+                + pdbId + '") { target_alignment { target_id } } }');
             $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
                 function (data, status, xhr) {
-                    if (status === "success" && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
-                        dataArr.push(data);
+                    if (status === "success"){//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
+
+                        // console.log("YO:", url, data,  nglSequence.structureId + '.' + nglSequence.chainName );
+
+                        const target_alignment = data.data.alignment.target_alignment;
+                        if (target_alignment) {
+                            const target = target_alignment[0].target_id;
+                            dataArr.push({
+                                pdb: nglSequence.structureID.toUpperCase() + '.' + nglSequence.chainName,
+                                uniprot: target
+                            });
+                        }
+
+                        // dataArr.push(data);
                     } else { // usually some kind of error if reached here as we didn't detect xml
-                        requireXiAlign.push(pdbUri);
+                        // requireXiAlign.push(pdbUri);
                     }
 
                     count--;
@@ -284,13 +299,13 @@ export const NGLUtils = {
                     }
                 }
             ).fail(function (jqxhr, status, error) {
-                requireXiAlign.push(pdbUri);
+                // requireXiAlign.push(pdbUri);
                 count--;
                 if (count === 0) {
                     dealWithReturnedData(dataArr);
                 }
             });
-        });
+        }//);
 
     },
 
@@ -325,50 +340,50 @@ export const NGLUtils = {
         const start = performance.now();
         // webworker way, only do if enough proteins and cores to make it worthwhile
         // if ((!window || !!window.Worker) && proteins.length > 20 && workerpool.cpus > 2) {
-            let count = proteins.length;
-            const pool = workerpool.pool("js/align/alignWorker.js");
-
-            proteins.forEach(function (prot, i) {
-                const protAlignModel = protAlignCollection.get(prot.id);
-                const settings = protAlignModel.getSettings();
-                settings.aligner = undefined;
-                pool.exec('protAlignPar', [prot.id, settings, filteredSeqInfo.uniqSeqs, {
-                    semiLocal: true
-                }])
-                    .then(function (alignResultsObj) {
-                        // be careful this is async, so protID better obtained from returned object - might not be prot.id
-                        updateMatchMatrix(alignResultsObj.protID, alignResultsObj.fullResults)
-                    })
-                    .catch(function (err) {
-                        console.log(err);
-                    })
-                    .then(function () {
-                        count--;
-                        if (count % 10 === 0) {
-                            CLMSUI.vent.trigger("alignmentProgress", count + " proteins remaining to align.");
-                            if (count === 0) {
-                                pool.terminate(); // terminate all workers when done
-                                console.log("tidy pool. TIME PAR", performance.now() - start);
-                                finished(matchMatrix);
-                            }
-                        }
-                    });
-            });
+        //     let count = proteins.length;
+        //     const pool = workerpool.pool("js/align/alignWorker.js");
+        //
+        //     proteins.forEach(function (prot, i) {
+        //         const protAlignModel = protAlignCollection.get(prot.id);
+        //         const settings = protAlignModel.getSettings();
+        //         settings.aligner = undefined;
+        //         pool.exec('protAlignPar', [prot.id, settings, filteredSeqInfo.uniqSeqs, {
+        //             semiLocal: true
+        //         }])
+        //             .then(function (alignResultsObj) {
+        //                 // be careful this is async, so protID better obtained from returned object - might not be prot.id
+        //                 updateMatchMatrix(alignResultsObj.protID, alignResultsObj.fullResults)
+        //             })
+        //             .catch(function (err) {
+        //                 console.log(err);
+        //             })
+        //             .then(function () {
+        //                 count--;
+        //                 if (count % 10 === 0) {
+        //                     CLMSUI.vent.trigger("alignmentProgress", count + " proteins remaining to align.");
+        //                     if (count === 0) {
+        //                         pool.terminate(); // terminate all workers when done
+        //                         console.log("tidy pool. TIME PAR", performance.now() - start);
+        //                         finished(matchMatrix);
+        //                     }
+        //                 }
+        //             });
+        //     });
         // }
         // // else do it on main thread
         // else {
-        //     // Do alignments
-        //     proteins.forEach(function (prot) {
-        //         const protAlignModel = protAlignCollection.get(prot.id);
-        //         // Only calc alignments for unique sequences, we can copy values for repeated sequences in the next bit
-        //         const alignResults = protAlignModel.alignWithoutStoring(filteredSeqInfo.uniqSeqs, {
-        //             semiLocal: true
-        //         });
-        //         console.log("alignResults", /*alignResults,*/ prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
-        //         updateMatchMatrix(prot.id, alignResults)
-        //     });
-        //
-        //     finished(matchMatrix);
+            // Do alignments
+            proteins.forEach(function (prot) {
+                const protAlignModel = protAlignCollection.get(prot.id);
+                // Only calc alignments for unique sequences, we can copy values for repeated sequences in the next bit
+                const alignResults = protAlignModel.alignWithoutStoring(filteredSeqInfo.uniqSeqs, {
+                    semiLocal: true
+                });
+                console.log("alignResults", /*alignResults,*/ prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
+                updateMatchMatrix(prot.id, alignResults)
+            });
+
+            finished(matchMatrix);
         // }
     },
 

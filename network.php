@@ -73,8 +73,10 @@
         <script type="text/javascript" src="../vendor/js/spin.js<?php echo $cacheBuster ?>"></script>
 
         <script type="text/javascript" src="./vendor/ngl.dev.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="./vendor/cola.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="./vendor/cola.js--><?php //echo $cacheBuster ?><!--"></script>-->
 
+
+<!--        <script type="text/javascript" src="./js/align/bioseq32.js"></script>-->
         <script type="text/javascript" src="../dist/xiview.js"></script>
 
         <script type="text/javascript" src="../vendor/js/d3-octree.js<?php echo $cacheBuster ?>"></script>
