@@ -3,7 +3,7 @@ import Backbone from "backbone";
 // import * as $ from "jquery";
 
 import {svgUtils} from "../svgexp";
-import {utils} from "../utils";
+import {makeLegalFileName, searchesToString, updateColourKey, utils} from "../utils";
 // import {Spin}
 import {download} from  "../downloads";
 import d3 from "d3";
@@ -231,7 +231,7 @@ export const BaseFrameView = Backbone.View.extend({
     addKey: function (options) {
         options = options || {};
         const tempSVG = (options.addToSelection || d3.select(this.el).select("svg")).append("svg").attr("class", "tempKey");
-        utils.updateColourKey(window.compositeModelInst.get("linkColourAssignment"), tempSVG);
+        updateColourKey(window.compositeModelInst.get("linkColourAssignment"), tempSVG);
         if (options.addOrigin) {
             tempSVG.select("g.key").attr("transform", "translate(0,20)");
             const link = this.model.get("filterModel") ?
@@ -405,13 +405,13 @@ export const BaseFrameView = Backbone.View.extend({
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
-        return utils.makeLegalFileName(utils.searchesToString() + "--" + this.identifier
+        return makeLegalFileName(searchesToString() + "--" + this.identifier
             + "-" + this.optionsToString() + "--" + utils.filterStateToString());
     },
 
     // Returns a useful image title string - omit type of view as user will see it
     imageOriginString: function () {
-        return utils.makeLegalFileName(utils.searchesToString() + "--" + utils.filterStateToString());
+        return makeLegalFileName(searchesToString() + "--" + utils.filterStateToString());
     },
 
     /* Following used in PDBFileChooser and StringFileChooser, though any of the views could take advantage of them */

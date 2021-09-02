@@ -5,7 +5,7 @@ import c3 from "c3/src";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
-import {utils} from "../utils";
+import {addMultipleSelectControls, utils} from "../utils";
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {modelUtils} from "../modelUtils";
 import d3 from "d3";
@@ -416,7 +416,7 @@ export const DistogramBB = BaseFrameView.extend({
 
     setMultipleSelectControls: function(elem, options, keepOld) {
         const self = this;
-        utils.addMultipleSelectControls({
+        addMultipleSelectControls({
             addToElem: elem,
             selectList: ["X"],
             optionList: options,

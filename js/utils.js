@@ -417,23 +417,25 @@ export const utils = {
         const filterStr = window.compositeModelInst.get("filterModel").stateString();
         return filterStr.substring(0, 160);
     },
+};
 
-    searchesToString: function () {
+export function searchesToString () {
         const searches = Array.from(window.compositeModelInst.get("clmsModel").get("searches"));
         const searchKeys = _.pluck(searches, 0); // just the keys
         const searchStr = ("SRCH=" + searchKeys.join("-")).substring(0, 40);
         return searchStr;
-    },
+    }
 
-    makeLegalFileName: function (fileNameStr) {
+
+export function makeLegalFileName (fileNameStr) {
         let newStr = fileNameStr.replace(utils.commonRegexes.invalidFilenameChars, "");
         newStr = newStr.substring(0, 240);
         return newStr;
-    },
+    }
 
 
     // Function for making a cross-link colour key as an svg group element
-    updateColourKey: function (colourAssign, svgElem) {
+export function updateColourKey (colourAssign, svgElem) {
         svgElem.attr("height", "200");
 
         const keyGroup = svgElem.selectAll("g.key").data([0]);
@@ -547,9 +549,9 @@ export const utils = {
 
             // add undefined category
         }
-    },
+    }
 
-    updateAnnotationColourKey: function (bbModelArray, svgElem, myOptions) {
+export function updateAnnotationColourKey (bbModelArray, svgElem, myOptions) {
         const defaults = {
             colour: function (d) {
                 return d.colour;
@@ -599,7 +601,7 @@ export const utils = {
         colourElems.select("text").text(function (d) {
             return d[1];
         });
-    },
+    }
 
 
     // settings can be
@@ -610,7 +612,7 @@ export const utils = {
     // optionLabelFunc - function to set human readable name for option
     // changeFunc - function that runs when change event occurs on a select element
     // initialSelectionFunc - function that decides initially set option
-    addMultipleSelectControls: function (settings) {
+export function addMultipleSelectControls (settings) {
         const defaults = {
             selectList: [],
             optionList: [],
@@ -688,33 +690,33 @@ export const utils = {
         }
 
         return selects;
-    },
+    }
+
 
     // add to local storage, partObj is object such as {distanceColours: {"BS3": {domain:[15,25], range:["red", "blue", "green"]} }} that gets merged
     // into existing stored object
-    setLocalStorage: function (partObj, objName) {
+export function setLocalStorage (partObj, objName) {
         objName = objName || "xiView";
         const storageStr = localStorage.getItem(objName) || "{}";
         let storage = JSON.parse(storageStr);
         storage = $.extend(true, storage, partObj);
         localStorage.setItem(objName, JSON.stringify(storage));
-    },
+    }
 
-    getLocalStorage: function (objName) {
+export function getLocalStorage (objName) {
         objName = objName || "xiView";
         const storageStr = localStorage.getItem(objName) || "{}";
         return JSON.parse(storageStr);
-    },
+    }
 
     // is local storage viable?
-    canLocalStorage: function () {
-        try {
-            localStorage.setItem('mod_xi', 'mod');
-            localStorage.removeItem('mod_xi');
-            return true;
-        } catch (e) {
-            return false;
-        }
-    },
+// export function canLocalStorage () {
+//         try {
+//             localStorage.setItem('mod_xi', 'mod');
+//             localStorage.removeItem('mod_xi');
+//             return true;
+//         } catch (e) {
+//             return false;
+//         }
+//     }
 
-};

@@ -1,4 +1,4 @@
-import {utils} from "../utils";
+import {getLocalStorage, setLocalStorage, utils} from "../utils";
 import {modelUtils} from "../modelUtils";
 import d3 from "d3";
 
@@ -39,7 +39,7 @@ export const STRINGUtils = {
     },
 
     getStringIdentifiers: function (proteinIDs, taxonID) {
-        const stringIDCache = utils.getLocalStorage("StringIds");
+        const stringIDCache = getLocalStorage("StringIds");
         const identifiersBySpecies = stringIDCache[taxonID] || {};
         const split = _.partition(proteinIDs, function (pid) {
             return identifiersBySpecies[pid];
@@ -65,14 +65,14 @@ export const STRINGUtils = {
                     }
                 })
                     .done(function (data, textStatus, xhr) {
-                        const stringCache = utils.getLocalStorage("StringIds");   // get stored data
+                        const stringCache = getLocalStorage("StringIds");   // get stored data
                         const identifiersBySpecies = stringCache[taxonID] || {};  // get or make object for species
                         data.forEach(function (record) {   // add new data to this species object
                             identifiersBySpecies[record.queryItem] = record.stringId;
                         });
                         stringCache[taxonID] = identifiersBySpecies;    // (re)attach species object to stored data
                         try {
-                            utils.setLocalStorage(stringCache, "StringIds");    // re-store the data
+                            setLocalStorage(stringCache, "StringIds");    // re-store the data
                         } catch (err) {
                             alert("Local Storage Full. Cannot Cache STRING IDs.");
                         }
@@ -100,7 +100,7 @@ export const STRINGUtils = {
             stringIDs.sort(); // sort string ids
             const networkKey = stringIDs.join("%0d");     // id/key made of string IDs joined together
 
-            const stringNetworkScoreCache = utils.getLocalStorage("StringNetworkScores");
+            const stringNetworkScoreCache = getLocalStorage("StringNetworkScores");
             const idBySpecies = stringNetworkScoreCache[taxonID] || {};
             let cachedNetwork = idBySpecies[networkKey];    // exact key match in cache?
 
@@ -133,7 +133,7 @@ export const STRINGUtils = {
                             stringNetworkScoreCache[taxonID] = idBySpecies;
                             idBySpecies[networkKey] = STRINGUtils.lzw_encode(retrievedNetwork);
                             try {
-                                utils.setLocalStorage(stringNetworkScoreCache, "StringNetworkScores");
+                                setLocalStorage(stringNetworkScoreCache, "StringNetworkScores");
                             } catch (err) {
                                 alert("Local Storage Full. Cannot cache returned STRING network.");
                             }

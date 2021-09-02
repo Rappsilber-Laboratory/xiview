@@ -2,7 +2,7 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 // import * as $ from "jquery";
 
-import {utils} from "../utils";
+import {makeLegalFileName, searchesToString, updateAnnotationColourKey, utils} from "../utils";
 import {checkBoxView} from "./checkbox-view";
 import {svgUtils} from "../svgexp";
 import d3 from "d3";
@@ -435,7 +435,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     downloadKey: function() {
         const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey").style("text-transform", "capitalize");
         const self = this;
-        utils.updateAnnotationColourKey(
+        updateAnnotationColourKey(
             this.collection.where({
                 shown: true
             }),
@@ -477,6 +477,6 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     identifier: "Sequence Annotations",
 
     filenameStateString: function() {
-        return utils.makeLegalFileName(utils.searchesToString() + "--" + this.identifier);
+        return makeLegalFileName(searchesToString() + "--" + this.identifier);
     },
 });

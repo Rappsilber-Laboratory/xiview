@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {modelUtils} from "../modelUtils";
-import {utils} from "../utils";
+import {addMultipleSelectControls, utils} from "../utils";
 import {NGLUtils} from "../views/ngl/NGLUtils";
 import d3 from "d3";
 
@@ -201,7 +201,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     updateProteinDropdown: function (parentElem) {
         const proteins = this.getSelectedProteins();
 
-        utils.addMultipleSelectControls({
+        addMultipleSelectControls({
             addToElem: parentElem,
             selectList: ["Proteins"],
             optionList: modelUtils.filterOutDecoyInteractors(proteins),

@@ -5,7 +5,7 @@ import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
-import {utils} from './utils';
+import {getLocalStorage, utils} from './utils';
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 import {modelUtils} from "./modelUtils";
 import {FilterModel} from "./filter/filter-model";
@@ -224,14 +224,14 @@ init.models = function (options) {
 
     // Set up colour models, some (most) of which depend on data properties
     const crosslinkerKeys = d3.keys(window.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
-    const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(utils.getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
+    const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
     setupColourModels({distance: storedDistanceColourSettings});
 
     if (crosslinkerKeys.length === 1) {
         window.compositeModelInst.listenTo(window.linkColor.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
             const obj = {distanceColours: {}};
             obj.distanceColours[crosslinkerKeys[0]] = attr;
-            utils.setLocalStorage(obj);
+            setLocalStorage(obj);
         });
     }
 

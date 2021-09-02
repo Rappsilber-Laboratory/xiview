@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
-import {utils} from "../utils";
+import {addMultipleSelectControls, utils} from "../utils";
 import {modelUtils} from "../modelUtils";
 import d3 from "d3";
 
@@ -323,7 +323,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
     setMultipleSelectControls: function(elem, options, keepOld) {
         const self = this;
-        utils.addMultipleSelectControls({
+        addMultipleSelectControls({
             addToElem: elem,
             selectList: ["X", "Y"],
             optionList: options,

@@ -1,10 +1,10 @@
 import {modelUtils} from "./modelUtils";
-import {utils} from "./utils";
+import {makeLegalFileName, searchesToString, utils} from "./utils";
 import d3 from "d3";
 
 export function downloadFilename(type, suffix) {
     suffix = suffix || "csv";
-    return utils.makeLegalFileName(utils.searchesToString() + "--" + type + "--" + utils.filterStateToString()) + "." + suffix;
+    return makeLegalFileName(searchesToString() + "--" + type + "--" + utils.filterStateToString()) + "." + suffix;
 }
 
 export function downloadMatches() {

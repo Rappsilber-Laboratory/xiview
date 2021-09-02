@@ -2,7 +2,7 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import * as _ from 'underscore';
 import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
-import {utils} from "../utils";
+import {makeLegalFileName, utils} from "../utils";
 import d3 from "d3";
 import {validate} from "../validate";
 
@@ -274,7 +274,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
-        return utils.makeLegalFileName(this.identifier + "-" + this.optionsToString());
+        return makeLegalFileName(this.identifier + "-" + this.optionsToString());
     },
 
     clearSpectrumHighlights: function () {

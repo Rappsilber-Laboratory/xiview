@@ -2,7 +2,7 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {utils} from "../utils";
+import {addMultipleSelectControls, utils} from "../utils";
 import {AlignSettingsViewBB, CollectionAsSelectViewBB} from "./alignSettingsViewBB";
 import d3 from "d3";
 
@@ -35,7 +35,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
 
             // Sort dropdown
             const self = this;
-            utils.addMultipleSelectControls({
+            addMultipleSelectControls({
                 addToElem: topElem.select(".alignSortWidget"),
                 selectList: ["Sort Tabs By"],
                 optionList: this.collection.possibleComparators,

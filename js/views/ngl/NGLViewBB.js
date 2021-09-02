@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 // import * as $ from 'jquery';
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
-import {utils} from "../../utils";
+import {addMultipleSelectControls, makeLegalFileName, searchesToString, utils} from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 import {modelUtils} from "../../modelUtils";
 import {NGLExportUtils} from "./NGLExportUtils";
@@ -177,7 +177,7 @@ export const NGLViewBB = BaseFrameView.extend({
                     key: ass
                 };
             });
-            utils.addMultipleSelectControls({
+            addMultipleSelectControls({
                 addToElem: toolbar,
                 selectList: ["Assembly"],
                 optionList: labelPairs,
@@ -320,7 +320,7 @@ export const NGLViewBB = BaseFrameView.extend({
         const allReps = NGL.RepresentationRegistry.names.slice().sort();
         const ignoreReps = ["axes", "base", "contact", "distance", "helixorient", "hyperball", "label", "rocket", "trace", "unitcell", "validation", "angle", "dihedral"];
         const mainReps = _.difference(allReps, ignoreReps);
-        utils.addMultipleSelectControls({
+        addMultipleSelectControls({
             addToElem: toolbar,
             selectList: ["Draw Proteins As"],
             optionList: mainReps,
@@ -441,7 +441,7 @@ export const NGLViewBB = BaseFrameView.extend({
             }
         };
 
-        utils.addMultipleSelectControls({
+        addMultipleSelectControls({
             addToElem: toolbar,
             selectList: ["Colour Proteins By"],
             optionList: mainColourSchemes,
@@ -790,7 +790,7 @@ export const NGLViewBB = BaseFrameView.extend({
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
                 "Xi Crosslinks in CONECT and LINK records",
-                "Search ID: " + utils.searchesToString(),
+                "Search ID: " + searchesToString(),
                 "Filter: " + utils.filterStateToString()
             ]
         );
@@ -803,7 +803,7 @@ export const NGLViewBB = BaseFrameView.extend({
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
-                "Search ID: " + utils.searchesToString(),
+                "Search ID: " + searchesToString(),
                 "Filter: " + utils.filterStateToString()
             ]
         );
@@ -857,7 +857,7 @@ export const NGLViewBB = BaseFrameView.extend({
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
-                "Search ID: " + utils.searchesToString(),
+                "Search ID: " + searchesToString(),
                 "Filter: " + utils.filterStateToString()
             ],
             {
@@ -1003,12 +1003,12 @@ export const NGLViewBB = BaseFrameView.extend({
 
     pdbFilenameStateString: function () {
         const stageModel = this.model.get("stageModel");
-        return utils.makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + utils.searchesToString() + "-" + utils.filterStateToString());
+        return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString() + "-" + utils.filterStateToString());
     },
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
         const stageModel = this.model.get("stageModel");
-        return utils.makeLegalFileName(utils.searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + utils.filterStateToString());
+        return makeLegalFileName(searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + utils.filterStateToString());
     },
 });

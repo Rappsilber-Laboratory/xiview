@@ -4,7 +4,7 @@ import * as _ from 'underscore';
 import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
-import {utils} from "../../utils";
+import {updateColourKey, utils} from "../../utils";
 import d3 from "d3";
 
 export const KeyViewBB = BaseFrameView.extend({
@@ -445,7 +445,7 @@ export const KeyViewBB = BaseFrameView.extend({
     downloadKey: function (evt) {
         const d = d3.select(evt.target).datum();  // d3 datum for this button
         const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey");
-        utils.updateColourKey(this.model.get(d.colourModelKey), tempSVG);
+        updateColourKey(this.model.get(d.colourModelKey), tempSVG);
         this.downloadSVG(null, tempSVG);
         tempSVG.remove();
     },
