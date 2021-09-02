@@ -84,22 +84,22 @@ export const NGLUtils = {
 
                     // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                     // between ngl protein chains and clms proteins. This is asynchronous so we use a callback
-                    if (self.pdbSettings[0].pdbCode && modelUtils.getLegalAccessionIDs(interactorMap).length) {
-                        console.log("WEB SERVICE CALLED");
-                        NGLUtils.matchPDBChainsToUniprot(self.pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
-                            utils.xilog ("UniprotMapRes", uniprotMappingResults, nglSequences);
-                            if (uniprotMappingResults.remaining.length) { // Some PDB sequences don't have unicode protein matches in this search
-                                var remainingSequences = _.pluck (uniprotMappingResults.remaining, "seqObj");   // strip the remaining ones back to just sequence objects
-                                //console.log ("rem", remainingSequences, uniprotMappingResults);
-                                matchByXiAlignment (remainingSequences, uniprotMappingResults.uniprotMapped);   // fire them into xi alignment routine
-                                //returnFailure ("No valid uniprot data returned");
-                            } else {
-                                sequenceMapsAvailable (uniprotMappingResults.uniprotMapped);
-                            }
-                        });
-                    } else { // without access to pdb codes have to match comparing all proteins against all chains
+                    // if (self.pdbSettings[0].pdbCode && modelUtils.getLegalAccessionIDs(interactorMap).length) {
+                    //     console.log("WEB SERVICE CALLED");
+                    //     NGLUtils.matchPDBChainsToUniprot(self.pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
+                    //         utils.xilog ("UniprotMapRes", uniprotMappingResults, nglSequences);
+                    //         if (uniprotMappingResults.remaining.length) { // Some PDB sequences don't have unicode protein matches in this search
+                    //             var remainingSequences = _.pluck (uniprotMappingResults.remaining, "seqObj");   // strip the remaining ones back to just sequence objects
+                    //             //console.log ("rem", remainingSequences, uniprotMappingResults);
+                    //             matchByXiAlignment (remainingSequences, uniprotMappingResults.uniprotMapped);   // fire them into xi alignment routine
+                    //             //returnFailure ("No valid uniprot data returned");
+                    //         } else {
+                    //             sequenceMapsAvailable (uniprotMappingResults.uniprotMapped);
+                    //         }
+                    //     });
+                    // } else { // without access to pdb codes have to match comparing all proteins against all chains
                         matchByXiAlignment(nglSequences, []);
-                    }
+                    // }
 
                     // bit to continue onto after ngl protein chain to clms protein matching has been done
                     function sequenceMapsAvailable(sequenceMap) {
