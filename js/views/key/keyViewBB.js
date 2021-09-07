@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 // import Backbone from "backbone";
-
+// import { jscolor } from "@eastdesire/jscolor";
 import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
@@ -352,7 +352,7 @@ export const KeyViewBB = BaseFrameView.extend({
                 colourSection.rows = labelColourPairings.map(function (val, i) {
                     const rgbCol = val[1];
                     const rgbHex = d3.rgb(rgbCol).toString();
-                    const span = "<input type='color' value='" + rgbHex + "' title='Press to change colour for " + val[0] + "'/>";
+                    const span =  "<input data-jscolor='{format:rgba, alphaChannel:true}' value='" + rgbHex + "' title='Press to change colour for " + val[0] + "'/>";
                     return [span, val[0], i];
                 });
             }
@@ -438,7 +438,7 @@ export const KeyViewBB = BaseFrameView.extend({
                 }
             }
         }, this);
-
+        jscolor.install();
         return this;
     },
 

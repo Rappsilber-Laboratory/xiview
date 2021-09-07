@@ -5,7 +5,7 @@ import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
-import {getLocalStorage, utils} from './utils';
+import {getLocalStorage, setLocalStorage, utils} from './utils';
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 import {modelUtils} from "./modelUtils";
 import {FilterModel} from "./filter/filter-model";
