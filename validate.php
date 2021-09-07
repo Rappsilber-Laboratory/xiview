@@ -77,7 +77,7 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="../vendor/js/jquery.jsonview.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/datatables.min.js<?php echo $cacheBuster ?>"></script>
-        <script type="text/javascript" src="../spectrum/vendor/jscolor.min.js<?php echo $cacheBuster ?>"></script>
+        <script type="text/javascript" src="../vendor/js/jscolor.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/spin.js<?php echo $cacheBuster ?>"></script>
         <!--        gonna take c3 out anyway -->
         <script type="text/javascript" src="../vendor/js/c3.js<?php echo $cacheBuster ?>"></script>
