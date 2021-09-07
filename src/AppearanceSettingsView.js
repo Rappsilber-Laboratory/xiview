@@ -87,8 +87,9 @@ export const AppearanceSettingsView = SettingsView.extend({
             .attr("value", this.model.get('highlightColor'))
             .attr("type", "text")
             .attr("style", "width: 103px;")
+            .attr("data-jscolor", "{}")
         ;
-        jscolor.installByClassName("jscolor");
+        jscolor.install();
 
         this.decimals = generalTab.append("label").text("Number of decimals to display: ")
             .append("input").attr("type", "number").attr("id", "xispec_settingsDecimals")
