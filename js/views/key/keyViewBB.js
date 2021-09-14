@@ -14,7 +14,7 @@ export const KeyViewBB = BaseFrameView.extend({
             parentEvents = parentEvents();
         }
         return _.extend({}, parentEvents, {
-            "change input[type='color']": "changeColour",
+            "change input.color-chooser": "changeColour",
             "click .downloadButton3": "downloadKey",
         });
     },
@@ -352,7 +352,7 @@ export const KeyViewBB = BaseFrameView.extend({
                 colourSection.rows = labelColourPairings.map(function (val, i) {
                     const rgbCol = val[1];
                     const rgbHex = d3.rgb(rgbCol).toString();
-                    const span =  "<input data-jscolor='{format:rgba, alphaChannel:true}' value='" + rgbHex + "' title='Press to change colour for " + val[0] + "'/>";
+                    const span =  "<input class='color-chooser' data-jscolor='{}' value='" + rgbHex + "FF' title='Press to change colour for " + val[0] + "'/>";
                     return [span, val[0], i];
                 });
             }

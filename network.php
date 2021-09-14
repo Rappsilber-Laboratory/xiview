@@ -100,7 +100,8 @@
             </div>
 
             <div class="page-header">
-                    <i class="fa fa-home fa-xi"
+<!--                <input data-jscolor='{}' value="#3399FF80"/>-->
+                <i class="fa fa-home fa-xi"
                         onclick="window.open('../history/history.html');"
                         title="Return to search history / Login"></i>
                     <p id="loadDropdownPlaceholder"></p>
