@@ -18,6 +18,9 @@ export const loadSpectrum = function (match, randId, spectrumModel) {
     const search = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId);
     formatted_data.customConfig = search.customsettings.split('\n');
 
+    for (let cl of search.crosslinkers) {
+        formatted_data.customConfig.push(cl.description);
+    }
 
     formatted_data.losses = [];
     search.losses.forEach(function (loss) {
