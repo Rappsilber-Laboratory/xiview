@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 // import * as $ from "jquery";
-// import jscolor
+import * as jscolor from "@eastdesire/jscolor";
 import {SettingsView} from "./SettingsView";
 import d3 from "d3";
 
