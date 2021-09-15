@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 // import Backbone from "backbone";
-// import { jscolor } from "@eastdesire/jscolor";
+import * as jscolor from "@eastdesire/jscolor";
 import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
