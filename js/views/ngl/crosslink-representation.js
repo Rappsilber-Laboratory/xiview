@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 // import * as $ from 'jquery';
-
+import * as NGL from "../../../vendor/ngl.dev";
 import {utils} from "../../utils";
 import d3 from "d3";
 

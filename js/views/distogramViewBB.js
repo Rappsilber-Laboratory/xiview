@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 // import Backbone from "backbone";
 // import * as $ from "jquery";
-// import c3 from "c3/src";
+import * as c3 from "../../vendor/c3.js";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";

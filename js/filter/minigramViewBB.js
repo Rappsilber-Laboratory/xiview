@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
-// import c3 from "c3/src";
+import * as c3 from "../../vendor/c3.js";
 import {utils} from '../utils';
 import d3 from "d3";
 

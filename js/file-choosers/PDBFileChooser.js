@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 // import Backbone from "backbone";
+import * as NGL from "../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {modelUtils} from "../modelUtils";

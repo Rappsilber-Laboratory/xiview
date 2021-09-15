@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 // import * as $ from "jquery";
 // const workerpool = require('workerpool');
-
+import * as NGL from "../../../vendor/ngl.dev";
 import {utils} from "../../utils";
 import {modelUtils} from "../../modelUtils";
 import Backbone from "backbone";

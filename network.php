@@ -69,12 +69,11 @@
         <script type="text/javascript" src="../vendor/js/jquery.jsonview.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../vendor/js/jquery-ui.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/vendor/datatables.min.js<?php echo $cacheBuster ?>"></script>
-<!--        spin.js and c3 both misbehavin' when imported using webpack-->
-<!--        <script type="text/javascript" src="../vendor/js/spin.js--><?php //echo $cacheBuster ?><!--"></script>-->
+
 <!--        gonna take c3 out anyway -->
-        <script type="text/javascript" src="../vendor/js/c3.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="../vendor/js/c3.js--><?php //echo $cacheBuster ?><!--"></script>-->
 <!--    we're on a forked dev version of ngl -- https://github.com/fredludlow/ngl/tree/selection-parser-blank-chain  -->
-        <script type="text/javascript" src="./vendor/ngl.dev.js<?php echo $cacheBuster ?>"></script>
+<!--        <script type="text/javascript" src="./vendor/ngl.dev.js--><?php //echo $cacheBuster ?><!--"></script>-->
 <!--        <script type="text/javascript" src="./vendor/cola.js--><?php //echo $cacheBuster ?><!--"></script>-->
 
 

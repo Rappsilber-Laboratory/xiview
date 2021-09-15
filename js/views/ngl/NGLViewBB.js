@@ -2,6 +2,8 @@ import * as _ from 'underscore';
 // import Backbone from "backbone";
 // import * as $ from 'jquery';
 
+import * as NGL from "../../../vendor/ngl.dev";
+
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {addMultipleSelectControls, makeLegalFileName, searchesToString, utils} from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
