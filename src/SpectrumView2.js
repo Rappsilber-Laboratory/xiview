@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
 // import * as $ from "jquery";
-// import {Spinner} from 'spin.js';
+import * as Spinner from 'spin';
 import * as d3 from 'd3';
 
 import {Graph} from "./graph/Graph";
