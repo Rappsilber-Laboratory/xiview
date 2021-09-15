@@ -5,7 +5,7 @@
 
 // require('webpack-jquery-ui');
 // require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
-// import {Spinner} from 'spin.js';
+import * as Spinner from 'spin';
 import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
 
 import * as d3 from 'd3';
@@ -21,27 +21,29 @@ import {setupColourModels} from "./model/color/setup-colors";
 export function main() {
 
     const spinnerOpts = {
-        lines: 13, // The number of lines to draw
+        // lines: 13, // The number of lines to draw
         length: 38, // The length of each line
         width: 17, // The line thickness
         radius: 45, // The radius of the inner circle
-        scale: 5, // Scales overall size of the spinner
-        corners: 1, // Corner roundness (0..1)
-        speed: 1, // Rounds per second
-        rotate: 0, // The rotation offset
-        animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
-        direction: 1, // 1: clockwise, -1: counterclockwise
-        color: '#000000', // CSS color or array of colors
-        fadeColor: 'transparent', // CSS color or array of colors
-        top: '50%', // Top position relative to parent
-        left: '50%', // Left position relative to parent
-        shadow: '0 0 1px transparent', // Box-shadow for the lines
-        zIndex: 2000000000, // The z-index (defaults to 2e9)
-        className: 'spinner', // The CSS class to assign to the spinner
-        position: 'absolute', // Element positioning
+        // scale: 5, // Scales overall size of the spinner
+        // corners: 1, // Corner roundness (0..1)
+        // speed: 1, // Rounds per second
+        // rotate: 0, // The rotation offset
+        // animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
+        // direction: 1, // 1: clockwise, -1: counterclockwise
+        // color: '#000000', // CSS color or array of colors
+        // fadeColor: 'transparent', // CSS color or array of colors
+        // top: '50%', // Top position relative to parent
+        // left: '50%', // Left position relative to parent
+        // shadow: '0 0 1px transparent', // Box-shadow for the lines
+        // zIndex: 2000000000, // The z-index (defaults to 2e9)
+        // className: 'spinner', // The CSS class to assign to the spinner
+        // position: 'absolute', // Element positioning
     };
 
-    const spinner = new Spinner({scale: 5}).spin(d3.select("#main").node());
+    const spinTarget = d3.select("#main").node();
+    console.log("spinTarget", spinTarget);
+    const spinner = new Spinner(spinnerOpts).spin(spinTarget);
     // let z;
 
     const success = function (json) {
