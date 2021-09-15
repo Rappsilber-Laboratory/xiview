@@ -29,7 +29,7 @@ export const TooltipViewBB = Backbone.View.extend({
 
         const self = this;
         const tooltip = d3.select(this.el);
-        tooltip.select("h2").text(this.model.get("header"));
+        tooltip.select("h2").html(this.model.get("header"));
 
         const oned = $.isArray(contents);
         const twod = oned ? $.isArray(contents[0]) : false;
