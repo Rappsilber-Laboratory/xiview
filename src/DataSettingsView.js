@@ -1,9 +1,10 @@
-import * as _ from 'underscore';
-// import Backbone from "backbone";
-// import * as $ from "jquery";
-// import 'datatables';
-// import 'datatables.net-dt/css/jquery.dataTables.css';
+import "../css/settings.css";
+// import "../../xi3/css/xispecAdjust.css";
+import 'datatables.net-dt/css/jquery.dataTables.css';
 
+import * as _ from 'underscore';
+import * as $ from "jquery";
+import 'datatables.net';
 import {SettingsView} from "./SettingsView";
 import {PepInputView} from "./PepInputView";
 import d3 from "d3";

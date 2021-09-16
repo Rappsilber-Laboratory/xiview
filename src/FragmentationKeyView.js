@@ -3,7 +3,7 @@ import {KeyFragment} from "./FragKey/KeyFragment";
 import Backbone from "backbone";
 import * as _ from 'underscore';
 import d3 from "d3";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 
 //TODO: find a better place for this?

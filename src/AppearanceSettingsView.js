@@ -1,8 +1,10 @@
+import "../css/settings.css";
+// import "../../xi3/css/xispecAdjust.css";
 import * as _ from 'underscore';
-// import * as $ from "jquery";
+import * as $ from "jquery";
 import * as jscolor from "@eastdesire/jscolor";
 import {SettingsView} from "./SettingsView";
-import d3 from "d3";
+import * as d3 from "d3";
 
 export const AppearanceSettingsView = SettingsView.extend({
 

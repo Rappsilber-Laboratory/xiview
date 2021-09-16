@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 // import Backbone from "backbone";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 import * as d3 from 'd3';
 import {Peak} from "./Peak";
 

@@ -1,8 +1,12 @@
+import "../css/spectrum.css";
+import "../css/dropdown.css";
+import "../css/font-awesome.min.css";
+import "../../xi3/css/xispecAdjust.css";
+import * as $ from "jquery";
 import * as _ from 'underscore';
 import Backbone from "backbone";
-// import * as $ from "jquery";
-import * as Spinner from 'spin';
 import * as d3 from 'd3';
+import * as Spinner from 'spin';
 
 import {Graph} from "./graph/Graph";
 import {svgUtils} from "../../xi3/js/svgexp";

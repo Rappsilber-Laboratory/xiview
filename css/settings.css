@@ -278,16 +278,16 @@
     top: 2px;
     letter-spacing: 0.5px;
     font-size: 0.9em;
-    color: white;
+    /*color: white;*/
 }
 .xispec_dynDiv{
     padding-top: 30px;
-    background: #333;
+    /*background: #333;*/
     overflow: hidden;
-    color:#fff;
+    /*color:#fff;*/
     position:fixed;
     pointer-events:all;
-    border: 1px solid white;
+    /*border: 1px solid white;*/
     border-radius: 5px;
 }
 
@@ -298,23 +298,23 @@
 }
 
 
-.draggableCorner {
-    width:20px;
-    height:20px;
-    border:none;
-    background: #750000 url("../images/tl.png");
-}
+/*.draggableCorner {*/
+/*    width:20px;*/
+/*    height:20px;*/
+/*    border:none;*/
+/*    background: #750000 url("../images/tl.png");*/
+/*}*/
 
-/* just need 1 background image and rotate it for corner orientations */
-.xispec_dynDiv_resizeDiv_tr {
-    transform: rotate(90deg);
-}
-.xispec_dynDiv_resizeDiv_bl {
-    transform: rotate(270deg);
-}
-.xispec_dynDiv_resizeDiv_br {
-    transform: rotate(180deg);
-}
+/*!* just need 1 background image and rotate it for corner orientations *!*/
+/*.xispec_dynDiv_resizeDiv_tr {*/
+/*    transform: rotate(90deg);*/
+/*}*/
+/*.xispec_dynDiv_resizeDiv_bl {*/
+/*    transform: rotate(270deg);*/
+/*}*/
+/*.xispec_dynDiv_resizeDiv_br {*/
+/*    transform: rotate(180deg);*/
+/*}*/
 
 .xispec_dynDiv_resizeDiv_tl,.xispec_dynDiv_resizeDiv_tr,.xispec_dynDiv_resizeDiv_bl,.xispec_dynDiv_resizeDiv_br {
  position: absolute;
@@ -352,8 +352,8 @@
  position: absolute;
  top: -1px;
  left: -1px;
- background: #750000;
- border: 1px solid #fff;
+ /*background: #750000;*/
+ /*border: 1px solid #fff;*/
  border-left: 0;
  border-right: 0;
  padding: 0;
@@ -368,8 +368,58 @@
  right: 15px;
  width: 15px;
  height: 15px;
- background: #750000;
+ /*background: #750000;*/
  font-size: 15px;
  padding: 0;
  margin: 0;
+}
+/*HACK cc*/
+
+#xispec_spectrumControls {
+    background-color: #091d42;
+    color: #000;
+}
+
+.xispec_dynDiv_moveParentDiv {
+    font-size: 15px;
+}
+
+.xispec_subViewHeader{
+    background: rgb(9, 29, 66);
+}
+.xispec_settings_menu{
+    margin: -2px -9px;
+}
+.xispec_settings_menu .xispec_btn{
+    background: #e3e3e3!important;
+    color: #091d42;
+}
+.xispec_dynDiv_moveParentDiv {
+    border: none;
+}
+.xispec_settings_menu .xispec_btn:hover{
+    background: #fff!important;
+}
+.xispec_settings_menu .xispec_active{
+    background: rgba(192,206,224,1)!important;
+}
+.xispec_settings_menu .xispec_active:hover{
+    background: rgba(192,206,224,1)!important;
+    color: #091d42;
+}
+.xispec_settings-bottom .xispec_btn-1 {
+    border: 1px solid #091d42;
+    color: #091d42;
+}
+.xispec_multiSelect_dropdown-content {
+    background-color: #091d42;
+}
+.xispec_form-control:focus {
+    border-color: #091d42;
+}
+#xispec_settingsCustomCfgApply{
+    display: inline;
+}
+#xispec_settingsAnnotatorApply{
+    display: inline;
 }

@@ -1,5 +1,5 @@
 // import * as _ from 'underscore';
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 export function Fragment (fragment, all_clusters){
 	this.class = fragment.class;

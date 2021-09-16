@@ -1,9 +1,9 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 import {Fragment} from "./graph/Fragment";
 
-const colorbrewer = require('colorbrewer');
+import * as colorbrewer from 'colorbrewer';
 
 export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
