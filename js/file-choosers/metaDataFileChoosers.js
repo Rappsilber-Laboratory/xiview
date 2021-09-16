@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../css/csvUpload.css";
+import '../../css/csvUpload.css';
 
 import * as _ from 'underscore';
 import d3 from "d3";

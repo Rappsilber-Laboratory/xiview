@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../css/ddMenuViewBB.css";
+import '../../css/ddMenuViewBB.css';
 import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as $ from "jquery";

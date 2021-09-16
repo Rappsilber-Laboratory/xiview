@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../css/filter.css";
+import '../../css/filter.css';
 import Backbone from "backbone";
 import * as _ from 'underscore';
 import {checkBoxView} from "../ui-utils/checkbox-view";

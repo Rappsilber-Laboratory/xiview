@@ -1,13 +1,12 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../../css/key.css";
+import '../../../css/key.css';
 import * as _ from 'underscore';
-// import Backbone from "backbone";
+import d3 from "d3";
 import * as jscolor from "@eastdesire/jscolor";
+
 import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
-import {updateColourKey, utils} from "../../utils";
-import d3 from "d3";
+import {updateColourKey} from "../../utils";
 
 export const KeyViewBB = BaseFrameView.extend({
     events: function () {

@@ -1,9 +1,8 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../css/minigram.css";
-
-// I want MinigramBB to be model agnostic so I can re-use it in other places
+import '../../css/minigram.css';
 import Backbone from "backbone";
 import d3 from "d3";
+
+// I want MinigramBB to be model agnostic so I can re-use it in other places
 
 export const MinigramModel = Backbone.Model.extend({
             defaults: {

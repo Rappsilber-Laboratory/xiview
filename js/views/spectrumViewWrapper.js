@@ -7,7 +7,6 @@ import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, utils} from "../utils";
 import d3 from "d3";
-import {validate} from "../validate";
 
 export const SpectrumViewWrapper = BaseFrameView.extend({
 

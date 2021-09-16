@@ -1,11 +1,9 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../css/proteinInfoViewBB.css";
+import '../../css/proteinInfoViewBB.css';
 import * as _ from 'underscore';
-// import Backbone from "backbone";
+import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {utils} from "../utils";
-import d3 from "d3";
 
 export const ProteinInfoViewBB = BaseFrameView.extend({
     events: function () {

@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import * as css from "../../../css/circularViewBB.css";
+import '../../../css/circularViewBB.css';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 

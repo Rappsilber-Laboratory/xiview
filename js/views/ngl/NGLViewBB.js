@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../../css/nglViewBB.css";
+import '../../../css/nglViewBB.css';
 
 import * as _ from 'underscore';
 // import Backbone from "backbone";

@@ -1,7 +1,5 @@
-// eslint-disable-next-line no-unused-vars
-import * as css from "../../css/scatterplot.css";
+import '../../css/scatterplot.css';
 import * as _ from 'underscore';
-// import Backbone from "backbone";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";

@@ -1,10 +1,10 @@
 // eslint-disable-next-line no-unused-vars
-import * as css from "../../css/alignViewBB.css";
+import '../../css/alignViewBB.css';
 import * as _ from 'underscore';
 import Backbone from "backbone";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {addMultipleSelectControls, utils} from "../utils";
+import {addMultipleSelectControls} from "../utils";
 import {AlignSettingsViewBB, CollectionAsSelectViewBB} from "./alignSettingsViewBB";
 import d3 from "d3";
 

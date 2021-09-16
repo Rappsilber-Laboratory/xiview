@@ -1,4 +1,3 @@
-import * as $ from 'jquery';
 import Backbone from "backbone";
 import d3 from "d3";
 

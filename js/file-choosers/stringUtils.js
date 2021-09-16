@@ -1,4 +1,4 @@
-import {getLocalStorage, setLocalStorage, utils} from "../utils";
+import {getLocalStorage, setLocalStorage} from "../utils";
 import {modelUtils} from "../modelUtils";
 import d3 from "d3";
 
