@@ -1,7 +1,8 @@
-// import * as _ from 'underscore';
+import "../../css/tooltip.css"
+
 import Backbone from "backbone";
 import d3 from "d3";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 export const TooltipViewBB = Backbone.View.extend({
     className: "CLMStooltip",

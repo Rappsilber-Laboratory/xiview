@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
 import d3 from "d3";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 // import {BaseFrameView} from "../ui-utils/base-frame-view";
 

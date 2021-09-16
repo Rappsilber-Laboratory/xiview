@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import d3 from "d3";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 export const utils = {
 

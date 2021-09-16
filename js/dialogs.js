@@ -1,11 +1,11 @@
-// import $ from "jquery";
-// window.jQuery = $
-// import 'jquery-ui';
+import * as $ from "jquery";
+window.jQuery = $
+// require('jquery-ui');
 
 // import $ from 'webpack-jquery-ui';
 //
-// require('webpack-jquery-ui');
-// require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+require('webpack-jquery-ui');
+require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
 import d3 from "d3";
 

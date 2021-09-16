@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-unused-vars
+import * as css from "../../css/minigram.css";
+
 // I want MinigramBB to be model agnostic so I can re-use it in other places
 import Backbone from "backbone";
 import d3 from "d3";

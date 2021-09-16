@@ -1,12 +1,12 @@
-// import * as $ from 'jquery';
-// // export for others scripts to use
-// window.$ = $;
-// import "jquery-ui";
+import "../css/reset.css";
+import "../css/common.css";
+import "../vendor/byrei-dyndiv_0.5.css"
+import "../css/style.css";
+import "../css/xiView.css";
+import "../css/multiple-select.css"; //? where is this used?
 
-// require('webpack-jquery-ui');
-// require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 import * as Spinner from 'spin';
-import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
+import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
 import * as d3 from 'd3';
 import {init} from './networkFrame';

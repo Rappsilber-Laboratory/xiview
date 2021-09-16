@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-// import * as $ from "jquery";
+import * as $ from "jquery";
 // const workerpool = require('workerpool');
 import * as NGL from "../../../vendor/ngl.dev";
 import {utils} from "../../utils";
@@ -1399,9 +1399,9 @@ export class NGLModelWrapperBB extends Backbone.Model {
             }, this);
 
             sele = "(" + modParts.join(" OR ") + " )" + (options.allAtoms || options.chainsOnly ? "" : " AND .CA");
-            // if (NGL.Debug) {
-            console.log("SELE", sele);
-            // }
+            if (NGL.Debug) {
+                console.log("SELE", sele);
+            }
         }
 
         return sele;

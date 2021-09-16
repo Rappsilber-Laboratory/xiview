@@ -1,10 +1,13 @@
+// eslint-disable-next-line no-unused-vars
+import "../../../css/goTermsView.css";
+
+import * as $ from 'jquery';
 import * as _ from 'underscore';
-// import Backbone from "backbone";
+import * as d3 from "d3";
+import "./sankey";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {GoTerm} from "./goTerm";
-import d3 from "d3";
-
 
 export const GoTermsViewBB = BaseFrameView.extend({
 

@@ -1,7 +1,9 @@
+import "../../css/distogram.css";
+import "../../vendor/c3.css";
+
+import * as $ from "jquery";
 import * as _ from 'underscore';
-// import Backbone from "backbone";
-// import * as $ from "jquery";
-import * as c3 from "../../vendor/c3.js";
+import * as c3 from "../../vendor/c3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";

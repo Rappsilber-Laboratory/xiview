@@ -1,4 +1,4 @@
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 import {DefaultLinkColourModel} from "./link-color-model";
 import {GroupColourModel} from "./link-color-model";

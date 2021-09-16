@@ -1,10 +1,11 @@
+// eslint-disable-next-line no-unused-vars
+import * as css from "../../css/csvUpload.css";
+
 import * as _ from 'underscore';
-// import Backbone from "backbone";
+import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-// import {utils} from "../utils";
 import {modelUtils} from "../modelUtils";
-import d3 from "d3";
 
 const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 

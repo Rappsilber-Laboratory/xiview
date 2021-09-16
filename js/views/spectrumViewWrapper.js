@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-unused-vars
+import "../../css/spectrumViewWrapper.css";
+
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import * as _ from 'underscore';
 import {CompositeModel} from "../model/composite-model";

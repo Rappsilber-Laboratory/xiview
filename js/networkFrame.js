@@ -1,7 +1,10 @@
+// eslint-disable-next-line no-unused-vars
+import * as css from "../css/networkPage.css";
+
 import * as _ from 'underscore';
 import Backbone from "backbone";
-// import * as $ from "jquery";
-import {ByRei_dynDiv} from "./ui-utils/byrei-dyndiv_1.0rc1-src";
+import * as $ from "jquery";
+import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";

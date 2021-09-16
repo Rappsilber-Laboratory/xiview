@@ -1,9 +1,10 @@
+import "../../css/selectionViewBB.css";
 import * as _ from 'underscore';
 import Backbone from "backbone";
+import d3 from "d3";
 
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import {utils} from "../utils";
-import d3 from "d3";
 
 export const SelectionTableViewBB = Backbone.View.extend({
     events: {

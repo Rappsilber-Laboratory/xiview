@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
-// import * as $ from "jquery";
+import * as $ from "jquery";
 
 import {svgUtils} from "../svgexp";
 import {makeLegalFileName, searchesToString, updateColourKey, utils} from "../utils";

@@ -1,11 +1,16 @@
+// eslint-disable-next-line no-unused-vars
+import "../../css/searchSummary.css";
+import "../../vendor/jquery.jsonview.css";
+
+import * as $ from 'jquery';
+// window.jQuery = $;
+import 'jsonview';
 import * as _ from 'underscore';
-// import $ from 'jquery';
-// import Backbone from "backbone";
+import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {modelUtils} from "../modelUtils";
 import {download} from "../downloads";
-import d3 from "d3";
 
 export const SearchSummaryViewBB = BaseFrameView.extend({
     events: function() {

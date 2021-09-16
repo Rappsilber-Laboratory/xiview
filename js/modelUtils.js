@@ -1,11 +1,12 @@
 import * as _ from 'underscore';
-// import * as $ from 'jquery';
+import * as $ from 'jquery';
 // require('d3');
-// require('d3-octree'); //not working
 
 import {utils} from "./utils";
 import {GoTerm} from "./views/go/goTerm";
 import d3 from "d3";
+// window.d3 =d3;
+// require('d3-octree'); //not working?
 
 export const modelUtils = {
     flattenMatches: function(matchesArr) {
@@ -1105,6 +1106,7 @@ export const modelUtils = {
 
         const bigPointArr = points1Bigger ? points1 : points2;
         const smallPointArr = points1Bigger ? points2 : points1;
+        // alert("yo"); //wtf? this code shouldn't run, seems like it never gets here
         const octree = d3.octree();
         octree
             .x(accessorObj.x || octree.x())
