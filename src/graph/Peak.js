@@ -1,6 +1,5 @@
 import * as _ from 'underscore';
 import d3 from "d3";
-import * as $ from "jquery";
 
 export function Peak (id, graph){
 	let peak = graph.model.get("JSONdata").peaks[id];

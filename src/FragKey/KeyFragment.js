@@ -1,6 +1,3 @@
-// import * as _ from 'underscore';
-import * as $ from "jquery";
-
 import d3 from "d3";
 
 export function KeyFragment (fragments, index, offset, peptideId, FragKey) {

@@ -298,23 +298,23 @@
 }
 
 
-/*.draggableCorner {*/
-/*    width:20px;*/
-/*    height:20px;*/
-/*    border:none;*/
-/*    background: #750000 url("../images/tl.png");*/
-/*}*/
+.draggableCorner {
+    width:20px;
+    height:20px;
+    border:none;
+    /*background: #750000 url("../images/tl.png");*/
+}
 
-/*!* just need 1 background image and rotate it for corner orientations *!*/
-/*.xispec_dynDiv_resizeDiv_tr {*/
-/*    transform: rotate(90deg);*/
-/*}*/
-/*.xispec_dynDiv_resizeDiv_bl {*/
-/*    transform: rotate(270deg);*/
-/*}*/
-/*.xispec_dynDiv_resizeDiv_br {*/
-/*    transform: rotate(180deg);*/
-/*}*/
+/* just need 1 background image and rotate it for corner orientations */
+.xispec_dynDiv_resizeDiv_tr {
+    transform: rotate(90deg);
+}
+.xispec_dynDiv_resizeDiv_bl {
+    transform: rotate(270deg);
+}
+.xispec_dynDiv_resizeDiv_br {
+    transform: rotate(180deg);
+}
 
 .xispec_dynDiv_resizeDiv_tl,.xispec_dynDiv_resizeDiv_tr,.xispec_dynDiv_resizeDiv_bl,.xispec_dynDiv_resizeDiv_br {
  position: absolute;
