@@ -1,6 +1,6 @@
 import _ from "underscore";
 import {download, downloadFilename} from "../../downloads";
-import {NGLUtils} from "./NGLUtils";
+import {NGLUtils} from "./RepopulateNGL";
 import d3 from "d3";
 
 export const NGLExportUtils = {

@@ -2,125 +2,138 @@ import * as _ from 'underscore';
 import d3 from "d3";
 import * as $ from "jquery";
 
-export const utils = {
+const debug = false;
 
-    debug: false,
-
-    xilog: function () {
-        if (this.debug && (typeof (console) !== 'undefined')) {
+export function xilog () {
+        if (debug && (typeof (console) !== 'undefined')) {
             console.log.apply(console, arguments);
         }
-    },
+    }
 
-    commonRegexes: {
+export const commonRegexes = {
         uniprotAccession: new RegExp("[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}", "i"),
         pdbPattern: "[A-Za-z0-9]{4}",
         multiPdbPattern: "(\\b[A-Za-z0-9]{4}((\\W+)|$))+",    // matches only if full string conforms to 4 char and some separator pattern (double escaped)
         multiPdbSplitter: /(\b[A-Za-z0-9]{4}\b)+/g, // matches parts of the string that conform to 4 char and some separator pattern
         hexColour: new RegExp("#[0-9A-F]{3}([0-9A-F]{3})?", "i"), // matches #3-char or #6-char hex colour strings
-        validDomID: /^[^a-z]+|[^\w:.-]+/gi,
+        // validDomID: /^[^a-z]+|[^\w:.-]+/gi,
         invalidFilenameChars: /[^a-zA-Z0-9-=&()¦_\\.]/g,
         digitsOnly: "\\d{3,}",
-    },
+    }
 
+//used by downloads and selectiontableview, and spectrumWrapperView
     // return comma-separated list of protein names from array of protein ids
-    proteinConcat: function (match, matchedPeptideIndex, clmsModel) {
+export function proteinConcat (match, matchedPeptideIndex, clmsModel) {
         const mpeptides = match.matchedPeptides[matchedPeptideIndex];
         const pnames = mpeptides ? mpeptides.prt.map(function (pid) {
             return clmsModel.get("participants").get(pid).name;
         }) : [];
         return pnames.join(";");
-    },
+    }
 
-    pepPosConcat: function (match, matchedPeptideIndex) {
+//used by downloads and selectiontableview
+export function pepPosConcat (match, matchedPeptideIndex) {
         const mpeptides = match.matchedPeptides[matchedPeptideIndex];
         return mpeptides ? mpeptides.pos.join("; ") : "";
-    },
+    }
 
-    fullPosConcat: function (match, matchedPeptideIndex) {
+
+//used by downloads and selectiontableview
+export function fullPosConcat (match, matchedPeptideIndex) {
         const mpeptides = match.matchedPeptides[matchedPeptideIndex];
         const linkPos = matchedPeptideIndex === 0 ? match.linkPos1 : match.linkPos2;
         return mpeptides ? mpeptides.pos.map(function (v) {
             return v + linkPos - 1;
         }).join("; ") : "";
-    },
+    }
 
-    commonLabels: {
+
+export const commonLabels = {
         downloadImg: "Download Image As ", // http://ux.stackexchange.com/a/61757/76906
         shareLink: "Share Search Link with Current Filter State",
-    },
+    }
 
-    commonTemplates: {
-        downloadImg: _.template("Download Image As <%=fileType%>"),
-        downloadCSV: _.template("Download Filtered <%=items> as CSV"),
-    },
+    // commonTemplates: {
+    //     downloadImg: _.template("Download Image As <%=fileType%>"),
+    //     downloadCSV: _.template("Download Filtered <%=items> as CSV"),
+    // },
 
 
-
+//used by baseframeview
     // http://stackoverflow.com/questions/10066630/how-to-check-if-element-is-visible-in-zepto
-    isZeptoDOMElemVisible: function (zeptoElem) { // could be a jquery-ref'ed elem as well
+export function isZeptoDOMElemVisible(zeptoElem) { // could be a jquery-ref'ed elem as well
         //console.log ("zepto", zeptoElem);
         const display = zeptoElem.css('display') !== 'none';
         return display && (zeptoElem.css('visibility') !== 'hidden') && (zeptoElem.height() > 0);
-    },
+    }
 
+// used by scatterplot
     // try .layerX / .layerY first as .offsetX / .offsetY is wrong in firefox
     // in fact don't use layerX / offsetX, they're unreliable cross-browser
-    crossBrowserElementX: function (evt, optElem) {
+export function crossBrowserElementX (evt, optElem) {
         return evt.clientX - $(optElem || evt.target).offset().left; // use evt.target if no optional element passed
         //return (evt.layerX || evt.offsetX) - evt.target.offsetLeft;
-    },
+    }
 
-    crossBrowserElementY: function (evt, optElem) {
+// used by scatterplot
+export function crossBrowserElementY (evt, optElem) {
         return evt.clientY - $(optElem || evt.target).offset().top;
-    },
+    }
 
-    niceRoundMap: {
-        1: 1,
-        2: 2,
-        3: 5,
-        4: 5,
-        5: 5,
-        6: 10,
-        7: 10,
-        8: 10,
-        9: 10,
-        10: 10
-    },
 
-    niceRound: function (val) {
-        const log = Math.floor(Math.log(val) / Math.log(10)); //no log10 func in IE
+const niceRoundMap = {
+    1: 1,
+    2: 2,
+    3: 5,
+    4: 5,
+    5: 5,
+    6: 10,
+    7: 10,
+    8: 10,
+    9: 10,
+    10: 10
+};
+
+//used by minigram, circular, distogram
+export function niceRound (val) {
+         const log = Math.floor(Math.log(val) / Math.log(10)); //no log10 func in IE
         const pow = Math.pow(10, log);
         val = Math.ceil(val / pow); // will now be a number 1-10
-        let roundVal = utils.niceRoundMap[val];
+        let roundVal = niceRoundMap[val];
         roundVal *= pow;
         return roundVal;
-    },
+    }
 
+    //used in scatterplot for axes tooltips
     // correlates to d3's .round with decimal places function
-    ceil: function (val, decimalPlaces) {
+export function ceil (val, decimalPlaces) {
         const pow = Math.pow(10, decimalPlaces);
         val *= pow;
         val = Math.ceil(val);
         return val / pow;
-    },
+    }
 
-    floor: function (val, decimalPlaces) {
+
+export function floor (val, decimalPlaces) {
         const pow = Math.pow(10, decimalPlaces);
         val *= pow;
         val = Math.floor(val);
         return val / pow;
-    },
+    }
 
-    toNearest: function (val, interval) {
+
+//used by nglutils, ngl-model-wrapper, distances
+export function toNearest (val, interval) {
         // adapted from https://stackoverflow.com/a/27861660/368214 - inverting small intervals avoids .00000001 stuff
         return interval ?
             (Math.abs(interval) > 1 ? Math.round(val * interval) / interval : Math.round(val / interval) * interval)
             : val
             ;
-    },
+    }
 
-    displayError: function (condition, message, borderColour, scale) {
+
+//used by main, network frame
+export function displayError (condition, message, borderColour, scale) {
         if (condition()) {
             let box = d3.select("#clmsErrorBox");
             if (box.empty()) {
@@ -149,9 +162,11 @@ export const utils = {
                 .style("opacity", 1)
             ;
         }
-    },
+    }
 
-    makeCanvas: function (width, height, existingD3CanvasSel) {
+
+//used here and by nglview
+export function makeCanvas (width, height, existingD3CanvasSel) {
         const canvas = (existingD3CanvasSel ? existingD3CanvasSel.node() : null) || document.createElement("canvas");
         const d3canvas = d3.select(canvas);
         d3canvas
@@ -164,15 +179,19 @@ export const utils = {
         const canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         // const cd = canvasData.data;
         return {canvas: canvas, context: ctx, dataStructure: canvasData, d3canvas: d3canvas};
-    },
+    }
 
-    nullCanvasObj: function (canvasObj) {
+
+//used here and by nglview
+export function nullCanvasObj (canvasObj) {
         canvasObj.canvas = null;
         canvasObj.context = null;
         canvasObj.dataStructure = null;
-    },
+    }
 
-    drawCanvasToSVGImage: function (d3canvas, svgImage, callback) { // d3canvas is a canvas wrapped in a d3 selection
+
+//only used by baseframeview, can be moved
+export function drawCanvasToSVGImage (d3canvas, svgImage, callback) { // d3canvas is a canvas wrapped in a d3 selection
         let destinationCanvasObj;
         let url;
 
@@ -181,7 +200,7 @@ export const utils = {
 
         svgImage.on("load", function () {
             // tidy up canvas and url
-            utils.nullCanvasObj(destinationCanvasObj);
+            nullCanvasObj(destinationCanvasObj);
             const DOMURL = URL || webkitURL || this;
             DOMURL.revokeObjectURL(url);
 
@@ -195,7 +214,7 @@ export const utils = {
                 // from https://stackoverflow.com/a/19539048/368214
                 // use dummy canvas and fill with background colour so exported png is not transparent
 
-                destinationCanvasObj = utils.makeCanvas(width, height);
+                destinationCanvasObj = makeCanvas(width, height);
                 const destinationCanvas = destinationCanvasObj.canvas;
 
                 //create a rectangle with the desired color
@@ -219,10 +238,10 @@ export const utils = {
                 return url;
             })
         ;
-    },
+    }
 
-    // Hide overlapping d3 axis labels
-    declutterAxis: function (d3AxisElem, keepHidden) {
+    // Hide overlapping d3 axis labels - used by minigram, distogram, martix, scatterplot
+export function declutterAxis (d3AxisElem, keepHidden) {
         let lastBounds = {
             left: -100,
             right: -100,
@@ -246,10 +265,10 @@ export const utils = {
                     }
                 }
             });
-    },
+    }
 
-    // Remove non-round d3 axis labels and associated ticks
-    niceValueAxis: function (d3AxisElem, maxVal) {
+    // Remove non-round d3 axis labels and associated ticks - used by mimigram and distogram
+export function niceValueAxis (d3AxisElem, maxVal) {
         const u = Math.round(Math.log10(maxVal + 3)) - 1;
         const m = Math.pow(10, u);
 
@@ -266,21 +285,24 @@ export const utils = {
                 }
             })
         ;
-    },
+    }
 
-    makeLegalDomID: function (id) {
-        return id.replace(utils.commonRegexes.validDomID, "");
-    },
+
+export function makeLegalDomID (id) {
+    const validDomID = /^[^a-z]+|[^\w:.-]+/gi;
+    return id.replace(validDomID, "");
+    }
+
 
     // Routine assumes on click methods are added via backbone definitions, though they could be added later with d3
     // targetDiv is a d3 select element
     // buttonData array of objects of type:
     // {class: "circRadio", label: "Alphabetical", id: "alpha", type: "radio"|"checkbox"|"button",
     // initialState: true|false, group: "sort", tooltip: "tooltipText", noBreak: true|false},
-    makeBackboneButtons: function (targetDiv, baseID, buttonData) {
+export function makeBackboneButtons (targetDiv, baseID, buttonData) {
         const makeID = function (d) {
-            return utils.makeLegalDomID(baseID + d.id);
-        };
+            return makeLegalDomID(baseID + d.id);
+        }
 
         // Don't make buttons whose id already exists
         buttonData = buttonData.filter(function (d) {
@@ -377,11 +399,11 @@ export const utils = {
             .text(function (d) {
                 return d.label;
             });
-    },
+    }
 
     // Functions for making useful file names
 
-    objectStateToAbbvString: function (object, fields, zeroFormatFields, abbvMap) {
+export function objectStateToAbbvString (object, fields, zeroFormatFields, abbvMap) {
         fields = fields.filter(function (field) {
             const val = object.get ? object.get(field) || object[field] : object[field];
             return !(val === "" || val === false || val === undefined);
@@ -411,13 +433,12 @@ export const utils = {
             return (abbvMap[field] || field.toUpperCase()) + (val === true ? "" : "=" + strValue(field, val));
         }, this);
         return strParts.join(".");
-    },
+    }
 
-    filterStateToString: function () {
+export function filterStateToString () {
         const filterStr = window.compositeModelInst.get("filterModel").stateString();
         return filterStr.substring(0, 160);
-    },
-};
+    }
 
 export function searchesToString () {
         const searches = Array.from(window.compositeModelInst.get("clmsModel").get("searches"));
@@ -428,7 +449,7 @@ export function searchesToString () {
 
 
 export function makeLegalFileName (fileNameStr) {
-        let newStr = fileNameStr.replace(utils.commonRegexes.invalidFilenameChars, "");
+        let newStr = fileNameStr.replace(commonRegexes.invalidFilenameChars, "");
         newStr = newStr.substring(0, 240);
         return newStr;
     }

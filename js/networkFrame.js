@@ -7,9 +7,9 @@ import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
-import {getLocalStorage, setLocalStorage, utils} from './utils';
+import {displayError, getLocalStorage, setLocalStorage} from './utils';
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
-import {modelUtils} from "./modelUtils";
+import {flattenMatches, getSearchGroups, matchScoreRange, parseURLQueryString} from "./modelUtils";
 import {FilterModel} from "./filter/filter-model";
 import {TooltipModel} from "./model/models";
 import {MinigramModel} from "./model/models";
@@ -267,7 +267,7 @@ init.modelsEssential = function (options) {
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
     const hasNoMatches = _.isEmpty(options.rawMatches);
 
-    utils.displayError(function () {
+    displayError(function () {
             return hasMissing || hasIncorrect || hasNoMatches;
         },
         (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
@@ -280,7 +280,7 @@ init.modelsEssential = function (options) {
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
-    const scoreExtentInstance = modelUtils.matchScoreRange(clmsModelInst.get("matches"), true);
+    const scoreExtentInstance = matchScoreRange(clmsModelInst.get("matches"), true);
     if (scoreExtentInstance[0]) {
         scoreExtentInstance[0] = Math.min(0, scoreExtentInstance[0]); // make scoreExtent min zero, if existing min isn't negative
     }
@@ -297,7 +297,7 @@ init.modelsEssential = function (options) {
         //matchScoreCutoff: [undefined, undefined],
         matchScoreCutoff: scoreExtentInstance.slice(),
         //distanceCutoff: [0, 250],
-        searchGroups: modelUtils.getSearchGroups(clmsModelInst),
+        searchGroups: getSearchGroups(clmsModelInst),
     };
     // const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
     // filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
@@ -305,7 +305,7 @@ init.modelsEssential = function (options) {
     const filterModelInst = new FilterModel(filterSettings, {
         scoreExtent: scoreExtentInstance,
         //distanceExtent: [0, 250],
-        possibleSearchGroups: modelUtils.getSearchGroups(clmsModelInst),
+        possibleSearchGroups: getSearchGroups(clmsModelInst),
     });
 
     const tooltipModelInst = new TooltipModel();
@@ -337,7 +337,7 @@ init.modelsEssential = function (options) {
 
     // Data generation routines for minigram models
     minigramModels[0].data = function () {
-        return modelUtils.flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
+        return flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
     };
     minigramModels[1].data = function () {
         const crosslinks = window.compositeModelInst.getAllCrossLinks();
@@ -1102,7 +1102,7 @@ init.viewsThatNeedAsyncData = function () {
         displayEventName: "nglViewShow",
     });
 
-    const urlChunkMap = modelUtils.parseURLQueryString(window.location.search.slice(1));
+    const urlChunkMap = parseURLQueryString(window.location.search.slice(1));
     new PDBFileChooserBB({
         el: "#pdbPanel",
         model: compModel,

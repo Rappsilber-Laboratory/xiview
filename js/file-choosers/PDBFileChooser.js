@@ -1,12 +1,12 @@
 import * as _ from 'underscore';
-// import Backbone from "backbone";
 import * as NGL from "../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {modelUtils} from "../modelUtils";
-import {addMultipleSelectControls, utils} from "../utils";
+import {filterOutDecoyInteractors, getLegalAccessionIDs, loadUserFile} from "../modelUtils";
+import {addMultipleSelectControls, commonRegexes} from "../utils";
 import {NGLUtils} from "../views/ngl/NGLUtils";
 import d3 from "d3";
+import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 
 export const PDBFileChooserBB = BaseFrameView.extend({
 
@@ -50,7 +50,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 value: this.cAlphaOnly,
             },
         ];
-        utils.makeBackboneButtons (box.append("div"), this.el.id, buttonData);
+        makeBackboneButtons (box.append("div"), this.el.id, buttonData);
         */
 
 
@@ -85,9 +85,9 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 type: "text",
                 class: "inputPDBCode withSideMargins",
                 //maxlength: 4,
-                //pattern: utils.commonRegexes.pdbPattern,
+                //pattern: commonRegexes.pdbPattern,
                 maxlength: 100,
-                pattern: utils.commonRegexes.multiPdbPattern,
+                pattern: commonRegexes.multiPdbPattern,
                 size: 8,
                 title: "Enter PDB IDs here e.g. 1AO6 for one structure, 1YSX 1BKE to merge two",
                 //placeholder: "eg 1AO6"
@@ -205,7 +205,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         addMultipleSelectControls({
             addToElem: parentElem,
             selectList: ["Proteins"],
-            optionList: modelUtils.filterOutDecoyInteractors(proteins),
+            optionList: filterOutDecoyInteractors(proteins),
             keepOldOptions: false,
             selectLabelFunc: function () {
                 return "Select Protein for EBI Sequence Search ►";
@@ -233,7 +233,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         // Basically chrome has this point in this function as being traceable back to a user click event but the
         // callback from the ajax isn't.
         const newtab = window.open("", "_blank");
-        const accessionIDs = modelUtils.getLegalAccessionIDs(this.getSelectedProteins());
+        const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
         if (accessionIDs.length) {
             // https://search.rcsb.org/#search-example-8
             const query = {
@@ -339,7 +339,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         const fileCount = evt.target.files.length;
 
         const onLastLoad = _.after(fileCount, function () {
-                NGLUtils.repopulateNGL({
+                repopulateNGL({
                     pdbSettings: pdbSettings,
                     stage: self.stage,
                     compositeModel: self.model
@@ -350,7 +350,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         for (let n = 0; n < fileCount; n++) {
             const fileObj = evt.target.files[n];
 
-            modelUtils.loadUserFile(
+            loadUserFile(
                 fileObj,
                 function (fileContents, associatedData) {
                     const blob = new Blob([fileContents], {
@@ -388,7 +388,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         this.loadRoute = "pdb";
         this.setWaitingEffect();
 
-        const pdbSettings = pdbCode.match(utils.commonRegexes.multiPdbSplitter).map(function (code) {
+        const pdbSettings = pdbCode.match(commonRegexes.multiPdbSplitter).map(function (code) {
             return {
                 id: code,
                 pdbCode: code,
@@ -398,7 +398,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             };
         }, this);
 
-        NGLUtils.repopulateNGL({
+        repopulateNGL({
             pdbSettings: pdbSettings,
             stage: this.stage,
             compositeModel: this.model

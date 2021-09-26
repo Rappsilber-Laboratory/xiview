@@ -4,7 +4,7 @@ import Backbone from "backbone";
 import d3 from "d3";
 
 import {checkBoxView} from "../ui-utils/checkbox-view";
-import {utils} from "../utils";
+import {fullPosConcat, pepPosConcat, proteinConcat} from "../utils";
 
 export const SelectionTableViewBB = Backbone.View.extend({
     events: {
@@ -161,10 +161,10 @@ export const SelectionTableViewBB = Backbone.View.extend({
                     ((d.matchedPeptides[1].prt.length !== 0) ? d.matchedPeptides[1].prt.length : 1);
             },
             protein1: function (d) {
-                return utils.proteinConcat(d, 0, self.model.get("clmsModel"));
+                return proteinConcat(d, 0, self.model.get("clmsModel"));
             },
             protein2: function (d) {
-                return utils.proteinConcat(d, 1, self.model.get("clmsModel"));
+                return proteinConcat(d, 1, self.model.get("clmsModel"));
             },
             runName: function (d) {
                 return d.runName();
@@ -179,16 +179,16 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return d.searchId;
             },
             pos1: function (d) {
-                return utils.fullPosConcat(d, 0);
+                return fullPosConcat(d, 0);
             },
             pos2: function (d) {
-                return utils.fullPosConcat(d, 1);
+                return fullPosConcat(d, 1);
             },
             pepPos1: function (d) {
-                return utils.pepPosConcat(d, 0);
+                return pepPosConcat(d, 0);
             },
             pepPos2: function (d) {
-                return utils.pepPosConcat(d, 1);
+                return pepPosConcat(d, 1);
             },
             pepSeq1raw: function (d) {
                 const seqMods = d.matchedPeptides[0].seq_mods;

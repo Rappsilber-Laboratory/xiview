@@ -1,5 +1,5 @@
 import {getLocalStorage, setLocalStorage} from "../utils";
-import {modelUtils} from "../modelUtils";
+import {filterOutDecoyInteractors} from "../modelUtils";
 import d3 from "d3";
 
 export const STRINGUtils = {
@@ -10,7 +10,7 @@ export const STRINGUtils = {
     // Filter the CLMS model's participants down to just those that have non-decoy inter-protein links
     filterProteinsToPPISet: function (clmsModel) {
         const proteinMap = clmsModel.get("participants");
-        const realProteins = modelUtils.filterOutDecoyInteractors(Array.from(proteinMap.values()));
+        const realProteins = filterOutDecoyInteractors(Array.from(proteinMap.values()));
         const ppiProteins = realProteins.filter(function (prot) {
             return prot.crosslinks.some(function (clink) {
                 // is there a real crosslink going to another protein?

@@ -9,7 +9,7 @@ import * as _ from 'underscore';
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {modelUtils} from "../modelUtils";
+import {amino1toNameMap, crosslinkerSpecificityPerLinker} from "../modelUtils";
 import {download} from "../downloads";
 
 export const SearchSummaryViewBB = BaseFrameView.extend({
@@ -63,7 +63,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
     exportDescriptions: function() {
         const template = _.template(this.searchDescriptionTemplate);
         const searches = Array.from(this.model.get("searches").values());
-        const linkerData = modelUtils.crosslinkerSpecificityPerLinker(searches);
+        const linkerData = crosslinkerSpecificityPerLinker(searches);
         //console.log ("LD", linkerData);
 
         const modRegex = /^.*;MODIFIED:([^;]*)/;
@@ -78,7 +78,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
             const codonsToNames = function (codonArray) {
                 return codonArray
                     .map(function (code) {
-                        const name = modelUtils.amino1toNameMap[code];
+                        const name = amino1toNameMap[code];
                         return name ? name.replace("_", "-") : "(codon " + code + ")";  // state codon if no long name
                     })
                     ;

@@ -1,10 +1,17 @@
-import {modelUtils} from "./modelUtils";
-import {makeLegalFileName, searchesToString, utils} from "./utils";
+import {amino1toMass} from "./modelUtils";
+import {
+    filterStateToString,
+    fullPosConcat,
+    makeLegalFileName,
+    pepPosConcat,
+    proteinConcat,
+    searchesToString
+} from "./utils";
 import d3 from "d3";
 
 export function downloadFilename(type, suffix) {
     suffix = suffix || "csv";
-    return makeLegalFileName(searchesToString() + "--" + type + "--" + utils.filterStateToString()) + "." + suffix;
+    return makeLegalFileName(searchesToString() + "--" + type + "--" + filterStateToString()) + "." + suffix;
 }
 
 export function downloadMatches() {
@@ -176,10 +183,10 @@ export function getMatchesCSV() {
     matchMap.values().forEach(function (match) {
         const peptides1 = match.matchedPeptides[0];
         const peptides2 = match.matchedPeptides[1];
-        const pp1 = utils.pepPosConcat(match, 0);
-        const pp2 = utils.pepPosConcat(match, 1);
-        const lp1 = utils.fullPosConcat(match, 0);
-        const lp2 = utils.fullPosConcat(match, 1);
+        const pp1 = pepPosConcat(match, 0);
+        const pp2 = pepPosConcat(match, 1);
+        const lp1 = fullPosConcat(match, 0);
+        const lp2 = fullPosConcat(match, 1);
 
         const decoy1 = participants.get(peptides1.prt[0]).is_decoy;
         // TODO: looks to rely on "" == false, prob doesn't give right result for linears
@@ -249,7 +256,7 @@ function getSSL() {
                 delta = deltaMatch[1];
             } else {
                 const modified = modifiedRegex.exec(desc)[1];
-                delta = massRegex.exec(desc)[1] - modelUtils.amino1toMass[modified];
+                delta = massRegex.exec(desc)[1] - amino1toMass[modified];
             }
 
             if (delta > 0) {
@@ -328,10 +335,10 @@ function getSSL() {
                 sequence = sequence + "K[" + joiningAAModMass + "]" + pep2sslSeq;
             }
 
-            const pp1 = utils.pepPosConcat(match, 0);
-            const pp2 = utils.pepPosConcat(match, 1);
-            const lp1 = utils.fullPosConcat(match, 0);
-            const lp2 = utils.fullPosConcat(match, 1);
+            const pp1 = pepPosConcat(match, 0);
+            const pp2 = pepPosConcat(match, 1);
+            const lp1 = fullPosConcat(match, 0);
+            const lp2 = fullPosConcat(match, 1);
 
             const data = [
                 match.peakListFileName(),
@@ -341,12 +348,12 @@ function getSSL() {
                 "UNKNOWN",
                 match.score(),
                 match.id,
-                utils.proteinConcat(match, 0, clmsModel),
+                proteinConcat(match, 0, clmsModel),
                 lp1,
                 pp1,
                 peptide1.seq_mods,
                 match.linkPos1,
-                (peptide1 ? utils.proteinConcat(match, 1, clmsModel) : ""),
+                (peptide1 ? proteinConcat(match, 1, clmsModel) : ""),
                 lp2,
                 pp2,
                 (peptide2 ? peptide2.seq_mods : ""),

@@ -7,9 +7,16 @@ import * as c3 from "../../vendor/c3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
-import {addMultipleSelectControls, utils} from "../utils";
+import {
+    addMultipleSelectControls,
+    commonLabels,
+    declutterAxis,
+    makeBackboneButtons,
+    niceRound,
+    niceValueAxis
+} from "../utils";
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
-import {modelUtils} from "../modelUtils";
+import {crosslinkerSpecificityPerLinker} from "../modelUtils";
 import d3 from "d3";
 
 export const DistogramBB = BaseFrameView.extend({
@@ -87,12 +94,12 @@ export const DistogramBB = BaseFrameView.extend({
 
         const buttonData = [{
             class: "downloadButton",
-            label: utils.commonLabels.downloadImg + "SVG",
+            label: commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
         },];
         const toolbar = mainDivSel.select("div.toolbar");
-        utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
+        makeBackboneButtons(toolbar, self.el.id, buttonData);
 
         // Various view options set up, then put in a dropdown menu
         const toggleButtonData = [{
@@ -126,7 +133,7 @@ export const DistogramBB = BaseFrameView.extend({
                     d.initialState = (d.value === this.options[d.group]);
                 }
             }, this);
-        utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
+        makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
 
         const optid = this.el.id + "RandomOptions";
         toolbar.append("p").attr("id", optid);
@@ -359,7 +366,7 @@ export const DistogramBB = BaseFrameView.extend({
                 const userMax = +mainDivSel.select(".xAxisMax").property("value");    // user defined value from widget
                 const distObj = this.model.get("clmsModel").get("distancesObj");
                 if (!userMax) {
-                    distAttr[0].maxVal = utils.niceRound (distObj.maxDistance * 1.3) + 1;
+                    distAttr[0].maxVal = niceRound (distObj.maxDistance * 1.3) + 1;
                 }
             }
 
@@ -668,8 +675,8 @@ export const DistogramBB = BaseFrameView.extend({
     tidyXAxis: function () {
         const xaxis = d3.select(this.el).select(".c3-axis-x");
         if (this.chart) {
-            utils.niceValueAxis (xaxis, this.getAxisRange());
-            utils.declutterAxis (xaxis, true);
+            niceValueAxis (xaxis, this.getAxisRange());
+            declutterAxis (xaxis, true);
         }
         return this;
     },
@@ -716,7 +723,7 @@ export const DistogramBB = BaseFrameView.extend({
 
     recalcRandomBinning: function(linkCount) {
         const searchArray = Array.from(this.model.get("clmsModel").get("searches").values());
-        const crosslinkerSpecificityMap = modelUtils.crosslinkerSpecificityPerLinker(searchArray);
+        const crosslinkerSpecificityMap = crosslinkerSpecificityPerLinker(searchArray);
         const distObj = this.model.get("clmsModel").get("distancesObj");
         const rscope = this.options.randomScope;
         const randArr = distObj ? distObj.getSampleDistances(
@@ -837,7 +844,7 @@ export const DistogramBB = BaseFrameView.extend({
         })));
         const min = d3.min([0, Math.floor(extent[0])]);
         const max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
-        const step = Math.max(1, utils.niceRound((max - min) / 100));
+        const step = Math.max(1, niceRound((max - min) / 100));
         let thresholds = d3.range(min, max + (step * 2), step);
         //console.log ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
 

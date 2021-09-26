@@ -13,7 +13,7 @@ import {
     ThresholdColourModel
 } from "./color-model";
 import {DefaultProteinColourModel} from "./protein-color-model";
-import {utils} from "../../utils";
+import {commonRegexes} from "../../utils";
 import d3 from "d3";
 
 window.linkColor = {};//todo - get rid
@@ -189,7 +189,7 @@ const makeColourModel = function(field, label, objs) {
                     val = val.trim();
                 }
                 categories.add(val);
-                if (allColors && !utils.commonRegexes.hexColour.test(val)) {
+                if (allColors && !commonRegexes.hexColour.test(val)) {
                     allColors = false;
                 }
             }

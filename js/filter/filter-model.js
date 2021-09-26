@@ -1,7 +1,8 @@
 import * as _ from 'underscore';
-import {utils} from "../utils";
-import {modelUtils} from "../modelUtils";
+import {objectStateToAbbvString} from "../utils";
+import {makeURLQueryPairs} from "../modelUtils";
 import d3 from "d3";
+import Backbone from "backbone";
 
 export class FilterModel extends Backbone.Model{
     constructor(attributes, options) {
@@ -518,13 +519,13 @@ export class FilterModel extends Backbone.Model{
                     //console.log ("filter fieldset", this.attributes, fields);
                 }
 
-                const str = utils.objectStateToAbbvString(this, fields, zeroFormatFields, abbvMap);
+                const str = objectStateToAbbvString(this, fields, zeroFormatFields, abbvMap);
                 return str;
             }
 
     getURLQueryPairs () {
         // make url parts from current filter attributes
-        return modelUtils.makeURLQueryPairs (this.attributes, "F");
+        return makeURLQueryPairs (this.attributes, "F");
     }
 
             getFilterUrlSettings (urlChunkMap) {

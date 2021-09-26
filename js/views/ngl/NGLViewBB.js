@@ -1,15 +1,20 @@
 import '../../../css/nglViewBB.css';
 
 import * as _ from 'underscore';
-// import Backbone from "backbone";
 import * as $ from 'jquery';
 
 import * as NGL from "../../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
-import {addMultipleSelectControls, makeLegalFileName, searchesToString, utils} from "../../utils";
+import {
+    addMultipleSelectControls, commonLabels,
+    filterStateToString, makeBackboneButtons, makeCanvas,
+    makeLegalFileName, nullCanvasObj,
+    objectStateToAbbvString,
+    searchesToString, xilog
+} from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
-import {modelUtils} from "../../modelUtils";
+import {filterOutDecoyInteractors, mergeContiguousFeatures, totalProteinLength} from "../../modelUtils";
 import {NGLExportUtils} from "./NGLExportUtils";
 import {CrosslinkRepresentation} from "./crosslink-representation";
 import d3 from "d3";
@@ -75,7 +80,7 @@ export const NGLViewBB = BaseFrameView.extend({
             .attr("class", "verticalFlexContainer");
 
         const buttonData = [{
-            label: utils.commonLabels.downloadImg + "PNG",
+            label: commonLabels.downloadImg + "PNG",
             class: "downloadButton",
             type: "button",
             id: "download",
@@ -91,7 +96,7 @@ export const NGLViewBB = BaseFrameView.extend({
         ];
 
         const toolbar = flexWrapperPanel.append("div").attr("class", "toolbar toolbarArea");
-        utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
+        makeBackboneButtons(toolbar, self.el.id, buttonData);
 
         // Generate Export/Save cross-link data dropdown
         const saveExportButtonData = [{
@@ -149,7 +154,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 d.value = d.value || d.label;
             }, this)
         ;
-        utils.makeBackboneButtons(toolbar, self.el.id, saveExportButtonData);
+        makeBackboneButtons(toolbar, self.el.id, saveExportButtonData);
 
         // ...then moved to a dropdown menu
         const optid = this.el.id + "Exports";
@@ -300,7 +305,7 @@ export const NGLViewBB = BaseFrameView.extend({
                     d.initialState = (d.value === this.options[d.group]);
                 }
             }, this);
-        utils.makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
+        makeBackboneButtons(toolbar, self.el.id, toggleButtonData);
 
         // ...then moved to a dropdown menu
         const optid2 = this.el.id + "Options";
@@ -521,7 +526,7 @@ export const NGLViewBB = BaseFrameView.extend({
         this.listenTo(this.model, "change:stageModel", function (model, newStageModel) {
             // swap out stage models and listeners
             const prevStageModel = model.previous("stageModel");
-            utils.xilog("STAGE MODEL CHANGED", arguments, this, prevStageModel);
+            xilog("STAGE MODEL CHANGED", arguments, this, prevStageModel);
             if (prevStageModel) {
                 this.stopListening(prevStageModel); // remove old stagemodel linklist change listener;
             }
@@ -615,17 +620,17 @@ export const NGLViewBB = BaseFrameView.extend({
 
     repopulate: function () {
         const stageModel = this.model.get("stageModel");
-        utils.xilog("REPOPULATE", this.model, stageModel);
+        xilog("REPOPULATE", this.model, stageModel);
         const sname = stageModel.getStructureName();
         let overText = "PDB File: " + (sname.length === 4 ?
             "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
             " - " + stageModel.get("structureComp").structure.title;
 
-        const interactors = modelUtils.filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
+        const interactors = filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
         const alignColl = this.model.get("alignColl");
         const pdbLengthsPerProtein = interactors.map(function (inter) {
             const pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);
-            const contigPDBFeatures = modelUtils.mergeContiguousFeatures(pdbFeatures);
+            const contigPDBFeatures = mergeContiguousFeatures(pdbFeatures);
 
             const totalLength = d3.sum(contigPDBFeatures, function (d) {
                 return d.end - d.begin + 1;
@@ -634,11 +639,11 @@ export const NGLViewBB = BaseFrameView.extend({
             return totalLength;
         }, this);
         const totalPDBLength = d3.sum(pdbLengthsPerProtein);
-        const totalProteinLength = modelUtils.totalProteinLength(interactors);
-        const pcent = d3.format(".0%")(totalPDBLength / totalProteinLength);
+        const totalLength = totalProteinLength(interactors);
+        const pcent = d3.format(".0%")(totalPDBLength / totalLength);
         const commaFormat = d3.format(",");
 
-        overText += " - covers approx " + commaFormat(totalPDBLength) + " of " + commaFormat(totalProteinLength) + " AAs (" + pcent + ")";
+        overText += " - covers approx " + commaFormat(totalPDBLength) + " of " + commaFormat(totalLength) + " AAs (" + pcent + ")";
         this.chartDiv.select("div.overlayInfo").html(overText);
 
         this.xlRepr = new CrosslinkRepresentation(stageModel,
@@ -660,7 +665,7 @@ export const NGLViewBB = BaseFrameView.extend({
     render: function () {
         if (this.isVisible()) {
             this.showFiltered();
-            utils.xilog("re rendering NGL view");
+            xilog("re rendering NGL view");
         }
         return this;
     },
@@ -698,7 +703,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 // make fresh canvas
                 if (self.options.exportKey) {
                     const gap = 50;
-                    const canvasObj = utils.makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
+                    const canvasObj = makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
 
                     // draw blob as image to this canvas
                     const DOMURL = URL || webkitURL || window;
@@ -729,7 +734,7 @@ export const NGLViewBB = BaseFrameView.extend({
                             // turn canvas to blob and download it as a png file
                             canvasObj.canvas.toBlob(function (newBlob) {
                                 if (newBlob) {
-                                    utils.nullCanvasObj(canvasObj);
+                                    nullCanvasObj(canvasObj);
                                     NGL.download(newBlob, self.filenameStateString() + ".png");
                                 }
                             }, 'image/png');
@@ -795,7 +800,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 "Exported by " + this.identifier + " and XiView",
                 "Xi Crosslinks in CONECT and LINK records",
                 "Search ID: " + searchesToString(),
-                "Filter: " + utils.filterStateToString()
+                "Filter: " + filterStateToString()
             ]
         );
         return this;
@@ -808,7 +813,7 @@ export const NGLViewBB = BaseFrameView.extend({
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
                 "Search ID: " + searchesToString(),
-                "Filter: " + utils.filterStateToString()
+                "Filter: " + filterStateToString()
             ]
         );
         return this;
@@ -862,7 +867,7 @@ export const NGLViewBB = BaseFrameView.extend({
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
                 "Search ID: " + searchesToString(),
-                "Filter: " + utils.filterStateToString()
+                "Filter: " + filterStateToString()
             ],
             {
                 crosslinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"),
@@ -950,7 +955,7 @@ export const NGLViewBB = BaseFrameView.extend({
 
     rerenderColourSchemes: function (repSchemePairs) {
         if (this.xlRepr && this.isVisible()) {
-            utils.xilog("rerendering ngl");
+            xilog("rerendering ngl");
             this.xlRepr.rerenderColourSchemes(repSchemePairs);
         }
         return this;
@@ -1002,17 +1007,17 @@ export const NGLViewBB = BaseFrameView.extend({
         const optionsPlus = $.extend({}, this.options);
         optionsPlus.rep = this.xlRepr.options.chainRep;
 
-        return utils.objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
+        return objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
     },
 
     pdbFilenameStateString: function () {
         const stageModel = this.model.get("stageModel");
-        return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString() + "-" + utils.filterStateToString());
+        return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString() + "-" + filterStateToString());
     },
 
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
         const stageModel = this.model.get("stageModel");
-        return makeLegalFileName(searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + utils.filterStateToString());
+        return makeLegalFileName(searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + filterStateToString());
     },
 });

@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 // Model for one sequence pairing
 import Backbone from "backbone";
 
-import {modelUtils} from "../modelUtils";
+import {mergeContiguousFeatures} from "../modelUtils";
 
 class SeqModel extends Backbone.Model {
     constructor(attributes, options) {
@@ -134,7 +134,7 @@ class SeqModel extends Backbone.Model {
             }
             blocks.push({begin: start + 1, end: _.last(index) + 1});
 
-            this.blocks = modelUtils.mergeContiguousFeatures(blocks);
+            this.blocks = mergeContiguousFeatures(blocks);
             this.dirtyBlocks = false;
         }
 

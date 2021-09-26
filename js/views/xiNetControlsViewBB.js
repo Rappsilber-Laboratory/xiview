@@ -3,7 +3,7 @@ import Backbone from "backbone";
 
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {utils} from "../utils";
+import {commonLabels, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 
 export const xiNetControlsViewBB = Backbone.View.extend({
@@ -83,7 +83,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
             "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
             "<span class='noBreak sectionDividerLeft' ></span>" +
-            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + utils.commonLabels.downloadImg + "SVG" + "</button>";
+            "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + commonLabels.downloadImg + "SVG" + "</button>";
 
         mainDivSel.html(
             buttonHtml
@@ -200,9 +200,9 @@ export const xiNetControlsViewBB = Backbone.View.extend({
 
         const self = this;
 
-        utils.makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
+        makeBackboneButtons(mainDivSel, self.el.id, toggleButtonData);
         // toggleButtonData.splice(0, 0, {
-        //     name: utils.commonLabels.downloadImg + "SVG",
+        //     name: commonLabels.downloadImg + "SVG",
         //     tooltip: "Download image from xiNET as SVG; a vector format that can be edited in InkScape or Illustrator",
         //     class: "xinetSvgDownload",
         //     sectionEnd: true,

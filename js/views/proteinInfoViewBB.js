@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {utils} from "../utils";
+import {makeLegalDomID} from "../utils";
 
 export const ProteinInfoViewBB = BaseFrameView.extend({
     events: function () {
@@ -67,7 +67,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
             // d3 data bind
             const protJoin = d3.select(this.el).select("div.proteinTabs").selectAll(".protTab").data(prots,
                 function (d) {
-                    return utils.makeLegalDomID(d.id);
+                    return makeLegalDomID(d.id);
                 });
             const self = this;
             protJoin.enter().append("span")
@@ -210,8 +210,8 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     // var interactor = self.model.get("clmsModel").get("participants").get(posData[0]);
                     //
                     // self.model.get("tooltipModel")
-                    //     .set("header", "Cross-Linked with " + modelUtils.makeTooltipTitle.residue(interactor, +posData[1]))
-                    //     .set("contents", modelUtils.makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
+                    //     .set("header", "Cross-Linked with " + makeTooltipTitle.residue(interactor, +posData[1]))
+                    //     .set("contents", makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
                     //     .set("location", {
                     //         pageX: d3.event.pageX,
                     //         pageY: d3.event.pageY

@@ -3,9 +3,9 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as $ from "jquery";
 
-import {makeLegalFileName, searchesToString, updateAnnotationColourKey, utils} from "../utils";
+import {makeLegalDomID, makeLegalFileName, searchesToString, updateAnnotationColourKey} from "../utils";
 import {checkBoxView} from "./checkbox-view";
-import {svgUtils} from "../svgexp";
+import {svgUtils} from "../../vendor/svgexp";
 import d3 from "d3";
 import {download} from "../downloads";
 
@@ -112,7 +112,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                 adata.push(cbdata);
                 lastCat = cat;
 
-                 if (d3.select("#"+utils.makeLegalDomID(cbdata.id)).empty()) {
+                 if (d3.select("#"+makeLegalDomID(cbdata.id)).empty()) {
                      const options = $.extend({
                          toggleAttribute: self.options.toggleAttribute,
                          labelFirst: self.options.labelFirst
@@ -150,7 +150,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
         /*
         choices.each (function (d) {
             if (d.id) {
-                var targetSel = d3.select("#" + utils.makeLegalDomID(d.id));
+                var targetSel = d3.select("#" + makeLegalDomID(d.id));
                 if (!targetSel.empty()) {
                     targetSel.remove();
                 }
@@ -166,7 +166,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                     ind.classed(d.class, true);
                 }
             } else if (d.id) {
-                const targetSel = d3.select("#" + utils.makeLegalDomID(d.id));
+                const targetSel = d3.select("#" + makeLegalDomID(d.id));
                 if (!targetSel.empty()) {
                     const targetNode = targetSel.node();
                     if (targetNode.parentElement) {
@@ -175,7 +175,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                     ind.node().appendChild(targetNode);
 
                     if (targetSel.datum() == undefined) {
-                        ind.select("#" + utils.makeLegalDomID(d.id)); // this pushes parent d3 datum onto this element
+                        ind.select("#" + makeLegalDomID(d.id)); // this pushes parent d3 datum onto this element
                     }
                 }
             }

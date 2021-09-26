@@ -3,8 +3,8 @@ import * as _ from 'underscore';
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {STRINGUtils} from "./stringUtils";
-import {utils} from "../utils";
-import {modelUtils} from "../modelUtils";
+import {commonRegexes} from "../utils";
+import {updateLinkMetadata} from "../modelUtils";
 import d3 from "d3";
 
 export const STRINGFileChooserBB = BaseFrameView.extend({
@@ -69,7 +69,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
                 type: "text",
                 class: "inputTaxonID withSideMargins",
                 maxlength: 16,
-                pattern: utils.commonRegexes.digitsOnly,
+                pattern: commonRegexes.digitsOnly,
                 size: 16,
                 title: "Enter NCBI Taxon ID here for use in STRING search",
                 //placeholder: "eg 1AO6"
@@ -122,7 +122,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             let statusText = "";
             if (!errorReason) {
                 //var t = performance.now();
-                const result = modelUtils.updateLinkMetadata(csv, self.model.get("clmsModel"));
+                const result = updateLinkMetadata(csv, self.model.get("clmsModel"));
                 //t = performance.now() - t;
                 //console.log ("assignt to links took", t/1000, "s");
                 statusText = result.ppiCount + " STRING interactions matched to protein set.<br>";

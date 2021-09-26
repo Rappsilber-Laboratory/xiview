@@ -1,10 +1,8 @@
-import {ColourModel} from "./color-model";
-
 import * as _ from 'underscore';
-import {modelUtils} from "../../modelUtils";
 import d3 from "d3";
-
-const colorbrewer = require('colorbrewer');
+import * as colorbrewer from 'colorbrewer';
+import {ColourModel} from "./color-model";
+import {filterOutDecoyInteractors} from "../../modelUtils";
 
 export class DefaultLinkColourModel extends ColourModel {
     constructor(attributes, options) {
@@ -174,7 +172,7 @@ export class InterProteinColourModel extends ColourModel{
     initialize (properties, options) {
         let colScale;
         let labels = ["Same Protein"];
-        const proteinIDs = _.pluck(modelUtils.filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
+        const proteinIDs = _.pluck(filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
 
         if (proteinIDs && proteinIDs.length > 2 && proteinIDs.length < 6) {
             const groupDomain = ["same"];

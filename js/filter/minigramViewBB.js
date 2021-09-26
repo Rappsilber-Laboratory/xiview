@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as c3 from "../../vendor/c3.js";
-import {utils} from '../utils';
+import {declutterAxis, niceRound, niceValueAxis, xilog} from '../utils';
 import d3 from "d3";
 
 export const MinigramViewBB = Backbone.View.extend({
@@ -91,14 +91,14 @@ export const MinigramViewBB = Backbone.View.extend({
                     // eventually do snapping: http://bl.ocks.org/mbostock/6232620
 
                     // the below fires one change:domainStart event, one change:domainEnd event and one change event (if we want to process both changes together)
-                    //utils.xilog ("minigram domain", domain[0], domain[1]);
+                    //xilog ("minigram domain", domain[0], domain[1]);
                     const interval = 0.1;
                     const roundDomain = domain.map(function (v) {
                         return +((Math.round(v / interval) * interval).toFixed(1));
                     });
 
-                    utils.xilog("domain", domain);
-                    //utils.xilog ("roundDomain", roundDomain[0], roundDomain[1]);
+                    xilog("domain", domain);
+                    //xilog ("roundDomain", roundDomain[0], roundDomain[1]);
 
                     // We want these rounded values to be communicated to the model and onwards,
                     // but we don't want them bouncing back to the brush (which it should if the model values are obtained from elsewhere)
@@ -185,7 +185,7 @@ export const MinigramViewBB = Backbone.View.extend({
         });
         thresholds.unshift("x");
         countArrays.push(thresholds);
-        //utils.xilog ("thresholds", thresholds);
+        //xilog ("thresholds", thresholds);
 
         const curMaxY = this.chart.axis.max().y;
         if (curMaxY === undefined || curMaxY < maxY || curMaxY / maxY >= 2) { // only reset maxY if necessary as it causes redundant repaint (given we load and repaint straight after)
@@ -205,7 +205,7 @@ export const MinigramViewBB = Backbone.View.extend({
             self.tidyXAxis();   // i think I'm having to wait for c3 to finish setting up before the size calculates properly
         }, 500);
 
-        //utils.xilog ("data", distArr, binnedData);
+        //xilog ("data", distArr, binnedData);
         return this;
     },
     
@@ -219,8 +219,8 @@ export const MinigramViewBB = Backbone.View.extend({
         const xaxis = d3.select(d3.select(this.el).selectAll(".c3-axis-x").filter(function (d, i) {
             return i === 1;
         }).node());
-        utils.niceValueAxis (xaxis, this.getAxisRange());
-        utils.declutterAxis (xaxis, true);
+        niceValueAxis (xaxis, this.getAxisRange());
+        declutterAxis (xaxis, true);
         return this;
     },
     
@@ -247,11 +247,11 @@ export const MinigramViewBB = Backbone.View.extend({
         })));
         const min = d3.min([0, Math.floor(extent[0])]);
         const max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
-        const step = Math.max(1, utils.niceRound((max - min) / this.options.maxBars));
+        const step = Math.max(1, niceRound((max - min) / this.options.maxBars));
         let thresholds = d3.range(min, max + (step * 2), step);
-        //utils.xilog ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
+        //xilog ("thresholds", thresholds, extent, min, max, step, this.options.maxX, series);
 
-        //utils.xilog ("Extent", extent, min, max);
+        //xilog ("Extent", extent, min, max);
         if (thresholds.length === 0) {
             thresholds = [0, 1]; // need at least 1 so empty data gets represented as 1 empty bin
         }
@@ -273,7 +273,7 @@ export const MinigramViewBB = Backbone.View.extend({
             });
         }, this);
 
-        utils.xilog("ca", countArrays);
+        xilog("ca", countArrays);
 
         return {
             counts: countArrays,
@@ -282,7 +282,7 @@ export const MinigramViewBB = Backbone.View.extend({
     },
 
     brushRecalc: function() {
-        //utils.xilog ("changed brushExtent", this.model.get("domainStart"), this.model.get("domainEnd"));
+        //xilog ("changed brushExtent", this.model.get("domainStart"), this.model.get("domainEnd"));
         // Have to go via c3 chart internal properties as it isn't exposed via API
 
         if (this.model.get("domainStart") !== undefined) {

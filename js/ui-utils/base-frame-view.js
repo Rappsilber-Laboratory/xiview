@@ -2,8 +2,16 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as $ from "jquery";
 
-import {svgUtils} from "../svgexp";
-import {makeLegalFileName, searchesToString, updateColourKey, utils} from "../utils";
+import {svgUtils} from "../../vendor/svgexp";
+import {
+    drawCanvasToSVGImage,
+    filterStateToString,
+    isZeptoDOMElemVisible,
+    makeLegalFileName,
+    searchesToString,
+    updateColourKey,
+    xilog
+} from "../utils";
 import * as Spinner from 'spin';
 import {download} from  "../downloads";
 import d3 from "d3";
@@ -222,7 +230,7 @@ export const BaseFrameView = Backbone.View.extend({
             style.text(style.text() + "\n" + extraRule);
 
             // Now convert the canvas and its data to the image element we just added and download the whole svg when done
-            utils.drawCanvasToSVGImage(d3canvas, img, finalDownload);
+            drawCanvasToSVGImage(d3canvas, img, finalDownload);
         });
 
         return this;
@@ -295,7 +303,7 @@ export const BaseFrameView = Backbone.View.extend({
         if (this.options.canBringToTop !== false && this.el.id !== BaseFrameView.staticLastTopID) {
             const sortArr = [];
             const activeDivs = d3.selectAll(".dynDiv").filter(function () {
-                return utils.isZeptoDOMElemVisible($(this));
+                return isZeptoDOMElemVisible($(this));
             });
             //console.log("this view", this);
 
@@ -348,10 +356,10 @@ export const BaseFrameView = Backbone.View.extend({
     // Ask if view is currently visible in the DOM (use boolean for performance, querying dom for visibility often took ages)
     isVisible: function () {
         const start = window.performance.now();
-        utils.xilog(this.$el.toString(), "isVis start:", start);
-        //var answer = utils.isZeptoDOMElemVisible (this.$el);
+        xilog(this.$el.toString(), "isVis start:", start);
+        //var answer = isZeptoDOMElemVisible (this.$el);
         const answer = this.visible;
-        utils.xilog(this.$el, "isVis time:" + answer, (window.performance.now() - start));
+        xilog(this.$el, "isVis time:" + answer, (window.performance.now() - start));
         return answer;
     },
 
@@ -406,12 +414,12 @@ export const BaseFrameView = Backbone.View.extend({
     // Returns a useful filename given the view and filters current states
     filenameStateString: function () {
         return makeLegalFileName(searchesToString() + "--" + this.identifier
-            + "-" + this.optionsToString() + "--" + utils.filterStateToString());
+            + "-" + this.optionsToString() + "--" + filterStateToString());
     },
 
     // Returns a useful image title string - omit type of view as user will see it
     imageOriginString: function () {
-        return makeLegalFileName(searchesToString() + "--" + utils.filterStateToString());
+        return makeLegalFileName(searchesToString() + "--" + filterStateToString());
     },
 
     /* Following used in PDBFileChooser and StringFileChooser, though any of the views could take advantage of them */

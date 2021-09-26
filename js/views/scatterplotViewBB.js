@@ -1,11 +1,19 @@
 import '../../css/scatterplot.css';
 import * as _ from 'underscore';
+import * as $ from 'jquery';
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
-import {addMultipleSelectControls, utils} from "../utils";
-import {modelUtils} from "../modelUtils";
+import {
+    addMultipleSelectControls, ceil, commonLabels,
+    crossBrowserElementX,
+    crossBrowserElementY,
+    declutterAxis, floor,
+    makeBackboneButtons
+} from "../utils";
+import {radixSort} from "../modelUtils";
 import d3 from "d3";
+import {makeTooltipContents} from "../make-tooltip";
 
 export const ScatterplotViewBB = BaseFrameView.extend({
 
@@ -71,11 +79,11 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         // Add download button
         const buttonData = [{
             class: "downloadButton2",
-            label: utils.commonLabels.downloadImg + "SVG",
+            label: commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
         },];
-        utils.makeBackboneButtons(this.controlDiv, self.el.id, buttonData);
+        makeBackboneButtons(this.controlDiv, self.el.id, buttonData);
 
         // Add two select widgets for picking axes data types
         this.setMultipleSelectControls(this.controlDiv, this.options.attributeOptions, false);
@@ -106,7 +114,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 initialState: this.options.logY
             }
         ];
-        utils.makeBackboneButtons(this.controlDiv, self.el.id, toggleButtonData);
+        makeBackboneButtons(this.controlDiv, self.el.id, toggleButtonData);
 
 
         // Add the scatterplot and axes
@@ -627,8 +635,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     getHighlightRange: function(evt, squarius) {
         const background = d3.select(this.el).select(".background").node();
         const margin = this.options.chartMargin;
-        const x = utils.crossBrowserElementX(evt, background) + margin;
-        const y = utils.crossBrowserElementY(evt, background) + margin;
+        const x = crossBrowserElementX(evt, background) + margin;
+        const y = crossBrowserElementY(evt, background) + margin;
         const sortFunc = function (a, b) {
             return a - b;
         };
@@ -652,6 +660,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
         let tooltipData = axesMetaData.map(function (axisMetaData, i) {
             const commaFormat = d3.format(",." + axisMetaData.decimalPlaces + "f");
+
+            //hack
+            const utils = {};
+            utils["ceil"] = ceil;
+            utils["floor"] = floor;
+
             const rvals = ["ceil", "floor"].map(function (func, ii) {
                 let v = utils[func](vals[i][ii], axisMetaData.decimalPlaces);
                 if (v === 0) {
@@ -675,8 +689,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         const levelText = isMatchLevel ? (size === 1 ? "Match" : "Matches") : (size === 1 ? "Cross-Link" : "Cross-Links");
 
         if (this.nearest && this.nearest.link) {
-            const tipExtra = isMatchLevel ? modelUtils.makeTooltipContents.match(this.nearest.match) :
-                modelUtils.makeTooltipContents.link(this.nearest.link);
+            const tipExtra = isMatchLevel ? makeTooltipContents.match(this.nearest.match) :
+                makeTooltipContents.link(this.nearest.link);
             tooltipData = tooltipData.concat([
                 ["&nbsp;"],
                 ["Nearest " + (isMatchLevel ? "Match" : "Cross-Link")]
@@ -773,7 +787,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 sortedFilteredCrossLinks = filteredCrossLinks.filter (function (link) { return highlightedCrossLinkIDs.has(link.id); });
             } else {
                 selectedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
-                sortedFilteredCrossLinks = modelUtils.radixSort (4, filteredCrossLinks, function(link) {
+                sortedFilteredCrossLinks = radixSort (4, filteredCrossLinks, function(link) {
                     return highlightedCrossLinkIDs.has(link.id) ? 3 : (selectedCrossLinkIDs.has(link.id) ? 2 : (link.isDecoyLink() ? 0 : 1));
                 });
             }
@@ -1038,8 +1052,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .call(this.yAxis)
         ;
 
-        utils.declutterAxis(this.vis.select(".x"));
-        utils.declutterAxis(this.vis.select(".y"));
+        declutterAxis(this.vis.select(".x"));
+        declutterAxis(this.vis.select(".y"));
 
         return this;
     },

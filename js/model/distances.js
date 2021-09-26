@@ -37,7 +37,7 @@
 //             const distance = this.getXLinkDistanceFromPDBCoords(
 //                 this.matrices, linkWrapper.residueA.seqIndex, linkWrapper.residueB.seqIndex, linkWrapper.residueA.chainIndex, linkWrapper.residueB.chainIndex
 //             );
-//             linkWrapper.distance = utils.toNearest (distance, angstromAccuracy);
+//             linkWrapper.distance = toNearest (distance, angstromAccuracy);
 //         }, this);
 //
 //         nglLinkWrappers = nglLinkWrappers.filter (function (wrappedLink) { return !isNaN (wrappedLink.distance); });
@@ -57,7 +57,7 @@
 //             return group.values[0];
 //         });
 //
-//         utils.xilog("nestedLinks", nglLinkWrappers, nestedLinks, shortestLinks);
+//         xilog("nestedLinks", nglLinkWrappers, nestedLinks, shortestLinks);
 //
 //         return shortestLinks;
 //     }
@@ -113,7 +113,7 @@
 //                             const alignId2 = NGLUtils.make3DAlignID(this.structureName, chainName2, chainIndex2);
 //                             const seqIndex2 = alignCollBB.getAlignedIndex(xlink.toResidue, pid2, false, alignId2, true) - 1; // -1 for ZERO-INDEXED
 //                             // align from 3d to search index. seqindex is 0-indexed so -1 before querying
-//                             //utils.xilog ("alignid", alignId1, alignId2, pid1, pid2);
+//                             //xilog ("alignid", alignId1, alignId2, pid1, pid2);
 //
 //                             if (seqIndex2 >= 0 && NGLUtils.not3DHomomultimeric(xlink, chainIndex1, chainIndex2)) {
 //                                 const dist = this.getXLinkDistanceFromPDBCoords(matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
@@ -174,7 +174,7 @@
 //             dist = undefined;//Number.POSITIVE_INFINITY;
 //         }
 //
-//         //utils.xilog ("dist", dist);
+//         //xilog ("dist", dist);
 //         return dist;
 //     }
 //
@@ -184,8 +184,8 @@
 //         const specificitySearchTotal = d3.sum(crosslinkerSpecificityList, function (rdata) {
 //             return rdata.searches.size;
 //         });
-//         utils.xilog("------ RANDOM DISTRIBUTION CALCS ------", crosslinkerSpecificityList);
-//         utils.xilog(crosslinkerSpecificityList, "STOTS", specificitySearchTotal, this, this.matrices);
+//         xilog("------ RANDOM DISTRIBUTION CALCS ------", crosslinkerSpecificityList);
+//         xilog(crosslinkerSpecificityList, "STOTS", specificitySearchTotal, this, this.matrices);
 //         const sampleLinksPerSearch = Math.ceil(sampleLinkQuantity / specificitySearchTotal);
 //
 //         const alignCollBB = window.compositeModelInst.get("alignColl");
@@ -197,10 +197,10 @@
 //         }).entries(distanceableSequences), function (d) {
 //             return d.key;
 //         });
-//         utils.xilog("dsp", distanceableSequencesByProtein);
+//         xilog("dsp", distanceableSequencesByProtein);
 //
 //         const alignedTerminalIndices = this.calcAlignedTerminalIndices(distanceableSequencesByProtein, clmsModel, alignCollBB);
-//         utils.xilog("ati", alignedTerminalIndices);
+//         xilog("ati", alignedTerminalIndices);
 //
 //
 //         const sampleDists = []; // store for sample distances
@@ -225,7 +225,7 @@
 //                 if (!crosslinkerSpecificity.heterobi) {
 //                     srmap[1] = srmap[0];
 //                 }
-//                 utils.xilog("rr", searchID, srmap);
+//                 xilog("rr", searchID, srmap);
 //
 //                 // Now pick lots of pairings from the remaining residues, one for each end of the crosslinker, so one from each residue list
 //                 const searchMeta = {
@@ -239,8 +239,8 @@
 //             }, this);
 //         }, this);
 //
-//         utils.xilog("RANDOM", sampleDists, "avg:", d3.sum(sampleDists) / (sampleDists.length || 1));
-//         utils.xilog("------ RANDOM DISTRIBUTION END ------");
+//         xilog("RANDOM", sampleDists, "avg:", d3.sum(sampleDists) / (sampleDists.length || 1));
+//         xilog("------ RANDOM DISTRIBUTION END ------");
 //         return sampleDists;
 //     }
 //
@@ -270,7 +270,7 @@
 //                 }, this);
 //         }, this);
 //         seqs = d3.merge(seqs); // collapse nested arrays
-//         utils.xilog("seqs", seqs);
+//         xilog("seqs", seqs);
 //
 //         return seqs;
 //     }
@@ -322,10 +322,10 @@
 //             const all = linkableResSet.has("*") || linkableResSet.has("X") || linkableResSet.size === 0;
 //             const rmap = [];
 //             distanceableSequences.forEach(function (distSeq) {
-//                 utils.xilog("distSeq", distSeq);
+//                 xilog("distSeq", distSeq);
 //                 const protID = distSeq.protID;
 //                 const alignID = distSeq.alignID;
-//                 const filteredSubSeqIndices = modelUtils.filterSequenceByResidueSet(distSeq.subSeq, linkableResSet, all);
+//                 const filteredSubSeqIndices = filterSequenceByResidueSet(distSeq.subSeq, linkableResSet, all);
 //                 for (let m = 0; m < filteredSubSeqIndices.length; m++) {
 //                     const searchIndex = distSeq.first + filteredSubSeqIndices[m];
 //                     // assign if residue position has definite hit between search and pdb sequence, but not if it's a gap (even a single-letter gap).
@@ -355,7 +355,7 @@
 //
 //         if (rmaps.length === 1) { rmaps.push ([]); }    // add empty second array for non-heterobi crosslinkers
 //
-//         utils.xilog ("rmaps", rmaps, linkableResidueSets);
+//         xilog ("rmaps", rmaps, linkableResidueSets);
 //         return rmaps;
 //     }
 //
@@ -408,7 +408,7 @@
 //                 srmapPerProtChain[1] = srmapPerProtChain[0];
 //             }
 //
-//             utils.xilog("intra spp", srmapPerProtChain);
+//             xilog("intra spp", srmapPerProtChain);
 //
 //             // Assign randoms to inter-protein links based on number of possible pairings
 //             // e.g. if proteinA-A is 100->100 residues and proteinB-B is 20->20 residues
@@ -449,7 +449,7 @@
 //         if (possibleLinks && count) { // can't do this if no actual residues pairings left, or no sample links requested (count == 0)
 //             const hop = Math.max(1, possibleLinks / count);
 //             const maxRuns = Math.min(possibleLinks, count);
-//             utils.xilog("hop", hop, "possible link count", possibleLinks, maxRuns);
+//             xilog("hop", hop, "possible link count", possibleLinks, maxRuns);
 //
 //             const residuesPerSide = Math.max(1, Math.round(Math.sqrt(count)));
 //             const residueRowIndices = d3.range(0, Math.min(rowCount, residuesPerSide)).map(function (r) {

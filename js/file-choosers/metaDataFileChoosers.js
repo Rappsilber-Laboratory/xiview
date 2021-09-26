@@ -4,7 +4,12 @@ import * as _ from 'underscore';
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {modelUtils} from "../modelUtils";
+import {
+    loadUserFile,
+    updateLinkMetadata,
+    updateProteinMetadata,
+    updateUserAnnotationsMetadata
+} from "../modelUtils";
 
 const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 
@@ -89,7 +94,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         this.setStatusText("Please Wait...");
         this.lastFileName = fileObj.name;
         const onLoadFunc = this.onLoadFunction.bind(this);
-        modelUtils.loadUserFile(fileObj, onLoadFunc);
+        loadUserFile(fileObj, onLoadFunc);
     },
 
     identifier: "An Abstract MetaData File Chooser",
@@ -110,7 +115,7 @@ export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend
 
     onLoadFunction: function(fileContents) {
         this.setUpCompletionListener ();
-        modelUtils.updateProteinMetadata (fileContents, this.model.get("clmsModel"));
+        updateProteinMetadata (fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "Protein MetaData File Chooser",
@@ -132,7 +137,7 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     onLoadFunction: function(fileContents) {
         this.setUpCompletionListener ();
-        modelUtils.updateLinkMetadata (fileContents, this.model.get("clmsModel"));
+        updateLinkMetadata (fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "Cross-Link MetaData File Chooser",
@@ -154,7 +159,7 @@ export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserB
 
     onLoadFunction: function(fileContents) {
         this.setUpCompletionListener ();
-        modelUtils.updateUserAnnotationsMetadata (fileContents, this.model.get("clmsModel"));
+        updateUserAnnotationsMetadata (fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "User Annotations File Chooser",

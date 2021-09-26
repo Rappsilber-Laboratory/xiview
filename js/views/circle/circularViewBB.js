@@ -4,11 +4,12 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
-import {modelUtils} from "../../modelUtils";
-import {utils} from "../../utils";
+import {getResidueType} from "../../modelUtils";
+import {commonLabels, makeBackboneButtons, niceRound, objectStateToAbbvString, xilog} from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 import d3 from "d3";
 import {circleArrange} from "./circleArrange";
+import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
 
 const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
 
@@ -60,7 +61,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
             size: size
         });
         total += size + dgap;
-        //utils.xilog ("prot", nodeCoordMap.get(node.id));
+        //xilog ("prot", nodeCoordMap.get(node.id));
     });
 
     const featureCoords = [];
@@ -70,7 +71,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
         const nodeCoord = nodeCoordMap.get(nodeID);
         farr.forEach(function(feature) {
             const tofrom = _options.featureParse(feature, nodeID);
-            //utils.xilog (nodeArr[i].name, "nc", nodeCoord, farr, tofrom, "ORIG FEATURE", feature);
+            //xilog (nodeArr[i].name, "nc", nodeCoord, farr, tofrom, "ORIG FEATURE", feature);
             if (tofrom) {
                 featureCoords.push({
                     id: feature.category + fid.toString(),
@@ -88,7 +89,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
             }
         });
     });
-    //utils.xilog ("CONV FEATURES", featureCoords);
+    //xilog ("CONV FEATURES", featureCoords);
 
     const linkCoords = linkArr.map(function (link) {
         const tofrom = _options.linkParse(link);
@@ -196,7 +197,7 @@ export const CircularViewBB = BaseFrameView.extend({
             //convEnd--;    // commented out as convEnd must extend by 1 so length of displayed range is (end-start) + 1
             // e.g. a feature that starts/stops at some point has length of 1, not 0
 
-            utils.xilog(feature, "convStart", +feature.start, convStart, "convEnd", +feature.end, convEnd, protAlignModel);
+            xilog(feature, "convStart", +feature.start, convStart, "convEnd", +feature.end, convEnd, protAlignModel);
             return {
                 fromPos: convStart,
                 toPos: convEnd
@@ -231,13 +232,13 @@ export const CircularViewBB = BaseFrameView.extend({
 
         const buttonData = [{
             class: "downloadButton",
-            label: utils.commonLabels.downloadImg + "SVG",
+            label: commonLabels.downloadImg + "SVG",
             type: "button",
             id: "download"
         },];
 
         const toolbar = mainDivSel.select("div.toolbar");
-        utils.makeBackboneButtons(toolbar, self.el.id, buttonData);
+        makeBackboneButtons(toolbar, self.el.id, buttonData);
 
 
         // DROPDOWN STARTS
@@ -290,7 +291,7 @@ export const CircularViewBB = BaseFrameView.extend({
                     });
                 };
             }, this);
-        utils.makeBackboneButtons(toolbar, self.el.id, orderOptionsButtonData);
+        makeBackboneButtons(toolbar, self.el.id, orderOptionsButtonData);
 
         const orderoptid = this.el.id + "OrderOptions";
         toolbar.append("p").attr("id", orderoptid);
@@ -351,7 +352,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 d.type = "checkbox";
                 d.inputFirst = true;
             });
-        utils.makeBackboneButtons(toolbar, self.el.id, showOptionsButtonData);
+        makeBackboneButtons(toolbar, self.el.id, showOptionsButtonData);
 
         const showoptid = this.el.id + "ShowOptions";
         toolbar.append("p").attr("id", showoptid);
@@ -514,8 +515,8 @@ export const CircularViewBB = BaseFrameView.extend({
         this.nodeTip = function(d) {
             const interactor = self.model.get("clmsModel").get("participants").get(d.id);
             self.model.get("tooltipModel")
-                .set("header", modelUtils.makeTooltipTitle.interactor(interactor))
-                .set("contents", modelUtils.makeTooltipContents.interactor(interactor))
+                .set("header", makeTooltipTitle.interactor(interactor))
+                .set("contents", makeTooltipContents.interactor(interactor))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -525,8 +526,8 @@ export const CircularViewBB = BaseFrameView.extend({
         this.linkTip = function(d) {
             const xlink = self.model.get("clmsModel").get("crosslinks").get(d.id);
             self.model.get("tooltipModel")
-                .set("header", modelUtils.makeTooltipTitle.link())
-                .set("contents", modelUtils.makeTooltipContents.link(xlink))
+                .set("header", makeTooltipTitle.link())
+                .set("contents", makeTooltipContents.link(xlink))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -535,8 +536,8 @@ export const CircularViewBB = BaseFrameView.extend({
 
         this.featureTip = function(d) {
             self.model.get("tooltipModel")
-                .set("header", modelUtils.makeTooltipTitle.feature())
-                .set("contents", modelUtils.makeTooltipContents.feature(d))
+                .set("header", makeTooltipTitle.feature())
+                .set("contents", makeTooltipContents.feature(d))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -570,7 +571,7 @@ export const CircularViewBB = BaseFrameView.extend({
             this.showAccentedNodes("highlights");
         });
         this.listenTo(this.model.get("alignColl"), "bulkAlignChange", function() {
-            utils.xilog(++alignCall, ". CIRCULAR VIEW AWARE OF ALIGN CHANGES", arguments);
+            xilog(++alignCall, ". CIRCULAR VIEW AWARE OF ALIGN CHANGES", arguments);
             self.renderPartial(["features"]);
         });
         this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function() {
@@ -593,7 +594,7 @@ export const CircularViewBB = BaseFrameView.extend({
 
     reOrder: function(orderOptions) {
         orderOptions = orderOptions || {};
-        //utils.xilog ("this", this, this.options);
+        //xilog ("this", this, this.options);
         if (orderOptions.reverseConsecutive) {
             this.options.sortDir = -this.options.sortDir; // reverse direction of consecutive resorts
         }
@@ -771,7 +772,7 @@ export const CircularViewBB = BaseFrameView.extend({
             const a2 = Math.max(link.start, link.end);
             const midang = (a1 + a2) / 2; //(a2 - a1 < 180) ? (a1 + a2) / 2 : ((a1 + a2 + 360) / 2) % 360; // mid-angle (bearing in mind it might be shorter to wrap round the circle)
             const degSep = a2 - a1; // Math.min (a2 - a1, a1 - a2 + 360); // angle of separation, 2nd one works for doing long outside links the other way round. See next comment.
-            //utils.xilog ("angs", link.start, link.end, degSep);
+            //xilog ("angs", link.start, link.end, degSep);
             let coords;
 
             if (out && degSep > 70) {
@@ -864,17 +865,17 @@ export const CircularViewBB = BaseFrameView.extend({
     render: function (renderOptions) {
 
         renderOptions = renderOptions || {};
-        //utils.xilog ("render options", renderOptions);
+        //xilog ("render options", renderOptions);
         const changed = renderOptions.changed;
 
         if (this.isVisible()) {
-            //utils.xilog ("re-rendering circular view");
+            //xilog ("re-rendering circular view");
             const svg = d3.select(this.el).select("svg");
             this.radius = this.getMaxRadius(svg);
 
             const interactors = this.model.get("clmsModel").get("participants");
-            //utils.xilog ("interactorOrder", this.interactorOrder);
-            //utils.xilog ("model", this.model);
+            //xilog ("interactorOrder", this.interactorOrder);
+            //xilog ("model", this.model);
 
             let filteredInteractors = this.filterInteractors(interactors);
             let filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
@@ -894,7 +895,7 @@ export const CircularViewBB = BaseFrameView.extend({
             if (filteredInteractors.length < 2) {
                 this.options.intraOutside = false;
             }
-            //utils.xilog ("fi", filteredInteractors, interactors);
+            //xilog ("fi", filteredInteractors, interactors);
 
             const fmap = d3.map(filteredInteractors, function (d) {
                 return d.id;
@@ -920,10 +921,10 @@ export const CircularViewBB = BaseFrameView.extend({
             const filteredFeatures = filteredInteractors.map(function (inter) {
                 return this.model.getFilteredFeatures(inter);
             }, this);
-            //utils.xilog ("filteredFeatures", filteredFeatures);
+            //xilog ("filteredFeatures", filteredFeatures);
 
             const layout = circleLayout(filteredInteractors, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
-            //utils.xilog ("layout", layout);
+            //xilog ("layout", layout);
 
             const tickRadius = (this.radius - this.options.tickWidth) * (this.options.intraOutside ? 0.8 : 1.0); // shrink radius if some links drawn on outside
             const innerNodeRadius = tickRadius * ((100 - this.options.nodeWidth) / 100);
@@ -960,7 +961,7 @@ export const CircularViewBB = BaseFrameView.extend({
             const features = layout.features;
             // turns link end & start angles into something d3.svg.arc can use
             const linkCoords = this.convertLinks(links, innerNodeRadius, tickRadius);
-            //utils.xilog ("linkCoords", linkCoords);
+            //xilog ("linkCoords", linkCoords);
 
             const gTrans = svg.select("g");
             gTrans.attr("transform", "translate(" + this.radius + "," + this.radius + ")");
@@ -1001,7 +1002,7 @@ export const CircularViewBB = BaseFrameView.extend({
     drawLinks: function(g, links) {
         const self = this;
         const crosslinks = this.model.get("clmsModel").get("crosslinks");
-        //utils.xilog ("clinks", crosslinks);
+        //xilog ("clinks", crosslinks);
         const colourScheme = this.model.get("linkColourAssignment");
 
         const lineCopy = {}; // make cache as linkJoin and ghostLinkJoin will have same 'd' paths for the same link
@@ -1122,7 +1123,7 @@ export const CircularViewBB = BaseFrameView.extend({
         }, 0);
 
         const tickValGap = (tot / 360) * 5;
-        const tickGap = utils.niceRound(tickValGap);
+        const tickGap = niceRound(tickValGap);
 
         const groupTicks = function (d) {
             const k = (d.end - d.start) / (d.size || 1);
@@ -1137,7 +1138,7 @@ export const CircularViewBB = BaseFrameView.extend({
 
             const labelCycle = self.options.tickLabelCycle;
             return tRange.map(function (v, i) {
-                //utils.xilog ("d.start", d);
+                //xilog ("d.start", d);
                 return {
                     angle: (((v - 1) + 0.5) * k) + d.start, // v-1 cos we want 1 to be at the zero pos angle, +0.5 cos we want it to be a tick in the middle
                     // show label every labelCycle'th tick starting with first.
@@ -1218,7 +1219,7 @@ export const CircularViewBB = BaseFrameView.extend({
         pathJoin
             .attr("d", function(d) {
                 let pathd = self.textArc(d);
-                // utils.xilog ("pathd", pathd);
+                // xilog ("pathd", pathd);
                 // only want one curve, not solid arc shape, so chop path string
                 const cutoff = pathd.indexOf("L");
                 if (cutoff >= 0) {
@@ -1288,7 +1289,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 self.actionNodeLinks(d.nodeID, "selection", add, d.fstart, d.fend);
             });
 
-        //utils.xilog ("FEATURES", features);
+        //xilog ("FEATURES", features);
 
         const annotColl = this.model.get("annotationTypes");
 
@@ -1306,7 +1307,7 @@ export const CircularViewBB = BaseFrameView.extend({
     drawResidueLetters: function(g, links) {
 
         const circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
-        //utils.xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
+        //xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
         if (circumference / links.length < 30 || !this.options.showResLabels) { // arbitrary cutoff decided by me (mjg)
             links = [];
         }
@@ -1317,11 +1318,11 @@ export const CircularViewBB = BaseFrameView.extend({
             const xlink = crosslinks.get(link.id);
             resMap.set(xlink.fromProtein.id + "-" + xlink.fromResidue, {
                 polar: link.coords[0],
-                res: modelUtils.getResidueType(xlink.fromProtein, xlink.fromResidue)
+                res: getResidueType(xlink.fromProtein, xlink.fromResidue)
             });
             resMap.set(xlink.toProtein.id + "-" + xlink.toResidue, {
                 polar: _.last(link.coords),
-                res: modelUtils.getResidueType(xlink.toProtein, xlink.toResidue)
+                res: getResidueType(xlink.toProtein, xlink.toResidue)
             });
         });
         const degToRad = Math.PI / 180;
@@ -1378,7 +1379,7 @@ export const CircularViewBB = BaseFrameView.extend({
             fields.push("intraOutside", "showLinkLess", "sort");
         }
 
-        const str = utils.objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
+        const str = objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
         return str;
     },
 

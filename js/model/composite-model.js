@@ -4,9 +4,9 @@ import Backbone from "backbone";
 
 import {fdr, clearFdr} from "../filter/fdr";
 import {jqdialogs} from "../dialogs";
-import {modelUtils} from "../modelUtils";
-import {utils} from "../utils";
+import {makeURLQueryPairs, mergeContiguousFeatures} from "../modelUtils";
 import d3 from "d3";
+import {xilog} from "../utils";
 
 export class CompositeModel extends Backbone.Model{
     constructor(attributes, options) {
@@ -797,23 +797,23 @@ export class CompositeModel extends Backbone.Model{
 
         if (featureFilterSet.has("Digestible")) {
             const digestFeatures = this.get("clmsModel").getDigestibleResiduesAsFeatures(participant);
-            var mergedFeatures = modelUtils.mergeContiguousFeatures(digestFeatures);
+            var mergedFeatures = mergeContiguousFeatures(digestFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-1")) {
             var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
-            var mergedFeatures = modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
+            var mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-2")) {
             var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
-            var mergedFeatures = modelUtils.mergeContiguousFeatures(crosslinkableFeatures);
+            var mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
-        utils.xilog("annots", annots, "f", features);
+        xilog("annots", annots, "f", features);
         return features ? features.filter(function(f) {
             return featureFilterSet.has(f.type);
         }, this) : [];
@@ -838,7 +838,7 @@ export class CompositeModel extends Backbone.Model{
         // make url parts from current filter attributes
         let parts = this.get("filterModel").getURLQueryPairs();
         if (this.get("pdbCode")) {
-            const pdbParts = modelUtils.makeURLQueryPairs({pdb: this.get("pdbCode")});
+            const pdbParts = makeURLQueryPairs({pdb: this.get("pdbCode")});
             parts = pdbParts.concat(parts);
         }
 

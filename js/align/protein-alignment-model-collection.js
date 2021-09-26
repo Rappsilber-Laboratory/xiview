@@ -1,7 +1,7 @@
 // Model of sequence alignment settings for a protein (including the above collection as an attribute)
 import Backbone from "backbone";
 
-import {modelUtils} from "../modelUtils";
+import {filterOutDecoyInteractors} from "../modelUtils";
 import {GotohAligner} from "./bioseq32";
 import {SeqCollection} from "./sequence-model-collection";
 import d3 from "d3";
@@ -274,7 +274,7 @@ export class ProtAlignCollection extends Backbone.Collection {
     }
 
     addNewProteins(proteinArray) {
-        const decoysOut = modelUtils.filterOutDecoyInteractors(proteinArray);
+        const decoysOut = filterOutDecoyInteractors(proteinArray);
 
         decoysOut.forEach(function (prot) {
             //console.log ("entry", entry);

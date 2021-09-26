@@ -7,16 +7,16 @@ import "../css/multiple-select.css"; //? where is this used?
 
 import * as Spinner from 'spin';
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
-
+import * as NGL from "../vendor/ngl.dev"; // only used here for test setup
 import * as d3 from 'd3';
-import {init} from './networkFrame';
-import {allDataLoaded} from "./networkFrame";
-import {utils} from './utils';
+import {init, allDataLoaded} from './networkFrame';
+import {commonRegexes, displayError} from './utils';
 import {loadGOAnnotations} from "./loadGO";
 import Split from "split.js";
 import {NGLUtils} from "./views/ngl/NGLUtils";
 import {testCallback} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
+import {repopulateNGL} from "./views/ngl/RepopulateNGL";
 
 export function main() {
 
@@ -60,7 +60,7 @@ export function main() {
         //console.log (json);
 
         if (json.warn) {
-            utils.displayError(function () {
+            displayError(function () {
                 return true;
             }, "Warning <p class='errorReason'>" + json.warn + "</p>");
         }
@@ -85,7 +85,7 @@ export function main() {
         const returnedTimeStamp = new Date(json.timeStamp * 1000);
         console.log(new Date(), returnedTimeStamp, new Date() - returnedTimeStamp);
         if (Math.abs(new Date() - returnedTimeStamp) > 60 * 5 * 1000) { // if out by 5 minutes...
-            utils.displayError(function () {
+            displayError(function () {
                 return true;
             }, "Returned search results were generated at " + returnedTimeStamp + " and are likely from cache.<p class='errorReason'>If you have revalidated results since, press CTRL + F5 to refresh.</p>");
         }
@@ -95,7 +95,7 @@ export function main() {
 
         //   } catch (err) {
         //     //console.log ("ERR", err);
-        // 	utils.displayError (function() { return true; }, "An error has occurred. \t&#9785;<p class='errorReason'>"
+        // 	displayError (function() { return true; }, "An error has occurred. \t&#9785;<p class='errorReason'>"
         //         + (json.error? json.error : err.stack)
         //         +"</p>");
         // }
@@ -107,7 +107,7 @@ export function main() {
 
     if (window.location.search) {
         // 1. Load spectrum matches, dont send all query string to php (ostensibly to help with caching)
-        // var urlChunkMap = modelUtils.parseURLQueryString (window.location.search.slice(1));
+        // var urlChunkMap = parseURLQueryString (window.location.search.slice(1));
         // var phpProps = _.pick (urlChunkMap, "upload", "sid", "auto",  "unval", "linears", "lowestScore", "highestScore", "decoys");
         // var newQueryString = d3.entries(phpProps).map(function (entry) { return entry.key+"="+entry.value; }).join("&");
         // console.log ("ucm", urlChunkMap, newQueryString);
@@ -119,7 +119,7 @@ export function main() {
             if (!error) {
                 success(json);
             } else {
-                utils.displayError(function () {
+                displayError(function () {
                     return true;
                 }, "An error has occurred. \t&#9785;<p class='errorReason'>"
                     + (error.statusText ? error.statusText : error) + "</p>"
@@ -223,7 +223,7 @@ function testSetupNew(cbfunc) {
 
             const pdbCode = "1AO6";
 
-            const pdbSettings = pdbCode.match(utils.commonRegexes.multiPdbSplitter).map(function (code) {
+            const pdbSettings = pdbCode.match(commonRegexes.multiPdbSplitter).map(function (code) {
                 return {
                     id: code,
                     pdbCode: code,
@@ -233,7 +233,7 @@ function testSetupNew(cbfunc) {
                 };
             }, this);
 
-            NGLUtils.repopulateNGL({
+            repopulateNGL({
                 pdbSettings: pdbSettings,
                 stage: stage,
                 compositeModel: window.compositeModelInst

@@ -1,11 +1,11 @@
 //has to be loaded after utils.js
 //only used by KeyViewBB.js
-import {utils} from "../utils";
+import {makeLegalDomID} from "../utils";
 import d3 from "d3";
 
 export const sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
     const self = this;
-    const legalDom = utils.makeLegalDomID;
+    const legalDom = makeLegalDomID;
     const setArrow = function (d) {
         const assocTable = d3.select("#" + idPrefix + legalDom(d.id));
         d3.select(this).classed("tableShown", assocTable.style("display") !== "none");

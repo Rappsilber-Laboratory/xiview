@@ -1,6 +1,6 @@
 import Backbone from "backbone";
 import * as _ from 'underscore';
-import {utils} from '../utils';
+import {makeLegalDomID} from '../utils';
 import d3 from "d3";
 
 export const checkBoxView = Backbone.View.extend({
@@ -21,7 +21,7 @@ export const checkBoxView = Backbone.View.extend({
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const sel = d3.select(this.el);
         if (!sel.attr("id")) {
-            sel.attr("id", utils.makeLegalDomID(this.options.id));
+            sel.attr("id", makeLegalDomID(this.options.id));
         }
 
         const labs = sel.append("label")

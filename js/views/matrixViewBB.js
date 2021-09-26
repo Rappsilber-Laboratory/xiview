@@ -3,10 +3,16 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {modelUtils} from "../modelUtils";
-import {NGLUtils} from "./ngl/NGLUtils";
-import {utils} from "../utils";
+import {
+    crosslinkCountPerProteinPairing,
+    findResiduesInSquare,
+    getDistanceSquared,
+    radixSort
+} from "../modelUtils";
+import {getChainNameFromChainIndex, make3DAlignID, NGLUtils} from "./ngl/NGLUtils";
+import {commonLabels, declutterAxis, makeBackboneButtons} from "../utils";
 import d3 from "d3";
+import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
 
 export const DistanceMatrixViewBB = BaseFrameView.extend({
 
@@ -73,7 +79,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
         this.controlDiv.append("button")
             .attr("class", "downloadButton btn btn-1 btn-1a")
-            .text(utils.commonLabels.downloadImg + "SVG");
+            .text(commonLabels.downloadImg + "SVG");
 
         const buttonHolder = this.controlDiv.append("span").attr("class", "noBreak reducePadding");
         // Radio Button group to decide pan or select
@@ -105,7 +111,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                     d.initialState = (d.value === this.options[d.group]);
                 }
             }, this);
-        utils.makeBackboneButtons(buttonHolder, self.el.id, toggleButtonData);
+        makeBackboneButtons(buttonHolder, self.el.id, toggleButtonData);
 
 
         const setSelectTitleString = function () {
@@ -302,7 +308,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
     makeProteinPairingOptions: function() {
         const crosslinks = this.model.getAllTTCrossLinks();
-        const totals = modelUtils.crosslinkCountPerProteinPairing(crosslinks);
+        const totals = crosslinkCountPerProteinPairing(crosslinks);
         const entries = d3.entries(totals);
 
         let nonEmptyEntries = entries.filter(function (entry) {
@@ -434,8 +440,8 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         proteinIDsObj.forEach(function(pid) {
             pid.alignID = null;
             if (pid.proteinID) {
-                const chainName = NGLUtils.getChainNameFromChainIndex(distancesObj.chainMap, pid.chainID);
-                pid.alignID = NGLUtils.make3DAlignID(distancesObj.structureName, chainName, pid.chainID);
+                const chainName = getChainNameFromChainIndex(distancesObj.chainMap, pid.chainID);
+                pid.alignID = make3DAlignID(distancesObj.structureName, chainName, pid.chainID);
             }
         }, this);
         return proteinIDsObj;
@@ -491,7 +497,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 proteinY: proteinIDs[1] ? proteinIDs[1].proteinID : undefined,
             };
         };
-        const neighbourhoodLinks = modelUtils.findResiduesInSquare(convFunc, filteredCrossLinkMap, extent[0][0], extent[0][1], extent[1][0], extent[1][1], true);
+        const neighbourhoodLinks = findResiduesInSquare(convFunc, filteredCrossLinkMap, extent[0][0], extent[0][1], extent[1][0], extent[1][1], true);
         return neighbourhoodLinks;
     },
 
@@ -546,8 +552,8 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             });
 
             this.model.get("tooltipModel")
-                .set("header", modelUtils.makeTooltipTitle.linkList(crosslinks.length))
-                .set("contents", modelUtils.makeTooltipContents.linkList(crosslinks, {"Distance": linkDistances}))
+                .set("header", makeTooltipTitle.linkList(crosslinks.length))
+                .set("contents", makeTooltipContents.linkList(crosslinks, {"Distance": linkDistances}))
                 .set("location", evt)
             ;
             //this.trigger("change:location", this.model, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
@@ -755,7 +761,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                         if (searchIndex1 >= 0) {
                             const row = distanceMatrix[i];
                             for (let j = 0; j < len; j++) { // was seqLength
-                                const distance2 = row && row[j] ? row[j] * row[j] : modelUtils.getDistanceSquared(atoms1[i], atoms2[j]);
+                                const distance2 = row && row[j] ? row[j] * row[j] : getDistanceSquared(atoms1[i], atoms2[j]);
                                 if (distance2 < max2) {
                                     const searchIndex2 = preCalcRowIndices[j];
                                     if (searchIndex2 >= 0) {
@@ -854,7 +860,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 if (highlightOnly) {
                     sortedFinalCrossLinks = finalCrossLinks.filter (function (link) { return highlightedCrossLinkIDs.has(link.id); });
                 } else {
-                    sortedFinalCrossLinks = modelUtils.radixSort (3, finalCrossLinks, function(link) {
+                    sortedFinalCrossLinks = radixSort (3, finalCrossLinks, function(link) {
                         return highlightedCrossLinkIDs.has(link.id) ? 2 : (selectedCrossLinkIDs.has(link.id) ? 1 : 0);
                     });
                 }
@@ -1122,7 +1128,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             .attr("transform", "translate(0," + bottom + ")")
             .call(self.xAxis);
 
-        utils.declutterAxis(this.vis.select(".x"));
+        declutterAxis(this.vis.select(".x"));
 
         sizeData.bottom = bottom;
         sizeData.right = right;

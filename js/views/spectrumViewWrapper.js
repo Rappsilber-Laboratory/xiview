@@ -5,7 +5,7 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import * as _ from 'underscore';
 import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
-import {makeLegalFileName, utils} from "../utils";
+import {makeLegalFileName, proteinConcat} from "../utils";
 import d3 from "d3";
 
 export const SpectrumViewWrapper = BaseFrameView.extend({
@@ -210,7 +210,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         },
             {
                 label: "prot1",
-                value: utils.proteinConcat(match, 0, this.model.get("clmsModel"))
+                value: proteinConcat(match, 0, this.model.get("clmsModel"))
             },
             {
                 label: "pep1",
@@ -228,7 +228,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         if (match.matchedPeptides[1]) {
             description.push({
                 label: "prot2",
-                value: utils.proteinConcat(match, 1, this.model.get("clmsModel"))
+                value: proteinConcat(match, 1, this.model.get("clmsModel"))
             }, {
                 label: "pep2",
                 value: match.matchedPeptides[1].sequence
