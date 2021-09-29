@@ -262,7 +262,7 @@ export class CrosslinkRepresentation {
                 const colRGBString = model.get("linkColourAssignment").getColour(link); // returns an 'rgb(r,g,b)' string
                 let col24bit = colCache[colRGBString];
                 if (col24bit === undefined) {
-                    const col3 = d3.rgb(colRGBString);
+                    const col3 = d3.rgb(colRGBString.substring(0, 7)); // substring to remove transparency, smnall hack
                     col24bit = colRGBString ? (col3.r << 16) + (col3.g << 8) + col3.b : 255;
                     colCache[colRGBString] = col24bit;
                 }
