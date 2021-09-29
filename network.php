@@ -60,7 +60,7 @@
 
 <!--        <link rel="stylesheet" href="../vendor/css/jquery.jsonview.css--><?php //echo $cacheBuster ?><!--">-->
 <!--        <link rel="stylesheet" href="../vendor/css/d3table.css--><?php //echo $cacheBuster ?><!--">-->
-      	<link rel="stylesheet" href="../vendor/css/multiple-select.css<?php echo $cacheBuster ?>">
+<!--      	<link rel="stylesheet" href="../vendor/css/multiple-select.css--><?php //echo $cacheBuster ?><!--">-->
 <!--      	<link rel="stylesheet" href="./css/list.css--><?php //echo $cacheBuster ?><!--">-->
 <!--      	<link rel="stylesheet" href="./css/goTermsView.css--><?php //echo $cacheBuster ?><!--">-->
 
