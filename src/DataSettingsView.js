@@ -8,6 +8,7 @@ import 'datatables.net';
 import {SettingsView} from "./SettingsView";
 import {PepInputView} from "./PepInputView";
 import d3 from "d3";
+import Spinner from "spin";
 
 export const DataSettingsView = SettingsView.extend({
 
