@@ -33,6 +33,7 @@ export const NGLViewBB = BaseFrameView.extend({
             "click #nglPanelpymolExport": "exportPymol",
             "click #nglPanellinksCSVExport": "export3dLinksCSV",
             "click #nglPanellinksCSVExportSelected": "export3dLinksCSVSelected",
+            "click #nglPanellinksHalfInCSVExport": "exportHalfInLinksCSV",
             "click #nglPanelhaddockExport": "exportHaddock",
             "click #nglPanelexportChimeraPB": "exportChimeraPB",
             "click #nglPanelexportJWalk": "exportJWalk",
@@ -122,6 +123,12 @@ export const NGLViewBB = BaseFrameView.extend({
                 label: "3D Links CSV - Selected Only",
                 id: "linksCSVExportSelected",
                 d3tooltip: "Export a CSV file of the links currently selected in NGL"
+            },
+            {
+                class: "exportHalfInLinksCSV",
+                label: "Half-in Links CSV",
+                id: "linksHalfInCSVExport",
+                d3tooltip: "Export a CSV file of the links with one end in the 3d structure"
             },
             {
                 class: "exportHaddockButton",
@@ -832,6 +839,14 @@ export const NGLViewBB = BaseFrameView.extend({
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), true
+        );
+        return this;
+    },
+
+    exportHalfInLinksCSV: function () {
+        const stageModel = this.model.get("stageModel");
+        NGLExportUtils.exportHalfInLinksCSV(
+            stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
     },

@@ -122,6 +122,40 @@ export const NGLExportUtils = {
         return header.concat(crosslinkLines);
     },
 
+
+    exportHalfInLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
+        const crosslinks = nglModelWrapper.getHalfLinks();
+        const linkExportArray = NGLExportUtils.makeHalfInLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
+        const fileName = downloadFilename("half-in-NGL", "csv");
+        download(linkExportArray.join("\r\n"), "plain/text", fileName);
+    },
+
+    makeHalfInLinkSyntax: function (structure, links, nglModelWrapper, selectedOnly) {
+        const pdbIds = structure.chainToOriginalStructureIDMap || {};
+        const chainProxy = structure.getChainProxy();
+        const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
+
+        const header = ["model,protein1,chain1,res1,protein2"];
+        const crosslinkLines = [];
+        for (let link of links) {
+            if (!selectedOnly || selectedLinkIds.indexOf(link.origId) !== -1) {
+                chainProxy.index = link.residue.chainIndex;
+                const chainA = chainProxy.chainname;
+
+                const xiviewLink = crosslinkMap.get(link.origId);
+                const p1 = xiviewLink.fromProtein.accession;
+                const p2 = xiviewLink.toProtein.accession;
+
+                crosslinkLines.push((pdbIds[link.residue.chainIndex] || structure.name) + ","
+                    + p1 + "," + chainA + "," + link.residue.resno + ","
+                    + p2);
+            }
+        }
+
+        return header.concat(crosslinkLines);
+    },
+
     exportChimeraPseudobonds: function (structure, nglModelWrapper, name, selectedOnly) {
         const chainProxy = structure.getChainProxy();
         const bondArray = [];
