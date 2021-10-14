@@ -380,7 +380,7 @@ export const FilterViewBB = Backbone.View.extend({
         addFilterGroup.call (this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
         addFilterGroup.call (this, {groupName: "Crosslinks"}, ["linears", "crosslinks", "ambig", "betweenLinks", "selfLinks", "homomultimericLinks", "aaApart", "pepLength"]);
         initMinigramFilterGroup.call(this, {attr: "distanceCutoff", extentProperty: "distanceExtent", undefAttr: "distanceUndef", label: "Distance", id: "distanceFilter", groupName: "Distances", tooltipIntro: "Filter out crosslinks with distance"});
-        addFilterGroup.call (this, {id: "validationStatus", groupName: "Auto Val"}, ["A", "B", "C", "Q", "AUTO", "unval", "decoys"]);
+        addFilterGroup.call (this, {id: "validationStatus", groupName: "Validation"}, ["A", "B", "C", "Q", "AUTO", "unval", "decoys"]);
         initMinigramFilterGroup.call(this, {attr: "matchScoreCutoff", extentProperty: "scoreExtent", label: "Match Score", id: "matchScore", groupName: "Scores", tooltipIntro: "Filter out matches with scores"});
         initFDRPlaceholder.call(this);
         addFilterGroup.call (this, {id: "navFilters", groupName: "Protein"}, ["pepSeq", "protNames", "protDesc", "protPDB"]);
