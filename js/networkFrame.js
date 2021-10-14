@@ -20,7 +20,6 @@ import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
 
-const colorbrewer = require('colorbrewer');
 import {xiSPEC_wrapper} from "../../spectrum/src/Wrapper";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
@@ -851,7 +850,7 @@ init.viewsEssential = function (options) {
         knownModificationsURL: window.xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: true,
         showQualityControl: "min",
-        colorScheme: colorbrewer.PRGn[8],
+        colorScheme: "PRGn"
     };
 
     window.xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
