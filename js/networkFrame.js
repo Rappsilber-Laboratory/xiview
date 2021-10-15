@@ -921,17 +921,17 @@ init.viewsEssential = function (options) {
                     tooltip: "Produces an SSL file for quantitation in SkyLine",
                     categoryTitle: "As an SSL File",
                     sectionBegin: true,
-                    sectionEnd: true
+                    // sectionEnd: true
                 },
-                {
-                    name: "Make Filtered XI URL",
-                    func: function () {
-                        vent.trigger("shareURLViewShow", true);
-                    },
-                    tooltip: "Produces a URL that embeds the current filter state within it for later reproducibility",
-                    categoryTitle: "As a URL",
-                    sectionBegin: true,
-                },
+                // {
+                //     name: "Make Filtered XI URL",
+                //     func: function () {
+                //         vent.trigger("shareURLViewShow", true);
+                //     },
+                //     tooltip: "Produces a URL that embeds the current filter state within it for later reproducibility",
+                //     categoryTitle: "As a URL",
+                //     sectionBegin: true,
+                // },
             ],
             //tooltipModel: compModel.get("tooltipModel"),
             sectionHeader: function (d) {
