@@ -108,7 +108,7 @@ init.postDataLoaded = function () {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of window.compositeModelInst.get("clmsModel").get("participants")) { //todo - remove static ref?
+    for (let participant of window.compositeModelInst.get("clmsModel").get("participants").values()) { //todo - remove static ref?
         if (participant.uniprot) {
             const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
