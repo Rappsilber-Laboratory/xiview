@@ -1,6 +1,8 @@
+import * as _ from 'underscore';
+import * as $ from 'jquery';
+import d3 from "d3";
 import {getLocalStorage, setLocalStorage} from "../utils";
 import {filterOutDecoyInteractors} from "../modelUtils";
-import d3 from "d3";
 
 export const STRINGUtils = {
 

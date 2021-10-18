@@ -1,11 +1,11 @@
 import * as _ from 'underscore';
-// import Backbone from "backbone";
+import * as $ from 'jquery';
+import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {STRINGUtils} from "./stringUtils";
 import {commonRegexes} from "../utils";
 import {updateLinkMetadata} from "../modelUtils";
-import d3 from "d3";
 
 export const STRINGFileChooserBB = BaseFrameView.extend({
 
