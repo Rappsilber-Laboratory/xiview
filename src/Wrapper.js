@@ -2,12 +2,14 @@ import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as $ from "jquery";
 import Split from "split.js";
+import d3 from "d3";
+import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
+import "../vendor/byrei-dyndiv_0.5.css"
 
 import {SpectrumWrapper} from "./SpectrumWrapper";
 import {SpectrumControlsView} from "./SpectrumControlsView";
 import {DataSettingsView} from "./DataSettingsView";
 import {AppearanceSettingsView} from "./AppearanceSettingsView";
-import d3 from "d3";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.xiSPECUI.vent = {};
@@ -97,6 +99,8 @@ export const xiSPEC_wrapper = Backbone.View.extend({
             showCustomCfg: this.options.showCustomConfig,
             title: 'Appearance Settings'
         });
+
+        ByRei_dynDiv.init.main();
     },
 
     setData: function (data) {

@@ -589,7 +589,7 @@ Graph.prototype.measure = function(on){
 			}
 			const massArr = [];
 			for(let i=1; i<7; i++){
-				const massObj = new Object();
+				const massObj = {};
 				massObj.mass = distance * i;
 				massObj.matchAA = window.xiSPECUI.matchMassToAA(distance * i);
 				massArr.push(massObj);

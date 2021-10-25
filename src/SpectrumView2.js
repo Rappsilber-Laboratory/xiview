@@ -9,8 +9,8 @@ import * as d3 from 'd3';
 import * as Spinner from 'spin';
 
 import {Graph} from "./graph/Graph";
-import {svgUtils} from "../../xi3/vendor/svgexp";
-import {download} from "../../xi3/js/downloads";
+import {svgUtils} from "../vendor/svgexp";
+import {download} from "./download";
 
 export const SpectrumView = Backbone.View.extend({
 
