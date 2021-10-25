@@ -12,7 +12,7 @@ module.exports = {
     // },
 
     entry: {
-        xispec: "./src/Wrapper.js"
+        xispec: "./src/main.js"
         // aligner: './xi3/js/align/alignWorker.js',
     },
     output: {

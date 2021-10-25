@@ -220,7 +220,7 @@ export const FragmentationKeyView = Backbone.View.extend({
                 if (!self.changeMod) {
                     self.tooltip.style("opacity", 0);
                     self.CLlineHighlight.attr("opacity", 1);
-                    self.changeCL = jQuery.extend(true, [], self.linkPos); // todo - check - is the ref to jquery right
+                    self.changeCL = $.extend(true, [], self.linkPos);
                     for (let i = 0; i < self.fraglines.length; i++) {
                         self.fraglines[i].disableCursor();
                     }

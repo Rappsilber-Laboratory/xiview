@@ -1,6 +1,7 @@
 import * as _ from 'underscore';
 import * as d3 from 'd3';
 import {Peak} from "./Peak";
+import {matchMassToAA} from "../matchMassToAA";
 
 export const Graph = function(targetSvg, model, options) {
 	this.xscale = d3.scale.linear();
@@ -591,7 +592,7 @@ Graph.prototype.measure = function(on){
 			for(let i=1; i<7; i++){
 				const massObj = {};
 				massObj.mass = distance * i;
-				massObj.matchAA = window.xiSPECUI.matchMassToAA(distance * i);
+				massObj.matchAA = matchMassToAA(distance * i);
 				massArr.push(massObj);
 			}
 

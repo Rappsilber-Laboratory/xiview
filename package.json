@@ -1,15 +1,16 @@
 {
   "name": "xispec",
-  "version": "",
+  "version": "2.1.0",
   "description": "visualisation of mass spectrometry data",
   "author": {
     "name": "Lars Kolbowski",
-    "email": ""
+    "email": "lars.kolbowski@tu-berlin.de"
   },
   "contributors": [
     {
       "name": "Lars Kolbowski",
-      "email": ""    },
+      "email": "lars.kolbowski@tu-berlin.de"
+    },
     {
       "name": "Colin Combe",
       "email": "colin.combe@ed.ac.uk"
@@ -45,15 +46,12 @@
   },
   "dependencies": {
     "core-js": "~3.14.0",
-
     "jquery": "~3.4.1",
     "jsonview": "~1.2.0",
     "webpack-jquery-ui": "~2.0.1",
     "datatables.net": "~1.11.2",
     "datatables.net-dt": "~1.11.2",
-
     "d3": "~3.5.5",
-
     "underscore": "^1.13.1",
     "backbone": "~1.4.0",
     "split.js": "~1.6.4",
@@ -66,5 +64,5 @@
     "visualisation",
     "crosslinking"
   ],
-  "main": "./src/Wrapper.js"
+  "main": "./src/main.js"
 }
