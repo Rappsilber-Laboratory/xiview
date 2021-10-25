@@ -57,11 +57,11 @@ export function download(content, contentType, fileName) {
     if (navigator.msSaveOrOpenBlob) {
         navigator.msSaveOrOpenBlob(blob, fileName);
     } else {
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
         // Give filename you wish to download
         a.download = fileName;
-        a.style.display = 'none';
+        a.style.display = "none";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

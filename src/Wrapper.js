@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 import Split from "split.js";
@@ -17,7 +17,7 @@ _.extend(window.xiSPECUI.vent, Backbone.Events);
 
 _.extend(window, Backbone.Events);// what's this for - cc
 window.onresize = function () {
-    window.trigger('resize')
+    window.trigger("resize");
 };
 
 export const xiSPEC_wrapper = Backbone.View.extend({
@@ -25,11 +25,11 @@ export const xiSPEC_wrapper = Backbone.View.extend({
     initialize: function (options) {
 
         const defaultOptions = {
-            targetDiv: 'xispec_wrapper',
+            targetDiv: "xispec_wrapper",
             showCustomConfig: false,
-            showQualityControl: 'bottom',
-            baseDir: './',
-            xiAnnotatorBaseURL: 'https://spectrumviewer.org/xiAnnotator/',
+            showQualityControl: "bottom",
+            baseDir: "./",
+            xiAnnotatorBaseURL: "https://spectrumviewer.org/xiAnnotator/",
             knownModifications: [],
             knownModificationsURL: false,
         };
@@ -42,37 +42,33 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         }
 
         // event listeners
-        this.listenTo(window.xiSPECUI.vent, 'loadSpectrum', this.setData);
-        this.listenTo(window.xiSPECUI.vent, 'requestAnnotation', this.requestAnnotation);
-        this.listenTo(window.xiSPECUI.vent, 'revertAnnotation', this.revertAnnotation);
-        this.listenTo(window.xiSPECUI.vent, 'setCustomConfigOverwrite', this.setCustomConfigOverwrite);
-        this.listenTo(window.xiSPECUI.vent, 'addSpectrum', this.addSpectrum);
-        this.listenTo(window.xiSPECUI.vent, 'closeSpecPanel', this.closeSpectrum);
-        this.listenTo(window.xiSPECUI.vent, 'activateSpecPanel', this.activateSpectrum);
-        this.listenTo(window.xiSPECUI.vent, 'butterflyHighlight', this.butterflyHighlight);
+        this.listenTo(window.xiSPECUI.vent, "loadSpectrum", this.setData);
+        this.listenTo(window.xiSPECUI.vent, "requestAnnotation", this.requestAnnotation);
+        this.listenTo(window.xiSPECUI.vent, "revertAnnotation", this.revertAnnotation);
+        this.listenTo(window.xiSPECUI.vent, "setCustomConfigOverwrite", this.setCustomConfigOverwrite);
+        this.listenTo(window.xiSPECUI.vent, "addSpectrum", this.addSpectrum);
+        this.listenTo(window.xiSPECUI.vent, "closeSpecPanel", this.closeSpectrum);
+        this.listenTo(window.xiSPECUI.vent, "activateSpecPanel", this.activateSpectrum);
+        this.listenTo(window.xiSPECUI.vent, "butterflyHighlight", this.butterflyHighlight);
         // HTML elements
-        let d3el = d3.select(this.options.targetDiv)
+        let d3el = d3.select(this.options.targetDiv);
         // empty the targetDiv
         d3el.selectAll("*").remove();
         // create elements
         let spectrumPanelDiv = d3el.append("div")
-            .attr("id", 'xispec_spectrumPanel')
-        ;
-        spectrumPanelDiv.append('div')
-            .attr('class', 'xispec_dynDiv')
-            .attr('id', 'xispec_dataSettingsWrapper')
-        ;
-        spectrumPanelDiv.append('div')
-            .attr('class', 'xispec_dynDiv')
-            .attr('id', 'xispec_appearanceSettingsWrapper')
-        ;
-        spectrumPanelDiv.append('div')
-            .attr('id', 'xispec_spectrumControls')
-        ;
-        this.spectraWrapperDiv = spectrumPanelDiv
-            .append('div')
-            .attr('class', 'xispec_spectra')
-            .attr('id', 'xispec_spectra')
+            .attr("id", "xispec_spectrumPanel");
+spectrumPanelDiv.append("div")
+            .attr("class", "xispec_dynDiv")
+            .attr("id", "xispec_dataSettingsWrapper");
+spectrumPanelDiv.append("div")
+            .attr("class", "xispec_dynDiv")
+            .attr("id", "xispec_appearanceSettingsWrapper");
+spectrumPanelDiv.append("div")
+            .attr("id", "xispec_spectrumControls");
+this.spectraWrapperDiv = spectrumPanelDiv
+            .append("div")
+            .attr("class", "xispec_spectra")
+            .attr("id", "xispec_spectra")
         ;
 
         // create the initial spectrum
@@ -82,22 +78,22 @@ export const xiSPEC_wrapper = Backbone.View.extend({
 
         // create the SpectrumControls and Settings views
         this.SpectrumControlsView = new SpectrumControlsView({
-            model: this.activeSpectrum.models['Spectrum'],
+            model: this.activeSpectrum.models["Spectrum"],
             el: "#xispec_spectrumControls",
         });
         this.DataSettingsView = new DataSettingsView({
-            model: this.activeSpectrum.models['SettingsSpectrum'],
-            displayModel: this.activeSpectrum.models['Spectrum'],
+            model: this.activeSpectrum.models["SettingsSpectrum"],
+            displayModel: this.activeSpectrum.models["Spectrum"],
             el: "#xispec_dataSettingsWrapper",
             showCustomCfg: this.options.showCustomConfig,
-            title: 'Data Settings'
+            title: "Data Settings"
         });
         this.AppearanceSettingsView = new AppearanceSettingsView({
-            model: this.activeSpectrum.models['SettingsSpectrum'],
-            displayModel: this.activeSpectrum.models['Spectrum'],
+            model: this.activeSpectrum.models["SettingsSpectrum"],
+            displayModel: this.activeSpectrum.models["Spectrum"],
             el: "#xispec_appearanceSettingsWrapper",
             showCustomCfg: this.options.showCustomConfig,
-            title: 'Appearance Settings'
+            title: "Appearance Settings"
         });
 
         ByRei_dynDiv.init.main();
@@ -125,16 +121,16 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         if (this.customConfigOverwrite)
             json_request.annotation.custom = this.customConfigOverwrite;
 
-        let activeSpecModel = this.activeSpectrum.models['Spectrum']
-        activeSpecModel.set('butterfly', false);
-        activeSpecModel.set('changedAnnotation', false);
+        let activeSpecModel = this.activeSpectrum.models["Spectrum"];
+        activeSpecModel.set("butterfly", false);
+        activeSpecModel.set("changedAnnotation", false);
         activeSpecModel.reset_all_modifications();
-        activeSpecModel.set('spectrum_id', data.spectrum_id);
-        activeSpecModel.set('spectrum_title', data.spectrum_title);
+        activeSpecModel.set("spectrum_id", data.spectrum_id);
+        activeSpecModel.set("spectrum_title", data.spectrum_title);
         this.activeSpectrum.originalMatchRequest = $.extend(true, {}, json_request);
-        let originalAnnotator = this.activeSpectrum.models['originalSpectrum'].get('annotatorURL');
-        activeSpecModel.set('annotatorURL', originalAnnotator);
-        this.activeSpectrum.requestAnnotation(json_request, activeSpecModel.get('annotatorURL'), true);
+        let originalAnnotator = this.activeSpectrum.models["originalSpectrum"].get("annotatorURL");
+        activeSpecModel.set("annotatorURL", originalAnnotator);
+        this.activeSpectrum.requestAnnotation(json_request, activeSpecModel.get("annotatorURL"), true);
         this.activeSpectrum.setTitle(data.spectrum_title);
     },
 
@@ -167,11 +163,11 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         let peptide = {};
         peptide.sequence = [];
 
-        const seq_AAonly = seq_mods.replace(/[^A-Z]/g, '')
+        const seq_AAonly = seq_mods.replace(/[^A-Z]/g, "");
         let seq_length = seq_AAonly.length;
 
         for (let i = 0; i < seq_length; i++) {
-            peptide.sequence[i] = {"aminoAcid": seq_AAonly[i], "Modification": ""}
+            peptide.sequence[i] = {"aminoAcid": seq_AAonly[i], "Modification": ""};
         }
 
         const re = /[^A-Z]+/g;
@@ -199,7 +195,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
             data.modifications = [];
         }
         if (data.fragmentTolerance === undefined) {
-            data.fragmentTolerance = {"tolerance": '10.0', 'unit': 'ppm'};
+            data.fragmentTolerance = {"tolerance": "10.0", "unit": "ppm"};
         }
         if (data.requestID === undefined) {
             data.requestID = -1;
@@ -215,7 +211,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         }
         if (data.sequence2 !== undefined) {
             peptides[1] = this.arrayifyPeptide(data.sequence2);
-            linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2}
+            linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
         }
 
         let peaks = [];
@@ -241,7 +237,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
         annotationRequest.annotation.modifications = data.modifications;
         annotationRequest.annotation.ions = ions;
-        annotationRequest.annotation.crosslinker = {'modMass': data.crossLinkerModMass};
+        annotationRequest.annotation.crosslinker = {"modMass": data.crossLinkerModMass};
         annotationRequest.annotation.precursorMZ = +data.precursorMZ;
         annotationRequest.annotation.precursorCharge = +data.precursorCharge;
         annotationRequest.annotation.losses = data.losses;
@@ -254,7 +250,9 @@ export const xiSPEC_wrapper = Backbone.View.extend({
 
     updatePlotSplit: function () {
         //  destroy the plotSplit if it exists
-        try{ this.plotSplit.destroy(); } catch (e) {}
+        try{
+ this.plotSplit.destroy(); 
+} catch (e) {}
 
         // stop if there is only a single spectrum
         let numSpec = this.spectra.length;
@@ -264,7 +262,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         let splitIds = [];
         let minSizes = [];
         for (let i = 0; i < numSpec; i++) {
-            splitIds.push('#xispec_spec' + this.specIds[i]);
+            splitIds.push("#xispec_spec" + this.specIds[i]);
             splitSizes.push(100.0 / numSpec);
             minSizes.push(250);
         }
@@ -274,8 +272,10 @@ export const xiSPEC_wrapper = Backbone.View.extend({
             sizes: splitSizes,
             minSize: minSizes,
             gutterSize: 5,
-            direction: 'horizontal',
-            onDragEnd: function(){ window.xiSPECUI.vent.trigger('resize:spectrum'); }
+            direction: "horizontal",
+            onDragEnd: function(){
+ window.xiSPECUI.vent.trigger("resize:spectrum"); 
+}
         });
     },
 
@@ -286,14 +286,14 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         this.specIds.push(specId);
 
         // append a div for the new spectrum
-        this.spectraWrapperDiv.append('div')
-            .attr('class', 'xispec_plotsDiv')
-            .attr('id', 'xispec_spec' + specId)
+        this.spectraWrapperDiv.append("div")
+            .attr("class", "xispec_plotsDiv")
+            .attr("id", "xispec_spec" + specId)
         ;
 
         // create new SpectrumWrapper
         let newSpec = new SpectrumWrapper({
-            el: '#xispec_spec' + specId,
+            el: "#xispec_spec" + specId,
             opt: this.options,
             id: specId,
         });
@@ -302,15 +302,14 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         // if there is already an activeSpectrum copy it's originalMatchRequest
         if (this.activeSpectrum) {
             newSpec.requestAnnotation(this.activeSpectrum.originalMatchRequest,
-                this.activeSpectrum.originalAnnotator, true)
+                this.activeSpectrum.originalAnnotator, true);
             newSpec.setTitle(this.activeSpectrum.title);
         }
 
         // hide spectrumHeader if there's only one spectrumPanel visible
         if (this.spectra.length === 1){
             this.spectra[0].setHeaderVis(false);
-        }
-        else {
+        } else {
             this.spectra[0].setHeaderVis(true);
         }
 
@@ -318,31 +317,35 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         this.updatePlotSplit();
 
         // trigger resizing
-        window.xiSPECUI.vent.trigger('resize:spectrum');
+        window.xiSPECUI.vent.trigger("resize:spectrum");
 
         return newSpec;
     },
 
     closeSpectrum: function (id) {
         if (id === this.activeSpectrum.id){
-            window.xiSPECUI.vent.trigger('activateSpecPanel', 0);
+            window.xiSPECUI.vent.trigger("activateSpecPanel", 0);
         }
-        let specIndex = this.spectra.map(function(x) {return x.id; }).indexOf(id);
+        let specIndex = this.spectra.map(function(x) {
+return x.id; 
+}).indexOf(id);
         this.spectra.splice(specIndex, 1);
-        this.specIds.splice(specIndex, 1)
+        this.specIds.splice(specIndex, 1);
         this.updatePlotSplit();
-        window.xiSPECUI.vent.trigger('resize:spectrum');
+        window.xiSPECUI.vent.trigger("resize:spectrum");
     },
 
     activateSpectrum: function (id) {
-        let specIndex = this.spectra.map(function(x) {return x.id; }).indexOf(id);
+        let specIndex = this.spectra.map(function(x) {
+return x.id; 
+}).indexOf(id);
         this.activeSpectrum = this.spectra[specIndex];
-        this.SpectrumControlsView.model = this.activeSpectrum.models['Spectrum'];
-        this.DataSettingsView.model = this.activeSpectrum.models['SettingsSpectrum'];
-        this.DataSettingsView.displayModel = this.activeSpectrum.models['Spectrum'];
-        this.AppearanceSettingsView.model = this.activeSpectrum.models['SettingsSpectrum'];
-        this.AppearanceSettingsView.displayModel = this.activeSpectrum.models['Spectrum'];
-        window.xiSPECUI.vent.trigger('activeSpecPanel:changed');
+        this.SpectrumControlsView.model = this.activeSpectrum.models["Spectrum"];
+        this.DataSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
+        this.DataSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
+        this.AppearanceSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
+        this.AppearanceSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
+        window.xiSPECUI.vent.trigger("activeSpecPanel:changed");
     },
 
     butterflyHighlight: function () {

@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import d3 from "d3";
 
 export function Peak (id, graph){
@@ -9,11 +9,11 @@ export function Peak (id, graph){
 	this.IsotopeClusters = [];
 	this.labels = [];
 	for (let i=0; i<peak.clusterIds.length; i++){
-		let cluster = graph.model.get("JSONdata").clusters[peak.clusterIds[i]]
-		cluster.id = peak.clusterIds[i]
+		let cluster = graph.model.get("JSONdata").clusters[peak.clusterIds[i]];
+		cluster.id = peak.clusterIds[i];
 		this.IsotopeClusters.push(cluster);
 	}
-	this.clusterIds = peak.clusterIds
+	this.clusterIds = peak.clusterIds;
 	this.graph = graph;
 
 	//make fragments
@@ -26,7 +26,7 @@ export function Peak (id, graph){
 	for (let f=0; f < fragments.length; f++) {
 		if(_.intersection(fragments[f].clusterIds, this.clusterIds).length !== 0){
 			// monoisotopic peak for this fragment
-			let intersect = _.intersection(fragments[f].clusterIds, this.clusterIds)
+			let intersect = _.intersection(fragments[f].clusterIds, this.clusterIds);
 				for (let i=0; i < intersect.length; i++) {
 					fragments[f].isMonoisotopic = false;
 					for (let j=0; j < this.IsotopeClusters.length; j++) {
@@ -50,13 +50,13 @@ export function Peak (id, graph){
 
 Peak.prototype.draw = function(){
 	//svg elements
-	this.lineLabelGroup = this.graph.peaksSVG.append('g');
-	this.lineGroup = this.lineLabelGroup.append('g');
+	this.lineLabelGroup = this.graph.peaksSVG.append("g");
+	this.lineGroup = this.lineLabelGroup.append("g");
 
 	if (this.fragments.length > 0) {
-		this.highlightLine = this.lineGroup.append('line')
-								.attr("stroke", this.graph.model.get('highlightColor'))
-								.attr("stroke-width", this.graph.model.get('highlightWidth'))
+		this.highlightLine = this.lineGroup.append("line")
+								.attr("stroke", this.graph.model.get("highlightColor"))
+								.attr("stroke-width", this.graph.model.get("highlightWidth"))
 								.attr("opacity","0")
 								.attr("stroke-opacity", "0.7")
 								.attr("x1", 0)
@@ -72,8 +72,7 @@ Peak.prototype.draw = function(){
 				if (evt.ctrlKey){
 					self.line.style("cursor", "copy");
 					self.highlightLine.style("cursor", "copy");
-				}
-				else{
+				} else{
 					self.line.style("cursor", "pointer");
 					self.highlightLine.style("cursor", "pointer");
 				}
@@ -97,11 +96,9 @@ Peak.prototype.draw = function(){
 			.on("click", function() {
 				let evt = d3.event;
 				stickyHighlight(evt.ctrlKey);
-			})
-			;
-
-		function showTooltip(x, y, fragId){
-			let contents = [["m/z", self.x.toFixed(self.graph.model.get('showDecimals'))], ["Int", self.y.toFixed(self.graph.model.get('showDecimals'))]];
+			});
+function showTooltip(x, y, fragId){
+			let contents = [["m/z", self.x.toFixed(self.graph.model.get("showDecimals"))], ["Int", self.y.toFixed(self.graph.model.get("showDecimals"))]];
 			let header = [];
 
 			// filter fragments shown in tooltip (only fraglabel is hovered over)
@@ -113,13 +110,13 @@ Peak.prototype.draw = function(){
 				// get the right clusterId for this peak
 				let clusterId = _.intersection(self.clusterIds, fragments[f].clusterIds)[0];
 				let clusterInfoIdx = fragments[f].clusterIds.indexOf(clusterId);
-				let clusterInfo = fragments[f].clusterInfo[clusterInfoIdx]
+				let clusterInfo = fragments[f].clusterInfo[clusterInfoIdx];
 
 				let matchedMissingMonoIsotopic = clusterInfo.matchedMissingMonoIsotopic;
 				let charge = clusterInfo.matchedCharge;
-				let chargeStr = (charge > 1) ? charge: '';
-				let error = clusterInfo.error.toFixed(self.graph.model.get('showDecimals')) + " " + clusterInfo.errorUnit;
-				header.push(fragments[f].name + '<span style="vertical-align:super;font-size: 0.8em;">'+ chargeStr + '+</span>');
+				let chargeStr = (charge > 1) ? charge: "";
+				let error = clusterInfo.error.toFixed(self.graph.model.get("showDecimals")) + " " + clusterInfo.errorUnit;
+				header.push(fragments[f].name + "<span style=\"vertical-align:super;font-size: 0.8em;\">"+ chargeStr + "+</span>");
 
 				let fragName = fragments[f].name + " (" + fragments[f].sequence + ")";
 				let fragInfo = "charge: " + charge + ", error: " + error;
@@ -135,8 +132,7 @@ Peak.prototype.draw = function(){
 					.set("header", header.join(" "))
 					.set("location", {pageX: x, pageY: y});
 					//.set("location", {pageX: d3.event.pageX, pageY: d3.event.pageY})
-			}
-			else{
+			} else{
 				let html = header.join("; ");
 				for (let i = contents.length - 1; i >= 0; i--) {
 					html += "</br>";
@@ -171,9 +167,10 @@ Peak.prototype.draw = function(){
 			let fragments;
 			if(fragId){
 				fragId = parseInt(fragId);
-				fragments = self.fragments.filter(function(d) { return d.id == fragId; });
-			}
-			else{
+				fragments = self.fragments.filter(function(d) {
+ return d.id == fragId; 
+});
+			} else{
 				fragments = self.fragments;
 			}
 			self.graph.model.addHighlight(fragments);
@@ -188,9 +185,10 @@ Peak.prototype.draw = function(){
 			let fragments = [];
 			if(fragId){
 				fragId = parseInt(fragId);
-				fragments = self.fragments.filter(function(d) { return d.id == fragId; });
-			}
-			else
+				fragments = self.fragments.filter(function(d) {
+ return d.id == fragId; 
+});
+			} else
 				fragments = self.fragments;
 			self.graph.model.updateStickyHighlight(fragments, ctrl);
 		}
@@ -227,22 +225,18 @@ Peak.prototype.draw = function(){
 					const deltaY = (mouseY - startY > 0 ? -8 : 2);
 					let deltaX = 0;
 					if(Math.abs(mouseX) > 20){
-						deltaX = (mouseX > 0 ? -8 : 8)
+						deltaX = (mouseX > 0 ? -8 : 8);
 					}
 					filteredLabelLines
 						.attr("opacity", 1)
 						.attr("x1", 0)
 						.attr("x2", mouseX + deltaX)
 						.attr("y1", startY)
-						.attr("y2", mouseY + deltaY)
-					;
-				}
-				else
+						.attr("y2", mouseY + deltaY);
+} else
 					filteredLabelLines.attr("opacity", 0);
-			})
-		;
-
-		const lossy = [];
+			});
+const lossy = [];
 		const nonlossy = this.fragments.filter(function (frag) {
 			const bool = frag.class != "lossy";
 			if (!bool) {
@@ -324,32 +318,28 @@ Peak.prototype.draw = function(){
 					.on("click", function (d) {
 						const evt = d3.event;
 						stickyHighlight(evt.ctrlKey, d.id);
-					})
-				;
-
-				label.append("text")
+					});
+label.append("text")
 					.text(function(d) {
 						return d.name;
 					})
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
 					.style("stroke-width", "6px")
-					.style("font-size", self.graph.model.get('labelFontSize'))
+					.style("font-size", self.graph.model.get("labelFontSize"))
 					.attr("class", "xispec_peakAnnotHighlight")
-					.attr("stroke", this.graph.model.get('highlightColor'))
-				;
-
-				label.append("text")
+					.attr("stroke", this.graph.model.get("highlightColor"));
+label.append("text")
 					.text(function(d) {
 						return d.name;
 					})
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
-					.style("font-size", self.graph.model.get('labelFontSize'))
+					.style("font-size", self.graph.model.get("labelFontSize"))
 					.attr("font-weight", function(d){
 						if (self.graph.options.accentuateCLcontainingFragments && d.crossLinkContaining)
-							return '900';
-						return 'normal';
+							return "900";
+						return "normal";
 					})
 					.attr("class", function(d){
 						const pepIndex = d.peptideId + 1;
@@ -358,17 +348,15 @@ Peak.prototype.draw = function(){
 					.attr ("fill", function(d) {
 						const pepIndex = d.peptideId + 1;
 						return self.graph.model["p" + pepIndex + partition.colourClass];
-					})
-				;
-				if (self.graph.options.labelFragmentCharge){
-					label.selectAll('text').append('tspan')
+					});
+if (self.graph.options.labelFragmentCharge){
+					label.selectAll("text").append("tspan")
 						.text(function(d) {
-							return d.get_charge(self.id) + '+';
+							return d.get_charge(self.id) + "+";
 						})
 						.style("font-size", "75%")
-						.style("baseline-shift", "super")
-					;
-				}
+						.style("baseline-shift", "super");
+}
 			}
 
 		}, this);
@@ -387,7 +375,9 @@ Peak.prototype.draw = function(){
 
 		this.labelLines = this.lineLabelGroup
 			.selectAll("line.xispec_labelLine")
-			.filter(function(d){ return fset.has(d.id); });
+			.filter(function(d){
+ return fset.has(d.id); 
+});
 
 		this.highlight(false);
 
@@ -395,17 +385,19 @@ Peak.prototype.draw = function(){
 
 	let peakStrokeWidth = 1;
 	if (this.graph.options.accentuateCLcontainingFragments
-		&& this.fragments.filter(function(f){return f.crossLinkContaining}).length > 0){
+		&& this.fragments.filter(function(f){
+return f.crossLinkContaining;
+}).length > 0){
 		peakStrokeWidth = 2;
 	}
 
-	this.line = this.lineGroup.append('line')
+	this.line = this.lineGroup.append("line")
 		.attr("stroke-width", peakStrokeWidth)
 		.attr("x1", 0)
 		.attr("x2", 0);
 
 	// add max intensity breakSymbol
-	this.lineBreakSymbol = this.lineGroup.append('polyline')
+	this.lineBreakSymbol = this.lineGroup.append("polyline")
 		.attr("points", "-8,6 -2,-2 4,6 7,2")
 		.attr("stroke-width", peakStrokeWidth)
 		.attr("stroke", "#333")
@@ -418,21 +410,24 @@ Peak.prototype.draw = function(){
 	}
 
 
-	this.colour = this.graph.model.get('peakColor');
+	this.colour = this.graph.model.get("peakColor");
 	this.setColor();
-}
+};
 
 Peak.prototype.highlight = function(show, fragments){
 	if (show === true) {
 		this.highlightLine.attr("opacity","1");
 		if (this.labels.length) {
-			let fragMap = d3.set (fragments.map (function (frag) { return frag.id; }));
-			let ffunc = function (d) { return fragMap.has (d.id); };
+			let fragMap = d3.set (fragments.map (function (frag) {
+ return frag.id; 
+}));
+			let ffunc = function (d) {
+ return fragMap.has (d.id); 
+};
 			this.labelHighlights.filter(ffunc)
 				.attr("opacity", 1)
-				.attr("display", "inline")
-			;
-			this.labels.filter(ffunc).attr("display", "inline");
+				.attr("display", "inline");
+this.labels.filter(ffunc).attr("display", "inline");
 		}
 		// this.graph.peaksSVG.node().appendChild(this.lineLabelGroup.node());
 		this.line.attr("stroke", this.colour);
@@ -442,7 +437,7 @@ Peak.prototype.highlight = function(show, fragments){
 			this.labelHighlights.attr("opacity", 0);
 		}
 	}
-}
+};
 
 Peak.prototype.update = function(){
 
@@ -457,7 +452,7 @@ Peak.prototype.update = function(){
 					.attr("x1", 0)
 					.attr("x2", 0)
 					.attr("y1", 0)
-					.attr("y2", 0)
+					.attr("y2", 0);
 			}
 		//update Peak position
 		this.updateX(xDomain);
@@ -467,7 +462,7 @@ Peak.prototype.update = function(){
 	} else {
 		this.lineLabelGroup.attr("display","none");
 	}
-}
+};
 
 Peak.prototype.updateX = function(xDomain){
 	const labelCount = this.labels.length;
@@ -480,13 +475,13 @@ Peak.prototype.updateX = function(xDomain){
 
 		// Y labelCutoff
 		const peakYrel = (peakObj.y / model.ymaxPrimary * 100);
-		if (peakYrel < model.get('labelCutoff')) return false;
+		if (peakYrel < model.get("labelCutoff")) return false;
 
 		// is a sticky fragment
 		const isSticky = _.intersection(model.sticky, peakObj.fragments).length !== 0;
 
 		return (peakObj.graph.lossyShown === true || d.class === "non-lossy" || isSticky)	//lossy enabled OR not lossy OR isStickyFrag
-			 && (isSticky || model.sticky.length === 0 || !model.get('hideNotSelectedFragments'))	//isStickyFrag OR no StickyFrags or showAll
+			 && (isSticky || model.sticky.length === 0 || !model.get("hideNotSelectedFragments"));	//isStickyFrag OR no StickyFrags or showAll
 	}
 
 	const self = this;
@@ -495,15 +490,13 @@ Peak.prototype.updateX = function(xDomain){
 			.attr("x", 0)
 			.attr("display",function(d, i) {
 				return labelVisible (d, self) ? "inline" : "none";
-			})
-		;
-		this.labelHighlights
+			});
+this.labelHighlights
 			.attr("x", 0)
 			.attr("display",function(d) {
 				return labelVisible (d, self) ? "inline" : "none";
-			})
-		;
-	}
+			});
+}
 };
 
 Peak.prototype.updateY = function(yDomain){
@@ -518,9 +511,10 @@ Peak.prototype.updateY = function(yDomain){
 
 	// show lineBreakSymbol if intensity is above max
 	if (this.y > ymax){
-		this.lineBreakSymbol.attr("opacity", 1);}
-	else{
-		this.lineBreakSymbol.attr("opacity", 0);}
+		this.lineBreakSymbol.attr("opacity", 1);
+} else{
+		this.lineBreakSymbol.attr("opacity", 0);
+}
 	if (labelCount > 0) {
 		this.highlightLine
 			.attr("y1", yScale(y))
@@ -542,7 +536,7 @@ Peak.prototype.updateY = function(yDomain){
 			this.labelHighlights[i][0].setAttribute("y",  labelY);
 		}
 	}
-}
+};
 
 Peak.prototype.removeLabels = function(){
 	const labelCount = this.labels.length;
@@ -551,7 +545,7 @@ Peak.prototype.removeLabels = function(){
 		this.labelHighlights.attr("display", "none");
 // 		this.labelLines.attr("opacity", 0);
 	}
-}
+};
 
 Peak.prototype.showLabels = function(lossyOverride){
 	const xDomain = this.graph.xscale.domain();
@@ -566,7 +560,7 @@ Peak.prototype.showLabels = function(lossyOverride){
 			if (!inXrange) return false;
 			// LabelCutoff
 			let peakYrel = (self.y / model.ymaxPrimary * 100);
-			if (peakYrel < model.get('labelCutoff')) return false;
+			if (peakYrel < model.get("labelCutoff")) return false;
 
 			return (self.graph.lossyShown === true || d.class === "non-lossy" || lossyOverride === true);
 		};
@@ -574,24 +568,24 @@ Peak.prototype.showLabels = function(lossyOverride){
 		this.labelHighlights.filter(isVisible).attr("display", "inline");
 // 		this.labelLines.filter(isVisible).attr("opacity", 1);
 	}
-}
+};
 
 Peak.prototype.setColor = function(){
-	let model = this.graph.model
-	this.colour = model.get('peakColor');	// standard color
+	let model = this.graph.model;
+	this.colour = model.get("peakColor");	// standard color
 	// fragment peak
 	// let fragments = _.intersection(this.fragments, model.visFragments)	// only use visible fragments
 	if (this.fragments.length > 0){
 		// prioritize non-lossy fragments for color
-		let non_lossy = this.fragments.filter(function(f) { return !f.lossy; });
+		let non_lossy = this.fragments.filter(function(f) {
+ return !f.lossy; 
+});
 		if (non_lossy.length > 0){
 			this.colour = (non_lossy[0].peptideId === 0) ? model.p1color : model.p2color;
-		}
-		else{
+		} else{
 			this.colour = (this.fragments[0].peptideId === 0) ? model.p1color_loss : model.p2color_loss;
 		}
-	}
-	else if(this.isotopes.length > 0) {
+	} else if(this.isotopes.length > 0) {
 		if(this.isotopes[0].peptideId === 0)
 			this.colour = model.p1color_cluster;
 		if(this.isotopes[0].peptideId === 1)
@@ -601,10 +595,18 @@ Peak.prototype.setColor = function(){
 
 	if(this.labels.length > 0){
 
-		let filter_p1 = function(label){ return label.peptideId === 0};
-		let filter_p2 = function(label){ return label.peptideId === 1};
-		let filter_lossy = function(label){ return label.class === "lossy"};
-		let filter_nonLossy = function(label){ return label.class === "non-lossy"};
+		let filter_p1 = function(label){
+ return label.peptideId === 0;
+};
+		let filter_p2 = function(label){
+ return label.peptideId === 1;
+};
+		let filter_lossy = function(label){
+ return label.class === "lossy";
+};
+		let filter_nonLossy = function(label){
+ return label.class === "non-lossy";
+};
 
 		this.labels.filter(filter_p1).filter(filter_nonLossy).attr("fill", model.p1color);
 		this.labels.filter(filter_p1).filter(filter_lossy).attr("fill", model.p1color_loss);
@@ -613,4 +615,4 @@ Peak.prototype.setColor = function(){
 
 	}
 
-}
+};

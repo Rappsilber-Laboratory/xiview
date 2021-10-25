@@ -1,18 +1,18 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 import {Fragment} from "./graph/Fragment";
 
-import * as colorbrewer from 'colorbrewer';
+import * as colorbrewer from "colorbrewer";
 
 export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	defaults: function () {
 		return {
-			baseDir: './',
+			baseDir: "./",
 			knownModifications: [],
 			knownModificationsURL: false,
-			highlightColor: '#FFFF00',
+			highlightColor: "#FFFF00",
 			highlightWidth: 8,
 			peakColor: "#a6a6a6",
 			colorScheme: "RdBu",
@@ -29,24 +29,23 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	initialize: function(){
 
-		if(this.get('knownModificationsURL') !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {    // in tells difference between variable existing and having the undefined value and it not being defined at all
-			this.getKnownModifications(this.get('knownModificationsURL'));
+		if(this.get("knownModificationsURL") !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {    // in tells difference between variable existing and having the undefined value and it not being defined at all
+			this.getKnownModifications(this.get("knownModificationsURL"));
             AnnotatedSpectrumModel.prototype.cachedKnownModifications = this.knownModifications;
-		}
-		else{
-			this.knownModifications = AnnotatedSpectrumModel.prototype.cachedKnownModifications || this.get('knownModifications');
+		} else{
+			this.knownModifications = AnnotatedSpectrumModel.prototype.cachedKnownModifications || this.get("knownModifications");
 		}
 
-		this.set('showDecimals', 2);
-		this.set('moveLabels', false);
-		this.set('measureMode', false);
-		this.set('zoomLocked', false);
-		this.set('butterfly', false);
-		this.set('changedAnnotation', false);
+		this.set("showDecimals", 2);
+		this.set("moveLabels", false);
+		this.set("measureMode", false);
+		this.set("zoomLocked", false);
+		this.set("butterfly", false);
+		this.set("changedAnnotation", false);
 		// this.keepCustomConfig = false;
 
-		this.set('visFragments', 'both');
-		this.changeColorScheme(this.get('colorScheme'));
+		this.set("visFragments", "both");
+		this.changeColorScheme(this.get("colorScheme"));
 
 		this.labelFontSize = 10;
 
@@ -54,7 +53,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.pepStrsMods = [];
 		this.fragmentIons = [];
 		this.peakList = [];
-		this.precursor = {}
+		this.precursor = {};
 		this.precursor.charge = null;
 		this.customConfig = [];
 		this.sticky = [];
@@ -64,10 +63,9 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 		// define event triggers and listeners better
 		this.on("change:JSONdata", function(){
 			let json = this.get("JSONdata");
-			if (typeof json !== 'undefined'){
+			if (typeof json !== "undefined"){
 				this.setData();
-			}
-			else
+			} else
 				this.trigger("cleared");
 		});
 
@@ -184,7 +182,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.pepStrsMods = [];
 		this.fragmentIons = [];
 		this.peakList = [];
-		this.precursor = {}
+		this.precursor = {};
 		this.precursor.charge = null;
 		this.MSnTolerance = {};
 		this.customConfig = [];
@@ -197,29 +195,33 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		let peaks = this.get("JSONdata").peaks;
 
-		let xDataArr = peaks.map(function(p){ return p.mz; })
+		let xDataArr = peaks.map(function(p){
+ return p.mz; 
+});
 		let xmax = Math.max.apply(Math, xDataArr);
 		let xmin = Math.min.apply(Math, xDataArr);
 		this.xmaxPrimary = parseInt((xmax + 50).toFixed(0));
 		this.xminPrimary = parseInt((xmin - 50).toFixed(0));
 
-		let yDataArr = peaks.map(function(p){ return p.intensity; })
+		let yDataArr = peaks.map(function(p){
+ return p.intensity; 
+});
 		this.ymaxPrimary = Math.max.apply(Math, yDataArr);
 
-		if (!this.get('zoomLocked')){
-			this.set('mzRange', [this.xminPrimary, this.xmaxPrimary]);
+		if (!this.get("zoomLocked")){
+			this.set("mzRange", [this.xminPrimary, this.xmaxPrimary]);
 			this.ymax = this.ymaxPrimary;
 			this.ymin = 0;
 		}
 	},
 
 	setZoom: function(arr){
-		this.set('mzRange', [arr[0], arr[1]]);
+		this.set("mzRange", [arr[0], arr[1]]);
 	},
 
 	resetZoom: function(){
-		this.set('mzRange', [this.xminPrimary, this.xmaxPrimary]);
-		this.trigger('resetZoom');
+		this.set("mzRange", [this.xminPrimary, this.xmaxPrimary]);
+		this.trigger("resetZoom");
 	},
 
 	addHighlight: function(fragments){
@@ -232,7 +234,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	clearHighlight: function(fragments){
 		for (let f=0; f < fragments.length; f++){
-			let index = this.highlights.indexOf(fragments[f])
+			let index = this.highlights.indexOf(fragments[f]);
 			if(index !== -1 && !_.contains(this.sticky, fragments[f])){
 				this.highlights.splice(index, 1);
 			}
@@ -254,9 +256,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 				if (this.sticky.indexOf(fragments[f]) === -1)
 					this.sticky.push(fragments[f]);
 			}
-		}
-		else{
-			let clearHighlights = []
+		} else{
+			let clearHighlights = [];
 			if(this.sticky.length !== 0){
 				for(let f=0; f < this.sticky.length; f++){
 					if (fragments.indexOf(this.sticky[f]) == -1)
@@ -272,7 +273,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 	},
 
 	changeColorScheme: function(schemeStr){
-		this.set('colorScheme', schemeStr);
+		this.set("colorScheme", schemeStr);
 		this.colorPalette = colorbrewer.RdBu[8]; // default
 		switch(schemeStr) {
 			case "RdBu":
@@ -297,8 +298,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 	},
 
 	updateColors: function(){
-		switch(this.get('visFragments')) {
-			case 'both':
+		switch(this.get("visFragments")) {
+			case "both":
 				this.p1color = this.colorPalette[0];
 				this.p1color_cluster = this.colorPalette[2];
 				this.p1color_loss = this.colorPalette[1];
@@ -306,18 +307,18 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 				this.p2color_cluster = this.colorPalette[5];
 				this.p2color_loss = this.colorPalette[6];
 				break;
-			case 'pep1':
+			case "pep1":
 				this.p1color = this.colorPalette[0];
 				this.p1color_cluster = this.colorPalette[2];
 				this.p1color_loss = this.colorPalette[1];
-				this.p2color = this.get('peakColor');
-				this.p2color_cluster = this.get('peakColor');
-				this.p2color_loss = this.get('peakColor');
+				this.p2color = this.get("peakColor");
+				this.p2color_cluster = this.get("peakColor");
+				this.p2color_loss = this.get("peakColor");
 				break;
-			case 'pep2':
-				this.p1color = this.get('peakColor');
-				this.p1color_cluster = this.get('peakColor');
-				this.p1color_loss = this.get('peakColor');
+			case "pep2":
+				this.p1color = this.get("peakColor");
+				this.p1color_cluster = this.get("peakColor");
+				this.p1color_loss = this.get("peakColor");
 				this.p2color = this.colorPalette[7];
 				this.p2color_cluster = this.colorPalette[5];
 				this.p2color_loss = this.colorPalette[6];
@@ -329,25 +330,24 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 	changeLinkPos: function(newLinkSites){
 
 		// make sure this model is in the activated SpectrumWrapper
-		this.trigger('activate');
+		this.trigger("activate");
 
 		if(this.get("JSONrequest") !== undefined){
 			let json_req = $.extend(true, {}, this.get("JSONrequest"));
 			json_req.LinkSite = newLinkSites;
-			window.xiSPECUI.vent.trigger('requestAnnotation', json_req, this.get('annotatorURL'));
-		}
-		else{
-			this.get('JSONdata').LinkSite = newLinkSites;
+			window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
+		} else{
+			this.get("JSONdata").LinkSite = newLinkSites;
 			this.setData();
 		}
 
-		this.set('changedAnnotation', true);
+		this.set("changedAnnotation", true);
 	},
 
 	changeMod: function(oldPos, newPos, oldPepIndex, newPepIndex){
 
 		// make sure this model is in the activated SpectrumWrapper
-		this.trigger('activate');
+		this.trigger("activate");
 
 		if(this.get("JSONrequest") !== undefined){
 			let json_req = $.extend(true, {}, this.get("JSONrequest"));
@@ -359,20 +359,21 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 			json_req.Peptides[oldPepIndex].sequence[oldPos].Modification = "";
 
 			if (myNew.aminoAcid !== myOld.aminoAcid){
-				let annotationMod = $.grep(json_req.annotation.modifications, function(e){ return e.id == myNew.Modification; });
+				let annotationMod = $.grep(json_req.annotation.modifications, function(e){
+ return e.id == myNew.Modification; 
+});
 				if (annotationMod[0].aminoAcids.indexOf(myNew.aminoAcid) === -1)
 					annotationMod[0].aminoAcids.push(myNew.aminoAcid);
 			}
-			window.xiSPECUI.vent.trigger('requestAnnotation', json_req, this.get('annotatorURL'));
-		}
-		else{
+			window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
+		} else{
 			//Preview
 			this.get("JSONdata").Peptides[newPepIndex].sequence[newPos].Modification = this.get("JSONdata").Peptides[oldPepIndex].sequence[oldPos].Modification;
 			this.get("JSONdata").Peptides[oldPepIndex].sequence[oldPos].Modification = "";
 			this.setData();
 		}
 
-		this.set('changedAnnotation', true);
+		this.set("changedAnnotation", true);
 	},
 
 	checkForValidModification: function(mod, aminoAcid){
@@ -380,7 +381,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 		for (let i=0; i < this.knownModifications.length; i++) {
 			if(this.knownModifications[i].id == mod){
 				let knownMod_aminoAcids = this.knownModifications[i].aminoAcids;
-				return knownMod_aminoAcids.indexOf('*') !== -1 || knownMod_aminoAcids.indexOf(aminoAcid) !== -1;
+				return knownMod_aminoAcids.indexOf("*") !== -1 || knownMod_aminoAcids.indexOf(aminoAcid) !== -1;
 			}
 		}
 	},

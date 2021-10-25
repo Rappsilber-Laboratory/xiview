@@ -38,7 +38,7 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
     const self = this;
 
     //svg elements
-	this.g = this.FragKey.scaleSvgGroup.append('g');
+	this.g = this.FragKey.scaleSvgGroup.append("g");
 
 /*	var group = this.g
 		.on("mouseover", function() {
@@ -98,9 +98,9 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		// check for Crosslink containing fragment - checking first is sufficient
 		// fragments.b.filter(function(b){return b.type.crossLinkContaining})
-		var fragLineClass = 'xispec_fragBar';
+		var fragLineClass = "xispec_fragBar";
 		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.b[0].crossLinkContaining){
-			fragLineClass = 'xispec_fragBarThick';
+			fragLineClass = "xispec_fragBarThick";
 		}
 
 		if(fragments.y.length == 0)	//highlightPath full length of the fragbar
@@ -121,8 +121,7 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 						self.fragBar.style("cursor", "copy");
 						self.bTail.style("cursor", "copy");
 						self.bHighlight.style("cursor", "copy");
-					}
-					else{
+					} else{
 						self.fragBar.style("cursor", "pointer");
 						self.bTail.style("cursor", "pointer");
 						self.bHighlight.style("cursor", "pointer");
@@ -146,8 +145,8 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.bHighlight = this.bgroup.append("path")
 			.attr("d", highlightPath)
-			.attr("stroke", this.FragKey.model.get('highlightColor'))
-			.attr("stroke-width", this.FragKey.model.get('highlightWidth'))
+			.attr("stroke", this.FragKey.model.get("highlightColor"))
+			.attr("stroke-width", this.FragKey.model.get("highlightWidth"))
 			.attr("opacity", 0)
 			.style("cursor", "pointer");
 
@@ -206,9 +205,8 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				blossy = false;
 		}
 		if (blossy){
-			this.bTail.attr("stroke", this.FragKey.model.get('peakColor'));
-		}
-		else {
+			this.bTail.attr("stroke", this.FragKey.model.get("peakColor"));
+		} else {
 			this.bTail.attr("stroke", "black");
 		}
 	}
@@ -216,9 +214,9 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	// # yions; either normal or lossy; have different colors
 	if (fragments.y.length != 0){
 
-		var fragLineClass = 'xispec_fragBar';
+		var fragLineClass = "xispec_fragBar";
 		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.y[0].crossLinkContaining){
-			fragLineClass = 'xispec_fragBarThick';
+			fragLineClass = "xispec_fragBarThick";
 		}
 
 		if(fragments.b.length == 0)	//highlight full length of the fragbar
@@ -238,8 +236,7 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 						self.fragBar.style("cursor", "copy");
 						self.yTail.style("cursor", "copy");
 						self.yHighlight.style("cursor", "copy");
-					}
-					else{
+					} else{
 						self.fragBar.style("cursor", "pointer");
 						self.yTail.style("cursor", "pointer");
 						self.yHighlight.style("cursor", "pointer");
@@ -264,10 +261,10 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.yHighlight = this.ygroup.append("path")
 			.attr("d", highlightPath)
-			.attr("stroke", this.FragKey.model.get('highlightColor'))
-			.attr("stroke-width", this.FragKey.model.get('highlightWidth'))
+			.attr("stroke", this.FragKey.model.get("highlightColor"))
+			.attr("stroke-width", this.FragKey.model.get("highlightWidth"))
 			.attr("opacity", 0)
-			.style("cursor", "pointer")
+			.style("cursor", "pointer");
 
 		this.yTail = this.ygroup.append("line")
 			.attr("x1", this.x)
@@ -321,9 +318,8 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				ylossy = false;
 		}
 		if (ylossy){
-			this.yTail.attr("stroke", this.FragKey.model.get('peakColor'));
-		}
-		else {
+			this.yTail.attr("stroke", this.FragKey.model.get("peakColor"));
+		} else {
 			this.yTail.attr("stroke", "black");
 		}
 	}
@@ -339,9 +335,8 @@ export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 	//if all fragments are lossy
 	if ((fragments.y.length == 0 || ylossy) && (fragments.b.length == 0 || blossy)){
-		this.fragBar.attr("stroke", this.FragKey.model.get('peakColor'));
-	}
-	else {
+		this.fragBar.attr("stroke", this.FragKey.model.get("peakColor"));
+	} else {
 		this.fragBar.attr("stroke", "black");
 	}
 
@@ -355,28 +350,27 @@ KeyFragment.prototype.highlight = function(show, fragments){
 			if( this.b.indexOf(fragments[f]) != -1 && this.bHighlight){
 				this.bHighlight.attr("opacity", 1);
 				if (fragments[f].type.indexOf("AIon") != -1)
-					this.bText.text("a" + this.bfrag_index)
+					this.bText.text("a" + this.bfrag_index);
 				if (fragments[f].type.indexOf("BIon") != -1)
-					this.bText.text("b" + this.bfrag_index)
+					this.bText.text("b" + this.bfrag_index);
 				if (fragments[f].type.indexOf("CIon") != -1)
-					this.bText.text("c" + this.bfrag_index)
+					this.bText.text("c" + this.bfrag_index);
 				//if (fragments[f].type.indexOf("AIon") != -1 || fragments[f].type.indexOf("BIon") != -1 || fragments[f].type.indexOf("CIon") != -1)
 				this.bText.attr("opacity", 1);
 			}
 			if (this.y.indexOf(fragments[f]) != -1 && this.yHighlight){
 				this.yHighlight.attr("opacity", 1);
 				if (fragments[f].type.indexOf("XIon") != -1)
-					this.yText.text("x" + this.yfrag_index)
+					this.yText.text("x" + this.yfrag_index);
 				if (fragments[f].type.indexOf("YIon") != -1)
-					this.yText.text("y" + this.yfrag_index)
+					this.yText.text("y" + this.yfrag_index);
 				if (fragments[f].type.indexOf("ZIon") != -1)
-					this.yText.text("z" + this.yfrag_index)
+					this.yText.text("z" + this.yfrag_index);
 				//if (fragments[f].type.indexOf("XIon") != -1 || fragments[f].type.indexOf("YIon") != -1 || fragments[f].type.indexOf("ZIon") != -1)
 				this.yText.attr("opacity", 1);
 			}
 		}
-	}
-	else{
+	} else{
 		if (this.yHighlight){
 			this.yHighlight.attr("opacity", 0);
 			this.yText.attr("opacity", 0);
@@ -386,7 +380,7 @@ KeyFragment.prototype.highlight = function(show, fragments){
 			this.bText.attr("opacity", 0);
 		}
 	}
-}
+};
 
 KeyFragment.prototype.disableCursor = function(){
 	this.fragBar.style("cursor", "default");
@@ -398,4 +392,4 @@ KeyFragment.prototype.disableCursor = function(){
 		this.bTail.style("cursor", "default");
 		this.bHighlight.style("cursor", "default");
 	}
-}
+};

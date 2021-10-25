@@ -1,5 +1,5 @@
-import * as _ from 'underscore';
-import * as d3 from 'd3';
+import * as _ from "underscore";
+import * as d3 from "d3";
 import {Peak} from "./Peak";
 import {matchMassToAA} from "../matchMassToAA";
 
@@ -31,25 +31,20 @@ export const Graph = function(targetSvg, model, options) {
 		.attr("class", "zoom y box")
 		.style("visibility", "hidden")
 		.style("cursor", "s-resize")
-		.attr("pointer-events", "all")
-	;
-	this.yZoomRectRight = this.g.append("svg:rect")
+		.attr("pointer-events", "all");
+this.yZoomRectRight = this.g.append("svg:rect")
 		.attr("class", "zoom y box")
 		.style("visibility", "hidden")
 		.style("cursor", "s-resize")
-		.attr("pointer-events", "all")
-	;
-
-	this.plotBackgroundLabel = this.g.append('text')
-		.attr('visibility', 'hidden')
-		.attr('opacity','0.4')
-		.attr('style', 'text-anchor: middle; pointer-events: none; font-size: 2em;')
-	;
-	if (this.options.id === 'originalSpectrum'){
-		this.plotBackgroundLabel.text('original').attr('fill', 'grey');
-	}
-	else{
-		this.plotBackgroundLabel.text('re-annotation').attr('fill', 'rgb(53 117 255)');
+		.attr("pointer-events", "all");
+this.plotBackgroundLabel = this.g.append("text")
+		.attr("visibility", "hidden")
+		.attr("opacity","0.4")
+		.attr("style", "text-anchor: middle; pointer-events: none; font-size: 2em;");
+if (this.options.id === "originalSpectrum"){
+		this.plotBackgroundLabel.text("original").attr("fill", "grey");
+	} else{
+		this.plotBackgroundLabel.text("re-annotation").attr("fill", "rgb(53 117 255)");
 	}
 
 	this.measureBackground = this.g.append("rect")
@@ -69,20 +64,16 @@ export const Graph = function(targetSvg, model, options) {
 		.attr("height", "25")
 		.attr("opacity", 0)
 		.attr("pointer-events", "all")
-		.style("cursor", "crosshair")
-	;
-	this.xaxisZoomRect.call(this.brush);
+		.style("cursor", "crosshair");
+this.xaxisZoomRect.call(this.brush);
 
 	this.yAxisLeftSVG = this.g.append("g")
 		.attr("class", "y axis")
-		.attr("pointer-events", "none")
-	;
-	this.yAxisRightSVG = this.g.append("g")
+		.attr("pointer-events", "none");
+this.yAxisRightSVG = this.g.append("g")
 		.attr("class", "y axis")
-		.attr("pointer-events", "none")
-	;
-
-	this.dragZoomHighlight = this.innerSVG.append("rect").attr("y", 0).attr("width", 0).attr("fill","#addd8e");
+		.attr("pointer-events", "none");
+this.dragZoomHighlight = this.innerSVG.append("rect").attr("y", 0).attr("width", 0).attr("fill","#addd8e");
 
 	this.plot.on("click", function(){
 		this.model.clearStickyHighlights();
@@ -94,7 +85,7 @@ export const Graph = function(targetSvg, model, options) {
 	else{
 		// target = this.g.node().parentNode.parentNode; //this would get you #spectrumPanel
 		this.tooltip = d3.select("body").append("span")
-			.attr("class", "xispec_tooltip")
+			.attr("class", "xispec_tooltip");
 	}
 
 	this.highlights = this.innerSVG.append("g").attr("class", "peakHighlights");
@@ -120,23 +111,20 @@ export const Graph = function(targetSvg, model, options) {
 		.attr("pointer-events", "none");
 
 	this.measureTooltip = d3.select(this.options.measureTooltipSvgG).append("g")
-		.attr("style", "text-anchor: middle;")
-	;
-	this.measureTooltipBackground = this.measureTooltip.append("rect")
+		.attr("style", "text-anchor: middle;");
+this.measureTooltipBackground = this.measureTooltip.append("rect")
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("fill", "rgb(200,200,200)")
 		.attr("fill-opacity", "0.5")
 		.attr("stroke-opacity", "0.5")
 		.attr("stroke-width", "1px")
-		.attr("stroke", "rgb(100,100,100)")
-	;
-
-	this.measureTooltipText = [];
-	this.measureTooltipText['from'] = this.measureTooltip.append("text");
-	this.measureTooltipText['to'] = this.measureTooltip.append("text");
-	this.measureTooltipText['match'] = this.measureTooltip.append("text");
-	this.measureTooltipText['masses'] = this.measureTooltip.append("g")
+		.attr("stroke", "rgb(100,100,100)");
+this.measureTooltipText = [];
+	this.measureTooltipText["from"] = this.measureTooltip.append("text");
+	this.measureTooltipText["to"] = this.measureTooltip.append("text");
+	this.measureTooltipText["match"] = this.measureTooltip.append("text");
+	this.measureTooltipText["masses"] = this.measureTooltip.append("g")
 		.attr("class", "xispec_measureMasses")
 	;
 
@@ -187,12 +175,20 @@ Graph.prototype.setData = function(){
 		// draw non_fragment_peaks first then add fragment_peaks on top
 		// for correct z-layering
 		this.non_fragment_peaks = this.peaks.filter(
-			function(p){if (p.fragments.length === 0) return true;});
-		this.non_fragment_peaks.forEach(function(p){ p.draw();});
+			function(p){
+if (p.fragments.length === 0) return true;
+});
+		this.non_fragment_peaks.forEach(function(p){
+ p.draw();
+});
 
 		this.fragment_peaks = this.peaks.filter(
-			function(p){if (p.fragments.length > 0) return true;});
-		this.fragment_peaks.forEach(function(p){ p.draw();});
+			function(p){
+if (p.fragments.length > 0) return true;
+});
+		this.fragment_peaks.forEach(function(p){
+ p.draw();
+});
 
 		this.updatePeakColors();
 
@@ -204,27 +200,26 @@ Graph.prototype.setData = function(){
 
 	this.g.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-	if(this.model.get('zoomLocked')){
-		this.resize(this.model.get('mzRange')[0], this.model.get('mzRange')[1], this.model.ymin, this.model.ymax);
+	if(this.model.get("zoomLocked")){
+		this.resize(this.model.get("mzRange")[0], this.model.get("mzRange")[1], this.model.ymin, this.model.ymax);
 		this.disableZoom();
-	}
-	else{
+	} else{
 		this.resize(this.model.xminPrimary, this.model.xmaxPrimary,
 			 this.model.ymin, this.model.ymaxPrimary);
 		this.enableZoom();
 	}
-}
+};
 
 Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 
 	if(this.options.hidden){
-		this.xlabel.attr('visibility', 'hidden');
-		this.plotBackgroundLabel.attr('visibility', 'hidden');
+		this.xlabel.attr("visibility", "hidden");
+		this.plotBackgroundLabel.attr("visibility", "hidden");
 		return;
 	}
 
 	//reset measureTool
-	if(this.model.get('measureMode'))
+	if(this.model.get("measureMode"))
 		this.measureClear();
 	//see https://gist.github.com/mbostock/3019563
 	const cx = this.g.node().parentNode.parentNode.parentNode.clientWidth;
@@ -251,8 +246,7 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 			.range([0, height]).nice();
 		this.yscale_right.domain([0, ymax]).nice()
 			.range([0, height]).nice();
-	}
-	else{
+	} else{
 		this.yscale.domain([0, ymax]).nice()
 			.range([height, 0]).nice();
 		this.yscale_right.domain([0, ymax]).nice()
@@ -260,7 +254,7 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	}
 
 	const yTicks = height / 40;
-	var xTicks = 0
+	var xTicks = 0;
 	if(!this.options.butterfly || this.options.invert)
 		var xTicks = width / 100;
 
@@ -280,9 +274,8 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	this.yAxisLeftSVG.call(this.yAxisLeft);
 	this.yAxisRightSVG
 		.attr("transform", "translate(" + width + " ,0)")
-		.call(this.yAxisRight)
-	;
-	this.xaxisZoomRect.attr("width", width);
+		.call(this.yAxisRight);
+this.xaxisZoomRect.attr("width", width);
 
 	// var xAxisOrient = this.options.invert ? "top" : "bottom";
 	// this.xAxis = d3.svg.axis().scale(this.xscale).ticks(xTicks).orient(xAxisOrient);
@@ -290,13 +283,11 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 
 	this.xaxisSVG
 		.attr("transform", "translate(0," + height + ")")
-		.call(this.xAxis)
-	;
+		.call(this.xAxis);
+this.g.selectAll(".axis line, .axis path")
+		.style({"stroke": "Black", "fill": "none", "stroke-width": "1.2px"});
 
-	this.g.selectAll('.axis line, .axis path')
-		.style({'stroke': 'Black', 'fill': 'none', 'stroke-width': '1.2px'});
-
-	this.g.selectAll('.tick')
+	this.g.selectAll(".tick")
 		.attr("pointer-events", "none");
 
 	this.plot.attr("width", width)
@@ -323,31 +314,27 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	this.yZoomRectLeft.attr("width", this.margin.left)
 		.attr("height", cy - this.margin.top - this.margin.bottom)
 		.attr("transform", "translate(" + -this.margin.left + "," + 0 + ")")
-		.call(this.yzoom)
-	;
-	this.yZoomRectRight.attr("width", this.margin.right)
+		.call(this.yzoom);
+this.yZoomRectRight.attr("width", this.margin.right)
 		.attr("height", cy - this.margin.top - this.margin.bottom)
 		.attr("transform", "translate(" + width + " ,0)")
-		.call(this.yzoom)
-	;
-
-	if(this.title) {
+		.call(this.yzoom);
+if(this.title) {
 		this.title.attr("x", width/2);
 	}
 
 	this.xlabel.attr("x", width/2).attr("y", height);
 	this.plotBackgroundLabel.attr("x", width/2).attr("y", height/2);
 	if(this.options.butterfly && !this.options.invert){
-		this.xlabel.attr('visibility', 'hidden');
-	}
-	else{
-		this.xlabel.attr('visibility', 'visible');
+		this.xlabel.attr("visibility", "hidden");
+	} else{
+		this.xlabel.attr("visibility", "visible");
 	}
 	this.ylabelLeft.attr("transform","translate(" + -50 + " " + height/2+") rotate(-90)");
 	this.ylabelRight.attr("transform","translate(" + (width+45) + " " + height/2+") rotate(-90)");
 
 	this.redraw()();
-}
+};
 
 Graph.prototype.disableZoom = function(){
 
@@ -358,7 +345,7 @@ Graph.prototype.disableZoom = function(){
 		.on("brushend", null);
 	this.plot.call(this.zoom)
 		.on("zoom", null);
-}
+};
 
 Graph.prototype.enableZoom = function(){
 	this.plot.attr("pointer-events", "visible");
@@ -372,9 +359,8 @@ Graph.prototype.enableZoom = function(){
 	function brushstart() {
 		self.dragZoomHighlight
 			.attr("width",0)
-			.attr("display","inline")
-		;
-	}
+			.attr("display","inline");
+}
 
 	function brushmove() {
 		const s = self.brush.extent();
@@ -393,7 +379,7 @@ Graph.prototype.enableZoom = function(){
 	  self.yZoomed = false;
 	  self.resize(self.model.xmin, self.model.xmax, self.model.ymin, self.model.ymax);
 	}
-}
+};
 
 Graph.prototype.measure = function(on){
 	if (on === true){
@@ -430,21 +416,18 @@ Graph.prototype.measure = function(on){
 				.attr("x1", self.xscale(self.measureStartPeak.x))
 				.attr("x2", self.xscale(self.measureStartPeak.x))
 				.attr("y1", self.yscale(self.model.ymaxPrimary))
-				.attr("y2", self.yscale(self.measureStartPeak.y))
-			;
-			self.measuringToolLine
+				.attr("y2", self.yscale(self.measureStartPeak.y));
+self.measuringToolLine
 				.attr("x1", self.xscale(self.measureStartPeak.x))
 				.attr("x2", coords[0])
 				.attr("y1", coords[1])
-				.attr("y2", coords[1])
-			;
-			self.measuringToolVLineEnd
+				.attr("y2", coords[1]);
+self.measuringToolVLineEnd
 				.attr("x1", coords[0])
 				.attr("x2", coords[0])
 				.attr("y1", self.yscale(0))
-				.attr("y2", self.yscale(self.model.ymaxPrimary))
-			;
-		}
+				.attr("y2", self.yscale(self.model.ymaxPrimary));
+}
 
 		function measureMove() {
 			const coords = d3.mouse(this);
@@ -461,7 +444,7 @@ Graph.prototype.measure = function(on){
 						break;
 					}
 					if (Math.abs(peak.x - mouseX)  < distance){
-						var endPeak = peak
+						var endPeak = peak;
 						distance = Math.abs(peak.x - mouseX);
 					}
 				}
@@ -474,17 +457,14 @@ Graph.prototype.measure = function(on){
 					.attr("x1", self.xscale(endPeak.x))
 					.attr("x2", self.xscale(endPeak.x))
 					.attr("y1", self.yscale(endPeak.y))
-					.attr("y2", self.yscale(self.model.ymaxPrimary))
-				;
-			}
-			else{
+					.attr("y2", self.yscale(self.model.ymaxPrimary));
+} else{
 				self.measuringToolVLineEnd
 					.attr("x1", coords[0])
 					.attr("x2", coords[0])
 					.attr("y1", self.yscale(0))
-					.attr("y2", self.yscale(self.model.ymaxPrimary))
-				;
-			}
+					.attr("y2", self.yscale(self.model.ymaxPrimary));
+}
 
 			//draw horizontal line
 			const measureStartX = parseFloat(self.measuringToolVLineStart.attr("x1"));
@@ -497,8 +477,7 @@ Graph.prototype.measure = function(on){
 					var y  = self.yscale(0);
 				else
 					var y = coords[1];
-			}
-			else{
+			} else{
 				if (coords[1] < self.yscale(self.model.ymaxPrimary))
 					var y = self.yscale(self.model.ymaxPrimary);
 				else if (coords[1] > self.yscale(0))
@@ -521,7 +500,7 @@ Graph.prototype.measure = function(on){
 			else
 				var labelX = measureEndX + deltaX/2;
 
-			self.measureDistance.text(distance.toFixed(self.model.get('showDecimals'))+" Th");
+			self.measureDistance.text(distance.toFixed(self.model.get("showDecimals"))+" Th");
 
 			const matrix = this.getScreenCTM()
 				.translate(+this.getAttribute("cx"),
@@ -566,26 +545,25 @@ Graph.prototype.measure = function(on){
 			//fromText
 			let fromTextColor = self.measureStartPeak.colour;
 			if(self.measureStartPeak.fragments.length > 0)
-					var fromText = "From: " + self.measureStartPeak.fragments[0].name +" (" + self.measureStartPeak.x.toFixed(self.model.get('showDecimals')) + " m/z)";
+					var fromText = "From: " + self.measureStartPeak.fragments[0].name +" (" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
 			else if (self.measureStartPeak.isotopes.length > 0)
-					var fromText = "From: " + self.measureStartPeak.isotopes[0].name + "+" + self.measureStartPeak.isotopenumbers[0]+ "(" + self.measureStartPeak.x.toFixed(self.model.get('showDecimals')) + " m/z)";
+					var fromText = "From: " + self.measureStartPeak.isotopes[0].name + "+" + self.measureStartPeak.isotopenumbers[0]+ "(" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
 			else{
-				var fromText = "From: Peak (" + self.measureStartPeak.x.toFixed(self.model.get('showDecimals')) + " m/z)";
+				var fromText = "From: Peak (" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
 				fromTextColor = "black";
 			}
 			//toText
 			if(endPeak){
 				var toTextColor = endPeak.colour;
 				if(endPeak.fragments.length > 0)
-						var toText = "To: " + endPeak.fragments[0].name +"(" + endPeak.x.toFixed(self.model.get('showDecimals')) + " m/z)";
+						var toText = "To: " + endPeak.fragments[0].name +"(" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
 				else if(endPeak.isotopes.length > 0)
-						var toText = "To: " + endPeak.isotopes[0].name + "+" + endPeak.isotopenumbers[0]+ "(" + endPeak.x.toFixed(self.model.get('showDecimals')) + " m/z)";
+						var toText = "To: " + endPeak.isotopes[0].name + "+" + endPeak.isotopenumbers[0]+ "(" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
 				else{
-					var toText= "To: Peak (" + endPeak.x.toFixed(self.model.get('showDecimals')) + " m/z)";
+					var toText= "To: Peak (" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
 					toTextColor = "black";
 				}
-			}
-			else{
+			} else{
 				toText = "";
 			}
 			const massArr = [];
@@ -597,36 +575,34 @@ Graph.prototype.measure = function(on){
 			}
 
 			let yText = coords[1] + 25 + measureTooltipAbsOffsetY;
-			self.measureTooltipText['from']
+			self.measureTooltipText["from"]
 				.attr("y", yText)
 				.attr("fill", fromTextColor)
-				.text(fromText)
-			;
-
-			yText += 18;
-			self.measureTooltipText['to']
+				.text(fromText);
+yText += 18;
+			self.measureTooltipText["to"]
 				.attr("y", yText)
 				.attr("fill", toTextColor)
-				.text(toText)
-			;
-
-			yText += 6;
-			self.measureTooltipText['masses'].selectAll("*").remove();
-			self.measureTooltipText['masses'].selectAll('text')
+				.text(toText);
+yText += 6;
+			self.measureTooltipText["masses"].selectAll("*").remove();
+			self.measureTooltipText["masses"].selectAll("text")
 				.data(massArr)
-				.enter().append('text')
+				.enter().append("text")
 				.text(function (d, i) {
 					const z = i + 1;
 					let matchText = "";
 					if (d.matchAA.length > 0)
 						matchText = "("+d.matchAA+")";
-					return "z="+z+": " + d.mass.toFixed(self.model.get('showDecimals')) + " Da " + matchText;
+					return "z="+z+": " + d.mass.toFixed(self.model.get("showDecimals")) + " Da " + matchText;
 				})
-				.attr("y", function (d) { return yText += 15; } )
-				.attr("class", function(d){ if(d.matchAA.length > 0) return 'matchedAA' })
-			;
-
-			const maxTextWidth = Math.max.apply(Math, self.measureTooltip.selectAll('text')[0].map(function (t) {
+				.attr("y", function (d) {
+ return yText += 15; 
+} )
+				.attr("class", function(d){
+ if(d.matchAA.length > 0) return "matchedAA"; 
+});
+const maxTextWidth = Math.max.apply(Math, self.measureTooltip.selectAll("text")[0].map(function (t) {
 				return d3.select(t).node().getComputedTextLength();
 			}));
 			const backgroundWidth = maxTextWidth + 20;
@@ -636,57 +612,49 @@ Graph.prototype.measure = function(on){
 				.attr("x", backgroundWidthX + self.margin.left)
 				.attr("y", coords[1] + 10 + measureTooltipAbsOffsetY)
 				.attr("width", backgroundWidth)
-				.attr("height", 140)
-			;
-
-			self.measureTooltip.selectAll('text')
-				.attr("x", positionX + self.margin.left)
-
-			;
-			self.measureTooltipText['masses'].selectAll('text')
-				.attr("fill", "#333")
-			;
-			self.measureTooltipText['masses'].selectAll('.matchedAA')
-				.attr("fill", "black")
-			;
-		}
+				.attr("height", 140);
+self.measureTooltip.selectAll("text")
+				.attr("x", positionX + self.margin.left);
+self.measureTooltipText["masses"].selectAll("text")
+				.attr("fill", "#333");
+self.measureTooltipText["masses"].selectAll(".matchedAA")
+				.attr("fill", "black");
+}
 
 		this.measureBrush = d3.svg.brush()
 			.x(this.xscale)
 			.on("brushstart", measureStart)
-			.on("brush", measureMove)
+			.on("brush", measureMove);
 
 		this.measureBackground.call(this.measureBrush);
 
-	}
-	else{
+	} else{
 		this.measureClear();
 		this.peaksSVG.style("pointer-events", "visible");
 		this.measureBackground.attr("height", 0);
 		this.enableZoom();
 	}
-}
+};
 
 Graph.prototype.measureClear = function(){
 	this.measuringTool.attr("display","none");
 	this.measureDistance.attr("display","none");
 	this.measureTooltip.attr("display","none");
-}
+};
 
 Graph.prototype.measureShow = function(){
 	this.measuringTool.attr("display","inline");
 	this.measureDistance.attr("display","inline");
 	this.measureTooltip.attr("display","inline");
-}
+};
 
 Graph.prototype.redraw = function(){
 	let self = this;
 	return function (){
-		if(self.options.butterfly || self.model.get('changedAnnotation')){
-			self.plotBackgroundLabel.attr('visibility', 'visible');
-		}
-		else{
-			self.plotBackgroundLabel.attr('visibility', 'hidden');
+		if(self.options.butterfly || self.model.get("changedAnnotation")){
+			self.plotBackgroundLabel.attr("visibility", "visible");
+		} else{
+			self.plotBackgroundLabel.attr("visibility", "hidden");
 		}
 		// get highest intensity from peaks in x range
 		// adjust y scale to new highest intensity
@@ -699,8 +667,7 @@ Graph.prototype.redraw = function(){
 				});
 				self.yscale.domain([0, ymax/0.95]);
 				self.yscale_right.domain([0, (ymax/(self.model.ymaxPrimary*0.95))*100]);
-			}
-			else{
+			} else{
 				let yDomain = self.yscale.domain();
 				let ymax = d3.min([yDomain[1], self.model.ymaxPrimary]);
 				self.model.ymax = ymax;
@@ -720,16 +687,16 @@ Graph.prototype.redraw = function(){
 			self.disableZoom();
 		self.model.setZoom(self.xscale.domain());
 	};
-}
+};
 
 Graph.prototype.clear = function(){
-	this.model.set('measureMode', false);
+	this.model.set("measureMode", false);
 	this.peaks = [];
 	this.highlights.selectAll("*").remove();
 	this.peaksSVG.selectAll("*").remove();
 	this.lossyAnnotations.selectAll("*").remove();
 	this.annotations.selectAll("*").remove();
-}
+};
 
 Graph.prototype.clearHighlights = function(){
 	for (let p = 0; p < this.peaks.length; p++) {
@@ -737,16 +704,18 @@ Graph.prototype.clearHighlights = function(){
 			this.peaks[p].highlight(false);
 		}
 	}
-}
+};
 
 Graph.prototype.updatePeakColors = function(){
 	let model = this.model;
 
 	// standard mode
-	if (model.highlights.length === 0 || !this.model.get('hideNotSelectedFragments')){
+	if (model.highlights.length === 0 || !this.model.get("hideNotSelectedFragments")){
 
 		// color all fragment peaks
-		this.fragment_peaks.forEach(function(p){ p.line.attr("stroke", p.colour); })
+		this.fragment_peaks.forEach(function(p){
+ p.line.attr("stroke", p.colour); 
+});
 
 		// let pepFragVis = model.get('pepFragmentVis');
 		// if (pepFragVis === 'pep1'){
@@ -765,15 +734,17 @@ Graph.prototype.updatePeakColors = function(){
 	// only highlighted fragments are colored
 	else{
 		let self = this;
-		let highlightClusterIds = [].concat.apply([], model.highlights.map(function(h){ return h.clusterIds;}));
+		let highlightClusterIds = [].concat.apply([], model.highlights.map(function(h){
+ return h.clusterIds;
+}));
 		this.peaks.forEach(function(p){
 			if (_.intersection(self.model.highlights, p.fragments).length > 0 || _.intersection(highlightClusterIds, p.clusterIds).length > 0)
 				p.line.attr("stroke", p.colour);
 			else
-				p.line.attr("stroke", model.get('peakColor'));
+				p.line.attr("stroke", model.get("peakColor"));
 		});
 	}
-}
+};
 
 Graph.prototype.updatePeakLabels = function(){
 	let peakCount = this.peaks.length;
@@ -785,17 +756,15 @@ Graph.prototype.updatePeakLabels = function(){
 				this.peaks[p].showLabels();
 			}
 		}
-	}
-	else{
+	} else{
 		for (let p = 0; p < peakCount; p++) {
 			// if it's not a fragment from the highlight selection
 			if (_.intersection(this.model.highlights, this.peaks[p].fragments).length === 0){
 				// show it if allFragmentHighlights is true (dependent on lossyShown)
-				if (!this.model.get('hideNotSelectedFragments')){
+				if (!this.model.get("hideNotSelectedFragments")){
 					this.peaks[p].removeLabels();
 					this.peaks[p].showLabels();
-				}
-				else{
+				} else{
 					this.peaks[p].removeLabels();
 				}
 			}
@@ -806,34 +775,34 @@ Graph.prototype.updatePeakLabels = function(){
 			}
 		}
 	}
-}
+};
 
 Graph.prototype.setColors = function(){
 	for (let p = 0; p < this.peaks.length; p++) {
 		this.peaks[p].setColor();
 	}
-}
+};
 
 Graph.prototype.updateHighlightColors = function(){
 	for (let p=0; p < this.peaks.length; p++) {
 		if(this.peaks[p].highlightLine !== undefined){
-			this.peaks[p].highlightLine.attr("stroke", this.model.get('highlightColor'));
-			this.peaks[p].labelHighlights.attr("stroke", this.model.get('highlightColor'));
+			this.peaks[p].highlightLine.attr("stroke", this.model.get("highlightColor"));
+			this.peaks[p].labelHighlights.attr("stroke", this.model.get("highlightColor"));
 		}
 	}
-}
+};
 
 Graph.prototype.show = function(){
 	this.g.attr("visibility", "visible");
 	this.enableZoom();
-}
+};
 
 Graph.prototype.hide = function(){
 	this.g.attr("visibility", "hidden");
 	this.disableZoom();
 	//this.xaxisZoomRect.attr("pointer-events", "none");
 	//this.g.style("pointer-events", "none");
-}
+};
 /*
 
 Graph.prototype.resetScales = function(text) {
