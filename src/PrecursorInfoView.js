@@ -25,7 +25,7 @@ export const PrecursorInfoView = Backbone.View.extend({
         this.expand = true;
 
         // create svg text el
-		this.svg = d3.select(this.el);
+        this.svg = d3.select(this.el);
         this.wrapper = this.svg.append("text")
             .attr("class", "precursorInfo")
             .attr("x", 10)

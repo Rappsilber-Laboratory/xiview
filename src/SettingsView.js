@@ -35,10 +35,10 @@ export const SettingsView = Backbone.View.extend({
         // title
         let titleElement = this.wrapper.append("div")
             .attr("class", "xispec_dynDiv_moveParentDiv");
-titleElement.append("span")
+        titleElement.append("span")
             .attr("class", "xispec_dynTitle")
             .html(this.options.title);
-titleElement.append("i").attr("class", "fa fa-times-circle panelMenuButton xispec_settingsCancel");
+        titleElement.append("i").attr("class", "fa fa-times-circle panelMenuButton xispec_settingsCancel");
         // dynDiv resize corners
         this.wrapper.append("div").attr("class", "xispec_dynDiv_resizeDiv_tl draggableCorner");
         this.wrapper.append("div").attr("class", "xispec_dynDiv_resizeDiv_tr draggableCorner");
@@ -57,7 +57,7 @@ titleElement.append("i").attr("class", "fa fa-times-circle panelMenuButton xispe
                 // .attr("id", "xispec_" + b_id)
                 .attr("style", "z-index: " + zIndex)
                 .text(b);
-});
+        });
         // add active class to first tab-button
         this.menu.select("button").classed("xispec_active", true);
 
@@ -83,12 +83,13 @@ titleElement.append("i").attr("class", "fa fa-times-circle panelMenuButton xispe
     },
 
     // dummy function overwritten by children that have a reset option
-    reset: function () {},
+    reset: function () {
+    },
 
     changeTab: function (e) {
         this.reset();
         this.render();
-        let $target =  $(e.target);
+        let $target = $(e.target);
         let activeTab = $target.data("tab");
         this.wrapper.selectAll(".xispec_settings-tab").style("display", "none");
         this.wrapper.select("#xispec_" + activeTab + "_tab").style("display", "inherit");

@@ -19,7 +19,7 @@ export const PepInputView = Backbone.View.extend({
         let peptides = [];
         let linkSites = [];
 
-        for (let i=0; i < pepStrs.length; i++) {
+        for (let i = 0; i < pepStrs.length; i++) {
 
             if (pepStrs[i] !== "") {
                 let firstChar = pepStrs[i][0];
@@ -43,7 +43,7 @@ export const PepInputView = Backbone.View.extend({
             // peptide sequence
             let pepAAseq = pepStrs[i].replace(/[^A-Z]/g, "");
             let peptide = {"sequence": []};
-            for (let j=0; j < pepAAseq.length; j++) {
+            for (let j = 0; j < pepAAseq.length; j++) {
                 peptide["sequence"].push({"aminoAcid": pepAAseq[j], "Modification": ""});
             }
 
@@ -79,13 +79,13 @@ export const PepInputView = Backbone.View.extend({
             return;
 
         let pepStrsArr = [];
-        for (let i=0; i < this.model.peptides.length; i++) {
+        for (let i = 0; i < this.model.peptides.length; i++) {
             pepStrsArr[i] = "";
-            for (let j=0; j < this.model.peptides[i].sequence.length; j++) {
+            for (let j = 0; j < this.model.peptides[i].sequence.length; j++) {
                 pepStrsArr[i] += this.model.peptides[i].sequence[j].aminoAcid + this.model.peptides[i].sequence[j].Modification;
                 // insert the # for the crosslink
                 if (this.model.get("JSONdata").LinkSite.length > 0) {
-                    for (let k=0; k < this.model.get("JSONdata").LinkSite.length; k++) {
+                    for (let k = 0; k < this.model.get("JSONdata").LinkSite.length; k++) {
                         if (this.model.get("JSONdata").LinkSite[k].peptideId == i && this.model.get("JSONdata").LinkSite[k].linkSite == j)
                             pepStrsArr[i] += "#";
                     }

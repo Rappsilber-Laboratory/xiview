@@ -12,7 +12,7 @@ import Spinner from "spin";
 
 export const DataSettingsView = SettingsView.extend({
 
-    events: function() {
+    events: function () {
         return _.extend({}, SettingsView.prototype.events, {
             "click #xispec_toggleModifications": "toggleModTable",
             "click #xispec_toggleLosses": "toggleLossTable",
@@ -51,11 +51,11 @@ export const DataSettingsView = SettingsView.extend({
         let generalTab = this.mainDiv.append("div")
             .attr("class", "xispec_settings-tab xispec_flex-column")
             .attr("id", "xispec_general_tab");
-let dataForm = generalTab.append("form")
+        let dataForm = generalTab.append("form")
             .attr("id", "xispec_settingsForm")
             .attr("method", "post")
             .attr("class", "xispec_flex-column");
-let topDataDiv = dataForm.append("div").attr("class", "xispec_topDataDiv");
+        let topDataDiv = dataForm.append("div").attr("class", "xispec_topDataDiv");
         let peptideLabel = topDataDiv.append("label").attr("class", "xispec_flex-row").text("Peptide Sequence: ");
         this.peptideViewEl = peptideLabel.append("div").attr("class", "xispec_flex-grow").append("input")
             .attr("type", "text")
@@ -64,7 +64,7 @@ let topDataDiv = dataForm.append("div").attr("class", "xispec_topDataDiv");
             .attr("autocomplete", "off")
             .attr("placeholder", "Peptide Sequence1[;Peptide Sequence2]")
             .attr("name", "peps");
-this.pepInputView = new PepInputView({model: this.model, el: this.peptideViewEl[0]});
+        this.pepInputView = new PepInputView({model: this.model, el: this.peptideViewEl[0]});
 
         let dataFlexRow = topDataDiv.append("div").attr("class", "xispec_flex-row xispec_splitDataDiv");
 
@@ -77,16 +77,16 @@ this.pepInputView = new PepInputView({model: this.model, el: this.peptideViewEl[
             .attr("placeholder", "Peak List [m/z intensity]")
             .attr("name", "peaklist")
             .attr("class", "xispec_form-control");
-let rightDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataRight");
+        let rightDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataRight");
 
         let ionSelector = rightDiv.append("label").attr("class", "xispec_flex-row").text("Fragment Ions: ")
             .append("div").attr("class", "xispec_multiSelect_dropdown xispec_flex-grow");
-ionSelector.append("input")
+        ionSelector.append("input")
             .attr("type", "text")
             .attr("class", "xispec_btn-drop")
             .attr("id", "xispec_ionSelection")
             .attr("readonly", "");
-let ionSelectorDropdown = ionSelector.append("div").attr("class", "xispec_multiSelect_dropdown-content");
+        let ionSelectorDropdown = ionSelector.append("div").attr("class", "xispec_multiSelect_dropdown-content");
         let ionSelectorList = ionSelectorDropdown.append("ul").attr("id", "xispec_ionList");
         const ionOptions = [
             {value: "peptide", text: "Peptide Ion"},
@@ -110,14 +110,14 @@ let ionSelectorDropdown = ionSelector.append("div").attr("class", "xispec_multiS
             .attr("value", function (d) {
                 return d.value;
             });
-ionSelectorList.selectAll("label").data(ionOptions)
+        ionSelectorList.selectAll("label").data(ionOptions)
             .append("span")
             .text(function (d) {
                 return d.text;
             });
-this.precursorZ = rightDiv.append("label").attr("class", "xispec_flex-row").text("Precursor charge state: ").append("div").attr("class", "xispec_flex-grow")
+        this.precursorZ = rightDiv.append("label").attr("class", "xispec_flex-row").text("Precursor charge state: ").append("div").attr("class", "xispec_flex-grow")
             .append("input").attr("type", "number").attr("placeholder", "Charge").attr("autocomplete", "off").attr("name", "preCharge").attr("min", "1").attr("required", "");
-let toleranceWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("MS2 tolerance: ");
+        let toleranceWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("MS2 tolerance: ");
         this.toleranceValue = toleranceWrapper.append("div").attr("class", "xispec_flex-grow").append("input")
             .attr("type", "text")
             // .attr("type", "number")
@@ -134,7 +134,7 @@ let toleranceWrapper = rightDiv.append("label").attr("class", "xispec_flex-row")
             .attr("required", "")
             .attr("style", "width: 65px; margin-left: 8px;")
             .attr("class", "xispec_form-control");
-this.toleranceUnit.append("option").attr("value", "ppm").text("ppm");
+        this.toleranceUnit.append("option").attr("value", "ppm").text("ppm");
         this.toleranceUnit.append("option").attr("value", "Da").text("Da");
 
         this.crossLinkerModMassWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("Cross-linker mod mass: ");
@@ -155,33 +155,33 @@ this.toleranceUnit.append("option").attr("value", "ppm").text("ppm");
         let modToggle = dataForm.append("div")
             .attr("id", "xispec_toggleModifications")
             .attr("class", "pointer");
-modToggle.append("i").attr("class", "fa fa-minus-square").attr("aria-hidden", "true");
+        modToggle.append("i").attr("class", "fa fa-minus-square").attr("aria-hidden", "true");
         modToggle.append("span").text(" Modifications:");
 
         this.modTableWrapper = dataForm.append("div")
             .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper");
-let modTable = this.modTableWrapper.append("table")
+        let modTable = this.modTableWrapper.append("table")
             .attr("id", "xispec_modificationTable")
             .attr("class", "xispec_settingsTable")
             .attr("style", "width: 100%");
-this.initializeModTable();
+        this.initializeModTable();
         //end modTable
 
         //lossTable
         let lossToggle = dataForm.append("div")
             .attr("id", "xispec_toggleLosses")
             .attr("class", "pointer");
-lossToggle.append("i").attr("class", "fa fa-plus-square pointer").attr("aria-hidden", "true");
+        lossToggle.append("i").attr("class", "fa fa-plus-square pointer").attr("aria-hidden", "true");
         lossToggle.append("span").text(" Losses:").append("span");
 
         this.lossTableWrapper = dataForm.append("div")
             .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper")
             .style("display", "none");
-let lossTable = this.lossTableWrapper.append("table")
+        let lossTable = this.lossTableWrapper.append("table")
             .attr("id", "xispec_lossTable")
             .attr("class", "xispec_settingsTable")
             .attr("style", "width: 100%");
-this.initializeLossTable();
+        this.initializeLossTable();
         //end lossTable
 
         let dataBottom = dataForm.append("div").attr("class", "xispec_settings-bottom");
@@ -191,12 +191,12 @@ this.initializeLossTable();
             .attr("value", "Apply")
             .attr("id", "settingsDataApply")
             .attr("type", "submit");
-let cancelxispec_btn = dataBottom.append("input")
+        let cancelxispec_btn = dataBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
             .attr("type", "button")
         ;
-        
+
         //custom config
         let customConfigTab = this.mainDiv.append("div")
             .attr("class", "xispec_settings-tab xispec_flex-column")
@@ -265,7 +265,7 @@ let cancelxispec_btn = dataBottom.append("input")
             .attr("name", "annotator")
             .attr("class", "xispec_form-control")
             .attr("id", "xispec_annotatorDropdown");
-this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("classic");
+        this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("classic");
         this.annotatorDropdown.append("option").attr("value", "test/FULL").text("test");
         let annotatorBottom = annotatorTab.append("div")
             .attr("class", "xispec_settings-bottom");
@@ -338,7 +338,7 @@ this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("cla
         // this.updateStepSize($(this.crossLinkerModMass[0][0]));
     },
 
-    reset: function(){
+    reset: function () {
         // resetModel: ToDo: move to xiSPEC Wrapper? change to cloning of models?
         // used to reset SettingsModel
         if (this.displayModel.get("JSONdata") == null) return;
@@ -496,7 +496,7 @@ this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("cla
                     console.log("ok", formDataMods[i].value);
                     // return true;
                 } else {
-                    for (let j=0; j < inputAminoAcidsArr.length; j++) {
+                    for (let j = 0; j < inputAminoAcidsArr.length; j++) {
                         if (formDataAminoAcidsArr.indexOf(inputAminoAcidsArr[j]) === -1) {
                             console.log("not ok", formDataMods[i].value);
                             alert("Invalid modification specificity for: " + formDataMods[i].value);
@@ -729,10 +729,10 @@ this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("cla
                     mod.aminoAcids,
                 ];
                 let annotation_mod_match = self.model.annotationModifications.filter(
-                    function(m){
- return m.id === mod.id; 
-});
-                if (annotation_mod_match.length === 1){
+                    function (m) {
+                        return m.id === mod.id;
+                    });
+                if (annotation_mod_match.length === 1) {
                     add_mod = [
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].id,

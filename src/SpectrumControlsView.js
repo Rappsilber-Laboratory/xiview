@@ -25,7 +25,7 @@ export const SpectrumControlsView = Backbone.View.extend({
 
     initialize: function () {
 
-    	// event listeners
+        // event listeners
         this.listenTo(this.model, "change:mzRange", this.renderMzRange);
         this.listenTo(this.model, "change:changedAnnotation", this.changedAnnotation);
         this.listenTo(this.model, "change:butterfly", this.renderButterflyChkbox);
@@ -52,35 +52,35 @@ export const SpectrumControlsView = Backbone.View.extend({
             .text("Move Labels")
         ;
         // moveLabelCheckbox
-		this.moveLabelsChkbox = moveLabelsLabel.append("input")
+        this.moveLabelsChkbox = moveLabelsLabel.append("input")
             .attr("id", "xispec_moveLabels")
             .attr("type", "checkbox")
         ;
-		// toggleMeasureLabel
+        // toggleMeasureLabel
         let toggleMeasureLabel = this.wrapper.append("label")
             .attr("class", "xispec_btn")
             .attr("title", "measure mode on/off")
             .text("Measure")
         ;
         // toggleMeasureCheckbox
-		this.measureModeChkbox = toggleMeasureLabel.append("input")
+        this.measureModeChkbox = toggleMeasureLabel.append("input")
             .attr("class", "pointer")
             .attr("id", "xispec_measuringTool")
             .attr("type", "checkbox")
         ;
-		// setRangeForm
+        // setRangeForm
         let setRangeForm = this.wrapper.append("form")
             .attr("id", "xispec_setrange")
         ;
         // mzRangeLabel
-		setRangeForm.append("label")
+        setRangeForm.append("label")
             .attr("class", "xispec_btn")
             .attr("title", "m/z range")
             .attr("style", "cursor: default;")
             .text("m/z:")
         ;
         // lockZoomLabel
-		setRangeForm.append("label")
+        setRangeForm.append("label")
             .attr("class", "xispec_btn")
             .attr("id", "xispec_lock")
             .attr("for", "xispec_lockZoom")
@@ -88,21 +88,21 @@ export const SpectrumControlsView = Backbone.View.extend({
             .text("🔓")
         ;
         // lockZoomCheckbox
-		setRangeForm.append("input")
+        setRangeForm.append("input")
             .attr("id", "xispec_lockZoom")
             .attr("type", "checkbox")
             .attr("style", "display: none;")
         ;
         // mzRangeFrom
-		setRangeForm.append("input")
+        setRangeForm.append("input")
             .attr("id", "xispec_xleft")
             .attr("class", "xispec_form-control")
             .attr("type", "text")
             .attr("size", "5")
             .attr("title", "m/z range from:");
-setRangeForm.append("span").text("-");
+        setRangeForm.append("span").text("-");
         // mzRangeTo
-		setRangeForm.append("input")
+        setRangeForm.append("input")
             .attr("id", "xispec_xright")
             .attr("class", "xispec_form-control")
             .attr("type", "text")
@@ -110,22 +110,22 @@ setRangeForm.append("span").text("-");
             .attr("title", "m/z range to:")
         ;
         // mzRangeSubmit
-		setRangeForm.append("input")
+        setRangeForm.append("input")
             .attr("id", "xispec_mzRangeSubmit")
             .attr("type", "submit")
             .attr("style", "display:none;")
         ;
         // mzRangeError
-		setRangeForm.append("span").attr("id", "xispec_range-error");
+        setRangeForm.append("span").attr("id", "xispec_range-error");
         // resetZoomButton
-		setRangeForm.append("button")
+        setRangeForm.append("button")
             .attr("id", "xispec_reset")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a")
             .text("Reset Zoom")
             .attr("title", "Reset to initial zoom level")
         ;
         // toggleDataSettingsButton
-		this.wrapper.append("i")
+        this.wrapper.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-cog")
             .attr("aria-hidden", "true")
             .attr("id", "xispec_toggleDataSettings")
@@ -139,7 +139,7 @@ setRangeForm.append("span").text("-");
             .attr("title", "show/hide appearance settings")
         ;
         // revertAnnotationButton
-		this.wrapper.append("i")
+        this.wrapper.append("i")
             .attr("class", "xispec_btn xispec_btn-topNav fa fa-undo xispec_disabled")
             .attr("aria-hidden", "true")
             .attr("id", "xispec_revertAnnotation")
@@ -152,12 +152,12 @@ setRangeForm.append("span").text("-");
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-plus")
             .attr("aria-hidden", "true")
         ;
-		// butterflyControls
+        // butterflyControls
         this.butterflyControls = this.wrapper.append("div")
             .attr("id", "xispec_butterflyControls")
             // .attr('class', )
             .attr("style", "display:none;");
-let butterflyMenu = this.butterflyControls.append("div")
+        let butterflyMenu = this.butterflyControls.append("div")
             .attr("class", "xispec_multiSelect_dropdown");
         let butterflyToggleLabel = butterflyMenu.append("label").text("Butterly").attr("class", "xispec_btn");
 
@@ -166,38 +166,38 @@ let butterflyMenu = this.butterflyControls.append("div")
             .attr("class", "pointer")
             .attr("id", "xispec_butterflyChkbx")
             .attr("type", "checkbox");
-this.butterflyMenuIcon = butterflyToggleLabel.append("i")
+        this.butterflyMenuIcon = butterflyToggleLabel.append("i")
             .attr("class", "fa fa-chevron-down")
             .attr("aria-hidden", "true")
             .style("display", "none");
-this.butterflyMenuContent = butterflyMenu.append("div");
+        this.butterflyMenuContent = butterflyMenu.append("div");
         this.butterflyMenuContentList = this.butterflyMenuContent.append("ul").style("display", "none");
         let butterflySwap = this.butterflyMenuContentList.append("li")
             .text("Swap spectra")
             .attr("title", "swap position of original and re-annotated spectrum")
             .attr("id", "xispec_butterflySwap");
-let butterflyHighlight = this.butterflyMenuContentList.append("li")
+        let butterflyHighlight = this.butterflyMenuContentList.append("li")
             .text("Highlight differences")
             .attr("title", "Highlight fragments that are in one annotation but not the other")
             .attr("id", "xispec_butterflyHighlightBtn");
-this.butterflyMenuContentList.selectAll("li").classed ("xispec_btn xispec_btn-1a", true);
+        this.butterflyMenuContentList.selectAll("li").classed("xispec_btn xispec_btn-1a", true);
 
 
-		// extra_controls_after
+        // extra_controls_after
         this.wrapper.append("span")
             .attr("id", "xispec_extra_spectrumControls_after")
         ;
-		// helpLink
+        // helpLink
         let helpLink = this.wrapper.append("a")
             .attr("href", "http://spectrumviewer.org/help.php")
             .attr("target", "_blank")
         ;
-		// helpButton
+        // helpButton
         helpLink.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-question")
             .attr("aria-hidden", "true")
             .attr("title", "Help");
-},
+    },
 
     render: function () {
         this.renderMzRange();
@@ -273,7 +273,7 @@ this.butterflyMenuContentList.selectAll("li").classed ("xispec_btn xispec_btn-1a
     },
 
     butterflySwap: function () {
-        if ($("#xispec_butterflyChkbx").is(":checked")){
+        if ($("#xispec_butterflyChkbx").is(":checked")) {
             this.model.trigger("butterflySwap");
         }
     },
@@ -288,9 +288,9 @@ this.butterflyMenuContentList.selectAll("li").classed ("xispec_btn xispec_btn-1a
         let xr = xispec_xright.value - 0;
         if (xl > xr) {
             $("#xispec_range-error")
-				.show()
-				.html("Error: " + xl + " is larger than " + xr);
-} else {
+                .show()
+                .html("Error: " + xl + " is larger than " + xr);
+        } else {
             $("#xispec_range-error").hide();
             this.model.set("mzRange", [xl, xr]);
         }

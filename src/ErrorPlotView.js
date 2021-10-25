@@ -44,7 +44,7 @@ export const ErrorPlotView = Backbone.View.extend({
         else {
             this.tooltip = d3.select("body").append("span")
                 .attr("class", "xispec_tooltip");
-}
+        }
 
         this.listenTo(this.model, "change", this.render);
         this.listenTo(this.model, "change:colors", this.render);
@@ -83,7 +83,7 @@ export const ErrorPlotView = Backbone.View.extend({
                         }
                     }
                     let clAA_index = positions[linkSites[index]] + 1;
-					pepStrs[index] = pepStr.slice(0, clAA_index) + "#" + pepStr.slice(clAA_index, pepStr.length);
+                    pepStrs[index] = pepStr.slice(0, clAA_index) + "#" + pepStr.slice(clAA_index, pepStr.length);
                 });
             }
 
@@ -131,7 +131,7 @@ export const ErrorPlotView = Backbone.View.extend({
             fragment.clusterInfo.forEach(function (cluster) {
                 let firstPeakId = self.model.get("JSONdata").clusters[cluster.Clusterid].firstPeakId;
                 let intensity = self.model.get("JSONdata").peaks[firstPeakId].intensity;
-                let mz =  self.model.get("JSONdata").peaks[firstPeakId].mz;
+                let mz = self.model.get("JSONdata").peaks[firstPeakId].mz;
                 let x_value = self.options.xData === "Intensity" ? intensity : mz;
 
                 let point = {
@@ -173,7 +173,7 @@ export const ErrorPlotView = Backbone.View.extend({
         this.y = d3.scale.linear()
             .domain([ymin, ymax]).nice()
             .range([this.height, 0]).nice();
-let yTicks = this.height / 40;
+        let yTicks = this.height / 40;
         let xTicks = this.width / 100;
 
         this.svgWrapper.selectAll(".axis line, .axis path")
@@ -184,7 +184,7 @@ let yTicks = this.height / 40;
             // .style("z-index", -1)
             .attr("width", this.width)
             .attr("height", 0);
-this.background.on("click", function () {
+        this.background.on("click", function () {
             this.model.clearStickyHighlights();
         }.bind(this));
 
@@ -220,13 +220,13 @@ this.background.on("click", function () {
             .attr("transform", "translate(0,0)")
             .attr("class", "axis")
             .call(this.yAxis);
-let yLabelText = self.absolute ? "absolute " : "";
+        let yLabelText = self.absolute ? "absolute " : "";
         yLabelText += "error (" + this.model.MSnTolerance.unit + ")";
         this.yLabel = this.svgWrapper.append("g").append("text")
             .attr("class", "axis")
             .text(yLabelText)
             .style("text-anchor", "middle").style("pointer-events", "none");
-this.yLabel.attr("transform", "translate(" + -50 + " " + this.height / 2 + ") rotate(-90)");
+        this.yLabel.attr("transform", "translate(" + -50 + " " + this.height / 2 + ") rotate(-90)");
 
         let p1color = this.model.p1color;
         let p2color = this.model.p2color;
@@ -314,7 +314,6 @@ this.yLabel.attr("transform", "translate(" + -50 + " " + this.height / 2 + ") ro
         ];
 
 
-
         //Tooltip
         if (window.compositeModelInst !== undefined) {
             this.tooltip.set("contents", contents)
@@ -325,8 +324,8 @@ this.yLabel.attr("transform", "translate(" + -50 + " " + this.height / 2 + ") ro
 
             let charge = data.charge;
             // clusterInfo.matchedCharge;
-            let chargeStr = (charge > 1) ? charge: "";
-            html += "<span style=\"vertical-align:super;font-size: 0.8em;\">"+ chargeStr + "+</span>";
+            let chargeStr = (charge > 1) ? charge : "";
+            html += "<span style=\"vertical-align:super;font-size: 0.8em;\">" + chargeStr + "+</span>";
 
             for (let i = contents.length - 1; i >= 0; i--) {
                 html += "</br>";

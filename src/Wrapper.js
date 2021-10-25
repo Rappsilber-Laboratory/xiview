@@ -57,15 +57,15 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         // create elements
         let spectrumPanelDiv = d3el.append("div")
             .attr("id", "xispec_spectrumPanel");
-spectrumPanelDiv.append("div")
+        spectrumPanelDiv.append("div")
             .attr("class", "xispec_dynDiv")
             .attr("id", "xispec_dataSettingsWrapper");
-spectrumPanelDiv.append("div")
+        spectrumPanelDiv.append("div")
             .attr("class", "xispec_dynDiv")
             .attr("id", "xispec_appearanceSettingsWrapper");
-spectrumPanelDiv.append("div")
+        spectrumPanelDiv.append("div")
             .attr("id", "xispec_spectrumControls");
-this.spectraWrapperDiv = spectrumPanelDiv
+        this.spectraWrapperDiv = spectrumPanelDiv
             .append("div")
             .attr("class", "xispec_spectra")
             .attr("id", "xispec_spectra")
@@ -250,9 +250,10 @@ this.spectraWrapperDiv = spectrumPanelDiv
 
     updatePlotSplit: function () {
         //  destroy the plotSplit if it exists
-        try{
- this.plotSplit.destroy(); 
-} catch (e) {}
+        try {
+            this.plotSplit.destroy();
+        } catch (e) {
+        }
 
         // stop if there is only a single spectrum
         let numSpec = this.spectra.length;
@@ -273,16 +274,16 @@ this.spectraWrapperDiv = spectrumPanelDiv
             minSize: minSizes,
             gutterSize: 5,
             direction: "horizontal",
-            onDragEnd: function(){
- window.xiSPECUI.vent.trigger("resize:spectrum"); 
-}
+            onDragEnd: function () {
+                window.xiSPECUI.vent.trigger("resize:spectrum");
+            }
         });
     },
 
     addSpectrum: function () {
 
         // create an unused id and append it to the plotIds arr
-        let specId = (this.specIds.length === 0) ? 0: this.specIds[this.specIds.length-1] + 1;
+        let specId = (this.specIds.length === 0) ? 0 : this.specIds[this.specIds.length - 1] + 1;
         this.specIds.push(specId);
 
         // append a div for the new spectrum
@@ -307,7 +308,7 @@ this.spectraWrapperDiv = spectrumPanelDiv
         }
 
         // hide spectrumHeader if there's only one spectrumPanel visible
-        if (this.spectra.length === 1){
+        if (this.spectra.length === 1) {
             this.spectra[0].setHeaderVis(false);
         } else {
             this.spectra[0].setHeaderVis(true);
@@ -323,12 +324,12 @@ this.spectraWrapperDiv = spectrumPanelDiv
     },
 
     closeSpectrum: function (id) {
-        if (id === this.activeSpectrum.id){
+        if (id === this.activeSpectrum.id) {
             window.xiSPECUI.vent.trigger("activateSpecPanel", 0);
         }
-        let specIndex = this.spectra.map(function(x) {
-return x.id; 
-}).indexOf(id);
+        let specIndex = this.spectra.map(function (x) {
+            return x.id;
+        }).indexOf(id);
         this.spectra.splice(specIndex, 1);
         this.specIds.splice(specIndex, 1);
         this.updatePlotSplit();
@@ -336,9 +337,9 @@ return x.id;
     },
 
     activateSpectrum: function (id) {
-        let specIndex = this.spectra.map(function(x) {
-return x.id; 
-}).indexOf(id);
+        let specIndex = this.spectra.map(function (x) {
+            return x.id;
+        }).indexOf(id);
         this.activeSpectrum = this.spectra[specIndex];
         this.SpectrumControlsView.model = this.activeSpectrum.models["Spectrum"];
         this.DataSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];

@@ -56,7 +56,7 @@ export const FragmentationKeyView = Backbone.View.extend({
 
         this.tooltip = d3.select("body").append("span")
             .attr("class", "xispec_tooltip");
-},
+    },
 
     render: function () {
         if (this.options.hidden) {
@@ -297,7 +297,7 @@ export const FragmentationKeyView = Backbone.View.extend({
         let pep1SvgGroup = self.scaleSvgGroup
             .append("g")
             .attr("class", "peptide");
-let peptides = [{
+        let peptides = [{
             sequence: this.peptides[0],
             color: this.model.p1color,
             y: [20, 5],
@@ -308,7 +308,7 @@ let peptides = [{
             let pep2SvgGroup = self.scaleSvgGroup
                 .append("g")
                 .attr("class", "peptide");
-peptides.push({
+            peptides.push({
                 sequence: this.peptides[1],
                 color: this.model.p2color,
                 y: [71, 83],
@@ -365,7 +365,7 @@ peptides.push({
                     // 	changeModEndHighlight(d);
                     // }
                 });
-pepLetterG.append("text")
+            pepLetterG.append("text")
                 .attr("x", function (d, i) {
                     return self.xStep * i;
                 })
@@ -381,7 +381,7 @@ pepLetterG.append("text")
                     if (d.aminoAcid != "#")
                         return d.aminoAcid;
                 });
-pepLetterG.append("text")
+            pepLetterG.append("text")
                 .attr("x", function (d, i) {
                     return self.xStep * i;
                 })
@@ -394,7 +394,8 @@ pepLetterG.append("text")
                     if (d.aminoAcid != "#")
                         return d.aminoAcid;
                 });
-function changeMod(d) {
+
+            function changeMod(d) {
                 let offset = self.pepoffset[self.changeMod.pepIndex];
                 let oldPos = self.changeMod.pos - offset;
                 let newPos = d.pos;
@@ -619,7 +620,7 @@ function changeMod(d) {
                         changeModStartHighlight(pepLetterG, pepLetterData);
                     }
                 });
-modLetterG.append("text")
+            modLetterG.append("text")
                 .attr("x", function (d) {
                     return self.xStep * d.pos;
                 })
@@ -633,7 +634,7 @@ modLetterG.append("text")
                 })
                 .attr("stroke-width", "2px")
                 .attr("opacity", 0);
-modLetterG.append("text")
+            modLetterG.append("text")
                 .attr("x", function (d) {
                     return self.xStep * d.pos;
                 })
@@ -651,7 +652,7 @@ modLetterG.append("text")
                 .attr("data-FullModName", function (d) {
                     return d.fullMod;
                 });
-self.pepLetterHighlights[pepIndex] = pep.group.selectAll("text.pepLetterHighlight");
+            self.pepLetterHighlights[pepIndex] = pep.group.selectAll("text.pepLetterHighlight");
             self.pepLetters[pepIndex] = pep.group.selectAll("text.pepLetter");
             self.modLetterHighlights[pepIndex] = pep.group.selectAll("text.modLetterHighlight");
             self.modLetters[pepIndex] = pep.group.selectAll("text.modLetter");
