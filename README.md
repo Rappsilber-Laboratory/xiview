@@ -17,7 +17,7 @@ Please refer to the following examples of using xiSPEC in a html page:
 
 ### Usage
 
-To initialize the module create a xiSPEC_wrapper with your desired options:
+To initialize the module create the xiSPEC app with your desired options:
 
 targetDiv is the only required option.
 
@@ -34,7 +34,7 @@ var options = {
   peakColor: "#a6a6a6",                       // color for not annotated peaks
 };
 
-var xiSPEC = new xiSPEC_wrapper(options);
+var xiSPEC = xispec.createApp(options);
 
 ```
 
