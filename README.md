@@ -6,7 +6,7 @@ Citation: Lars Kolbowski, Colin Combe, Juri Rappsilber; xiSPEC: web-based visual
 
 Annotation of spectra is done per default via xiAnnotator (https://github.com/Rappsilber-Laboratory/xiAnnotator) set up on https://spectrumviewer.org/xiAnnotator/. Instructions for setting up your own copy of the xiAnnotator can be found here: https://github.com/Rappsilber-Laboratory/xiAnnotator/blob/master/doc/SysV/Readme.md
 
-To change the xiAnnotatorURL use the xiAnnotatorBaseURL option.
+To change the xiAnnotatorURL use the xiAnnotatorBaseURL option. (If you use the default you may run into issues with CORS.)
 
 
 ### Examples
