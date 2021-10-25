@@ -1,24 +1,6 @@
-//		a spectrum viewer
-//
-//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Sven Giese, Colin Combe, Lars Kolbowski
-//
-//		FragKey/fragment.js
+import d3 from "d3";
 
-function KeyFragment (fragments, index, offset, peptideId, FragKey) {
+export function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	this.FragKey = FragKey;
 	this.peptideId = peptideId;
 	this.peptide = FragKey.model.peptides[peptideId];
@@ -43,19 +25,19 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		var color = this.FragKey.model.p2color;
 
 
-	var xStep = FragKey.xStep;
-	// var xStep = 23;
+    const xStep = FragKey.xStep;
+    // var xStep = 23;
 
 	this.x = (xStep * (index+offset)) + (xStep / 2);
 	if (this.peptideId == 0)
 		var y = 25;
 	if (this.peptideId == 1)
 		var y = 75;
-	var barHeight = 18, tailX = 5, tailY = 5;
+    const barHeight = 18, tailX = 5, tailY = 5;
 
-	var self = this;
+    const self = this;
 
-	//svg elements
+    //svg elements
 	this.g = this.FragKey.scaleSvgGroup.append('g');
 
 /*	var group = this.g
@@ -133,8 +115,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.bgroup = this.g.append("g")
 			.on("mouseover", function() {
-				var evt = d3.event;
-				if(!self.FragKey.changeMod && !self.FragKey.changeCL){
+                const evt = d3.event;
+                if(!self.FragKey.changeMod && !self.FragKey.changeCL){
 					if (evt.ctrlKey){
 						self.fragBar.style("cursor", "copy");
 						self.bTail.style("cursor", "copy");
@@ -158,8 +140,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				endHighlight(self.b);
 			})
 			.on("click", function() {
-				var evt = d3.event;
-				self.FragKey.model.updateStickyHighlight(self.b, evt.ctrlKey);
+                const evt = d3.event;
+                self.FragKey.model.updateStickyHighlight(self.b, evt.ctrlKey);
 			});
 
 		this.bHighlight = this.bgroup.append("path")
@@ -222,7 +204,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		for (var i = 0; i < fragments.b.length; i++) {
 			if(fragments.b[i].class != "lossy")
 				blossy = false;
-		};
+		}
 		if (blossy){
 			this.bTail.attr("stroke", this.FragKey.model.get('peakColor'));
 		}
@@ -250,8 +232,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.ygroup = this.g.append("g")
 			.on("mouseover", function() {
-				var evt = d3.event;
-				if(!self.FragKey.changeMod && !self.FragKey.changeCL){
+                const evt = d3.event;
+                if(!self.FragKey.changeMod && !self.FragKey.changeCL){
 					if (evt.ctrlKey){
 						self.fragBar.style("cursor", "copy");
 						self.yTail.style("cursor", "copy");
@@ -275,8 +257,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				endHighlight(self.y);
 			})
 			.on("click", function() {
-				var evt = d3.event;
-				self.FragKey.model.updateStickyHighlight(self.y, evt.ctrlKey);
+                const evt = d3.event;
+                self.FragKey.model.updateStickyHighlight(self.y, evt.ctrlKey);
 			});
 
 
@@ -337,7 +319,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		for (var i = 0; i < fragments.y.length; i++) {
 			if(fragments.y[i].class != "lossy")
 				ylossy = false;
-		};
+		}
 		if (ylossy){
 			this.yTail.attr("stroke", this.FragKey.model.get('peakColor'));
 		}
@@ -369,7 +351,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 KeyFragment.prototype.highlight = function(show, fragments){
 	if(show === true){
-		for(f = 0; f < fragments.length; f++){
+		for(let f = 0; f < fragments.length; f++){
 			if( this.b.indexOf(fragments[f]) != -1 && this.bHighlight){
 				this.bHighlight.attr("opacity", 1);
 				if (fragments[f].type.indexOf("AIon") != -1)

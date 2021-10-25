@@ -1,24 +1,7 @@
-//		a spectrum viewer
-//
-//	  Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Colin Combe, Lars Kolbowski
-//
-//		graph/Peak.js
+import * as _ from 'underscore';
+import d3 from "d3";
 
-function Peak (id, graph){
+export function Peak (id, graph){
 	let peak = graph.model.get("JSONdata").peaks[id];
 	this.id = id;
 	this.x = peak.mz;
@@ -81,7 +64,7 @@ Peak.prototype.draw = function(){
 							;
 
 		//set the dom events for it
-		var self = this;
+		const self = this;
 
 		this.lineGroup
 			.on("mouseover", function() {
@@ -147,7 +130,7 @@ Peak.prototype.draw = function(){
 			}
 
 			// Tooltip
-			if (CLMSUI.compositeModelInst !== undefined){
+			if (window.compositeModelInst !== undefined){
 				self.graph.tooltip.set("contents", contents )
 					.set("header", header.join(" "))
 					.set("location", {pageX: x, pageY: y});
@@ -176,7 +159,7 @@ Peak.prototype.draw = function(){
 		}
 
 		function hideTooltip(){
-			if (CLMSUI.compositeModelInst !== undefined)
+			if (window.compositeModelInst !== undefined)
 				self.graph.tooltip.set("contents", null);
 			else{
 				self.graph.tooltip.style("opacity", 0);
@@ -202,7 +185,7 @@ Peak.prototype.draw = function(){
 		}
 
 		function stickyHighlight(ctrl, fragId){
-			var fragments = [];
+			let fragments = [];
 			if(fragId){
 				fragId = parseInt(fragId);
 				fragments = self.fragments.filter(function(d) { return d.id == fragId; });
@@ -220,23 +203,29 @@ Peak.prototype.draw = function(){
 				self.labelLines.attr("opacity", 1); // MJG
 			})
 			.on("drag", function(d) {
-				var coords = d3.mouse(this);
-				var fragId = d.id;
-				var filteredLabels = self.labels.filter(function(d) { return d.id == fragId; });
-				var filteredHighlights = self.labelHighlights.filter(function(d) { return d.id == fragId; });
-				var filteredLabelLines = self.labelLines.filter(function(d) { return d.id == fragId; });
+				const coords = d3.mouse(this);
+				const fragId = d.id;
+				const filteredLabels = self.labels.filter(function (d) {
+					return d.id == fragId;
+				});
+				const filteredHighlights = self.labelHighlights.filter(function (d) {
+					return d.id == fragId;
+				});
+				const filteredLabelLines = self.labelLines.filter(function (d) {
+					return d.id == fragId;
+				});
 
 				filteredLabels.attr("x", coords[0]).attr("y", coords[1]);
 				filteredHighlights.attr("x", coords[0]).attr("y", coords[1]);
 
-				var y = d3.min([self.graph.yscale.domain()[1], self.y]);
-				var startY = self.graph.yscale(y);
-				var mouseX = coords[0];
-				var mouseY = coords[1];
-				var r = Math.sqrt((mouseX * mouseX) + ((mouseY-startY) * (mouseY-startY) ));
+				const y = d3.min([self.graph.yscale.domain()[1], self.y]);
+				const startY = self.graph.yscale(y);
+				const mouseX = coords[0];
+				const mouseY = coords[1];
+				const r = Math.sqrt((mouseX * mouseX) + ((mouseY - startY) * (mouseY - startY)));
 				if (r > 15){
-					var deltaY = (mouseY - startY > 0 ? -8 : 2);
-					var deltaX = 0;
+					const deltaY = (mouseY - startY > 0 ? -8 : 2);
+					let deltaX = 0;
 					if(Math.abs(mouseX) > 20){
 						deltaX = (mouseX > 0 ? -8 : 8)
 					}
@@ -253,31 +242,33 @@ Peak.prototype.draw = function(){
 			})
 		;
 
-		var lossy = [];
-		var nonlossy = this.fragments.filter(function(frag) {
-			var bool = frag.class != "lossy";
-			if (!bool) { lossy.push (frag); }
+		const lossy = [];
+		const nonlossy = this.fragments.filter(function (frag) {
+			const bool = frag.class != "lossy";
+			if (!bool) {
+				lossy.push(frag);
+			}
 			return bool;
 		});
 
-		var partitions = [
+		const partitions = [
 			{frags: nonlossy, group: this.graph.annotations, type: "nonlossy", colourClass: "color"},
 			{frags: lossy, group: this.graph.lossyAnnotations, type: "lossy", colourClass: "color_loss"},
 		];
 
-		CLMSUI.idList = CLMSUI.idList || [];	//obsolete?
+		// CLMSUI.idList = CLMSUI.idList || [];	//obsolete?
 
-		var makeIdentityID = function (d) {
+		const makeIdentityID = function (d) {
 			return d.id;
 		};
 
 		partitions.forEach (function (partition) {
-			var peakFrags = partition.frags;
+			const peakFrags = partition.frags;
 
 			if (peakFrags.length > 0) {
-				var group = partition.group;
-				var labelgroup = self.lineLabelGroup.selectAll("g.xispec_label").data (peakFrags, makeIdentityID);
-				var labelLines = self.lineLabelGroup.selectAll("line.xispec_labelLine").data (peakFrags, makeIdentityID);
+				const group = partition.group;
+				const labelgroup = self.lineLabelGroup.selectAll("g.xispec_label").data(peakFrags, makeIdentityID);
+				const labelLines = self.lineLabelGroup.selectAll("line.xispec_labelLine").data(peakFrags, makeIdentityID);
 
 				labelLines.enter()
 					.append("line")
@@ -286,57 +277,55 @@ Peak.prototype.draw = function(){
 					.attr("class", "xispec_labelLine")
 					.style("stroke-dasharray", ("3, 3"));
 
-				var label = labelgroup.enter()
+				const label = labelgroup.enter()
 					.append("g")
-						.attr("class", "xispec_label")
-						.style("cursor", "pointer")
-						.on("mouseover", function(d) {
-							var evt = d3.event;
-							if(!self.graph.model.moveLabels){
-								if (evt.ctrlKey){
-									self.line.style("cursor", "copy");
-									self.highlightLine.style("cursor", "copy");
-								}
-								else{
-									self.line.style("cursor", "pointer");
-									self.highlightLine.style("cursor", "pointer");
-								}
-								showTooltip(evt.pageX, evt.pageY, d.id);
-								startHighlight(d.id);
+					.attr("class", "xispec_label")
+					.style("cursor", "pointer")
+					.on("mouseover", function (d) {
+						const evt = d3.event;
+						if (!self.graph.model.moveLabels) {
+							if (evt.ctrlKey) {
+								self.line.style("cursor", "copy");
+								self.highlightLine.style("cursor", "copy");
+							} else {
+								self.line.style("cursor", "pointer");
+								self.highlightLine.style("cursor", "pointer");
 							}
-						})
-						.on("mouseout", function() {
-							if(!self.graph.model.moveLabels){
-								hideTooltip();
-								endHighlight();
+							showTooltip(evt.pageX, evt.pageY, d.id);
+							startHighlight(d.id);
+						}
+					})
+					.on("mouseout", function () {
+						if (!self.graph.model.moveLabels) {
+							hideTooltip();
+							endHighlight();
+						}
+					})
+					.on("touchstart", function (d) {
+						const evt = d3.event;
+						if (!self.graph.model.moveLabels) {
+							if (evt.ctrlKey) {
+								self.line.style("cursor", "copy");
+								self.highlightLine.style("cursor", "copy");
+							} else {
+								self.line.style("cursor", "pointer");
+								self.highlightLine.style("cursor", "pointer");
 							}
-						})
-						.on("touchstart", function(d) {
-							var evt = d3.event;
-							if(!self.graph.model.moveLabels){
-								if (evt.ctrlKey){
-									self.line.style("cursor", "copy");
-									self.highlightLine.style("cursor", "copy");
-								}
-								else{
-									self.line.style("cursor", "pointer");
-									self.highlightLine.style("cursor", "pointer");
-								}
-								showTooltip(evt.pageX, evt.pageY, d.id);
-								startHighlight(d.id);
-							}
-						})
-						.on("touchend", function() {
-							if(!self.graph.model.moveLabels){
-								hideTooltip();
-								endHighlight();
-							}
-						})
-						.on("click", function(d) {
-							var evt = d3.event;
-							stickyHighlight(evt.ctrlKey, d.id);
-						})
-					;
+							showTooltip(evt.pageX, evt.pageY, d.id);
+							startHighlight(d.id);
+						}
+					})
+					.on("touchend", function () {
+						if (!self.graph.model.moveLabels) {
+							hideTooltip();
+							endHighlight();
+						}
+					})
+					.on("click", function (d) {
+						const evt = d3.event;
+						stickyHighlight(evt.ctrlKey, d.id);
+					})
+				;
 
 				label.append("text")
 					.text(function(d) {
@@ -363,11 +352,11 @@ Peak.prototype.draw = function(){
 						return 'normal';
 					})
 					.attr("class", function(d){
-						var pepIndex = d.peptideId+1;
+						const pepIndex = d.peptideId + 1;
 						return "xispec_peakAnnot pep" + pepIndex + " " + partition.colourClass;
 					})
 					.attr ("fill", function(d) {
-						var pepIndex = d.peptideId+1;
+						const pepIndex = d.peptideId + 1;
 						return self.graph.model["p" + pepIndex + partition.colourClass];
 					})
 				;
@@ -384,10 +373,14 @@ Peak.prototype.draw = function(){
 
 		}, this);
 
-		var fset = d3.set(this.fragments.map(function(frag){ return frag.id; }));
-		var labelgroups = this.lineLabelGroup
+		const fset = d3.set(this.fragments.map(function (frag) {
+			return frag.id;
+		}));
+		const labelgroups = this.lineLabelGroup
 			.selectAll("g.xispec_label")
-			.filter (function(d){ return fset.has(d.id); });
+			.filter(function (d) {
+				return fset.has(d.id);
+			});
 
 		this.labels = labelgroups.selectAll("text.xispec_peakAnnot");
 		this.labelHighlights = labelgroups.selectAll("text.xispec_peakAnnotHighlight");
@@ -400,7 +393,7 @@ Peak.prototype.draw = function(){
 
 	}
 
-	var peakStrokeWidth = 1;
+	let peakStrokeWidth = 1;
 	if (this.graph.options.accentuateCLcontainingFragments
 		&& this.fragments.filter(function(f){return f.crossLinkContaining}).length > 0){
 		peakStrokeWidth = 2;
@@ -454,8 +447,8 @@ Peak.prototype.highlight = function(show, fragments){
 Peak.prototype.update = function(){
 
 	this.lineLabelGroup.attr("transform", "translate("+this.graph.xscale(this.x)+",0)");
-	var xDomain = this.graph.xscale.domain();
-	var yDomain = this.graph.yscale.domain();
+	const xDomain = this.graph.xscale.domain();
+	const yDomain = this.graph.yscale.domain();
 	if (this.x > xDomain[0] && this.x < xDomain[1]){
 		//reset label lines
 		if (this.labels.length > 0){
@@ -477,24 +470,26 @@ Peak.prototype.update = function(){
 }
 
 Peak.prototype.updateX = function(xDomain){
-	var labelCount = this.labels.length;
-	var model = this.graph.model;
+	const labelCount = this.labels.length;
+	const model = this.graph.model;
+
 	function labelVisible (d, peakObj) {
 		// in the currently visible x range
-		var inXrange = peakObj.x > xDomain[0] && peakObj.x < xDomain[1];
+		const inXrange = peakObj.x > xDomain[0] && peakObj.x < xDomain[1];
 		if (!inXrange) return false;
 
 		// Y labelCutoff
-		var peakYrel = (peakObj.y / model.ymaxPrimary * 100);
+		const peakYrel = (peakObj.y / model.ymaxPrimary * 100);
 		if (peakYrel < model.get('labelCutoff')) return false;
 
 		// is a sticky fragment
-		var isSticky = _.intersection(model.sticky, peakObj.fragments).length !== 0;
+		const isSticky = _.intersection(model.sticky, peakObj.fragments).length !== 0;
 
 		return (peakObj.graph.lossyShown === true || d.class === "non-lossy" || isSticky)	//lossy enabled OR not lossy OR isStickyFrag
 			 && (isSticky || model.sticky.length === 0 || !model.get('hideNotSelectedFragments'))	//isStickyFrag OR no StickyFrags or showAll
 	}
-	var self = this;
+
+	const self = this;
 	if (labelCount) {
 		this.labels
 			.attr("x", 0)
@@ -512,14 +507,14 @@ Peak.prototype.updateX = function(xDomain){
 };
 
 Peak.prototype.updateY = function(yDomain){
-	var yScale = this.graph.yscale;
-	var ymax = yDomain[1];
-	var y = d3.min([ymax, this.y]);
+	const yScale = this.graph.yscale;
+	const ymax = yDomain[1];
+	const y = d3.min([ymax, this.y]);
 	this.line
 		.attr("y1", yScale(y))
 		.attr("y2", yScale(0));
 
-	var labelCount = this.labels.length;
+	const labelCount = this.labels.length;
 
 	// show lineBreakSymbol if intensity is above max
 	if (this.y > ymax){
@@ -530,11 +525,11 @@ Peak.prototype.updateY = function(yDomain){
 		this.highlightLine
 			.attr("y1", yScale(y))
 			.attr("y2", yScale(0));
-		var yStep = 13;
+		const yStep = 13;
 
-		for (var i = 0; i < labelCount; i++) {
-			var deltaY = 0;
-			var gap = this.graph.options.invert ? -10 - (yStep * i) : 5 + (yStep * i);
+		for (let i = 0; i < labelCount; i++) {
+			let deltaY = 0;
+			let gap = this.graph.options.invert ? -10 - (yStep * i) : 5 + (yStep * i);
 			// move labels to right if peak intensity is at max
 			if (this.y > ymax){
 				this.labels[i][0].setAttribute("x",  16);
@@ -542,7 +537,7 @@ Peak.prototype.updateY = function(yDomain){
 				deltaY = -2;
 				gap = -gap;
 			}
-			var labelY = yScale(y) - gap + deltaY;
+			const labelY = yScale(y) - gap + deltaY;
 			this.labels[i][0].setAttribute("y",  labelY);
 			this.labelHighlights[i][0].setAttribute("y",  labelY);
 		}
@@ -550,7 +545,7 @@ Peak.prototype.updateY = function(yDomain){
 }
 
 Peak.prototype.removeLabels = function(){
-	var labelCount = this.labels.length;
+	const labelCount = this.labels.length;
 	if(labelCount){
 		this.labels.attr("display", "none");
 		this.labelHighlights.attr("display", "none");
@@ -559,12 +554,12 @@ Peak.prototype.removeLabels = function(){
 }
 
 Peak.prototype.showLabels = function(lossyOverride){
-	var xDomain = this.graph.xscale.domain();
-	var labelCount = this.labels.length;
-	var self = this;
-	var model = this.graph.model;
+	const xDomain = this.graph.xscale.domain();
+	const labelCount = this.labels.length;
+	const self = this;
+	const model = this.graph.model;
 	if (labelCount) {
-		var isVisible = function(d) {
+		const isVisible = function (d) {
 			// ToDo: code duplication with updateX isVisible function
 			// in the currently visible x range
 			let inXrange = self.x > xDomain[0] && self.x < xDomain[1];

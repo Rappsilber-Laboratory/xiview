@@ -1,28 +1,11 @@
-//		a spectrum viewer
-//
-//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		SettingsView.js
+import * as $ from "jquery";
+import * as _ from 'underscore';
+import * as Backbone from "backbone";
+import * as d3 from "d3";
 
-var xiSPECUI = xiSPECUI || {};
-var CLMSUI = CLMSUI || {};
+window.xiSPECUI = {};
 
-let SettingsView = Backbone.View.extend({
+export const SettingsView = Backbone.View.extend({
 
     events: {
         'click .xispec_settingsTab': 'changeTab',
@@ -42,7 +25,7 @@ let SettingsView = Backbone.View.extend({
 
         // event listeners
         this.listenTo(this.model, 'change:JSONdata', this.render);
-        this.listenTo(xiSPECUI.vent, 'activeSpecPanel:changed', this.modelChanged);
+        this.listenTo(window.xiSPECUI.vent, 'activeSpecPanel:changed', this.modelChanged);
 
         this.isVisible = false;
 

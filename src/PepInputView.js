@@ -1,25 +1,8 @@
-//		a spectrum viewer
-//
-//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		PepInputView.js
+// import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
 
-var PepInputView = Backbone.View.extend({
+export const PepInputView = Backbone.View.extend({
 
     events: {
         "input": "contentChanged",
@@ -50,6 +33,7 @@ var PepInputView = Backbone.View.extend({
 
             // linkSite
             let cl_re = /#([0-9]+)?/g;
+            let match;
             while ((match = cl_re.exec(pep_noMods)) != null) {
                 let clIndex = match[1] === undefined ? 0 : match[1];
                 let linkSite = {'id': clIndex, 'peptideId': i, 'linkSite': match.index - 1};

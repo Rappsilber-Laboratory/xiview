@@ -1,25 +1,16 @@
-//		a spectrum viewer
-//
-//      Copyright 2020 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		SpectrumWrapper.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
 
-let SpectrumWrapper = Backbone.View.extend({
+import {AnnotatedSpectrumModel} from "./AnnotatedSpectrumModel";
+import {SpectrumView} from "./SpectrumView2";
+import {FragmentationKeyView} from "./FragmentationKeyView";
+import {PrecursorInfoView} from "./PrecursorInfoView";
+import {QCwrapperView} from "./QCwrapperView";
+import {ErrorPlotView} from "./ErrorPlotView";
+import d3 from "d3";
+
+export const SpectrumWrapper = Backbone.View.extend({
 	events: {
 		'click .xispec_toggleActiveSpecPanel': 'toggleActive',
 		'click .xispec_closeSpecPanel': 'close',
@@ -54,7 +45,7 @@ let SpectrumWrapper = Backbone.View.extend({
 		}
 
 		// event listeners
-		this.listenTo(xiSPECUI.vent, 'activateSpecPanel', this.updateHeader);
+		this.listenTo(window.xiSPECUI.vent, 'activateSpecPanel', this.updateHeader);
 		this.listenTo(SpectrumModel, 'activate', this.toggleActive);
 
 		// ToDo: create SpectrumPanel model to have these synced
@@ -295,12 +286,12 @@ let SpectrumWrapper = Backbone.View.extend({
 
 		}
 		if (options.showQualityControl !== 'min')
-			xiSPECUI.vent.trigger('QCWrapperShow', this.id);
+			window.xiSPECUI.vent.trigger('QCWrapperShow', this.id);
 	},
 
 	requestAnnotation: function (json_request, annotatorURL, isOriginalMatchRequest, ) {
 		if (json_request.annotation.requestID)
-			xiSPECUI.lastRequestedID = json_request.annotation.requestID;
+			window.xiSPECUI.lastRequestedID = json_request.annotation.requestID;
 
 		this.models['Spectrum'].trigger('requestAnnotation:pending');
 		console.log("annotation request:", json_request);
@@ -315,7 +306,7 @@ let SpectrumWrapper = Backbone.View.extend({
 			url: this.xiAnnotatorBaseURL + annotatorURL,
 			success: function (data) {
 				if (data && data.annotation && data.annotation.requestID &&
-					data.annotation.requestID === xiSPECUI.lastRequestedID) {
+					data.annotation.requestID === window.xiSPECUI.lastRequestedID) {
 					//ToDo: Error handling -> https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/330
 					console.log("annotation response:", data);
 
@@ -346,12 +337,12 @@ let SpectrumWrapper = Backbone.View.extend({
 	},
 
 	toggleActive: function () {
-		xiSPECUI.vent.trigger('activateSpecPanel', this.id);
+		window.xiSPECUI.vent.trigger('activateSpecPanel', this.id);
 	},
 
 	close: function () {
 		this.destroy();
-		xiSPECUI.vent.trigger('closeSpecPanel', this.id);
+		window.xiSPECUI.vent.trigger('closeSpecPanel', this.id);
 	},
 
 	// clear: function () {

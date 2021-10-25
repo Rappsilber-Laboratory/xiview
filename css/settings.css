@@ -10,7 +10,7 @@
     right: 5%;
     top: 10%;
     width: 550px;
-    height: 530;
+    height: 530px;
     min-width: 550px;
     min-height: 400px;
 }
@@ -302,9 +302,8 @@
 .draggableCorner {
     width:20px;
     height:20px;
-    background: #750000;
     border:none;
-    background-image: url("../images/tl.png");
+    background: #750000 url("../images/tl.png");
 }
 
 /* just need 1 background image and rotate it for corner orientations */

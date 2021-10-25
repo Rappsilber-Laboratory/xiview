@@ -1,25 +1,11 @@
-//		a spectrum viewer
-//
-//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		AnnotatedSpectrumModel.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
+import {Fragment} from "./graph/Fragment";
 
-let AnnotatedSpectrumModel = Backbone.Model.extend({
+import * as colorbrewer from 'colorbrewer';
+
+export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	defaults: function () {
 		return {
@@ -348,7 +334,7 @@ let AnnotatedSpectrumModel = Backbone.Model.extend({
 		if(this.get("JSONrequest") !== undefined){
 			let json_req = $.extend(true, {}, this.get("JSONrequest"));
 			json_req.LinkSite = newLinkSites;
-			xiSPECUI.vent.trigger('requestAnnotation', json_req, this.get('annotatorURL'));
+			window.xiSPECUI.vent.trigger('requestAnnotation', json_req, this.get('annotatorURL'));
 		}
 		else{
 			this.get('JSONdata').LinkSite = newLinkSites;
@@ -377,7 +363,7 @@ let AnnotatedSpectrumModel = Backbone.Model.extend({
 				if (annotationMod[0].aminoAcids.indexOf(myNew.aminoAcid) === -1)
 					annotationMod[0].aminoAcids.push(myNew.aminoAcid);
 			}
-			xiSPECUI.vent.trigger('requestAnnotation', json_req, this.get('annotatorURL'));
+			window.xiSPECUI.vent.trigger('requestAnnotation', json_req, this.get('annotatorURL'));
 		}
 		else{
 			//Preview

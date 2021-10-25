@@ -1,25 +1,9 @@
-//		a spectrum viewer
-//
-//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		PrecursorInfoView.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import d3 from "d3";
+import * as $ from "jquery";
 
-let PrecursorInfoView = Backbone.View.extend({
+export const PrecursorInfoView = Backbone.View.extend({
 
     events: {
         'click .toggle': 'expandToggle',
@@ -36,7 +20,7 @@ let PrecursorInfoView = Backbone.View.extend({
         // event listeners
         this.listenTo(this.model, 'change:butterfly', this.butterflyToggle);
         this.listenTo(this.model, 'butterflySwap', this.butterflySwap);
-        this.listenTo(xiSPECUI.vent, 'resize:spectrum', this.render);
+        this.listenTo(window.xiSPECUI.vent, 'resize:spectrum', this.render);
 
         this.expand = true;
 
@@ -76,19 +60,19 @@ let PrecursorInfoView = Backbone.View.extend({
             .style("cursor", "default");
 
         if (this.options.invert) {
-            var $el = $(this.el)
-            var parentWidth = $el.width();
-            var parentHeight = $el.height();
+            const $el = $(this.el);
+            const parentWidth = $el.width();
+            const parentHeight = $el.height();
             var top = this.model.isLinear ? parentHeight - 65 : parentHeight - 115;
         } else {
             var top = 0;
         }
         this.wrapper.attr("transform", "translate(0," + top + ")");
 
-        var precursor = this.model.precursor;
-        var content = "";
+        const precursor = this.model.precursor;
+        let content = "";
 
-        var dataArr = [];
+        const dataArr = [];
         if (precursor.intensity !== undefined && precursor.intensity != -1)
             dataArr.push("Intensity=" + precursor.intensity);
         if (precursor.expMz !== undefined && precursor.expMz != -1)
@@ -109,7 +93,7 @@ let PrecursorInfoView = Backbone.View.extend({
         this.expand = !this.expand;
         if (this.options.hidden)
             return;
-        newOpacity = this.expand ? 1 : 0;
+        const newOpacity = this.expand ? 1 : 0;
 
         this.content.style("opacity", newOpacity);
         if (!this.expand)

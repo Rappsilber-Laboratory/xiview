@@ -1,25 +1,26 @@
-// xiSPEC Spectrum Viewer
-// Copyright 2016 Rappsilber Laboratory, University of Edinburgh
-//
-// This product includes software developed at
-// the Rappsilber Laboratory (http://www.rappsilberlab.org/).
-//
-// author: Lars Kolbowski
-//
-// Wrapper.js
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as $ from "jquery";
+import Split from "split.js";
+import d3 from "d3";
+import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
+// import "../vendor/byrei-dyndiv_0.5.css"
 
-'use strict'
+import {SpectrumWrapper} from "./SpectrumWrapper";
+import {SpectrumControlsView} from "./SpectrumControlsView";
+import {DataSettingsView} from "./DataSettingsView";
+import {AppearanceSettingsView} from "./AppearanceSettingsView";
 
-var xiSPECUI = xiSPECUI || {};
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
-xiSPECUI.vent = {};
-_.extend(xiSPECUI.vent, Backbone.Events);
-_.extend(window, Backbone.Events);
+window.xiSPECUI.vent = {};
+_.extend(window.xiSPECUI.vent, Backbone.Events);
+
+_.extend(window, Backbone.Events);// what's this for - cc
 window.onresize = function () {
     window.trigger('resize')
 };
 
-let xiSPEC_wrapper = Backbone.View.extend({
+export const xiSPEC_wrapper = Backbone.View.extend({
 
     initialize: function (options) {
 
@@ -41,14 +42,14 @@ let xiSPEC_wrapper = Backbone.View.extend({
         }
 
         // event listeners
-        this.listenTo(xiSPECUI.vent, 'loadSpectrum', this.setData);
-        this.listenTo(xiSPECUI.vent, 'requestAnnotation', this.requestAnnotation);
-        this.listenTo(xiSPECUI.vent, 'revertAnnotation', this.revertAnnotation);
-        this.listenTo(xiSPECUI.vent, 'setCustomConfigOverwrite', this.setCustomConfigOverwrite);
-        this.listenTo(xiSPECUI.vent, 'addSpectrum', this.addSpectrum);
-        this.listenTo(xiSPECUI.vent, 'closeSpecPanel', this.closeSpectrum);
-        this.listenTo(xiSPECUI.vent, 'activateSpecPanel', this.activateSpectrum);
-        this.listenTo(xiSPECUI.vent, 'butterflyHighlight', this.butterflyHighlight);
+        this.listenTo(window.xiSPECUI.vent, 'loadSpectrum', this.setData);
+        this.listenTo(window.xiSPECUI.vent, 'requestAnnotation', this.requestAnnotation);
+        this.listenTo(window.xiSPECUI.vent, 'revertAnnotation', this.revertAnnotation);
+        this.listenTo(window.xiSPECUI.vent, 'setCustomConfigOverwrite', this.setCustomConfigOverwrite);
+        this.listenTo(window.xiSPECUI.vent, 'addSpectrum', this.addSpectrum);
+        this.listenTo(window.xiSPECUI.vent, 'closeSpecPanel', this.closeSpectrum);
+        this.listenTo(window.xiSPECUI.vent, 'activateSpecPanel', this.activateSpectrum);
+        this.listenTo(window.xiSPECUI.vent, 'butterflyHighlight', this.butterflyHighlight);
         // HTML elements
         let d3el = d3.select(this.options.targetDiv)
         // empty the targetDiv
@@ -98,6 +99,8 @@ let xiSPEC_wrapper = Backbone.View.extend({
             showCustomCfg: this.options.showCustomConfig,
             title: 'Appearance Settings'
         });
+
+        ByRei_dynDiv.init.main();
     },
 
     setData: function (data) {
@@ -272,7 +275,7 @@ let xiSPEC_wrapper = Backbone.View.extend({
             minSize: minSizes,
             gutterSize: 5,
             direction: 'horizontal',
-            onDragEnd: function(){ xiSPECUI.vent.trigger('resize:spectrum'); }
+            onDragEnd: function(){ window.xiSPECUI.vent.trigger('resize:spectrum'); }
         });
     },
 
@@ -315,20 +318,20 @@ let xiSPEC_wrapper = Backbone.View.extend({
         this.updatePlotSplit();
 
         // trigger resizing
-        xiSPECUI.vent.trigger('resize:spectrum');
+        window.xiSPECUI.vent.trigger('resize:spectrum');
 
         return newSpec;
     },
 
     closeSpectrum: function (id) {
         if (id === this.activeSpectrum.id){
-            xiSPECUI.vent.trigger('activateSpecPanel', 0);
+            window.xiSPECUI.vent.trigger('activateSpecPanel', 0);
         }
         let specIndex = this.spectra.map(function(x) {return x.id; }).indexOf(id);
         this.spectra.splice(specIndex, 1);
         this.specIds.splice(specIndex, 1)
         this.updatePlotSplit();
-        xiSPECUI.vent.trigger('resize:spectrum');
+        window.xiSPECUI.vent.trigger('resize:spectrum');
     },
 
     activateSpectrum: function (id) {
@@ -339,7 +342,7 @@ let xiSPEC_wrapper = Backbone.View.extend({
         this.DataSettingsView.displayModel = this.activeSpectrum.models['Spectrum'];
         this.AppearanceSettingsView.model = this.activeSpectrum.models['SettingsSpectrum'];
         this.AppearanceSettingsView.displayModel = this.activeSpectrum.models['Spectrum'];
-        xiSPECUI.vent.trigger('activeSpecPanel:changed');
+        window.xiSPECUI.vent.trigger('activeSpecPanel:changed');
     },
 
     butterflyHighlight: function () {
@@ -347,40 +350,3 @@ let xiSPEC_wrapper = Backbone.View.extend({
     },
 
 });
-
-xiSPECUI.matchMassToAA = function (mass, tolerance) {
-
-    if (tolerance === undefined) tolerance = 0.01;
-
-    const aminoAcids = [
-        {"aminoAcid": "A", "monoisotopicMass": 71.03711},
-        {"aminoAcid": "R", "monoisotopicMass": 156.10111},
-        {"aminoAcid": "N", "monoisotopicMass": 114.04293},
-        {"aminoAcid": "D", "monoisotopicMass": 115.02694},
-        {"aminoAcid": "C", "monoisotopicMass": 103.00919},
-        {"aminoAcid": "E", "monoisotopicMass": 129.04259},
-        {"aminoAcid": "Q", "monoisotopicMass": 128.05858},
-        {"aminoAcid": "G", "monoisotopicMass": 57.02146},
-        {"aminoAcid": "H", "monoisotopicMass": 137.05891},
-        {"aminoAcid": "I", "monoisotopicMass": 113.08406},
-        {"aminoAcid": "L", "monoisotopicMass": 113.08406},
-        {"aminoAcid": "K", "monoisotopicMass": 128.09496},
-        {"aminoAcid": "M", "monoisotopicMass": 131.04049},
-        {"aminoAcid": "F", "monoisotopicMass": 147.06841},
-        {"aminoAcid": "P", "monoisotopicMass": 97.05276},
-        {"aminoAcid": "S", "monoisotopicMass": 87.03203},
-        {"aminoAcid": "T", "monoisotopicMass": 101.04768},
-        {"aminoAcid": "W", "monoisotopicMass": 186.07931},
-        {"aminoAcid": "Y", "monoisotopicMass": 163.06333},
-        {"aminoAcid": "V", "monoisotopicMass": 99.06841}
-    ]
-
-    let aaArray = aminoAcids.filter(function (d) {
-        if (Math.abs(mass - d.monoisotopicMass) < tolerance)
-            return true;
-    }).map(function (d) {
-        return d.aminoAcid
-    });
-
-    return aaArray.join();
-};

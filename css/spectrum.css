@@ -1,4 +1,4 @@
-@charset 'UTF-8';
+@charset "UTF-8";
 @font-face {
   font-family: 'Lato-Bold';
   src: url('../fonts/lato/bold/Lato-Bold.eot'); /* IE9 Compat Modes */
@@ -139,8 +139,7 @@
     transition: all .3s;
     cursor:pointer;
     float:right;
-    margin:2px;
-    margin-right:22px;
+    margin: 2px 22px 2px 2px;
 }
 .fa-times-circle:hover {
     color: #333333;
@@ -232,7 +231,7 @@
     font-weight: 300;
     line-height: 1.3em;
     color: #888;
-    -webkit-text-stroke: .15px;
+    /*-webkit-text-stroke: .15px;*/ /* IDE complains about this - cc*/
     overflow: hidden;
 }
 

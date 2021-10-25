@@ -1,28 +1,12 @@
-//		a spectrum viewer
-//
-//      Copyright  2020 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		AppearanceSettingsView.js
+import "../css/settings.css";
+// import "../../xi3/css/xispecAdjust.css";
+import * as _ from 'underscore';
+import * as $ from "jquery";
+import * as jscolor from "@eastdesire/jscolor";
+import {SettingsView} from "./SettingsView";
+import * as d3 from "d3";
 
-var xiSPECUI = xiSPECUI || {};
-var CLMSUI = CLMSUI || {};
-
-let AppearanceSettingsView = SettingsView.extend({
+export const AppearanceSettingsView = SettingsView.extend({
 
     events: function() {
         return _.extend({}, SettingsView.prototype.events, {
@@ -53,7 +37,7 @@ let AppearanceSettingsView = SettingsView.extend({
 
         this.displayModel = this.options.displayModel;
         // event listeners
-        this.listenTo(xiSPECUI.vent, 'appearanceSettingsToggle', this.toggleView);
+        this.listenTo(window.xiSPECUI.vent, 'appearanceSettingsToggle', this.toggleView);
 
         // HTML elements
         //
@@ -105,8 +89,9 @@ let AppearanceSettingsView = SettingsView.extend({
             .attr("value", this.model.get('highlightColor'))
             .attr("type", "text")
             .attr("style", "width: 103px;")
+            .attr("data-jscolor", "{}")
         ;
-        jscolor.installByClassName("jscolor");
+        jscolor.install();
 
         this.decimals = generalTab.append("label").text("Number of decimals to display: ")
             .append("input").attr("type", "number").attr("id", "xispec_settingsDecimals")
@@ -189,7 +174,7 @@ let AppearanceSettingsView = SettingsView.extend({
     },
 
     changeHighlightColor: function (e) {
-        let color = '#' + e.originalEvent.srcElement.value;
+        let color = e.target.value;//'#' + e.originalEvent.srcElement.value;
         //for now change color of model directly
         this.displayModel.set('highlightColor', color);
     },
@@ -207,13 +192,13 @@ let AppearanceSettingsView = SettingsView.extend({
     absErrToggle: function (e) {
         let selected = $(e.target).is(':checked');
         this.displayModel.set('QCabsErr', selected);
-        // xiSPECUI.vent.trigger('QCabsErr', selected);
+        // window.xiSPECUI.vent.trigger('QCabsErr', selected);
     },
 
     accentuateCLcontainingToggle: function (e) {
         let selected = $(e.target).is(':checked');
         this.displayModel.set('accentuateCrossLinkContainingFragments', selected);
-        // xiSPECUI.vent.trigger('accentuateCrossLinkContainingFragments', selected);
+        // window.xiSPECUI.vent.trigger('accentuateCrossLinkContainingFragments', selected);
     },
 
     changePepFragmentsVis: function (e) {
@@ -224,7 +209,7 @@ let AppearanceSettingsView = SettingsView.extend({
     chargeLabelToggle: function (e) {
         let selected = $(e.target).is(':checked');
         this.displayModel.set('labelFragmentCharge', selected);
-        // xiSPECUI.vent.trigger('labelFragmentCharge', selected);
+        // window.xiSPECUI.vent.trigger('labelFragmentCharge', selected);
     },
 
     changeColorScheme: function (e) {

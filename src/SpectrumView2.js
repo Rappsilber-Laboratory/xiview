@@ -1,28 +1,18 @@
-//		a spectrum viewer
-//
-//	  Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Lars Kolbowski
-//
-//
-//		SpectrumView2.js
+import "../css/spectrum.css";
+import "../css/dropdown.css";
+import "../css/font-awesome.min.css";
+// import "../../xi3/css/xispecAdjust.css";
+import * as $ from "jquery";
+import * as _ from 'underscore';
+import Backbone from "backbone";
+import * as d3 from 'd3';
+import * as Spinner from 'spin';
 
-var xiSPECUI = xiSPECUI || {};
-var CLMSUI = CLMSUI || {};
+import {Graph} from "./graph/Graph";
+import {svgUtils} from "../vendor/svgexp";
+import {download} from "./download";
 
-let SpectrumView = Backbone.View.extend({
+export const SpectrumView = Backbone.View.extend({
 
 	events : {},
 
@@ -67,9 +57,9 @@ let SpectrumView = Backbone.View.extend({
 		this.listenTo(this.model, 'change:hideNotSelectedFragments', this.updatePeakHighlighting);
 		this.listenTo(this.model, 'change:showLossLabels', this.showLossy);
 
-		this.listenTo(xiSPECUI.vent, 'downloadSpectrumSVG', this.downloadSVG);
-		this.listenTo(xiSPECUI.vent, 'resize:spectrum', this.resize);
-		this.listenTo(xiSPECUI.vent, 'clearSpectrumHighlights', this.clearHighlights);
+		this.listenTo(window.xiSPECUI.vent, 'downloadSpectrumSVG', this.downloadSVG);
+		this.listenTo(window.xiSPECUI.vent, 'resize:spectrum', this.resize);
+		this.listenTo(window.xiSPECUI.vent, 'clearSpectrumHighlights', this.clearHighlights);
 
 		this.listenTo(this.model, 'resetZoom', this.resetZoom);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
@@ -231,8 +221,8 @@ let SpectrumView = Backbone.View.extend({
 	downloadSVG: function(){
 		let svgSel = d3.select(this.el.parentNode);
 		let svgArr = svgSel[0];
-		let svgStrings = CLMSUI.svgUtils.capture (svgArr);
-		let svgXML = CLMSUI.svgUtils.makeXMLStr (new XMLSerializer(), svgStrings[0]);
+		let svgStrings = svgUtils.capture (svgArr);
+		let svgXML = svgUtils.makeXMLStr (new XMLSerializer(), svgStrings[0]);
 
 		let charge = this.model.get("JSONdata").annotation.precursorCharge;
 		let pepStrs = this.model.pepStrsMods;

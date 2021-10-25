@@ -1,32 +1,21 @@
-//		a spectrum viewer
-//
-//	  Copyright  2015 Rappsilber Laboratory, Edinburgh University
-//
-// 		Licensed under the Apache License, Version 2.0 (the "License");
-// 		you may not use this file except in compliance with the License.
-// 		You may obtain a copy of the License at
-//
-// 		http://www.apache.org/licenses/LICENSE-2.0
-//
-//   	Unless required by applicable law or agreed to in writing, software
-//   	distributed under the License is distributed on an "AS IS" BASIS,
-//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//   	See the License for the specific language governing permissions and
-//   	limitations under the License.
-//
-//		authors: Sven Giese, Colin Combe, Lars Kolbowski
-//
-//
-//		FragmentationKeyView.js
+import {KeyFragment} from "./FragKey/KeyFragment";
+
+import Backbone from "backbone";
+import * as _ from 'underscore';
+import d3 from "d3";
+import * as $ from "jquery";
+
 
 //TODO: find a better place for this?
+// is this working at moment?
 d3.selection.prototype.moveToFront = function () {
     return this.each(function () {
         this.parentNode.appendChild(this);
     });
 };
 
-let FragmentationKeyView = Backbone.View.extend({
+
+export const FragmentationKeyView = Backbone.View.extend({
 
     initialize: function (viewOptions) {
         const defaultOptions = {
@@ -62,7 +51,7 @@ let FragmentationKeyView = Backbone.View.extend({
         this.listenTo(this.model, 'change:butterfly', this.butterflyToggle);
         this.listenTo(this.model, 'butterflySwap', this.butterflySwap);
         this.listenTo(window, 'resize', _.debounce(this.resize));
-        this.listenTo(xiSPECUI.vent, 'resize:spectrum', this.resize);
+        this.listenTo(window.xiSPECUI.vent, 'resize:spectrum', this.resize);
         this.listenTo(this.model, 'change:accentuateCrossLinkContainingFragments', this.accentuateCLcontainingToggle);
 
         this.tooltip = d3.select("body").append("span")
@@ -231,7 +220,7 @@ let FragmentationKeyView = Backbone.View.extend({
                 if (!self.changeMod) {
                     self.tooltip.style("opacity", 0);
                     self.CLlineHighlight.attr("opacity", 1);
-                    self.changeCL = jQuery.extend(true, [], self.linkPos);
+                    self.changeCL = $.extend(true, [], self.linkPos);
                     for (let i = 0; i < self.fraglines.length; i++) {
                         self.fraglines[i].disableCursor();
                     }
@@ -369,7 +358,7 @@ let FragmentationKeyView = Backbone.View.extend({
                         if (self.changeMod !== false) {	//if changeMod is active
                             changeModStartHighlight(this, d);
                         }
-                        ;
+
 
                         if (self.changeCL != false) {
                             changeCLHighlight(this, d);
@@ -439,7 +428,7 @@ let FragmentationKeyView = Backbone.View.extend({
                 let highlight = self.modLetterHighlights[self.changeMod.pepIndex][0][self.changeMod.pos - offset];
                 let oldModLetters = self.modLetters[self.changeMod.pepIndex][0][self.changeMod.pos - offset];
 
-                var x = parseInt(pepLetterHighlight[0][0].getAttribute("x"));
+                const x = parseInt(pepLetterHighlight[0][0].getAttribute("x"));
                 if (pepLetterData.pepIndex == 0)
                     var y = 5;
                 else if (pepLetterData.pepIndex == 1)
@@ -492,13 +481,13 @@ let FragmentationKeyView = Backbone.View.extend({
             }
 
             function changeCLHighlight(pepLetterG, pepLetterData) {
-                var pepLetterHighlight = pepLetterG.childNodes[0];
-                var pepLetter = pepLetterG.childNodes[1];
+                const pepLetterHighlight = pepLetterG.childNodes[0];
+                const pepLetter = pepLetterG.childNodes[1];
                 clearHighlights();
 
                 self.CLline.attr("stroke", "grey");
                 // update changeCL to the currently highlighted ones
-                for (var i = 0; i < self.changeCL.length; i++) {
+                for (let i = 0; i < self.changeCL.length; i++) {
                     if (self.changeCL[i].peptideId == pepLetterData.pepIndex)
                         self.changeCL[i].linkSite = pepLetterData.pos;
                 }
@@ -517,7 +506,7 @@ let FragmentationKeyView = Backbone.View.extend({
             }
 
             //mods
-            var mod_data = []
+            const mod_data = [];
 
             for (var i = 0; i < self.pepModsArray[pepIndex].length; i++) {
                 for (var shift = 0; shift < pep.sequence.length; shift++) {
@@ -544,7 +533,7 @@ let FragmentationKeyView = Backbone.View.extend({
             function get_mod_mass(fullModName) {
                 if (fullModName === undefined)
                     return;
-                var mod = self.model.get("JSONdata").annotation.modifications.filter(function (m) {
+                const mod = self.model.get("JSONdata").annotation.modifications.filter(function (m) {
                     return m.id == fullModName;
                 });
                 if (mod.length < 1) {
@@ -558,18 +547,18 @@ let FragmentationKeyView = Backbone.View.extend({
                 return parseFloat(mod_mass).toFixed(6);
             }
 
-            var modLettersG = pep.group.selectAll("g.modLetterG").data(mod_data);
-            var modLetterG = modLettersG.enter()
+            const modLettersG = pep.group.selectAll("g.modLetterG").data(mod_data);
+            const modLetterG = modLettersG.enter()
                 .append('g')
                 .attr('class', "modLetterG")
                 .style("cursor", self.cursor)
                 .on("mouseover", function () {
                     if (!self.changeMod && !self.changeCL) {
                         //highlight pepLetter
-                        var pepIndex = this.__data__.pepIndex;
-                        var pos = this.__data__.pos;
-                        var modMass = this.__data__.modMass;
-                        var tooltipHTML = "";
+                        const pepIndex = this.__data__.pepIndex;
+                        const pos = this.__data__.pos;
+                        const modMass = this.__data__.modMass;
+                        let tooltipHTML = "";
                         if (modMass !== undefined)
                             tooltipHTML += "Modification mass: " + modMass + "</br>";
                         if (!self.options.disabled)
@@ -624,20 +613,20 @@ let FragmentationKeyView = Backbone.View.extend({
                             self.CLlineHighlight.style("cursor", "not-allowed");
 
 
-                        var highlight = d3.select(this).select(".modLetterHighlight");
+                        const highlight = d3.select(this).select(".modLetterHighlight");
                         highlight.style("font-size", "0.7em").style("cursor", "default");
                         //set changeMod var to the clicked modification
                         self.changeMod = d;
                         highlight.style("opacity", 1);
                         //disable fragBar cursor
-                        for (var i = 0; i < self.fraglines.length; i++) {
+                        for (let i = 0; i < self.fraglines.length; i++) {
                             self.fraglines[i].disableCursor();
                         }
-                        ;
-                        var pepIndex = this.__data__.pepIndex;
-                        var pos = this.__data__.pos;
+
+                        const pepIndex = this.__data__.pepIndex;
+                        const pos = this.__data__.pos;
                         pepLetterG = self.pepLetters[pepIndex][0][pos].parentNode;
-                        pepLetterData = self.pepLetters[pepIndex][0][pos].__data__;
+                        const pepLetterData = self.pepLetters[pepIndex][0][pos].__data__;
                         changeModStartHighlight(pepLetterG, pepLetterData);
                     }
                 })
@@ -688,10 +677,10 @@ let FragmentationKeyView = Backbone.View.extend({
 
     updateHighlights: function () {
 
-        var lines = this.fraglines;
+        const lines = this.fraglines;
 
-        for (l = 0; l < lines.length; l++) {
-            var highlightFragments = _.intersection(lines[l].fragments, this.model.highlights);
+        for (let l = 0; l < lines.length; l++) {
+            const highlightFragments = _.intersection(lines[l].fragments, this.model.highlights);
 
             if (lines[l].fragments.length > 0)
                 lines[l].highlight(false);
@@ -706,30 +695,30 @@ let FragmentationKeyView = Backbone.View.extend({
             this.greyLetters();
             this.colorLetters(this.model.highlights);
         } else {
-            var color = true;
+            let color = true;
             for (i = 1; i < this.model.highlights.length; i++) {
                 if (JSON.stringify(this.model.highlights[i].range) !== JSON.stringify(this.model.highlights[i - 1].range))
                     color = false;
             }
 
             //
-            var duplicates = function (a) {
-                for (var i = 0; i <= a.length; i++) {
-                    for (var j = i; j <= a.length; j++) {
+            const duplicates = function (a) {
+                for (let i = 0; i <= a.length; i++) {
+                    for (let j = i; j <= a.length; j++) {
                         if (i != j && a[i] == a[j]) {
                             return true;
                         }
                     }
                 }
                 return false;
-            }
+            };
             //
 
             //check for overlap
-            var arrays = [[], []];
+            const arrays = [[], []];
             for (var i = 0; i < this.model.highlights.length; i++) {
-                for (var r = 0; r < this.model.highlights[i].range.length; r++) {
-                    var range = [];
+                for (let r = 0; r < this.model.highlights[i].range.length; r++) {
+                    const range = [];
                     for (var j = this.model.highlights[i].range[r].from; j <= this.model.highlights[i].range[r].to; j++) {
                         range.push(j);
                     }
@@ -747,20 +736,20 @@ let FragmentationKeyView = Backbone.View.extend({
     },
 
     greyLetters: function () {
-        for (var i = 0; i < this.pepLetters.length; i++) {
+        for (let i = 0; i < this.pepLetters.length; i++) {
             this.pepLetters[i].attr("fill", this.model.get('peakColor'));
             this.modLetters[i].attr("fill", this.model.get('peakColor'));
         }
     },
 
     colorLetters: function (fragments) {
-        var self = this;
+        const self = this;
         if (fragments == "all") {
             color(0, this.model.p1color, 0, this.pepLetters[0][0].length);
             if (this.peptides[1])
                 color(1, this.model.p2color, 0, this.pepLetters[1][0].length);
         } else {
-            for (var f = 0; f < fragments.length; f++) {
+            for (let f = 0; f < fragments.length; f++) {
                 for (var i = 0; i < fragments[f].range.length; i++) {
                     if (fragments[f].range[i].peptideId == 0)
                         color(0, this.model.p1color, fragments[f].range[i].from, fragments[f].range[i].to + 1);
@@ -774,7 +763,7 @@ let FragmentationKeyView = Backbone.View.extend({
             start += self.pepoffset[pep];
             end += self.pepoffset[pep];
 
-            for (var i = start; i < end; i++) {
+            for (let i = start; i < end; i++) {
                 if (self.pepLetters[pep][0][i])
                     self.pepLetters[pep][0][i].setAttribute("fill", pepColor)
                 if (self.modLetters[pep][0][i - self.pepoffset[pep]])
@@ -815,11 +804,11 @@ let FragmentationKeyView = Backbone.View.extend({
 
     resize: function () {
 
-        var $el = $(this.el)
-        var parentWidth = $el.width();
-        var parentHeight = $el.height();
+        const $el = $(this.el);
+        const parentWidth = $el.width();
+        const parentHeight = $el.height();
 
-        var fragKeyWidth, fragKeyHeight;
+        let fragKeyWidth, fragKeyHeight;
         try {
             fragKeyWidth = this.scaleSvgGroup.node().getBBox().width;
             fragKeyHeight = this.scaleSvgGroup.node().getBBox().height;
@@ -828,13 +817,13 @@ let FragmentationKeyView = Backbone.View.extend({
             fragKeyHeight = 0;
         }
 
-        var scale = 1;
+        let scale = 1;
         if (parentWidth < fragKeyWidth + this.margin.left + this.margin.right) {
             scale = parentWidth / (fragKeyWidth + this.margin.left + this.margin.right)
         }
         this.scaleSvgGroup.attr("transform", "scale(" + scale + ")");
 
-        var top = (this.options.invert) ? parentHeight - fragKeyHeight - 15 + this.margin.top : this.margin.top;
+        const top = (this.options.invert) ? parentHeight - fragKeyHeight - 15 + this.margin.top : this.margin.top;
         this.fragKeyWrapper.attr("transform", "translate(" + this.margin.left + "," + top + ")");
 
     },
