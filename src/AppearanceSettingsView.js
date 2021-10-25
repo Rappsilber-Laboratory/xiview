@@ -174,7 +174,7 @@ export const AppearanceSettingsView = SettingsView.extend({
     },
 
     changeHighlightColor: function (e) {
-        let color = '#' + e.originalEvent.srcElement.value;
+        let color = e.target.value;//'#' + e.originalEvent.srcElement.value;
         //for now change color of model directly
         this.displayModel.set('highlightColor', color);
     },

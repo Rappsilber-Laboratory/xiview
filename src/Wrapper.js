@@ -4,7 +4,7 @@ import * as $ from "jquery";
 import Split from "split.js";
 import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
-import "../vendor/byrei-dyndiv_0.5.css"
+// import "../vendor/byrei-dyndiv_0.5.css"
 
 import {SpectrumWrapper} from "./SpectrumWrapper";
 import {SpectrumControlsView} from "./SpectrumControlsView";
