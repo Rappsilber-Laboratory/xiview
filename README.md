@@ -13,9 +13,14 @@ To change the xiAnnotatorURL use the xiAnnotatorBaseURL option. (If you use the 
 Please refer to the following examples of using xiSPEC in a html page:
   1. example_linear.html 	-- linear peptide example
   2. example_crosslink.html 	-- crosslinked peptide example
-  
+
 
 ### Usage
+
+You need to include the following javascript file in your webpage:
+```
+<script type="text/javascript" src="dist/xispec.js"></script>
+```
 
 To initialize the module create the xiSPEC app with your desired options:
 
@@ -82,3 +87,32 @@ fragmentTolerance: MS2 tolerance for annotating fragment peaks (in ppm or Da). e
 ionTypes: Fragment ion types to annotate separated by semicolon e.g. ```"peptide;a;b;c;x;y;z"```
 
 peakList: Array of peaks of the MS2 scan e.g. ```[[110.0714, 28063.6230], [118.08385, 2084.98925781], ...]```
+
+
+
+### Building on localhost
+
+First install dependencies:
+
+```sh
+npm install
+```
+
+To create a production build:
+
+```sh
+npm run build-prod
+```
+
+To create a development build:
+
+```sh
+npm run build-dev
+```
+
+To run a web server serving the crosslink example page:
+
+```sh
+npm run start:dev
+```
+
