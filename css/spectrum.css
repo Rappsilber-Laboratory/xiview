@@ -242,6 +242,10 @@
 .xispec_peakAnnot{
     font-size:12px;
 }
+.xispec_peakAnnotHighlight{
+    stroke-linecap:round;
+    stroke-linejoin: round;
+}
 .xispec_fragBar{
     stroke-width: 1.3px;
     stroke-linecap:round;
