@@ -842,8 +842,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             hctx.fillStyle = this.options.highlightedColour;
             hctx.strokeStyle = "black";
 
-            var datax = this.getAxisData("X", true, sortedFilteredCrossLinks);
-            var datay = this.getAxisData("Y", true, sortedFilteredCrossLinks);
+            const datax = this.getAxisData("X", true, sortedFilteredCrossLinks);
+            const datay = this.getAxisData("Y", true, sortedFilteredCrossLinks);
 
             const matchLevel = datax.matchLevel || datay.matchLevel;
             const coords = makeCoords(datax, datay);

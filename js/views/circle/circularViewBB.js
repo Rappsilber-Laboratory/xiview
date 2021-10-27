@@ -46,7 +46,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
     const dgap = _options.gap * ratio;
     totalLength += dgap * noOfGaps;
     const scale = d3.scale.linear().domain([0, totalLength]).range(range);
-    var total = dgap / 2; // start with half gap, so gap at top is symmetrical (like a double top)
+    let total = dgap / 2; // start with half gap, so gap at top is symmetrical (like a double top)
 
     const nodeCoordMap = d3.map();
     nodeArr.forEach(function(node) {
@@ -395,7 +395,7 @@ export const CircularViewBB = BaseFrameView.extend({
             })
         ;
 
-        var svg = mainDivSel.select("svg");//.call(backgroundDrag);
+        let svg = mainDivSel.select("svg");//.call(backgroundDrag);
 
         this.nodeDrag = d3.behavior.drag();
         this.nodeDrag.reOrder = function(d) {

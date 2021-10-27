@@ -13,7 +13,6 @@ import {init, allDataLoaded} from './networkFrame';
 import {commonRegexes, displayError} from './utils';
 import {loadGOAnnotations} from "./loadGO";
 import Split from "split.js";
-import {NGLUtils} from "./views/ngl/NGLUtils";
 import {testCallback} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
 import {repopulateNGL} from "./views/ngl/RepopulateNGL";

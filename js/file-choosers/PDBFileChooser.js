@@ -4,7 +4,6 @@ import * as NGL from "../../vendor/ngl.dev";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {filterOutDecoyInteractors, getLegalAccessionIDs, loadUserFile} from "../modelUtils";
 import {addMultipleSelectControls, commonRegexes} from "../utils";
-import {NGLUtils} from "../views/ngl/NGLUtils";
 import d3 from "d3";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 

@@ -1,10 +1,9 @@
-// eslint-disable-next-line no-unused-vars
 import "../../../css/goTermsView.css";
 
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as d3 from "d3";
-import "./sankey";
+import {d3_sankey} from "./sankey";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {GoTerm} from "./goTerm";
@@ -108,7 +107,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         this.listenTo(this.model.get("clmsModel"), "change:matches", this.updateThenRender); // New matches added (via csv generally)
         this.listenTo(this.model, "hiddenChanged", this.updateThenRender);
 
-        this.sankey = d3.sankey().nodeWidth(15);
+        this.sankey = d3_sankey().nodeWidth(15);
         //this.fixed = [];
 
         //markers
@@ -234,8 +233,8 @@ export const GoTermsViewBB = BaseFrameView.extend({
         const proteins = this.model.get("clmsModel").get("participants").values();
         for (let protein of proteins) {
             if (protein.uniprot) {
-                for (var goId of protein.uniprot.go) {
-                    var goTerm = go.get(goId);
+                for (let goId of protein.uniprot.go) {
+                    const goTerm = go.get(goId);
                     if (goTerm) {
                         goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
                         goTerm.interactors.add(protein);

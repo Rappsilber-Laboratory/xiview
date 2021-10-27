@@ -413,10 +413,10 @@ export class FilterModel extends Backbone.Model{
                         const pepStringsCount = preprocPepStrings.length;
 
                         if (pepStringsCount == 1) {
-                            var uppercasePep = preprocPepStrings[0].upper;
-                            var lowercasePep = preprocPepStrings[0].lower
-                            for (var i = 0; i < matchedPepCount; i++) {
-                                var matchedPeptide = matchedPeptides[i];
+                            let uppercasePep = preprocPepStrings[0].upper;
+                            let lowercasePep = preprocPepStrings[0].lower
+                            for (let i = 0; i < matchedPepCount; i++) {
+                                let matchedPeptide = matchedPeptides[i];
                                 if (matchedPeptide.sequence.indexOf(uppercasePep) != -1 ||
                                     (matchedPeptide.seq_mods && matchedPeptide.seq_mods.toLowerCase().indexOf(lowercasePep) != -1)) {
                                     return true;
@@ -428,11 +428,11 @@ export class FilterModel extends Backbone.Model{
                         let aggMatchedCount = 0;
                         for (let ps = 0; ps < pepStringsCount; ps++) {
                             const pepStringCases = preprocPepStrings[ps];
-                            var uppercasePep = pepStringCases.upper;
-                            var lowercasePep = pepStringCases.lower;
+                            let uppercasePep = pepStringCases.upper;
+                            let lowercasePep = pepStringCases.lower;
                             let matchCount = 0;
-                            for (var i = 0; i < matchedPepCount; i++) {
-                                var matchedPeptide = matchedPeptides[i];
+                            for (let i = 0; i < matchedPepCount; i++) {
+                                let matchedPeptide = matchedPeptides[i];
                                 if (matchedPeptide.sequence.indexOf(uppercasePep) != -1 ||
                                     (matchedPeptide.seq_mods && matchedPeptide.seq_mods.toLowerCase().indexOf(lowercasePep) != -1)) {
                                     matchCount += (i + 1); // add 1 for first matched peptide, add 2 for second. So will be 3 if both.

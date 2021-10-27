@@ -1,13 +1,8 @@
 import * as $ from "jquery";
 window.jQuery = $
-// require('jquery-ui');
-
-// import $ from 'webpack-jquery-ui';
-//
-require('webpack-jquery-ui');
-require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
-
 import d3 from "d3";
+import webpack_jquery_ui from "webpack-jquery-ui";
+import webpack_jquery_ui0 from "webpack-jquery-ui/css";  //ommit, if you don't want to load basic css theme
 
 export const jqdialogs = {
         constructDialogMessage: function (dialogID, msg, title) {

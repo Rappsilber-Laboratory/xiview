@@ -115,7 +115,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
                     return selectedMatches.get(match.match.id);
                 }) : [];
                 if (filteredSelectedMatches.length) {
-                    var match = filteredSelectedMatches[0].match;
+                    const match = filteredSelectedMatches[0].match;
                     //console.log ("match", match, selectedMatches.get(match.id));
                     if (match.score() > highestScore || !highestScoringMatch) {
                         highestScore = match.score();
@@ -280,6 +280,6 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
     },
 
     clearSpectrumHighlights: function () {
-        xiSPEC.vent.trigger('clearSpectrumHighlights'); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
+        window.xiSPECUI.vent.trigger('clearSpectrumHighlights'); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
     }
 });

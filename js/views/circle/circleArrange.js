@@ -157,7 +157,7 @@ export const circleArrange = function(proteins, options) {
             });
 
             //console.log (node, "left", leftDistance, "right", rightDistance);
-            var pos = (leftDistance > rightDistance) ? order.length : 0;
+            const pos = (leftDistance > rightDistance) ? order.length : 0;
             order.splice(pos, 0, node);
 
             return order;
@@ -311,7 +311,7 @@ export const circleArrange = function(proteins, options) {
             // Prone to local minima and not reproducible but searching full space is prohibitive (20 nodes = 20! combinations)
             let min = 100000;
             let shuffledOrder = order;
-            for (var n = 0; n < variations && min > 0; n++) {
+            for (let n = 0; n < variations && min > 0; n++) {
                 const crossings = countCrossing(shuffledOrder);
                 if (crossings < min) {
                     min = crossings;
@@ -353,7 +353,7 @@ export const circleArrange = function(proteins, options) {
         return (pArray.length === 1 ? [pArray[0].id] : []);
     }
 
-    var interLinks = makeNodeEdgeLists(proteins);
+    const interLinks = makeNodeEdgeLists(proteins);
     const defaults = {
         crossingMethod: "inwardConn",
         endType: "leastCrossingsEnd",

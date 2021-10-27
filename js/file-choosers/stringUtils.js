@@ -90,7 +90,7 @@ export const STRINGUtils = {
             });
             return promiseObj;
         } else {
-            var idMap = _.pick (identifiersBySpecies, alreadyKnown);
+            const idMap = _.pick (identifiersBySpecies, alreadyKnown);
             console.log ("IDMAP CACHED", idMap);
             return Promise.resolve (idMap);
         }
@@ -163,7 +163,7 @@ export const STRINGUtils = {
         let currChar;
         let phrase = data[0];
         let code = 256;
-        for (var i = 1; i < data.length; i++) {
+        for (let i = 1; i < data.length; i++) {
             currChar = data[i];
             if (dict.has(phrase + currChar)) {
                 phrase += currChar;
@@ -176,7 +176,7 @@ export const STRINGUtils = {
             }
         }
         out.push (phrase.length > 1 ? dict.get(phrase) : phrase.codePointAt(0));
-        for (var i = 0; i < out.length; i++) {
+        for (let i = 0; i < out.length; i++) {
             out[i] = String.fromCodePoint(out[i]);
         }
         //console.log ("LZW MAP SIZE", dict.size, out.slice (-50), out.length, out.join("").length);

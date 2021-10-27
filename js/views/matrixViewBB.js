@@ -9,7 +9,7 @@ import {
     getDistanceSquared,
     radixSort
 } from "../modelUtils";
-import {getChainNameFromChainIndex, make3DAlignID, NGLUtils} from "./ngl/NGLUtils";
+import {getChainNameFromChainIndex, make3DAlignID} from "./ngl/NGLUtils";
 import {commonLabels, declutterAxis, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
@@ -756,7 +756,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
                     //var p = performance.now();
                     const len = atoms2.length;
-                    for (var i = 0; i < atoms1.length; i++) {
+                    for (let i = 0; i < atoms1.length; i++) {
                         const searchIndex1 = alignColl.getAlignedIndex(i + 1, alignInfo1.proteinID, true, alignInfo1.alignID, true) - 1;
                         if (searchIndex1 >= 0) {
                             const row = distanceMatrix[i];
@@ -787,7 +787,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
                 const canvasData = ctx.getImageData(0, 0, this.canvas.attr("width"), this.canvas.attr("height"));
                 const cd = new Uint32Array(canvasData.data.buffer); // canvasData.data         // 32-bit view of buffer
-                var minArray = (alignInfo[0].length * alignInfo[1].length) > 1 ? new Uint8Array(this.canvas.attr("width") * this.canvas.attr("height")) : undefined;
+                let minArray = (alignInfo[0].length * alignInfo[1].length) > 1 ? new Uint8Array(this.canvas.attr("width") * this.canvas.attr("height")) : undefined;
 
                 // draw actual content of chain pairings
                 alignInfo[0].forEach(function(alignInfo1) {

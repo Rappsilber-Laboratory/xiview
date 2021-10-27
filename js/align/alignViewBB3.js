@@ -375,7 +375,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
                 }
             }
 
-            for (var n = 0; n < str.length; n++) {
+            for (var n = 0; n < str.length; n++) { // yep - it has to be a var - cc
                 const c = str[n];
                 const r = rstr[n];
                 const rhyphen = (r === "-");

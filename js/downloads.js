@@ -294,7 +294,7 @@ function getSSL() {
         const sslSeqLinkIndex = findIndexofNthUpperCaseLetter(seq, linkPos);
         return seq.slice(0, sslSeqLinkIndex + 1) + "[+1.008]" + seq.slice(sslSeqLinkIndex + 1, seq.length);
     };
-    var findIndexofNthUpperCaseLetter = function (str, n) { // n is 1-indexed here
+    const findIndexofNthUpperCaseLetter = function (str, n) { // n is 1-indexed here
         str = str || "";
         let i = -1;
         while (n > 0 && i < str.length) {
@@ -662,7 +662,7 @@ function getModificationCount() {
             for (let mod of modSet) {
                 const modCount = modCountMap.get(mod);
                 if (typeof modCount == "undefined") {
-                    var counts = [0, 0, 0];
+                    let counts = [0, 0, 0];
                     modCountMap.set(mod, counts);
                     counts[decoyIndex] = counts[decoyIndex] + 1;
                 } else {
@@ -672,7 +672,7 @@ function getModificationCount() {
             for (let modByRes of modByResSet) {
                 const modByResCount = modByResCountMap.get(modByRes);
                 if (!modByResCount) {
-                    var counts = [0, 0, 0];
+                    let counts = [0, 0, 0];
                     modByResCountMap.set(modByRes, counts);
                     ++counts[decoyIndex];
                 } else {
@@ -685,14 +685,14 @@ function getModificationCount() {
     // var mapSort1 = new Map([...modCountMap.entries()].sort((a, b) => b[1] - a[1]));
     // var mapSort2 = new Map([...modByResCountMap.entries()].sort((a, b) => b[1] - a[1]));
 
-    for (var e of modCountMap.entries()) {
+    for (let e of modCountMap.entries()) {
         csv += '"' + e[0] + '","' + e[1][0] + '","' + e[1][1] + '","' + e[1][2] + '"\r\n';
     }
 
 
     csv += '"",,,""\r\n"",,,""\r\n"",,,""\r\n';
 
-    for (var e of modByResCountMap.entries()) {
+    for (let e of modByResCountMap.entries()) {
         csv += '"' + e[0] + '","' + e[1][0] + '","' + e[1][1] + '","' + e[1][2] + '"\r\n';
     }
 

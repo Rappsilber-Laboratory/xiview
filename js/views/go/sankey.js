@@ -1,4 +1,6 @@
-d3.sankey = function() {
+import d3 from "d3";
+
+export const d3_sankey = function() {
     const sankey = {};
     let nodeWidth = 24,
         nodePadding = 8,
@@ -86,8 +88,8 @@ d3.sankey = function() {
               console.log(sourceVal, sourceSize);*/
               if (d.partOf){//sourceVal <= sourceSize) {
                   //     console.log("**", d.ty);
-                  y0 = d.source.y, /*+ d.sy + d.dy / 2*/
-                  y1 = d.target.y
+                  y0 = d.source.y; /*+ d.sy + d.dy / 2*/
+                  y1 = d.target.y;
               }
 
 
@@ -177,6 +179,7 @@ d3.sankey = function() {
     scaleNodeBreadths((size[0] - nodeWidth) / (x - 1));
   }
 
+  /*
   function moveSourcesRight() {
     nodes.forEach(function(node) {
       if (!node.targetLinks.length) {
@@ -184,6 +187,7 @@ d3.sankey = function() {
       }
     });
   }
+  */
 
   function moveSinksRight(x) {
     nodes.forEach(function(node) {
@@ -214,7 +218,7 @@ d3.sankey = function() {
       //
     initializeNodeDepth();
     resolveCollisions();
-    for (var alpha = 1; iterations > 0; --iterations) {
+    for (let alpha = 1; iterations > 0; --iterations) {
       relaxRightToLeft(alpha *= .99);
       resolveCollisions();
       relaxLeftToRight(alpha);
@@ -241,7 +245,7 @@ d3.sankey = function() {
     }
 
     function relaxLeftToRight(alpha) {
-      nodesByBreadth.forEach(function(nodes, breadth) {
+      nodesByBreadth.forEach(function(nodes/*, breadth*/) {
         nodes.forEach(function(node) {
           if (node.targetLinks.length) {
               const y = d3.sum(node.targetLinks, weightedSource) / d3.sum(node.targetLinks, value);

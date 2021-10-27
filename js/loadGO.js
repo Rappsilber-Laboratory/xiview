@@ -56,14 +56,14 @@ export function loadGOAnnotations (txt) {
         if (term.is_a) {
             for (let superclassId of term.is_a){
                 //console.log ("go", go, superclassId, go.get(superclassId));
-                var other = go.get(superclassId);
+                let other = go.get(superclassId);
                 other.subclasses = other.subclasses || new Set();
                 other.subclasses.add(term.id);
             }
         }
         if (term.part_of) {
             for (let partOfId of term.part_of){
-                var other = go.get(partOfId);
+                let other = go.get(partOfId);
                 other.parts = other.parts || new Set();
                 other.parts.add(term.id);
             }

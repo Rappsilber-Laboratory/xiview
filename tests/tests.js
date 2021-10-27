@@ -89,7 +89,7 @@ export function testCallback (model) {
         const actual = clmsModel.getProteinSearchMap(peptides, matches);
         const expected = {"S1": d3.set(["A", "B", "C"]), "S2": d3.set(["C", "D"])};
 
-        assert.deepEqual(actual, expected, "Expected "+JSON.stringify(expected)+" search to protein map, Passed!");
+        assert.deepEqual(actual, expected);//, "Expected "+JSON.stringify(expected)+" search to protein map, Passed!");
     });
 
     QUnit.test ("Readable ID Generation", function (assert) {

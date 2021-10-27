@@ -354,12 +354,12 @@ export class NGLModelWrapperBB extends Backbone.Model {
                     }
                 }, this);
             } else if (!toEmpty || !fromEmpty) {    // only one end of link in a pdb-indexed protein
-                var toChains = chainValueMap.get(toProtID);
+                const toChains = chainValueMap.get(toProtID);
                 const fromChains = chainValueMap.get(fromProtID);
 
                 // One of these residue lists will be empty
-                var fromPDBResidues = makePDBIndexedResidues(fromChains, xlink.fromResidue, fromProtID);
-                var toPDBResidues = makePDBIndexedResidues(toChains, xlink.toResidue, toProtID);
+                const fromPDBResidues = makePDBIndexedResidues(fromChains, xlink.fromResidue, fromProtID);
+                const toPDBResidues = makePDBIndexedResidues(toChains, xlink.toResidue, toProtID);
                 addResidueListsExtraInfo([fromPDBResidues, toPDBResidues]);
                 addToHalfLinkList(xlink, fromPDBResidues);
                 addToHalfLinkList(xlink, toPDBResidues);
@@ -503,13 +503,13 @@ export class NGLModelWrapperBB extends Backbone.Model {
     getHalfLinkResidues(halfLink) {
         if (halfLink === undefined) {
             const halfLink = this.getHalfLinks();
-            var residues = [];
+            let residues = [];
             halfLink.forEach(function (l) {
                 residues.push(l.residue); // push two values at once so don't use .map
             });
             return residues;
         } else if (Array.isArray(halfLink)) {
-            var residues = [];
+            let residues = [];
             halfLink.forEach(function (l) {
                 residues.push(l.residue); // push two values at once so don't use .map
             });
@@ -871,14 +871,14 @@ export class NGLModelWrapperBB extends Backbone.Model {
                 // Make a hierarchy of models --> chains --> residues to build a string from later
                 let modelBranch = modelTree.get(cp.modelIndex);
                 if (!modelBranch) {
-                    var a = new d3.map();
+                    let a = new d3.map();
                     modelTree.set(cp.modelIndex, a);
                     modelBranch = a;
                 }
 
                 let chainBranch = modelBranch.get(cp.chainname);
                 if (!chainBranch) {
-                    var a = new d3.set();
+                    let a = new d3.set();
                     modelBranch.set(cp.chainname, a);
                     chainBranch = a;
                 }

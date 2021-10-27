@@ -45,7 +45,7 @@ export class GoTerm {
 
             if (this.parts) {
                 for (let partId of this.parts) {
-                    var sub = go.get(partId).getInteractors(storeCount);
+                    let sub = go.get(partId).getInteractors(storeCount);
                     if (sub) {
                         sub.forEach(subTreeSet.add, subTreeSet);
                     }
@@ -53,7 +53,7 @@ export class GoTerm {
             }
             if (this.subclasses) {
                 for (let subclassId of this.subclasses) {
-                    var sub = go.get(subclassId).getInteractors(storeCount);
+                    let sub = go.get(subclassId).getInteractors(storeCount);
                     if (sub) {
                         sub.forEach(subTreeSet.add, subTreeSet);
                     }
@@ -62,7 +62,7 @@ export class GoTerm {
 
             if (this.interactors) {
                 for (let i of this.interactors) {
-                    if (i.hidden == false) {
+                    if (i.hidden === false) {
                         subTreeSet.add(i);
                     }
                 }
@@ -83,7 +83,7 @@ export class GoTerm {
     isDirectRelation(anotherGoTerm) {
         const agoid = anotherGoTerm.id;
         return (
-            (this == anotherGoTerm) ||
+            (this === anotherGoTerm) ||
             (this.is_a && this.is_a.has(agoid)) ||
             (this.subclasses && this.subclasses.has(agoid)) ||
             (this.part_of && this.part_of.has(agoid)) ||
@@ -94,7 +94,7 @@ export class GoTerm {
 
     isDescendantOf(anotherGoTermId) {
         const go = window.compositeModelInst.get("go");
-        if (anotherGoTermId == this.id) {
+        if (anotherGoTermId === this.id) {
             return true;
         }
         if (this.part_of) {

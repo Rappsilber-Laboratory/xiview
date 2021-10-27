@@ -979,7 +979,7 @@ export const DistogramBB = BaseFrameView.extend({
                     return bin !== undefined;
                 })
             ;
-            var bin = d3.merge(bins);
+            const bin = d3.merge(bins);
 
 
             const ev = d3.event || {};

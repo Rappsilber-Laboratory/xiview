@@ -26,7 +26,7 @@ export const fdr = function(crosslinksArr, options) {
         filterLinears: false
     }, options);
 
-    var filterModel = options.filterModel;
+    const filterModel = options.filterModel;
     const clmsModel = options.CLMSModel;
     if (!filterModel || !clmsModel) {
         return null;
@@ -35,7 +35,7 @@ export const fdr = function(crosslinksArr, options) {
     // Work out link score based on a function of the related match scores
     const clCount = crosslinksArr.length;
     for (let i = 0; i < clCount; ++i) {
-        var crosslink = crosslinksArr[i];
+        const crosslink = crosslinksArr[i];
         crosslink.setMeta("linkScore", options.scoreCalcFunc(crosslink));
     }
 
