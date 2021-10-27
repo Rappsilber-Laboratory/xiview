@@ -192,27 +192,27 @@
     padding:20px 10px;
     /*background: rgba(9, 29, 66, 0.9);*/
     overflow: hidden;
-    color:#091d42;
+    color:#091d42!important;
     position:fixed;
     pointer-events:all;
-    background: rgba(224,224,224,1);
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
-    border: 1px solid #888;
+    background: rgba(224,224,224,1)!important;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.5)!important;
+    border: 1px solid #888!important;
 /*
     height:400px;
 */
 }
 .dynDiv_moveParentDiv, .xispec_dynDiv_moveParentDiv{
     height:20px;
-    background:#091D42;
+    background:#091D42!important;
 }
 
 .draggableCorner {
     width:20px;
     height:20px;
-    background:#091D42;
+    background:#091D42!important;
     border:none;
-    background-image:url("../images/tl.png");
+    background-image:url("../images/tl.png")!important;
 }
 
 /* just need 1 background image and rotate it for corner orientations */
@@ -281,11 +281,11 @@
     bottom: 0;
     height: 65px;
 
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #ccc!important;
 
     width: 100%;
-    background:#ecedf2;
-    color:#091D42;
+    background:#ecedf2!important;
+    color:#091D42!important;
     padding-left: 10px;
     padding-right: 10px;
     -webkit-user-select: none;

@@ -1,8 +1,10 @@
 import '../css/networkPage.css';
+import "../css/xispecAdjust.css";
 
 import * as _ from 'underscore';
 import Backbone from "backbone";
 import * as $ from "jquery";
+import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
@@ -54,7 +56,6 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {loadSpectrum} from "./loadSpectrum";
-import d3 from "d3";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
