@@ -23,13 +23,13 @@ export const matchMassToAA = function (mass, tolerance) {
         {"aminoAcid": "W", "monoisotopicMass": 186.07931},
         {"aminoAcid": "Y", "monoisotopicMass": 163.06333},
         {"aminoAcid": "V", "monoisotopicMass": 99.06841}
-    ]
+    ];
 
     let aaArray = aminoAcids.filter(function (d) {
         if (Math.abs(mass - d.monoisotopicMass) < tolerance)
             return true;
     }).map(function (d) {
-        return d.aminoAcid
+        return d.aminoAcid;
     });
 
     return aaArray.join();
