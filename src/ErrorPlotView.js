@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 import {svgUtils} from "../vendor/svgexp";
@@ -11,12 +11,12 @@ export const ErrorPlotView = Backbone.View.extend({
 
     initialize: function (viewOptions) {
 
-        this.listenTo(this.model, 'change:QCabsErr', this.toggleAbsErr);
-        this.listenTo(window.xiSPECUI.vent, 'QCPlotToggle', this.toggleView);
-        this.listenTo(window, 'resize', _.debounce(this.render));
-        this.listenTo(window.xiSPECUI.vent, 'resize:spectrum', this.render);
-        this.listenTo(window.xiSPECUI.vent, 'downloadQCSVG', this.downloadSVG);
-        this.listenTo(window.xiSPECUI.vent, 'QCWrapperShow', this.wrapperVisToggle);
+        this.listenTo(this.model, "change:QCabsErr", this.toggleAbsErr);
+        this.listenTo(window.xiSPECUI.vent, "QCPlotToggle", this.toggleView);
+        this.listenTo(window, "resize", _.debounce(this.render));
+        this.listenTo(window.xiSPECUI.vent, "resize:spectrum", this.render);
+        this.listenTo(window.xiSPECUI.vent, "downloadQCSVG", this.downloadSVG);
+        this.listenTo(window.xiSPECUI.vent, "QCWrapperShow", this.wrapperVisToggle);
 
         const defaultOptions = {};
         this.options = _.extend(defaultOptions, viewOptions);
@@ -33,24 +33,23 @@ export const ErrorPlotView = Backbone.View.extend({
         let height = 500 - margin.top - margin.bottom;
 
         this.svgWrapper = this.svg
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-            .attr('width', width)
-            .attr('height', height)
-            .attr('class', 'wrapper')
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "wrapper");
 
         if (window.compositeModelInst !== undefined)
             this.tooltip = window.compositeModelInst.get("tooltipModel");
         else {
             this.tooltip = d3.select("body").append("span")
-                .attr("class", "xispec_tooltip")
-            ;
+                .attr("class", "xispec_tooltip");
         }
 
-        this.listenTo(this.model, 'change', this.render);
-        this.listenTo(this.model, 'change:colors', this.render);
-        this.listenTo(this.model, 'change:highlightColor', this.render);
-        this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
+        this.listenTo(this.model, "change", this.render);
+        this.listenTo(this.model, "change:colors", this.render);
+        this.listenTo(this.model, "change:highlightColor", this.render);
+        this.listenTo(this.model, "changed:Highlights", this.updateHighlights);
     },
 
     wrapperVisToggle: function (specPanelId) {
@@ -84,20 +83,20 @@ export const ErrorPlotView = Backbone.View.extend({
                         }
                     }
                     let clAA_index = positions[linkSites[index]] + 1;
-					pepStrs[index] = pepStr.slice(0, clAA_index) + "#" + pepStr.slice(clAA_index, pepStr.length);
-                })
+                    pepStrs[index] = pepStr.slice(0, clAA_index) + "#" + pepStr.slice(clAA_index, pepStr.length);
+                });
             }
 
             let svg_name = pepStrs.join("-") + "_z=" + charge;
             svg_name += svgSel.node().id;
             svg_name += ".svg";
-            download(svgXML, 'application/svg', svg_name, true);
+            download(svgXML, "application/svg", svg_name, true);
         }
     },
 
     toggleView: function (specPanelId, id) {
         if (this.options.specPanelId !== specPanelId)
-            return
+            return;
         if (id === this.options.xData) {
             this.isVisible = !this.isVisible;
             $(this.el).toggle();
@@ -132,8 +131,8 @@ export const ErrorPlotView = Backbone.View.extend({
             fragment.clusterInfo.forEach(function (cluster) {
                 let firstPeakId = self.model.get("JSONdata").clusters[cluster.Clusterid].firstPeakId;
                 let intensity = self.model.get("JSONdata").peaks[firstPeakId].intensity;
-                let mz =  self.model.get("JSONdata").peaks[firstPeakId].mz
-                let x_value = self.options.xData === 'Intensity' ? intensity : mz;
+                let mz = self.model.get("JSONdata").peaks[firstPeakId].mz;
+                let x_value = self.options.xData === "Intensity" ? intensity : mz;
 
                 let point = {
                     fragId: fragId,
@@ -145,7 +144,7 @@ export const ErrorPlotView = Backbone.View.extend({
                     y: self.absolute ? Math.abs(cluster.error) : cluster.error,
                     charge: cluster.matchedCharge,
                     //mz: self.model.get("JSONdata").peaks[firstPeakId].mz
-                }
+                };
                 self.data.push(point);
             });
         });
@@ -159,7 +158,7 @@ export const ErrorPlotView = Backbone.View.extend({
         this.height = cy - self.options.margin.top - margin_bottom;
 
         let xmax = d3.max(this.data, function (d) {
-            return d['x'];
+            return d["x"];
         });
         // let ymax = d3.max(this.data, function(d) { return d['error']; });
         let ymax = this.model.MSnTolerance.tolerance;
@@ -173,22 +172,18 @@ export const ErrorPlotView = Backbone.View.extend({
 
         this.y = d3.scale.linear()
             .domain([ymin, ymax]).nice()
-            .range([this.height, 0]).nice()
-        ;
-
+            .range([this.height, 0]).nice();
         let yTicks = this.height / 40;
         let xTicks = this.width / 100;
 
-        this.svgWrapper.selectAll('.axis line, .axis path')
-            .style({'stroke': 'Black', 'fill': 'none', 'stroke-width': '1.2px'});
+        this.svgWrapper.selectAll(".axis line, .axis path")
+            .style({"stroke": "Black", "fill": "none", "stroke-width": "1.2px"});
 
         this.background = this.svgWrapper.append("rect")
             .style("fill", "white")
             // .style("z-index", -1)
             .attr("width", this.width)
-            .attr("height", 0)
-        ;
-
+            .attr("height", 0);
         this.background.on("click", function () {
             this.model.clearStickyHighlights();
         }.bind(this));
@@ -196,9 +191,9 @@ export const ErrorPlotView = Backbone.View.extend({
         // draw the x axis
         this.xAxis = d3.svg.axis().scale(self.x).ticks(xTicks).orient("bottom").tickFormat(d3.format("s"));
 
-        this.xAxisSVG = this.svgWrapper.append('g')
-            .attr('transform', 'translate(0,' + this.y(0) + ')')
-            .attr('class', 'axis xAxis')
+        this.xAxisSVG = this.svgWrapper.append("g")
+            .attr("transform", "translate(0," + this.y(0) + ")")
+            .attr("class", "axis xAxis")
             .call(this.xAxis);
 
 
@@ -221,55 +216,51 @@ export const ErrorPlotView = Backbone.View.extend({
         // draw the y axis
         self.yAxis = d3.svg.axis().scale(this.y).ticks(yTicks).orient("left").tickFormat(d3.format("s"));
 
-        this.yAxisSVG = this.svgWrapper.append('g')
-            .attr('transform', 'translate(0,0)')
-            .attr('class', 'axis')
-            .call(this.yAxis)
-        ;
-
+        this.yAxisSVG = this.svgWrapper.append("g")
+            .attr("transform", "translate(0,0)")
+            .attr("class", "axis")
+            .call(this.yAxis);
         let yLabelText = self.absolute ? "absolute " : "";
         yLabelText += "error (" + this.model.MSnTolerance.unit + ")";
         this.yLabel = this.svgWrapper.append("g").append("text")
             .attr("class", "axis")
             .text(yLabelText)
-            .style("text-anchor", "middle").style("pointer-events", "none")
-        ;
-
+            .style("text-anchor", "middle").style("pointer-events", "none");
         this.yLabel.attr("transform", "translate(" + -50 + " " + this.height / 2 + ") rotate(-90)");
 
         let p1color = this.model.p1color;
         let p2color = this.model.p2color;
 
-        this.g = this.svgWrapper.append('g');
+        this.g = this.svgWrapper.append("g");
 
-        this.highlights = this.g.selectAll('scatter-dot-highlights')
+        this.highlights = this.g.selectAll("scatter-dot-highlights")
             .data(this.data)
-            .enter().append('circle')
+            .enter().append("circle")
             .attr("cx", function (d) {
-                return self.x(d['x']);
+                return self.x(d["x"]);
             })
             .attr("cy", function (d) {
-                return self.y(d['y']);
+                return self.y(d["y"]);
             })
-            .style('fill', this.model.get('highlightColor'))
-            .style('opacity', 0)
-            .style('pointer-events', 'none')
-            .attr('id', function (d) {
-                return d.fragId
+            .style("fill", this.model.get("highlightColor"))
+            .style("opacity", 0)
+            .style("pointer-events", "none")
+            .attr("id", function (d) {
+                return d.fragId;
             })
-            .attr('r', 8);
+            .attr("r", 8);
 
-        this.datapoints = this.g.selectAll('scatter-dots')
+        this.datapoints = this.g.selectAll("scatter-dots")
             .data(this.data)
-            .enter().append('circle')
+            .enter().append("circle")
             .attr("cx", function (d) {
-                return self.x(d['x']);
+                return self.x(d["x"]);
             })
             .attr("cy", function (d) {
-                return self.y(d['y']);
+                return self.y(d["y"]);
             })
-            .attr('id', function (d) {
-                return d.fragId
+            .attr("id", function (d) {
+                return d.fragId;
             })
             .style("cursor", "pointer")
             .style("fill-opacity", 0)
@@ -295,10 +286,10 @@ export const ErrorPlotView = Backbone.View.extend({
 
         function getColor(d) {
             if (d.lossy) {
-                if (d['peptideId'] == 0) return self.model.p1color_loss;
+                if (d["peptideId"] == 0) return self.model.p1color_loss;
                 else return self.model.p2color_loss;
             } else {
-                if (d['peptideId'] == 0) return self.model.p1color;
+                if (d["peptideId"] == 0) return self.model.p1color;
                 else return self.model.p2color;
             }
         }
@@ -318,10 +309,9 @@ export const ErrorPlotView = Backbone.View.extend({
         let header = [[fragment.name]];
         let contents = [
             ["charge", data.charge],
-            ["error", data.error.toFixed(this.model.get('showDecimals')) + ' ' + data.errorUnit],
-            [this.options.xData, data.x.toFixed(this.model.get('showDecimals'))]
+            ["error", data.error.toFixed(this.model.get("showDecimals")) + " " + data.errorUnit],
+            [this.options.xData, data.x.toFixed(this.model.get("showDecimals"))]
         ];
-
 
 
         //Tooltip
@@ -334,8 +324,8 @@ export const ErrorPlotView = Backbone.View.extend({
 
             let charge = data.charge;
             // clusterInfo.matchedCharge;
-            let chargeStr = (charge > 1) ? charge: '';
-            html += '<span style="vertical-align:super;font-size: 0.8em;">'+ chargeStr + '+</span>';
+            let chargeStr = (charge > 1) ? charge : "";
+            html += "<span style=\"vertical-align:super;font-size: 0.8em;\">" + chargeStr + "+</span>";
 
             for (let i = contents.length - 1; i >= 0; i--) {
                 html += "</br>";
@@ -382,22 +372,22 @@ export const ErrorPlotView = Backbone.View.extend({
             return parseInt(d.id) === fragId;
         });
         highlights.forEach(function (circle) {
-            circle.style.opacity = '1';
-        })
+            circle.style.opacity = "1";
+        });
 
         points.forEach(function (point) {
-            point.style.fillOpacity = '1';
-        })
+            point.style.fillOpacity = "1";
+        });
     },
 
     clearHighlights: function () {
         this.highlights[0].forEach(function (circle) {
-            circle.style.opacity = '0';
-        })
+            circle.style.opacity = "0";
+        });
 
         this.datapoints[0].forEach(function (point) {
-            point.style.fillOpacity = '0';
-        })
+            point.style.fillOpacity = "0";
+        });
     },
 
     updateHighlights: function () {
@@ -410,7 +400,7 @@ export const ErrorPlotView = Backbone.View.extend({
     },
 
     toggleAbsErr: function () {
-        this.absolute = this.model.get('QCabsErr');
+        this.absolute = this.model.get("QCabsErr");
         this.render();
     },
 });

@@ -1,10 +1,10 @@
 import "../css/settings.css";
 // import "../../xi3/css/xispecAdjust.css";
-import 'datatables.net-dt/css/jquery.dataTables.css';
+import "datatables.net-dt/css/jquery.dataTables.css";
 
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import * as $ from "jquery";
-import 'datatables.net';
+import "datatables.net";
 import {SettingsView} from "./SettingsView";
 import {PepInputView} from "./PepInputView";
 import d3 from "d3";
@@ -12,18 +12,18 @@ import Spinner from "spin";
 
 export const DataSettingsView = SettingsView.extend({
 
-    events: function() {
+    events: function () {
         return _.extend({}, SettingsView.prototype.events, {
-            'click #xispec_toggleModifications': 'toggleModTable',
-            'click #xispec_toggleLosses': 'toggleLossTable',
-            'click #xispec_addNewLoss': 'addNewLoss',
-            'click #xispec_toggleCustomCfgHelp': 'toggleCustomCfgHelp',
-            'click #xispec_settingsCustomCfgApply': 'applyCustomCfg',
-            'click #xispec_settingsCustomCfgDbSave': 'saveCustomCfg',
-            'click #xispec_settingsAnnotatorApply': 'applyAnnotator',
-            'submit #xispec_settingsForm': 'applyData',
+            "click #xispec_toggleModifications": "toggleModTable",
+            "click #xispec_toggleLosses": "toggleLossTable",
+            "click #xispec_addNewLoss": "addNewLoss",
+            "click #xispec_toggleCustomCfgHelp": "toggleCustomCfgHelp",
+            "click #xispec_settingsCustomCfgApply": "applyCustomCfg",
+            "click #xispec_settingsCustomCfgDbSave": "saveCustomCfg",
+            "click #xispec_settingsAnnotatorApply": "applyAnnotator",
+            "submit #xispec_settingsForm": "applyData",
             // 'keyup .stepInput' : 'updateStepSizeKeyUp',
-            'change .xispec_ionSelectChkbox': 'updateIons',
+            "change .xispec_ionSelectChkbox": "updateIons",
         });
     },
 
@@ -41,34 +41,29 @@ export const DataSettingsView = SettingsView.extend({
 
         this.displayModel = this.options.displayModel;
         // event listeners
-        this.listenTo(window.xiSPECUI.vent, 'dataSettingsToggle', this.toggleView);
+        this.listenTo(window.xiSPECUI.vent, "dataSettingsToggle", this.toggleView);
 
         if (!this.options.showCustomCfg) {
-            this.menu.selectAll('#custom_config').style("display", "none");
+            this.menu.selectAll("#custom_config").style("display", "none");
         }
 
         // general tab
         let generalTab = this.mainDiv.append("div")
             .attr("class", "xispec_settings-tab xispec_flex-column")
-            .attr("id", "xispec_general_tab")
-        ;
-
+            .attr("id", "xispec_general_tab");
         let dataForm = generalTab.append("form")
             .attr("id", "xispec_settingsForm")
             .attr("method", "post")
-            .attr("class", "xispec_flex-column")
-        ;
-
-        let topDataDiv = dataForm.append('div').attr('class', 'xispec_topDataDiv');
+            .attr("class", "xispec_flex-column");
+        let topDataDiv = dataForm.append("div").attr("class", "xispec_topDataDiv");
         let peptideLabel = topDataDiv.append("label").attr("class", "xispec_flex-row").text("Peptide Sequence: ");
-        this.peptideViewEl = peptideLabel.append('div').attr('class', 'xispec_flex-grow').append("input")
+        this.peptideViewEl = peptideLabel.append("div").attr("class", "xispec_flex-grow").append("input")
             .attr("type", "text")
             .attr("required", "")
             .attr("autofocus", "")
             .attr("autocomplete", "off")
             .attr("placeholder", "Peptide Sequence1[;Peptide Sequence2]")
-            .attr("name", "peps")
-        ;
+            .attr("name", "peps");
         this.pepInputView = new PepInputView({model: this.model, el: this.peptideViewEl[0]});
 
         let dataFlexRow = topDataDiv.append("div").attr("class", "xispec_flex-row xispec_splitDataDiv");
@@ -81,22 +76,18 @@ export const DataSettingsView = SettingsView.extend({
             .attr("type", "text")
             .attr("placeholder", "Peak List [m/z intensity]")
             .attr("name", "peaklist")
-            .attr("class", "xispec_form-control")
-        ;
-
+            .attr("class", "xispec_form-control");
         let rightDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataRight");
 
         let ionSelector = rightDiv.append("label").attr("class", "xispec_flex-row").text("Fragment Ions: ")
-            .append("div").attr("class", "xispec_multiSelect_dropdown xispec_flex-grow")
-        ;
+            .append("div").attr("class", "xispec_multiSelect_dropdown xispec_flex-grow");
         ionSelector.append("input")
             .attr("type", "text")
             .attr("class", "xispec_btn-drop")
             .attr("id", "xispec_ionSelection")
-            .attr("readonly", "")
-        ;
+            .attr("readonly", "");
         let ionSelectorDropdown = ionSelector.append("div").attr("class", "xispec_multiSelect_dropdown-content");
-        let ionSelectorList = ionSelectorDropdown.append("ul").attr("id", 'xispec_ionList');
+        let ionSelectorList = ionSelectorDropdown.append("ul").attr("id", "xispec_ionList");
         const ionOptions = [
             {value: "peptide", text: "Peptide Ion"},
             {value: "a", text: "A Ion"},
@@ -118,21 +109,16 @@ export const DataSettingsView = SettingsView.extend({
             })
             .attr("value", function (d) {
                 return d.value;
-            })
-        ;
+            });
         ionSelectorList.selectAll("label").data(ionOptions)
-            .append('span')
+            .append("span")
             .text(function (d) {
                 return d.text;
-            })
-        ;
-
-        this.precursorZ = rightDiv.append("label").attr("class", "xispec_flex-row").text("Precursor charge state: ").append('div').attr('class', 'xispec_flex-grow')
-            .append("input").attr("type", "number").attr("placeholder", "Charge").attr("autocomplete", "off").attr("name", "preCharge").attr("min", "1").attr("required", "")
-        ;
-
+            });
+        this.precursorZ = rightDiv.append("label").attr("class", "xispec_flex-row").text("Precursor charge state: ").append("div").attr("class", "xispec_flex-grow")
+            .append("input").attr("type", "number").attr("placeholder", "Charge").attr("autocomplete", "off").attr("name", "preCharge").attr("min", "1").attr("required", "");
         let toleranceWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("MS2 tolerance: ");
-        this.toleranceValue = toleranceWrapper.append('div').attr('class', 'xispec_flex-grow').append("input")
+        this.toleranceValue = toleranceWrapper.append("div").attr("class", "xispec_flex-grow").append("input")
             .attr("type", "text")
             // .attr("type", "number")
             .attr("placeholder", "tolerance")
@@ -143,18 +129,17 @@ export const DataSettingsView = SettingsView.extend({
             .attr("required", "")
         // .attr("class", "stepInput")
         ;
-        this.toleranceUnit = toleranceWrapper.append('div').append("select")
+        this.toleranceUnit = toleranceWrapper.append("div").append("select")
             .attr("name", "tolUnit")
             .attr("required", "")
             .attr("style", "width: 65px; margin-left: 8px;")
-            .attr("class", "xispec_form-control")
-        ;
+            .attr("class", "xispec_form-control");
         this.toleranceUnit.append("option").attr("value", "ppm").text("ppm");
         this.toleranceUnit.append("option").attr("value", "Da").text("Da");
 
         this.crossLinkerModMassWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("Cross-linker mod mass: ");
 
-        this.crossLinkerModMass = this.crossLinkerModMassWrapper.append('div').attr('class', 'xispec_flex-grow')
+        this.crossLinkerModMass = this.crossLinkerModMassWrapper.append("div").attr("class", "xispec_flex-grow")
             .append("input")
             .attr("placeholder", "CL mod mass")
             .attr("autocomplete", "off")
@@ -167,41 +152,35 @@ export const DataSettingsView = SettingsView.extend({
         ;
 
         // modTable
-        let modToggle = dataForm.append('div')
-            .attr('id', 'xispec_toggleModifications')
-            .attr('class', 'pointer')
-        ;
-        modToggle.append('i').attr("class", "fa fa-minus-square").attr("aria-hidden", "true")
-        modToggle.append('span').text(' Modifications:');
+        let modToggle = dataForm.append("div")
+            .attr("id", "xispec_toggleModifications")
+            .attr("class", "pointer");
+        modToggle.append("i").attr("class", "fa fa-minus-square").attr("aria-hidden", "true");
+        modToggle.append("span").text(" Modifications:");
 
         this.modTableWrapper = dataForm.append("div")
-            .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper")
-        ;
+            .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper");
         let modTable = this.modTableWrapper.append("table")
             .attr("id", "xispec_modificationTable")
             .attr("class", "xispec_settingsTable")
-            .attr("style", "width: 100%")
-        ;
+            .attr("style", "width: 100%");
         this.initializeModTable();
         //end modTable
 
         //lossTable
-        let lossToggle = dataForm.append('div')
-            .attr('id', 'xispec_toggleLosses')
-            .attr('class', 'pointer')
-        ;
-        lossToggle.append('i').attr("class", "fa fa-plus-square pointer").attr("aria-hidden", "true");
-        lossToggle.append('span').text(' Losses:').append('span');
+        let lossToggle = dataForm.append("div")
+            .attr("id", "xispec_toggleLosses")
+            .attr("class", "pointer");
+        lossToggle.append("i").attr("class", "fa fa-plus-square pointer").attr("aria-hidden", "true");
+        lossToggle.append("span").text(" Losses:").append("span");
 
         this.lossTableWrapper = dataForm.append("div")
             .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper")
-            .style('display', 'none')
-        ;
+            .style("display", "none");
         let lossTable = this.lossTableWrapper.append("table")
             .attr("id", "xispec_lossTable")
             .attr("class", "xispec_settingsTable")
-            .attr("style", "width: 100%")
-        ;
+            .attr("style", "width: 100%");
         this.initializeLossTable();
         //end lossTable
 
@@ -211,32 +190,31 @@ export const DataSettingsView = SettingsView.extend({
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
             .attr("value", "Apply")
             .attr("id", "settingsDataApply")
-            .attr("type", "submit")
-        ;
+            .attr("type", "submit");
         let cancelxispec_btn = dataBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
             .attr("type", "button")
         ;
-        
+
         //custom config
         let customConfigTab = this.mainDiv.append("div")
             .attr("class", "xispec_settings-tab xispec_flex-column")
             .attr("id", "xispec_custom_config_tab")
             .style("display", "none");
-        let customConfigHelpToggle = customConfigTab.append('div')
-            .attr('id', 'xispec_toggleCustomCfgHelp')
-            .attr('class', 'pointer')
-            .text('Help ')
-            .append('i').attr("class", "fa fa-question-circle").attr("aria-hidden", "true");
+        let customConfigHelpToggle = customConfigTab.append("div")
+            .attr("id", "xispec_toggleCustomCfgHelp")
+            .attr("class", "pointer")
+            .text("Help ")
+            .append("i").attr("class", "fa fa-question-circle").attr("aria-hidden", "true");
         customConfigTab.append("textarea")
             .attr("id", "xispec_customCfgHelp")
             .attr("class", "xispec_form-control")
             .attr("style", "display:none")
-            .text('# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# also match peaks if they are one Dalton off\n# assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)');
-        let customConfigInputLabel = customConfigTab.append('label')
+            .text("# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# also match peaks if they are one Dalton off\n# assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)");
+        let customConfigInputLabel = customConfigTab.append("label")
             .attr("for", "xispec_settingsCustomCfg-input")
-            .text('Custom config input:');
+            .text("Custom config input:");
         this.customConfigInput = customConfigTab.append("textarea")
             .attr("id", "xispec_settingsCustomCfg-input")
             .attr("class", "xispec_form-control");
@@ -264,7 +242,7 @@ export const DataSettingsView = SettingsView.extend({
             .attr("title", "Write the current custom config to the database.")
             .attr("id", "xispec_settingsCustomCfgDbSave")
             .attr("type", "submit");
-        if (window.dbView !== 'true') {
+        if (window.dbView !== "true") {
             customConfigDbSave.style("display", "none");
         }
 
@@ -286,8 +264,7 @@ export const DataSettingsView = SettingsView.extend({
         this.annotatorDropdown = annotatorWrapper.append("select")
             .attr("name", "annotator")
             .attr("class", "xispec_form-control")
-            .attr('id', 'xispec_annotatorDropdown')
-        ;
+            .attr("id", "xispec_annotatorDropdown");
         this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("classic");
         this.annotatorDropdown.append("option").attr("value", "test/FULL").text("test");
         let annotatorBottom = annotatorTab.append("div")
@@ -309,7 +286,7 @@ export const DataSettingsView = SettingsView.extend({
         d3el.selectAll("input[type=text]").classed("xispec_form-control", true);
         d3el.selectAll("input[type=number]").classed("xispec_form-control", true);
         d3el.selectAll("input[type=textarea]").classed("xispec_form-control", true);
-        d3el.selectAll('select').style("cursor", "pointer");
+        d3el.selectAll("select").style("cursor", "pointer");
 
         // borrowed from CLMSUI.BaseframeView
         // add drag listener to four corners to call resizing locally rather than through dyn_div's api,
@@ -332,22 +309,22 @@ export const DataSettingsView = SettingsView.extend({
         this.renderLossTable();
 
         //ions
-        $('.xispec_ionSelectChkbox:checkbox').prop('checked', false);
+        $(".xispec_ionSelectChkbox:checkbox").prop("checked", false);
         this.model.fragmentIons.forEach(function (ion) {
-            $('#' + ion.type).prop('checked', true);
+            $("#" + ion.type).prop("checked", true);
         });
         let ionSelectionArr = [];
-        $('.xispec_ionSelectChkbox:checkbox:checked').each(function () {
+        $(".xispec_ionSelectChkbox:checkbox:checked").each(function () {
             ionSelectionArr.push($(this).val());
         });
-        $('#xispec_ionSelection').val(ionSelectionArr.join(", "));
+        $("#xispec_ionSelection").val(ionSelectionArr.join(", "));
 
         this.peaklist[0][0].value = this.model.peaksToMGF();
         this.precursorZ[0][0].value = this.model.precursor.charge;
         this.toleranceValue[0][0].value = this.model.MSnTolerance.tolerance;
         this.toleranceUnit[0][0].value = this.model.MSnTolerance.unit;
         this.crossLinkerModMass[0][0].value = this.model.crossLinkerModMass;
-        this.annotatorDropdown[0][0].value = this.displayModel.get('annotatorURL');
+        this.annotatorDropdown[0][0].value = this.displayModel.get("annotatorURL");
         if (this.model.isLinear)
             $(this.crossLinkerModMassWrapper[0][0]).hide();
         else
@@ -356,12 +333,12 @@ export const DataSettingsView = SettingsView.extend({
         if (this.model.customConfig !== undefined)
             this.customConfigInput[0][0].value = this.model.customConfig.join("\n");
         else
-            this.customConfigInput[0][0].value = '';
+            this.customConfigInput[0][0].value = "";
         // this.updateStepSize($(this.toleranceValue[0][0]));
         // this.updateStepSize($(this.crossLinkerModMass[0][0]));
     },
 
-    reset: function(){
+    reset: function () {
         // resetModel: ToDo: move to xiSPEC Wrapper? change to cloning of models?
         // used to reset SettingsModel
         if (this.displayModel.get("JSONdata") == null) return;
@@ -375,8 +352,8 @@ export const DataSettingsView = SettingsView.extend({
     applyCustomCfg: function (e) {
         let json = this.model.get("JSONrequest");
         json.annotation.custom = $("#xispec_settingsCustomCfg-input").val().split("\n");
-        window.xiSPECUI.vent.trigger('requestAnnotation', json, this.displayModel.get('annotatorURL'));
-        this.displayModel.set('changedAnnotation', true);
+        window.xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
+        this.displayModel.set("changedAnnotation", true);
         // this.render();
     },
 
@@ -389,7 +366,7 @@ export const DataSettingsView = SettingsView.extend({
         };
         $.ajax({
             url: "/php/saveCustomCfg.php",
-            type: 'POST',
+            type: "POST",
             data: post_data,
             success: function (data) {
                 customConfig = customConfig.split("\n");
@@ -397,9 +374,9 @@ export const DataSettingsView = SettingsView.extend({
                 let json = self.model.get("JSONrequest");
                 json.annotation.custom = customConfig;
                 // overwrite customConfig on current wrapper
-                window.xiSPECUI.vent.trigger('setCustomConfigOverwrite', customConfig);
+                window.xiSPECUI.vent.trigger("setCustomConfigOverwrite", customConfig);
                 // request current spectrum with updated custom config as original annotation
-                window.xiSPECUI.vent.trigger('requestAnnotation', json_req, this.displayModel.get('annotatorURL'), true);
+                window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.displayModel.get("annotatorURL"), true);
             }
         });
     },
@@ -407,9 +384,9 @@ export const DataSettingsView = SettingsView.extend({
     applyAnnotator: function (e) {
         e.preventDefault();
         let json = this.model.get("JSONrequest");
-        this.displayModel.set('annotatorURL', $('#xispec_annotatorDropdown').val());
-        window.xiSPECUI.vent.trigger('requestAnnotation', json, this.displayModel.get('annotatorURL'));
-        this.displayModel.set('changedAnnotation', true);
+        this.displayModel.set("annotatorURL", $("#xispec_annotatorDropdown").val());
+        window.xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
+        this.displayModel.set("changedAnnotation", true);
     },
 
     applyData: function (e) {
@@ -419,17 +396,17 @@ export const DataSettingsView = SettingsView.extend({
         let form = e.currentTarget;
         //Todo error handling!
         if (!this.checkInputsForValidity(form)) {
-            console.log('Invalid character found in form');
+            console.log("Invalid character found in form");
             return false;
         }
         let self = this;
         let formData = new FormData($(form)[0]);
-        $('#xispec_settingsForm').hide();
+        $("#xispec_settingsForm").hide();
         let spinner = new Spinner({scale: 5}).spin(d3.select("#xispec_settings_main").node());
 
         $.ajax({
-            url: self.model.get('baseDir') + "php/formToJson.php",
-            type: 'POST',
+            url: self.model.get("baseDir") + "php/formToJson.php",
+            type: "POST",
             data: formData,
             async: false,
             cache: false,
@@ -438,14 +415,14 @@ export const DataSettingsView = SettingsView.extend({
             success: function (response) {
                 let json = JSON.parse(response);
 // 				json['annotation']['custom'] = self.displayModel.customConfig;
-                json['annotation']['custom'] = self.displayModel.get("JSONdata").annotation.custom;
-                json['annotation']['precursorMZ'] = self.displayModel.precursor.expMz;
-                json['annotation']['requestID'] = window.xiSPECUI.lastRequestedID + Date.now();
-                window.xiSPECUI.vent.trigger('requestAnnotation', json, self.displayModel.get('annotatorURL'));
-                self.displayModel.set('changedAnnotation', true);
+                json["annotation"]["custom"] = self.displayModel.get("JSONdata").annotation.custom;
+                json["annotation"]["precursorMZ"] = self.displayModel.precursor.expMz;
+                json["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
+                window.xiSPECUI.vent.trigger("requestAnnotation", json, self.displayModel.get("annotatorURL"));
+                self.displayModel.set("changedAnnotation", true);
                 self.displayModel.knownModifications = $.extend(true, [], self.model.knownModifications);
                 spinner.stop();
-                $('#xispec_settingsForm').show();
+                $("#xispec_settingsForm").show();
             }
         });
         return false;
@@ -460,69 +437,69 @@ export const DataSettingsView = SettingsView.extend({
                 return match[0];
             }
             return false;
-        }
+        };
 
         // peptideStr
-        var invalidChar = invalidChars(formData['peps'].value, /([^GALMFWKQESPVICYHRNDTXa-z:;#0-9(.)\-+]+)/);
+        var invalidChar = invalidChars(formData["peps"].value, /([^GALMFWKQESPVICYHRNDTXa-z:;#0-9(.)\-+]+)/);
         if (invalidChar) {
-            alert('Invalid character(s) in peptide sequence: ' + invalidChar);
+            alert("Invalid character(s) in peptide sequence: " + invalidChar);
             return false;
         }
 
         // peakList
-        var invalidChar = invalidChars(formData['peaklist'].value, /([^0-9\.\s]+)/);
+        var invalidChar = invalidChars(formData["peaklist"].value, /([^0-9\.\s]+)/);
         if (invalidChar) {
-            alert('Invalid character(s) in peak list: ' + invalidChar);
+            alert("Invalid character(s) in peak list: " + invalidChar);
             return false;
         }
         // clModMass
-        var invalidChar = invalidChars(formData['clModMass'].value, /([^0-9\.\-]+)/);
+        var invalidChar = invalidChars(formData["clModMass"].value, /([^0-9\.\-]+)/);
         if (invalidChar) {
-            alert('Invalid character(s) in cros-linker modmass: ' + invalidChar);
+            alert("Invalid character(s) in cros-linker modmass: " + invalidChar);
             return false;
         }
         // precursor charge state
-        var invalidChar = invalidChars(formData['preCharge'].value, /([^0-9]+)/);
+        var invalidChar = invalidChars(formData["preCharge"].value, /([^0-9]+)/);
         if (invalidChar) {
-            alert('Invalid character(s) in charge state: ' + invalidChar);
+            alert("Invalid character(s) in charge state: " + invalidChar);
             return false;
         }
         // ms2Tolerance
-        var invalidChar = invalidChars(formData['ms2Tol'].value, /([^0-9\.]+)/);
+        var invalidChar = invalidChars(formData["ms2Tol"].value, /([^0-9\.]+)/);
         if (invalidChar) {
-            alert('Invalid character(s) in ms2Tolerance: ' + invalidChar);
+            alert("Invalid character(s) in ms2Tolerance: " + invalidChar);
             return false;
         }
 
 
         // modifications
-        if (formData['mods[]']) {
-            const inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(''));
+        if (formData["mods[]"]) {
+            const inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(""));
 
-            if (formData['mods[]'][0] === undefined) {
-                var formDataMods = new Array(formData['mods[]']);
-                var formDataSpecificities = new Array(formData['modSpecificities[]'])
+            if (formData["mods[]"][0] === undefined) {
+                var formDataMods = new Array(formData["mods[]"]);
+                var formDataSpecificities = new Array(formData["modSpecificities[]"]);
             } else {
-                var formDataMods = formData['mods[]'];
-                var formDataSpecificities = formData['modSpecificities[]'];
+                var formDataMods = formData["mods[]"];
+                var formDataSpecificities = formData["modSpecificities[]"];
             }
 
             for (let i = 0; i < formDataMods.length; i++) {
-                let formDataAminoAcidsArr = formDataSpecificities[i].value.split('');
+                let formDataAminoAcidsArr = formDataSpecificities[i].value.split("");
 
                 let inputMod = inputMods.filter(function (mod) {
-                    return mod.id == formDataMods[i].value
+                    return mod.id == formDataMods[i].value;
                 })[0];
-                let inputAminoAcidsArr = inputMod.aminoAcids.split('');
+                let inputAminoAcidsArr = inputMod.aminoAcids.split("");
 
-                if (formDataAminoAcidsArr.indexOf('*') !== -1) {
-                    console.log('ok', formDataMods[i].value);
+                if (formDataAminoAcidsArr.indexOf("*") !== -1) {
+                    console.log("ok", formDataMods[i].value);
                     // return true;
                 } else {
-                    for (let j=0; j < inputAminoAcidsArr.length; j++) {
+                    for (let j = 0; j < inputAminoAcidsArr.length; j++) {
                         if (formDataAminoAcidsArr.indexOf(inputAminoAcidsArr[j]) === -1) {
-                            console.log('not ok', formDataMods[i].value);
-                            alert('Invalid modification specificity for: ' + formDataMods[i].value);
+                            console.log("not ok", formDataMods[i].value);
+                            alert("Invalid modification specificity for: " + formDataMods[i].value);
                             return false;
                         }
                         // else{
@@ -554,14 +531,14 @@ export const DataSettingsView = SettingsView.extend({
             "columnDefs": [
                 {
                     "render": function (data, type, row, meta) {
-                        return '<input class="xispec_form-control" id="modName_' + meta.row + '" title="modification code" name="mods[]" readonly type="text" value=' + data + '>';
+                        return "<input class=\"xispec_form-control\" id=\"modName_" + meta.row + "\" title=\"modification code\" name=\"mods[]\" readonly type=\"text\" value=" + data + ">";
                     },
                     "class": "invisible",
                     "targets": 0,
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return row[0] + '<i class="fa fa-undo xispec_resetMod" title="reset modification to default" aria-hidden="true"></i></span>';
+                        return row[0] + "<i class=\"fa fa-undo xispec_resetMod\" title=\"reset modification to default\" aria-hidden=\"true\"></i></span>";
                     },
                     "targets": 1,
                 },
@@ -582,7 +559,7 @@ export const DataSettingsView = SettingsView.extend({
                         //     let stepSize = '0.' + '0'.repeat(data.toString().split('.')[1].length - 1) + 1;
                         // else
                         //     let stepSize = 1;
-                        return '<input class="xispec_form-control stepInput" id="modMass_' + meta.row + '" row="' + meta.row + '" title="modification mass" name="modMasses[]" type="text" required value=' + data + ' autocomplete=off>';
+                        return "<input class=\"xispec_form-control stepInput\" id=\"modMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"modification mass\" name=\"modMasses[]\" type=\"text\" required value=" + data + " autocomplete=off>";
                     },
                     "targets": 2,
                 },
@@ -592,8 +569,8 @@ export const DataSettingsView = SettingsView.extend({
                             for (let i = 0; i < self.model.knownModifications.length; i++) {
                                 if (self.model.knownModifications[i].id == row[0]) {
                                     data = data.split("");
-                                    if (self.model.knownModifications[i].aminoAcids == '*')
-                                        data = '*';
+                                    if (self.model.knownModifications[i].aminoAcids == "*")
+                                        data = "*";
                                     else {
                                         data = _.union(data, self.model.knownModifications[i].aminoAcids);
                                         data.sort();
@@ -604,24 +581,24 @@ export const DataSettingsView = SettingsView.extend({
                             }
                         }
                         data = data.split(",").join("");
-                        return '<input class="xispec_form-control" id="modSpec_' + meta.row + '" row="' + meta.row + '" title="amino acids that can be modified" name="modSpecificities[]" type="text" required value=' + data + ' autocomplete=off>'
+                        return "<input class=\"xispec_form-control\" id=\"modSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"amino acids that can be modified\" name=\"modSpecificities[]\" type=\"text\" required value=" + data + " autocomplete=off>";
                     },
                     "targets": 3,
                 }
             ]
         };
-        let $modTable = $('#xispec_modificationTable')
+        let $modTable = $("#xispec_modificationTable");
 
         this.modTable = $modTable.DataTable(tableVars);
 
         //ToDo: change to BB event handling
-        $modTable.on('input', 'input', function () {
+        $modTable.on("input", "input", function () {
             let row = this.getAttribute("row");
-            let modName = $('#modName_' + row).val();
-            let modMass = parseFloat($('#modMass_' + row).val());
-            let modSpec = $('#modSpec_' + row).val();
+            let modName = $("#modName_" + row).val();
+            let modMass = parseFloat($("#modMass_" + row).val());
+            let modSpec = $("#modSpec_" + row).val();
 
-            let mod = {'id': modName, 'mass': modMass, 'aminoAcids': modSpec.split('')};
+            let mod = {"id": modName, "mass": modMass, "aminoAcids": modSpec.split("")};
 
             let updatedMod = self.model.updateModification(mod);
             if (!updatedMod.userMod)
@@ -629,11 +606,11 @@ export const DataSettingsView = SettingsView.extend({
         });
 
         let displayModified = function (row) {
-            row.addClass('userModified');
+            row.addClass("userModified");
             row.find(".xispec_resetMod").css("visibility", "visible");
-        }
+        };
 
-        $modTable.on('click', '.xispec_resetMod', function () {
+        $modTable.on("click", ".xispec_resetMod", function () {
             let modId = $(this).parent()[0].innerText;
             self.model.resetModification(modId);
             self.renderModTable();
@@ -653,7 +630,7 @@ export const DataSettingsView = SettingsView.extend({
             "columns": [
                 {},
                 {
-                    "title": 'Neutral Loss <i id="xispec_addNewLoss" class="fa fa-plus-circle" aria-hidden="true" title="add new neutral loss"></i>',
+                    "title": "Neutral Loss <i id=\"xispec_addNewLoss\" class=\"fa fa-plus-circle\" aria-hidden=\"true\" title=\"add new neutral loss\"></i>",
                     "className": "dt-center"
                 },
                 {"title": "Mass", "className": "dt-center"},
@@ -662,37 +639,37 @@ export const DataSettingsView = SettingsView.extend({
             "columnDefs": [
                 {
                     "render": function (data, type, row, meta) {
-                        return '<i class="fa fa-trash xispec_deleteLoss" title="delete neutral loss" aria-hidden="true">';
+                        return "<i class=\"fa fa-trash xispec_deleteLoss\" title=\"delete neutral loss\" aria-hidden=\"true\">";
                     },
                     "targets": 0,
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return '<input class="xispec_form-control" style="width:100px" id="lossName_' + meta.row + '" title="neutral loss name" name="losses[]" type="text" value=' + data + '>';
+                        return "<input class=\"xispec_form-control\" style=\"width:100px\" id=\"lossName_" + meta.row + "\" title=\"neutral loss name\" name=\"losses[]\" type=\"text\" value=" + data + ">";
                     },
                     "targets": 1,
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return '<input class="xispec_form-control stepInput" style="width:120px" id="lossMass_' + meta.row + '" row="' + meta.row + '" title="neutral loss mass" name="lossMasses[]" type="text" required value=' + data + ' autocomplete=off>';
+                        return "<input class=\"xispec_form-control stepInput\" style=\"width:120px\" id=\"lossMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss mass\" name=\"lossMasses[]\" type=\"text\" required value=" + data + " autocomplete=off>";
                     },
                     "targets": 2,
                 },
                 {
                     "render": function (data, type, row, meta) {
                         data = data.join(", ");
-                        return '<input class="xispec_form-control" id="lossSpec_' + meta.row + '" row="' + meta.row + '" title="neutral loss specificity" name="lossSpecificities[]" type="text" required value="' + data + '" autocomplete=off>'
+                        return "<input class=\"xispec_form-control\" id=\"lossSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss specificity\" name=\"lossSpecificities[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
                     },
                     "targets": 3,
                 }
             ]
         };
 
-        this.lossTable = $('#xispec_lossTable').DataTable(tableVars);
+        this.lossTable = $("#xispec_lossTable").DataTable(tableVars);
 
-        $('#xispec_lossTable ').on('click', '.xispec_deleteLoss', function () {
+        $("#xispec_lossTable ").on("click", ".xispec_deleteLoss", function () {
             self.lossTable
-                .row($(this).parents('tr'))
+                .row($(this).parents("tr"))
                 .remove()
                 .draw();
         });
@@ -734,7 +711,7 @@ export const DataSettingsView = SettingsView.extend({
     renderModTable: function () {
 
         // ToDo: modifications might be better placed inside model
-        let modifications = this.extractModsFromPepStr(this.model.pepStrsMods.join(''));
+        let modifications = this.extractModsFromPepStr(this.model.pepStrsMods.join(""));
 
         let self = this;
         this.modTable.clear();
@@ -752,8 +729,10 @@ export const DataSettingsView = SettingsView.extend({
                     mod.aminoAcids,
                 ];
                 let annotation_mod_match = self.model.annotationModifications.filter(
-                    function(m){ return m.id === mod.id; })
-                if (annotation_mod_match.length === 1){
+                    function (m) {
+                        return m.id === mod.id;
+                    });
+                if (annotation_mod_match.length === 1) {
                     add_mod = [
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].id,
@@ -768,29 +747,29 @@ export const DataSettingsView = SettingsView.extend({
     },
 
     hideModTable: function () {
-        $('#xispec_toggleModifications').find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
+        $("#xispec_toggleModifications").find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
         $(this.modTableWrapper.node()).hide();
     },
 
     showModTable: function () {
-        $('#xispec_toggleModifications').find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
+        $("#xispec_toggleModifications").find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
         $(this.modTableWrapper.node()).show();
     },
 
     toggleModTable: function () {
         if ($(this.modTableWrapper.node()).is(":visible")) {
-            $('#xispec_toggleModifications').find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
+            $("#xispec_toggleModifications").find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
         } else {
-            $('#xispec_toggleModifications').find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
+            $("#xispec_toggleModifications").find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
         }
         $(this.modTableWrapper.node()).toggle();
     },
 
     addNewLoss: function () {
-        console.log('new loss');
+        console.log("new loss");
         this.lossTable.row.add([
-            '',
-            '',
+            "",
+            "",
             0,
             [],
         ]).draw(false);
@@ -798,9 +777,9 @@ export const DataSettingsView = SettingsView.extend({
 
     toggleLossTable: function () {
         if ($(this.lossTableWrapper.node()).is(":visible")) {
-            $('#xispec_toggleLosses').find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
+            $("#xispec_toggleLosses").find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
         } else {
-            $('#xispec_toggleLosses').find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
+            $("#xispec_toggleLosses").find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
         }
         $(this.lossTableWrapper.node()).toggle();
     },
@@ -815,7 +794,7 @@ export const DataSettingsView = SettingsView.extend({
         } else {
             losses.forEach(function (loss) {
                 self.lossTable.row.add([
-                    '',
+                    "",
                     loss.id,
                     loss.mass,
                     loss.specificity,
@@ -825,7 +804,7 @@ export const DataSettingsView = SettingsView.extend({
     },
 
     toggleCustomCfgHelp: function () {
-        $('#xispec_customCfgHelp').toggle();
+        $("#xispec_customCfgHelp").toggle();
     },
 
     // updateStepSizeKeyUp: function(e){
@@ -847,14 +826,14 @@ export const DataSettingsView = SettingsView.extend({
 
     updateIons: function () {
         let ionSelectionArr = [];
-        $('.xispec_ionSelectChkbox:checkbox:checked').each(function () {
+        $(".xispec_ionSelectChkbox:checkbox:checked").each(function () {
             ionSelectionArr.push($(this).val());
         });
 
         if (ionSelectionArr.length === 0)
-            $('#xispec_ionSelection').val("Select ions...");
+            $("#xispec_ionSelection").val("Select ions...");
         else
-            $('#xispec_ionSelection').val(ionSelectionArr.join(", "));
+            $("#xispec_ionSelection").val(ionSelectionArr.join(", "));
     },
 
     modelChanged: function () {
