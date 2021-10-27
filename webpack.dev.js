@@ -18,6 +18,7 @@ module.exports = merge(common, {
     devServer: {
         contentBase: path.join(__dirname),
         compress: true,
-        port: 9000
+        port: 9000,
+        openPage: "example_crosslink.html"
     }
 });
