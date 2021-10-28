@@ -534,11 +534,11 @@ init.views = function () {
         myOptions: {
             title: "Protein-Selection",
             menu: [{
-                name: "Hide Selected",
-                func: compModel.hideSelectedProteins,
-                context: compModel,
-                tooltip: "Hide selected proteins",
-            },
+                    name: "Hide Selected",
+                    func: compModel.hideSelectedProteins,
+                    context: compModel,
+                    tooltip: "Hide selected proteins",
+                },
                 {
                     name: "Hide Unselected",
                     func: compModel.hideUnselectedProteins,
@@ -582,7 +582,8 @@ init.views = function () {
             title: "Groups",
             menu: [
                 {
-                    categoryTitle: "Group Selected",
+                    sectionBegin: true,
+                    categoryTitle: "Group Selected - enter name:",
                     id: "groupSelected",
                     func: compModel.groupSelectedProteins,
                     closeOnClick: false,
@@ -599,7 +600,7 @@ init.views = function () {
                     name: "Auto Group",
                     func: compModel.autoGroup,
                     context: compModel,
-                    tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)",
+                    tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
                     sectionEnd: true
                 },
                 {
