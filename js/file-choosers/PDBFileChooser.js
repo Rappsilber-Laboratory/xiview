@@ -106,11 +106,11 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 text: "Show PDBs Matching UniProt Accessions @ RCSB.org",
                 tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"
             },
-            {
-                class: "ebiPdbWindowButton",
-                text: "Show PDBs Matching a Protein Sequence @ EBI",
-                tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"
-            }
+            // {
+            //     class: "ebiPdbWindowButton",
+            //     text: "Show PDBs Matching a Protein Sequence @ EBI",
+            //     tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"
+            // }
         ];
         queryBox.selectAll("button").data(qButtonData, function (d) {
             return d.text;
@@ -132,10 +132,10 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             .classed("btn btn-1 btn-1a", true)
             .append("i").attr("class", "fa fa-xi fa-external-link")
         ;
+        //
+        // this.updateProteinDropdown(queryBox);
 
-        this.updateProteinDropdown(queryBox);
-
-        wrapperPanel.append("p").attr("class", "smallHeading").text("Load Results");
+        wrapperPanel.append("p").attr("class", "smallHeading").text("Results:");
         wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
 
         d3.select(this.el).selectAll(".smallHeading").classed("smallHeadingBar", true);
@@ -151,13 +151,13 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             return str.replace(/[^a-z0-9 ,.?!]/ig, '');
         }
 
-        function updatePD() {
-            this.updateProteinDropdown(d3.select(this.el).select(".queryBox"));
-        }
-
-        // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
-        this.listenTo(this.model, "change:selectedProteins", updatePD);
-        this.listenTo(vent, "proteinMetadataUpdated", updatePD);
+        // function updatePD() {
+        //     this.updateProteinDropdown(d3.select(this.el).select(".queryBox"));
+        // }
+        //
+        // // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
+        // this.listenTo(this.model, "change:selectedProteins", updatePD);
+        // this.listenTo(vent, "proteinMetadataUpdated", updatePD);
 
         this.listenTo(this.model, "3dsync", function (newSequences) {
             const count = _.isEmpty(newSequences) ? 0 : newSequences.length;
@@ -197,7 +197,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         const selectedProteins = this.model.get("selectedProteins");
         return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
     },
-
+/*
     updateProteinDropdown: function (parentElem) {
         const proteins = this.getSelectedProteins();
 
@@ -224,7 +224,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         });
 
     },
-
+*/
     launchExternalPDBWindow: function () {
         // http://stackoverflow.com/questions/15818892/chrome-javascript-window-open-in-new-tab
         // annoying workaround whereby we need to open a blank window here and set the location later

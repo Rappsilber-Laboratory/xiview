@@ -664,9 +664,9 @@ div.columnbar[disabled], div.columnbar[disabled], label.fakeButton[disabled] {
 	vertical-align: text-bottom;
 }
 
-button.pdbWindowButton {
-    margin-bottom: 2em;
-}
+/*button.pdbWindowButton {*/
+/*    margin-bottom: 2em;*/
+/*}*/
 
 DIV.messagebar {
 	font-size: 1.4em;
