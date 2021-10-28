@@ -16,9 +16,9 @@ export const FilterViewBB = Backbone.View.extend({
         "mouseup input.filterTypeNumber": "processNumberFilter",
         "click input.filterTypeToggle": "processBooleanFilter",
         "click input.groupToggleFilter": "processGroupToggleFilter",
-        "dblclick button.filterReset": function() {
-            this.model.resetFilter();
-        },
+        // "dblclick button.filterReset": function() {
+        //     this.model.resetFilter();
+        // },
     },
 
     initialize: function(viewOptions) {
@@ -93,10 +93,10 @@ export const FilterViewBB = Backbone.View.extend({
                     label: "C",
                     id: "C"
                 },
-                {
-                    label: "?",
-                    id: "Q"
-                },
+                // {
+                //     label: "?",
+                //     id: "Q"
+                // },
                 {
                     label: "Auto",
                     id: "AUTO",
@@ -228,15 +228,15 @@ export const FilterViewBB = Backbone.View.extend({
 
 
 
-        function initResetGroup() {
-            const resetDivSel = makeFilterControlDiv({class: "verticalFlexContainer", expandable: false});
-            resetDivSel.append("p").attr("class", "smallHeading").text("Filter Bar");
-            resetDivSel.append("button")
-                .attr("class", "filterReset btn btn-1a btn-tight")
-                .attr("title", "Double-click to reset filter to originally set values")
-                .text("Reset")
-            ;
-        }
+        // function initResetGroup() {
+        //     const resetDivSel = makeFilterControlDiv({class: "verticalFlexContainer", expandable: false});
+        //     resetDivSel.append("p").attr("class", "smallHeading").text("Filter Bar");
+        //     resetDivSel.append("button")
+        //         .attr("class", "filterReset btn btn-1a btn-tight")
+        //         .attr("title", "Double-click to reset filter to originally set values")
+        //         .text("Reset")
+        //     ;
+        // }
 
 
         function addFilterGroup (config, filterIDs) {
@@ -376,11 +376,11 @@ export const FilterViewBB = Backbone.View.extend({
         const groupIDs = _.pluck(defaultOptions.searchGroupToggles, "id");
         groupIDs.push ("multipleGroup");
 
-        initResetGroup.call(this);
+        // initResetGroup.call(this);
         addFilterGroup.call (this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
         addFilterGroup.call (this, {groupName: "Crosslinks"}, ["linears", "crosslinks", "ambig", "betweenLinks", "selfLinks", "homomultimericLinks", "aaApart", "pepLength"]);
         initMinigramFilterGroup.call(this, {attr: "distanceCutoff", extentProperty: "distanceExtent", undefAttr: "distanceUndef", label: "Distance", id: "distanceFilter", groupName: "Distances", tooltipIntro: "Filter out crosslinks with distance"});
-        addFilterGroup.call (this, {id: "validationStatus", groupName: "Validation"}, ["A", "B", "C", "Q", "AUTO", "unval", "decoys"]);
+        addFilterGroup.call (this, {id: "validationStatus", groupName: "Validation"}, ["A", "B", "C", "AUTO", "unval", "decoys"]);
         initMinigramFilterGroup.call(this, {attr: "matchScoreCutoff", extentProperty: "scoreExtent", label: "Match Score", id: "matchScore", groupName: "Scores", tooltipIntro: "Filter out matches with scores"});
         initFDRPlaceholder.call(this);
         addFilterGroup.call (this, {id: "navFilters", groupName: "Protein"}, ["pepSeq", "protNames", "protDesc", "protPDB"]);
