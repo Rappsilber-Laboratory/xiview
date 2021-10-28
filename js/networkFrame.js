@@ -555,11 +555,13 @@ init.views = function () {
                     sectionBegin: true
                 },
                 {
+                    sectionBegin: true,
                     id: "proteinSelectionFilter",
                     func: compModel.proteinSelectionTextFilter,
                     closeOnClick: false,
                     context: compModel,
                     tooltip: "Select proteins whose descriptions include input text",
+                    categoryTitle: "Select by text filter:",
                     sectionEnd: true
                 }
             ],
