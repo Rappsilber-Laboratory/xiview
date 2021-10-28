@@ -1103,6 +1103,7 @@ init.viewsThatNeedAsyncData = function () {
         el: "#nglPanel",
         model: compModel,
         displayEventName: "nglViewShow",
+        showAllProteins: false
     });
 
     const urlChunkMap = parseURLQueryString(window.location.search.slice(1));

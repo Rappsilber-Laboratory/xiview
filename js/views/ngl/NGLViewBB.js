@@ -43,7 +43,8 @@ export const NGLViewBB = BaseFrameView.extend({
             "click .showResiduesCB": "toggleResidues",
             "click .shortestLinkCB": "toggleShortestLinksOnly",
             "click .allowInterModelDistancesCB": "toggleAllowInterModelDistances",
-            "click .showAllProteinsCB": "toggleShowAllProteins",
+            "change .showAllProteinsCB": "toggleShowAllProteins",
+            "change .showCrosslinkedProteinsCB": "toggleShowAllProteins",
             "click .chainLabelLengthRB": "setChainLabelLength",
             "click .chainLabelFixedSizeCB": "setChainLabelFixedSize",
             "mouseleave canvas": "clearHighlighted",
@@ -80,13 +81,32 @@ export const NGLViewBB = BaseFrameView.extend({
         const flexWrapperPanel = mainDivSel.append("div")
             .attr("class", "verticalFlexContainer");
 
-        const buttonData = [{
-            label: commonLabels.downloadImg + "PNG",
-            class: "downloadButton",
-            type: "button",
-            id: "download",
-            tooltip: "Save a PNG image of the view"
-        },
+        const buttonData = [
+            // {
+            //     label: commonLabels.downloadImg + "PNG",
+            //     class: "downloadButton",
+            //     type: "button",
+            //     id: "download",
+            //     tooltip: "Save a PNG image of the view"
+            // },
+            {
+                initialState: this.options.showAllProteins,
+                class: "showCrosslinkedProteinsCB",
+                label: "ALL PROTEINS", //todo - should be capitalised by css, to do with btn class
+                type: "radio",
+                group: "allProteins",
+                id: "showCrosslinkedProteins",
+                tooltip: "Keep showing proteins with no current crosslinks (within available PDB structure)"
+            },
+            {
+                initialState: !this.options.showAllProteins,
+                class: "showAllProteinsCB",
+                label: "CROSSLINKED ONLY",//todo - should be capitalised by css, to do with btn class
+                type: "radio",
+                group: "allProteins",
+                id: "showAllProteins",
+                tooltip: "Keep showing proteins with no current crosslinks (within available PDB structure)"
+            },
             {
                 label: "Re-Centre",
                 class: "centreButton",
@@ -253,13 +273,13 @@ export const NGLViewBB = BaseFrameView.extend({
                 id: "showResidues",
                 d3tooltip: "Show crosslinked residues on protein representations"
             },
-            {
-                initialState: this.options.showAllProteins,
-                class: "showAllProteinsCB",
-                label: "All Proteins",
-                id: "showAllProteins",
-                d3tooltip: "Keep showing proteins with no current crosslinks (within available PDB structure)"
-            },
+            // {
+            //     initialState: this.options.showAllProteins,
+            //     class: "showAllProteinsCB",
+            //     label: "All Proteins",
+            //     id: "showAllProteins",
+            //     d3tooltip: "Keep showing proteins with no current crosslinks (within available PDB structure)"
+            // },
             {
                 initialState: this.options.labelVisible,
                 class: "distanceLabelCB",
@@ -935,8 +955,9 @@ export const NGLViewBB = BaseFrameView.extend({
         return this;
     },
 
-    toggleShowAllProteins: function (event) {
-        const bool = event.target.checked;
+    toggleShowAllProteins: function () {
+        const showAllCB = d3.select(".showAllProteinsCB");
+        const bool = !showAllCB.node().checked;
         this.options.showAllProteins = bool;
         if (this.xlRepr) {
             this.xlRepr.options.showAllProteins = bool;

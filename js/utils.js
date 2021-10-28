@@ -309,26 +309,6 @@ export function makeBackboneButtons (targetDiv, baseID, buttonData) {
             return d3.select("#" + makeID(d)).empty();
         });
 
-        targetDiv.selectAll("button.tempClass") // .tempClass ensures existing buttons aren't picked up, only new ones created
-            .data(buttonData.filter(function (bd) {
-                return bd.type === "button";
-            }), function (d) {
-                return d.id;
-            })
-            .enter()
-            .append("button")
-            .text(function (d) {
-                return d.label;
-            })
-            .attr("class", function (d) {
-                return d.class;
-            })
-            .classed("btn btn-1 btn-1a", true) // and we don't class .temp so these can't be picked up by a subsequent call to make backbonebuttons
-            .attr("title", function (d) {
-                return d.tooltip;
-            })
-            .attr("id", makeID);
-
         const cboxes = targetDiv.selectAll("label.tempClass") // .tempClass ensures existing buttons aren't picked up, only new ones created
             .data(buttonData.filter(function (bd) {
                 return bd.type === "checkbox" || bd.type === "radio";
@@ -399,7 +379,28 @@ export function makeBackboneButtons (targetDiv, baseID, buttonData) {
             .text(function (d) {
                 return d.label;
             });
-    }
+
+    targetDiv.selectAll("button.tempClass") // .tempClass ensures existing buttons aren't picked up, only new ones created
+        .data(buttonData.filter(function (bd) {
+            return bd.type === "button";
+        }), function (d) {
+            return d.id;
+        })
+        .enter()
+        .append("button")
+        .text(function (d) {
+            return d.label;
+        })
+        .attr("class", function (d) {
+            return d.class;
+        })
+        .classed("btn btn-1 btn-1a", true) // and we don't class .temp so these can't be picked up by a subsequent call to make backbonebuttons
+        .attr("title", function (d) {
+            return d.tooltip;
+        })
+        .attr("id", makeID);
+
+}
 
     // Functions for making useful file names
 
