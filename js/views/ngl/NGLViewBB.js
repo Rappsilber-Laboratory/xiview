@@ -74,7 +74,7 @@ export const NGLViewBB = BaseFrameView.extend({
     initialize: function (viewOptions) {
         NGLViewBB.__super__.initialize.apply(this, arguments);
         const self = this;
-
+        this.colourScheme = this.options.initialColourScheme;
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el);
 
@@ -455,7 +455,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 self.colourScheme = value;
                 const structure = self.model.get("stageModel").get("structureComp").structure;
                 self.xlRepr.colorOptions.residueSubScheme = NGL.ColormakerRegistry.getScheme({
-                    scheme: value || "uniform",
+                    scheme: value || "uniform", // should be ref to initialColourState instead of "uniform"? - cc
                     structure: structure
                 });
                 //console.log ("SUBSCHEME", self.xlRepr.colorOptions.residueSubScheme);
@@ -601,7 +601,8 @@ export const NGLViewBB = BaseFrameView.extend({
                 buildAssemblySelector.call(this);
                 this
                     .setAssemblyChains()
-                    .repopulate();
+                    .repopulate()
+                    .colorChange(); // added so colours are updated before initial display
             });
 
             // can't save pdb files with 100,000 or more atoms
@@ -623,6 +624,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 this.showFiltered().centerView();
             }
         });
+
     },
 
     setAssemblyChains: function () {
@@ -778,16 +780,16 @@ export const NGLViewBB = BaseFrameView.extend({
     },
 
     colorChange: function () {
-        const val = d3.select(".greyer").property("checked");
-        console.log("GREYNESS", val)
-        NGL.ColormakerRegistry.removeScheme(this.xlRepr.colorOptions.residueColourScheme);
+        // const val = d3.select(".greyer").property("checked");
+        // console.log("GREYNESS", val)
+        // NGL.ColormakerRegistry.removeScheme(this.xlRepr.colorOptions.residueColourScheme);
         // NGL.ColormakerRegistry.removeScheme (this.colorOptions.linkColourScheme);
 
         const self = this;
-        self.xlRepr._initColourSchemes(val);
+        // self.xlRepr._initColourSchemes(val);
         if (self.xlRepr) {
             // var value = d3.event.target.value;
-            // self.colourScheme = value;
+            // self.colourScheme = "chainname";//value;
             const structure = self.model.get("stageModel").get("structureComp").structure;
             self.xlRepr.colorOptions.residueSubScheme = NGL.ColormakerRegistry.getScheme({
                 scheme: self.colourScheme,//value || "uniform",
@@ -799,7 +801,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 {
                     nglRep: self.xlRepr.resRepr,
                     colourScheme: self.xlRepr.colorOptions.residueColourScheme,
-                    immediateUpdate: false
+                    immediateUpdate: true // seemed necessary to change immediate update to true for intial settingof colours
                 },
                 // {
                 //     nglRep: self.xlRepr.halfLinkResRepr,

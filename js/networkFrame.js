@@ -1103,7 +1103,10 @@ init.viewsThatNeedAsyncData = function () {
         el: "#nglPanel",
         model: compModel,
         displayEventName: "nglViewShow",
-        showAllProteins: false
+        myOptions: {
+            showAllProteins: false,
+            initialColourScheme: "chainname",
+        }
     });
 
     const urlChunkMap = parseURLQueryString(window.location.search.slice(1));

@@ -6,8 +6,6 @@ import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
 import {isViableChain, make3DAlignID} from "./NGLUtils";
 
-const {NGLUtils} = require("./NGLUtils");
-
 export class CrosslinkRepresentation {
 
     constructor(newNGLModelWrapper, params) {
