@@ -1,8 +1,8 @@
-import * as _ from 'underscore';
-import * as $ from 'jquery';
-import * as d3 from 'd3';
-import {octree as d3octree} from '../vendor/d3-octree';
-import {commonRegexes} from './utils';
+import * as _ from "underscore";
+import * as $ from "jquery";
+import * as d3 from "d3";
+import {octree as d3octree} from "../vendor/d3-octree";
+import {commonRegexes} from "./utils";
 
 //used by networkframe for setting up minigram
 export function flattenMatches(matchesArr) {
@@ -99,81 +99,81 @@ export function findResiduesInSquare (convFunc, crosslinkMap, x1, y1, x2, y2, as
 
 export const amino3to1Map = {
     "Ala": "A",
-        "Asx": "B",
-        "Cys": "C",
-        "Asp": "D",
-        "Glu": "E",
-        "Phe": "F",
-        "Gly": "G",
-        "His": "H",
-        "Ile": "I",
-        "Lys": "K",
-        "Leu": "L",
-        "Met": "M",
-        "Asn": "N",
-        "Pro": "P",
-        "Gln": "Q",
-        "Arg": "R",
-        "Ser": "S",
-        "Thr": "T",
-        "Val": "V",
-        "Trp": "W",
-        "Tyr": "Y",
-        "Glx": "Z",
-        "*": "*",
-}
+    "Asx": "B",
+    "Cys": "C",
+    "Asp": "D",
+    "Glu": "E",
+    "Phe": "F",
+    "Gly": "G",
+    "His": "H",
+    "Ile": "I",
+    "Lys": "K",
+    "Leu": "L",
+    "Met": "M",
+    "Asn": "N",
+    "Pro": "P",
+    "Gln": "Q",
+    "Arg": "R",
+    "Ser": "S",
+    "Thr": "T",
+    "Val": "V",
+    "Trp": "W",
+    "Tyr": "Y",
+    "Glx": "Z",
+    "*": "*",
+};
 
 const aminoNameto1Map = {
     Alanine: "A",
-        Arginine: "R",
-        Asparagine: "N",
-        Aspartate: "D",
-        Cysteine: "C",
-        Glutamate: "E",
-        Glutamine: "Q",
-        Glycine: "G",
-        Histidine: "H",
-        Isoleucine: "I",
-        Leucine: "L",
-        Lysine: "K",
-        Methionine: "M",
-        Phenylalanine: "F",
-        Proline: "P",
-        Selenocysteine: "U",
-        Serine: "S",
-        Threonine: "T",
-        Tryptophan: "W",
-        Tyrosine: "Y",
-        Valine: "V",
-        All: "*",
-        _All: "X",
-        C_Terminal: "CTERM",
-        N_Terminal: "NTERM"
-}
+    Arginine: "R",
+    Asparagine: "N",
+    Aspartate: "D",
+    Cysteine: "C",
+    Glutamate: "E",
+    Glutamine: "Q",
+    Glycine: "G",
+    Histidine: "H",
+    Isoleucine: "I",
+    Leucine: "L",
+    Lysine: "K",
+    Methionine: "M",
+    Phenylalanine: "F",
+    Proline: "P",
+    Selenocysteine: "U",
+    Serine: "S",
+    Threonine: "T",
+    Tryptophan: "W",
+    Tyrosine: "Y",
+    Valine: "V",
+    All: "*",
+    _All: "X",
+    C_Terminal: "CTERM",
+    N_Terminal: "NTERM"
+};
 
 //used by download.js/getSSL()
 export const amino1toMass = {
     "A": 71.03711,
-        "R": 156.10111,
-        "N": 114.04293,
-        "D": 115.02694,
-        "C": 103.00919,
-        "E": 129.04259,
-        "Q": 128.05858,
-        "G": 57.02146,
-        "H": 137.05891,
-        "I": 113.08406,
-        "L": 113.08406,
-        "K": 128.09496,
-        "M": 131.04049,
-        "F": 147.06841,
-        "P": 97.05276,
-        "S": 87.03203,
-        "T": 101.04768,
-        "W": 186.07931,
-        "Y": 163.06333,
-        "V": 99.06841,
-}
+    "R": 156.10111,
+    "N": 114.04293,
+    "D": 115.02694,
+    "C": 103.00919,
+    "E": 129.04259,
+    "Q": 128.05858,
+    "G": 57.02146,
+    "H": 137.05891,
+    "I": 113.08406,
+    "L": 113.08406,
+    "K": 128.09496,
+    "M": 131.04049,
+    "F": 147.06841,
+    "P": 97.05276,
+    "S": 87.03203,
+    "T": 101.04768,
+    "W": 186.07931,
+    "Y": 163.06333,
+    "V": 99.06841,
+};
 
 // return array of indices of first occurrence of a sequence when encountering a repetition
 // e.g. ["CAT", "DOG", "CAT", "DOG"] -> [undefined, undefined, 0, 1];
@@ -281,8 +281,7 @@ export function getLegalAccessionIDs (interactorCollection) {
         ids = _.pluck (filterOutDecoyInteractors(interactorCollection), "accession")
             .filter(function(accession) {
                 return accession.match(commonRegexes.uniprotAccession);
-            })
-        ;
+            });
     }
     return ids;
 }
@@ -297,7 +296,7 @@ export function loadUserFile (fileObj, successFunc, associatedData) {
             return function(e) {
                 successFunc(e.target.result, associatedData);
                 // hack for https://stackoverflow.com/a/28274454
-                const fileChooserInputs = document.getElementsByClassName('selectMetaDataFileButton');
+                const fileChooserInputs = document.getElementsByClassName("selectMetaDataFileButton");
                 for (let fci of fileChooserInputs) {
                     fci.value = null;
                 }
@@ -467,9 +466,7 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
                     matchedCrossLink.setMeta(entry.key, val.toString());
                 }
             });
-        })
-    ;
-
+        });
     const registry = clmsModel.get("crosslinkMetaRegistry") || d3.set();
     columns.forEach (registry.add, registry);
     clmsModel.set("crosslinkMetaRegistry", registry);
@@ -483,7 +480,7 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
     };
 
     if (columns) {
-        vent.trigger("linkMetadataUpdated", result, {source: "file"});
+        window.vent.trigger("linkMetadataUpdated", result, {source: "file"});
     }
 
     return result;
@@ -542,7 +539,7 @@ export function updateProteinMetadata (metaDataFileContents, clmsModel) {
     });
 
     if (columns) {
-        vent.trigger("proteinMetadataUpdated", {
+        window.vent.trigger("proteinMetadataUpdated", {
             columns: columns,//_.difference (columns, ["name", "Name"]),
             items: proteins,
             matchedItemCount: matchedProteinCount
@@ -562,7 +559,7 @@ export function updateProteinMetadata (metaDataFileContents, clmsModel) {
                 } else {
                     const groupParticipants = new Set();
                     groupParticipants.add(participant.id);
-                    groupMap.set(group, groupParticipants)
+                    groupMap.set(group, groupParticipants);
                 }
             }
         }
@@ -640,7 +637,7 @@ export function updateUserAnnotationsMetadata (userAnnotationsFileContents, clms
         }
     });
 
-    vent.trigger("userAnnotationsUpdated", {
+    window.vent.trigger("userAnnotationsUpdated", {
         types: annotationMap.values(),
         columns: annotationMap.values(),
         items: newAnnotations,
@@ -716,8 +713,7 @@ export function mergeContiguousFeatures (features) {
         mergedRanges.map(function (coords) { // make new features based on the new merged ranges
             return $.extend({}, features[0], coords); // features[0] is used to get other fields
         }) :
-        features // otherwise just use originals
-    ;
+        features; // otherwise just use originals
     //console.log ("mergedFeatures", features, merged);
     return merged;
 }
@@ -816,7 +812,9 @@ function tryParseJSON (jsonString) {
         if (o && typeof o === "object") {
             return o;
         }
-    } catch (e) {}
+    } catch (e) {
+        console.log(e);
+    }
 
     return false;
 }

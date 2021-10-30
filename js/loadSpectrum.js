@@ -10,13 +10,13 @@ export const loadSpectrum = function (match, randId, spectrumModel) {
         formatted_data.sequence2 = match.matchedPeptides[1].seq_mods;
         formatted_data.linkPos2 = match.linkPos2 - 1;
     }
-    formatted_data.crossLinkerModMass = match.crosslinkerModMass()
+    formatted_data.crossLinkerModMass = match.crosslinkerModMass();
     formatted_data.modifications = xiSPEC.activeSpectrum.models.Spectrum.knownModifications;
     formatted_data.precursorCharge = match.precursorCharge;
     formatted_data.fragmentTolerance = match.fragmentTolerance();
 
     const search = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId);
-    formatted_data.customConfig = search.customsettings.split('\n');
+    formatted_data.customConfig = search.customsettings.split("\n");
 
     for (let cl of search.crosslinkers) {
         formatted_data.customConfig.push(cl.description);
@@ -28,12 +28,12 @@ export const loadSpectrum = function (match, randId, spectrumModel) {
         const match = /(?=.*NAME:([^;]+))(?=.*aminoacids:([^;]+))(?=.*MASS:([^;]+)).*/.exec(loss.description);
         if (match) {
             formatted_loss.id = match[1];
-            formatted_loss.specificity = match[2].split(',');
+            formatted_loss.specificity = match[2].split(",");
             formatted_loss.mass = parseFloat(match[3]);
-            if (loss.description.indexOf(';nterm') !== -1)
-                formatted_loss.specificity.push('NTerm');
-            if (loss.description.indexOf(';cterm') !== -1)
-                formatted_loss.specificity.push('CTerm');
+            if (loss.description.indexOf(";nterm") !== -1)
+                formatted_loss.specificity.push("NTerm");
+            if (loss.description.indexOf(";cterm") !== -1)
+                formatted_loss.specificity.push("CTerm");
         }
         formatted_data.losses.push(formatted_loss);
         // ToDo: remove tmp fix for losses to customConfig
@@ -42,15 +42,15 @@ export const loadSpectrum = function (match, randId, spectrumModel) {
 
     const ions = match.ionTypes();
     formatted_data.ionTypes = ions.map(function (ion) {
-        return ion.type.replace("Ion", "")
-    }).join(';')
+        return ion.type.replace("Ion", "");
+    }).join(";");
     formatted_data.precursorMZ = match.expMZ();
     formatted_data.requestID = match.id;
-    formatted_data.spectrum_title = 'PSMID: ' + match.id;
+    formatted_data.spectrum_title = "PSMID: " + match.id;
 
     console.log("loadSpectrum match:" + match.id);
 
-    d3.text('../CLMS-model/php/peakList.php?sid=' + match.searchId + '-' + randId + '&spid=' + match.spectrumId, function (error, text) {
+    d3.text("../CLMS-model/php/peakList.php?sid=" + match.searchId + "-" + randId + "&spid=" + match.spectrumId, function (error, text) {
         if (error) {
             console.log("error getting peak list", error);
         } else {

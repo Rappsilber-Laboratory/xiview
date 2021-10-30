@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 
 import Backbone from "backbone";
 
@@ -62,7 +62,9 @@ export class CompositeModel extends Backbone.Model{
         crosslinksArr.forEach (function (clink) {
             clink.confirmedHomomultimer = false;
             if (clink.isSelfLink()) {
-                clink.confirmedHomomultimer = _.any (clink.matches_pp, function (m) { return m.match.confirmedHomomultimer;});
+                clink.confirmedHomomultimer = _.any (clink.matches_pp, function (m) {
+                    return m.match.confirmedHomomultimer;
+                });
             }
         });
         return this;
@@ -185,33 +187,33 @@ export class CompositeModel extends Backbone.Model{
                     const matches_pp = crosslink.matches_pp;
                     const matchCount = matches_pp.length;
                     for (let m = 0; m < matchCount; m++) {
-                            var matchAndPepPos = matches_pp[m];
-                            var match = matchAndPepPos.match;
-                            var pass = filterModel.subsetFilter(match) &&
+                        var matchAndPepPos = matches_pp[m];
+                        var match = matchAndPepPos.match;
+                        var pass = filterModel.subsetFilter(match) &&
                                 filterModel.validationStatusFilter(match) &&
                                 filterModel.scoreFilter(match) &&
                                 filterModel.decoyFilter(match);
 
-                            // Either 1.
-                            // this beforehand means navigation filters do affect ambiguous state of crosslinks
-                            // pass = pass && filterModel.navigationFilter(match);
+                        // Either 1.
+                        // this beforehand means navigation filters do affect ambiguous state of crosslinks
+                        // pass = pass && filterModel.navigationFilter(match);
 
-                            if (pass && match.crosslinks.length === 1) {
-                                crosslink.ambiguous = false;
-                            }
+                        if (pass && match.crosslinks.length === 1) {
+                            crosslink.ambiguous = false;
+                        }
 
-                            // Or 2.
-                            // this afterwards means navigation filters don't affect ambiguous state of crosslinks
-                            pass = pass && filterModel.navigationFilter(match) && filterModel.groupFilter(match);
+                        // Or 2.
+                        // this afterwards means navigation filters don't affect ambiguous state of crosslinks
+                        pass = pass && filterModel.navigationFilter(match) && filterModel.groupFilter(match);
 
-                            if (pass) {
-                                crosslink.filteredMatches_pp.push(matchAndPepPos);
-                                // TODO: match reporting as homomultimer if ambiguous and one associated crosslink is homomultimeric
-                                if (match.confirmedHomomultimer && isSelf) {
-                                    crosslink.confirmedHomomultimer = true;
-                                }
+                        if (pass) {
+                            crosslink.filteredMatches_pp.push(matchAndPepPos);
+                            // TODO: match reporting as homomultimer if ambiguous and one associated crosslink is homomultimeric
+                            if (match.confirmedHomomultimer && isSelf) {
+                                crosslink.confirmedHomomultimer = true;
                             }
                         }
+                    }
                     //}
 
                     if (!filterModel.distanceFilter (crosslink)) {
@@ -651,17 +653,17 @@ export class CompositeModel extends Backbone.Model{
                     if (interactors && interactors.size > 1) {
                         // console.log("*"+ goTerm.name);
                         if (goTerm.isDescendantOf("GO0032991")) {
-                                console.log(">" + goTerm.name);
+                            console.log(">" + goTerm.name);
 
                             const participantIds = new Set();
                             for (let p of interactors) {
-                                    participantIds.add(p.id);
-                                }
-                                groupMap.set(goTerm.name, participantIds);
-
-                            } else {
-                                // console.log("!" + goTerm.name);
+                                participantIds.add(p.id);
                             }
+                            groupMap.set(goTerm.name, participantIds);
+
+                        } else {
+                            // console.log("!" + goTerm.name);
+                        }
 
                     }
                 }
@@ -761,7 +763,9 @@ export class CompositeModel extends Backbone.Model{
             return options.returnChainInfo || dist == undefined ? dist : +dist; // + is to stop it being a string
         }, this);
         if (!includeUndefineds) {
-            distArr = distArr.filter (function (d) { return d != undefined; });
+            distArr = distArr.filter (function (d) {
+                return d != undefined; 
+            });
         }
         //console.log ("distArr", distArr);
 

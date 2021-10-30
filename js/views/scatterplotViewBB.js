@@ -1,6 +1,6 @@
-import '../../css/scatterplot.css';
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import "../../css/scatterplot.css";
+import * as _ from "underscore";
+import * as $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
@@ -97,22 +97,22 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             inputFirst: true,
             initialState: this.options.jitter
         },
-            {
-                class: "logX",
-                label: "Log X Axis",
-                id: "logx",
-                type: "checkbox",
-                inputFirst: true,
-                initialState: this.options.logX
-            },
-            {
-                class: "logY",
-                label: "Log Y Axis",
-                id: "logy",
-                type: "checkbox",
-                inputFirst: true,
-                initialState: this.options.logY
-            }
+        {
+            class: "logX",
+            label: "Log X Axis",
+            id: "logx",
+            type: "checkbox",
+            inputFirst: true,
+            initialState: this.options.logX
+        },
+        {
+            class: "logY",
+            label: "Log Y Axis",
+            id: "logy",
+            type: "checkbox",
+            inputFirst: true,
+            initialState: this.options.logY
+        }
         ];
         makeBackboneButtons(this.controlDiv, self.el.id, toggleButtonData);
 
@@ -130,8 +130,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         // Canvas
         const canvasDiv = viewDiv.append("div")
             .style("position", "absolute")
-            .style("transform", "translate(" + this.margin.left + "px," + this.margin.top + "px)")
-        ;
+            .style("transform", "translate(" + this.margin.left + "px," + this.margin.top + "px)");
 
         // canvas for drawing the current filtered and selected node sets
         this.filteredCanvas = canvasDiv.append("canvas");
@@ -173,16 +172,16 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             text: this.options.xlabel,
             dy: "0em"
         },
-            {
-                class: "axis",
-                text: this.options.ylabel,
-                dy: "1em"
-            },
-            {
-                class: "chartHeader",
-                text: this.options.chartTitle,
-                dy: "-0.5em"
-            },
+        {
+            class: "axis",
+            text: this.options.ylabel,
+            dy: "1em"
+        },
+        {
+            class: "chartHeader",
+            text: this.options.chartTitle,
+            dy: "-0.5em"
+        },
         ];
 
         this.vis.selectAll("g.label")
@@ -286,10 +285,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         // if highlighted/selection matches change, or colour model change, then recolour cross links
         this.listenTo(this.model, "selectionMatchesLinksChanged change:linkColourAssignment currentColourModelChanged", this.recolourCrossLinks);
         this.listenTo(this.model, "highlightsMatchesLinksChanged", this.rehighlightCrossLinks);
-        this.listenTo(this.model, "filteringDone", function() { this.renderCrossLinks({isFiltering: true}); });
+        this.listenTo(this.model, "filteringDone", function() {
+            this.renderCrossLinks({isFiltering: true}); 
+        });
         this.listenTo(this.model.get("clmsModel"), "change:distancesObj", this.ifADistanceAxisRerender);
-        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
-        this.listenTo(vent, "linkMetadataUpdated", function(metaMetaData) {
+        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
+        this.listenTo(window.vent, "linkMetadataUpdated", function(metaMetaData) {
             //console.log ("HELLO", arguments);
             const columns = metaMetaData.columns;
             const newOptions = columns.map(function (column) {
@@ -493,9 +494,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             })
             .each(function(d) {
                 funcMeta = d;
-            })
-        ;
-
+            });
         return funcMeta;
     },
 
@@ -594,10 +593,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             dataDetails: datax,
             scale: this.x
         },
-            {
-                dataDetails: datay,
-                scale: this.y
-            },
+        {
+            dataDetails: datay,
+            scale: this.y
+        },
         ];
 
         directions.forEach(function(direction) {
@@ -784,7 +783,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
             let sortedFilteredCrossLinks;
             if (highlightsOnly) {
-                sortedFilteredCrossLinks = filteredCrossLinks.filter (function (link) { return highlightedCrossLinkIDs.has(link.id); });
+                sortedFilteredCrossLinks = filteredCrossLinks.filter (function (link) {
+                    return highlightedCrossLinkIDs.has(link.id); 
+                });
             } else {
                 selectedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
                 sortedFilteredCrossLinks = radixSort (4, filteredCrossLinks, function(link) {
@@ -1010,14 +1011,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.filteredCanvas
             .attr("width", sizeData.width)
             .attr("height", sizeData.height)
-            .classed ("backdrop", true)
-        ;
-
+            .classed ("backdrop", true);
         this.highlightedCanvas
             .attr("width", sizeData.width)
-            .attr("height", sizeData.height)
-        ;
-
+            .attr("height", sizeData.height);
         const extent = this.brush.extent(); // extent saved before x and y ranges updated
         const chartMargin = this.options.chartMargin;
 
@@ -1044,14 +1041,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     redrawAxes: function(sizeData) {
         this.vis.select(".x")
             .attr("transform", "translate(0," + (sizeData.height) + ")")
-            .call(this.xAxis)
-        ;
-
+            .call(this.xAxis);
         this.vis.select(".y")
             .attr("transform", "translate(-1,0)")
-            .call(this.yAxis)
-        ;
-
+            .call(this.yAxis);
         declutterAxis(this.vis.select(".x"));
         declutterAxis(this.vis.select(".y"));
 
@@ -1066,16 +1059,16 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             y: sizeData.height + this.margin.bottom - 5,
             rot: 0
         },
-            {
-                x: -this.margin.left,
-                y: sizeData.height / 2,
-                rot: -90
-            },
-            {
-                x: sizeData.width / 2,
-                y: 0,
-                rot: 0
-            }
+        {
+            x: -this.margin.left,
+            y: sizeData.height / 2,
+            rot: -90
+        },
+        {
+            x: sizeData.width / 2,
+            y: 0,
+            rot: 0
+        }
         ];
         this.vis.selectAll("g.label text")
             .data(labelCoords)

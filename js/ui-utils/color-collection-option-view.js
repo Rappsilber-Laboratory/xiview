@@ -13,8 +13,7 @@ export const ColourCollectionOptionViewBB = Backbone.View.extend({
         const addOptions = function (selectSel) {
             const optionSel = selectSel
                 .selectAll("option")
-                .data(self.model.toJSON())
-            ;
+                .data(self.model.toJSON());
             optionSel.exit().remove();
             optionSel.enter().append("option");
             optionSel

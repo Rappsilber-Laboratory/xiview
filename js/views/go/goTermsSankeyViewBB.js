@@ -1,7 +1,7 @@
 import "../../../css/goTermsView.css";
 
-import * as $ from 'jquery';
-import * as _ from 'underscore';
+import * as $ from "jquery";
+import * as _ from "underscore";
 import * as d3 from "d3";
 import {d3_sankey} from "./sankey";
 
@@ -77,9 +77,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         controlDiv.append("input")
             .attr("type", "text")
             .attr("placeholder", "Search Go Term Names...")
-            .attr("class", "btn-1 goTextMatch")
-        ;
-
+            .attr("class", "btn-1 goTextMatch");
         controlDiv.append("span").attr("class", "goTextResult");
 
         this.chartDiv = flexWrapperPanel.append("div")
@@ -113,48 +111,47 @@ export const GoTermsViewBB = BaseFrameView.extend({
         //markers
         const data = [{
             id: 1,
-            name: 'diamond',
-            path: 'M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z',
-            viewbox: '-5 -5 15 15',
-            transform: 'scale(0.7) translate(5,0)',
+            name: "diamond",
+            path: "M 0,-7.0710768 L -7.0710894,0 L 0,7.0710589 L 7.0710462,0 L 0,-7.0710768 z",
+            viewbox: "-5 -5 15 15",
+            transform: "scale(0.7) translate(5,0)",
             color: this.options.partofColour
         }, {
             id: 2,
-            name: 'arrow',
+            name: "arrow",
             path: "M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z",
-            viewbox: '-5 -5 15 15',
-            transform: 'scale(1.1) translate(1,0)',
+            viewbox: "-5 -5 15 15",
+            transform: "scale(1.1) translate(1,0)",
             color: this.options.subclassColour
         }];
 
-        const defs = this.svg.append('svg:defs');
-        const marker = defs.selectAll('marker')
+        const defs = this.svg.append("svg:defs");
+        const marker = defs.selectAll("marker")
             .data(data)
             .enter()
-            .append('svg:marker')
-            .attr('id', function (d) {
-                return 'marker_' + d.name;
+            .append("svg:marker")
+            .attr("id", function (d) {
+                return "marker_" + d.name;
             })
-            .attr('markerHeight', 15)
-            .attr('markerWidth', 15)
-            .attr('markerUnits', 'userSpaceOnUse')
+            .attr("markerHeight", 15)
+            .attr("markerWidth", 15)
+            .attr("markerUnits", "userSpaceOnUse")
             // .attr('orient', 'auto')
-            .attr('refX', 0)
-            .attr('refY', 0)
-            .attr('viewBox', function (d) {
+            .attr("refX", 0)
+            .attr("refY", 0)
+            .attr("viewBox", function (d) {
                 return d.viewbox;
             })
-            .append('svg:path')
-            .attr('d', function (d) {
+            .append("svg:path")
+            .attr("d", function (d) {
                 return d.path;
             })
-            .attr('fill', function (d) {
+            .attr("fill", function (d) {
                 return d.color;
             })
-            .attr('transform', function (d) {
+            .attr("transform", function (d) {
                 return d.transform;
-            })
-        ;
+            });
 
         // initial update done via hiddenChanged trigger above - which is called after all views are set up
         this.update();  // needed here to init interactors in goterms, temp hack, todo
@@ -186,24 +183,18 @@ export const GoTermsViewBB = BaseFrameView.extend({
             })
             .classed("highlightedGOTerm", function (d) {
                 return d.strMatch;
-            })
-        ;
-
+            });
         nodes.select("rect")
             .style("stroke", function (d) {
                 return d.strMatch ? null : d3.rgb(d.color).darker(2);
-            })
-        ;
-
+            });
         nodes.select("text")
             .attr("clip-path", function (d) {
                 return d.strMatch ? null : self.textOrient(d);
             })
             .call(textPos, function () {
                 return false;
-            })
-        ;
-
+            });
         const interactors = Array.from(allInteractorSet.values());
         const msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
         d3.select(this.el).select(".goTextResult").text(msg);
@@ -217,9 +208,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 return d3.select(this).property("selected");
             })
             .datum()
-            .trim()
-        ;
-
+            .trim();
         const go = this.model.get("go");
         //associate go terms with proteins (clear them first)
         for (let g of go.values()) {
@@ -307,9 +296,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     for (let partId of goTerm.parts) {
                         const partTerm = go.get(partId);
                         // if (partTerm.isDescendantOf("GO0032991")) {
-                            if (partTerm.namespace == goTerm.namespace && partTerm.filtInteractorCount > 1) {
-                                sankeyNode(partId);
-                            }
+                        if (partTerm.namespace == goTerm.namespace && partTerm.filtInteractorCount > 1) {
+                            sankeyNode(partId);
+                        }
                         // }
                     }
                 }
@@ -317,9 +306,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     for (let subclassId of goTerm.subclasses) {
                         const subclassTerm = go.get(subclassId);
                         // if (subclassTerm.isDescendantOf("GO0032991")){
-                            if (subclassTerm.namespace == goTerm.namespace && subclassTerm.filtInteractorCount > 1) {
-                                sankeyNode(subclassId);
-                            }
+                        if (subclassTerm.namespace == goTerm.namespace && subclassTerm.filtInteractorCount > 1) {
+                            sankeyNode(subclassId);
+                        }
                         // }
                     }
                 }
@@ -437,17 +426,13 @@ export const GoTermsViewBB = BaseFrameView.extend({
                         return d.partOf ? self.options.partofColour : self.options.subclassColour; //"#bdbdbd"
                     })
                     .style("display", "none")
-                    .attr('marker-start', function (d, i) {
-                        return 'url(#marker_' + (d.partOf ? "diamond" : "arrow") + ')';
-                    })
-                ;
-
+                    .attr("marker-start", function (d, i) {
+                        return "url(#marker_" + (d.partOf ? "diamond" : "arrow") + ")";
+                    });
                 const nodeSel = this.foregroundGroup.selectAll(".node")
                     .data(this.data.nodes, function (d) {
                         return d.id;
-                    })
-                ;
-
+                    });
                 const nodeEnter = nodeSel.enter().append("g")
                     .attr("class", "node")
                     .on("click", function (d) {
@@ -519,9 +504,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     })
                     .attr("y", function (d) {
                         return (d.dy ? d.dy : 0) / 4;
-                    })
-                ;
-
+                    });
                 linkSel.attr("d", path);
 
                 nodeSel.exit().remove();
@@ -536,8 +519,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         const nodeSel = this.foregroundGroup.selectAll(".node")
             .data(this.data.nodes, function (d) {
                 return d.id;
-            })
-        ;
+            });
         if (!term) {
             nodeSel.style("opacity", function (d2) {
                 return 1;

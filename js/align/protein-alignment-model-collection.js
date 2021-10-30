@@ -216,8 +216,7 @@ export class ProtAlignModel extends Backbone.Model {
         return d3.merge(featuresPerSeq)
             .filter(function (alignFeature) {
                 return includeCanonical || alignFeature.name !== "Canonical";
-            })
-            ;
+            });
     }
 }
 
@@ -233,22 +232,22 @@ export class ProtAlignCollection extends Backbone.Collection {
             label: "Name",
             compFunc: "displayLabel"
         },
-            {
-                label: "No. of Aligned Sequences",
-                compFunc: function (m) {
-                    return m.get("seqCollection").length;
-                },
-                reverse: true
+        {
+            label: "No. of Aligned Sequences",
+            compFunc: function (m) {
+                return m.get("seqCollection").length;
             },
-            {
-                label: "Total Alignment Score",
-                compFunc: function (m) {
-                    return d3.sum(m.get("seqCollection").pluck("compAlignment").map(function (ca) {
-                        return ca.score;
-                    }));
-                },
-                reverse: true
-            }
+            reverse: true
+        },
+        {
+            label: "Total Alignment Score",
+            compFunc: function (m) {
+                return d3.sum(m.get("seqCollection").pluck("compAlignment").map(function (ca) {
+                    return ca.score;
+                }));
+            },
+            reverse: true
+        }
         ];
 
         this.nonTrivialChange = undefined;

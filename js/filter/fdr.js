@@ -1,5 +1,6 @@
-import {clearObjectMetaData} from "../modelUtils";
+import * as _ from "underscore";
 import d3 from "d3";
+import {clearObjectMetaData} from "../modelUtils";
 
 export const clearFdr = function (crosslinksArr) {
     // clear fdr information from crosslinks (usually because we've gone into none-fdr mode and don't want it showing in tooltips)

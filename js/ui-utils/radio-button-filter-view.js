@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 
@@ -19,7 +19,7 @@ export const RadioButtonFilterViewBB = Backbone.View.extend({
         };
         this.options = _.extend(defaultOptions, initData.myOptions);
         if (this.options.eventName) {
-            this.listenTo(vent, this.options.eventName, this.showState);
+            this.listenTo(window.vent, this.options.eventName, this.showState);
         }
         this.render();
     },
@@ -40,9 +40,9 @@ export const RadioButtonFilterViewBB = Backbone.View.extend({
             .attr("value", function (d) {
                 return d;
             })
-            .attr("class", "singleRadioButton")
+            .attr("class", "singleRadioButton");
         //.property("checked", function(d,i) { return i == self.options.presetIndex; })
-        ;
+
         const labels = this.options.labels;
         labs.append("span").text(function (d, i) {
             return labels[i];
@@ -60,7 +60,7 @@ export const RadioButtonFilterViewBB = Backbone.View.extend({
 
     changeFilter: function (evt) {
         if (this.options.eventName) {
-            vent.trigger(this.options.eventName, +evt.currentTarget.value);
+            window.vent.trigger(this.options.eventName, +evt.currentTarget.value);
         }
     }
 });

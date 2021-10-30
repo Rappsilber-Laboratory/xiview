@@ -1,5 +1,5 @@
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import * as _ from "underscore";
+import * as $ from "jquery";
 import * as NGL from "../../../vendor/ngl.dev";
 import {xilog} from "../../utils";
 import d3 from "d3";
@@ -33,7 +33,7 @@ export class CrosslinkRepresentation {
 
         this.stage.signals.clicked.add(this._selectionPicking, this);
         this.stage.signals.hovered.add(this._highlightPicking, this);
-        this.stage.mouseControls.add('clickPick-left', function (stage, pickingProxy) {
+        this.stage.mouseControls.add("clickPick-left", function (stage, pickingProxy) {
             // so calls that reach here are those left clicks without ctrl
             if (!pickingProxy) { // and if no pickingProxy i.e. nothing was clicked on
                 // then blank the current selection
@@ -56,8 +56,7 @@ export class CrosslinkRepresentation {
             ._initStructureRepr()
             ._initLinkRepr()
             ._initLabelRepr()
-            .updateAssemblyType()
-        ;
+            .updateAssemblyType();
         this.stage.autoView();
     }
 
@@ -360,7 +359,7 @@ export class CrosslinkRepresentation {
             links: undefined,
             xlinks: undefined
         };
-        const add = ((pickingData && (pickingData.ctrlKey || pickingData.shiftKey))) && (pickType === 'selection'); // should selection add to current selection?
+        const add = ((pickingData && (pickingData.ctrlKey || pickingData.shiftKey))) && (pickType === "selection"); // should selection add to current selection?
 
         /*
         console.log("pickingData", pickingData, pickType, add);
@@ -404,8 +403,7 @@ export class CrosslinkRepresentation {
                     nglModelWrapper.getCompositeModel().get("tooltipModel")
                         .set("header", "Cross-Linked with " + makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))
                         .set("contents", makeTooltipContents.multilinks(pdtrans.xlinks, protein.id, srindex, {"Distance": distances}))
-                        .set("location", this.makeTooltipCoords(pickingData.canvasPosition))
-                    ;
+                        .set("location", this.makeTooltipCoords(pickingData.canvasPosition));
                 }
             } else if (link3d !== undefined) {
                 // atomIndex / resno’s output here are wrong, usually sequential (indices) or the same (resno’s)
@@ -429,8 +427,7 @@ export class CrosslinkRepresentation {
                         nglModelWrapper.getCompositeModel().get("tooltipModel")
                             .set("header", makeTooltipTitle.link())
                             .set("contents", makeTooltipContents.link(pdtrans.xlinks[0]))
-                            .set("location", this.makeTooltipCoords(pickingData.canvasPosition))
-                        ;
+                            .set("location", this.makeTooltipCoords(pickingData.canvasPosition));
                     }
                 }
             }
@@ -455,9 +452,7 @@ export class CrosslinkRepresentation {
             .setDisplayedResidues(this.nglModelWrapper.getResidues(), this.nglModelWrapper.getHalfLinkResidues())
             // .setSelectedRes(this.nglModelWrapper.getHalfLinks())
             .setDisplayedLinks(links)
-            .setSelectedLinks(links)
-        ;
-
+            .setSelectedLinks(links);
         const subScheme = this.colorOptions.residueSubScheme || {};
         if (subScheme.filterSensitive) {
             console.log("recolour structure");
@@ -567,7 +562,7 @@ export class CrosslinkRepresentation {
     dispose () {
         this.stage.signals.clicked.remove(this._selectionPicking, this);
         this.stage.signals.hovered.remove(this._highlightPicking, this);
-        this.stage.mouseControls.remove('clickPick-left'); // added 14/01/2020 MJG to stop crosslinkrep object lingering in memory via mouseControl-NGL persistence
+        this.stage.mouseControls.remove("clickPick-left"); // added 14/01/2020 MJG to stop crosslinkrep object lingering in memory via mouseControl-NGL persistence
         // console.log ("dispose called");
         // this.stage.removeAllComponents(); // calls dispose on each component, which calls dispose on each representation
 

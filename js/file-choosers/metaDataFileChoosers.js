@@ -1,6 +1,6 @@
-import '../../css/csvUpload.css';
+import "../../css/csvUpload.css";
 
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -61,13 +61,12 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         formatPanel.append("a")
             .text ("Click to open XiDocs for CSV format details")
             .attr ("href", self.options.docUrl)
-            .attr ("target", "_blank")
-        ;
+            .attr ("target", "_blank");
     },
 
     setUpCompletionListener: function () {
         const self = this;
-        this.listenToOnce (vent, self.options.loadedEventName, function(metaMetaData, sourceData) {
+        this.listenToOnce (window.vent, self.options.loadedEventName, function(metaMetaData, sourceData) {
             if (sourceData && sourceData.source === "file") {
                 const columns = metaMetaData.columns;
                 const matchedItemCount = metaMetaData.matchedItemCount;

@@ -1,5 +1,5 @@
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import * as _ from "underscore";
+import * as $ from "jquery";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -44,26 +44,25 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             .attr ("class", "btn nopadLeft")
             .attr ("title", "Select an organism to search STRING scores on")
             .append("select").attr("class", "selectTaxonID withSideMargins")
-                .on ("change", function () {
-                    const optionSelected = $("option:selected", this);
-                    const valueSelected = this.value;
-                    d3.select(self.el).select(".inputTaxonID").property ("value", valueSelected);
-                    self.enteringTaxonID({keyCode: 13});
-                })
-                .selectAll("option")
-                .data (common)
-                .enter()
-                .append("option")
-                .attr ("value", function (d) { return d.value; })
-                .text (function(d) { return d.name + " (" + d.value + ")"; })
-        ;
-
-
+            .on ("change", function () {
+                const optionSelected = $("option:selected", this);
+                const valueSelected = this.value;
+                d3.select(self.el).select(".inputTaxonID").property ("value", valueSelected);
+                self.enteringTaxonID({keyCode: 13});
+            })
+            .selectAll("option")
+            .data (common)
+            .enter()
+            .append("option")
+            .attr ("value", function (d) {
+                return d.value; 
+            })
+            .text (function(d) {
+                return d.name + " (" + d.value + ")"; 
+            });
         const taxonSpan = box.append("div")
             .attr("class", "btn nopadLeft")
-            .html("or Enter <a href='https://www.ncbi.nlm.nih.gov/taxonomy' target='_blank'>NCBI Taxon ID</a>")
-        ;
-
+            .html("or Enter <a href='https://www.ncbi.nlm.nih.gov/taxonomy' target='_blank'>NCBI Taxon ID</a>");
         taxonSpan.append("input")
             .attr({
                 type: "text",
@@ -74,9 +73,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
                 title: "Enter NCBI Taxon ID here for use in STRING search",
                 //placeholder: "eg 1AO6"
             })
-            .property("required", true)
-        ;
-
+            .property("required", true);
         taxonSpan.append("span").text("& Press Enter");
 
 
@@ -90,9 +87,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
                 if (localStorage) {
                     STRINGUtils.purgeCache();
                 }
-            })
-        ;
-
+            });
         wrapperPanel.append("p").attr("class", "smallHeading").text("Results");
         wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
 

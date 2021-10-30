@@ -1,10 +1,10 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
+import d3 from "d3";
 import * as NGL from "../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {filterOutDecoyInteractors, getLegalAccessionIDs, loadUserFile} from "../modelUtils";
-import {addMultipleSelectControls, commonRegexes} from "../utils";
-import d3 from "d3";
+import {getLegalAccessionIDs, loadUserFile} from "../modelUtils";
+import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 
 export const PDBFileChooserBB = BaseFrameView.extend({
@@ -70,14 +70,10 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 accept: ".txt,.cif,.pdb",
                 class: "selectPdbButton"
             })
-            .property("multiple", true)
-        ;
-
+            .property("multiple", true);
         const pdbCodeSpan = box.append("span")
-                .attr("class", "btn nopadLeft")
-                .text("or Enter 4-character PDB IDs")
-            //.append("div")
-        ;
+            .attr("class", "btn nopadLeft")
+            .text("or Enter 4-character PDB IDs");
 
         pdbCodeSpan.append("input")
             .attr({
@@ -91,9 +87,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 title: "Enter PDB IDs here e.g. 1AO6 for one structure, 1YSX 1BKE to merge two",
                 //placeholder: "eg 1AO6"
             })
-            .property("required", true)
-        ;
-
+            .property("required", true);
         pdbCodeSpan.append("span").text("& Press Enter");
 
         const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
@@ -125,13 +119,10 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             })
             .attr("title", function (d) {
                 return d.tooltip;
-            })
-        ;
-
+            });
         queryBox.selectAll("button")
             .classed("btn btn-1 btn-1a", true)
-            .append("i").attr("class", "fa fa-xi fa-external-link")
-        ;
+            .append("i").attr("class", "fa fa-xi fa-external-link");
         //
         // this.updateProteinDropdown(queryBox);
 
@@ -148,7 +139,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         //console.log("STAGE", this.stage);
 
         function sanitise(str) {
-            return str.replace(/[^a-z0-9 ,.?!]/ig, '');
+            return str.replace(/[^a-z0-9 ,.?!]/ig, "");
         }
 
         // function updatePD() {
@@ -169,9 +160,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             const pdbString = nameArr ?
                 d3.set(nameArr.map(function (name) {
                     return name.substr(0, _./*last*/indexOf(name, ":"));
-                })).values().join(", ") : "?"
-            ;
-
+                })).values().join(", ") : "?";
             let msg = newSequences.failureReason ? "" : "Completed Loading " + sanitise(pdbString) + ".<br>";
             msg += success ? "✓ Success! " + count + " sequence" + (count > 1 ? "s" : "") + " mapped between this search and the PDB file." :
                 sanitise((newSequences.failureReason || "No sequence matches found between this search and the PDB file") +
@@ -182,7 +171,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             this.setStatusText(msg, success);
         });
 
-        this.listenTo(vent, "alignmentProgress", this.setStatusText);
+        this.listenTo(window.vent, "alignmentProgress", this.setStatusText);
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {
@@ -197,7 +186,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         const selectedProteins = this.model.get("selectedProteins");
         return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
     },
-/*
+    /*
     updateProteinDropdown: function (parentElem) {
         const proteins = this.getSelectedProteins();
 
@@ -316,9 +305,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             })
             .each(function (d) {
                 funcMeta = d;
-            })
-        ;
-
+            });
         return funcMeta;
     },
 
@@ -338,12 +325,12 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         const fileCount = evt.target.files.length;
 
         const onLastLoad = _.after(fileCount, function () {
-                repopulateNGL({
-                    pdbSettings: pdbSettings,
-                    stage: self.stage,
-                    compositeModel: self.model
-                });
-            }
+            repopulateNGL({
+                pdbSettings: pdbSettings,
+                stage: self.stage,
+                compositeModel: self.model
+            });
+        }
         );
 
         for (let n = 0; n < fileCount; n++) {
@@ -353,7 +340,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 fileObj,
                 function (fileContents, associatedData) {
                     const blob = new Blob([fileContents], {
-                        type: 'application/text'
+                        type: "application/text"
                     });
                     const name = associatedData.name;
                     pdbSettings.push({
@@ -361,7 +348,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                         uri: blob,
                         local: true,
                         params: {
-                            ext: name.substr(name.lastIndexOf('.') + 1),
+                            ext: name.substr(name.lastIndexOf(".") + 1),
                             cAlphaOnly: self.cAlphaOnly,
                         }
                     });

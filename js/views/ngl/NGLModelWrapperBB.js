@@ -32,7 +32,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
             fullDistanceCalcCutoff: 1200,
             allowInterModelDistances: false,
             showShortestLinksOnly: true,
-        }
+        };
     }
 
     // Most of the stuff in this file is dealing with the complications of a single protein possibly mapping to many different chains
@@ -53,7 +53,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         this.listenTo(this, "change:allowInterModelDistances", function (model, val) {
             const compModel = this.get("compositeModel");
             compModel.getCrossLinkDistances(compModel.getAllCrossLinks());  // regenerate distances for all crosslinks
-            vent.trigger("changeAllowInterModelDistances", model, val);
+            window.vent.trigger("changeAllowInterModelDistances", model, val);
         });
 
         this.listenTo(this, "change:chainMap", function (model, val) {
@@ -693,10 +693,10 @@ export class NGLModelWrapperBB extends Backbone.Model {
         };
 
         links = links.filter(function (link) {
-            return (link.residueA.chainIndex === chainIndex1 && link.residueB.chainIndex === chainIndex2 && notHomomultimeric.call(this, link.origId, chainIndex1, chainIndex2))
-                /*||
+            return (link.residueA.chainIndex === chainIndex1 && link.residueB.chainIndex === chainIndex2 && notHomomultimeric.call(this, link.origId, chainIndex1, chainIndex2));
+            /*||
                                (link.residueA.chainIndex === chainIndex2 && link.residueB.chainIndex === chainIndex1)*/
-                ;
+
             // The reverse match condition produced erroneous links i.e. link chain3,49 to chain 2,56 also passed chain3,56 to chain2,49
         }, this);
 
@@ -797,7 +797,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         const pdbLinks = [];
         const struc = this.get("structureComp").structure;
         const ap = struc.getAtomProxy();
-        const linkFormat = 'LINK        %-4s %-3s %1s%4d                %-4s %-3s %1s%4d   %6s %6s %5.2f';
+        const linkFormat = "LINK        %-4s %-3s %1s%4d                %-4s %-3s %1s%4d   %6s %6s %5.2f";
 
         links.forEach(function (link) {
             const res1 = link.residueA;
@@ -828,7 +828,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
     getPDBConectString(links) {  // Conect is spelt right
         const pdbConects = [];
         const atomPairs = this.getAtomPairsFromLinkList(links);
-        const conectFormat = 'CONECT%5d%5d                                                                ';
+        const conectFormat = "CONECT%5d%5d                                                                ";
         atomPairs.sort(function (a, b) {
             return a[0] - b[0];
         });   // order by ascending first atompair index

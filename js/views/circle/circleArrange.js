@@ -1,3 +1,4 @@
+import * as _ from "underscore";
 import d3 from "d3";
 
 export const circleArrange = function(proteins, options) {

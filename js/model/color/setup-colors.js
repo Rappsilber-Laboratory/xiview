@@ -4,7 +4,7 @@ import {DefaultLinkColourModel} from "./link-color-model";
 import {GroupColourModel} from "./link-color-model";
 import {InterProteinColourModel} from "./link-color-model";
 import {DistanceColourModel} from "./link-color-model";
-const colorbrewer = require('colorbrewer');
+const colorbrewer = require("colorbrewer");
 import {HighestScoreColourModel} from "./link-color-model";
 import {
     ColourModelCollection,
@@ -21,7 +21,7 @@ window.linkColor = {};//todo - get rid
 export const setupColourModels = function (userConfig) {
     const defaultConfig = {
         default: {domain: [0, 1, 2], range: ["#7570b3", "#d95f02", "#1b9e77"]},
-        distance: {domain: [15, 25], range: ['#5AAE61', '#FDB863', '#9970AB']}
+        distance: {domain: [15, 25], range: ["#5AAE61", "#FDB863", "#9970AB"]}
     };
     const config = $.extend(true, {}, defaultConfig, userConfig);    // true = deep merging
 
@@ -182,7 +182,7 @@ const makeColourModel = function(field, label, objs) {
                     max = val;
                 }
                 numbers.push(val);
-                allColors = false
+                allColors = false;
             } else {
                 allNumbers = false;
                 if (val.trim) {

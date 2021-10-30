@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 
 // Model for one sequence pairing
 import Backbone from "backbone";

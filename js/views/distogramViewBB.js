@@ -2,7 +2,7 @@ import "../../css/distogram.css";
 import "../../vendor/c3.css";
 
 import * as $ from "jquery";
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import * as c3 from "../../vendor/c3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -89,9 +89,7 @@ export const DistogramBB = BaseFrameView.extend({
 
         mainDivSel.append("div")
             .attr("class", "verticalFlexContainer")
-            .html("<DIV class='toolbar toolbarArea'></DIV><DIV class='panelInner distoDiv' flex-grow='1'></DIV>")
-        ;
-
+            .html("<DIV class='toolbar toolbarArea'></DIV><DIV class='panelInner distoDiv' flex-grow='1'></DIV>");
         const buttonData = [{
             class: "downloadButton",
             label: commonLabels.downloadImg + "SVG",
@@ -108,18 +106,18 @@ export const DistogramBB = BaseFrameView.extend({
             d3tooltip: "Calculate random links from within and between all proteins",
             value: "All"
         },
-            {
-                label: "Within proteins only (Self)",
-                id: "Intra",
-                d3tooltip: "Only calculate random links from within the same proteins",
-                value: "Intra"
-            },
-            {
-                label: "Within chains only (Self in same protein copy)",
-                id: "Chain",
-                d3tooltip: "Only calculate random links from within the same chain",
-                value: "Chain"
-            },
+        {
+            label: "Within proteins only (Self)",
+            id: "Intra",
+            d3tooltip: "Only calculate random links from within the same proteins",
+            value: "Intra"
+        },
+        {
+            label: "Within chains only (Self in same protein copy)",
+            id: "Chain",
+            d3tooltip: "Only calculate random links from within the same chain",
+            value: "Chain"
+        },
         ];
         toggleButtonData
             .forEach(function(d) {
@@ -164,8 +162,7 @@ export const DistogramBB = BaseFrameView.extend({
                 self.getSelectedOption("X").maxVal = +d3.event.target.value;
                 self.options.reRandom = true;
                 self.render();
-            })
-        ;
+            });
 
 
         // Add a select widget for picking axis data type
@@ -188,9 +185,9 @@ export const DistogramBB = BaseFrameView.extend({
                 duration: null, // no animations, causes bugs in c3 when actions performed rapidly
             },
             data: {
-                x: 'x',
+                x: "x",
                 columns: columnsAsNamesOnly,
-                type: 'bar',
+                type: "bar",
                 colors: {
                     "Cross-Links": "#44d",
                     Random: "#444",
@@ -348,8 +345,7 @@ export const DistogramBB = BaseFrameView.extend({
             .attr("patternUnits", "userSpaceOnUse")
             .attr("width", "10")
             .attr("height", "10")
-            .attr("patternTransform", "rotate(45)")
-        ;
+            .attr("patternTransform", "rotate(45)");
         pattern.append("rect").attr("x", "0").attr("y", "0").attr("width", "10").attr("height", "10").style("fill", this.options.selectedColour);
         pattern.append("line").attr("x1", "0").attr("y1", "0").attr("x2", "0").attr("y2", "10");
         pattern.append("line").attr("x1", "5").attr("y1", "0").attr("x2", "5").attr("y2", "10");
@@ -394,8 +390,8 @@ export const DistogramBB = BaseFrameView.extend({
             });
         }); // update selection series
         this.listenTo(this.model.get("clmsModel"), "change:distancesObj", distancesAvailable); // new distanceObj for new pdb
-        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
-        this.listenTo(vent, "linkMetadataUpdated", function(metaMetaData) {
+        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
+        this.listenTo(window.vent, "linkMetadataUpdated", function(metaMetaData) {
             const columns = metaMetaData.columns;
             //console.log ("HELLO", arguments);
             const newOptions = columns.map(function (column) {
@@ -488,8 +484,7 @@ export const DistogramBB = BaseFrameView.extend({
                         linkValues: [],
                         isSubSeries: true,
                     };
-                })
-            ;
+                });
 
             //console.log ("measurements", measurements);
             seriesData[TT].linkValues.forEach(function(linkDatum) {
@@ -560,16 +555,13 @@ export const DistogramBB = BaseFrameView.extend({
                 const subSeries = seriesData
                     .filter(function (d) {
                         return d.isSubSeries;
-                    })
-                ;
+                    });
                 this.options.subSeriesNames = _.pluck(subSeries, "name");
 
                 const subSeriesLengths = subSeries
                     .map(function (d) {
                         return d.linkValues.length;
-                    })
-                ;
-
+                    });
                 const chartOptions = {
                     columns: countArrays,
                     colors: this.getSeriesColours(this.options.subSeriesNames),
@@ -584,9 +576,7 @@ export const DistogramBB = BaseFrameView.extend({
                 }
 
                 this
-                    .makeChartTitle(subSeriesLengths, colModel, d3.select(this.el).select(".c3-title"), this.getSelectedOption("X").matchLevel)
-                ;
-
+                    .makeChartTitle(subSeriesLengths, colModel, d3.select(this.el).select(".c3-title"), this.getSelectedOption("X").matchLevel);
                 return {
                     unload: unload,
                     newloads: newloads
@@ -699,7 +689,7 @@ export const DistogramBB = BaseFrameView.extend({
         }
         const oldNewMatch = newData.every(function (newSeries) {
             const oldSeries = this.chart.data.values(newSeries[0]);
-            return newSeries[0] === 'x' || (oldSeries && oldSeries.length === newSeries.length - 1);
+            return newSeries[0] === "x" || (oldSeries && oldSeries.length === newSeries.length - 1);
         }, this);
 
         //console.log ("match", oldNewMatch);
@@ -733,14 +723,13 @@ export const DistogramBB = BaseFrameView.extend({
                 withinChain: rscope === "Chain",
                 withinModel: !this.model.get("stageModel").get("allowInterModelDistances"),
             }
-            ) :
+        ) :
             [];
         const thresholds = this.getBinThresholds([
             []
         ]);
         const binnedData = d3.layout.histogram()
-            .bins(thresholds)
-            (randArr);
+            .bins(thresholds)(randArr);
         console.log("RANDOM", binnedData, randArr.length);
 
         return {
@@ -929,11 +918,9 @@ export const DistogramBB = BaseFrameView.extend({
         const extras = this.attrExtraOptions[funcMeta.id] || {};
         const d3el = d3.select(this.el);
         d3el.select("#distoPanelRandomOptions")
-            .style("display", /*self.model.get("clmsModel").targetProteinCount > 1 && */ extras.showRandoms ? null : "none")
-        ;
+            .style("display", /*self.model.get("clmsModel").targetProteinCount > 1 && */ extras.showRandoms ? null : "none");
         d3el.select("#distoPanelMaxXValue")
-            .style("display", extras.showDistMaxInput ? null : "none")
-        ;
+            .style("display", extras.showDistMaxInput ? null : "none");
         d3el.selectAll(".c3-axis-y2,c3-axis-y2-label").style("display", extras.showY2Axis ? null : "none");
         return this;
     },
@@ -943,8 +930,7 @@ export const DistogramBB = BaseFrameView.extend({
         // See https://github.com/masayuki0812/c3/issues/1450
         d3.select(this.el).select(".c3")
             .style("max-height", "none")
-            .style("position", null)
-        ;
+            .style("position", null);
         //console.log ("RESiZING DISTOGRAM");
         this.options.dodgeTidyXAxis = false;  // retidy x axis on resize
         this.chart.resize();
@@ -977,8 +963,7 @@ export const DistogramBB = BaseFrameView.extend({
                 })
                 .filter(function (bin) {
                     return bin !== undefined;
-                })
-            ;
+                });
             const bin = d3.merge(bins);
 
 

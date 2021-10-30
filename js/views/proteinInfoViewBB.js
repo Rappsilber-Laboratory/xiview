@@ -1,5 +1,5 @@
-import '../../css/proteinInfoViewBB.css';
-import * as _ from 'underscore';
+import "../../css/proteinInfoViewBB.css";
+import * as _ from "underscore";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -81,8 +81,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     self.displayedProt = d;
                     self.updateTabs();
                     self.updateTable(d);
-                })
-            ;
+                });
             protJoin.exit().remove();
             protJoin.order();
 
@@ -145,7 +144,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     cell2.textContent = value;
                 }
                 if (key.indexOf("seq") !== -1) {
-                    cell2.classList.add('fixedSizeFont');
+                    cell2.classList.add("fixedSizeFont");
                 }
             }
 
@@ -173,8 +172,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                                 let cell1 = row.insertCell();
                                 if (subkey === "go"){
                                     cell1.textContent = subValue + " : " + goTermsMap.get(subValue).name;
-                                }
-                                else {
+                                } else {
                                     cell1.textContent = subValue.toString();
                                 }
                             }
@@ -183,7 +181,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                             subCell2.textContent = value;
                         }
                         if (subkey.indexOf("seq") !== -1) {
-                            subCell2.classList.add('fixedSizeFont');
+                            subCell2.classList.add("fixedSizeFont");
                         }
                     }
                 }

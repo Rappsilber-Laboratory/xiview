@@ -1,7 +1,7 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
-import colorbrewer from 'colorbrewer';
+import colorbrewer from "colorbrewer";
 
 export class AnnotationType extends Backbone.Model{
     constructor(attributes, options) {
@@ -24,8 +24,7 @@ export class AnnotationType extends Backbone.Model{
         this
             .set("id", (options.category + "-" + options.type).toLocaleLowerCase())
             .set("category", options.category)
-            .set("type", options.type)
-        ;
+            .set("type", options.type);
     }
 
 }
@@ -48,12 +47,11 @@ export class AnnotationTypeCollection extends Backbone.Collection {
 
         this.baseScale = d3.scale.ordinal()
             .range(colorbrewer.Set3[11])
-            .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"])
-        ;
+            .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"]);
     }
 
     initialize (models, options) {
-        this.listenTo(vent, "userAnnotationsUpdated", function (details) {
+        this.listenTo(window.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
                 this.add(details.types);

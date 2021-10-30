@@ -1,4 +1,5 @@
 import _ from "underscore";
+import * as NGL from "../../../vendor/ngl.dev";
 import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./RepopulateNGL";
 import d3 from "d3";
@@ -76,8 +77,7 @@ export const NGLExportUtils = {
 
             return "distance " + name1 + "-" + name2 +
                 ", resi " + link.residueA.resno + " and name CA and chain " + chainA + " and " + pdbIdA +
-                ", resi " + link.residueB.resno + " and name CA and chain " + chainB + " and " + pdbIdB
-                ;
+                ", resi " + link.residueB.resno + " and name CA and chain " + chainB + " and " + pdbIdB;
         });
 
         const lines = remarkLines.concat(pdbLines, crosslinkLines);
@@ -260,7 +260,7 @@ export const NGLExportUtils = {
         //json.subunits = Array.from(subunits.keys());
 
         for (let subunit of subunits.entries()) {
-            const chainIdArr = Array.from(subunit[1].values())
+            const chainIdArr = Array.from(subunit[1].values());
             const selString = ":." + chainIdArr.join(",.");
             const su = {
                 "chainIds": chainIdArr,
@@ -331,8 +331,7 @@ export const NGLExportUtils = {
                 })).values() : [])
                     .map(function (clid) {
                         return clid === "undefined" ? "default" : clid;
-                    })
-            ;
+                    });
             if (_.isEmpty(crosslinkerIDs)) {
                 crosslinkerIDs = ["default"];
             }
@@ -344,8 +343,7 @@ export const NGLExportUtils = {
                 const line = "assign" +
                     " (segid " + String.fromCharCode(65 + link.residueA.modelIndex) + " and name CA and resi " + link.residueA.resno + ")" +
                     " (segid " + String.fromCharCode(65 + link.residueB.modelIndex) + " and name CA and resi " + link.residueB.resno + ")" +
-                    " " + clRestraints
-                ;
+                    " " + clRestraints;
                 crosslinkLines[clid].push(line);
             });
         });

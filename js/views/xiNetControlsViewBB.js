@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
@@ -19,7 +19,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             },
             "click .autoLayoutButton": function () {
                 const fixSelected = d3.select("input.fixSelected").property("checked");
-                window.vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : [])
+                window.vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : []);
             },
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
@@ -40,7 +40,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
             if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                 if (xmlhttp.responseText === "false") {
-                    alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.")
+                    alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
                     window.open("../userGUI/userLogin.html", "_blank");
                 } else {
                     const callback = function (layoutJson) {
@@ -94,9 +94,9 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         }
 
         const tooltips = {
-            autoLayoutButton: 'Automatically relayout network of displayed proteins',
-            saveLayoutButton: 'Save the current layout for later',
-            loadLayoutButton: 'Load a previously saved layout',
+            autoLayoutButton: "Automatically relayout network of displayed proteins",
+            saveLayoutButton: "Save the current layout for later",
+            loadLayoutButton: "Load a previously saved layout",
         };
         d3.entries(tooltips).forEach(function (entry) {
             let elem = d3.select(this.el).select("." + entry.key);
@@ -184,7 +184,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             .attr("value", 2)
             .attr("id", "xiNetButtonBarppiStep1")
             // .attr("disabled", self.model.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
-            .classed('xinetPpiStep', true);
+            .classed("xinetPpiStep", true);
 
         d3.select("body")
             .append("label")
@@ -196,7 +196,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             .attr("value", 3)
             .attr("id", "xiNetButtonBarppiStep2")
             // .attr("disabled", self.model.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
-            .classed('xinetPpiStep', true);
+            .classed("xinetPpiStep", true);
 
         const self = this;
 
@@ -319,7 +319,7 @@ const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
                     //     self.set("groups", new Map());
                     //     self.trigger("change:groups");
                     // });
-                    vent.trigger("xinetLoadLayout", layouts[selectedKey]);
+                    window.vent.trigger("xinetLoadLayout", layouts[selectedKey]);
                 },
                 context: window.compositeModelInst
             };

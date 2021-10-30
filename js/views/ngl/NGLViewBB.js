@@ -1,13 +1,13 @@
-import '../../../css/nglViewBB.css';
+import "../../../css/nglViewBB.css";
 
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import * as _ from "underscore";
+import * as $ from "jquery";
 
 import * as NGL from "../../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {
-    addMultipleSelectControls, commonLabels,
+    addMultipleSelectControls,
     filterStateToString, makeBackboneButtons, makeCanvas,
     makeLegalFileName, nullCanvasObj,
     objectStateToAbbvString,
@@ -126,61 +126,60 @@ export const NGLViewBB = BaseFrameView.extend({
             id: "savePDB",
             d3tooltip: "Saves a copy of the PDB with complete filtered crosslinks"
         },
-            {
-                class: "exportPymolButton",
-                label: "Pymol Command File",
-                id: "pymolExport",
-                d3tooltip: "Export a Pymol command script for recreating this pdb and complete filtered crosslinks"
-            },
-            {
-                class: "export3dLinksCSV",
-                label: "3D Links CSV",
-                id: "linksCSVExport",
-                d3tooltip: "Export a CSV file of the links currently displayed in NGL"
-            },
-            {
-                class: "export3dLinksCSVSelected",
-                label: "3D Links CSV - Selected Only",
-                id: "linksCSVExportSelected",
-                d3tooltip: "Export a CSV file of the links currently selected in NGL"
-            },
-            {
-                class: "exportHalfInLinksCSV",
-                label: "Half-in Links CSV",
-                id: "linksHalfInCSVExport",
-                d3tooltip: "Export a CSV file of the links with one end in the 3d structure"
-            },
-            {
-                class: "exportHaddockButton",
-                label: "Haddock Distance Restraints File",
-                id: "haddockExport",
-                d3tooltip: "Export a Haddock command script containing the complete filtered inter-pdb(model) crosslinks. Requires 'Show > Inter-Model Distances' to be set"
-            },
-            {
-                class: "exportChimeraPB",
-                label: "ChimeraX Pseudobonds",
-                id: "exportChimeraPB",
-                d3tooltip: "Export Chimera Pseudobonds of the links currently displayed in NGL"
-            },
-            {
-                class: "exportJWalk",
-                label: "JWalk",
-                id: "exportJWalk",
-                d3tooltip: "Export a jWalk text file of the links currently displayed in NGL"
-            },
-            {
-                class: "exportXlinkAnalyzer",
-                label: "XlinkAnalyzer",
-                id: "exportXlinkAnalyzer",
-                d3tooltip: "Exports two files: XlinkAnalyzer json (recording the mapping from search seq's to PDB seq's) and XlinkAnalyzer CSV (of the links currently displayed in NGL)"
-            },
+        {
+            class: "exportPymolButton",
+            label: "Pymol Command File",
+            id: "pymolExport",
+            d3tooltip: "Export a Pymol command script for recreating this pdb and complete filtered crosslinks"
+        },
+        {
+            class: "export3dLinksCSV",
+            label: "3D Links CSV",
+            id: "linksCSVExport",
+            d3tooltip: "Export a CSV file of the links currently displayed in NGL"
+        },
+        {
+            class: "export3dLinksCSVSelected",
+            label: "3D Links CSV - Selected Only",
+            id: "linksCSVExportSelected",
+            d3tooltip: "Export a CSV file of the links currently selected in NGL"
+        },
+        {
+            class: "exportHalfInLinksCSV",
+            label: "Half-in Links CSV",
+            id: "linksHalfInCSVExport",
+            d3tooltip: "Export a CSV file of the links with one end in the 3d structure"
+        },
+        {
+            class: "exportHaddockButton",
+            label: "Haddock Distance Restraints File",
+            id: "haddockExport",
+            d3tooltip: "Export a Haddock command script containing the complete filtered inter-pdb(model) crosslinks. Requires 'Show > Inter-Model Distances' to be set"
+        },
+        {
+            class: "exportChimeraPB",
+            label: "ChimeraX Pseudobonds",
+            id: "exportChimeraPB",
+            d3tooltip: "Export Chimera Pseudobonds of the links currently displayed in NGL"
+        },
+        {
+            class: "exportJWalk",
+            label: "JWalk",
+            id: "exportJWalk",
+            d3tooltip: "Export a jWalk text file of the links currently displayed in NGL"
+        },
+        {
+            class: "exportXlinkAnalyzer",
+            label: "XlinkAnalyzer",
+            id: "exportXlinkAnalyzer",
+            d3tooltip: "Exports two files: XlinkAnalyzer json (recording the mapping from search seq's to PDB seq's) and XlinkAnalyzer CSV (of the links currently displayed in NGL)"
+        },
         ];
         saveExportButtonData
             .forEach(function (d) {
                 d.type = d.type || "button";
                 d.value = d.value || d.label;
-            }, this)
-        ;
+            }, this);
         makeBackboneButtons(toolbar, self.el.id, saveExportButtonData);
 
         // ...then moved to a dropdown menu
@@ -231,8 +230,7 @@ export const NGLViewBB = BaseFrameView.extend({
                         self.options.defaultAssembly = d3.event.target.value;
                         self.xlRepr
                             .updateOptions(self.options, ["defaultAssembly"])
-                            .updateAssemblyType()
-                        ;
+                            .updateAssemblyType();
                         self.setAssemblyChains();
                     }
                 },
@@ -252,76 +250,76 @@ export const NGLViewBB = BaseFrameView.extend({
             id: "selectedOnly",
             d3tooltip: "Only show selected crosslinks"
         },
-            {
-                initialState: this.options.shortestLinksOnly,
-                class: "shortestLinkCB",
-                label: "Shortest Possible Crosslinks Only",
-                id: "shortestOnly",
-                d3tooltip: "Only show shortest possible crosslinks: complexes with multiple (N) copies of a protein can have multiple possible alternatives for crosslinks - N x N for self links, N x M for between links"
-            },
-            {
-                initialState: this.options.allowInterModelDistances,
-                class: "allowInterModelDistancesCB",
-                label: "Inter-Model Distances",
-                id: "allowInterModelDistances",
-                d3tooltip: "Allow Inter-Model Distances - Warning: Different Models may not be correctly spatially aligned"
-            },
-            {
-                initialState: this.options.showResidues,
-                class: "showResiduesCB",
-                label: "Cross-Linked Residues",
-                id: "showResidues",
-                d3tooltip: "Show crosslinked residues on protein representations"
-            },
-            // {
-            //     initialState: this.options.showAllProteins,
-            //     class: "showAllProteinsCB",
-            //     label: "All Proteins",
-            //     id: "showAllProteins",
-            //     d3tooltip: "Keep showing proteins with no current crosslinks (within available PDB structure)"
-            // },
-            {
-                initialState: this.options.labelVisible,
-                class: "distanceLabelCB",
-                label: "Distance Labels",
-                id: "visLabel",
-                d3tooltip: "Show distance labels on displayed crosslinks"
-            },
-            {
-                class: "chainLabelLengthRB",
-                label: "Long",
-                id: "showLongChainLabels",
-                tooltip: "Show protein chain labels with more verbose content if available",
-                group: "chainLabelSetting",
-                type: "radio",
-                value: "Verbose",
-                header: "Protein Chain Label Style"
-            },
-            {
-                class: "chainLabelLengthRB",
-                label: "Short",
-                id: "showShortChainLabels",
-                tooltip: "Show protein chain labels with shorter content",
-                group: "chainLabelSetting",
-                type: "radio",
-                value: "Short"
-            },
-            {
-                class: "chainLabelLengthRB",
-                label: "None",
-                id: "showNoChainLabels",
-                tooltip: "Show no protein chain labels",
-                group: "chainLabelSetting",
-                type: "radio",
-                value: "None"
-            },
-            {
-                initialState: this.options.fixedLabelSize,
-                class: "chainLabelFixedSizeCB",
-                label: "Fixed Size",
-                id: "showFixedSizeChainLabels",
-                d3tooltip: "Show fixed size protein chain labels",
-            },
+        {
+            initialState: this.options.shortestLinksOnly,
+            class: "shortestLinkCB",
+            label: "Shortest Possible Crosslinks Only",
+            id: "shortestOnly",
+            d3tooltip: "Only show shortest possible crosslinks: complexes with multiple (N) copies of a protein can have multiple possible alternatives for crosslinks - N x N for self links, N x M for between links"
+        },
+        {
+            initialState: this.options.allowInterModelDistances,
+            class: "allowInterModelDistancesCB",
+            label: "Inter-Model Distances",
+            id: "allowInterModelDistances",
+            d3tooltip: "Allow Inter-Model Distances - Warning: Different Models may not be correctly spatially aligned"
+        },
+        {
+            initialState: this.options.showResidues,
+            class: "showResiduesCB",
+            label: "Cross-Linked Residues",
+            id: "showResidues",
+            d3tooltip: "Show crosslinked residues on protein representations"
+        },
+        // {
+        //     initialState: this.options.showAllProteins,
+        //     class: "showAllProteinsCB",
+        //     label: "All Proteins",
+        //     id: "showAllProteins",
+        //     d3tooltip: "Keep showing proteins with no current crosslinks (within available PDB structure)"
+        // },
+        {
+            initialState: this.options.labelVisible,
+            class: "distanceLabelCB",
+            label: "Distance Labels",
+            id: "visLabel",
+            d3tooltip: "Show distance labels on displayed crosslinks"
+        },
+        {
+            class: "chainLabelLengthRB",
+            label: "Long",
+            id: "showLongChainLabels",
+            tooltip: "Show protein chain labels with more verbose content if available",
+            group: "chainLabelSetting",
+            type: "radio",
+            value: "Verbose",
+            header: "Protein Chain Label Style"
+        },
+        {
+            class: "chainLabelLengthRB",
+            label: "Short",
+            id: "showShortChainLabels",
+            tooltip: "Show protein chain labels with shorter content",
+            group: "chainLabelSetting",
+            type: "radio",
+            value: "Short"
+        },
+        {
+            class: "chainLabelLengthRB",
+            label: "None",
+            id: "showNoChainLabels",
+            tooltip: "Show no protein chain labels",
+            group: "chainLabelSetting",
+            type: "radio",
+            value: "None"
+        },
+        {
+            initialState: this.options.fixedLabelSize,
+            class: "chainLabelFixedSizeCB",
+            label: "Fixed Size",
+            id: "showFixedSizeChainLabels",
+            d3tooltip: "Show fixed size protein chain labels",
+        },
         ];
         toggleButtonData
             .forEach(function (d) {
@@ -516,13 +514,12 @@ export const NGLViewBB = BaseFrameView.extend({
                         nglRep: this.xlRepr.linkRepr,
                         colourScheme: this.xlRepr.colorOptions.linkColourScheme
                     }
-                //    , {
-                //        nglRep: this.xlRepr.halfLinkResRepr,
-                //        colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
-                //   }
+                        //    , {
+                        //        nglRep: this.xlRepr.halfLinkResRepr,
+                        //        colourScheme: this.xlRepr.colorOptions.halfLinkResidueColourScheme
+                        //   }
                     ]);
-                }
-                else {
+                } else {
                     this.rerenderColourSchemes([{nglRep: null, colourScheme: null}]);
                 }
             })  // if crosslink colour model changes internally, or is swapped for new one
@@ -533,14 +530,12 @@ export const NGLViewBB = BaseFrameView.extend({
                 } : {nglRep: null, colourScheme: null}]);
             })  // if cross-view protein colour model changes, or is swapped for new one
             .listenTo(this.model, "change:selection", this.showSelectedLinks)
-            .listenTo(this.model, "change:highlights", this.showHighlightedLinks)
-        ;
-
+            .listenTo(this.model, "change:highlights", this.showHighlightedLinks);
         const disableHaddock = function (stageModel) {
             mainDivSel.select(".exportHaddockButton").property("disabled", !stageModel.get("allowInterModelDistances") || stageModel.get("structureComp").structure.modelStore.count == 1);
         };
         // listen to vent rather than directly to newStageModel's change:allowInterModelDistances as we needed to recalc distances before informing views
-        this.listenTo(vent, "changeAllowInterModelDistances", function (stageModel, value) {
+        this.listenTo(window.vent, "changeAllowInterModelDistances", function (stageModel, value) {
             this.options.allowInterModelDistances = value;
             d3.select(this.el).selectAll(".allowInterModelDistancesCB input").property("checked", value);
             if (this.xlRepr) {
@@ -587,14 +582,12 @@ export const NGLViewBB = BaseFrameView.extend({
                     if (this.xlRepr) {
                         this.showFiltered();
                     }
-                })
-            ;
+                });
 
             // Copy view state settings to new model
             newStageModel
                 .set("allowInterModelDistances", this.options.allowInterModelDistances, {silent: true})    // firing change at this point causes error
-                .set("showShortestLinksOnly", this.options.shortestLinksOnly)
-            ;
+                .set("showShortestLinksOnly", this.options.shortestLinksOnly);
 
             // First time distancesObj fires we should setup the display for a new data set
             this.listenToOnce(this.model.get("clmsModel"), "change:distancesObj", function () {
@@ -612,14 +605,14 @@ export const NGLViewBB = BaseFrameView.extend({
             disableHaddock(newStageModel);
         });
 
-        this.listenTo(vent, "proteinMetadataUpdated", function () {
+        this.listenTo(window.vent, "proteinMetadataUpdated", function () {
             if (this.xlRepr) {
                 this.xlRepr.redisplayChainLabels();
             }
         });
 
         // if the assembly structure has changed the chain sets that can be used in distance calculations, recalc and redraw distances
-        this.listenTo(vent, "PDBPermittedChainSetsUpdated", function () {
+        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated", function () {
             if (this.xlRepr) {
                 this.showFiltered().centerView();
             }
@@ -641,8 +634,7 @@ export const NGLViewBB = BaseFrameView.extend({
         const linkText = "Currently showing " + commaFormat(fullLinkCount) + " in full " +
             (halfLinkCount ? "and " + commaFormat(halfLinkCount) + " in part " : "") +
             "of " + commaFormat(currentFilteredLinkCount) + " filtered TT crosslinks" +
-            (missingLinkCount ? " (" + commaFormat(missingLinkCount) + " others outside of structure scope)" : "")
-        ;
+            (missingLinkCount ? " (" + commaFormat(missingLinkCount) + " others outside of structure scope)" : "");
         this.chartDiv.select("div.linkInfo").html(linkText);
         return this;
     },
@@ -766,7 +758,7 @@ export const NGLViewBB = BaseFrameView.extend({
                                     nullCanvasObj(canvasObj);
                                     NGL.download(newBlob, self.filenameStateString() + ".png");
                                 }
-                            }, 'image/png');
+                            }, "image/png");
                         };
                         keyimg.src = keyurl;
                     };

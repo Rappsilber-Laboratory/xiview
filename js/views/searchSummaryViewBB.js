@@ -2,10 +2,10 @@
 import "../../css/searchSummary.css";
 import "../../vendor/jquery.jsonview.css";
 
-import * as $ from 'jquery';
+import * as $ from "jquery";
 // window.jQuery = $;
-import 'jsonview';
-import * as _ from 'underscore';
+import "jsonview";
+import * as _ from "underscore";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -41,8 +41,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
                     })
                     .join("-");
                 download(self.exportDescriptions(), "plain/text", "search_description_" + searchString + ".txt");
-            })
-        ;
+            });
         descriptionButton.style ("display", _.isEmpty(self.model.get("crosslinkerSpecificity")) ? "none" : null);
 
         mainPanel.append("div").attr("class", "searchSummaryDiv");
@@ -53,7 +52,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
     render: function() {
         const searches = this.model.get("searches");
         $(".searchSummaryDiv").JSONView(Array.from(searches.values()));
-        $('.searchSummaryDiv').JSONView('collapse', 2);
+        $(".searchSummaryDiv").JSONView("collapse", 2);
 
         return this;
     },
@@ -72,7 +71,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
 
             // https://stackoverflow.com/questions/15069587/is-there-a-way-to-join-the-elements-in-an-js-array-but-let-the-last-separator-b
             const niceJoin = function (arr) {
-                return arr.length < 2 ? arr.join("") : arr.slice(0, -1).join(', ') + ' and ' + arr.slice(-1);
+                return arr.length < 2 ? arr.join("") : arr.slice(0, -1).join(", ") + " and " + arr.slice(-1);
             };
 
             const codonsToNames = function (codonArray) {
@@ -80,8 +79,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
                     .map(function (code) {
                         const name = amino1toNameMap[code];
                         return name ? name.replace("_", "-") : "(codon " + code + ")";  // state codon if no long name
-                    })
-                    ;
+                    });
             };
 
             // crosslinker descriptions for each search

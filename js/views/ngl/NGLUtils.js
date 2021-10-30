@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import * as $ from "jquery";
 // const workerpool = require('workerpool');
 import {xilog} from "../../utils";
@@ -106,7 +106,7 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
                 const pdbName = (dotIndex >= 0 ? mapping.pdb.slice(0, dotIndex) : mapping.pdb.slice(-1)).toLocaleLowerCase();
                 const chainName = dotIndex >= 0 ? mapping.pdb.slice(dotIndex + 1) : mapping.pdb.slice(-1); // bug fix 27/01/17
                 const matchSeqs = nglSequences.filter(function (seqObj) {
-                    return seqObj.chainName == chainName //&& seqObj.structureID === pdbName;
+                    return seqObj.chainName == chainName; //&& seqObj.structureID === pdbName;
                 });
                 //console.log ("SEQOBJS", matchSeqs);
                 mapping.seqObj = matchSeqs[0];
@@ -132,9 +132,9 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
     // pdbUris.forEach(function (pdbUri) {
     for (let nglSequence of nglSequences) {
         // alert(pdbUri.id);
-        const pdbId = nglSequence.structureID.toUpperCase() + '.' + nglSequence.chainName;
-        const url = 'https://1d-coordinates.rcsb.org/graphql?query=' + encodeURI('{ alignment(from:PDB_INSTANCE, to:UNIPROT, queryId:"'
-            + pdbId + '") { target_alignment { target_id } } }');
+        const pdbId = nglSequence.structureID.toUpperCase() + "." + nglSequence.chainName;
+        const url = "https://1d-coordinates.rcsb.org/graphql?query=" + encodeURI("{ alignment(from:PDB_INSTANCE, to:UNIPROT, queryId:\""
+            + pdbId + "\") { target_alignment { target_id } } }");
         $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
             function (data, status, xhr) {
                 if (status === "success"){//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
@@ -145,7 +145,7 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
                     if (target_alignment) {
                         const target = target_alignment[0].target_id;
                         dataArr.push({
-                            pdb: nglSequence.structureID.toUpperCase() + '.' + nglSequence.chainName,
+                            pdb: nglSequence.structureID.toUpperCase() + "." + nglSequence.chainName,
                             uniprot: target
                         });
                     }
@@ -178,8 +178,7 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
     proteins = filterOutDecoyInteractors(proteins)
         .filter(function (protein) {
             return protAlignCollection.get(protein.id);
-        })
-    ;
+        });
     const matchMatrix = {};
     const seqs = extractFunc ? sequenceObjs.map(extractFunc) : sequenceObjs;
 
@@ -188,7 +187,7 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
 
     function finished(matchMatrix) {
         // inflate score matrix to accommodate repeated sequences that were found and filtered out above
-        vent.trigger("sequenceMatchingDone", reinflateSequenceMap(matchMatrix, seqs, filteredSeqInfo));
+        window.vent.trigger("sequenceMatchingDone", reinflateSequenceMap(matchMatrix, seqs, filteredSeqInfo));
     }
 
     function updateMatchMatrix(protID, alignResults) {
@@ -197,7 +196,7 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
     }
 
     const totalAlignments = filteredSeqInfo.uniqSeqs.length * proteins.length;
-    vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
+    window.vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
 
     const start = performance.now();
     // webworker way, only do if enough proteins and cores to make it worthwhile
@@ -242,7 +241,7 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
             semiLocal: true
         });
         console.log("alignResults", /*alignResults,*/ prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
-        updateMatchMatrix(prot.id, alignResults)
+        updateMatchMatrix(prot.id, alignResults);
     });
 
     finished(matchMatrix);

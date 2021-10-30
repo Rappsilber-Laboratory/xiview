@@ -1,5 +1,5 @@
-import '../../css/ddMenuViewBB.css';
-import * as _ from 'underscore';
+import "../../css/ddMenuViewBB.css";
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 
@@ -112,20 +112,20 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                 adata.push(cbdata);
                 lastCat = cat;
 
-                 if (d3.select("#"+makeLegalDomID(cbdata.id)).empty()) {
-                     const options = $.extend({
-                         toggleAttribute: self.options.toggleAttribute,
-                         labelFirst: self.options.labelFirst
-                     }, cbdata);
-                     if (self.options.tooltipModel) {
+                if (d3.select("#"+makeLegalDomID(cbdata.id)).empty()) {
+                    const options = $.extend({
+                        toggleAttribute: self.options.toggleAttribute,
+                        labelFirst: self.options.labelFirst
+                    }, cbdata);
+                    if (self.options.tooltipModel) {
                         options.tooltipModel = self.options.tooltipModel;
                     }
 
-                     const cbView = new checkBoxView({
-                         model: model,
-                         myOptions: options,
-                     });
-                     self.$el.append(cbView.$el);
+                    const cbView = new checkBoxView({
+                        model: model,
+                        myOptions: options,
+                    });
+                    self.$el.append(cbView.$el);
                 }
             });
 
@@ -139,9 +139,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
         const choices = listHolder.selectAll("li")
             .data(this.options.menu, function (d) {
                 return d.name || d.id;
-            })
-        ;
-
+            });
         choices.exit().remove();
 
         const ttm = this.options.tooltipModel;
@@ -202,11 +200,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
             .filter(function(d) {
                 return d.sectionBegin;
             })
-            .insert("span", ":first-child").attr("class", "ddSectionHeader").text(self.options.sectionHeader)
-        ;
-
-
-
+            .insert("span", ":first-child").attr("class", "ddSectionHeader").text(self.options.sectionHeader);
         choices.classed("sectionEnd", function(d) {
             return d.sectionEnd;
         });
@@ -235,8 +229,7 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                 const li = d3.select(nestedSel.parentNode);
                 li.classed ("disabledItem", !enable)
                     .selectAll("input")
-                    .property("disabled", !enable)
-                ;
+                    .property("disabled", !enable);
             }
         });
         return this;
@@ -251,11 +244,9 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                     const li = d3.select(this);
                     li.classed ("disabledItem", !enable)
                         .selectAll("input")
-                        .property("disabled", !enable)
-                    ;
+                        .property("disabled", !enable);
                 }
-            })
-        ;
+            });
         return this;
     },
 
@@ -378,14 +369,11 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
                     .attr("class", "colourSwatchLabel")
                     .style("visibility", function (d) {
                         return self.collection.get(d.id).get("shown") ? null : "hidden";
-                    })
-                ;
-
+                    });
                 colourControl
                     .append("span")
                     .attr("class", "colourSwatchSquare")
-                    .attr("title", "Click to change colour")
-                ;
+                    .attr("title", "Click to change colour");
 
                 // add colour input widgets, but hide them and call them when pressing the colour swatch
                 colourControl
@@ -396,8 +384,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
                         return self.collection.getColour (d.category, d.type);
                     })
                     .on("change", colourChange)
-                    .on("input", colourChange)
-                ;
+                    .on("input", colourChange);
             }
         });
 
@@ -466,7 +453,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
         const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
 
         const fileName = this.filenameStateString().substring(0, 240);
-        download(svgXML, 'application/svg', fileName + ".svg");
+        download(svgXML, "application/svg", fileName + ".svg");
         return this;
     },
 

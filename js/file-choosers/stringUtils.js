@@ -1,5 +1,5 @@
-import * as _ from 'underscore';
-import * as $ from 'jquery';
+import * as _ from "underscore";
+import * as $ from "jquery";
 import d3 from "d3";
 import {getLocalStorage, setLocalStorage} from "../utils";
 import {filterOutDecoyInteractors} from "../modelUtils";
@@ -27,7 +27,9 @@ export const STRINGUtils = {
     // Filter to appropriate protein IDs for brevity
     translateToCSV: function (uniprotToStringIDMap, networkTsvString) {
         const stringToUniprotIDMap = _.invert(uniprotToStringIDMap);
-        networkTsvString = networkTsvString.replace(/^.*/, function(m) { return m.replace (/\tscore/g, '\tSTRING Score'); });
+        networkTsvString = networkTsvString.replace(/^.*/, function(m) {
+            return m.replace (/\tscore/g, "\tSTRING Score"); 
+        });
         let rows = d3.tsv.parse(networkTsvString, function (d) {
             d.SeqPos1 = null;
             d.SeqPos2 = null;
@@ -36,7 +38,9 @@ export const STRINGUtils = {
             // return empty string if protein ids not in current id map
             return (d.Protein1 && d.Protein2 ? _.omit(d, ["ncbiTaxonId", "stringId_A", "stringId_B", "preferredName_A", "preferredName_B"]) : null);
         });
-        rows = rows.filter (function (row) { return row != null; });
+        rows = rows.filter (function (row) {
+            return row != null; 
+        });
         return d3.csv.format (rows);
     },
 
@@ -85,8 +89,7 @@ export const STRINGUtils = {
                     })
                     .fail(function (xhr) {
                         reject("Error returned from STRING id resolution service");
-                    })
-                ;
+                    });
             });
             return promiseObj;
         } else {
@@ -119,7 +122,7 @@ export const STRINGUtils = {
             // If no cached network, go to STRING
             if (!cachedNetwork) {
                 if (stringIDs.length >= STRINGUtils.stringAPIMaxProteins) {
-                    return Promise.reject ("Too Large. More than "+d3.format(",")(STRINGUtils.stringAPIMaxProteins)+" proteins in requested network. Consider filtering first.")
+                    return Promise.reject ("Too Large. More than "+d3.format(",")(STRINGUtils.stringAPIMaxProteins)+" proteins in requested network. Consider filtering first.");
                 }
                 const promiseObj = new Promise(function (resolve, reject) {
                     $.ajax({
@@ -171,7 +174,9 @@ export const STRINGUtils = {
                 out.push (phrase.length > 1 ? dict.get(phrase) : phrase.codePointAt(0));
                 dict.set(phrase + currChar, code);
                 code++;
-                if (code === 0xd800) { code = 0xe000; }
+                if (code === 0xd800) {
+                    code = 0xe000; 
+                }
                 phrase = currChar;
             }
         }
@@ -204,7 +209,9 @@ export const STRINGUtils = {
             currChar = String.fromCodePoint(cp); //phrase.charAt(0);
             dict.set(code, oldPhrase + currChar);
             code++;
-            if (code === 0xd800) { code = 0xe000; }
+            if (code === 0xd800) {
+                code = 0xe000; 
+            }
             oldPhrase = phrase;
         }
         return out.join("");
@@ -226,7 +233,9 @@ export const STRINGUtils = {
     },
 
     loadStringData: function (pids, taxonID, callback) {
-        function chainError (err) { return Promise.reject (err); }
+        function chainError (err) {
+            return Promise.reject (err); 
+        }
 
         STRINGUtils.getStringIdentifiers (pids, taxonID)
             .then (function (identifiersBySpecies) {
@@ -242,13 +251,14 @@ export const STRINGUtils = {
             }, chainError)
             .catch (function (errorReason) {
                 callback (null, errorReason);
-            })
-        ;
+            });
     },
 
     getCacheSize: function () {
         if (localStorage) {
-            return ["StringIds", "StringNetworkScores"].reduce (function (a,b) { return a + (localStorage[b] ? localStorage[b].length : 0);}, 0)
+            return ["StringIds", "StringNetworkScores"].reduce (function (a,b) {
+                return a + (localStorage[b] ? localStorage[b].length : 0);
+            }, 0);
         }
         return 0;
     },

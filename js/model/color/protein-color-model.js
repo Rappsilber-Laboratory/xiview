@@ -4,8 +4,7 @@ export class DefaultProteinColourModel extends ColourModel {
     initialize  () {
         this
             .set("labels", this.get("colScale").copy().range(["Protein"]))
-            .set("type", "ordinal")
-        ;
+            .set("type", "ordinal");
     }
 
     getValue  () {

@@ -1,5 +1,5 @@
 import "../../css/selectionViewBB.css";
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 
@@ -41,7 +41,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         });
         this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", this.updateSwatchesOnly);
         // redraw datable on protein metadata change (possible protein name change)
-        this.listenTo(vent, "proteinMetadataUpdated", this.render);
+        this.listenTo(window.vent, "proteinMetadataUpdated", this.render);
 
         // emphasise selected match table row (or not if nothing selected)
         this.listenTo(this.model, "change:lastSelectedMatch", function (model) {
@@ -261,9 +261,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                     if (d3.event.inputType !== "deleteContentBackward" && this.value) { // "deleteContentBackward" is chrome specific
                         self.setPage(this.value);
                     }
-                })
-            ;
-
+                });
             let timer, interval;
             pager.append("span").selectAll(".btn")
                 .data([{text: "<", incr: -1, tooltip: "Higher scoring crosslinks"}, {
@@ -295,9 +293,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 .on("mouseleave", function () {
                     clearTimeout(timer);
                     clearInterval(interval);
-                })
-            ;
-
+                });
         } else {
             pager.append("span").text("Alternative Explanations");
         }
@@ -315,7 +311,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 this.listenTo(this, "change:hidden", function (model, val) {
                     d3.select(self.el).selectAll("table").style("display", val ? "none" : null);
                     if (self.options.mainModel) {
-                        vent.trigger("resizeSpectrumSubViews", true);
+                        window.vent.trigger("resizeSpectrumSubViews", true);
                     }
                 });
             },
@@ -360,8 +356,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         return _.pluck(xlink.filteredMatches_pp, "match")
             .filter(function (m) {
                 return selectedMatches.has(m.id);
-            }) // selection now done on a per-match basis
-            ;
+            }); // selection now done on a per-match basis
     },
 
     updateTable: function (options) {
@@ -384,8 +379,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
             // Then sort links by top remaining match score for each link
             .sort(function (a, b) {
                 return b.matches[0].score() - a.matches[0].score();
-            })
-        ;
+            });
 
         // filter to top match per link if requested
         if (options.topMatchesOnly) {
@@ -427,9 +421,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 })
                 .classed("minWidth", function (d) {
                     return self.minWidthColumns.has(d);
-                })
-            ;
-
+                });
             this.setPage(this.page);
         }
 
@@ -482,7 +474,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         const TSFUniqueMatches = totalSelectedFilteredMatches - repeats;
 
         if (selectedXLinkCount === 0) {
-            panelHeading.html("Currently empty<sup>?</sup>").attr("title", "Select Crosslinks / Matches in other views to populate this table")
+            panelHeading.html("Currently empty<sup>?</sup>").attr("title", "Select Crosslinks / Matches in other views to populate this table");
         } else {
             panelHeading.text(
                 commaFormat(lower) + " - " + commaFormat(upper) + " of " +
@@ -529,8 +521,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         elem.attr("class", "colourSwatchSquare")
             .style("background", function (d) {
                 return colourScheme ? colourScheme.getColour(d.link) : "transparent";
-            })
-        ;
+            });
     },
 
     // code that maintains the rows in the table
@@ -565,8 +556,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
             .append("TBODY")
             .append("TR")
             .append("TD")
-            .attr("colspan", colspan)
-        ;
+            .attr("colspan", colspan);
         newLinks.append("span").attr("class", "colourSwatchSquare");
         newLinks.append("span").attr("class", "niceCrossLinkName");
         xlinkTBodyJoin.order(); // reorder existing dom elements so they are in same order as data (selectedLinkArray)
@@ -596,12 +586,11 @@ export const SelectionTableViewBB = Backbone.View.extend({
         tjoin.enter().append("tr")
             .attr("class", "matchRow")
             .attr("id", function (d) {
-                return 'match' + d.id;
+                return "match" + d.id;
             }) // since we key the rows on d.id this won't change, so we can set it for all time in enter()
             .on("click", function (d) {
                 self.select(d);
-            })
-        ;
+            });
         //tjoin.order();
         tjoin.sort(function (a, b) {
             return b.score() - a.score();
@@ -610,10 +599,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
             .classed("spectrumShown2", function (d) {
                 const lsm = self.model.get("lastSelectedMatch");
                 return lsm && lsm.match ? lsm.match.id === d.id : false;
-            })
-        ;
-
-
+            });
         const getText = function (d) {
             const link = d3.select(this.parentNode).datum();
             const cellFunc = self.cellFuncs[d];
@@ -672,9 +658,9 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 if (!self.changeableColumns.has(d)) {
                     setCell.call(this, d);
                 }
-            })
+            });
         // The above states shouldn't change over the cells lifetime, so do it once in enter rather than repeatedly in the update() selection below
-        ;
+
 
         cellJoin
             .each(function (d) {
@@ -698,19 +684,18 @@ export const SelectionTableViewBB = Backbone.View.extend({
         d3.select(this.el).selectAll(".colourSwatchSquare")
             .each(function () {
                 self.makeColourSwatch(d3.select(this), colourScheme);
-            })
-        ;
+            });
     },
 
     setVisible: function (show) {
-        d3.select(this.el).style('display', show ? 'block' : 'none');
+        d3.select(this.el).style("display", show ? "block" : "none");
         if (show) {
             this.render();
         }
     },
 
     clearCurrentRowHighlight: function () {
-        d3.select(this.el).selectAll("tr").classed('spectrumShown2', false);
+        d3.select(this.el).selectAll("tr").classed("spectrumShown2", false);
         return this;
     },
 

@@ -56,9 +56,7 @@ export class DistancesObj {
                 const d = linkWrapper1.distance - linkWrapper2.distance;
                 return (d < 0 ? -1 : (d > 0 ? 1 : self.tieBreaker(linkWrapper1.residueA, linkWrapper1.residueB, linkWrapper2.residueA, linkWrapper2.residueB)));
             })
-            .entries(nglLinkWrappers)
-        ;
-
+            .entries(nglLinkWrappers);
         const shortestLinks = nestedLinks.map(function (group) {
             return group.values[0];
         });
@@ -517,8 +515,8 @@ export class DistancesObj {
         console.log("PCIS", this.permittedChainIndicesSet);
         if (!isNewObj) {
             // if changing existing object fire an event, otherwise hold off. Fire an event once whole new distancesObj object is installed.
-            vent.trigger("recalcLinkDistances"); // this needs listened to and link distances updated before views listen to next trigger
-            vent.trigger("PDBPermittedChainSetsUpdated", this.permittedChainIndicesSet);
+            window.vent.trigger("recalcLinkDistances"); // this needs listened to and link distances updated before views listen to next trigger
+            window.vent.trigger("PDBPermittedChainSetsUpdated", this.permittedChainIndicesSet);
         }
 
         return this;

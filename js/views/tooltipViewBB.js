@@ -1,4 +1,4 @@
-import "../../css/tooltip.css"
+import "../../css/tooltip.css";
 
 import Backbone from "backbone";
 import d3 from "d3";
@@ -66,11 +66,11 @@ export const TooltipViewBB = Backbone.View.extend({
             .transition()
             .style("visibility", "visible")
             .style("opacity", null);
-            // .transition()
-            // .duration(self.holdDuration)
-            // .each("end", function () {
-            //     self.setToFade();
-            // });
+        // .transition()
+        // .duration(self.holdDuration)
+        // .each("end", function () {
+        //     self.setToFade();
+        // });
 
         return this;
     },

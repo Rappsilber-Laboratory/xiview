@@ -1,6 +1,6 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import d3 from "d3";
-import * as colorbrewer from 'colorbrewer';
+import * as colorbrewer from "colorbrewer";
 import {ColourModel} from "./color-model";
 import {filterOutDecoyInteractors} from "../../modelUtils";
 
@@ -12,8 +12,7 @@ export class DefaultLinkColourModel extends ColourModel {
     initialize () {
         this
             .set("labels", this.get("colScale").copy().range(["Self", "Homomultimeric (Overlapping Peptides)", "Heteromeric"]))
-            .set("type", "ordinal")
-        ;
+            .set("type", "ordinal");
     }
 
     getValue (link) {
@@ -69,10 +68,10 @@ export class GroupColourModel extends ColourModel{
         const multiGroupColour = "#202020"; // default colour for links involved in multiple groups
         if (groupCount < 11) {
             const colArr = [multiGroupColour].concat(groupCount < 6 ? ["#1b9e77",
-            "#7570b3",
-            "#e7298a",
-            "#66a61e",
-            "#d95f02"
+                "#7570b3",
+                "#e7298a",
+                "#66a61e",
+                "#d95f02"
             ] : colorbrewer.Paired[10]);
             colScale = d3.scale.ordinal().range(colArr).domain(groupDomain);
         } else { // more than 10 groups, not really feasible to find colour scale that works - a d3.scale that always returns gray?
@@ -82,8 +81,7 @@ export class GroupColourModel extends ColourModel{
         this
             .set("colScale", colScale)
             .set("labels", this.get("colScale").copy().range(labelRange))
-            .set("type", "ordinal")
-        ;
+            .set("type", "ordinal");
     }
 
     getValue (link) {
@@ -105,8 +103,7 @@ export class GroupColourModel extends ColourModel{
                 // choose value if link definitely belongs to just one group or set as undefined (-1)
                 return value;
             }
-        }
-        else {
+        } else {
             //check if link uniquely belongs to one group
             const filteredMatchesAndPepPositions = link.filteredMatches_pp;
 
@@ -151,8 +148,7 @@ export class DistanceColourModel extends ColourModel {
         this
             .set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Within Distance", "Borderline", "Overlong"]))
-            .set("unit", "Å")
-        ;
+            .set("unit", "Å");
     }
 
     getValue (link) {
@@ -193,8 +189,7 @@ export class InterProteinColourModel extends ColourModel{
 
         this
             .set("colScale", colScale)
-            .set("labels", this.get("colScale").copy().range(labels))
-        ;
+            .set("labels", this.get("colScale").copy().range(labels));
     }
 
     makeProteinPairKey (pid1, pid2) {
@@ -205,8 +200,8 @@ export class InterProteinColourModel extends ColourModel{
         let id1, id2;
         if (link.isAggregateLink) {
             const crosslink = link.getCrosslinks()[0];
-            id1 = link.getCrosslinks()[0].fromProtein.id;
-            id2 = link.getCrosslinks()[0].toProtein ? link.getCrosslinks()[0].toProtein.id : undefined;
+            id1 = crosslink.fromProtein.id;
+            id2 = crosslink.toProtein ? link.getCrosslinks()[0].toProtein.id : undefined;
         } else {
             id1 = link.fromProtein.id;
             id2 = link.toProtein ? link.toProtein.id : undefined;
@@ -247,6 +242,6 @@ export class HighestScoreColourModel extends ColourModel {
         const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength);//.concat(this.get("undefinedColour"));
-       return d3.zip (labels, colScaleRange);
+        return d3.zip (labels, colScaleRange);
     }
 }

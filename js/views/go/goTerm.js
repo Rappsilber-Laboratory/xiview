@@ -9,30 +9,30 @@ export class GoTerm {
         this.filtInteractorCount = 0;
     }
 
-// GoTerm.prototype.getInteractors = function(interactorSet) {
-//     var go = window.compositeModelInst.get("go");
-//     if (!interactorSet) {
-//         interactorSet = new Set();
-//     }
-//     if (this.parts) {
-//         for (let partId of this.parts) {
-//             go.get(partId).getInteractors(interactorSet);
-//         }
-//     }
-//     if (this.subclasses) {
-//         for (let subclassId of this.subclasses) {
-//             go.get(subclassId).getInteractors(interactorSet);
-//         }
-//     }
-//     if (this.interactors) {
-//         for (let i of this.interactors) {
-//             if (i.hidden == false) {
-//                 interactorSet.add(i);
-//             }
-//         }
-//     }
-//     return interactorSet;
-// }
+    // GoTerm.prototype.getInteractors = function(interactorSet) {
+    //     var go = window.compositeModelInst.get("go");
+    //     if (!interactorSet) {
+    //         interactorSet = new Set();
+    //     }
+    //     if (this.parts) {
+    //         for (let partId of this.parts) {
+    //             go.get(partId).getInteractors(interactorSet);
+    //         }
+    //     }
+    //     if (this.subclasses) {
+    //         for (let subclassId of this.subclasses) {
+    //             go.get(subclassId).getInteractors(interactorSet);
+    //         }
+    //     }
+    //     if (this.interactors) {
+    //         for (let i of this.interactors) {
+    //             if (i.hidden == false) {
+    //                 interactorSet.add(i);
+    //             }
+    //         }
+    //     }
+    //     return interactorSet;
+    // }
 
     getInteractors (storeCount) {
         const go = window.compositeModelInst.get("go");

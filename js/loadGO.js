@@ -15,7 +15,7 @@ export function loadGOAnnotations (txt) {
         const endi = txt.indexOf("\n", i);
         let line = txt.slice(i, endi !== -1 ? endi : undefined);
         //not having ':' in go ids, so valid html id later, maybe a mistake, (do trim here to get rid of '/r's too - mjg)
-        line = line.trim().replace (/:/g, '');
+        line = line.trim().replace (/:/g, "");
         //var line = lines[l].trim().replace (/:/g, '');
 
         if (line) {

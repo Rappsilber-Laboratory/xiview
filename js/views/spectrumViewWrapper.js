@@ -2,7 +2,7 @@
 import "../../css/spectrumViewWrapper.css";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, proteinConcat} from "../utils";
@@ -16,7 +16,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             parentEvents = parentEvents();
         }
         return _.extend({
-            'click #clearHighlights': 'clearSpectrumHighlights',
+            "click #clearHighlights": "clearSpectrumHighlights",
         }, parentEvents, {});
     },
 
@@ -154,9 +154,9 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             const visible = !!match;
             if (this.isVisible() !== visible) {
                 //console.log ("CHANGE VISIBILITY");
-                vent.trigger("spectrumShow", visible);
+                window.vent.trigger("spectrumShow", visible);
             }
-            vent.trigger("individualMatchSelected", match);
+            window.vent.trigger("individualMatchSelected", match);
             this.enableControls(match);
             if (match) {
                 d3.select(this.el).select("span.validatedState")
@@ -184,7 +184,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             this.triggerSpectrumViewer(selectedMatch.match, true);
         }
         // resize the spectrum on drag
-        vent.trigger("resizeSpectrumSubViews", true);
+        window.vent.trigger("resizeSpectrumSubViews", true);
 
         const altModel = this.alternativesModel.get("clmsModel");
         const keepDisplayNone = (altModel && altModel.get("matches").length === 1); // altModel check as sometime clmsModel isn't populated (undefined)
@@ -208,22 +208,22 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         const description = [{
             field: "id"
         },
-            {
-                label: "prot1",
-                value: proteinConcat(match, 0, this.model.get("clmsModel"))
-            },
-            {
-                label: "pep1",
-                value: match.matchedPeptides[0].sequence
-            },
-            {
-                label: "pos1",
-                value: match.matchedPeptides[0].pos[0]
-            },
-            {
-                label: "lp1",
-                value: match.linkPos1
-            },
+        {
+            label: "prot1",
+            value: proteinConcat(match, 0, this.model.get("clmsModel"))
+        },
+        {
+            label: "pep1",
+            value: match.matchedPeptides[0].sequence
+        },
+        {
+            label: "pos1",
+            value: match.matchedPeptides[0].pos[0]
+        },
+        {
+            label: "lp1",
+            value: match.linkPos1
+        },
         ];
         if (match.matchedPeptides[1]) {
             description.push({
@@ -241,27 +241,27 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             });
         }
         description.push({
-                field: "score",
-                value: match.score()
-            }, {
-                field: "autovalidated",
-                label: "Auto"
-            }, {
-                field: "validated",
-                label: "Val"
-            },
-            //["precursorCharge"],
-            {
-                field: "searchId"
-            }, {
-                label: "run",
-                value: match.runName()
-            }, {
-                field: "scanNumber"
-            }, {
-                field: "is_decoy",
-                label: "Decoy"
-            }
+            field: "score",
+            value: match.score()
+        }, {
+            field: "autovalidated",
+            label: "Auto"
+        }, {
+            field: "validated",
+            label: "Val"
+        },
+        //["precursorCharge"],
+        {
+            field: "searchId"
+        }, {
+            label: "run",
+            value: match.runName()
+        }, {
+            field: "scanNumber"
+        }, {
+            field: "is_decoy",
+            label: "Decoy"
+        }
         );
         description.forEach(function (desc) {
             desc.value = desc.value || match[desc.field] || "null";
@@ -280,6 +280,6 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
     },
 
     clearSpectrumHighlights: function () {
-        window.xiSPECUI.vent.trigger('clearSpectrumHighlights'); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
+        window.xiSPECUI.vent.trigger("clearSpectrumHighlights"); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
     }
 });

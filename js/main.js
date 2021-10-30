@@ -1,16 +1,16 @@
 import "../css/reset.css";
 import "../css/common.css";
-import "../vendor/byrei-dyndiv_0.5.css"
+import "../vendor/byrei-dyndiv_0.5.css";
 import "../css/style.css";
 import "../css/xiView.css";
 import "../css/multiple-select.css"; //? where is this used?
 
-import * as Spinner from 'spin';
+import * as Spinner from "spin";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 import * as NGL from "../vendor/ngl.dev"; // only used here for test setup
-import * as d3 from 'd3';
-import {init, allDataLoaded} from './networkFrame';
-import {commonRegexes, displayError} from './utils';
+import * as d3 from "d3";
+import {init, allDataLoaded} from "./networkFrame";
+import {commonRegexes, displayError} from "./utils";
 import {loadGOAnnotations} from "./loadGO";
 import Split from "split.js";
 import {testCallback} from "../tests/tests";
@@ -75,7 +75,7 @@ export function main() {
                     window.oldSplitterProportions = window.split.getSizes();
                 },
                 gutterStyle: function () {
-                    return {'margin': '0 10px', 'height': '10px'}
+                    return {"margin": "0 10px", "height": "10px"};
                 }
             },
         );
@@ -162,18 +162,17 @@ export function validationPage() {
             direction: "vertical",
             sizes: [60, 40], minSize: [200, 10],
             onDragEnd: function () {
-                vent.trigger("resizeSpectrumSubViews", true);
+                window.vent.trigger("resizeSpectrumSubViews", true);
             }
         });
 
         // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
         d3.select("body").append("div")
             .attr("id", "spectrumSettingsWrapper")
-            .attr("class", "dynDiv")
-        ;
+            .attr("class", "dynDiv");
         init.viewsEssential({"specWrapperDiv": "#topDiv", spectrumToTop: false});
 
-        vent.trigger("spectrumShow", true);
+        window.vent.trigger("spectrumShow", true);
 
         const allMatches = window.compositeModelInst.get("clmsModel").get("matches");
         window.compositeModelInst.setMarkedMatches("selection", allMatches);
@@ -183,7 +182,7 @@ export function validationPage() {
         ByRei_dynDiv.init.main();
 
         const resize = function (event) {
-            vent.trigger("resizeSpectrumSubViews", true);
+            window.vent.trigger("resizeSpectrumSubViews", true);
             const alts = d3.select("#alternatives");
             const w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
             alts.attr("style", "width:" + w + "px;"); //dont know why d3 style() aint working
@@ -248,5 +247,5 @@ function testSetupNew(cbfunc) {
 }
 
 export function test() {
-    testSetupNew(testCallback)
+    testSetupNew(testCallback);
 }

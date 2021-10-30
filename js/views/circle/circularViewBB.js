@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import '../../../css/circularViewBB.css';
-import * as $ from 'jquery';
-import * as _ from 'underscore';
+import "../../../css/circularViewBB.css";
+import * as $ from "jquery";
+import * as _ from "underscore";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {getResidueType} from "../../modelUtils";
@@ -206,7 +206,9 @@ export const CircularViewBB = BaseFrameView.extend({
 
         // if protein default colour model use this instead for legibility
         this.replacementDefaultNodeColourModel = {
-            getColour: function () { return "#dde"; }
+            getColour: function () {
+                return "#dde"; 
+            }
         };
 
         CircularViewBB.__super__.initialize.apply(this, arguments);
@@ -221,15 +223,10 @@ export const CircularViewBB = BaseFrameView.extend({
                 template({
                     svgClass: "circularView",
                 })
-            )
-        ;
-
+            );
         mainDivSel.select(".backdrop")
             // can replace .backdrop class colouring with this option if defined
-            .style("background-color", this.options.background)
-        ;
-
-
+            .style("background-color", this.options.background);
         const buttonData = [{
             class: "downloadButton",
             label: commonLabels.downloadImg + "SVG",
@@ -251,31 +248,31 @@ export const CircularViewBB = BaseFrameView.extend({
             type: "radio",
             group: "sort"
         },
-            {
-                class: "circRadio",
-                label: "By Length",
-                id: "size",
-                raw_id: "size",
-                type: "radio",
-                group: "sort"
-            },
-            {
-                class: "circRadio",
-                label: "To Reduce Crossings",
-                id: "best",
-                raw_id: "best",
-                type: "radio",
-                group: "sort",
-                sectionEnd: true,
-                d3tooltip: "Order proteins to reduce visual crosslink intersections in the circle - making it easier to comprehend"
-            },
-            {
-                class: "niceButton",
-                label: "Redo Current Ordering",
-                id: "nice",
-                raw_id: "nice",
-                type: "button"
-            },
+        {
+            class: "circRadio",
+            label: "By Length",
+            id: "size",
+            raw_id: "size",
+            type: "radio",
+            group: "sort"
+        },
+        {
+            class: "circRadio",
+            label: "To Reduce Crossings",
+            id: "best",
+            raw_id: "best",
+            type: "radio",
+            group: "sort",
+            sectionEnd: true,
+            d3tooltip: "Order proteins to reduce visual crosslink intersections in the circle - making it easier to comprehend"
+        },
+        {
+            class: "niceButton",
+            label: "Redo Current Ordering",
+            id: "nice",
+            raw_id: "nice",
+            type: "button"
+        },
         ];
         orderOptionsButtonData
             .filter(function(d) {
@@ -318,34 +315,34 @@ export const CircularViewBB = BaseFrameView.extend({
             initialState: this.options.showLinkless,
             d3tooltip: "Keep showing proteins with no current crosslinks for a steadier layout"
         },
-            {
-                class: "showResLabelsButton",
-                label: "Residue Labels (If Few Links)",
-                id: "resLabels",
-                initialState: this.options.showResLabels,
-                d3tooltip: "If only a few crosslinks, show the residue letters at the ends of the cross-links"
-            },
-            {
-                class: "flipIntraButton",
-                label: "Self Links on Outside",
-                id: "flip",
-                initialState: this.options.intraOutside,
-                d3tooltip: "Flips the display of Self crosslinks between inside and outside"
-            },
-            {
-                class: "toggleHomomOpposition",
-                label: "Links with Overlapping Peptides Opposite to Self Links",
-                id: "homomOpposite",
-                initialState: this.options.homomOpposite,
-                d3tooltip: "Show crosslinks with overlapping peptides on the opposite side (in/out) to Self crosslinks. Often these may be homomultimeric - links between different copies of the same protein."
-            },
-            {
-                class: "showSelectedOnly",
-                label: "Selected Crosslinks Only",
-                id: "showSelectedOnly",
-                initialState: this.options.showSelectedOnly,
-                d3tooltip: "Show selected crosslinks only (yellow highlighting is removed also.)"
-            },
+        {
+            class: "showResLabelsButton",
+            label: "Residue Labels (If Few Links)",
+            id: "resLabels",
+            initialState: this.options.showResLabels,
+            d3tooltip: "If only a few crosslinks, show the residue letters at the ends of the cross-links"
+        },
+        {
+            class: "flipIntraButton",
+            label: "Self Links on Outside",
+            id: "flip",
+            initialState: this.options.intraOutside,
+            d3tooltip: "Flips the display of Self crosslinks between inside and outside"
+        },
+        {
+            class: "toggleHomomOpposition",
+            label: "Links with Overlapping Peptides Opposite to Self Links",
+            id: "homomOpposite",
+            initialState: this.options.homomOpposite,
+            d3tooltip: "Show crosslinks with overlapping peptides on the opposite side (in/out) to Self crosslinks. Often these may be homomultimeric - links between different copies of the same protein."
+        },
+        {
+            class: "showSelectedOnly",
+            label: "Selected Crosslinks Only",
+            id: "showSelectedOnly",
+            initialState: this.options.showSelectedOnly,
+            d3tooltip: "Show selected crosslinks only (yellow highlighting is removed also.)"
+        },
         ];
         showOptionsButtonData
             .forEach(function(d) {
@@ -379,22 +376,20 @@ export const CircularViewBB = BaseFrameView.extend({
         // Lets user rotate diagram
         const backgroundDrag = d3.behavior.drag();
         backgroundDrag.on("dragstart", function() {
-                d3.event.sourceEvent.stopPropagation();
-                d3.event.sourceEvent.stopImmediatePropagation();
-                d3.event.sourceEvent.preventDefault();
+            d3.event.sourceEvent.stopPropagation();
+            d3.event.sourceEvent.stopImmediatePropagation();
+            d3.event.sourceEvent.preventDefault();
             const curTheta = d3.transform(svg.select("g g").attr("transform")).rotate * degToRad;
             const mc = d3.mouse(this);
             const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             backgroundDrag.offTheta = curTheta - dragStartTheta;
-            })
+        })
             .on("drag", function() {
                 const dmc = d3.mouse(this);
                 let theta = Math.atan2(dmc[1] - self.radius, dmc[0] - self.radius);
                 theta += backgroundDrag.offTheta;
                 svg.select("g g").attr("transform", "rotate(" + (theta / degToRad) + ")");
-            })
-        ;
-
+            });
         let svg = mainDivSel.select("svg");//.call(backgroundDrag);
 
         this.nodeDrag = d3.behavior.drag();
@@ -440,18 +435,18 @@ export const CircularViewBB = BaseFrameView.extend({
             }
         };
         this.nodeDrag.on("dragstart", function() {
-                d3.event.sourceEvent.stopPropagation();
-                d3.event.sourceEvent.preventDefault();
+            d3.event.sourceEvent.stopPropagation();
+            d3.event.sourceEvent.preventDefault();
             const mc = d3.mouse(svg.node());
             self.nodeDrag.startClick = mc;
             const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             self.nodeDrag.startDeg = (((dragStartTheta / degToRad) + 90) + 360) % 360;
-                // draw drag representation if >1 protein displayed
-                if (self.filterInteractors(self.model.get("clmsModel").get("participants")).length > 1) {
-                    d3.select(this).classed("draggedNode", true);
-                }
-                self.nodeDrag.visited = true;
-            })
+            // draw drag representation if >1 protein displayed
+            if (self.filterInteractors(self.model.get("clmsModel").get("participants")).length > 1) {
+                d3.select(this).classed("draggedNode", true);
+            }
+            self.nodeDrag.visited = true;
+        })
             .on("drag", function(d) {
                 d3.event.sourceEvent.stopPropagation();
                 d3.event.sourceEvent.preventDefault();
@@ -580,7 +575,7 @@ export const CircularViewBB = BaseFrameView.extend({
         this.listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function() {
             self.renderPartial(["nodes"]);
         }); // either colour change or new colour model
-        this.listenTo(vent, "proteinMetadataUpdated", function() {   // generally a name change
+        this.listenTo(window.vent, "proteinMetadataUpdated", function() {   // generally a name change
             self.renderPartial(["nodes"]);
         });
         this.listenTo(this.model.get("annotationTypes"), "change:shown", function() {
@@ -690,13 +685,14 @@ export const CircularViewBB = BaseFrameView.extend({
             const accentedLinkIDs = _.pluck(accentedLinkList, "id");
             const idset = d3.set(accentedLinkIDs);
             d3Selection.filter("."+linkType)
-                .filter(function(d) { return !idset.has(d.id); })
-                .classed(linkType, false)
-            ;
-
-            d3Selection.filter(function(d) { return idset.has(d.id); })
-                .classed(linkType, true)
-            ;
+                .filter(function(d) {
+                    return !idset.has(d.id); 
+                })
+                .classed(linkType, false);
+            d3Selection.filter(function(d) {
+                return idset.has(d.id); 
+            })
+                .classed(linkType, true);
         }
         return this;
     },
@@ -936,21 +932,21 @@ export const CircularViewBB = BaseFrameView.extend({
                 inner: innerNodeRadius,
                 outer: tickRadius
             },
-                {
-                    arc: "featureArc",
-                    inner: innerFeatureRadius,
-                    outer: tickRadius
-                }, // both radii same for textArc
-                {
-                    arc: "textArc",
-                    inner: textRadius,
-                    outer: textRadius
-                }, // both radii same for textArc
-                {
-                    arc: "resLabelArc",
-                    inner: innerNodeRadius,
-                    outer: textRadius
-                },
+            {
+                arc: "featureArc",
+                inner: innerFeatureRadius,
+                outer: tickRadius
+            }, // both radii same for textArc
+            {
+                arc: "textArc",
+                inner: textRadius,
+                outer: textRadius
+            }, // both radii same for textArc
+            {
+                arc: "resLabelArc",
+                inner: innerNodeRadius,
+                outer: textRadius
+            },
             ];
             arcRadii.forEach(function(arcData) {
                 this[arcData.arc].innerRadius(arcData.inner).outerRadius(arcData.outer);
@@ -974,8 +970,7 @@ export const CircularViewBB = BaseFrameView.extend({
             if (!changed || changed.has("nodes")) {
                 this
                     .drawNodes(gRot, nodes) // draw nodes (around edge)
-                    .drawNodeTicks(gRot, nodes, tickRadius) // draw scales on nodes - adapted from http://bl.ocks.org/mbostock/4062006
-                ;
+                    .drawNodeTicks(gRot, nodes, tickRadius); // draw scales on nodes - adapted from http://bl.ocks.org/mbostock/4062006
             }
             if (!changed || changed.has("features")) {
                 this.drawFeatures(gRot, features);  // draw features
@@ -1056,9 +1051,7 @@ export const CircularViewBB = BaseFrameView.extend({
             })
             .call(function() {
                 self.showAccentOnTheseLinks.call(self, this, "selection");
-            })
-        ;
-
+            });
         return this;
     },
 
@@ -1086,7 +1079,7 @@ export const CircularViewBB = BaseFrameView.extend({
         nodeJoin.exit().remove();
 
         nodeJoin.enter()
-            .append('path')
+            .append("path")
             .attr("class", "circleNode")
             .on("mouseenter", function(d) {
                 self.nodeTip(d);
@@ -1103,14 +1096,12 @@ export const CircularViewBB = BaseFrameView.extend({
                 if (multipleNodes) {
                     sel.call(self.nodeDrag);
                 }
-            })
-        ;
-
+            });
         nodeJoin
             .attr("d", this.arc)
-            .style("fill", function(d) { return colourScheme.getColour(interactors.get(d.id)); })
-        ;
-
+            .style("fill", function(d) {
+                return colourScheme.getColour(interactors.get(d.id)); 
+            });
         this.showAccentOnTheseNodes(nodeJoin, "selection");
 
         return this;
@@ -1246,9 +1237,8 @@ export const CircularViewBB = BaseFrameView.extend({
             .attr("startOffset", "50%")
             .attr("xlink:href", function(d) {
                 return "#" + pathId(d);
-            })
+            });
         //.text (function(d) { return d.name.replace("_", " "); })
-        ;
 
         // this lets names update for existing nodes
         textJoin.select("text textPath").text(function(d) {
@@ -1273,7 +1263,7 @@ export const CircularViewBB = BaseFrameView.extend({
         featureJoin.exit().remove();
 
         featureJoin.enter()
-            .append('path')
+            .append("path")
             .attr("class", "circleFeature")
             .on("mouseenter", function(d) {
                 self.featureTip(d);

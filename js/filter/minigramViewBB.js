@@ -1,7 +1,7 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as c3 from "../../vendor/c3.js";
-import {declutterAxis, niceRound, niceValueAxis, xilog} from '../utils';
+import {declutterAxis, niceRound, niceValueAxis, xilog} from "../utils";
 import d3 from "d3";
 
 export const MinigramViewBB = Backbone.View.extend({
@@ -32,11 +32,11 @@ export const MinigramViewBB = Backbone.View.extend({
         this.chart = c3.generate({
             bindto: bid,
             data: {
-                x: 'x', // x is now declared as a column to account for possible negative values
+                x: "x", // x is now declared as a column to account for possible negative values
                 columns: [
                     [this.options.seriesName],
                 ],
-                type: 'bar',
+                type: "bar",
                 colors: this.options.colours || {
                     actual: "#555",
                     random: "#aaa"
@@ -289,8 +289,7 @@ export const MinigramViewBB = Backbone.View.extend({
             this.chart.internal.brush
                 .clamp(true)
                 .extent([this.model.get("domainStart"), this.model.get("domainEnd")])
-                .update()
-            ;
+                .update();
         }
         return this;
     },
