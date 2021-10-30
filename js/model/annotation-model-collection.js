@@ -3,12 +3,12 @@ import Backbone from "backbone";
 import d3 from "d3";
 import colorbrewer from "colorbrewer";
 
-export class AnnotationType extends Backbone.Model{
+export class AnnotationType extends Backbone.Model {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
-    defaults(){
+    defaults() {
         return {
             id: undefined,
             category: undefined,
@@ -18,7 +18,7 @@ export class AnnotationType extends Backbone.Model{
         };
     }
 
-    initialize (options) {
+    initialize(options) {
         const defaultOptions = {};
         this.options = _.extend(defaultOptions, options);
         this
@@ -50,7 +50,7 @@ export class AnnotationTypeCollection extends Backbone.Collection {
             .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"]);
     }
 
-    initialize (models, options) {
+    initialize(models, options) {
         this.listenTo(window.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
@@ -59,15 +59,15 @@ export class AnnotationTypeCollection extends Backbone.Collection {
         });
     }
 
-    modelId (attrs) {
+    modelId(attrs) {
         return (attrs.category + "-" + attrs.type).toLocaleLowerCase();
     }
 
-    comparator (model) {
+    comparator(model) {
         return model.get("id");
     }
 
-    getColour (catName, typeName) {
+    getColour(catName, typeName) {
         catName = catName || "undefined";
         typeName = typeName || "undefined";
         const id = this.modelId({category: catName, type: typeName});

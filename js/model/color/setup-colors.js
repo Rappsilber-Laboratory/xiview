@@ -4,6 +4,7 @@ import {DefaultLinkColourModel} from "./link-color-model";
 import {GroupColourModel} from "./link-color-model";
 import {InterProteinColourModel} from "./link-color-model";
 import {DistanceColourModel} from "./link-color-model";
+
 const colorbrewer = require("colorbrewer");
 import {HighestScoreColourModel} from "./link-color-model";
 import {
@@ -67,8 +68,8 @@ export const setupColourModels = function (userConfig) {
     const maxScore = clmsModel.get("maxScore");
 
     const hiScores = [];
-    for (let crosslink of clmsModel.get("crosslinks").values()){
-        const scores = crosslink.filteredMatches_pp.map(function(m) {
+    for (let crosslink of clmsModel.get("crosslinks").values()) {
+        const scores = crosslink.filteredMatches_pp.map(function (m) {
             return m.match.score();
         });
         hiScores.push(Math.max.apply(Math, scores));
@@ -116,7 +117,7 @@ export const setupColourModels = function (userConfig) {
     });*/
 
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
-    linkColourCollection.listenTo(window.vent, "linkMetadataUpdated", function(metaMetaData) {
+    linkColourCollection.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
         const columns = metaMetaData.columns;
         const crosslinks = metaMetaData.items;
         const colMaps = columns.map(function (field) {
@@ -132,7 +133,7 @@ export const setupColourModels = function (userConfig) {
 
     // Protein colour schemes
 
-    window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel ({
+    window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({
         colScale: d3.scale.ordinal().domain([0]).range(["#fff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
@@ -153,7 +154,7 @@ export const setupColourModels = function (userConfig) {
     };
 
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
-    proteinColourCollection.listenTo(window.vent, "proteinMetadataUpdated", function(metaMetaData) {
+    proteinColourCollection.listenTo(window.vent, "proteinMetadataUpdated", function (metaMetaData) {
         const columns = metaMetaData.columns;
         const proteins = metaMetaData.items;
         const colMaps = columns.map(function (field) {
@@ -167,7 +168,7 @@ export const setupColourModels = function (userConfig) {
     window.linkColor.ProteinCollection = proteinColourCollection;
 };
 
-const makeColourModel = function(field, label, objs) {
+const makeColourModel = function (field, label, objs) {
     let allColors = true, allNumbers = true, min = Number.POSITIVE_INFINITY, max = Number.NEGATIVE_INFINITY;
     const categories = new Set();
     const numbers = [];

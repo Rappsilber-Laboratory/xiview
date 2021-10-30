@@ -414,8 +414,8 @@ export function getLinksCSV() {
         const linear = crosslink.isLinearLink();
         const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
         row.push(
-            mostReadableId(crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
-            (linear ? "" : mostReadableId(crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
+            mostReadableId(crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence ? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
+            (linear ? "" : mostReadableId(crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence ? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
         );
 
         let highestScore = null;
@@ -519,7 +519,7 @@ function getPPIsCSV() {
         const decoyType = getDecoyTypeFromCrosslink(aCrosslink);
 
         const searchesFound = new Set();
-        for (let crosslink of ppi){
+        for (let crosslink of ppi) {
             const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
             for (let fm_pp of filteredMatchesAndPepPos) {
                 const match = fm_pp.match;
@@ -547,7 +547,7 @@ function getPPIsCSV() {
     return rows.join("\r\n") + "\r\n";
 }
 
-function getDecoyTypeFromCrosslink (aCrosslink) {
+function getDecoyTypeFromCrosslink(aCrosslink) {
     let decoyType;
     if (aCrosslink.isLinearLink()) {
         if (aCrosslink.fromProtein.is_decoy) {

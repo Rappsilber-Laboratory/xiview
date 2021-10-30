@@ -4,10 +4,10 @@ import {clearObjectMetaData} from "../modelUtils";
 
 export const clearFdr = function (crosslinksArr) {
     // clear fdr information from crosslinks (usually because we've gone into none-fdr mode and don't want it showing in tooltips)
-    clearObjectMetaData (crosslinksArr, ["fdr", "linkScore"]);
+    clearObjectMetaData(crosslinksArr, ["fdr", "linkScore"]);
 };
 
-export const fdr = function(crosslinksArr, options) {
+export const fdr = function (crosslinksArr, options) {
 
     const defaultScoreCalcFunc = function (crosslink) { // default function is based on quadratic mean (rms)
         const filtered = crosslink.matches_pp
@@ -42,7 +42,7 @@ export const fdr = function(crosslinksArr, options) {
 
     // filter out linears
     if (options.filterLinears) {
-        crosslinksArr = crosslinksArr.filter(function(link) {
+        crosslinksArr = crosslinksArr.filter(function (link) {
             return !link.isLinearLink();
         });
     }
@@ -52,8 +52,8 @@ export const fdr = function(crosslinksArr, options) {
     const linkArrs = _.partition(crosslinksArr, function (xLink) {
         return !xLink.isSelfLink();
     });
-    linkArrs.forEach(function(linkArr) {
-        linkArr.sort(function(a, b) {
+    linkArrs.forEach(function (linkArr) {
+        linkArr.sort(function (a, b) {
             return a.getMeta("linkScore") - b.getMeta("linkScore");
         });
     }); // in ascending order (lowest first)

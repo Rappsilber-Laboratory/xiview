@@ -34,7 +34,7 @@ export class GoTerm {
     //     return interactorSet;
     // }
 
-    getInteractors (storeCount) {
+    getInteractors(storeCount) {
         const go = window.compositeModelInst.get("go");
         GoTerm.prototype.getCount++;
 

@@ -9,25 +9,25 @@ export const MinigramModel = Backbone.Model.extend({
         //domainStart: 0,
         //domainEnd: 100,
     },
-    data: function() {
+    data: function () {
         return [1, 2, 3, 4];
     },
-    extent: [0,4],
+    extent: [0, 4],
 });
 
-export const  TooltipModel = Backbone.Model.extend({
+export const TooltipModel = Backbone.Model.extend({
     defaults: {
         location: null,
         header: "Tooltip",
     },
-    initialize: function() {
+    initialize: function () {
         // ^^^setting an array in defaults passes that same array reference to every instantiated model, so do it in initialize
         this.set("contents", ["Can show", "single items", "lists or", "tables"]);
     }
 });
 
 const BlosumModel = Backbone.Model.extend({
-    initialize: function() {
+    initialize: function () {
         //console.log ("Blosum model initialised", this);
     },
 });
@@ -37,7 +37,7 @@ const BlosumModel = Backbone.Model.extend({
 export const BlosumCollection = Backbone.Collection.extend({
     model: BlosumModel,
     url: "R/blosums.json",
-    parse: function(response) {
+    parse: function (response) {
         // turn json object into array, add keys to value parts, then export just the values
         const entries = d3.entries(response);
         const values = entries.map(function (entry) {
@@ -46,7 +46,7 @@ export const BlosumCollection = Backbone.Collection.extend({
             return entry.value;
         });
 
-        console.log ("response", response, values);
+        console.log("response", response, values);
         return values;
     }
 });

@@ -13,7 +13,7 @@ import {
     xilog
 } from "../utils";
 import * as Spinner from "spin";
-import {download} from  "../downloads";
+import {download} from "../downloads";
 import d3 from "d3";
 
 // https://stackoverflow.com/questions/32065257/having-a-static-variable-in-backbone-js-views#32820288

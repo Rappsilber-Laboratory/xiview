@@ -11,7 +11,7 @@ import d3 from "d3";
 
 export const AlignCollectionViewBB = BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -22,7 +22,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         }, parentEvents, {});
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         AlignCollectionViewBB.__super__.initialize.apply(this, arguments);
 
         const topElem = d3.select(this.el);
@@ -42,28 +42,28 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
             addToElem: topElem.select(".alignSortWidget"),
             selectList: ["Sort Tabs By"],
             optionList: this.collection.possibleComparators,
-            optionLabelFunc: function(d) {
+            optionLabelFunc: function (d) {
                 return d.label;
             },
-            optionValueFunc: function(d) {
+            optionValueFunc: function (d) {
                 return d.compFunc;
             },
-            changeFunc: function() {
+            changeFunc: function () {
                 let compFunc, reverse;
                 // cant rely on event.target.value as it returns functions as a string
                 d3.select(d3.event.target)
                     .selectAll("option")
-                    .filter(function() {
+                    .filter(function () {
                         return d3.select(this).property("selected");
                     })
-                    .each(function(d) {
+                    .each(function (d) {
                         compFunc = d.compFunc;
                     });
                 self.collection.comparator = compFunc;
                 self.collection.sort();
                 self.render();
             },
-            initialSelectionFunc: function(d) {
+            initialSelectionFunc: function (d) {
                 return d.compFunc === self.collection.comparator;
             },
         });
@@ -83,35 +83,35 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         const firstModel = this.collection.models[0];
         this.setFocusModel(firstModel);
 
-        this.listenTo(this.collection, "bulkAlignChange", function() {
+        this.listenTo(this.collection, "bulkAlignChange", function () {
             this.render();
         });
-        this.listenTo(this.collection, "change:displayLabel", function(indAlignModel) {
+        this.listenTo(this.collection, "change:displayLabel", function (indAlignModel) {
             this.renderTab(indAlignModel);
         });
         return this;
     },
 
-    hollowElement: function(view) {
+    hollowElement: function (view) {
         view.stopListening(); // remove backbone events bound with listenTo etc 
         $(view.el).off(); // remove dom events
         const a = d3.select(view.el);
         a.selectAll("*").remove(); // remove all elements underneath el
     },
 
-    clearTooltip: function() {
+    clearTooltip: function () {
         if (this.tooltipModel) {
             this.tooltipModel.set("contents", null);
         }
         return this;
     },
 
-    setTabContents: function(d) {
+    setTabContents: function (d) {
         const seqCount = d.get("seqCollection") ? d.get("seqCollection").length : 0;
         return d.get("displayLabel") + (seqCount ? "<span class='alignSeqCount'>" + seqCount + "</span>" : "");
     },
 
-    renderTab: function(indAlignModel) {
+    renderTab: function (indAlignModel) {
         const list = d3.select(this.el).select("DIV.checkHolder");
         const indTab = list.selectAll("span.alignTab").filter(function (d) {
             return (d.id = indAlignModel.get("id"));
@@ -120,7 +120,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         indTab.select("label").html(self.setTabContents);
     },
 
-    render: function() {
+    render: function () {
         const models = this.collection.models;
 
         const topElem = d3.select(this.el);
@@ -138,25 +138,25 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
             .attr("class", "alignRadio")
             .attr("type", "radio")
             .attr("name", topElem.attr("id") + "pgroup")
-            .attr("id", function(d, i) {
+            .attr("id", function (d, i) {
                 return topElem.attr("id") + "pgroup" + i;
             })
-            .attr("value", function(d) {
+            .attr("value", function (d) {
                 return d.id;
             })
-            .property("checked", function(d, i) {
+            .property("checked", function (d, i) {
                 return i === 0;
             });
         pspans.append("label")
-            .attr("for", function(d, i) {
+            .attr("for", function (d, i) {
                 return topElem.attr("id") + "pgroup" + i;
             })
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function (d) {
                 const nformat = d3.format(",d");
                 self.tooltipModel
                     .set("header", d.get("displayLabel"))
                     .set("contents",
-                        self.collection.possibleComparators.slice(1).map(function(comp) {
+                        self.collection.possibleComparators.slice(1).map(function (comp) {
                             return [comp.label, d.get("seqCollection") ? nformat(comp.compFunc(d)) : 0];
                         })
                     )
@@ -176,12 +176,12 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         return this;
     },
 
-    radioClicked: function(evt) {
+    radioClicked: function (evt) {
         const model = this.collection.get(evt.target.value);
         this.setFocusModel(model);
     },
 
-    setFocusModel: function(model) {
+    setFocusModel: function (model) {
         const prevModel = this.modelView ? this.modelView.model : undefined;
         if (prevModel) {
             console.log("old modelView", this.modelView);
@@ -216,7 +216,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
 
             this.alignViewBlosumSelector
                 .setSelected(model.get("scoreMatrix"))
-                .listenTo(model, "change:scoreMatrix", function(protAlignModel, scoreMatrix) { // and then make it track it thereafter
+                .listenTo(model, "change:scoreMatrix", function (protAlignModel, scoreMatrix) { // and then make it track it thereafter
                     this.setSelected(scoreMatrix);
                 });
 
@@ -239,7 +239,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         "mouseleave th": "clearTooltip",
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         this.tooltipModel = viewOptions.tooltipModel;
 
         const topElem = d3.select(this.el);
@@ -266,27 +266,27 @@ export const ProtAlignViewBB = Backbone.View.extend({
         d3.select(this.el).select(".alignChoiceGroup").selectAll("label").data(labelData)
             .enter()
             .append("label")
-            .text(function(d) {
+            .text(function (d) {
                 return d.label;
             })
             .append("input")
             .attr("type", "radio")
             .attr("class", "diff")
             .attr("name", "alignChoice")
-            .attr("value", function(d) {
+            .attr("value", function (d) {
                 return d.value;
             });
 
         d3.select(this.el).select(".alignChoiceGroup input[type=radio][value='" + this.defaults.defaultSeqShowSetting + "']").property("checked", true);
-        this.listenTo(this.model.get("seqCollection"), "change:compAlignment", function(affectedSeqModel) {
+        this.listenTo(this.model.get("seqCollection"), "change:compAlignment", function (affectedSeqModel) {
             this.render({affectedSeqModel: affectedSeqModel});
         });
-        this.listenTo(this.model.get("seqCollection"), "remove", function(affectedSeqModel) {
+        this.listenTo(this.model.get("seqCollection"), "remove", function (affectedSeqModel) {
             this.render({affectedSeqModel: affectedSeqModel, affectedAction: "remove"});
         });
 
         // Listen for change in blosum selection and pass it to model
-        this.listenTo(window.blosumCollInst, "blosumModelSelected", function(blosumMatrix) {
+        this.listenTo(window.blosumCollInst, "blosumModelSelected", function (blosumMatrix) {
             console.log("BLOSUM", this, arguments);
             this.model.set("scoreMatrix", blosumMatrix);
             this.model.collection.bulkAlignChangeFinished();
@@ -298,12 +298,12 @@ export const ProtAlignViewBB = Backbone.View.extend({
         return this;
     },
 
-    ellipFill: function(length) {
+    ellipFill: function (length) {
         const sigfigs = length ? Math.floor(Math.log(length) / Math.LN10) + 1 : 0; // cos Math.log10 non-existent in IE11
         return this.ellipStr.substring(0, sigfigs);
     },
 
-    makeIndexString: function(length, unit) {
+    makeIndexString: function (length, unit) {
         unit = unit || 10;
 
         let iFillStr = new Array(unit).join(" ");
@@ -318,7 +318,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         }
         return segs.join("");
     },
-        
+
     // generate other sequence strings from comp object
     stringGeneration: function (seq, showSimilar, showDiff) {
 
@@ -416,7 +416,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         seq.indexStr = this.makeIndexString(max, 20).substring(0, max);
     },
 
-    render: function(obj) {
+    render: function (obj) {
         //console.log ("ALIGNVIEWMODEL RENDER", obj);
         const affectedSeqModel = obj ? obj.affectedSeqModel : undefined;
         const affectedAction = obj ? obj.affectedAction : undefined;  // set to 'remove' if you want to remove this particular sequence from the view
@@ -436,7 +436,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         const seqModels = (affectedAction === "remove") ? [affectedSeqModel] : this.model.get("seqCollection").filter(function (m) {
             return !affectedSeqModel || (affectedSeqModel.id === m.id);
         });
-            //var seqModels = affectedSeqModel ? [affectedSeqModel] : this.model.get("seqCollection").models;
+        //var seqModels = affectedSeqModel ? [affectedSeqModel] : this.model.get("seqCollection").models;
         const comps = seqModels.map(function (seqModel) {
             return seqModel.get("compAlignment");
         });
@@ -452,15 +452,16 @@ export const ProtAlignViewBB = Backbone.View.extend({
             return d.label;
         });
         if (!affectedSeqModel) {
-            tbodybind.exit().remove(); 
+            tbodybind.exit().remove();
         }   // don't remove other tbodies if only 1 affectedSeqModel passed in.
         else if (affectedAction === "remove") {
-            tbodybind.remove(); return this; 
+            tbodybind.remove();
+            return this;
         }   // but do remove matched tbodies if action is to remove 
-            
+
         tbodybind.enter().append("tbody");
-        tbodybind.each (function (d) { 
-            self.stringGeneration (d, showSimilar, showDiff);   // calculate sequence strings per comparator sequence model
+        tbodybind.each(function (d) {
+            self.stringGeneration(d, showSimilar, showDiff);   // calculate sequence strings per comparator sequence model
         });
 
         // add 2 rows to each tbody
@@ -490,7 +491,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         // add a th element to each of these rows with sequence name and a tooltip
         newRows.append("th")
             .attr("class", "seqLabel")
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function (d) {
                 const seqInfo = d.seqInfo;
                 self.tooltipModel
                     .set("header", self.model.get("displayLabel"))
@@ -514,7 +515,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
 
         // update th element with row label
         rowBind.select("th") // .select rather than .selectAll pushes changes in datum on existing rows in rowBind down to the th element
-            .html(function(d) {
+            .html(function (d) {
                 return d.rowLabel;
             });
 
@@ -535,7 +536,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         // add tooltip to each segment span
         segmentSpans.enter()
             .append("span")
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function (d) {
                 if (self.tooltipModel && d.klass) {
                     const parent = d3.select(this.parentNode);
                     const parentDatum = parent.datum();
@@ -560,17 +561,17 @@ export const ProtAlignViewBB = Backbone.View.extend({
 
         // update segment spans with current data (from d.segments)
         segmentSpans
-            .attr("class", function(d) {
+            .attr("class", function (d) {
                 return d.klass;
             })
-            .text(function(d) {
+            .text(function (d) {
                 return d.segment;
             });
 
         return this;
     },
 
-    clearTooltip: function() {
+    clearTooltip: function () {
         if (this.tooltipModel) {
             this.tooltipModel.set("contents", null);
         }

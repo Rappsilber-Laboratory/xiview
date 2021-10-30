@@ -19,12 +19,12 @@ export function flattenMatches(matchesArr) {
 }
 
 //used by networkframe
-export function matchScoreRange (matches, integerise) {
+export function matchScoreRange(matches, integerise) {
     let extent = d3.extent(matches, function (m) {
         return m.score();
     });
     if (integerise) {
-        extent = extent.map(function(val, i) {
+        extent = extent.map(function (val, i) {
             return val !== undefined ? Math[i === 0 ? "floor" : "ceil"](val) : val;
             //return Math[i === 0 ? "ceil" : "floor"](val + (i === 0 ? -1 : 1));
         });
@@ -33,7 +33,7 @@ export function matchScoreRange (matches, integerise) {
 }
 
 // used here and in circleview
-export function getResidueType (protein, seqIndex, seqAlignFunc) {
+export function getResidueType(protein, seqIndex, seqAlignFunc) {
     // Some sequence alignment stuff can be done if you pass in a func
     seqIndex = seqAlignFunc ? seqAlignFunc(seqIndex) : seqIndex;
     // seq is 0-indexed, but seqIndex is 1-indexed so -1
@@ -41,26 +41,26 @@ export function getResidueType (protein, seqIndex, seqAlignFunc) {
 }
 
 //used here
-export function getDirectionalResidueType (xlink, getTo, seqAlignFunc) {
+export function getDirectionalResidueType(xlink, getTo, seqAlignFunc) {
     return getResidueType(getTo ? xlink.toProtein : xlink.fromProtein, getTo ? xlink.toResidue : xlink.fromResidue, seqAlignFunc);
 }
 
 //used widely
-export function filterOutDecoyInteractors (interactorArr) {
-    return interactorArr.filter (function(i) {
+export function filterOutDecoyInteractors(interactorArr) {
+    return interactorArr.filter(function (i) {
         return !i.is_decoy;
     });
 }
 
 //used by make-tooltip
-export function highestScore (crosslink) {
-    return d3.max(crosslink.filteredMatches_pp.map(function(m) {
+export function highestScore(crosslink) {
+    return d3.max(crosslink.filteredMatches_pp.map(function (m) {
         return +m.match.score();
     }));
 }
 
 //used by matrixview
-export function findResiduesInSquare (convFunc, crosslinkMap, x1, y1, x2, y2, asymmetric) {
+export function findResiduesInSquare(convFunc, crosslinkMap, x1, y1, x2, y2, asymmetric) {
     const a = [];
     const xmin = Math.max(0, Math.round(Math.min(x1, x2)));
     const xmax = Math.round(Math.max(x1, x2));
@@ -177,8 +177,8 @@ export const amino1toMass = {
 
 // return array of indices of first occurrence of a sequence when encountering a repetition
 // e.g. ["CAT", "DOG", "CAT", "DOG"] -> [undefined, undefined, 0, 1];
-export function indexSameSequencesToFirstOccurrence (sequences) {
-    return sequences.map (function(seq, i) {
+export function indexSameSequencesToFirstOccurrence(sequences) {
+    return sequences.map(function (seq, i) {
         let val = undefined;
         for (let j = 0; j < i; j++) {
             if (seq === sequences[j]) {
@@ -191,7 +191,7 @@ export function indexSameSequencesToFirstOccurrence (sequences) {
 }
 
 //use here, nglutils
-export function filterRepeatedSequences (sequences) {
+export function filterRepeatedSequences(sequences) {
     // Filter out repeated sequences to avoid costly realignment calculation of the same sequences
     const sameSeqIndices = indexSameSequencesToFirstOccurrence(sequences);
     const uniqSeqs = sequences.filter(function (seq, i) {
@@ -210,10 +210,10 @@ export function filterRepeatedSequences (sequences) {
 }
 
 //used by nglutils
-export function reinflateSequenceMap (matchMatrix, sequences, filteredSeqInfo) {
-    d3.keys(matchMatrix).forEach(function(protID) {
+export function reinflateSequenceMap(matchMatrix, sequences, filteredSeqInfo) {
+    d3.keys(matchMatrix).forEach(function (protID) {
         const matchMatrixProt = matchMatrix[protID];
-        matchMatrix[protID] = d3.range(0, sequences.length).map(function(i) {
+        matchMatrix[protID] = d3.range(0, sequences.length).map(function (i) {
             const sameSeqIndex = filteredSeqInfo.sameSeqIndices[i];
             const seqIndex = sameSeqIndex === undefined ? i : sameSeqIndex;
             const uniqSeqIndex = +filteredSeqInfo.uniqSeqReverseIndex[seqIndex]; // + 'cos invert above turns numbers into strings
@@ -225,7 +225,7 @@ export function reinflateSequenceMap (matchMatrix, sequences, filteredSeqInfo) {
 }
 
 //used by nglutils
-export function matrixPairings (matrix, sequenceObjs) {
+export function matrixPairings(matrix, sequenceObjs) {
     const entries = d3.entries(matrix);
     const pairings = [];
 
@@ -236,7 +236,7 @@ export function matrixPairings (matrix, sequenceObjs) {
             bestScore: 2 //1e-25
         };
         const seqObj = sequenceObjs[n];
-        entries.forEach(function(entry) {
+        entries.forEach(function (entry) {
             //var eScore = entry.value[n];
             const avgBitScore = entry.value[n];
 
@@ -259,7 +259,7 @@ export function matrixPairings (matrix, sequenceObjs) {
     return pairings;
 }
 
-export function intersectObjectArrays (a, b, compFunc) {
+export function intersectObjectArrays(a, b, compFunc) {
     if (!_.isEmpty(a) && !_.isEmpty(b) && compFunc) {
         const map = d3.map(a, compFunc);
         const result = b.filter(function (elem) {
@@ -272,14 +272,14 @@ export function intersectObjectArrays (a, b, compFunc) {
 
 //used by pdbfilechooser, nglutils
 // interactorCollection can be map or array
-export function getLegalAccessionIDs (interactorCollection) {
+export function getLegalAccessionIDs(interactorCollection) {
     let ids = [];
     if (interactorCollection) {
         if (interactorCollection.length === undefined) {    // obj to array if necessary
             interactorCollection = Array.from(interactorCollection.values());
         }
-        ids = _.pluck (filterOutDecoyInteractors(interactorCollection), "accession")
-            .filter(function(accession) {
+        ids = _.pluck(filterOutDecoyInteractors(interactorCollection), "accession")
+            .filter(function (accession) {
                 return accession.match(commonRegexes.uniprotAccession);
             });
     }
@@ -287,13 +287,13 @@ export function getLegalAccessionIDs (interactorCollection) {
 }
 
 //used by pdbfilechooser, metadatafilechooser
-export function loadUserFile (fileObj, successFunc, associatedData) {
+export function loadUserFile(fileObj, successFunc, associatedData) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
         const reader = new FileReader();
 
         // Closure to capture the file information.
-        reader.onload = (function() {
-            return function(e) {
+        reader.onload = (function () {
+            return function (e) {
                 successFunc(e.target.result, associatedData);
                 // hack for https://stackoverflow.com/a/28274454
                 const fileChooserInputs = document.getElementsByClassName("selectMetaDataFileButton");
@@ -309,11 +309,11 @@ export function loadUserFile (fileObj, successFunc, associatedData) {
 }
 
 //nglutils, ngl-wrapper-model
-export function makeSubIndexedMap (mmap, subIndexingProperty) {
+export function makeSubIndexedMap(mmap, subIndexingProperty) {
     const subIndexedMap = {};
-    d3.entries(mmap).forEach(function(entry) {
+    d3.entries(mmap).forEach(function (entry) {
         subIndexedMap[entry.key] = d3.nest()
-            .key(function(d) {
+            .key(function (d) {
                 return d[subIndexingProperty];
             })
             .entries(entry.value);
@@ -322,11 +322,11 @@ export function makeSubIndexedMap (mmap, subIndexingProperty) {
 }
 
 //distogramview, searchsummaryview
-export function crosslinkerSpecificityPerLinker (searchArray) {
+export function crosslinkerSpecificityPerLinker(searchArray) {
     return window.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity") || {
         default: {
             name: "all",
-            searches: new Set(_.pluck (searchArray, "id")),
+            searches: new Set(_.pluck(searchArray, "id")),
             linkables: [new Set(["*"])]
         }
     };
@@ -334,7 +334,7 @@ export function crosslinkerSpecificityPerLinker (searchArray) {
 
 //nglutils, distances
 // return indices of sequence where letters match ones in the residue set. Index is to the array, not to any external factor
-export function filterSequenceByResidueSet (seq, residueSet, all) {
+export function filterSequenceByResidueSet(seq, residueSet, all) {
     const resIndices = all ? d3.range(0, seq.length) : [];
     if (!all) {
         for (let m = 0; m < seq.length; m++) {
@@ -349,7 +349,7 @@ export function filterSequenceByResidueSet (seq, residueSet, all) {
 
 function makeMultiKeyProteinMap(clmsModel) {
     const protMap = d3.map();
-    clmsModel.get("participants").forEach (function(value, key) {
+    clmsModel.get("participants").forEach(function (value, key) {
         protMap.set(value.accession, key);
         protMap.set(value.name, key);
         protMap.set(value.id, key);
@@ -357,17 +357,17 @@ function makeMultiKeyProteinMap(clmsModel) {
     return protMap;
 }
 
-function parseProteinID (protMap, pid) {
+function parseProteinID(protMap, pid) {
     const parts = pid.split("|");
     let pkey;
-    parts.forEach (function (part) {
+    parts.forEach(function (part) {
         pkey = pkey || protMap.get(part);
     });
     return pkey;
 }
 
 //metadatafilechooser, STRINGfilechooser
-export function updateLinkMetadata (metaDataFileContents, clmsModel) {
+export function updateLinkMetadata(metaDataFileContents, clmsModel) {
     const crosslinks = clmsModel.get("crosslinks");
     const crosslinksArr = Array.from(crosslinks.values());
     const protMap = makeMultiKeyProteinMap(clmsModel);
@@ -391,7 +391,7 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
     const matchedCrossLinks = [];
     let ppiCount = 0;
 
-    d3.csv.parse(metaDataFileContents, function(d) {
+    d3.csv.parse(metaDataFileContents, function (d) {
         const linkID = d.linkID || d.LinkID;
         let singleCrossLink = crosslinks.get(linkID);
         let rowCrossLinkArr;
@@ -424,18 +424,18 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
 
         if (rowCrossLinkArr && rowCrossLinkArr.length > 0) {
             ppiCount++;
-            matchedCrossLinks.push.apply (matchedCrossLinks, rowCrossLinkArr);
+            matchedCrossLinks.push.apply(matchedCrossLinks, rowCrossLinkArr);
             const keys = d3.keys(d);
 
             if (first) {
                 columns = _.difference(keys, dontStoreArray);
-                columns.forEach(function(column) {
+                columns.forEach(function (column) {
                     columnTypes[column] = "numeric";
                 });
                 first = false;
             }
 
-            keys.forEach(function(key) {
+            keys.forEach(function (key) {
                 let val = d[key];
                 if (val && !dontStoreSet.has(key)) {
                     if (!isNaN(val)) {
@@ -443,8 +443,8 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
                     } else {
                         columnTypes[key] = "alpha"; // at least one entry in the column is non-numeric
                     }
-                    rowCrossLinkArr.forEach (function (cl) {
-                        cl.setMeta (key, val);
+                    rowCrossLinkArr.forEach(function (cl) {
+                        cl.setMeta(key, val);
                     });
                 }
             });
@@ -456,11 +456,11 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
     // If any data types have been detected as non-numeric, go through the links and maked sure they're all non-numeric
     // or sorting etc will throw errors
     d3.entries(columnTypes)
-        .filter(function(entry) {
+        .filter(function (entry) {
             return entry.value === "alpha";
         })
-        .forEach(function(entry) {
-            matchedCrossLinks.forEach(function(matchedCrossLink) {
+        .forEach(function (entry) {
+            matchedCrossLinks.forEach(function (matchedCrossLink) {
                 const val = matchedCrossLink.getMeta(entry.key);
                 if (val !== undefined) {
                     matchedCrossLink.setMeta(entry.key, val.toString());
@@ -468,7 +468,7 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
             });
         });
     const registry = clmsModel.get("crosslinkMetaRegistry") || d3.set();
-    columns.forEach (registry.add, registry);
+    columns.forEach(registry.add, registry);
     clmsModel.set("crosslinkMetaRegistry", registry);
 
     const result = {
@@ -487,7 +487,7 @@ export function updateLinkMetadata (metaDataFileContents, clmsModel) {
 }
 
 //metadatafilechoosers
-export function updateProteinMetadata (metaDataFileContents, clmsModel) {
+export function updateProteinMetadata(metaDataFileContents, clmsModel) {
     const proteins = clmsModel.get("participants");
     let first = true;
     let columns = [];
@@ -500,7 +500,7 @@ export function updateProteinMetadata (metaDataFileContents, clmsModel) {
     const protMap = makeMultiKeyProteinMap(clmsModel);
     let groupsFound = false;
 
-    d3.csv.parse(metaDataFileContents, function(d) {
+    d3.csv.parse(metaDataFileContents, function (d) {
         if (first) {
             const keys = d3.keys(d).map(function (key) {
                 return key.toLocaleLowerCase();
@@ -520,7 +520,7 @@ export function updateProteinMetadata (metaDataFileContents, clmsModel) {
 
                 //protein.meta = protein.meta || {};
                 //var meta = protein.meta;
-                d3.entries(d).forEach(function(entry) {
+                d3.entries(d).forEach(function (entry) {
                     const key = entry.key;
                     let val = entry.value;
                     const column = key.toLocaleLowerCase();
@@ -531,7 +531,7 @@ export function updateProteinMetadata (metaDataFileContents, clmsModel) {
                     if (!isNaN(val)) {
                         val = +val;
                     }
-                    protein.setMeta (column, val);
+                    protein.setMeta(column, val);
                     // }
                 });
             }
@@ -571,10 +571,10 @@ export function updateProteinMetadata (metaDataFileContents, clmsModel) {
 
 //used by fdr.js
 // objectArr can be crosslinks or protein interactors (or a mix of)
-export function clearObjectMetaData (objectArr, metaFields) {
-    objectArr.forEach (function (obj) {
+export function clearObjectMetaData(objectArr, metaFields) {
+    objectArr.forEach(function (obj) {
         if (obj.getMeta()) {
-            metaFields.forEach(function(metaField) {
+            metaFields.forEach(function (metaField) {
                 if (obj.getMeta(metaField) !== undefined) {
                     obj.setMeta(metaField, undefined);
                 }
@@ -584,7 +584,7 @@ export function clearObjectMetaData (objectArr, metaFields) {
 }
 
 //metadatafilechoosers
-export function updateUserAnnotationsMetadata (userAnnotationsFileContents, clmsModel) {
+export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsModel) {
     const proteins = clmsModel.get("participants");
     let first = true;
     let columns = [];
@@ -594,7 +594,7 @@ export function updateUserAnnotationsMetadata (userAnnotationsFileContents, clms
     const annotationMap = d3.map();
     const proteinSet = d3.set();
 
-    d3.csv.parse(userAnnotationsFileContents, function(d) {
+    d3.csv.parse(userAnnotationsFileContents, function (d) {
         if (first) {
             const keys = d3.keys(d).map(function (key) {
                 return key.toLocaleLowerCase();
@@ -604,7 +604,7 @@ export function updateUserAnnotationsMetadata (userAnnotationsFileContents, clms
         }
 
         const dl = {};
-        d3.keys(d).forEach(function(key) {
+        d3.keys(d).forEach(function (key) {
             dl[key.toLocaleLowerCase()] = d[key];
         });
 
@@ -648,10 +648,10 @@ export function updateUserAnnotationsMetadata (userAnnotationsFileContents, clms
 }
 
 //used here, matrixview
-export function crosslinkCountPerProteinPairing (crosslinkArr, includeLinears) {
+export function crosslinkCountPerProteinPairing(crosslinkArr, includeLinears) {
     const obj = {};
     const linearShim = {id: "*linear", name: "linear"};
-    crosslinkArr.forEach(function(crosslink) {
+    crosslinkArr.forEach(function (crosslink) {
         if (crosslink.toProtein || includeLinears) {
             const fromProtein = crosslink.fromProtein;
             const toProtein = crosslink.toProtein || linearShim;
@@ -678,13 +678,13 @@ export function crosslinkCountPerProteinPairing (crosslinkArr, includeLinears) {
 // merges array of ranges
 // features should be pre-filtered to an individual protein and to an individual type
 // this can be reused for any array containing elements with properties 'begin' and 'end'
-export function mergeContiguousFeatures (features) {
-    features.sort(function(f1, f2) {
+export function mergeContiguousFeatures(features) {
+    features.sort(function (f1, f2) {
         return +f1.begin - +f2.begin;
     });
     const mergedRanges = [];
     let furthestEnd, mergeBegin;
-    features.forEach(function(f) {
+    features.forEach(function (f) {
         const b = +f.begin;
         const e = +f.end;
 
@@ -721,7 +721,7 @@ export function mergeContiguousFeatures (features) {
 //nglutils / ngl-model-wrapper
 // merges array of single numbers
 // assumes vals are already sorted numerically (though each val is a string)
-export function joinConsecutiveNumbersIntoRanges (vals, joinString) {
+export function joinConsecutiveNumbersIntoRanges(vals, joinString) {
     joinString = joinString || "-";
 
     if (vals && vals.length > 1) {
@@ -752,7 +752,7 @@ export function joinConsecutiveNumbersIntoRanges (vals, joinString) {
 }
 
 //nglutils, matrixview
-export function getDistanceSquared (coords1, coords2) {
+export function getDistanceSquared(coords1, coords2) {
     let d2 = 0;
     for (let n = 0; n < coords1.length; n++) {
         const diff = coords1[n] - coords2[n];
@@ -762,7 +762,7 @@ export function getDistanceSquared (coords1, coords2) {
 }
 
 // nglutils / nglmodelwrapper
-export function getMinimumDistance (points1, points2, accessorObj, maxDistance, ignoreFunc) {
+export function getMinimumDistance(points1, points2, accessorObj, maxDistance, ignoreFunc) {
 
     accessorObj = accessorObj || {};
     const points1Bigger = points1.length > points2.length;
@@ -788,11 +788,11 @@ export function getMinimumDistance (points1, points2, accessorObj, maxDistance, 
 }
 
 // matrixview, scatterplotview
-export function radixSort (categoryCount, data, bucketFunction) {
+export function radixSort(categoryCount, data, bucketFunction) {
     const radixSortBuckets = Array.apply(null, Array(categoryCount)).map(function () {
         return [];
     });
-    data.forEach(function(d) {
+    data.forEach(function (d) {
         const bucketIndex = bucketFunction(d);
         radixSortBuckets[bucketIndex].push(d);
     });
@@ -801,7 +801,7 @@ export function radixSort (categoryCount, data, bucketFunction) {
 }
 
 // https://stackoverflow.com/questions/3710204/how-to-check-if-a-string-is-a-valid-json-string-in-javascript-without-using-try
-function tryParseJSON (jsonString) {
+function tryParseJSON(jsonString) {
     try {
         const o = JSON.parse(decodeURI(jsonString)); // decodeURI in case square brackets have been escaped in url transmission
 
@@ -820,9 +820,9 @@ function tryParseJSON (jsonString) {
 }
 
 //networkframe
-export function parseURLQueryString (str) {
+export function parseURLQueryString(str) {
     const urlChunkMap = {};
-    str.split("&").forEach(function(part) {
+    str.split("&").forEach(function (part) {
         const keyValuePair = part.split("=");
         const val = keyValuePair[1];
         //console.log ("kvp", keyValuePair);
@@ -834,7 +834,7 @@ export function parseURLQueryString (str) {
 }
 
 //filtermodel, compositemodel
-export function makeURLQueryPairs (obj, commonKeyPrefix) {
+export function makeURLQueryPairs(obj, commonKeyPrefix) {
     const attrEntries = d3.entries(obj);
     const parts = attrEntries.map(function (attrEntry) {
         let val = attrEntry.value;
@@ -853,18 +853,18 @@ export function makeURLQueryPairs (obj, commonKeyPrefix) {
 }
 
 //nglview
-export function totalProteinLength (interactors) {
-    return d3.sum(interactors, function(d) {
+export function totalProteinLength(interactors) {
+    return d3.sum(interactors, function (d) {
         return d.size;
     });
 }
 
 //networkframe
-export function getSearchGroups (clmsModel) {
+export function getSearchGroups(clmsModel) {
     const searchArr = Array.from(clmsModel.get("searches").values());
     const uniqueGroups = _.uniq(_.pluck(searchArr, "group"));
     //console.log ("SSS", searchArr, uniqueGroups);
-    uniqueGroups.sort(function(a, b) {
+    uniqueGroups.sort(function (a, b) {
         const an = Number.parseFloat(a);
         const bn = Number.parseFloat(b);
         return !Number.isNaN(an) && !Number.isNaN(bn) ? an - bn : a.localeCompare(b);
@@ -875,6 +875,6 @@ export function getSearchGroups (clmsModel) {
 export const amino1to3Map = _.invert(amino3to1Map);
 export const amino1toNameMap = _.invert(aminoNameto1Map);
 
-d3.entries(amino3to1Map).forEach (function (entry) {
+d3.entries(amino3to1Map).forEach(function (entry) {
     amino3to1Map[entry.key.toUpperCase()] = entry.value;
 });

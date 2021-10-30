@@ -13,7 +13,7 @@ export const AlignSettingsViewBB = Backbone.View.extend({
         "input input": "inputChanged",
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         const controls = d3.select(this.el);
         const inputArray = [{
             label: "Set Gap Open Penalty",
@@ -38,12 +38,12 @@ export const AlignSettingsViewBB = Backbone.View.extend({
         const inputElems = inputSel.enter()
             .append("div")
             .attr("class", "controlBlock");
-        inputElems.append("label").text(function(d) {
+        inputElems.append("label").text(function (d) {
             return d.label;
         });
         //inputElems.append("input").attr("type",function(d) { return d.type; });
 
-        inputElems.each(function(datum) {
+        inputElems.each(function (datum) {
             if (datum.type !== "select") {
                 d3.select(this).append("input")
                     .attr("type", datum.type)
@@ -55,10 +55,10 @@ export const AlignSettingsViewBB = Backbone.View.extend({
                 seli.selectAll("option").data(datum.options)
                     .enter()
                     .append("option")
-                    .attr("value", function(d) {
+                    .attr("value", function (d) {
                         return d.key;
                     })
-                    .text(function(d) {
+                    .text(function (d) {
                         return d.key;
                     });
             }
@@ -71,17 +71,17 @@ export const AlignSettingsViewBB = Backbone.View.extend({
         return this;
     },
 
-    render: function() {
+    render: function () {
         const self = this;
         d3.select(this.el)
             .selectAll("div.controlBlock input")
-            .attr("value", function(d) {
+            .attr("value", function (d) {
                 return self.model.get(d.prop);
             });
         return this;
     },
 
-    inputChanged: function(evt) {
+    inputChanged: function (evt) {
         if (evt.target.checkValidity()) {
             const control = d3.select(evt.target);
             const controlDatum = control.datum();
@@ -92,14 +92,14 @@ export const AlignSettingsViewBB = Backbone.View.extend({
         }
     },
 
-    inputKeyed: function(evt) {
+    inputKeyed: function (evt) {
         const key = evt.which || evt.keyCode || 0;
         if (key === 13) {
             this.inputChanged(evt);
         }
     },
 
-    selectChanged: function(evt) {
+    selectChanged: function (evt) {
         const control = d3.select(evt.target);
         const controlDatum = control.datum();
         const selectedOption = control.selectAll("option")
@@ -117,25 +117,25 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
     events: {
         "change select": "selectChanged",
     },
-        
+
     initialize: function (viewOptions) {
-        this.options = $.extend ({optionLabelField: "name", label: "label", name: "name"}, viewOptions);
+        this.options = $.extend({optionLabelField: "name", label: "label", name: "name"}, viewOptions);
         const topElem = d3.select(this.el).append("DIV").attr("class", "controlBlock");
         const tpl = _.template("<LABEL><%= label %></LABEL><SELECT name='<%= name %>'></SELECT>");
-        topElem.html (tpl ({label: viewOptions.label, name: viewOptions.name})); 
-            
+        topElem.html(tpl({label: viewOptions.label, name: viewOptions.name}));
+
         this
-            .listenTo(this.collection, "sync", function() {
+            .listenTo(this.collection, "sync", function () {
                 console.log("Collection fetched and synced for view", this);
                 this.render();
             })
-        // If collection has fetched quickly then the sync event maybe fired before we registered the listener
-        // above, thus we add an immediate this.render() afterwards as a safety net
+            // If collection has fetched quickly then the sync event maybe fired before we registered the listener
+            // above, thus we add an immediate this.render() afterwards as a safety net
             .render();
         return this;
     },
 
-    render: function() {
+    render: function () {
         console.log("blosum select control rerendering");
         const self = this;
 
@@ -147,24 +147,24 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
         options
             .enter()
             .append("option")
-            .attr("value", function(d) {
-                return d.cid; 
-            })  
-        // because d will be a Backbone Model we use the .get notation to get attribute values
-            .text (function(d) {
-                return d.get(self.options.optionLabelField); 
+            .attr("value", function (d) {
+                return d.cid;
+            })
+            // because d will be a Backbone Model we use the .get notation to get attribute values
+            .text(function (d) {
+                return d.get(self.options.optionLabelField);
             });
-        options.property ("selected", function(d) {
-            return d.cid == self.lastSelected; 
+        options.property("selected", function (d) {
+            return d.cid == self.lastSelected;
         });
-            
+
         options.exit().remove();
 
         return this;
     },
 
     // In case the selected score matrix is set from another view or model, we should reflect that choice here
-    setSelected: function(aModel) {
+    setSelected: function (aModel) {
         console.log("aModel", aModel);
         if (aModel && aModel.cid !== this.lastSelected) {
             this.lastSelected = aModel.cid;
@@ -173,7 +173,7 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
         return this;
     },
 
-    selectChanged: function(evt) {
+    selectChanged: function (evt) {
         const control = d3.select(evt.target);
         const selectedOption = control.selectAll("option").filter(function () {
             return this.selected;

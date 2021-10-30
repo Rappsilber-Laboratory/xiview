@@ -9,13 +9,13 @@ export class DefaultLinkColourModel extends ColourModel {
         super(attributes, options);
     }
 
-    initialize () {
+    initialize() {
         this
             .set("labels", this.get("colScale").copy().range(["Self", "Homomultimeric (Overlapping Peptides)", "Heteromeric"]))
             .set("type", "ordinal");
     }
 
-    getValue (link) {
+    getValue(link) {
         if (link.isAggregateLink) {
             const crosslinks = link.getCrosslinks();
             return crosslinks[0].isSelfLink() || crosslinks[0].isLinearLink() ? (link.hd ? 1 : 0) : 2;
@@ -24,7 +24,7 @@ export class DefaultLinkColourModel extends ColourModel {
         }
     }
 
-    getColour (obj) {  // obj is generally a crosslink, but is non-specific at this point
+    getColour(obj) {  // obj is generally a crosslink, but is non-specific at this point
         if (obj.crosslinks) {
             return "#202020";
         }
@@ -33,18 +33,18 @@ export class DefaultLinkColourModel extends ColourModel {
     }
 }
 
-export class GroupColourModel extends ColourModel{
+export class GroupColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
-    initialize (attrs, options) {
+    initialize(attrs, options) {
 
         this.searchMap = options.searchMap;
         // find the search to group mappings
         const groups = new Map();
         const searchArray = Array.from(this.searchMap.values()); // todo - tidy
-        searchArray.forEach(function(search) {
+        searchArray.forEach(function (search) {
             let arr = groups.get(search.group);
             if (!arr) {
                 arr = [];
@@ -57,7 +57,7 @@ export class GroupColourModel extends ColourModel{
         const groupDomain = [-1]; //[undefined];
         let labelRange = ["Multiple Groups"];
         const groupArray = Array.from(groups.entries());
-        groupArray.forEach(function(group) {
+        groupArray.forEach(function (group) {
             groupDomain.push(group[0]);
             labelRange.push("Group " + group[0] + " (" + group[1].join(", ") + ")");
         });
@@ -84,7 +84,7 @@ export class GroupColourModel extends ColourModel{
             .set("type", "ordinal");
     }
 
-    getValue (link) {
+    getValue(link) {
         if (link.isAggregateLink) {
             for (let crosslink of link.getCrosslinks()) {
                 const filteredMatchesAndPepPositions = crosslink.filteredMatches_pp;
@@ -123,7 +123,7 @@ export class GroupColourModel extends ColourModel{
         }
     }
 
-    getColourByValue (val) {
+    getColourByValue(val) {
         const scale = this.get("colScale");
         // the ordinal scales will have had a colour for undefined already added to their scales (in initialize)
         // if it's the linear scale [-1 = multiple, 0 = single] and value is undefined we change it to -1 so it then takes the [multiple] colour value
@@ -134,8 +134,8 @@ export class GroupColourModel extends ColourModel{
         return scale(val);
     }
 
-    getColour (crosslink) {
-        return this.getColourByValue (this.getValue (crosslink));
+    getColour(crosslink) {
+        return this.getColourByValue(this.getValue(crosslink));
     }
 }
 
@@ -144,14 +144,14 @@ export class DistanceColourModel extends ColourModel {
         super(attributes, options);
     }
 
-    initialize () {
+    initialize() {
         this
             .set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Within Distance", "Borderline", "Overlong"]))
             .set("unit", "Å");
     }
 
-    getValue (link) {
+    getValue(link) {
         if (link.isAggregateLink) {
             return undefined;
         }
@@ -160,22 +160,22 @@ export class DistanceColourModel extends ColourModel {
     }
 }
 
-export class InterProteinColourModel extends ColourModel{
+export class InterProteinColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
-    initialize (properties, options) {
+    initialize(properties, options) {
         let colScale;
         let labels = ["Same Protein"];
         const proteinIDs = _.pluck(filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
 
         if (proteinIDs && proteinIDs.length > 2 && proteinIDs.length < 6) {
             const groupDomain = ["same"];
-            proteinIDs.forEach (function (proteinID1, i) {
+            proteinIDs.forEach(function (proteinID1, i) {
                 for (let m = i + 1; m < proteinIDs.length; m++) {
-                    groupDomain.push (this.makeProteinPairKey(proteinID1, proteinIDs[m]));
-                    labels.push (options.proteins.get(proteinID1).name + " - " + options.proteins.get(proteinIDs[m]).name);
+                    groupDomain.push(this.makeProteinPairKey(proteinID1, proteinIDs[m]));
+                    labels.push(options.proteins.get(proteinID1).name + " - " + options.proteins.get(proteinIDs[m]).name);
                 }
             }, this);
             const colArr = colorbrewer.Set3[10].slice();
@@ -192,11 +192,11 @@ export class InterProteinColourModel extends ColourModel{
             .set("labels", this.get("colScale").copy().range(labels));
     }
 
-    makeProteinPairKey (pid1, pid2) {
+    makeProteinPairKey(pid1, pid2) {
         return pid1 < pid2 ? pid1 + "---" + pid2 : pid2 + "---" + pid1;
     }
 
-    getValue (link) {
+    getValue(link) {
         let id1, id2;
         if (link.isAggregateLink) {
             const crosslink = link.getCrosslinks()[0];
@@ -215,12 +215,12 @@ export class HighestScoreColourModel extends ColourModel {
         super(attributes, options);
     }
 
-    initialize (properties, options) {
+    initialize(properties, options) {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low Score", "Mid Score", "High Score"]));
     }
 
-    getValue  (link) {
+    getValue(link) {
         let scores = [];
         if (link.isAggregateLink) {
             for (let crosslink of link.getCrosslinks()) {
@@ -229,19 +229,19 @@ export class HighestScoreColourModel extends ColourModel {
                     scores.push(m_pp.match.score());
                 }
             }
-        }else {
-            scores = link.filteredMatches_pp.map(function(m) {
+        } else {
+            scores = link.filteredMatches_pp.map(function (m) {
                 return m.match.score();
             });
         }
         return Math.max.apply(Math, scores);
     }
 
-    getLabelColourPairings  () {
+    getLabelColourPairings() {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));
         const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
         const colScaleRange = colScale.range().slice(0, minLength);//.concat(this.get("undefinedColour"));
-        return d3.zip (labels, colScaleRange);
+        return d3.zip(labels, colScaleRange);
     }
 }

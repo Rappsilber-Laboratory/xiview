@@ -254,8 +254,6 @@ export class ProtAlignCollection extends Backbone.Collection {
     }
 
 
-
-
     initialize() {
         this.listenTo(this, "nonTrivialAlignmentChange", function () {
             this.nonTrivialChange = true;

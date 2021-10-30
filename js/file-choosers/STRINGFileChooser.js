@@ -9,7 +9,7 @@ import {updateLinkMetadata} from "../modelUtils";
 
 export const STRINGFileChooserBB = BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -19,7 +19,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         });
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         STRINGFileChooserBB.__super__.initialize.apply(this, arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
@@ -40,25 +40,25 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         ];
 
         box.append("label")
-            .text ("Either Choose Organism")
-            .attr ("class", "btn nopadLeft")
-            .attr ("title", "Select an organism to search STRING scores on")
+            .text("Either Choose Organism")
+            .attr("class", "btn nopadLeft")
+            .attr("title", "Select an organism to search STRING scores on")
             .append("select").attr("class", "selectTaxonID withSideMargins")
-            .on ("change", function () {
+            .on("change", function () {
                 const optionSelected = $("option:selected", this);
                 const valueSelected = this.value;
-                d3.select(self.el).select(".inputTaxonID").property ("value", valueSelected);
+                d3.select(self.el).select(".inputTaxonID").property("value", valueSelected);
                 self.enteringTaxonID({keyCode: 13});
             })
             .selectAll("option")
-            .data (common)
+            .data(common)
             .enter()
             .append("option")
-            .attr ("value", function (d) {
-                return d.value; 
+            .attr("value", function (d) {
+                return d.value;
             })
-            .text (function(d) {
-                return d.name + " (" + d.value + ")"; 
+            .text(function (d) {
+                return d.name + " (" + d.value + ")";
             });
         const taxonSpan = box.append("div")
             .attr("class", "btn nopadLeft")
@@ -80,10 +80,10 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         box.append("p").attr("class", "smallHeading").text("Other Actions");
 
         box.append("button")
-            .attr ("class", "btn btn-1 btn-1a irreversible")
-            .text ("Purge cache")
-            .attr ("title", "If local storage reports as full, you can purge cached STRING interactions by pressing this button.")
-            .on ("click", function () {
+            .attr("class", "btn btn-1 btn-1a irreversible")
+            .text("Purge cache")
+            .attr("title", "If local storage reports as full, you can purge cached STRING interactions by pressing this button.")
+            .on("click", function () {
                 if (localStorage) {
                     STRINGUtils.purgeCache();
                 }
@@ -95,19 +95,19 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {
-            this.setVisible (true);
+            this.setVisible(true);
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
     },
 
-    enteringTaxonID: function(evt) {
+    enteringTaxonID: function (evt) {
         if (this.isTaxaIDValid() && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
             this.loadSTRINGData();
         }
     },
 
-    loadSTRINGData: function() {
+    loadSTRINGData: function () {
         const taxonID = d3.select(this.el).select(".inputTaxonID").property("value");
 
         this.setWaitingEffect();
@@ -128,10 +128,10 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             }
             self.setStatusText(errorReason || statusText, !errorReason);
         };
-        STRINGUtils.loadStringDataFromModel (this.model.get("clmsModel"), taxonID, callback);
+        STRINGUtils.loadStringDataFromModel(this.model.get("clmsModel"), taxonID, callback);
     },
 
-    isTaxaIDValid: function() {
+    isTaxaIDValid: function () {
         const elem = d3.select(this.el).select(".inputTaxonID");
         return elem.node().checkValidity();
     },

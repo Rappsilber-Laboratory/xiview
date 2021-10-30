@@ -16,7 +16,7 @@ import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
 
 export const DistanceMatrixViewBB = BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -53,7 +53,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         DistanceMatrixViewBB.__super__.initialize.apply(this, arguments);
 
         const self = this;
@@ -101,7 +101,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         },
         ];
         toggleButtonData
-            .forEach(function(d) {
+            .forEach(function (d) {
                 $.extend(d, {
                     type: "radio",
                     inputFirst: false,
@@ -131,7 +131,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             .text("Show Protein Pairing ►")
             .append("select")
             .attr("id", mainDivSel.attr("id") + "chainSelect")
-            .on("change", function(d) {
+            .on("change", function (d) {
                 const value = this.value;
                 const selectedDatum = d3.select(this).selectAll("option")
                     .filter(function (d) {
@@ -157,7 +157,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
         this.zoomStatus = d3.behavior.zoom()
             .scaleExtent([1, 8])
-            .on("zoom", function() {
+            .on("zoom", function () {
                 self.zoomHandler(self);
             });
 
@@ -170,7 +170,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
         this.canvas = canvasViewport
             .append("canvas")
-            .attr ("class", "toSvgImage")
+            .attr("class", "toSvgImage")
             .style("background", this.options.background) // override standard background colour with option
             .style("display", "none");
         canvasViewport.append("div")
@@ -197,8 +197,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             .x(self.x)
             .y(self.y)
             //.clamp ([false, false])
-            .on("brush", function() {})
-            .on("brushend", function(val) {
+            .on("brush", function () {
+            })
+            .on("brushend", function (val) {
                 self.selectNeighbourhood(self.brush.extent());
             });
 
@@ -207,7 +208,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         this.clipGroup = this.vis.append("g")
             .attr("class", "clipg")
             .attr("clip-path", "url(#matrixClip)");
-        this.clipGroup.append("rect").attr("width","100%").attr("height","100%").style("fill", "#e4e4e4");
+        this.clipGroup.append("rect").attr("width", "100%").attr("height", "100%").style("fill", "#e4e4e4");
         this.zoomGroup = this.clipGroup.append("g");
         this.zoomGroup.append("g").attr("class", "blockAreas");
         this.zoomGroup.append("g").attr("class", "backgroundImage").append("image");
@@ -248,38 +249,38 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             .append("g")
             .attr("class", "label")
             .append("text")
-            .attr("class", function(d) {
+            .attr("class", function (d) {
                 return d.class;
             })
-            .text(function(d) {
+            .text(function (d) {
                 return d.text;
             })
-            .attr("dy", function(d) {
+            .attr("dy", function (d) {
                 return d.dy;
             });
 
         // rerender crosslinks if selection/highlight changed, filteringDone or colourmodel changed
-        this.listenTo (this.model, "change:selection filteringDone", this.renderCrossLinks);
-        this.listenTo (this.model, "currentColourModelChanged", function (colourModel, domain) {
+        this.listenTo(this.model, "change:selection filteringDone", this.renderCrossLinks);
+        this.listenTo(this.model, "currentColourModelChanged", function (colourModel, domain) {
             if (colourModel.get("id") !== this.colourScaleModel.get("id")) {    // test if model is distances, if so rendering is already guaranteed
                 this.renderCrossLinks();
             }
         });
-        this.listenTo (this.model, "change:highlights", function () {
-            this.renderCrossLinks ({rehighlightOnly: true}); 
+        this.listenTo(this.model, "change:highlights", function () {
+            this.renderCrossLinks({rehighlightOnly: true});
         });
-        this.listenTo (this.model, "change:linkColourAssignment", this.render);
-        this.listenTo (this.model, "change:selectedProteins", this.makeProteinPairingOptions);
-        this.listenTo (this.colourScaleModel, "colourModelChanged", function () {
-            this.render({noResize: true}); 
+        this.listenTo(this.model, "change:linkColourAssignment", this.render);
+        this.listenTo(this.model, "change:selectedProteins", this.makeProteinPairingOptions);
+        this.listenTo(this.colourScaleModel, "colourModelChanged", function () {
+            this.render({noResize: true});
         }); // colourScaleModel is pointer to distance colour model, so this triggers even if not current colour model (redraws background)
-        this.listenTo (this.model.get("clmsModel"), "change:distancesObj", this.distancesChanged); // Entire new set of distances
-        this.listenTo (this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally)
-        this.listenTo (window.vent, "proteinMetadataUpdated", function() {
+        this.listenTo(this.model.get("clmsModel"), "change:distancesObj", this.distancesChanged); // Entire new set of distances
+        this.listenTo(this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally)
+        this.listenTo(window.vent, "proteinMetadataUpdated", function () {
             this.makeProteinPairingOptions();
             this.updateAxisLabels();
         });
-        this.listenTo (window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
+        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
 
         const entries = this.makeProteinPairingOptions();
         const startPairing = _.isEmpty(entries) ? undefined : entries[0].value;
@@ -292,19 +293,19 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         });
     },
 
-    relayout: function() {
+    relayout: function () {
         this.resize();
         return this;
     },
 
-    setAndShowPairing: function(pairing) {
+    setAndShowPairing: function (pairing) {
         this
             .matrixChosen(pairing)
             .resetZoomHandler(this)
             .render();
     },
 
-    makeProteinPairingOptions: function() {
+    makeProteinPairingOptions: function () {
         const crosslinks = this.model.getAllTTCrossLinks();
         const totals = crosslinkCountPerProteinPairing(crosslinks);
         const entries = d3.entries(totals);
@@ -317,13 +318,13 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         const selectedProteins = this.model.get("selectedProteins");
         if (selectedProteins.length) {
             const selectedProteinSet = d3.set(_.pluck(selectedProteins, "id"));
-            nonEmptyEntries = nonEmptyEntries.filter (function (entry) {
+            nonEmptyEntries = nonEmptyEntries.filter(function (entry) {
                 const value = entry.value;
-                return selectedProteinSet.has (value.fromProtein.id) && selectedProteinSet.has (value.toProtein.id);
+                return selectedProteinSet.has(value.fromProtein.id) && selectedProteinSet.has(value.toProtein.id);
             });
         }
 
-        nonEmptyEntries.sort(function(a, b) {
+        nonEmptyEntries.sort(function (a, b) {
             return b.value.crosslinks.length - a.value.crosslinks.length;
         });
 
@@ -339,16 +340,16 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             .append("option");
         matrixOptions
             .order()
-            .property("value", function(d) {
+            .property("value", function (d) {
                 return d.key;
             })
-            .text(function(d) {
+            .text(function (d) {
                 return "[" + d.value.crosslinks.length + "] " + d.value.label;
             });
         return nonEmptyEntries.length ? nonEmptyEntries : entries;
     },
 
-    getCurrentPairing: function(pairing, onlyIfNoneSelected) {
+    getCurrentPairing: function (pairing, onlyIfNoneSelected) {
         const mainDivSel = d3.select(this.el);
         const selected = mainDivSel.select("#" + mainDivSel.attr("id") + "chainSelect")
             .selectAll("option")
@@ -358,7 +359,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         return (selected.size() === 0 && onlyIfNoneSelected) ? pairing : selected.datum().value;
     },
 
-    matchesChanged: function() {
+    matchesChanged: function () {
         const entries = this.makeProteinPairingOptions();
         const pairing = this.getCurrentPairing(entries[0], true);
         this.matrixChosen(pairing);
@@ -367,20 +368,20 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
 
     // Either new PDB File in town, or change to existing distances
-    distancesChanged: function() {
+    distancesChanged: function () {
         this.render();
         return this;
     },
 
-    updateAxisLabels: function() {
+    updateAxisLabels: function () {
         const protIDs = this.getCurrentProteinIDs();
         this.vis.selectAll("g.label text").data(protIDs)
-            .text(function(d) {
+            .text(function (d) {
                 return d.labelText;
             });
     },
 
-    matrixChosen: function(proteinPairValue) {
+    matrixChosen: function (proteinPairValue) {
         if (proteinPairValue) {
             this.options.matrixObj = proteinPairValue;
 
@@ -399,17 +400,17 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
 
     // chain may show if checked in dropdown and if allowed by chainset in distancesobj (i.e. not cutoff by assembly choice)
-    chainMayShow: function(dropdownIndex, chainIndex) {
+    chainMayShow: function (dropdownIndex, chainIndex) {
         const distanceObj = this.model.get("clmsModel").get("distancesObj");
         const allowedChains = distanceObj ? distanceObj.permittedChainIndicesSet : null;
         return allowedChains ? allowedChains.has(chainIndex) : true;
     },
 
-    alignedIndexAxisFormat: function(searchIndex) {
+    alignedIndexAxisFormat: function (searchIndex) {
         return d3.format(",.0f")(searchIndex);
     },
 
-    getCurrentProteinIDs: function() {
+    getCurrentProteinIDs: function () {
         const mObj = this.options.matrixObj;
         return mObj ? [{
             chainIDs: null,
@@ -424,13 +425,13 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         ] : [null, null];
     },
 
-    getChainsForProtein: function(proteinID) {
+    getChainsForProtein: function (proteinID) {
         return this.model.get("clmsModel").get("distancesObj").chainMap[proteinID];
     },
 
-    addAlignIDs: function(proteinIDsObj) {
+    addAlignIDs: function (proteinIDsObj) {
         const distancesObj = this.model.get("clmsModel").get("distancesObj");
-        proteinIDsObj.forEach(function(pid) {
+        proteinIDsObj.forEach(function (pid) {
             pid.alignID = null;
             if (pid.proteinID) {
                 const chainName = getChainNameFromChainIndex(distancesObj.chainMap, pid.chainID);
@@ -448,7 +449,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
 
     // Tooltip functions
-    convertEvtToXY: function(evt) {
+    convertEvtToXY: function (evt) {
         const sd = this.getSizeData();
 
         // *****!$$$ finally, cross-browser
@@ -476,7 +477,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         return [Math.round(px), Math.round(py)];
     },
 
-    grabNeighbourhoodLinks: function(extent) {
+    grabNeighbourhoodLinks: function (extent) {
         const filteredCrossLinks = this.model.getFilteredCrossLinks();
         const filteredCrossLinkMap = d3.map(filteredCrossLinks, function (d) {
             return d.id;
@@ -494,7 +495,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         return neighbourhoodLinks;
     },
 
-    selectNeighbourhood: function(extent) {
+    selectNeighbourhood: function (extent) {
         const add = d3.event.ctrlKey || d3.event.shiftKey; // should this be added to current selection?
         const linkWrappers = this.grabNeighbourhoodLinks(extent);
         const crosslinks = _.pluck(linkWrappers, "crosslink");
@@ -503,7 +504,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
 
     // Brush neighbourhood and invoke tooltip
-    brushNeighbourhood: function(evt) {
+    brushNeighbourhood: function (evt) {
         const xy = this.convertEvtToXY(evt);
         const halfRange = this.options.tooltipRange / 2;
         const highlightExtent = d3.transpose(xy.map(function (xory) {
@@ -517,11 +518,11 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         this.model.setMarkedCrossLinks("highlights", crosslinks, true, false);
     },
 
-    cancelHighlights: function() {
+    cancelHighlights: function () {
         this.model.setMarkedCrossLinks("highlights", [], true, false);
     },
 
-    setMatrixDragMode: function(evt) {
+    setMatrixDragMode: function (evt) {
         this.options.matrixDragMode = evt.target.value;
         const top = d3.select(this.el);
         if (this.options.matrixDragMode === "Pan") {
@@ -534,10 +535,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         return this;
     },
 
-    invokeTooltip: function(evt, linkWrappers) {
+    invokeTooltip: function (evt, linkWrappers) {
         if (this.options.matrixObj) {
             const crosslinks = _.pluck(linkWrappers, "crosslink");
-            crosslinks.sort (function (a, b) {
+            crosslinks.sort(function (a, b) {
                 return a.getMeta("distance") - b.getMeta("distance");
             });
             const linkDistances = crosslinks.map(function (crosslink) {
@@ -553,7 +554,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
     // end of tooltip functions
 
-    zoomHandler: function(self) {
+    zoomHandler: function (self) {
         const sizeData = this.getSizeData();
         const width = sizeData.width;
         const height = sizeData.height;
@@ -574,7 +575,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         self.panZoom();
     },
 
-    resetZoomHandler: function(self) {
+    resetZoomHandler: function (self) {
         self.zoomStatus.scale(1.0).translate([0, 0]);
         return this;
     },
@@ -582,7 +583,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     // That's how you define the value of a pixel //
     // http://stackoverflow.com/questions/7812514/drawing-a-dot-on-html5-canvas
     // moved from out of render() as firefox in strict mode objected
-    drawPixel: function(cd, pixi, r, g, b, a) {
+    drawPixel: function (cd, pixi, r, g, b, a) {
         const index = pixi * 4;
         cd[index] = r;
         cd[index + 1] = g;
@@ -613,7 +614,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
         // Find continuous blocks for each chain when mapped to search sequence (as chain sequence may have gaps in) (called in next bit of code)
         const blockMap = {};
-        d3.merge(alignInfo).forEach (function (alignDatum) {
+        d3.merge(alignInfo).forEach(function (alignDatum) {
             blockMap[alignDatum.alignID] = this.model.get("alignColl").get(alignDatum.proteinID).blockify(alignDatum.alignID);
         }, this);
         //console.log ("blockMap", blockMap);
@@ -627,15 +628,15 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
         const allowInterModel = this.model.get("stageModel").get("allowInterModelDistances");
 
-        alignInfo[0].forEach (function (alignInfo1) {
+        alignInfo[0].forEach(function (alignInfo1) {
             const blocks1 = blockMap[alignInfo1.alignID];
 
-            alignInfo[1].forEach (function (alignInfo2) {
+            alignInfo[1].forEach(function (alignInfo2) {
                 if ((alignInfo1.modelID === alignInfo2.modelID) || allowInterModel) {
                     const blocks2 = blockMap[alignInfo2.alignID];
 
-                    blocks1.forEach (function (brange1) {
-                        blocks2.forEach (function (brange2) {
+                    blocks1.forEach(function (brange1) {
+                        blocks2.forEach(function (brange2) {
                             blockAreas.append("rect")
                                 .attr("x", brange1.begin - 1)
                                 .attr("y", seqLengthB - (brange2.end - 1))
@@ -651,7 +652,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         }, this);
     },
 
-    renderBackgroundMap: function() {
+    renderBackgroundMap: function () {
         let z = performance.now();
         const distancesObj = this.model.get("clmsModel").get("distancesObj");
         const stageModel = this.model.get("stageModel");
@@ -779,9 +780,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 let minArray = (alignInfo[0].length * alignInfo[1].length) > 1 ? new Uint8Array(this.canvas.attr("width") * this.canvas.attr("height")) : undefined;
 
                 // draw actual content of chain pairings
-                alignInfo[0].forEach(function(alignInfo1) {
+                alignInfo[0].forEach(function (alignInfo1) {
                     const chainIndex1 = alignInfo1.chainID;
-                    alignInfo[1].forEach(function(alignInfo2) {
+                    alignInfo[1].forEach(function (alignInfo2) {
                         const chainIndex2 = alignInfo2.chainID;
                         const distanceMatrixValue = distancesObj.matrices[chainIndex1 + "-" + chainIndex2];
                         drawDistanceMatrix.call(this, cd, minArray, distanceMatrixValue, alignInfo1, alignInfo2);
@@ -802,7 +803,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             }
         }
         z = performance.now() - z;
-        console.log ("render background map", z, "ms");
+        console.log("render background map", z, "ms");
 
         return this;
     },
@@ -827,7 +828,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 const overallScale = this.getOverallScale();
                 if (overallScale < 1 && overallScale > 0) {
                     linkWidth /= overallScale;
-                    linkWidth = Math.ceil (linkWidth);
+                    linkWidth = Math.ceil(linkWidth);
                 }
                 //console.log ("os", overallScale);
                 const xLinkWidth = linkWidth * xStep;
@@ -846,11 +847,11 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 // sort so that selected links appear on top
                 let sortedFinalCrossLinks;
                 if (highlightOnly) {
-                    sortedFinalCrossLinks = finalCrossLinks.filter (function (link) {
-                        return highlightedCrossLinkIDs.has(link.id); 
+                    sortedFinalCrossLinks = finalCrossLinks.filter(function (link) {
+                        return highlightedCrossLinkIDs.has(link.id);
                     });
                 } else {
-                    sortedFinalCrossLinks = radixSort (3, finalCrossLinks, function(link) {
+                    sortedFinalCrossLinks = radixSort(3, finalCrossLinks, function (link) {
                         return highlightedCrossLinkIDs.has(link.id) ? 2 : (selectedCrossLinkIDs.has(link.id) ? 1 : 0);
                     });
                 }
@@ -887,12 +888,12 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                     .data(sortedFinalCrossLinks, function (d) {
                         return d.id;
                     })
-                // Equivalent of d3 v4 selection.raise - https://github.com/d3/d3-selection/blob/master/README.md#selection_raise
+                    // Equivalent of d3 v4 selection.raise - https://github.com/d3/d3-selection/blob/master/README.md#selection_raise
                     .each(function () {
                         this.parentNode.appendChild(this);
                     });
-                    //.order()
-                
+                //.order()
+
                 if (!highlightOnly) {
                     linkSel.exit().remove();
                     linkSel.enter().append("circle")    // replacing rect
@@ -903,20 +904,20 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 }
                 //var linkWidthOffset = (linkWidth - 1) / 2;    // for rects
                 linkSel
-                    .attr("cx", function(d, i) {    // cx/cy for circle, x/y for rect
+                    .attr("cx", function (d, i) {    // cx/cy for circle, x/y for rect
                         return fromToStore[i][0];// - linkWidthOffset;
                     })
-                    .attr("cy", function(d, i) {
+                    .attr("cy", function (d, i) {
                         return (seqLengthB - fromToStore[i][1]);// - linkWidthOffset;
                     })
-                    .each (indLinkPlot);
+                    .each(indLinkPlot);
             }
         }
 
         return this;
     },
 
-    getSizeData: function() {
+    getSizeData: function () {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(this.svg.node());
         const cx = jqElem.width(); //this.svg.node().clientWidth;
@@ -937,7 +938,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         return sizeData;
     },
 
-    getSeqLengthData: function() {
+    getSeqLengthData: function () {
         const mObj = this.options.matrixObj;
         const size = mObj ? [mObj.fromProtein.size, mObj.toProtein.size] : [0, 0];
         return {
@@ -947,7 +948,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
 
     // called when things need repositioned, but not re-rendered from data
-    resize: function() {
+    resize: function () {
         console.log("matrix resize");
         const sizeData = this.getSizeData();
         const minDim = sizeData.minDim;
@@ -1030,7 +1031,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
 
     // Used to do this just on resize, but rectangular areas mean labels often need re-centred on panning
-    repositionLabels: function(sizeData) {
+    repositionLabels: function (sizeData) {
         // reposition labels
         //console.log ("SD", sizeData, this.options.margin);
         const labelCoords = [{
@@ -1051,14 +1052,14 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         ];
         this.vis.selectAll("g.label text")
             .data(labelCoords)
-            .attr("transform", function(d) {
+            .attr("transform", function (d) {
                 return "translate(" + d.x + " " + d.y + ") rotate(" + d.rot + ")";
             });
         return this;
     },
 
     // called when panning and zooming performed
-    panZoom: function() {
+    panZoom: function () {
 
         const self = this;
         const sizeData = this.getSizeData();
@@ -1078,12 +1079,12 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         [ /*{elem: d3.select(this.el).select(".mouseMat"), type: "style"},*/ {
             elem: this.zoomGroup,
             type: "attr"
-        }].forEach(function(d3sel) {
+        }].forEach(function (d3sel) {
             if (d3sel.type === "attr") {
                 d3sel.elem.attr("transform", transformStrings[d3sel.type]);
             } else {
                 const tString = transformStrings[d3sel.type];
-                ["-ms-transform", "-moz-transform", "-o-transform", "-webkit-transform", "transform"].forEach(function(styleName) {
+                ["-ms-transform", "-moz-transform", "-o-transform", "-webkit-transform", "transform"].forEach(function (styleName) {
                     d3sel.elem.style(styleName, tString);
                 });
             }
@@ -1127,10 +1128,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
     identifier: "Matrix View",
 
-    optionsToString: function() {
+    optionsToString: function () {
         const matrixObj = this.options.matrixObj;
         return [matrixObj.fromProtein, matrixObj.toProtein]
-            .map(function(protein) {
+            .map(function (protein) {
                 return protein.name.replace("_", " ");
             })
             .join("-");

@@ -13,7 +13,7 @@ import {amino1toNameMap, crosslinkerSpecificityPerLinker} from "../modelUtils";
 import {download} from "../downloads";
 
 export const SearchSummaryViewBB = BaseFrameView.extend({
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -21,7 +21,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
         return _.extend({}, parentEvents, {});
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         SearchSummaryViewBB.__super__.initialize.apply(this, arguments);
 
         this.listenTo(this.model, "change:matches", this.render);
@@ -42,14 +42,14 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
                     .join("-");
                 download(self.exportDescriptions(), "plain/text", "search_description_" + searchString + ".txt");
             });
-        descriptionButton.style ("display", _.isEmpty(self.model.get("crosslinkerSpecificity")) ? "none" : null);
+        descriptionButton.style("display", _.isEmpty(self.model.get("crosslinkerSpecificity")) ? "none" : null);
 
         mainPanel.append("div").attr("class", "searchSummaryDiv");
 
         return this;
     },
 
-    render: function() {
+    render: function () {
         const searches = this.model.get("searches");
         $(".searchSummaryDiv").JSONView(Array.from(searches.values()));
         $(".searchSummaryDiv").JSONView("collapse", 2);
@@ -59,7 +59,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
 
     searchDescriptionTemplate: "The identification of cross-links was performed with <%= version %> using the following parameters: MS accuracy, <%= ms1Value %> <%= ms1Units %>; MS/MS accuracy, <%= ms2Value %> <%= ms2Units %>; enzyme, <%= enzymeNames %>; maximum missed cleavages, <%= missedCleavages %>; maximum number of modifications, <%= maxModifications %>; fixed modification, <%= fixedModList %>; variable modifications, <%= varModList %>. Cross-linking was allowed to involve <%= crosslinkerDesc %>.",
 
-    exportDescriptions: function() {
+    exportDescriptions: function () {
         const template = _.template(this.searchDescriptionTemplate);
         const searches = Array.from(this.model.get("searches").values());
         const linkerData = crosslinkerSpecificityPerLinker(searches);
@@ -144,7 +144,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
 
         // rationalise so that searches with the same exact description shared a paragraph in the output
         const dmap = d3.map();
-        descriptions.forEach(function(desc, i) {
+        descriptions.forEach(function (desc, i) {
             let arr = dmap.get(desc);
             if (!arr) {
                 arr = [];

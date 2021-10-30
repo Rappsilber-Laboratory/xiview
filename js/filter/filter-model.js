@@ -4,7 +4,7 @@ import {makeURLQueryPairs} from "../modelUtils";
 import d3 from "d3";
 import Backbone from "backbone";
 
-export class FilterModel extends Backbone.Model{
+export class FilterModel extends Backbone.Model {
     constructor(attributes, options) {
         super(attributes, options);
 
@@ -113,8 +113,7 @@ export class FilterModel extends Backbone.Model{
     }
 
 
-
-    initialize (options, secondarySettings) {
+    initialize(options, secondarySettings) {
         if (!this.get("matchScoreCutoff")) {
             this.set("matchScoreCutoff", [undefined, undefined]);
             // ^^^setting an array in defaults passes that same array reference to every instantiated model, so do it in initialize
@@ -138,7 +137,7 @@ export class FilterModel extends Backbone.Model{
         this.resetValues = this.toJSON(); // Store copy of original values if needed to restore later
     }
 
-    resetFilter () {
+    resetFilter() {
         this
             .clear({
                 silent: true
@@ -148,28 +147,28 @@ export class FilterModel extends Backbone.Model{
         return this;
     }
 
-    getMinExtent (attrID) {
+    getMinExtent(attrID) {
         const extents = this.extents[attrID];
         return extents ? extents.min : null;
     }
 
-    getMaxExtent (attrID) {
+    getMaxExtent(attrID) {
         const extents = this.extents[attrID];
         return extents ? extents.max : null;
     }
 
-    preprocessFilterInputValues (searchArray) {
+    preprocessFilterInputValues(searchArray) {
         let protSplit1 = this.get("protNames").toLowerCase().split(","); // split by commas
-        this.preprocessedInputValues.set("protNames", protSplit1.map(function(prot) {
-            return prot.split("-").map(function(protSplit2) {
+        this.preprocessedInputValues.set("protNames", protSplit1.map(function (prot) {
+            return prot.split("-").map(function (protSplit2) {
                 return protSplit2.trim();
             });
         })); // split these in turn by hyphens
         //console.log ("preprocessedValues", this.preprocessedValues.get("protNames"));
 
         protSplit1 = this.get("protDesc").toLowerCase().split(","); // split by commas
-        this.preprocessedInputValues.set("protDesc", protSplit1.map(function(prot) {
-            return prot.split("-").map(function(protSplit2) {
+        this.preprocessedInputValues.set("protDesc", protSplit1.map(function (prot) {
+            return prot.split("-").map(function (protSplit2) {
                 return protSplit2.trim();
             });
         })); // split these in turn by hyphens
@@ -191,13 +190,13 @@ export class FilterModel extends Backbone.Model{
         this.precalcedSearchGroupsSet = d3.set(this.get("searchGroups"));
 
         const searchGroupMap = d3.map();
-        searchArray.forEach (function (search) {
-            searchGroupMap.set (search.id, search.group);
+        searchArray.forEach(function (search) {
+            searchGroupMap.set(search.id, search.group);
         });
         this.precalcedSearchToGroupMap = searchGroupMap;
     }
 
-    subsetFilter (match) {
+    subsetFilter(match) {
         const linear = match.isLinear();
         const mono = match.isMonoLink();
         const ambig = match.isAmbig();
@@ -206,15 +205,14 @@ export class FilterModel extends Backbone.Model{
         //cross-links? - if xl (linkPos > 0) and xls not selected return false
         if (mono && !this.get("monolinks")) {
             return false;
-        } else
-        if (linear && !this.get("linears")) {
+        } else if (linear && !this.get("linears")) {
             return false;
         }
         //self-links? - if self links's not selected and match is self link return false
         // possible an ambiguous self link will still get displayed
         else if (!linear && !mono && !((match.couldBelongToSelfLink && !match.confirmedHomomultimer && this.get("selfLinks")) ||
-                        (match.couldBelongToBetweenLink && this.get("betweenLinks")) ||
-                        (match.confirmedHomomultimer && this.get("homomultimericLinks")))) {
+            (match.couldBelongToBetweenLink && this.get("betweenLinks")) ||
+            (match.confirmedHomomultimer && this.get("homomultimericLinks")))) {
             return false;
         }
 
@@ -239,7 +237,7 @@ export class FilterModel extends Backbone.Model{
         if (!isNaN(pepLengthFilter)) {
             const seq1length = match.matchedPeptides[0].sequence.length;
             if (seq1length > 0 && (seq1length < pepLengthFilter ||
-                            (!linear && !mono && match.matchedPeptides[1].sequence.length < pepLengthFilter))) {
+                (!linear && !mono && match.matchedPeptides[1].sequence.length < pepLengthFilter))) {
                 return false;
             }
         }
@@ -247,7 +245,7 @@ export class FilterModel extends Backbone.Model{
         return true;
     }
 
-    scoreFilter (match) {
+    scoreFilter(match) {
         const score = match.score();
         //defend against not having a score (from a CSV file without such a column)
         if (score === undefined) {
@@ -257,11 +255,11 @@ export class FilterModel extends Backbone.Model{
         return (msc[0] == undefined || score >= msc[0]) && (msc[1] == undefined || score <= msc[1]); // == undefined cos shared links get undefined json'ified to null
     }
 
-    decoyFilter (match) {
+    decoyFilter(match) {
         return !match.isDecoy() || this.get("decoys");
     }
 
-    distanceFilter (crosslink) {
+    distanceFilter(crosslink) {
         const dist = crosslink.getMeta("distance");
         if (dist === undefined) {   // show undefined distances if either no distances or specifically allowed (distanceUndef flag)
             const noDistances = this.distanceExtent[0] === undefined;
@@ -271,7 +269,7 @@ export class FilterModel extends Backbone.Model{
         return (dsc[0] == undefined || dist >= dsc[0]) && (dsc[1] == undefined || dist <= dsc[1]); // == undefined cos shared links get undefined json'ified to null
     }
 
-    validationStatusFilter (match) {
+    validationStatusFilter(match) {
         const vChar = match.validated;
         if (vChar != "R") {
             if (this.get(vChar) || this.get(this.valMap.get(vChar))) return true;
@@ -283,7 +281,7 @@ export class FilterModel extends Backbone.Model{
     }
 
     // Test if there are proteins at both ends of a match that are in the current pdb file.
-    pdbProteinFilter (match) {
+    pdbProteinFilter(match) {
         if (this.get("protPDB")) {
             const dObj = window.compositeModelInst.get("clmsModel").get("distancesObj");
             if (dObj) {
@@ -303,7 +301,7 @@ export class FilterModel extends Backbone.Model{
         return true;
     }
 
-    proteinFilter (match, searchString, dataField, preProcessedField) {
+    proteinFilter(match, searchString, dataField, preProcessedField) {
         if (searchString) {
             //protein name check
             const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
@@ -357,37 +355,37 @@ export class FilterModel extends Backbone.Model{
         return true;
     }
 
-    navigationFilter (match) {
+    navigationFilter(match) {
         // Arranged so cheaper checks are done first
 
         //run name check
         const runNameFilter = this.preprocessedInputValues.get("runName");
         if (runNameFilter &&
-                    match.runName().toLowerCase().indexOf(runNameFilter) == -1) {
+            match.runName().toLowerCase().indexOf(runNameFilter) == -1) {
             return false;
         }
 
         //scan number check
         const scanNumberFilter = this.preprocessedInputValues.get("scanNumber");
         if (!isNaN(scanNumberFilter) &&
-                    match.scanNumber !== scanNumberFilter
-                    //match.scanNumber.toString().toLowerCase().indexOf(scanNumberFilter.toLowerCase()) == -1
+            match.scanNumber !== scanNumberFilter
+            //match.scanNumber.toString().toLowerCase().indexOf(scanNumberFilter.toLowerCase()) == -1
         ) {
             return false;
         }
 
         //protein name check
-        if (this.proteinFilter (match, this.get("protNames"), "name", "protNames") === false) {
+        if (this.proteinFilter(match, this.get("protNames"), "name", "protNames") === false) {
             return false;
         }
 
         //protein description check
-        if (this.proteinFilter (match, this.get("protDesc"), "description", "protDesc") === false) {
+        if (this.proteinFilter(match, this.get("protDesc"), "description", "protDesc") === false) {
             return false;
         }
 
         //protein in pdb check
-        if (this.pdbProteinFilter (match) === false) {
+        if (this.pdbProteinFilter(match) === false) {
             return false;
         }
 
@@ -417,7 +415,7 @@ export class FilterModel extends Backbone.Model{
                     for (let i = 0; i < matchedPepCount; i++) {
                         let matchedPeptide = matchedPeptides[i];
                         if (matchedPeptide.sequence.indexOf(uppercasePep) != -1 ||
-                                    (matchedPeptide.seq_mods && matchedPeptide.seq_mods.toLowerCase().indexOf(lowercasePep) != -1)) {
+                            (matchedPeptide.seq_mods && matchedPeptide.seq_mods.toLowerCase().indexOf(lowercasePep) != -1)) {
                             return true;
                         }
                     }
@@ -433,7 +431,7 @@ export class FilterModel extends Backbone.Model{
                     for (let i = 0; i < matchedPepCount; i++) {
                         let matchedPeptide = matchedPeptides[i];
                         if (matchedPeptide.sequence.indexOf(uppercasePep) != -1 ||
-                                    (matchedPeptide.seq_mods && matchedPeptide.seq_mods.toLowerCase().indexOf(lowercasePep) != -1)) {
+                            (matchedPeptide.seq_mods && matchedPeptide.seq_mods.toLowerCase().indexOf(lowercasePep) != -1)) {
                             matchCount += (i + 1); // add 1 for first matched peptide, add 2 for second. So will be 3 if both.
                         }
                     }
@@ -452,27 +450,27 @@ export class FilterModel extends Backbone.Model{
 
 
     // If activated, this only passes matches whose search ids belong to particular groups
-    groupFilter (match) {
+    groupFilter(match) {
         if (this.possibleSearchGroups.length > 1) {
             const matchGroup = this.precalcedSearchToGroupMap.get(match.searchId);
-            return this.precalcedSearchGroupsSet.has (matchGroup);
+            return this.precalcedSearchGroupsSet.has(matchGroup);
         }
         return true;
     }
 
     // If activated, this only passes an array of matches if they are of the same group
-    groupFilter2 (matchArr) {
+    groupFilter2(matchArr) {
         if (matchArr.length > 1 && this.possibleSearchGroups.length > 1 && !this.get("multipleGroup")) {
             const smap = this.precalcedSearchToGroupMap;
             const firstMatchGroup = smap.get(matchArr[0].match.searchId);
-            return matchArr.every (function (match) {
+            return matchArr.every(function (match) {
                 return smap.get(match.match.searchId) === firstMatchGroup;
             }, this);
         }
         return true;
     }
 
-    stateString () {
+    stateString() {
         // https://library.stanford.edu/research/data-management-services/case-studies/case-study-file-naming-done-well
         let fields = [];
 
@@ -522,17 +520,17 @@ export class FilterModel extends Backbone.Model{
         return str;
     }
 
-    getURLQueryPairs () {
+    getURLQueryPairs() {
         // make url parts from current filter attributes
-        return makeURLQueryPairs (this.attributes, "F");
+        return makeURLQueryPairs(this.attributes, "F");
     }
 
-    getFilterUrlSettings (urlChunkMap) {
+    getFilterUrlSettings(urlChunkMap) {
         const urlChunkKeys = d3.keys(urlChunkMap).filter(function (key) {
             return key[0] === "F";
         });
         const filterUrlSettingsMap = {};
-        urlChunkKeys.forEach(function(key) {
+        urlChunkKeys.forEach(function (key) {
             filterUrlSettingsMap[key.slice(1)] = urlChunkMap[key];
         });
         const allowableFilterKeys = d3.keys(this.defaults);

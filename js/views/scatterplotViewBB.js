@@ -17,7 +17,7 @@ import {makeTooltipContents} from "../make-tooltip";
 
 export const ScatterplotViewBB = BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -52,7 +52,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         ScatterplotViewBB.__super__.initialize.apply(this, arguments);
 
         this.options.attributeOptions = SearchResultsModel.attributeOptions;
@@ -136,7 +136,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.filteredCanvas = canvasDiv.append("canvas");
         // canvas for drawing the currently highlighted node set (should be faster than redrawing everything on one canvas)
         this.highlightedCanvas = canvasDiv.append("canvas");
-        [this.filteredCanvas, this.highlightedCanvas].forEach (function (canvas) {
+        [this.filteredCanvas, this.highlightedCanvas].forEach(function (canvas) {
             canvas.attr("class", "toSvgImage").style("position", "absolute").style("transform", "translate(0px,0px)");
         });
 
@@ -190,13 +190,13 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .append("g")
             .attr("class", "label")
             .append("text")
-            .attr("class", function(d) {
+            .attr("class", function (d) {
                 return d.class;
             })
-            .text(function(d) {
+            .text(function (d) {
                 return d.text;
             })
-            .attr("dy", function(d) {
+            .attr("dy", function (d) {
                 return d.dy;
             });
 
@@ -257,7 +257,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .y(self.y)
             //.clamp ([false, false])
             .on("brush", brushSnap)
-            .on("brushend", function() {
+            .on("brushend", function () {
                 brushEnded({
                     select: true
                 });
@@ -273,10 +273,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.scatg.select(".resize.e").append("text");
 
         this.scatg.select(".brush")
-            .on("mouseover", function() {
+            .on("mouseover", function () {
                 self.scatg.select(".brush").selectAll("text").transition().duration(500).style("opacity", 1);
             })
-            .on("mouseout", function() {
+            .on("mouseout", function () {
                 self.scatg.select(".brush").selectAll("text").transition().duration(500).style("opacity", 0);
             });
 
@@ -285,12 +285,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         // if highlighted/selection matches change, or colour model change, then recolour cross links
         this.listenTo(this.model, "selectionMatchesLinksChanged change:linkColourAssignment currentColourModelChanged", this.recolourCrossLinks);
         this.listenTo(this.model, "highlightsMatchesLinksChanged", this.rehighlightCrossLinks);
-        this.listenTo(this.model, "filteringDone", function() {
-            this.renderCrossLinks({isFiltering: true}); 
+        this.listenTo(this.model, "filteringDone", function () {
+            this.renderCrossLinks({isFiltering: true});
         });
         this.listenTo(this.model.get("clmsModel"), "change:distancesObj", this.ifADistanceAxisRerender);
         this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
-        this.listenTo(window.vent, "linkMetadataUpdated", function(metaMetaData) {
+        this.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
             //console.log ("HELLO", arguments);
             const columns = metaMetaData.columns;
             const newOptions = columns.map(function (column) {
@@ -316,8 +316,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.axisChosen().render(); // initial render with defaults
     },
 
-    takeImage: function(event, thisSVG) {
-        return this.downloadSVGWithCanvas ();
+    takeImage: function (event, thisSVG) {
+        return this.downloadSVGWithCanvas();
     },
 
     ifADistanceAxisRerender: function () {
@@ -325,31 +325,31 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             return axis.id === "Distance";
         });
         if (distanceAxes.length) {
-            console.log ("RERENDER SCATTERPLOT ON DISTANCE CHANGE");
+            console.log("RERENDER SCATTERPLOT ON DISTANCE CHANGE");
             this.axisChosen().render();
         }
     },
 
-    setMultipleSelectControls: function(elem, options, keepOld) {
+    setMultipleSelectControls: function (elem, options, keepOld) {
         const self = this;
         addMultipleSelectControls({
             addToElem: elem,
             selectList: ["X", "Y"],
             optionList: options,
             keepOldOptions: keepOld || false,
-            selectLabelFunc: function(d) {
+            selectLabelFunc: function (d) {
                 return "Plot This Data On The " + d + " Axis ►";
             },
-            optionLabelFunc: function(d) {
+            optionLabelFunc: function (d) {
                 return d.label;
             },
-            optionValueFunc: function(d) {
+            optionValueFunc: function (d) {
                 return d.id;
             },
-            changeFunc: function() {
+            changeFunc: function () {
                 self.axisChosen().render();
             },
-            idFunc: function(d) {
+            idFunc: function (d) {
                 return d.id;
             },
         });
@@ -358,7 +358,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     // options.extent = area of selection in data coordinates if we're not picking it up from the brush
     // options.add = add to existing selections
     // options.select = true for selections, false for highlight
-    selectPoints: function(options) {
+    selectPoints: function (options) {
         options = options || {};
         const xAxisData = this.getAxisData("X", true);
         const yAxisData = this.getAxisData("Y", true);
@@ -441,20 +441,20 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.nearest = nearest;
     },
 
-    relayout: function(descriptor) {
+    relayout: function (descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render();
         }
         return this;
     },
 
-    toggleJitter: function() {
+    toggleJitter: function () {
         this.options.jitter = !this.options.jitter;
         this.render();
         return this;
     },
 
-    toggleLogX: function(evt) {
+    toggleLogX: function (evt) {
         const checked = d3.select(evt.target).property("checked");
         this.options.logX = checked;
         return this
@@ -462,7 +462,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .render();
     },
 
-    toggleLogY: function(evt) {
+    toggleLogY: function (evt) {
         const checked = d3.select(evt.target).property("checked");
         this.options.logY = checked;
         return this
@@ -470,7 +470,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .render();
     },
 
-    getData: function(funcMeta, filteredFlag, optionalLinks) {
+    getData: function (funcMeta, filteredFlag, optionalLinks) {
         const linkFunc = funcMeta ? (filteredFlag ? funcMeta.linkFunc : funcMeta.unfilteredLinkFunc) : undefined;
         const crosslinks = optionalLinks ||
             (filteredFlag ? this.getFilteredCrossLinks() : this.model.getAllCrossLinks());
@@ -480,29 +480,29 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return data;
     },
 
-    getSelectedOption: function(axisLetter) {
+    getSelectedOption: function (axisLetter) {
         let funcMeta;
 
         this.controlDiv
             .selectAll("select")
-            .filter(function(d) {
+            .filter(function (d) {
                 return d === axisLetter;
             })
             .selectAll("option")
-            .filter(function() {
+            .filter(function () {
                 return d3.select(this).property("selected");
             })
-            .each(function(d) {
+            .each(function (d) {
                 funcMeta = d;
             });
         return funcMeta;
     },
 
-    getFilteredCrossLinks: function() {
+    getFilteredCrossLinks: function () {
         return this.model.getFilteredCrossLinks("all"); // include decoys and linears for this view
     },
 
-    getAxisData: function(axisLetter, filteredFlag, optionalLinks) {
+    getAxisData: function (axisLetter, filteredFlag, optionalLinks) {
         const funcMeta = this.getSelectedOption(axisLetter);
         const data = this.getData(funcMeta, filteredFlag, optionalLinks);
         return {
@@ -516,11 +516,11 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         };
     },
 
-    getBothAxesMetaData: function() {
+    getBothAxesMetaData: function () {
         return ["X", "Y"].map(this.getSelectedOption, this);
     },
 
-    isLinearScale: function(scale) {
+    isLinearScale: function (scale) {
         const domain = scale.domain();
         const bottomVal = scale(domain[0]);
         const fullRange = Math.abs(scale(domain[1]) - bottomVal);
@@ -528,14 +528,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return (fullRange / halfRange) >= (2 - 0.001); // -0.0001 for rounding
     },
 
-    setValidEmptyBrushExtent: function() {
+    setValidEmptyBrushExtent: function () {
         this.brush.extent([
             [this.x.domain()[0], this.y.domain()[0]],
             [this.x.domain()[0], this.y.domain()[0]]
         ]);
     },
 
-    makeXAxisType: function(setAsLogScale) {
+    makeXAxisType: function (setAsLogScale) {
         if (setAsLogScale === this.isLinearScale(this.x)) { // only if different scale type is required
             this.x = setAsLogScale ? d3.scale.log() : d3.scale.linear();
             this.xAxis.scale(this.x);
@@ -544,7 +544,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    makeYAxisType: function(setAsLogScale) {
+    makeYAxisType: function (setAsLogScale) {
         if (setAsLogScale === this.isLinearScale(this.y)) { // only if different scale type is required
             this.y = setAsLogScale ? d3.scale.log() : d3.scale.linear();
             this.yAxis.scale(this.y);
@@ -553,7 +553,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    axisChosen: function() {
+    axisChosen: function () {
         const dataX = this.getAxisData("X", false);
         const dataY = this.getAxisData("Y", false);
 
@@ -576,7 +576,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         // Update x/y labels and axes tick formats
         const self = this;
         this.vis.selectAll("g.label text").data([dataX, dataY])
-            .text(function(d, i) {
+            .text(function (d, i) {
                 return (d.canLogAxis && self.options[i === 0 ? "logX" : "logY"] ? "Log " : "") + d.label;
             });
 
@@ -588,7 +588,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    scaleAxes: function(datax, datay) {
+    scaleAxes: function (datax, datay) {
         const directions = [{
             dataDetails: datax,
             scale: this.x
@@ -599,7 +599,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         },
         ];
 
-        directions.forEach(function(direction) {
+        directions.forEach(function (direction) {
             let dom = d3.extent(d3.merge(direction.dataDetails.data));
             if (dom[0] === undefined || !_.isNumber(dom[0])) {
                 dom = [0, 0];
@@ -607,7 +607,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             if (direction.dataDetails.zeroBased && _.isNumber(dom[0])) {
                 dom[0] = d3.min([0, dom[0]]);
             }
-            dom = dom.map(function(v, i) {
+            dom = dom.map(function (v, i) {
                 return _.isNumber(v) ? Math[i === 0 ? "floor" : "ceil"](v) : v;
             });
 
@@ -627,11 +627,11 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    doHighlightAndTooltip: function(evt) {
+    doHighlightAndTooltip: function (evt) {
         return this.doHighlight(evt).doTooltip(evt);
     },
 
-    getHighlightRange: function(evt, squarius) {
+    getHighlightRange: function (evt, squarius) {
         const background = d3.select(this.el).select(".background").node();
         const margin = this.options.chartMargin;
         const x = crossBrowserElementX(evt, background) + margin;
@@ -651,7 +651,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         };
     },
 
-    doTooltip: function(evt) {
+    doTooltip: function (evt) {
         const axesMetaData = this.getBothAxesMetaData();
         const highlightRange = this.getHighlightRange(evt, 20);
         const vals = [highlightRange.xrange, highlightRange.yrange];
@@ -708,7 +708,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    doHighlight: function(evt) {
+    doHighlight: function (evt) {
         const highlightRange = this.getHighlightRange(evt, 20);
         const extent = [
             [highlightRange.xrange[0], highlightRange.yrange[0]],
@@ -723,21 +723,21 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    clearHighlightAndTooltip: function() {
+    clearHighlightAndTooltip: function () {
         return this.clearHighlight().clearTooltip();
     },
 
-    clearTooltip: function() {
+    clearTooltip: function () {
         this.model.get("tooltipModel").set("contents", null);
         return this;
     },
 
-    clearHighlight: function() {
+    clearHighlight: function () {
         this.model.setMarkedCrossLinks("highlights", [], false, false);
         return this;
     },
 
-    render: function() {
+    render: function () {
         if (this.isVisible()) {
             console.log("SCATTERPLOT RENDER");
             this
@@ -750,12 +750,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
 
-    recolourCrossLinks: function() {
+    recolourCrossLinks: function () {
         this.renderCrossLinks({recolourOnly: true});
         return this;
     },
 
-    rehighlightCrossLinks: function() {
+    rehighlightCrossLinks: function () {
         this.renderCrossLinks({rehighlightOnly: true});
         return this;
     },
@@ -783,12 +783,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
             let sortedFilteredCrossLinks;
             if (highlightsOnly) {
-                sortedFilteredCrossLinks = filteredCrossLinks.filter (function (link) {
-                    return highlightedCrossLinkIDs.has(link.id); 
+                sortedFilteredCrossLinks = filteredCrossLinks.filter(function (link) {
+                    return highlightedCrossLinkIDs.has(link.id);
                 });
             } else {
                 selectedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
-                sortedFilteredCrossLinks = radixSort (4, filteredCrossLinks, function(link) {
+                sortedFilteredCrossLinks = radixSort(4, filteredCrossLinks, function (link) {
                     return highlightedCrossLinkIDs.has(link.id) ? 3 : (selectedCrossLinkIDs.has(link.id) ? 2 : (link.isDecoyLink() ? 0 : 1));
                 });
             }
@@ -856,7 +856,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 return 0;
             }) : [];
 
-            sortedFilteredCrossLinks.forEach(function(link, i) {
+            sortedFilteredCrossLinks.forEach(function (link, i) {
                 const decoy = link.isDecoyLink();
                 const linkValue = colourScheme.getValue(link);
                 let linkDomainInd = colourScheme.getDomainIndex(link);
@@ -877,7 +877,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 const xjr = jitterOn ? this.getXJitter(link) : 0;
                 const yjr = jitterOn ? this.getYJitter(link) : 0;
 
-                coords[i].forEach(function(coord, ii) {
+                coords[i].forEach(function (coord, ii) {
                     //var xr = (Math.random() - 0.5);
                     //var yr = (Math.random() - 0.5);
                     if (matchLevel) {
@@ -909,7 +909,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                                 if (ambig) {
                                     context.globalAlpha = 0.7;
                                 }
-                                context.fillRect (x, y, pointSize, pointSize);
+                                context.fillRect(x, y, pointSize, pointSize);
                                 if (ambig) {
                                     context.globalAlpha = 1;
                                     context.setLineDash([3]);
@@ -951,23 +951,23 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    getXJitter: function(link) {
+    getXJitter: function (link) {
         return (((link.fromResidue % 10) / 10) - 0.45) * this.jitterRanges.x;
     },
 
-    getYJitter: function(link) {
+    getYJitter: function (link) {
         return (((link.fromResidue % 10) / 10) - 0.45) * this.jitterRanges.y;
     },
 
-    getXPosition: function(xCoord, xJitter) {
+    getXPosition: function (xCoord, xJitter) {
         return this.x(xCoord) + xJitter;
     },
 
-    getYPosition: function(yCoord, yJitter) {
+    getYPosition: function (yCoord, yJitter) {
         return this.y(yCoord) + yJitter;
     },
 
-    getSizeData: function() {
+    getSizeData: function () {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(this.svg.node());
         const cx = jqElem.width(); //this.svg.node().clientWidth;
@@ -986,7 +986,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         };
     },
 
-    calcJitterRanges: function() {
+    calcJitterRanges: function () {
         this.jitterRanges = this.jitterRanges || {};
         const xunit = Math.abs(this.x(this.x.domain()[0]) - this.x(this.x.domain()[0] + 1));
         this.jitterRanges.x = Math.max(2, xunit / 3);
@@ -996,7 +996,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     // called when things need repositioned, but not re-rendered from data
-    resize: function() {
+    resize: function () {
 
         const sizeData = this.getSizeData();
 
@@ -1011,7 +1011,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.filteredCanvas
             .attr("width", sizeData.width)
             .attr("height", sizeData.height)
-            .classed ("backdrop", true);
+            .classed("backdrop", true);
         this.highlightedCanvas
             .attr("width", sizeData.width)
             .attr("height", sizeData.height);
@@ -1038,7 +1038,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         return this;
     },
 
-    redrawAxes: function(sizeData) {
+    redrawAxes: function (sizeData) {
         this.vis.select(".x")
             .attr("transform", "translate(0," + (sizeData.height) + ")")
             .call(this.xAxis);
@@ -1052,7 +1052,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     },
 
     // Used to do this just on resize, but rectangular areas mean labels often need re-centred on panning
-    repositionLabels: function(sizeData) {
+    repositionLabels: function (sizeData) {
         // reposition labels
         const labelCoords = [{
             x: sizeData.width / 2,
@@ -1072,7 +1072,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         ];
         this.vis.selectAll("g.label text")
             .data(labelCoords)
-            .attr("transform", function(d) {
+            .attr("transform", function (d) {
                 return "translate(" + d.x + " " + d.y + ") rotate(" + d.rot + ")";
             });
         return this;
@@ -1082,17 +1082,17 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
     identifier: "Scatterplot",
 
-    optionsToString: function() {
+    optionsToString: function () {
         const meta = this.getBothAxesMetaData();
         let axisLabels = _.pluck(meta, "label");
 
         if (!this.brush.empty()) {
             const axisExtents = [];
             d3.select(this.el).selectAll(".brush text")
-                .each(function() {
+                .each(function () {
                     axisExtents.push(d3.select(this).text());
                 });
-            axisLabels = axisLabels.map(function(axisLabel, i) {
+            axisLabels = axisLabels.map(function (axisLabel, i) {
                 return axisLabel + "_(" + axisExtents[i] + ")";
             });
         }

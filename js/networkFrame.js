@@ -917,7 +917,7 @@ init.viewsEssential = function (options) {
                     tooltip: "Produces an SSL file for quantitation in SkyLine",
                     categoryTitle: "As an SSL File",
                     sectionBegin: true,
-                // sectionEnd: true
+                    // sectionEnd: true
                 },
                 // {
                 //     name: "Make Filtered XI URL",

@@ -1,7 +1,7 @@
 import * as _ from "underscore";
 import d3 from "d3";
 
-export const circleArrange = function(proteins, options) {
+export const circleArrange = function (proteins, options) {
 
     function makeNodeEdgeList(protein) {
         const node = {
@@ -12,7 +12,7 @@ export const circleArrange = function(proteins, options) {
         const edgeIds = d3.set();
 
         if (protein.crosslinks) {
-            protein.crosslinks.forEach(function(clink) {
+            protein.crosslinks.forEach(function (clink) {
                 // must have active matches, no intra-protein links, no repeated edges
                 if (clink.filteredMatches_pp.length && !clink.isLinearLink() // added this check to account for linears (they have no toProtein)
                     && clink.fromProtein.id !== clink.toProtein.id && !edgeIds.has(clink.id)) {
@@ -33,7 +33,7 @@ export const circleArrange = function(proteins, options) {
         //console.log ("flat edges", node.edges);
 
         node.edges = d3.nest()
-            .key(function(d) {
+            .key(function (d) {
                 return d.pos;
             })
             .entries(node.edges);
@@ -330,7 +330,7 @@ export const circleArrange = function(proteins, options) {
     function sort(interLinks, options) {
         let order = [];
         const pMap = {};
-        interLinks.sort(function(a, b) {
+        interLinks.sort(function (a, b) {
             return b.total - a.total;
         });
 
@@ -362,5 +362,5 @@ export const circleArrange = function(proteins, options) {
     };
     const combinedOptions = _.extend({}, defaults, options || {});
 
-    return _.pluck (sort(interLinks, combinedOptions), "id");
+    return _.pluck(sort(interLinks, combinedOptions), "id");
 };

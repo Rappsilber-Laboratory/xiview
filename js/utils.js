@@ -4,7 +4,7 @@ import * as $ from "jquery";
 
 const debug = false;
 
-export function xilog () {
+export function xilog() {
     if (debug && (typeof (console) !== "undefined")) {
         console.log.apply(console, arguments);
     }
@@ -23,7 +23,7 @@ export const commonRegexes = {
 
 //used by downloads and selectiontableview, and spectrumWrapperView
 // return comma-separated list of protein names from array of protein ids
-export function proteinConcat (match, matchedPeptideIndex, clmsModel) {
+export function proteinConcat(match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const pnames = mpeptides ? mpeptides.prt.map(function (pid) {
         return clmsModel.get("participants").get(pid).name;
@@ -32,14 +32,14 @@ export function proteinConcat (match, matchedPeptideIndex, clmsModel) {
 }
 
 //used by downloads and selectiontableview
-export function pepPosConcat (match, matchedPeptideIndex) {
+export function pepPosConcat(match, matchedPeptideIndex) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     return mpeptides ? mpeptides.pos.join("; ") : "";
 }
 
 
 //used by downloads and selectiontableview
-export function fullPosConcat (match, matchedPeptideIndex) {
+export function fullPosConcat(match, matchedPeptideIndex) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const linkPos = matchedPeptideIndex === 0 ? match.linkPos1 : match.linkPos2;
     return mpeptides ? mpeptides.pos.map(function (v) {
@@ -70,13 +70,13 @@ export function isZeptoDOMElemVisible(zeptoElem) { // could be a jquery-ref'ed e
 // used by scatterplot
 // try .layerX / .layerY first as .offsetX / .offsetY is wrong in firefox
 // in fact don't use layerX / offsetX, they're unreliable cross-browser
-export function crossBrowserElementX (evt, optElem) {
+export function crossBrowserElementX(evt, optElem) {
     return evt.clientX - $(optElem || evt.target).offset().left; // use evt.target if no optional element passed
     //return (evt.layerX || evt.offsetX) - evt.target.offsetLeft;
 }
 
 // used by scatterplot
-export function crossBrowserElementY (evt, optElem) {
+export function crossBrowserElementY(evt, optElem) {
     return evt.clientY - $(optElem || evt.target).offset().top;
 }
 
@@ -95,7 +95,7 @@ const niceRoundMap = {
 };
 
 //used by minigram, circular, distogram
-export function niceRound (val) {
+export function niceRound(val) {
     const log = Math.floor(Math.log(val) / Math.log(10)); //no log10 func in IE
     const pow = Math.pow(10, log);
     val = Math.ceil(val / pow); // will now be a number 1-10
@@ -106,7 +106,7 @@ export function niceRound (val) {
 
 //used in scatterplot for axes tooltips
 // correlates to d3's .round with decimal places function
-export function ceil (val, decimalPlaces) {
+export function ceil(val, decimalPlaces) {
     const pow = Math.pow(10, decimalPlaces);
     val *= pow;
     val = Math.ceil(val);
@@ -114,7 +114,7 @@ export function ceil (val, decimalPlaces) {
 }
 
 
-export function floor (val, decimalPlaces) {
+export function floor(val, decimalPlaces) {
     const pow = Math.pow(10, decimalPlaces);
     val *= pow;
     val = Math.floor(val);
@@ -123,7 +123,7 @@ export function floor (val, decimalPlaces) {
 
 
 //used by nglutils, ngl-model-wrapper, distances
-export function toNearest (val, interval) {
+export function toNearest(val, interval) {
     // adapted from https://stackoverflow.com/a/27861660/368214 - inverting small intervals avoids .00000001 stuff
     return interval ?
         (Math.abs(interval) > 1 ? Math.round(val * interval) / interval : Math.round(val / interval) * interval)
@@ -132,7 +132,7 @@ export function toNearest (val, interval) {
 
 
 //used by main, network frame
-export function displayError (condition, message, borderColour, scale) {
+export function displayError(condition, message, borderColour, scale) {
     if (condition()) {
         let box = d3.select("#clmsErrorBox");
         if (box.empty()) {
@@ -163,7 +163,7 @@ export function displayError (condition, message, borderColour, scale) {
 
 
 //used here and by nglview
-export function makeCanvas (width, height, existingD3CanvasSel) {
+export function makeCanvas(width, height, existingD3CanvasSel) {
     const canvas = (existingD3CanvasSel ? existingD3CanvasSel.node() : null) || document.createElement("canvas");
     const d3canvas = d3.select(canvas);
     d3canvas
@@ -179,7 +179,7 @@ export function makeCanvas (width, height, existingD3CanvasSel) {
 
 
 //used here and by nglview
-export function nullCanvasObj (canvasObj) {
+export function nullCanvasObj(canvasObj) {
     canvasObj.canvas = null;
     canvasObj.context = null;
     canvasObj.dataStructure = null;
@@ -187,7 +187,7 @@ export function nullCanvasObj (canvasObj) {
 
 
 //only used by baseframeview, can be moved
-export function drawCanvasToSVGImage (d3canvas, svgImage, callback) { // d3canvas is a canvas wrapped in a d3 selection
+export function drawCanvasToSVGImage(d3canvas, svgImage, callback) { // d3canvas is a canvas wrapped in a d3 selection
     let destinationCanvasObj;
     let url;
 
@@ -236,7 +236,7 @@ export function drawCanvasToSVGImage (d3canvas, svgImage, callback) { // d3canva
 }
 
 // Hide overlapping d3 axis labels - used by minigram, distogram, martix, scatterplot
-export function declutterAxis (d3AxisElem, keepHidden) {
+export function declutterAxis(d3AxisElem, keepHidden) {
     let lastBounds = {
         left: -100,
         right: -100,
@@ -263,7 +263,7 @@ export function declutterAxis (d3AxisElem, keepHidden) {
 }
 
 // Remove non-round d3 axis labels and associated ticks - used by mimigram and distogram
-export function niceValueAxis (d3AxisElem, maxVal) {
+export function niceValueAxis(d3AxisElem, maxVal) {
     const u = Math.round(Math.log10(maxVal + 3)) - 1;
     const m = Math.pow(10, u);
 
@@ -282,7 +282,7 @@ export function niceValueAxis (d3AxisElem, maxVal) {
 }
 
 
-export function makeLegalDomID (id) {
+export function makeLegalDomID(id) {
     const validDomID = /^[^a-z]+|[^\w:.-]+/gi;
     return id.replace(validDomID, "");
 }
@@ -293,7 +293,7 @@ export function makeLegalDomID (id) {
 // buttonData array of objects of type:
 // {class: "circRadio", label: "Alphabetical", id: "alpha", type: "radio"|"checkbox"|"button",
 // initialState: true|false, group: "sort", tooltip: "tooltipText", noBreak: true|false},
-export function makeBackboneButtons (targetDiv, baseID, buttonData) {
+export function makeBackboneButtons(targetDiv, baseID, buttonData) {
     const makeID = function (d) {
         return makeLegalDomID(baseID + d.id);
     };
@@ -398,7 +398,7 @@ export function makeBackboneButtons (targetDiv, baseID, buttonData) {
 
 // Functions for making useful file names
 
-export function objectStateToAbbvString (object, fields, zeroFormatFields, abbvMap) {
+export function objectStateToAbbvString(object, fields, zeroFormatFields, abbvMap) {
     fields = fields.filter(function (field) {
         const val = object.get ? object.get(field) || object[field] : object[field];
         return !(val === "" || val === false || val === undefined);
@@ -430,12 +430,12 @@ export function objectStateToAbbvString (object, fields, zeroFormatFields, abbvM
     return strParts.join(".");
 }
 
-export function filterStateToString () {
+export function filterStateToString() {
     const filterStr = window.compositeModelInst.get("filterModel").stateString();
     return filterStr.substring(0, 160);
 }
 
-export function searchesToString () {
+export function searchesToString() {
     const searches = Array.from(window.compositeModelInst.get("clmsModel").get("searches"));
     const searchKeys = _.pluck(searches, 0); // just the keys
     const searchStr = ("SRCH=" + searchKeys.join("-")).substring(0, 40);
@@ -443,7 +443,7 @@ export function searchesToString () {
 }
 
 
-export function makeLegalFileName (fileNameStr) {
+export function makeLegalFileName(fileNameStr) {
     let newStr = fileNameStr.replace(commonRegexes.invalidFilenameChars, "");
     newStr = newStr.substring(0, 240);
     return newStr;
@@ -451,7 +451,7 @@ export function makeLegalFileName (fileNameStr) {
 
 
 // Function for making a cross-link colour key as an svg group element
-export function updateColourKey (colourAssign, svgElem) {
+export function updateColourKey(colourAssign, svgElem) {
     svgElem.attr("height", "200");
 
     const keyGroup = svgElem.selectAll("g.key").data([0]);
@@ -509,7 +509,7 @@ export function updateColourKey (colourAssign, svgElem) {
             .style("fill", function (d, i) {
                 return d[1];
             })
-        // hide individual colour swatches if showing linear scale
+            // hide individual colour swatches if showing linear scale
             .style("display", function (d) {
                 return isLinear && d[0] !== colourAssign.get("undefinedLabel") ? "none" : null;
             });
@@ -555,7 +555,7 @@ export function updateColourKey (colourAssign, svgElem) {
     }
 }
 
-export function updateAnnotationColourKey (bbModelArray, svgElem, myOptions) {
+export function updateAnnotationColourKey(bbModelArray, svgElem, myOptions) {
     const defaults = {
         colour: function (d) {
             return d.colour;
@@ -616,7 +616,7 @@ export function updateAnnotationColourKey (bbModelArray, svgElem, myOptions) {
 // optionLabelFunc - function to set human readable name for option
 // changeFunc - function that runs when change event occurs on a select element
 // initialSelectionFunc - function that decides initially set option
-export function addMultipleSelectControls (settings) {
+export function addMultipleSelectControls(settings) {
     const defaults = {
         selectList: [],
         optionList: [],
@@ -697,7 +697,7 @@ export function addMultipleSelectControls (settings) {
 
 // add to local storage, partObj is object such as {distanceColours: {"BS3": {domain:[15,25], range:["red", "blue", "green"]} }} that gets merged
 // into existing stored object
-export function setLocalStorage (partObj, objName) {
+export function setLocalStorage(partObj, objName) {
     objName = objName || "xiView";
     const storageStr = localStorage.getItem(objName) || "{}";
     let storage = JSON.parse(storageStr);
@@ -705,7 +705,7 @@ export function setLocalStorage (partObj, objName) {
     localStorage.setItem(objName, JSON.stringify(storage));
 }
 
-export function getLocalStorage (objName) {
+export function getLocalStorage(objName) {
     objName = objName || "xiView";
     const storageStr = localStorage.getItem(objName) || "{}";
     return JSON.parse(storageStr);

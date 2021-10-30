@@ -509,7 +509,7 @@ export const NGLViewBB = BaseFrameView.extend({
             //.listenTo (this.model, "filteringDone", this.showFiltered) // any property changing in the filter model means rerendering this view
             .listenTo(this.model.get("filterModel"), "change", this.showFiltered) // any property changing in the filter model means rerendering this view
             .listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function () {
-                if (this.xlRepr){
+                if (this.xlRepr) {
                     this.rerenderColourSchemes([{
                         nglRep: this.xlRepr.linkRepr,
                         colourScheme: this.xlRepr.colorOptions.linkColourScheme

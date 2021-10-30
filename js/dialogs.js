@@ -1,4 +1,5 @@
 import * as $ from "jquery";
+
 window.jQuery = $;
 import d3 from "d3";
 import webpack_jquery_ui from "webpack-jquery-ui";
@@ -18,40 +19,40 @@ export const jqdialogs = {
             .data(msg.split("<br>"))
             .enter()
             .append("p")
-            .html (function(d) {
-                return d; 
+            .html(function (d) {
+                return d;
             });
     },
 
     errorDialog: function (dialogID, msg, title) {
         msg = msg.concat("<br><A href='https://github.com/Rappsilber-Laboratory/' target='_blank'>Rappsilber Lab GitHub</A>");
-        jqdialogs.constructDialogMessage (dialogID, msg, title || "Database Error");
+        jqdialogs.constructDialogMessage(dialogID, msg, title || "Database Error");
 
-        $("#"+dialogID).dialog({
-            modal:true,
+        $("#" + dialogID).dialog({
+            modal: true,
         });
     },
 
     areYouSureDialog: function (dialogID, msg, title, yesText, noText, yesFunc) {
-        jqdialogs.constructDialogMessage (dialogID, msg, title || "Confirm");
+        jqdialogs.constructDialogMessage(dialogID, msg, title || "Confirm");
 
-        function hardClose () {
+        function hardClose() {
             $(this).dialog("close").dialog("destroy").remove();
         }
 
-        function yesAndHardClose () {
-            hardClose.call (this);  // need to do it this way to pass on 'this' context
+        function yesAndHardClose() {
+            hardClose.call(this);  // need to do it this way to pass on 'this' context
             yesFunc();
         }
 
-        $("#"+dialogID).dialog({
+        $("#" + dialogID).dialog({
             modal: true,
             open: function () {
                 $(".ui-dialog :button").blur(); // http://stackoverflow.com/questions/1793592/jquery-ui-dialog-button-focus
             },
             buttons: [
-                { text: yesText, click: yesAndHardClose },
-                { text: noText, click: hardClose }
+                {text: yesText, click: yesAndHardClose},
+                {text: noText, click: hardClose}
             ]
         });
     }

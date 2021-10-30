@@ -121,7 +121,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
 
             for (let key in protein) {
                 if (this.options.orderedKeys.indexOf(key) === -1 && typeof protein[key] !== "function"
-                        && !this.options.removeTheseKeys.has(key)) {
+                    && !this.options.removeTheseKeys.has(key)) {
                     if (this.options.expandTheseKeys.has(key)) {
                         addMetaRows(key);
                     } else {
@@ -170,7 +170,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                             for (let subValue of value) {
                                 let row = innerInnerTBody.insertRow();
                                 let cell1 = row.insertCell();
-                                if (subkey === "go"){
+                                if (subkey === "go") {
                                     cell1.textContent = subValue + " : " + goTermsMap.get(subValue).name;
                                 } else {
                                     cell1.textContent = subValue.toString();

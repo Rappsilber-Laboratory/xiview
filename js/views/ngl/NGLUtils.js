@@ -7,7 +7,7 @@ import d3 from "d3";
 // import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
 // import {NGLModelWrapperBB} from "./ngl-wrapper-model"; // cyclic dependency, hack it into bottom of this file
 
-export function getChainSequencesFromNGLStructure (structureComponent) {
+export function getChainSequencesFromNGLStructure(structureComponent) {
     const sequences = [];
     const structure = structureComponent.structure;
     const chainToOriginalStructureMap = structure.chainToOriginalStructureIDMap || {};
@@ -40,7 +40,7 @@ export function getChainSequencesFromNGLStructure (structureComponent) {
 }
 
 //exported for tests
-export function getChainSequencesFromNGLStage (stage) {
+export function getChainSequencesFromNGLStage(stage) {
     const sequences = [];
     //console.log ("stage", stage);
 
@@ -55,7 +55,7 @@ export function getChainSequencesFromNGLStage (stage) {
 // Nice web-servicey way of doing ngl chain to clms protein matching (can be N-to-1)
 // Except it depends on having pdb codes, not a standalone file, and all the uniprot ids present too
 // Therefore, we need to return umatched sequences so we can fallback to using our own pairing algorithm if necessary
-function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback) {
+function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback) {
 
     let count = nglSequences.length;//pdbUris.length;
     const dataArr = [];
@@ -137,7 +137,7 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
             + pdbId + "\") { target_alignment { target_id } } }");
         $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
             function (data, status, xhr) {
-                if (status === "success"){//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
+                if (status === "success") {//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
 
                     // console.log("YO:", url, data,  nglSequence.structureId + '.' + nglSequence.chainName );
 
@@ -172,7 +172,7 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
 }
 
 // Fallback protein-to-pdb chain matching routines for when we don't have a pdbcode to query the pdb web services or it's offline or we still have sequences in the pdb unmatched to proteins
-export function matchSequencesToExistingProteins (protAlignCollection, sequenceObjs, proteins, extractFunc) {
+export function matchSequencesToExistingProteins(protAlignCollection, sequenceObjs, proteins, extractFunc) {
     xilog("SEQS TO PAIR INTERNALLY", sequenceObjs);
 
     proteins = filterOutDecoyInteractors(proteins)
@@ -249,14 +249,14 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
 }
 
 //used by crosslinikrepresentaion, matrixview,
-export function make3DAlignID (baseID, chainName, chainIndex) {
+export function make3DAlignID(baseID, chainName, chainIndex) {
     return baseID + ":" + chainName + ":" + chainIndex;
 }
 
 
 //matrixview
 // this avoids going via the ngl functions using data in a chainMap
-export function getChainNameFromChainIndex (chainMap, chainIndex) {
+export function getChainNameFromChainIndex(chainMap, chainIndex) {
     const chainsPerProt = d3.values(chainMap);
     const allChains = d3.merge(chainsPerProt);
     const matchChains = allChains.filter(function (entry) {
@@ -266,7 +266,7 @@ export function getChainNameFromChainIndex (chainMap, chainIndex) {
 }
 
 
-export function getRangedCAlphaResidueSelectionForChain (chainProxy) { // chainProxy is NGL Object
+export function getRangedCAlphaResidueSelectionForChain(chainProxy) { // chainProxy is NGL Object
     let min, max;
     chainProxy.eachResidue(function (rp) {
         const rno = rp.resno;
@@ -300,13 +300,13 @@ function getReasonableDistanceLimit (nglStageModel) {
 */
 
 // test to ignore short chains and those that aren't polymer chains (such as water molecules)
-export function isViableChain (chainProxy) {
+export function isViableChain(chainProxy) {
     //console.log ("cp", chainProxy.entity, chainProxy.residueCount, chainProxy);
     // should be chainProxy.entity.isPolymer() but some hand-built ngl models muff these settings up
     return chainProxy.residueCount > 10 && (!chainProxy.entity || (!chainProxy.entity.isWater() && !chainProxy.entity.isMacrolide()));
 }
 
-export function copyEntities (combinedStructure, originalStructures) {
+export function copyEntities(combinedStructure, originalStructures) {
     let gci = 0;
 
     originalStructures.forEach(function (s) {
@@ -327,7 +327,7 @@ export function copyEntities (combinedStructure, originalStructures) {
     //console.log (combinedStructure.entityList);
 }
 
-export function makeChainToOriginalStructureIDMap (combinedStructure, originalStructures) {
+export function makeChainToOriginalStructureIDMap(combinedStructure, originalStructures) {
     let gci = 0;
     const chainToOriginalStructureIDMap = [];
 
@@ -343,6 +343,6 @@ export function makeChainToOriginalStructureIDMap (combinedStructure, originalSt
     return chainToOriginalStructureIDMap;
 }
 
-export function not3DHomomultimeric (crosslink, chain1ID, chain2ID) {
+export function not3DHomomultimeric(crosslink, chain1ID, chain2ID) {
     return chain1ID !== chain2ID || !crosslink.confirmedHomomultimer;
 }
