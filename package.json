@@ -36,12 +36,16 @@
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.11",
     "webpack-merge": "^4.2.2",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "prettier-eslint-cli": "^5.0.1"
   },
   "scripts": {
     "build-dev": "webpack -d --mode development --config webpack.dev.js",
     "build-prod": "webpack -p --mode production --config webpack.prod.js",
-    "start:dev": "webpack-dev-server --open --config webpack.dev.js"
+    "start:dev": "webpack-dev-server --open --config webpack.dev.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier-eslint --write \"src/**/*.js\""
   },
   "engines": {
     "node": ">=14.0.0"
