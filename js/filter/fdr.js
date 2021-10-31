@@ -116,11 +116,11 @@ export const fdr = function (crosslinksArr, options) {
             const lastLink = linkArr[cutoffIndex];
             fdrScoreCutoff = nonzero ? lastLink.getMeta("linkScore") : 0.001;
 
-            if (false) {
+            /*if (false) {
                 console.log(arrLabels[index] + " post totals tt td dd (should be zero)", t);
                 console.log("runningFdr", runningFdr, "final fdr", fdr);
                 console.log(fdr, "fdr of", options.threshold, "met or lower at index", cutoffIndex, "link", lastLink, "and fdr score", fdrScoreCutoff);
-            }
+            }*/
         }
 
         return {

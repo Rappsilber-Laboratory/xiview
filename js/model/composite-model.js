@@ -91,8 +91,7 @@ export class CompositeModel extends Backbone.Model {
     applyFilter() {
         const filterModel = this.get("filterModel");
         const clmsModel = this.get("clmsModel");
-        var crosslinksArr = this.getAllCrossLinks();
-        var clCount = crosslinksArr.length;
+        const crosslinksArr = this.getAllCrossLinks();
         const searches = Array.from(clmsModel.get("searches").values());
         let result;
 
@@ -103,8 +102,8 @@ export class CompositeModel extends Backbone.Model {
         // set all matches fdrPass att to false, then calc
         if (filterModel && filterModel.get("fdrMode")) {
             const matches = clmsModel.get("matches");
-            for (var m = 0; m < matches.length; ++m) {
-                matches[m].fdrPass = false;
+            for (let match of matches) {
+                match.fdrPass = false;
             }
             result = fdr(crosslinksArr, {
                 filterModel: filterModel,
@@ -153,10 +152,10 @@ export class CompositeModel extends Backbone.Model {
                     for (let fm_pp = 0; fm_pp < filteredMatchCount; fm_pp++) {
                         //var fm_pp = filteredMatches_pp[fm_pp];
                         const fm = filteredMatches_pp[fm_pp];
-                        var match = fm.match;
+                        const match = fm.match;
                         //set its fdr pass att to true even though it may not be in final results
                         match.fdrPass = true;
-                        var pass = crosslink.fromProtein.manuallyHidden != true &&
+                        const pass = crosslink.fromProtein.manuallyHidden != true &&
                             (!crosslink.toProtein || crosslink.toProtein.manuallyHidden != true) &&
                             filterModel.navigationFilter(match) &&
                             filterModel.groupFilter(match);
@@ -187,9 +186,9 @@ export class CompositeModel extends Backbone.Model {
                     const matches_pp = crosslink.matches_pp;
                     const matchCount = matches_pp.length;
                     for (let m = 0; m < matchCount; m++) {
-                        var matchAndPepPos = matches_pp[m];
-                        var match = matchAndPepPos.match;
-                        var pass = filterModel.subsetFilter(match) &&
+                        const matchAndPepPos = matches_pp[m];
+                        const match = matchAndPepPos.match;
+                        let pass = filterModel.subsetFilter(match) &&
                             filterModel.validationStatusFilter(match) &&
                             filterModel.scoreFilter(match) &&
                             filterModel.decoyFilter(match);
@@ -227,8 +226,8 @@ export class CompositeModel extends Backbone.Model {
         // const a = performance.now();
 
         const homomultiSwitchers = [];
-        for (var i = 0; i < clCount; ++i) {
-            var crosslink = crosslinksArr[i];
+        for (let crosslink of crosslinksArr){//var i = 0; i < clCount; ++i) {
+            // var crosslink = crosslinksArr[i];
             const oldHM = crosslink.confirmedHomomultimer;
             if (filterModel) {
                 filterCrossLink(crosslink);
@@ -247,11 +246,11 @@ export class CompositeModel extends Backbone.Model {
 
         // Remove crosslinks with matches in multiple groups if filterModel's multipleGroup setting set to false
         if (filterModel && !filterModel.get("multipleGroup")) {
-            crosslinksArr.forEach(function (crosslink) {
+            for (let crosslink of crosslinksArr) {
                 if (!filterModel.groupFilter2(crosslink.filteredMatches_pp)) {
                     crosslink.filteredMatches_pp = [];
                 }
-            }, this);
+            }
         }
 
         // var b = performance.now();
@@ -262,14 +261,12 @@ export class CompositeModel extends Backbone.Model {
         if (filterModel) {
             const uniqueResiduePairsPerPPI = filterModel.get("urpPpi");
             if (uniqueResiduePairsPerPPI > 1) {
-                var value, key, crosslink;
+                let value;
+                let key;
                 const ppiMap = new Map();
-                var crosslinksArr = this.getAllCrossLinks();
-                var clCount = crosslinksArr.length;
-                for (var c = 0; c < clCount; c++) {
-                    crosslink = crosslinksArr[c];
+                for (let crosslink of crosslinksArr) {
                     if (crosslink.filteredMatches_pp.length) {
-                        var key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
+                        key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
                         value = ppiMap.get(key);
                         if (typeof value == "undefined") {
                             value = 1;
@@ -279,8 +276,7 @@ export class CompositeModel extends Backbone.Model {
                         ppiMap.set(key, value);
                     }
                 }
-                for (c = 0; c < clCount; c++) {
-                    crosslink = crosslinksArr[c];
+                for (let crosslink of this.getAllCrossLinks()) {
                     key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
                     value = ppiMap.get(key);
                     if (value < uniqueResiduePairsPerPPI) {
@@ -306,8 +302,7 @@ export class CompositeModel extends Backbone.Model {
         // count of decoy linears = linears - linearTargets
 
 
-        for (var i = 0; i < clCount; ++i) {
-            var crosslink = crosslinksArr[i];
+        for (let crosslink of crosslinksArr) {
             if (crosslink.filteredMatches_pp.length) {
                 this.filteredXLinks.all.push(crosslink);
                 const linear = crosslink.isLinearLink();
@@ -798,19 +793,19 @@ export class CompositeModel extends Backbone.Model {
 
         if (featureFilterSet.has("Digestible")) {
             const digestFeatures = this.get("clmsModel").getDigestibleResiduesAsFeatures(participant);
-            var mergedFeatures = mergeContiguousFeatures(digestFeatures);
+            const mergedFeatures = mergeContiguousFeatures(digestFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-1")) {
-            var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
-            var mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
+            const crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
+            const mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Cross-linkable-2")) {
-            var crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
-            var mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
+            const crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
+            const mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 

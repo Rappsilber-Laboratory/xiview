@@ -915,7 +915,6 @@ export const DistogramBB = BaseFrameView.extend({
 
     // handle extra options that can be attached to attribute being shown (usually distance)
     handleExtraOptions: function () {
-        const self = this;
         const funcMeta = this.getSelectedOption("X");
         const extras = this.attrExtraOptions[funcMeta.id] || {};
         const d3el = d3.select(this.el);

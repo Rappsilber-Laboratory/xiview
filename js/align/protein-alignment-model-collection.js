@@ -209,8 +209,7 @@ export class ProtAlignModel extends Backbone.Model {
         const featuresPerSeq = this.get("seqCollection")
             .map(function (seqModel) {
                 return seqModel.PDBAlignmentAsFeatures();
-            }, this)
-        ;
+            }, this);
 
         // flatten this array and remove canonical sequences if requested
         return d3.merge(featuresPerSeq)

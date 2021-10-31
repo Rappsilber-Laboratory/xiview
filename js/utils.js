@@ -236,7 +236,7 @@ export function drawCanvasToSVGImage(d3canvas, svgImage, callback) { // d3canvas
 }
 
 // Hide overlapping d3 axis labels - used by minigram, distogram, martix, scatterplot
-export function declutterAxis(d3AxisElem, keepHidden) {
+export function declutterAxis(d3AxisElem) {
     let lastBounds = {
         left: -100,
         right: -100,

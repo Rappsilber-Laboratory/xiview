@@ -129,7 +129,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
     makeLinkList(crosslinkArr) {
         const structure = this.get("structureComp").structure;
         let nextResidueId = 0;
-        const structureId = null;
+        // const structureId = null;
         const structureName = this.getStructureName();
         const residueDict = {};
         const fullLinkList = [];  // links where both ends are in pdb

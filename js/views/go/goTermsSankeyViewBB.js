@@ -369,8 +369,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     .nodes(this.data.nodes)
                     .links(this.data.links)
                     .size([width, height])
-                    .layout(renderOptions.iterations)
-                ;
+                    .layout(renderOptions.iterations);
 
                 //console.log ("res", this.sankey);
                 const maxDepth = d3.max(this.data.nodes, function (d) {

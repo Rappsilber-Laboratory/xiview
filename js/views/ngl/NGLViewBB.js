@@ -702,7 +702,7 @@ export const NGLViewBB = BaseFrameView.extend({
         return this;
     },
 
-    takeImage: function (event, thisSVG) {
+    takeImage: function (){
         return this.downloadImage();
     },
 
