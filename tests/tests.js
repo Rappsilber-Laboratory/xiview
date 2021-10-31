@@ -1,5 +1,5 @@
 import * as $ from "jquery";
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import * as NGL from "../vendor/ngl.dev";
 
 import {mostReadableMultipleId, } from "../js/downloads";
@@ -29,7 +29,7 @@ import {
     getChainSequencesFromNGLStage,
     getRangedCAlphaResidueSelectionForChain,
     make3DAlignID,
-    NGLUtils, not3DHomomultimeric
+    not3DHomomultimeric
 } from "../js/views/ngl/NGLUtils";
 import {toNearest} from "../js/utils";
 import {STRINGUtils} from "../js/file-choosers/stringUtils";
@@ -57,16 +57,22 @@ export function testCallback (model) {
             {id: "10001001", name: "REV", accession: "REV_P02768-A", is_decoy: true},
             {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
         ];
-        decoys.forEach (function (decoy) { clmsModel.get("participants").set (decoy.id, decoy); });
+        decoys.forEach (function (decoy) {
+            clmsModel.get("participants").set (decoy.id, decoy); 
+        });
 
         clmsModel.initDecoyLookup();
-        const actual = Array.from(clmsModel.get("participants").values()).map (function (p) { return {id: p.id, targetProteinID: p.targetProteinID}; });
+        const actual = Array.from(clmsModel.get("participants").values()).map (function (p) {
+            return {id: p.id, targetProteinID: p.targetProteinID}; 
+        });
         const expected = [{id: "P02768-A", targetProteinID: "P02768-A"}];
         decoys.forEach (function (decoy) {
             expected.push ({id: decoy.id, targetProteinID: "P02768-A"});
         });
 
-        decoys.forEach (function (decoy) { clmsModel.get("participants").delete (decoy.id); });
+        decoys.forEach (function (decoy) {
+            clmsModel.get("participants").delete (decoy.id); 
+        });
 
         assert.deepEqual(actual, expected, "Expected "+JSON.stringify(expected)+" decoy to real protein match, Passed!");
     });
@@ -97,11 +103,15 @@ export function testCallback (model) {
             {id: "10001001", name: "REV", accession: "REV_P02768-A", is_decoy: true},
             {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
         ];
-        decoys.forEach (function (decoy) { clmsModel.get("participants").set (decoy.accession, decoy); });
+        decoys.forEach (function (decoy) {
+            clmsModel.get("participants").set (decoy.accession, decoy); 
+        });
 
         const fakeMatch = {matchedPeptides: [{prt: ["P02768-A", "REV_P02768-A"]}, {prt: ["P02768-A"]}]};
         const expected = mostReadableMultipleId(fakeMatch, 0, clmsModel);
-        decoys.forEach (function (decoy) { clmsModel.get("participants").delete (decoy.accession); });
+        decoys.forEach (function (decoy) {
+            clmsModel.get("participants").delete (decoy.accession); 
+        });
 
         const actual = "sp|P02768-A|ALBU;sp|REV_P02768-A|REV";
 
@@ -407,7 +417,7 @@ export function testCallback (model) {
         examples.forEach (function (example) {
             const actualValue = joinConsecutiveNumbersIntoRanges(example.data);
             assert.deepEqual (actualValue, example.expected, "Expected "+example.expected+" when concatenating "+example.data);
-        })
+        });
     });
 
     QUnit.test ("Generate Nested Selection", function (assert) {
@@ -632,8 +642,12 @@ export function testCallback (model) {
             list2.push (matrices2[chainIndex].distanceMatrix[crosslink.residueA.seqIndex][crosslink.residueB.seqIndex]);
         });
 
-        list1 = list1.map (function (v) { return v.toFixed (2); });
-        list2 = list2.map (function (v) { return v.toFixed (2); });
+        list1 = list1.map (function (v) {
+            return v.toFixed (2); 
+        });
+        list2 = list2.map (function (v) {
+            return v.toFixed (2); 
+        });
 
         assert.deepEqual (list1, list2, "Expected "+list1.join(", ")+" distance (2 d.p.) for both link-only and all distance matrix link distances, Passed!");
     });
@@ -657,8 +671,12 @@ export function testCallback (model) {
             list2.push (Math.sqrt (distanceSquared));
         });
 
-        list1 = list1.map (function (v) { return v.toFixed (2); });
-        list2 = list2.map (function (v) { return v.toFixed (2); });
+        list1 = list1.map (function (v) {
+            return v.toFixed (2); 
+        });
+        list2 = list2.map (function (v) {
+            return v.toFixed (2); 
+        });
 
         assert.deepEqual (list1, list2, "Expected "+list1.join(", ")+" distance (2 d.p.) for both link-only and all distance matrix link distances, Passed!");
     });
@@ -705,14 +723,16 @@ export function testCallback (model) {
             [pointsA[parseInt(113, 4)], pointsB[1], cdist],
             [pointsA[parseInt(122, 4)], pointsB[2], cdist],
             [pointsA[parseInt(123, 4)], pointsB[3], cdist],
-            [pointsA[parseInt('010', 4)], pointsB[4], odddist],
+            [pointsA[parseInt("010", 4)], pointsB[4], odddist],
             [pointsA[parseInt(213, 4)], pointsB[5], cdist],
             [pointsA[parseInt(222, 4)], pointsB[6], cdist],
             [pointsA[parseInt(223, 4)], pointsB[7], cdist],
         ];
 
         const actual = getMinimumDistance(pointsA, pointsB, octAccessorObj, 200, octreeIgnoreFunc);
-        actual.forEach (function (indRes) { indRes[2] = toNearest (indRes[2], 0.25); });
+        actual.forEach (function (indRes) {
+            indRes[2] = toNearest (indRes[2], 0.25); 
+        });
 
         assert.deepEqual (actual, expected, "Expected "+expected.join(", ")+" distance (2 d.p.) for both link-only and all distance matrix link distances, Passed!");
     });
@@ -797,7 +817,9 @@ export function testCallback (model) {
         ];
 
         const actual = getMinimumDistance(pointsA, pointsB, octAccessorObj, 200, octreeIgnoreFunc);
-        actual.forEach (function (indRes) { indRes[2] = toNearest (indRes[2], 0.25); });
+        actual.forEach (function (indRes) {
+            indRes[2] = toNearest (indRes[2], 0.25); 
+        });
 
         assert.deepEqual (actual, expected, "Expected "+expected.join(", ")+" distance (2 d.p.) for both link-only and all distance matrix link distances, Passed!");
     });
@@ -890,7 +912,7 @@ export function testCallback (model) {
     QUnit.test ("Calc Filtered Residue Points from Cross-linker Specificity", function (assert) {
         let expectedValue = [535, 536, 540, 552, 555, 559, 561, 568, 569, 574];	// last 10 KSTY
         expectedValue = expectedValue.map (function (v) {
-            return {chainIndex: 1, protID: "P02768-A", seqIndex: v+1, searchIndex: v+5}	// seqIndex 1-indexed, sdearchIndex 4 on from that, last 10 residues will be chain 1
+            return {chainIndex: 1, protID: "P02768-A", seqIndex: v+1, searchIndex: v+5};	// seqIndex 1-indexed, sdearchIndex 4 on from that, last 10 residues will be chain 1
         });
 
         const searchArray = Array.from(clmsModel.get("searches").values());
@@ -1088,50 +1110,50 @@ export function testCallback (model) {
     });
 
 
-     QUnit.test ("Sample Distance Generation, 1 Search, 2 different models, but inter-model distance flag set to true, rounded to nearest integer", function (assert) {
-         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
+    QUnit.test ("Sample Distance Generation, 1 Search, 2 different models, but inter-model distance flag set to true, rounded to nearest integer", function (assert) {
+        const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
-         const searchArray = Array.from(clmsModel.get("searches").values());
-         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
-         const distanceableSequences = [
-             {
-                 first: 5,
-                 last: 582,
-                 subSeq: dseq1AO6,
-                 chainIndex: 0,
-                 modelIndex: 0,
-                 protID: "P02768-A",
-                 alignID: "1AO6:A:0"
-             },
-             {
-                 first: 5,
-                 last: 582,
-                 subSeq: dseq1AO6,
-                 chainIndex: 1,
-                 modelIndex: 1,
-                 protID: "P02768-A",
-                 alignID: "1AO6:B:1"
-             }
-         ];
-         const alignedTerminalIndices = {ntermList: [], ctermList: []};
+        const searchArray = Array.from(clmsModel.get("searches").values());
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const distanceableSequences = [
+            {
+                first: 5,
+                last: 582,
+                subSeq: dseq1AO6,
+                chainIndex: 0,
+                modelIndex: 0,
+                protID: "P02768-A",
+                alignID: "1AO6:A:0"
+            },
+            {
+                first: 5,
+                last: 582,
+                subSeq: dseq1AO6,
+                chainIndex: 1,
+                modelIndex: 1,
+                protID: "P02768-A",
+                alignID: "1AO6:B:1"
+            }
+        ];
+        const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-         const distObj = clmsModel.get("distancesObj");
-         const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
-         const sampleDists = [];
-         const cimimap = d3.map({0: 0, 1: 1}); // artifically associate each chain with a different model
+        const distObj = clmsModel.get("distancesObj");
+        const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
+        const sampleDists = [];
+        const cimimap = d3.map({0: 0, 1: 1}); // artifically associate each chain with a different model
         // heterobidirectional crosslinker, between same chains only
 
-         const options = {
-             linksPerSearch: 100,
-             heterobi: true,
-             restrictToChain: false,
-             restrictToModel: false,
-             restrictToProtein: true
-         };
-         distObj.generateSubDividedSampleDistancesBySearch (filteredResidueMap, sampleDists, options, cimimap);
-         const actualValue = sampleDists.map(Math.round);
+        const options = {
+            linksPerSearch: 100,
+            heterobi: true,
+            restrictToChain: false,
+            restrictToModel: false,
+            restrictToProtein: true
+        };
+        distObj.generateSubDividedSampleDistancesBySearch (filteredResidueMap, sampleDists, options, cimimap);
+        const actualValue = sampleDists.map(Math.round);
 
-         assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as sampled distances, Passed!");
+        assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as sampled distances, Passed!");
     });
 
     QUnit.test ("Run through DistancesObj right from getSampleDistances, 1 Search, restricted to same chain (monomer equivalent), rounded to nearest integer", function (assert) {
@@ -1491,7 +1513,7 @@ export function testCallback (model) {
             assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as proteinmetadata event data, Passed!");
 
             const actualValue2 = clmsModel.get("participants").get("P02768-A").getMeta();
-            const expectedValue2 = {proteinid: 'P02768-A', cat: 2, dog: 4};
+            const expectedValue2 = {proteinid: "P02768-A", cat: 2, dog: 4};
             assert.deepEqual (actualValue2, expectedValue2, "Expected "+JSON.stringify(expectedValue2)+" as protein meta value, Passed!");
         });
 
@@ -1520,17 +1542,14 @@ export function testCallback (model) {
 
         const fileContents = "Protein 1,SeqPos 1,Protein 2,SeqPos 2,cat,dog\n"
             + "ALBU,415,ALBU,497,2,4\n"
-            + "ALBU,190,ALBU,425,3,5\n"
-        ;
+            + "ALBU,190,ALBU,425,3,5\n";
         updateLinkMetadata (fileContents, clmsModel);
     });
 
 
     QUnit.test ("Parse User Annotations", function (assert) {
         model.get("filterModel")
-            .resetFilter()
-        ;
-
+            .resetFilter();
         window.vent.listenToOnce (window.vent, "userAnnotationsUpdated", function (actualValue) {
             const expectedAnnotationTypes = [
                 {category: "User Defined", type: "Helix", source: "Search", colour: "blue"},
@@ -1593,7 +1612,9 @@ export function testCallback (model) {
             });
 
             const modelsFromCollection = annotColl.where({category: "User Defined"});
-            actualValue = modelsFromCollection.map (function (model) { return model.toJSON(); });
+            actualValue = modelsFromCollection.map (function (model) {
+                return model.toJSON(); 
+            });
 
             assert.deepEqual (actualValue, expectedValue, "Expected "+JSON.stringify(expectedValue)+" as generated userAnnotation Models, Passed!");
 
@@ -1639,8 +1660,7 @@ export function testCallback (model) {
     QUnit.test ("Residues CSV", function (assert) {
         model.get("filterModel")
             .resetFilter()
-            .set ({AUTO: false})
-        ;
+            .set ({AUTO: false});
         const expectedValue = "\"Residue(s)\",\"Occurences(in_unique_links)\"\r\n\"V-Y\",\"1\"\r\n\"E-K\",\"2\"\r\n\"T-Y\",\"1\"\r\n\"D-K\",\"1\"\r\n\"V\",\"1\"\r\n\"Y\",\"2\"\r\n\"K\",\"3\"\r\n\"E\",\"2\"\r\n\"T\",\"1\"\r\n\"D\",\"1\"\r\n";
         const actualValue = getResidueCount();
 
@@ -1652,15 +1672,13 @@ export function testCallback (model) {
     QUnit.test ("Links CSV", function (assert) {
         model.get("filterModel")
             .resetFilter()
-            .set ({AUTO: false})
-        ;
+            .set ({AUTO: false});
         const expectedValue = "\"Protein1\",\"SeqPos1\",\"LinkedRes1\",\"Protein2\",\"SeqPos2\",\"LinkedRes2\",\"Highest Score\",\"Match Count\",\"DecoyType\",\"AutoValidated\",\"Validated\",\"Link FDR\",\"3D Distance\",\"From Chain\",\"To Chain\",\"PDB SeqPos 1\",\"PDB SeqPos 2\",\"Search_10003\",\"cat\",\"dog\"\r\n\"sp|P02768-A|ALBU\",\"415\",\"V\",\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"19.0000\",\"2\",\"TT\",\"true\",\"B,B\",\"\",\"8.79\",\"B\",\"B\",\"411\",\"493\",\"X\",\"2\",\"4\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"425\",\"E\",\"17.3400\",\"4\",\"TT\",\"true\",\"A,C,A,A\",\"\",\"12.07\",\"B\",\"B\",\"186\",\"421\",\"X\",\"3\",\"5\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"17.3200\",\"1\",\"TT\",\"true\",\"C\",\"\",\"15.26\",\"A\",\"A\",\"121\",\"157\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"131\",\"E\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"17.0300\",\"1\",\"TT\",\"true\",\"?\",\"\",\"8.30\",\"A\",\"A\",\"127\",\"158\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"107\",\"D\",\"sp|P02768-A|ALBU\",\"466\",\"K\",\"13.9400\",\"1\",\"TT\",\"true\",\"B\",\"\",\"8.37\",\"B\",\"B\",\"103\",\"462\",\"X\",\"\",\"\"\r\n";
 
         // add the metadata from the other test, so it's always the same columns/values (i.e. test order doesn't change outcome of this test)
         const fileContents = "Protein 1,SeqPos 1,Protein 2,SeqPos 2,cat,dog\n"
             + "ALBU,415,ALBU,497,2,4\n"
-            + "ALBU,190,ALBU,425,3,5\n"
-        ;
+            + "ALBU,190,ALBU,425,3,5\n";
         updateLinkMetadata (fileContents, clmsModel);
 
         const actualValue = getLinksCSV();
@@ -1674,8 +1692,7 @@ export function testCallback (model) {
     QUnit.test ("Matches CSV", function (assert) {
         model.get("filterModel")
             .resetFilter()
-            .set ({AUTO: false})
-        ;
+            .set ({AUTO: false});
         const expectedValue = "\"Id\",\"Protein1\",\"SeqPos1\",\"PepPos1\",\"PepSeq1\",\"LinkPos1\",\"Protein2\",\"SeqPos2\",\"PepPos2\",\"PepSeq2\",\"LinkPos2\",\"Score\",\"Charge\",\"ExpMz\",\"ExpMass\",\"CalcMz\",\"CalcMass\",\"MassError\",\"AutoValidated\",\"Validated\",\"Search\",\"RawFileName\",\"PeakListFileName\",\"ScanNumber\",\"ScanIndex\",\"CrossLinkerModMass\",\"FragmentTolerance\",\"IonTypes\",\"Decoy1\",\"Decoy2\",\"3D Distance\",\"From Chain\",\"To Chain\",\"PDB SeqPos 1\",\"PDB SeqPos 2\",\"LinkType\",\"DecoyType\",\"Retention Time\"\r\n\"625824830\",\"sp|P02768-A|ALBU\",\"425\",\"415\",\"VPQVSTPTLVEVSR\",\"11\",\"sp|P02768-A|ALBU\",\"190\",\"182\",\"LDELRDEGKASSAK\",\"9\",\"15.42\",\"5\",\"623.13706032591\",\"3110.6489192951553\",\"623.136349226899\",\"3110.6453638001\",\"1.141161179106242\",\"true\",\"C\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"23756\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"12.07\",\"B\",\"B\",\"185\",\"420\",\"Self\",\"TT\",\"-1\"\r\n\"625825062\",\"sp|P02768-A|ALBU\",\"425\",\"414\",\"KVPQVSTPTLVEVSR\",\"12\",\"sp|P02768-A|ALBU\",\"190\",\"182\",\"LDELRDEGKASSAK\",\"9\",\"14.8\",\"5\",\"648.75679602991\",\"3238.747597815155\",\"648.755341826899\",\"3238.7403268001\",\"2.2415276102587516\",\"true\",\"A\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"21558\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"12.07\",\"B\",\"B\",\"185\",\"420\",\"Self\",\"TT\",\"-1\"\r\n\"625825067\",\"sp|P02768-A|ALBU\",\"425\",\"414\",\"KVPQVSTPTLVEVSR\",\"12\",\"sp|P02768-A|ALBU\",\"190\",\"182\",\"LDELRDEGKASSAK\",\"9\",\"15.19\",\"5\",\"648.75676475862\",\"3238.747441458705\",\"648.755341826899\",\"3238.7403268001\",\"2.193325633318231\",\"true\",\"A\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"22016\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"12.07\",\"B\",\"B\",\"185\",\"420\",\"Self\",\"TT\",\"-1\"\r\n\"625825068\",\"sp|P02768-A|ALBU\",\"425\",\"414\",\"KVPQVSTPTLVEVSR\",\"12\",\"sp|P02768-A|ALBU\",\"190\",\"182\",\"LDELRDEGKASSAK\",\"9\",\"17.34\",\"4\",\"810.69382619827\",\"3238.746198925564\",\"810.692358166904\",\"3238.7403268001\",\"1.8108365660876746\",\"true\",\"A\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"21877\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"12.07\",\"B\",\"B\",\"185\",\"420\",\"Self\",\"TT\",\"-1\"\r\n\"625826126\",\"sp|P02768-A|ALBU\",\"497\",\"485\",\"RPCcmFSALEVDETYVPK\",\"13\",\"sp|P02768-A|ALBU\",\"415\",\"414\",\"KVPQVSTPTLVEVSR\",\"2\",\"10.59\",\"3\",\"1211.3077209543\",\"3630.901333462263\",\"1211.3060024002457\",\"3630.8961778001\",\"1.4187612799510967\",\"true\",\"B\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"32246\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"8.79\",\"B\",\"B\",\"410\",\"492\",\"Self\",\"TT\",\"-1\"\r\n\"625826136\",\"sp|P02768-A|ALBU\",\"497\",\"485\",\"RPCcmFSALEVDETYVPK\",\"13\",\"sp|P02768-A|ALBU\",\"415\",\"414\",\"KVPQVSTPTLVEVSR\",\"2\",\"19\",\"4\",\"908.73262202769\",\"3630.901382243244\",\"908.731320916904\",\"3630.8961778001\",\"1.4317882041347127\",\"true\",\"B\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"32195\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"8.79\",\"B\",\"B\",\"410\",\"492\",\"Self\",\"TT\",\"-1\"\r\n\"625827037\",\"sp|P02768-A|ALBU\",\"466\",\"446\",\"MoxPCcmAEDYLSVVLNQLCcmVLHEKTPVSDR\",\"21\",\"sp|P02768-A|ALBU\",\"107\",\"107\",\"DDNPNLPR\",\"1\",\"13.94\",\"5\",\"843.01100363988\",\"4210.018635865004\",\"843.009827426899\",\"4210.0127548001\",\"1.3952541745553082\",\"true\",\"B\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"50388\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"8.37\",\"B\",\"B\",\"102\",\"461\",\"Self\",\"TT\",\"-1\"\r\n\"625827168\",\"sp|P02768-A|ALBU\",\"125\",\"115\",\"LVRPEVDVMCcmTAFHDNEETFLK\",\"11\",\"sp|P02768-A|ALBU\",\"161\",\"161\",\"YKAAFTECcmCcmQAADK\",\"1\",\"17.32\",\"6\",\"733.17742554659\",\"4393.020894478266\",\"733.1765762668957\",\"4393.0157988001\",\"1.158356283873163\",\"true\",\"C\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"33444\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"15.26\",\"A\",\"A\",\"120\",\"156\",\"Self\",\"TT\",\"-1\"\r\n\"625828211\",\"sp|P02768-A|ALBU\",\"131\",\"115\",\"LVRPEVDVMCcmTAFHDNEETFLK\",\"17\",\"sp|P02768-A|ALBU\",\"162\",\"161\",\"YKAAFTECcmCcmQAADK\",\"2\",\"17.03\",\"6\",\"733.17716390522\",\"4393.019324630046\",\"733.1765762668957\",\"4393.0157988001\",\"0.8014963152490925\",\"true\",\"?\",\"10003\",\"E151023_07_Lumos_CS_AB_IN_190_HCD_HSA_SDA_3\",\"\",\"35032\",\"0\",\"82.0413162600906\",\"20 ppm\",\"b;y;peptide;\",\"false\",\"false\",\"8.30\",\"A\",\"A\",\"126\",\"157\",\"Self\",\"TT\",\"-1\"\r\n";
 
         const actualValue = getMatchesCSV();
