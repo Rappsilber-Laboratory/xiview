@@ -6,10 +6,11 @@ export class GoTerm {
         //this.part_of = new Set();
         //this.parts = new Set();
         //this.interactors = new Set();
+
         this.filtInteractorCount = 0;
     }
 
-    // GoTerm.prototype.getInteractors = function(interactorSet) {
+    // getInteractors (interactorSet) {
     //     var go = window.compositeModelInst.get("go");
     //     if (!interactorSet) {
     //         interactorSet = new Set();
@@ -36,7 +37,7 @@ export class GoTerm {
 
     getInteractors(storeCount) {
         const go = window.compositeModelInst.get("go");
-        GoTerm.prototype.getCount++;
+        // GoTerm.prototype.getCount++;
 
         let subTreeSet; // = new Set();
 
@@ -81,13 +82,13 @@ export class GoTerm {
     }
 
     isDirectRelation(anotherGoTerm) {
-        const agoid = anotherGoTerm.id;
+        const aGoId = anotherGoTerm.id;
         return (
             (this === anotherGoTerm) ||
-            (this.is_a && this.is_a.has(agoid)) ||
-            (this.subclasses && this.subclasses.has(agoid)) ||
-            (this.part_of && this.part_of.has(agoid)) ||
-            (this.parts && this.parts.has(agoid))
+            (this.is_a && this.is_a.has(aGoId)) ||
+            (this.subclasses && this.subclasses.has(aGoId)) ||
+            (this.part_of && this.part_of.has(aGoId)) ||
+            (this.parts && this.parts.has(aGoId))
         );
     }
 

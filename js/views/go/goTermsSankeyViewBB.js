@@ -87,7 +87,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
 
         // SVG element
         this.svg = this.chartDiv.append("svg");
-        this.svg.on("click", function (d) {
+        /* this.svg.on("click", function (d) {
             // self.model.set("groupedGoTerms", []);
             // self.model.trigger("groupedGoTermsChanged");
         })
@@ -96,7 +96,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 // react on right-clicking
                 //self.fixed = [];
                 //self.render();
-            });
+            });*/
         const margin = this.options.margin;
         this.vis = this.svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         this.backgroundGroup = this.vis.append("g");
@@ -106,7 +106,6 @@ export const GoTermsViewBB = BaseFrameView.extend({
         this.listenTo(this.model, "hiddenChanged", this.updateThenRender);
 
         this.sankey = d3_sankey().nodeWidth(15);
-        //this.fixed = [];
 
         //markers
         const data = [{
@@ -126,7 +125,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         }];
 
         const defs = this.svg.append("svg:defs");
-        const marker = defs.selectAll("marker")
+        defs.selectAll("marker")
             .data(data)
             .enter()
             .append("svg:marker")
@@ -136,7 +135,6 @@ export const GoTermsViewBB = BaseFrameView.extend({
             .attr("markerHeight", 15)
             .attr("markerWidth", 15)
             .attr("markerUnits", "userSpaceOnUse")
-            // .attr('orient', 'auto')
             .attr("refX", 0)
             .attr("refY", 0)
             .attr("viewBox", function (d) {
@@ -154,15 +152,27 @@ export const GoTermsViewBB = BaseFrameView.extend({
             });
 
         // initial update done via hiddenChanged trigger above - which is called after all views are set up
-        this.update();  // needed here to init interactors in goterms, temp hack, todo
+        // this.update();  // needed here to init interactors in goterms, temp hack, todo
+        const go = this.model.get("go");
+
+        const proteins = this.model.get("clmsModel").get("participants").values();
+        for (let protein of proteins) {
+            if (protein.uniprot) {
+                for (let goId of protein.uniprot.go) {
+                    const goTerm = go.get(goId);
+                    if (goTerm) {
+                        goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
+                        goTerm.interactors.add(protein);
+                    }
+                }
+            }
+        }
     },
 
 
     goTextMatch: function (evt) {
-        const self = this;
         const val = evt.target.value;
         const regex = new RegExp(val, "i");
-        //var textPos = this.textPos.bind(this);
 
         const allInteractorSet = new Set();
         let goMatchCount = 0;
@@ -184,17 +194,12 @@ export const GoTermsViewBB = BaseFrameView.extend({
             .classed("highlightedGOTerm", function (d) {
                 return d.strMatch;
             });
+
         nodes.select("rect")
             .style("stroke", function (d) {
                 return d.strMatch ? null : d3.rgb(d.color).darker(2);
             });
-        nodes.select("text")
-            .attr("clip-path", function (d) {
-                return d.strMatch ? null : self.textOrient(d);
-            })
-            .call(textPos, function () {
-                return false;
-            });
+
         const interactors = Array.from(allInteractorSet.values());
         const msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
         d3.select(this.el).select(".goTextResult").text(msg);
@@ -212,34 +217,34 @@ export const GoTermsViewBB = BaseFrameView.extend({
         const go = this.model.get("go");
         //associate go terms with proteins (clear them first)
         for (let g of go.values()) {
-            const gints = g.interactors;
-            if (gints && gints.size > 0) {
-                gints.clear();
-            }
+            // const gints = g.interactors;
+            // if (gints && gints.size > 0) {
+            //     gints.clear();
+            // }
             g.filtInteractorCount = 0;
         }
 
-        const proteins = this.model.get("clmsModel").get("participants").values();
-        for (let protein of proteins) {
-            if (protein.uniprot) {
-                for (let goId of protein.uniprot.go) {
-                    const goTerm = go.get(goId);
-                    if (goTerm) {
-                        goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
-                        goTerm.interactors.add(protein);
-                    }
-                }
-            }
-        }
+        // const proteins = this.model.get("clmsModel").get("participants").values();
+        // for (let protein of proteins) {
+        //     if (protein.uniprot) {
+        //         for (let goId of protein.uniprot.go) {
+        //             const goTerm = go.get(goId);
+        //             if (goTerm) {
+        //                 goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
+        //                 goTerm.interactors.add(protein);
+        //             }
+        //         }
+        //     }
+        // }
 
         const nodes = new Map();
         const linksMap = new Map();
 
-        GoTerm.prototype.getCount = 0; // what?
-        if (termType == "biological_process") {
+        // GoTerm.prototype.getCount = 0; // what?
+        if (termType === "biological_process") {
             go.get("GO0008150").getInteractors(true);
             sankeyNode("GO0008150");
-        } else if (termType == "molecular_function") {
+        } else if (termType === "molecular_function") {
             go.get("GO0003674").getInteractors(true);
             sankeyNode("GO0003674");
         } else { // default to cellular component
@@ -256,18 +261,17 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     term: goTerm,
                 };
                 nodes.set(node.id, node);
-                const interactorCount = goTerm.filtInteractorCount;
 
                 if (goTerm.part_of) {
                     for (let partOfId of goTerm.part_of) {
                         const partOfTerm = go.get(partOfId);
                         // if (partOfTerm.isDescendantOf("GO0032991")) {
-                        if (partOfTerm.namespace == goTerm.namespace) {
+                        if (partOfTerm.namespace === goTerm.namespace) {
                             const linkId = partOfId + "_" + node.id;
                             const link = {
                                 source: sankeyNode(partOfId),
                                 target: node,
-                                value: interactorCount,
+                                value:10,
                                 id: linkId,
                                 partOf: true
                             };
@@ -279,12 +283,12 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     for (let superclassId of goTerm.is_a) {
                         const superclassTerm = go.get(superclassId);
                         // if (superclassTerm.isDescendantOf("GO0032991")) {
-                        if (superclassTerm.namespace == goTerm.namespace) {
+                        if (superclassTerm.namespace === goTerm.namespace) {
                             const linkId = superclassId + "_" + node.id;
                             const link = {
                                 source: sankeyNode(superclassId),
                                 target: node,
-                                value: interactorCount,
+                                value:10,
                                 id: linkId,
                                 partOf: false
                             };
@@ -326,30 +330,6 @@ export const GoTermsViewBB = BaseFrameView.extend({
         return this;
     },
 
-    // leftRightSwitch: function (d) {
-    //     return false;//d.x < this.sankey.size()[0] / 1.5;   // if true, right
-    // },
-    //
-    // textOrient: function (d) {
-    //     var orient = this.leftRightSwitch(d) ? "right" : "left";
-    //     return "url(#sankeyColumn" + orient + ")";
-    // },
-    //
-    // textPos: function (sel, val1) {
-    //     var self = this;
-    //     sel
-    //         .filter(function (d) {
-    //             return !self.leftRightSwitch(d);
-    //         })
-    //         .style("text-anchor", function (d) {
-    //             return d.strMatch || val1(d) ? "end" : "start";
-    //         })
-    //         .attr("x", function (d) {
-    //             return d.strMatch || val1(d) ? -6 : -self.colWidth + self.sankey.nodeWidth();
-    //         })
-    //     ;
-    // },
-
     render: function (renderOptions) {
         if (this.isVisible()) {
             //this.update();
@@ -379,37 +359,10 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 this.colWidth = colWidth;
                 //console.log ("data", this.data, maxDepth, colWidth);
 
-                // this.svg.select("defs").selectAll("clipPath.sankeyColumn").remove();
-                // var leftRight = [
-                //     {x: -colWidth + this.sankey.nodeWidth(), width: colWidth - this.sankey.nodeWidth(), orient: "left"},
-                //     {x: 0, width: colWidth, orient: "right"}
-                // ];
-                // this.svg.select("defs").selectAll("clipPath.sankeyColumn")
-                //     .data(leftRight)
-                //     .enter()
-                //     .append("clipPath")
-                //     .attr("id", function (d) {
-                //         return "sankeyColumn" + d.orient;
-                //     })
-                //     .attr("class", "sankeyColumn")
-                //     .append("rect")
-                //     .attr("y", -10)
-                //     .attr("height", height + 10)
-                //     .attr("x", function (d) {
-                //         return isFinite(d.x) ? d.x : 0;
-                //     })
-                //     .attr("width", function (d) {
-                //         return d.width ? d.width : 0;
-                //     })
-                // ;
-
                 const color = d3.scale.category20();
 
                 const path = this.sankey.link();
                 const self = this;
-
-                // var textPos = self.textPos.bind(self);
-
 
                 const linkSel = self.backgroundGroup.selectAll(".goLink")
                     .data(this.data.links,
@@ -425,7 +378,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                         return d.partOf ? self.options.partofColour : self.options.subclassColour; //"#bdbdbd"
                     })
                     .style("display", "none")
-                    .attr("marker-start", function (d, i) {
+                    .attr("marker-start", function (d) {
                         return "url(#marker_" + (d.partOf ? "diamond" : "arrow") + ")";
                     });
                 const nodeSel = this.foregroundGroup.selectAll(".node")
@@ -451,20 +404,20 @@ export const GoTermsViewBB = BaseFrameView.extend({
                         self.hideAllExceptMe();
                         self.hideAllLinksExceptTo();
                         self.model.setHighlightedProteins([]);
-                    })
-                    .on("contextmenu", function (d) {
-                        //d3.event.preventDefault();
-                        //d3.event.stopPropagation();
-                        // react on right-clicking
-                        //self.fixed.push(d.id);
                     });
+                    // .on("contextmenu", function () {
+                    //     //d3.event.preventDefault();
+                    //     //d3.event.stopPropagation();
+                    //     // react on right-clicking
+                    //     //self.fixed.push(d.id);
+                    // });
 
                 nodeEnter.append("rect")
                     .attr("width", self.sankey.nodeWidth())
                     .style("fill", function (d) {
                         return d.color = color(d.name.replace(/ .*/, ""));
                     })
-                    .style("fill-opacity", function (d) {
+                    .style("fill-opacity", function () {
                         return 0.2;
                     })
                     .style("stroke", function (d) {
@@ -472,14 +425,12 @@ export const GoTermsViewBB = BaseFrameView.extend({
                     })
                     .append("title")
                     .text(function (d) {
-                        return d.id + ":" + d.name;// + ":" + d.value;
+                        return d.id + " : " + d.name + " : " + d.value;
                     });
 
                 nodeEnter.append("text")
                     .attr("dy", ".35em")
-                    // .attr("clip-path", function (d) {
-                    //     return self.textOrient(d);
-                    // })
+
                     .text(function (d) {
                         return d.name;
                     });
@@ -487,23 +438,27 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 nodeSel.attr("transform", function (d) {
                     return "translate(" + (d.x ? d.x : 0) + "," + (d.y ? d.y : 0) + ")";
                 });
+
                 nodeSel.select("rect")
                     .attr("height", function (d) {
                         return Math.max(1, (d.dy ? d.dy : 0));
                     });
+
                 nodeSel.select("text")
-                    .attr("x", function (d) {
-                        //return (d.x < width / 1.5) ? 6 + self.sankey.nodeWidth() : -6;
-                        // return (d.x < width / 1.5) ? 6 + self.sankey.nodeWidth() : -colWidth + self.sankey.nodeWidth() ;
-                        return -6;//6 + self.sankey.nodeWidth();
+                    .attr("x", function () {
+                        return -6;
                     })
-                    .style("text-anchor", function (d) {
+                    .style("text-anchor", function () {
                         return "end";
-                        // return self.leftRightSwitch(d) ? "start" : "end";
                     })
                     .attr("y", function (d) {
                         return (d.dy ? d.dy : 0) / 4;
                     });
+
+                nodeSel.select("title").text(function (d) {
+                    return d.id + " : " + d.name + " : " + d.value;
+                });
+
                 linkSel.attr("d", path);
 
                 nodeSel.exit().remove();
@@ -520,7 +475,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 return d.id;
             });
         if (!term) {
-            nodeSel.style("opacity", function (d2) {
+            nodeSel.style("opacity", function () {
                 return 1;
             });
         } else {
