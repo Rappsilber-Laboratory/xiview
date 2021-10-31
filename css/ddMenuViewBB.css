@@ -95,7 +95,7 @@
     margin: 0;
     padding: 0;
     visibility: hidden;
-    max-width: 0px;
+    max-width: 0;
 }
 
 .dropdown .disabledItem {

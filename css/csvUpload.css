@@ -5,9 +5,9 @@
 #csvPanel > div.panelInner > div > label
 */
 .csvToolbar .btn {
-	margin: 0px 0px 0px 0px;
+	margin: 0 0 0 0;
 }
 
 .csvToolbar div {
-	margin: 10px 0px 2px 0px;
+	margin: 10px 0 2px 0;
 }

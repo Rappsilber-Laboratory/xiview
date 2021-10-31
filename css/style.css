@@ -42,7 +42,7 @@
 }
 
 .showHidden{
-  margin: 0px;
+  margin: 0;
 }
 
 /* fa */
@@ -118,7 +118,7 @@
 }
 
 #main .mainContent {
-    top: 0px;
+    top: 0;
     bottom: 65px;
     position: absolute;
     width: 100%;
@@ -142,7 +142,7 @@
     display:block;
     position: absolute;
     top: 37px;
-    bottom:0px;
+    bottom:0;
 }
 
 #spectrumDiv {
@@ -181,11 +181,11 @@
 
 #bottomDiv {
     /*background: rgba(9, 29, 66, 0.9);*/
-    padding:0px 10px;
+    padding:0 10px;
     position: relative; /* will overlay previous absolute divs i.e. distance slider */
 }
 .noMarg{
-    margin:0px!important;
+    margin:0 !important;
 }
 
 .dynDiv, .xispec_dynDiv{
