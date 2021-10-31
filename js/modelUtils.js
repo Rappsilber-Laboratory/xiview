@@ -813,7 +813,7 @@ function tryParseJSON(jsonString) {
             return o;
         }
     } catch (e) {
-        console.log(e);
+        //console.log(e); //yes, its throws errors here
     }
 
     return false;
