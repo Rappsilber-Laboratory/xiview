@@ -96,6 +96,6 @@ svg.circularView {
 .draggedNode {
     opacity: 0.5;
     fill: cyan;
-    stroke: 2px solid cyan;
+    stroke: cyan;
     transform: scale(1.2);
 }

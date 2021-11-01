@@ -13,9 +13,9 @@
 
 .dropdown .menuTitle {
     -webkit-user-select: none;
-    -khtml-user-select: none;
+    /*-khtml-user-select: none;*/
     -moz-user-select: none;
-    -o-user-select: none;
+    /*-o-user-select: none;*/
     user-select: none;
 }
 
@@ -73,7 +73,7 @@
 }
 
 .dropdown .ddSectionHeader {
-    background: #091D42;
+    background: #091D42!important;
     /* opacity: 0.8; */
     text-transform: lowercase;
     font-variant: small-caps;
@@ -95,7 +95,7 @@
     margin: 0;
     padding: 0;
     visibility: hidden;
-    max-width: 0px;
+    max-width: 0;
 }
 
 .dropdown .disabledItem {

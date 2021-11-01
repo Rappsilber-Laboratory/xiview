@@ -58,7 +58,7 @@ DIV.tableWrapper TBODY {
 
 DIV.tableWrapper TD, DIV.tableWrapper TH {
     margin: 0;
-    padding: 0em 0.1em;
+    padding: 0 0.1em;
     line-height: 1em;
     height: 1em;
 }
@@ -114,7 +114,7 @@ DIV.checkHolder SPAN.alignTab:after {
 
 /* Next 3 rules give a tab like appearance to input-label sibling pairs inside spans */
 DIV.checkHolder SPAN LABEL {
-    padding: 0em 0.4em;
+    padding: 0 0.4em;
     margin: 0;
     border: 1px solid #bbb;
     border-bottom: none;

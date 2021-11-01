@@ -135,7 +135,7 @@
     background-color: inherit;
     -webkit-transition: initial;
     -moz-transition: initial;
-    -ms-transition: initial;
+    /*-ms-transition: initial;*/
     -o-transition: initial;
     transition: initial;
 }

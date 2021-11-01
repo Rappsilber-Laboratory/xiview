@@ -55,30 +55,39 @@ header('Content-type: text/html; charset=utf-8');
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
-        <link rel="stylesheet" href="../vendor/css/reset.css<?php echo $cacheBuster ?>" />
-        <link rel="stylesheet" href="../vendor/css/common.css<?php echo $cacheBuster ?>" />
-        <link rel="stylesheet" href="../vendor/css/byrei-dyndiv_0.5.css<?php echo $cacheBuster ?>" />
-        <link rel="stylesheet" href="../vendor/css/c3.css<?php echo $cacheBuster ?>">
-
+<!---->
+<!--        <link rel="stylesheet" href="../vendor/css/reset.css--><?php //echo $cacheBuster ?><!--" />-->
+<!--        <link rel="stylesheet" href="../vendor/css/common.css--><?php //echo $cacheBuster ?><!--" />-->
+<!--        <link rel="stylesheet" href="../vendor/css/byrei-dyndiv_0.5.css--><?php //echo $cacheBuster ?><!--" />-->
+<!--        <link rel="stylesheet" href="../vendor/css/c3.css--><?php //echo $cacheBuster ?><!--">-->
+<!---->
         <!-- Spectrum Viewer styles  -->
-        <link rel="stylesheet" href="../spectrum/css/spectrum.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="../spectrum/css/settings.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="../spectrum/css/QC.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="../spectrum/css/dropdown.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" type="text/css" href="../spectrum/css/font-awesome.min.css"/>
-        <link rel="stylesheet" href="../spectrum/vendor/dt-1.10.12_datatables.min.css<?php echo $cacheBuster ?>">
+<!--        <link rel="stylesheet" href="../spectrum/css/spectrum.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="../spectrum/css/settings.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="../spectrum/css/QC.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="../spectrum/css/dropdown.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" type="text/css" href="../spectrum/css/font-awesome.min.css"/>-->
+<!--        <link rel="stylesheet" href="../spectrum/vendor/dt-1.10.12_datatables.min.css--><?php //echo $cacheBuster ?><!--">-->
+<!---->
+<!--        <link rel="stylesheet" href="./css/xispecAdjust.css--><?php //echo $cacheBuster ?><!--" />-->
+<!--        <link rel="stylesheet" href="./css/style.css--><?php //echo $cacheBuster ?><!--" />-->
+<!--        <link rel="stylesheet" href="./css/tooltip.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/minigram.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/ddMenuViewBB.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/selectionViewBB.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/spectrumViewWrapper.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/validate.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/filter.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/validationPage.css--><?php //echo $cacheBuster ?><!--">-->
+<!--        <link rel="stylesheet" href="./css/xiView.css--><?php //echo $cacheBuster ?><!--">-->
 
-        <link rel="stylesheet" href="./css/xispecAdjust.css<?php echo $cacheBuster ?>" />
-        <link rel="stylesheet" href="./css/style.css<?php echo $cacheBuster ?>" />
-        <link rel="stylesheet" href="./css/tooltip.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="./css/minigram.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="./css/ddMenuViewBB.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="./css/selectionViewBB.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="./css/spectrumViewWrapper.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="./css/validate.css<?php echo $cacheBuster ?>">
-        <link rel="stylesheet" href="./css/filter.css<?php echo $cacheBuster ?>">
+<!--        <script type="text/javascript" src="../vendor/js/jquery-3.4.1.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/jquery.jsonview.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../vendor/js/jquery-ui.js--><?php //echo $cacheBuster ?><!--"></script>-->
+<!--        <script type="text/javascript" src="../spectrum/vendor/datatables.min.js--><?php //echo $cacheBuster ?><!--"></script>-->
+
         <link rel="stylesheet" href="./css/validationPage.css<?php echo $cacheBuster ?>">
+<<<<<<< HEAD
         <link rel="stylesheet" href="./css/xiView.css<?php echo $cacheBuster ?>">
 
         <script type="text/javascript" src="../vendor/js/byrei-dyndiv_1.0rc1-src.js<?php echo $cacheBuster ?>"></script>
@@ -139,6 +148,9 @@ header('Content-type: text/html; charset=utf-8');
         <script type="text/javascript" src="../spectrum/src/graph/Graph.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/src/graph/Peak.js<?php echo $cacheBuster ?>"></script>
         <script type="text/javascript" src="../spectrum/src/graph/Fragment.js<?php echo $cacheBuster ?>"></script>
+=======
+        <script type="text/javascript" src="../dist/xiview.js"></script>
+>>>>>>> 72da89c150c0eef374eacc2096a0a5b00b478713
     </head>
 
     <body>
@@ -166,68 +178,12 @@ header('Content-type: text/html; charset=utf-8');
         <script>
         //<![CDATA[
 
-        //~ var windowLoaded = function () {
-            var CLMSUI = CLMSUI || {};
+            xiview.validationPage();
             <?php
-                if (isset($_SESSION['session_name'])) {
-                    echo "CLMSUI.loggedIn = true;";
-                }
                 if (file_exists('../xiSpecConfig.php')) {
                     include('../xiSpecConfig.php');
                 }
             ?>
-
-            var spinner = new Spinner({scale: 5}).spin (d3.select("#topDiv").node());
-
-            var success = function (text) {
-                spinner.stop(); // stop spinner on request returning
-                var json = JSON.parse (text);
-                CLMSUI.init.modelsEssential(json);
-
-                var searches = CLMSUI.compositeModelInst.get("clmsModel").get("searches");
-                document.title = "Validate " + Array.from(searches.keys()).join();
-                Split (["#topDiv", "#bottomDiv"], { direction: "vertical",
-                        sizes: [60,40], minSize: [200,10],
-                            onDragEnd: function () {CLMSUI.vent.trigger ("resizeSpectrumSubViews", true);
-                } });
-
-                // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
-                d3.select("body").append("div")
-                    .attr("id", "spectrumSettingsWrapper")
-                    .attr("class", "dynDiv")
-                ;
-                CLMSUI.init.viewsEssential({"specWrapperDiv":"#topDiv", spectrumToTop: false});
-
-                CLMSUI.vent.trigger ("spectrumShow", true);
-
-        var allMatches = CLMSUI.compositeModelInst.get("clmsModel").get("matches")
-        CLMSUI.compositeModelInst.setMarkedMatches ("selection", allMatches);
-
-                // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
-                // so we run it again here, doesn't do any harm
-                ByRei_dynDiv.init.main();
-
-                var resize = function(event) {
-                    CLMSUI.vent.trigger ("resizeSpectrumSubViews", true);
-                    var alts = d3.select("#alternatives");
-                    var w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
-                    alts.attr("style", "width:"+w+"px;"); //dont know why d3 style() aint working
-                };
-
-                window.onresize = resize;
-
-                resize();
-            };
-
-            var url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
-
-
-            d3.text (url, function (error, text) {
-                if (!error) {
-                    success (text);
-                }
-            });
-
 
         //]]>
         </script>

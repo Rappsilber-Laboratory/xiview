@@ -1,8 +1,11 @@
-//has to be loaded after Utils.js
+//has to be loaded after utils.js
 //only used by KeyViewBB.js
-CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
+import {makeLegalDomID} from "../utils";
+import d3 from "d3";
+
+export const sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
     const self = this;
-    const legalDom = CLMSUI.utils.makeLegalDomID;
+    const legalDom = makeLegalDomID;
     const setArrow = function (d) {
         const assocTable = d3.select("#" + idPrefix + legalDom(d.id));
         d3.select(this).classed("tableShown", assocTable.style("display") !== "none");
@@ -14,16 +17,15 @@ CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, head
 
     const newElems = dataJoin.enter().append("section").attr("class", "sectionTable");
     const newHeaders = newElems.append("h2")
-            .on("click", function (d, i) {
-                const assocTable = d3.select("#" + idPrefix + legalDom(d.id));
-                const tableIsHidden = (assocTable.style("display") === "none");
-                assocTable.style("display", tableIsHidden ? "table" : "none");
-                if (clickFunc) {
-                    clickFunc(tableIsHidden, d, i);
-                }
-                setArrow.call(this, d);
-            })
-    ;
+        .on("click", function (d, i) {
+            const assocTable = d3.select("#" + idPrefix + legalDom(d.id));
+            const tableIsHidden = (assocTable.style("display") === "none");
+            assocTable.style("display", tableIsHidden ? "table" : "none");
+            if (clickFunc) {
+                clickFunc(tableIsHidden, d, i);
+            }
+            setArrow.call(this, d);
+        });
     newHeaders.append("svg")
         .append("polygon")
         .attr("points", "2,1 16,8 2,15");
@@ -37,16 +39,13 @@ CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, head
         })
         .style("display", function (d, i) {
             return !openSectionIndices || openSectionIndices.indexOf(i) >= 0 ? "table" : "none";
-        })
-    ;
+        });
     newTables.selectAll("thead th").data(function (d) {
-        return d.columnHeaders || columnHeaders
-        })
+        return d.columnHeaders || columnHeaders;
+    })
         .text(function (d) {
             return d;
-        })
-    ;
-
+        });
     const tables = dataJoin.selectAll("table");
 
     const arrayExpandFunc = function (d, entries) {
@@ -62,8 +61,7 @@ CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, head
             return arrayExpandFunc(d, rowFilterFunc(d));
         }, function (d) {
             return d.key;
-        })
-    ;
+        });
     rowJoin.exit().remove();
     rowJoin.enter().append("tr");
 
@@ -76,15 +74,13 @@ CLMSUI.utils.sectionTable = function (domid, data, idPrefix, columnHeaders, head
                 key: d.key,
                 value: d.value
             }];
-        })
-    ;
+        });
     cells
         .enter()
         .append("td")
         .classed("fixedSizeFont", function (d, i) {
             return self.options.fixedFontKeys && self.options.fixedFontKeys.has(d.key) && i;
-        })
-    ;
+        });
     rowJoin.selectAll("td").each(cellFunc); // existing rows in existing tables may have seen data change
 
     dataJoin.selectAll("h2").each(setArrow);

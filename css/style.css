@@ -2,9 +2,9 @@
 
 /*span, */label {
     -webkit-user-select: none;
-    -khtml-user-select: none;
+    /*-khtml-user-select: none;*/
     -moz-user-select: none;
-    -o-user-select: none;
+    /*-o-user-select: none;*/
     user-select: none;
 }
 
@@ -15,7 +15,7 @@
 /* class not named .background as that clashes with d3 brush stuff */
 .backdrop {
 	background: #eee;
-	background-color: #eee;
+	/*background-color: #eee;*/
 }
 
 #xiNetButtonBar p div ul li label{
@@ -42,7 +42,7 @@
 }
 
 .showHidden{
-  margin: 0px;
+  margin: 0;
 }
 
 /* fa */
@@ -118,11 +118,11 @@
 }
 
 #main .mainContent {
-    top: 0px;
+    top: 0;
     bottom: 65px;
     position: absolute;
     width: 100%;
-    overflow: none;
+    overflow: hidden;
 }
 
 .page-header p {
@@ -142,7 +142,7 @@
     display:block;
     position: absolute;
     top: 37px;
-    bottom:0px;
+    bottom:0;
 }
 
 #spectrumDiv {
@@ -181,38 +181,38 @@
 
 #bottomDiv {
     /*background: rgba(9, 29, 66, 0.9);*/
-    padding:0px 10px;
+    padding:0 10px;
     position: relative; /* will overlay previous absolute divs i.e. distance slider */
 }
 .noMarg{
-    margin:0px!important;
+    margin:0 !important;
 }
 
 .dynDiv, .xispec_dynDiv{
     padding:20px 10px;
     /*background: rgba(9, 29, 66, 0.9);*/
     overflow: hidden;
-    color:#091d42;
+    color:#091d42!important;
     position:fixed;
     pointer-events:all;
-    background: rgba(224,224,224,1);
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
-    border: 1px solid #888;
+    background: rgba(224,224,224,1)!important;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.5)!important;
+    border: 1px solid #888!important;
 /*
     height:400px;
 */
 }
 .dynDiv_moveParentDiv, .xispec_dynDiv_moveParentDiv{
     height:20px;
-    background:#091D42;
+    background:#091D42!important;
 }
 
 .draggableCorner {
     width:20px;
     height:20px;
-    background:#091D42;
+    background:#091D42!important;
     border:none;
-    background-image:url("../images/tl.png");
+    background-image:url("../images/tl.png")!important;
 }
 
 /* just need 1 background image and rotate it for corner orientations */
@@ -281,17 +281,17 @@
     bottom: 0;
     height: 65px;
 
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #ccc!important;
 
     width: 100%;
-    background:#ecedf2;
-    color:#091D42;
-    padding-left: 10px;
-    padding-right: 10px;
+    background:#ecedf2!important;
+    color:#091D42!important;
+    /*padding-left: 10px;*/
+    /*padding-right: 10px;*/
     -webkit-user-select: none;
-    -khtml-user-select: none;
+    /*-khtml-user-select: none;*/
     -moz-user-select: none;
-    -o-user-select: none;
+    /*-o-user-select: none;*/
     user-select: none;
 }
 
@@ -439,7 +439,7 @@ label.horizontalFlow input[type=number] {
 
 /* See http://jsfiddle.net/7jx02upg/1/ */
 label.horizontalFlow input[type=radio], label.horizontalFlow input[type=checkbox] {
-    vertical-align: normal;
+    /*vertical-align: normal;*/
 }
 
 /* <label class='horizontalFlow'><span class='noBreak'>stuff you dont want split over multiple lines</span></label><more labels n spans...>
@@ -588,7 +588,7 @@ A.btn {
     background: inherit;
     -webkit-transition: none;
     -moz-transition: none;
-    -ms-transition: none;
+    /*-ms-transition: none;*/
     -o-transition: none;
     transition: none;
     /*border-top-color: #444;
@@ -664,9 +664,9 @@ div.columnbar[disabled], div.columnbar[disabled], label.fakeButton[disabled] {
 	vertical-align: text-bottom;
 }
 
-button.pdbWindowButton {
-    margin-bottom: 2em;
-}
+/*button.pdbWindowButton {*/
+/*    margin-bottom: 2em;*/
+/*}*/
 
 DIV.messagebar {
 	font-size: 1.4em;
