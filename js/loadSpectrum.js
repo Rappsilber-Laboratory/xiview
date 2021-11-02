@@ -2,7 +2,7 @@ import d3 from "d3";
 
 export const loadSpectrum = function (match, randId) {
     if (match.spectrum && match.spectrum.pks) {
-        var formatted_data = {};
+        const formatted_data = {};
 
         formatted_data.sequence1 = match.matchedPeptides[0].seq_mods;
         formatted_data.linkPos1 = match.linkPos1 - 1;
@@ -16,7 +16,7 @@ export const loadSpectrum = function (match, randId) {
         formatted_data.fragmentTolerance = match.fragmentTolerance();
         //formatted_data.customConfig = CLMSUI.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).customsettings.split('\n');
 
-        var ions = match.ionTypes();
+        const ions = match.ionTypes();
         formatted_data.ionTypes = ions.map(function (ion) {
             return ion.type.replace("Ion", "");
         }).join(";");
@@ -41,7 +41,7 @@ export const loadSpectrum = function (match, randId) {
 
                 formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
                 console.log(formatted_data);
-                xiSPEC.setData(formatted_data);
+                window.xiSPEC.setData(formatted_data);
             }
         });
     }

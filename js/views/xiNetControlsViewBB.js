@@ -31,7 +31,6 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         });
     },
 
-	//todo -check
     saveLayout: function () {
         const xmlhttp = new XMLHttpRequest();
         const url = "./php/isLoggedIn.php";
@@ -43,6 +42,8 @@ export const xiNetControlsViewBB = Backbone.View.extend({
                 if (xmlhttp.responseText === "false") {
                     alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
                     window.open("../userGUI/userLogin.html", "_blank");
+                } else if (xmlhttp.responseText === "no") {
+                    alert("Didn't save - not your search.");
                 } else {
                     const callback = function (layoutJson) {
                         const xmlhttp = new XMLHttpRequest();
@@ -76,6 +77,12 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         xiNetControlsViewBB.__super__.initialize.apply(this, arguments);
 
         const mainDivSel = d3.select(this.el);
+
+        //todo
+        // if (!CLMSUI.loggedIn){
+        //     d3.select(".saveLayoutName").style("display", "none");
+        //     d3.select(".saveLayoutButton").style("display", "none");
+        // }
 
         const buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
             "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +

@@ -30,25 +30,28 @@ if (isset($_SESSION['session_name'])) {
     }
     $user = $_SESSION['session_name'];
 
-//    echo $user;
-
     $id_rands = explode(",", $uploadId);
     $searchId_randomId = [];
     for ($i = 0; $i < count($id_rands); $i++) {
         $dashSeperated = explode("-", $id_rands[$i]);
         $randId = implode('-', array_slice($dashSeperated, 1, 4));
         $id = $dashSeperated[0];
+//        echo "hello ".$user." ".$id;
+
 
         $searchDataQuery = "SELECT user_name, random_id FROM uploads inner JOIN users on (uploads.user_id = users.id) where uploads.id =  '".$id."';";
+
+//        echo $searchDataQuery;
+
 
         $res = pg_query($searchDataQuery)
         or die('Query failed: ' . pg_last_error());
         $line = pg_fetch_array($res, null, PGSQL_ASSOC);
 
-        if ($line["random_id"] != $randId || $line["user_name"] != $user) {
-            echo "no";
-            exit();
-        }
+//        if ($line["random_id"] != $randId || $line["user_name"] != $user) {
+//            echo "no";
+//            exit();
+//        }
 
     }
 
