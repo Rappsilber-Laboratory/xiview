@@ -82,21 +82,13 @@ export const FilterViewBB = Backbone.View.extend({
                     inequality: "&ge;",
                 },
                 {
-                    label: "A",
-                    id: "A"
+                    label: "pass",
+                    id: "pass"
                 },
                 {
-                    label: "B",
-                    id: "B"
+                    label: "fail",
+                    id: "fail"
                 },
-                {
-                    label: "C",
-                    id: "C"
-                },
-                // {
-                //     label: "?",
-                //     id: "Q"
-                // },
                 {
                     label: "Auto",
                     id: "AUTO",
@@ -371,8 +363,9 @@ export const FilterViewBB = Backbone.View.extend({
         groupIDs.push("multipleGroup");
 
         // initResetGroup.call(this);
-        addFilterGroup.call(this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
-        addFilterGroup.call(this, {groupName: "Crosslinks"}, ["linears", "crosslinks", "ambig", "betweenLinks", "selfLinks", "homomultimericLinks", "aaApart", "pepLength"]);
+        // addFilterGroup.call (this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
+        addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
+        addFilterGroup.call(this, {groupName: "Crosslinks"}, ["decoys", "linears", "monolinks", "crosslinks", "ambig", "betweenLinks", "selfLinks", "homomultimericLinks", "aaApart", "pepLength"]);
         initMinigramFilterGroup.call(this, {
             attr: "distanceCutoff",
             extentProperty: "distanceExtent",
@@ -382,10 +375,10 @@ export const FilterViewBB = Backbone.View.extend({
             groupName: "Distances",
             tooltipIntro: "Filter out crosslinks with distance"
         });
-        addFilterGroup.call(this, {
-            id: "validationStatus",
-            groupName: "Validation"
-        }, ["A", "B", "C", "AUTO", "unval", "decoys"]);
+        // addFilterGroup.call(this, {
+        //     id: "validationStatus",
+        //     groupName: "Validation"
+        // }, ["A", "B", "C", "AUTO", "unval", "decoys"]);
         initMinigramFilterGroup.call(this, {
             attr: "matchScoreCutoff",
             extentProperty: "scoreExtent",

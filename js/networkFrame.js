@@ -77,27 +77,27 @@ init.postDataLoaded = function () {
 
     //init annotation types
     let annotationTypes = [
-        new AnnotationType({
-            category: "AA",
-            type: "Digestible",
-            tooltip: "Mark Digestible Residues",
-            source: "Search",
-            colour: "#1f78b4",
-        }),
-        new AnnotationType({
-            category: "AA",
-            type: "Crosslinkable-1",
-            tooltip: "Mark CrossLinkable residues (first or only reactive group)",
-            source: "Search",
-            colour: "#a6cee3",
-        }),
-        new AnnotationType({
-            category: "AA",
-            type: "Cross-linkable-2",
-            tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
-            source: "Search",
-            colour: "#a6cee3",
-        }),
+        // new AnnotationType({
+        //     category: "AA",
+        //     type: "Digestible",
+        //     tooltip: "Mark Digestible Residues",
+        //     source: "Search",
+        //     colour: "#1f78b4",
+        // }),
+        // new AnnotationType({
+        //     category: "AA",
+        //     type: "Crosslinkable-1",
+        //     tooltip: "Mark CrossLinkable residues (first or only reactive group)",
+        //     source: "Search",
+        //     colour: "#a6cee3",
+        // }),
+        // new AnnotationType({
+        //     category: "AA",
+        //     type: "Cross-linkable-2",
+        //     tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
+        //     source: "Search",
+        //     colour: "#a6cee3",
+        // }),
         new AnnotationType({
             category: "Alignment",
             type: "PDB aligned region",
@@ -263,7 +263,7 @@ init.models = function (options) {
 init.modelsEssential = function (options) {
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
-    const hasNoMatches = _.isEmpty(options.rawMatches);
+    const hasNoMatches = _.isEmpty(options.identifications);
 
     displayError(function () {
         return hasMissing || hasIncorrect || hasNoMatches;

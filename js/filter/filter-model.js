@@ -45,12 +45,8 @@ export class FilterModel extends Backbone.Model {
             aaApart: "number",
             pepLength: "number",
             //validation status
-            A: "boolean",
-            B: "boolean",
-            C: "boolean",
-            Q: "boolean",
-            unval: "boolean",
-            AUTO: "boolean",
+            pass: "boolean",
+            fail: "boolean",
             decoys: "boolean",
             //distance
             distanceUndef: "boolean",
@@ -86,12 +82,8 @@ export class FilterModel extends Backbone.Model {
             aaApart: 0,
             pepLength: 1,
             //validation status
-            A: true,
-            B: true,
-            C: true,
-            Q: true,
-            unval: false,
-            AUTO: false, // if u change this to true one of the unit tests will fail
+            pass: true,
+            fail: false,
             decoys: true,
             //distance
             distanceUndef: true,
@@ -270,13 +262,12 @@ export class FilterModel extends Backbone.Model {
     }
 
     validationStatusFilter(match) {
-        const vChar = match.validated;
-        if (vChar != "R") {
-            if (this.get(vChar) || this.get(this.valMap.get(vChar))) return true;
-            if (match.autovalidated && this.get("AUTO")) return true;
-            if (!match.autovalidated && !vChar && this.get("unval")) return true;
+        if (this.get("pass") && match.passThreshold == true) {
+            return true;
         }
-
+        if (this.get("fail") && match.passThreshold == false) {
+            return true;
+        }
         return false;
     }
 
