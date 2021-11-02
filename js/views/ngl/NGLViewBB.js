@@ -71,6 +71,7 @@ export const NGLViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         NGLViewBB.__super__.initialize.apply(this, arguments);
         const self = this;
@@ -1002,7 +1003,7 @@ export const NGLViewBB = BaseFrameView.extend({
     showSelectedLinks: function () {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setSelectedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
-            this.xlRepr.setSelectedRes(this.xlRepr.nglModelWrapper.getHalfLinks());
+            // this.xlRepr.setSelectedRes(this.xlRepr.nglModelWrapper.getHalfLinks());
         }
         return this;
     },

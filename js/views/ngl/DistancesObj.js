@@ -69,7 +69,7 @@ export class DistancesObj {
     getXLinkDistance(xlink, alignCollBB, options) {
         options = options || {};
         const average = options.average || false;
-        const angstromAccuracy = options.angstromAccuracy || 1;
+        // const angstromAccuracy = options.angstromAccuracy || 1;
         const returnChainInfo = options.returnChainInfo || false;
         const chainInfo = returnChainInfo ? (average ? {
             from: [],

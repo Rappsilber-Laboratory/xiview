@@ -581,7 +581,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         const allLinks = xlinkTBodyJoin.select("TR>TD");
         allLinks.select(".niceCrossLinkName").text(niceCrossLinkName);
         const colourScheme = this.model.get("linkColourAssignment");
-        allLinks.each(function (d) {
+        allLinks.each(function () {
             self.makeColourSwatch(d3.select(this).select(".colourSwatchSquare"), colourScheme);
         });
 

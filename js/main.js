@@ -181,6 +181,7 @@ export function validationPage() {
         // so we run it again here, doesn't do any harm
         ByRei_dynDiv.init.main();
 
+        // eslint-disable-next-line no-unused-vars
         const resize = function (event) {
             window.vent.trigger("resizeSpectrumSubViews", true);
             const alts = d3.select("#alternatives");

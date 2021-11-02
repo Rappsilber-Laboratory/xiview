@@ -246,7 +246,7 @@ export function declutterAxis(d3AxisElem) {
     d3AxisElem.selectAll(".tick text").style("visibility", "visible");
 
     d3AxisElem.selectAll(".tick text")
-        .each(function (d) {
+        .each(function () {
             const text = d3.select(this);
             const elemVis = text.style("visibility") !== "hidden";
             if (elemVis) {
@@ -506,14 +506,14 @@ export function updateColourKey(colourAssign, svgElem) {
             .attr("x", 19)
             .attr("y", 12);
         colourElems.select("rect")
-            .style("fill", function (d, i) {
+            .style("fill", function (d) {
                 return d[1];
             })
             // hide individual colour swatches if showing linear scale
             .style("display", function (d) {
                 return isLinear && d[0] !== colourAssign.get("undefinedLabel") ? "none" : null;
             });
-        colourElems.select("text").text(function (d, i) {
+        colourElems.select("text").text(function (d) {
             return d[0];
         });
 
@@ -630,7 +630,7 @@ export function addMultipleSelectControls(settings) {
             return d;
         },
         optionSortFunc: undefined,
-        selectLabelTooltip: function (d) {
+        selectLabelTooltip: function () {
             return undefined;
         },
         initialSelectionFunc: function (d, i) {

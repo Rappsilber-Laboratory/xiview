@@ -6,7 +6,6 @@ import * as d3 from "d3";
 import {d3_sankey} from "./sankey";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
-import {GoTerm} from "./goTerm";
 
 export const GoTermsViewBB = BaseFrameView.extend({
 
@@ -33,6 +32,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         GoTermsViewBB.__super__.initialize.apply(this, arguments);
 

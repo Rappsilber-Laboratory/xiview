@@ -28,6 +28,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         removeTheseKeys: d3.set(["sectionName", "id"]),
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         AbstractMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
 
@@ -164,4 +165,4 @@ export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserB
     identifier: "User Annotations File Chooser",
 });
 
-const MetaLoaderViewRegistry = [ProteinMetaDataFileChooserBB, LinkMetaDataFileChooserBB, UserAnnotationsMetaDataFileChooserBB];
+// const MetaLoaderViewRegistry = [ProteinMetaDataFileChooserBB, LinkMetaDataFileChooserBB, UserAnnotationsMetaDataFileChooserBB];

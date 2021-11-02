@@ -23,6 +23,7 @@ const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
                 toNodeID: link.toNodeID
             };
         },
+        // eslint-disable-next-line no-unused-vars
         featureParse: function (feature, node) {
             return {
                 fromPos: feature.start - 1,
@@ -156,17 +157,18 @@ export const CircularViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         const self = this;
 
         this.defaultOptions.featureParse = function (feature, nodeid) {
             // feature.start and .end are 1-indexed, and so are the returned convStart and convEnd values
-            if (feature.start == undefined) {
+            if (!feature.start) {
                 feature.start = +feature.begin;
             }
             let convStart = +feature.start;
             let convEnd = +feature.end;
-            const type = feature.type.toLowerCase();
+            // const type = feature.type.toLowerCase();
             const protAlignModel = self.model.get("alignColl").get(nodeid);
 
             const annotationColl = self.model.get("annotationTypes");
@@ -913,7 +915,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 });
 
             // After rearrange interactors, because filtered features depends on the interactor order
-            const alignColl = this.model.get("alignColl");
+            // const alignColl = this.model.get("alignColl");
             const filteredFeatures = filteredInteractors.map(function (inter) {
                 return this.model.getFilteredFeatures(inter);
             }, this);

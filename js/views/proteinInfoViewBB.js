@@ -23,6 +23,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
         orderedKeys: ["name", "id", "accession", "description", "size", "sequence"],
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         ProteinInfoViewBB.__super__.initialize.apply(this, arguments);
 
@@ -130,7 +131,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 }
             }
 
-            function addRow(key) {
+            const addRow = function (key) {
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
                 cell1.textContent = key;
@@ -146,9 +147,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 if (key.indexOf("seq") !== -1) {
                     cell2.classList.add("fixedSizeFont");
                 }
-            }
+            };
 
-            function addMetaRows(key) {
+            const addMetaRows = function (key) {
                 const metaObj = protein[key];
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
@@ -186,7 +187,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     }
                 }
                 cell2.append(innerTable);
-            }
+            };
 
             div.appendChild(table);
 

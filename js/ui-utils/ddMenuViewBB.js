@@ -20,8 +20,8 @@ export const DropDownMenuViewBB = Backbone.View.extend({
     },
 
     initialize: function (viewOptions) {
-        const emptyFunc = function () {
-        };
+        // const emptyFunc = function () {
+        // };
         const defaultOptions = {
             title: "A DD Menu",
             closeOnClick: true,
@@ -360,7 +360,7 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
             self.collection.trigger("change:shown", model, model.get("shown"));
         }
 
-        items.each(function (d, i) {
+        items.each(function () {
             const d3this = d3.select(this);
 
             if (d3this.select(".colourSwatchLabel").empty()) {

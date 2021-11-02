@@ -16,7 +16,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         }
         return _.extend({}, parentEvents, {
             "click .pdbWindowButton": "launchExternalPDBWindow",
-            "click .ebiPdbWindowButton": "launchExternalEBIPDBWindow",
+            // "click .ebiPdbWindowButton": "launchExternalEBIPDBWindow",
             "change .selectPdbButton": "selectPDBFile",
             "keyup .inputPDBCode": "enteringPDBCode",
             "click button.PDBSubmit": "loadPDBCode",
@@ -309,12 +309,13 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         return funcMeta;
     },
 
+    /*
     launchExternalEBIPDBWindow: function () {
         const chosenSeq = (this.getSelectedOption(d3.select(this.el).select(".columnbar"), "Proteins") || {
             sequence: ""
         }).sequence;
         window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
-    },
+    },*/
 
     selectPDBFile: function (evt) {
         this.setWaitingEffect();
