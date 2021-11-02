@@ -49,7 +49,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
                 return d.compFunc;
             },
             changeFunc: function () {
-                let compFunc, reverse;
+                let compFunc;
                 // cant rely on event.target.value as it returns functions as a string
                 d3.select(d3.event.target)
                     .selectAll("option")
@@ -385,21 +385,15 @@ export const ProtAlignViewBB = Backbone.View.extend({
                 // add previous characters as current streak type
                 addSequenceSegment(streak);
                 streak = MATCH; // set new streak type
-            }
-            // if AA missing in c, but not currently on a delete streak
-            else if (chyphen && streak !== DELETE) {
+            } else if (chyphen && streak !== DELETE) {// if AA missing in c, but not currently on a delete streak
                 // add previous characters as current streak type
                 addSequenceSegment(streak);
                 streak = DELETE; // set new streak type
-            }
-            // else if AA missing in ref, but not currently on an insert streak
-            else if (rhyphen && streak !== INSERT) {
+            } else if (rhyphen && streak !== INSERT) {// else if AA missing in ref, but not currently on an insert streak
                 // add previous characters as current streak type
                 addSequenceSegment(streak);
                 streak = INSERT; // set new streak type
-            }
-            // else if AAs in c and ref different, but not currently on a variation streak
-            else if (!chyphen && !rhyphen && c !== r && streak !== VARIATION) {
+            } else if (!chyphen && !rhyphen && c !== r && streak !== VARIATION) {// else if AAs in c and ref different, but not currently on a variation streak
                 // add previous characters as current streak type
                 addSequenceSegment(streak);
                 streak = VARIATION; // set new streak type

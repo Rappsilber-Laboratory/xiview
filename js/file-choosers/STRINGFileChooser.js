@@ -1,5 +1,4 @@
 import * as _ from "underscore";
-import * as $ from "jquery";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -45,7 +44,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             .attr("title", "Select an organism to search STRING scores on")
             .append("select").attr("class", "selectTaxonID withSideMargins")
             .on("change", function () {
-                const optionSelected = $("option:selected", this);
+                // const optionSelected = $("option:selected", this);
                 const valueSelected = this.value;
                 d3.select(self.el).select(".inputTaxonID").property("value", valueSelected);
                 self.enteringTaxonID({keyCode: 13});

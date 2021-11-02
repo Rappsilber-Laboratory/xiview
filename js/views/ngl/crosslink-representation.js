@@ -90,7 +90,7 @@ export class CrosslinkRepresentation {
 
         const comp = this.structureComp;
         const resSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getResidues());
-        const halfLinkResSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getHalfLinkResidues());
+        // const halfLinkResSele = this.nglModelWrapper.getSelectionFromResidueList(this.nglModelWrapper.getHalfLinkResidues());
 
         this.replaceChainRepresentation(this.options.chainRep);
 
@@ -504,7 +504,7 @@ export class CrosslinkRepresentation {
     }
 
     // Shortcut functions for setting representations for currently filtered and selected residues
-    setDisplayedResidues(residues, halfLinkResidues) {
+    setDisplayedResidues(residues /*, halfLinkResidues*/) {
         const a = performance.now();
         this.setResidues(residues, this.resRepr);
         // this.setResidues(halfLinkResidues, this.halfLinkResRepr);
@@ -518,11 +518,11 @@ export class CrosslinkRepresentation {
         return this;
     }
 
-    setSelectedRes(halfLinks) {
+    /*   setSelectedRes(halfLinks) {
         // const filteredHalfLinks = this.filterByLinkState(halfLinks, "selection")
         // return this.setSelectedResidues(this.nglModelWrapper.getHalfLinkResidues(filteredHalfLinks));
         return this;
-    }
+    } */
 
     // Populate NGL distance representations with crosslinks
 

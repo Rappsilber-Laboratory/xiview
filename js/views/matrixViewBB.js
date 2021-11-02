@@ -131,10 +131,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             .text("Show Protein Pairing ►")
             .append("select")
             .attr("id", mainDivSel.attr("id") + "chainSelect")
-            .on("change", function (d) {
-                const value = this.value;
+            .on("change", function () {
+                // const value = this.value;
                 const selectedDatum = d3.select(this).selectAll("option")
-                    .filter(function (d) {
+                    .filter(function () {
                         return d3.select(this).property("selected");
                     })
                     .datum();
@@ -199,7 +199,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             //.clamp ([false, false])
             .on("brush", function () {
             })
-            .on("brushend", function (val) {
+            .on("brushend", function () {
                 self.selectNeighbourhood(self.brush.extent());
             });
 
@@ -262,7 +262,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         // rerender crosslinks if selection/highlight changed, filteringDone or colourmodel changed
         this.listenTo(this.model, "change:selection filteringDone", this.renderCrossLinks);
         this.listenTo(this.model, "currentColourModelChanged", function (colourModel, domain) {
-            if (colourModel.get("id") !== this.colourScaleModel.get("id")) {    // test if model is distances, if so rendering is already guaranteed
+            if (colourModel.get("id") !== this.colourScaleModel.get("id")) {    // todo - test if model is distances, if so rendering is already guaranteed
                 this.renderCrossLinks();
             }
         });
@@ -353,7 +353,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         const mainDivSel = d3.select(this.el);
         const selected = mainDivSel.select("#" + mainDivSel.attr("id") + "chainSelect")
             .selectAll("option")
-            .filter(function (d) {
+            .filter(function () {
                 return d3.select(this).property("selected");
             });
         return (selected.size() === 0 && onlyIfNoneSelected) ? pairing : selected.datum().value;
@@ -720,7 +720,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 const seqLengthB = seqLengths.lengthB - 1;
 
                 // let times = window.times || [];
-                const start = performance.now();
+                // const start = performance.now();
 
                 // function to draw one matrix according to a pairing of two chains (called in loop later)
                 const drawDistanceMatrix = function (imgDataArr, minArray, matrixValue, alignInfo1, alignInfo2) {
@@ -773,7 +773,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                     //console.log (atoms1.length * atoms2.length, "coordinates drawn to canvas in ", p, " ms.");
                 };
 
-                const middle = performance.now();
+                // const middle = performance.now();
 
                 const canvasData = ctx.getImageData(0, 0, this.canvas.attr("width"), this.canvas.attr("height"));
                 const cd = new Uint32Array(canvasData.data.buffer); // canvasData.data         // 32-bit view of buffer
@@ -791,7 +791,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
                 ctx.putImageData(canvasData, 0, 0);
 
-                const end = performance.now();
+                // const end = performance.now();
                 // window.times.push(Math.round(end - middle));
                 //console.log ("window.times", window.times);
 
@@ -832,7 +832,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 }
                 //console.log ("os", overallScale);
                 const xLinkWidth = linkWidth * xStep;
-                const yLinkWidth = linkWidth * yStep;
+                // const yLinkWidth = linkWidth * yStep;
 
                 const proteinIDs = this.getCurrentProteinIDs();
 
@@ -959,7 +959,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         const widthRatio = sizeData.width / sizeData.lengthA;
         const heightRatio = sizeData.height / sizeData.lengthB;
         const minRatio = Math.min(widthRatio, heightRatio);
-        const diffRatio = widthRatio / heightRatio;
+        // const diffRatio = widthRatio / heightRatio;
 
         const viewPort = d3.select(this.el).select(".viewport");
 

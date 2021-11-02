@@ -21,6 +21,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
         return _.extend({}, parentEvents, {});
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         SearchSummaryViewBB.__super__.initialize.apply(this, arguments);
 

@@ -98,6 +98,7 @@ export class MetaDataHexValuesColourModel extends ColourModel {
 }
 
 export class MetaDataColourModel extends ColourModel {
+    // eslint-disable-next-line no-unused-vars
     initialize(properties, options) {
         const domain = this.get("colScale").domain();
         this.set("labels", this.get("colScale").copy().range(domain)); //

@@ -52,6 +52,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         ScatterplotViewBB.__super__.initialize.apply(this, arguments);
 
@@ -316,6 +317,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.axisChosen().render(); // initial render with defaults
     },
 
+    // eslint-disable-next-line no-unused-vars
     takeImage: function (event, thisSVG) {
         return this.downloadSVGWithCanvas();
     },
@@ -821,7 +823,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 });
             };
 
-            const p = performance.now();
+            // const p = performance.now();
 
             const contexts = [
                 {d3canvas: this.filteredCanvas, clear: !highlightsOnly},

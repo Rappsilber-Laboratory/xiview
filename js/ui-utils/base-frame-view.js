@@ -208,7 +208,7 @@ export const BaseFrameView = Backbone.View.extend({
             self.removeKey();
         });
 
-        d3canvases.each(function (d) {
+        d3canvases.each(function () {
             const d3canvas = d3.select(this);
             // Add image to existing clip in svg, (as first-child so sibling group holding links appears on top of it)
             const img = detachedSVGD3
@@ -380,7 +380,7 @@ export const BaseFrameView = Backbone.View.extend({
         titleElem.text(titleText);
 
         const self = this;
-        titleElem.on("mouseenter", function (d) {
+        titleElem.on("mouseenter", function () {
             self.model.get("tooltipModel")
                 .set("header", self.identifier + ": " + totalStr + itemStr)
                 .set("contents", linkCountStr)

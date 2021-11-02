@@ -49,7 +49,7 @@ export const sectionTable = function (domid, data, idPrefix, columnHeaders, head
     const tables = dataJoin.selectAll("table");
 
     const arrayExpandFunc = function (d, entries) {
-        const expandKeys = self.options.expandTheseKeys;
+        // const expandKeys = self.options.expandTheseKeys;
         return entries.map(function (entry) {
             return entry;
         });

@@ -26,6 +26,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         canTakeImage: true,
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (options) {
         SpectrumViewWrapper.__super__.initialize.apply(this, arguments);
 

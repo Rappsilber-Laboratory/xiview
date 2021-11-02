@@ -50,6 +50,7 @@ export class AnnotationTypeCollection extends Backbone.Collection {
             .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"]);
     }
 
+    // eslint-disable-next-line no-unused-vars
     initialize(models, options) {
         this.listenTo(window.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {

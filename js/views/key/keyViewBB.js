@@ -36,6 +36,7 @@ export const KeyViewBB = BaseFrameView.extend({
         ],
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         KeyViewBB.__super__.initialize.apply(this, arguments);
 

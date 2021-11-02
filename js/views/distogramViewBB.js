@@ -51,6 +51,7 @@ export const DistogramBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
 
         this.identifier = "Histogram View";
@@ -742,7 +743,6 @@ export const DistogramBB = BaseFrameView.extend({
 
     getRelevantAttributeData: function (attrMetaData) {
         const linkFunc = attrMetaData.linkFunc;
-        const matchSelection = this.model.get("match_selection");
         const linkData = this.getFilteredLinksByDecoyStatus();
         const links = linkData.links;
         const matchFilters = linkData.matchFilters;

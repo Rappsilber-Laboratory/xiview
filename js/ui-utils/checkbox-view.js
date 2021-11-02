@@ -41,6 +41,7 @@ export const checkBoxView = Backbone.View.extend({
         }
     },
 
+    // eslint-disable-next-line no-unused-vars
     showState: function (args) {
         const boolVal = arguments.length > 1 ? arguments[1] : arguments[0];
         d3.select(this.el).select("input").property("checked", boolVal);

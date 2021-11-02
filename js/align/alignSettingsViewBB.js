@@ -3,8 +3,6 @@ import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
 
-// import {BaseFrameView} from "../ui-utils/base-frame-view";
-
 export const AlignSettingsViewBB = Backbone.View.extend({
     events: {
         "change input": "inputChanged",
@@ -13,6 +11,7 @@ export const AlignSettingsViewBB = Backbone.View.extend({
         "input input": "inputChanged",
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         const controls = d3.select(this.el);
         const inputArray = [{

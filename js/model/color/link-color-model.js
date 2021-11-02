@@ -215,6 +215,7 @@ export class HighestScoreColourModel extends ColourModel {
         super(attributes, options);
     }
 
+    // eslint-disable-next-line no-unused-vars
     initialize(properties, options) {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low Score", "Mid Score", "High Score"]));
