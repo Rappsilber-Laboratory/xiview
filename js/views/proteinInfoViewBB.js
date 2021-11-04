@@ -131,7 +131,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 }
             }
 
-            const addRow = function (key) {
+            function addRow (key) {
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
                 cell1.textContent = key;
@@ -147,9 +147,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 if (key.indexOf("seq") !== -1) {
                     cell2.classList.add("fixedSizeFont");
                 }
-            };
+            }
 
-            const addMetaRows = function (key) {
+            function addMetaRows (key) {
                 const metaObj = protein[key];
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
