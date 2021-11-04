@@ -798,7 +798,7 @@ init.viewsEssential = function (options) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match
-                const url = "../CLMS-model/php/spectrumMatches.php?sid=" +
+                const url = "../CLMS-model/php/spectrumMatches.php?upload=" +
                     this.model.get("clmsModel").get("sid") +
                     "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
                 const self = this;
