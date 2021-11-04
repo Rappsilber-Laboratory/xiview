@@ -701,17 +701,10 @@ init.viewsEssential = function (options) {
         model: filterModel,
         myOptions: {
             hide: {
-                //todo: reinstate sensible hiding of controls, need listeners on these attributes
-                //temp hack - dont hide anything, data may change when csv uploaded
-                /*
-                "selfLinks": singleTargetProtein,
-                "betweenLinks": singleTargetProtein,
                 "AUTO": !compModel.get("clmsModel").get("autoValidatedPresent"),
                 "ambig": !compModel.get("clmsModel").get("ambiguousPresent"),
                 "unval": !compModel.get("clmsModel").get("unvalidatedPresent"),
-                "linear": !compModel.get("clmsModel").get("linearsPresent"),
-                "protNames": singleTargetProtein,
-                */
+                "linears": !compModel.get("clmsModel").get("linearsPresent"),
             }
         }
     });
@@ -721,8 +714,13 @@ init.viewsEssential = function (options) {
         model: compModel,
     });
 
-    if (compModel.get("clmsModel").get("unvalidatedPresent") !== true) {
+    const unvalidatedPresent = compModel.get("clmsModel").get("unvalidatedPresent");
+    if (unvalidatedPresent !== true) {
         d3.select("#filterModeDiv").style("display", "none");
+    }
+    const linearsPresent = compModel.get("clmsModel").get("linearsPresent");
+    if (linearsPresent !== true) {
+        d3.select("#product").style("display", "none");
     }
 
 
@@ -862,7 +860,7 @@ init.viewsEssential = function (options) {
             const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
             loadSpectrum(match, randId, this.model);
         } else {
-            // xiSPEC.clear(); //todo - maybe it is better to clear it, but xiSPEC currently has no clear function
+            window.xiSPEC.setData({});
         }
     });
 

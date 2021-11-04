@@ -1,6 +1,5 @@
 <?php
 session_start();
-$cacheBuster = '?v='.microtime(true);
 if (!$_SESSION['session_name']) {
     header("location:login.html");
     exit;
@@ -29,7 +28,7 @@ header('Content-type: text/html; charset=utf-8');
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-        <link rel="stylesheet" href="./css/validationPage.css<?php echo $cacheBuster ?>">
+        <link rel="stylesheet" href="./css/validationPage.css">
         <script type="text/javascript" src="../dist/xiview.js"></script>
     </head>
 

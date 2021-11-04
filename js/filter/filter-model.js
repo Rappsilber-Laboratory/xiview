@@ -34,13 +34,13 @@ export class FilterModel extends Backbone.Model {
         this.types = {
             manualMode: "boolean",
             fdrMode: "boolean",
-            //subset
             linears: "boolean",
             monolinks: "boolean",
             crosslinks: "boolean",
             betweenLinks: "boolean",
             selfLinks: "boolean",
             homomultimericLinks: "boolean",
+            notHomomult: "boolean",
             ambig: "boolean",
             aaApart: "number",
             pepLength: "number",
@@ -52,6 +52,7 @@ export class FilterModel extends Backbone.Model {
             unval: "boolean",
             AUTO: "boolean",
             decoys: "boolean",
+            targets: "boolean",
             //distance
             distanceUndef: "boolean",
             //fdr
@@ -82,6 +83,7 @@ export class FilterModel extends Backbone.Model {
             betweenLinks: true,
             selfLinks: true,
             homomultimericLinks: true,
+            notHomomult: true,
             ambig: true,
             aaApart: 0,
             pepLength: 1,
@@ -93,6 +95,7 @@ export class FilterModel extends Backbone.Model {
             unval: false,
             AUTO: false, // if u change this to true one of the unit tests will fail
             decoys: true,
+            targets: true,
             //distance
             distanceUndef: true,
             //fdr
@@ -137,15 +140,15 @@ export class FilterModel extends Backbone.Model {
         this.resetValues = this.toJSON(); // Store copy of original values if needed to restore later
     }
 
-    resetFilter() {
-        this
-            .clear({
-                silent: true
-            })
-            .set(this.resetValues);
-
-        return this;
-    }
+    // resetFilter() {
+    //     this
+    //         .clear({
+    //             silent: true
+    //         })
+    //         .set(this.resetValues);
+    //
+    //     return this;
+    // }
 
     getMinExtent(attrID) {
         const extents = this.extents[attrID];
@@ -207,18 +210,27 @@ export class FilterModel extends Backbone.Model {
             return false;
         } else if (linear && !this.get("linears")) {
             return false;
+        } if (!linear && !this.get("crosslinks")){
+            return false;
         }
         //self-links? - if self links's not selected and match is self link return false
         // possible an ambiguous self link will still get displayed
-        else if (!linear && !mono && !((match.couldBelongToSelfLink && !match.confirmedHomomultimer && this.get("selfLinks")) ||
-            (match.couldBelongToBetweenLink && this.get("betweenLinks")) ||
-            (match.confirmedHomomultimer && this.get("homomultimericLinks")))) {
+        else if (!linear && !mono && !((match.couldBelongToSelfLink && this.get("selfLinks")) ||
+            (match.couldBelongToBetweenLink && this.get("betweenLinks")))) {
             return false;
         }
 
         //ambigs? - if ambig's not selected and match is ambig return false
         if (ambig && !this.get("ambig")) {
             return false;
+        }
+
+        if (match.couldBelongToSelfLink) {
+            if (match.confirmedHomomultimer && !this.get("homomultimericLinks")) {
+                return false;
+            } else if (!match.confirmedHomomultimer && !this.get("notHomomult")) {
+                return false;
+            }
         }
 
         const aaApart = +this.get("aaApart");
@@ -256,7 +268,11 @@ export class FilterModel extends Backbone.Model {
     }
 
     decoyFilter(match) {
-        return !match.isDecoy() || this.get("decoys");
+        if (match.isDecoy()) {
+            return this.get("decoys");
+        } else {
+            return this.get("targets");
+        }
     }
 
     distanceFilter(crosslink) {
