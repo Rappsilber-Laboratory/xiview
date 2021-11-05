@@ -8,9 +8,9 @@
 	display: none;
 }
 
-#filterModeDiv {
-	display: none !important;
-}
+/*#filterModeDiv {*/
+/*	display: none !important;*/
+/*}*/
 
 .movePeakLabels {
 	display: none !important;
@@ -73,6 +73,12 @@ button {
 }
 
 
-div.validationControls{
-    display: block;
+/*div.validationControls{*/
+/*    display: block;*/
+/*}*/
+#targetDecoy {
+    display: flex!important;
+}
+#filterModeDiv{
+    display:none;
 }

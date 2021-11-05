@@ -64,6 +64,8 @@ export function main() {
             }, "Warning <p class='errorReason'>" + json.warn + "</p>");
         }
 
+        window.loggedIn = json.loggedIn;
+
         init.models(json);
         const searches = window.compositeModelInst.get("clmsModel").get("searches");
         document.title = Array.from(searches.keys()).join();

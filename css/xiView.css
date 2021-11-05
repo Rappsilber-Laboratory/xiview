@@ -1,18 +1,6 @@
 body {
     overflow: hidden;
 }
-#filterModeDiv{
-    display: none;
-}
-#fdrPanel{
-    display: none;
-}
-#navNumberFilters{
-/*    display: none; */
-}
-.validationControls {
-    display: none;
-}
 
 #toggles_monolinks{
     display:none;

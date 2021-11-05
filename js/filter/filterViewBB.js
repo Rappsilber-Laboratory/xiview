@@ -3,8 +3,6 @@ import Backbone from "backbone";
 import * as _ from "underscore";
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import d3 from "d3";
-// import {utils} from './utils';
-
 
 export const FilterViewBB = Backbone.View.extend({
     tagName: "span",
@@ -16,43 +14,40 @@ export const FilterViewBB = Backbone.View.extend({
         "mouseup input.filterTypeNumber": "processNumberFilter",
         "click input.filterTypeToggle": "processBooleanFilter",
         "click input.groupToggleFilter": "processGroupToggleFilter",
-        // "dblclick button.filterReset": function() {
-        //     this.model.resetFilter();
-        // },
     },
 
     initialize: function (viewOptions) {
         const defaultOptions = {
             config: [
                 {
-                    label: "Manual",
+                    label: "Stored validation",
                     id: "manualMode",
-                    tooltip: "Filter using crosslink metadata",
+                    tooltip: "Filter using stored metadata",
                 },
                 {
-                    label: "FDR",
+                    label: "In-browser FDR",
                     id: "fdrMode",
-                    tooltip: "Filter using a False Discovery Rate cutoff",
+                    tooltip: "Filter using False Discovery Rate cutoff calculated in browser.",
                 },
                 {
                     label: "Linear",
                     id: "linears",
-                    tooltip: "Show linear peptides",
+                    tooltip: "Show matches to linear (uncrosslinked) peptides",
                 },
                 {
                     label: "Monolinks",
                     id: "monolinks",
-                    tooltip: "Show monolinks",
+                    tooltip: "Show matches to linker modified peptides (monolinks)",
                 },
                 {
-                    label: "Crosslinks",
+                    label: "Crosslink",
                     id: "crosslinks",
-                    tooltip: "Show crosslinks",
+                    tooltip: "Show matches to crosslinked peptides",
                 },
                 {
-                    label: "Ambig.",
+                    label: "Ambig. Position",
                     id: "ambig",
-                    tooltip: "Show ambiguous crosslinks",
+                    tooltip: "Show matches to peptides with ambiguous position",
                 },
                 {
                     label: "Heteromeric",
@@ -62,23 +57,28 @@ export const FilterViewBB = Backbone.View.extend({
                 {
                     label: "Self",
                     id: "selfLinks",
-                    tooltip: "Show crosslinks between the same protein",
+                    tooltip: "Show crosslinks with both ends in the same type of protein",
                 },
                 {
-                    label: "Homomultimeric",
+                    label: "overlap",
                     id: "homomultimericLinks",
-                    tooltip: "Show crosslinks with overlapping linked peptides",
+                    tooltip: "Show matches with overlapping linked peptides",
+                },
+                {
+                    label: "Don't Overlap",
+                    id: "notHomomult",
+                    tooltip: "Show matches for self links without overlapping peptides",
                 },
                 {
                     label: "AA apart",
                     id: "aaApart",
-                    tooltip: "Only show crosslinks separated by at least N amino acids e.g. 10",
+                    tooltip: "Only show self links separated by at least N amino acids e.g. 10",
                     inequality: "&ge;",
                 },
                 {
                     label: "Pep. length",
                     id: "pepLength",
-                    tooltip: "Only show crosslinks where both linked peptides are at least N amino acids long e.g. 4",
+                    tooltip: "Only show matches where both linked peptides are at least N amino acids long e.g. 4",
                     inequality: "&ge;",
                 },
                 {
@@ -90,25 +90,25 @@ export const FilterViewBB = Backbone.View.extend({
                     id: "fail"
                 },
                 {
-                    label: "Auto",
-                    id: "AUTO",
-                    tooltip: "Show autovalidated crosslinks"
-                },
-                {
                     label: "Unval.",
                     id: "unval",
-                    tooltip: "Show unvalidated crosslinks"
+                    tooltip: "Show unvalidated matches"
                 },
                 {
                     label: "Decoy",
                     id: "decoys",
-                    tooltip: "Show passing decoy crosslinks"
+                    tooltip: "Show decoy matches"
+                },
+                {
+                    label: "Target",
+                    id: "targets",
+                    tooltip: "Show target matches"
                 },
                 {
                     label: "Pep Seq",
                     id: "pepSeq",
                     chars: 7,
-                    tooltip: "Filter to crosslinks with matches whose linked peptides include this AA sequence at either end e.g. FAKR, or define both ends e.g. FAKR-KKE",
+                    tooltip: "Filter to matches whose linked peptides include this AA sequence at either end e.g. FAKR, or define both ends e.g. FAKR-KKE",
                 },
                 {
                     label: "Name / Acc.",
@@ -131,13 +131,13 @@ export const FilterViewBB = Backbone.View.extend({
                     label: "Run",
                     id: "runName",
                     chars: 5,
-                    tooltip: "Filter to crosslinks with matches whose run name includes this text e.g. 07_Lumos"
+                    tooltip: "Filter to matches whose run name includes this text e.g. 07_Lumos"
                 },
                 {
                     label: "Scan",
                     id: "scanNumber",
                     chars: 5,
-                    tooltip: "Filter to crosslinks with matches with this scan number e.g. 44565",
+                    tooltip: "Filter to matches with this scan number e.g. 44565",
                 },
                 {
                     label: "Multi",
@@ -221,18 +221,6 @@ export const FilterViewBB = Backbone.View.extend({
             return nestedDiv;
         }
 
-
-        // function initResetGroup() {
-        //     const resetDivSel = makeFilterControlDiv({class: "verticalFlexContainer", expandable: false});
-        //     resetDivSel.append("p").attr("class", "smallHeading").text("Filter Bar");
-        //     resetDivSel.append("button")
-        //         .attr("class", "filterReset btn btn-1a btn-tight")
-        //         .attr("title", "Double-click to reset filter to originally set values")
-        //         .text("Reset")
-        //     ;
-        // }
-
-
         function addFilterGroup(config, filterIDs) {
             const divSel = makeFilterControlDiv(config);
             const filters = filterIDs.map(function (id) {
@@ -257,7 +245,6 @@ export const FilterViewBB = Backbone.View.extend({
                     }
                 });
         }
-
 
         function initMinigramFilterGroup(config) {
             if (config && config.attr) {
@@ -362,10 +349,29 @@ export const FilterViewBB = Backbone.View.extend({
         const groupIDs = _.pluck(defaultOptions.searchGroupToggles, "id");
         groupIDs.push("multipleGroup");
 
-        // initResetGroup.call(this);
-        // addFilterGroup.call (this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
+        addFilterGroup.call(this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
+
         addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
-        addFilterGroup.call(this, {groupName: "Crosslinks"}, ["decoys", "linears", "monolinks", "crosslinks", "ambig", "betweenLinks", "selfLinks", "homomultimericLinks", "aaApart", "pepLength"]);
+
+        addFilterGroup.call(this, {
+            id: "targetDecoy",
+            groupName: "TD"
+        }, ["decoys", "targets"]);
+
+        addFilterGroup.call(this, {
+            id: "peptide",
+            groupName: "Peptide"
+        }, ["pepSeq", "pepLength", "ambig"]);
+
+        addFilterGroup.call(this, {
+            id: "product",
+            groupName: "Product"
+        }, ["linears", "monolinks", "crosslinks"]);
+
+        addFilterGroup.call(this, {groupName: "Crosslink", id:"crosslinkGroup"}, ["betweenLinks", "selfLinks"]);
+
+        addFilterGroup.call(this, {id:"self", groupName: "Self Links"}, ["aaApart", "notHomomult", "homomultimericLinks"]);
+
         initMinigramFilterGroup.call(this, {
             attr: "distanceCutoff",
             extentProperty: "distanceExtent",
@@ -375,10 +381,7 @@ export const FilterViewBB = Backbone.View.extend({
             groupName: "Distances",
             tooltipIntro: "Filter out crosslinks with distance"
         });
-        // addFilterGroup.call(this, {
-        //     id: "validationStatus",
-        //     groupName: "Validation"
-        // }, ["A", "B", "C", "AUTO", "unval", "decoys"]);
+
         initMinigramFilterGroup.call(this, {
             attr: "matchScoreCutoff",
             extentProperty: "scoreExtent",
@@ -387,14 +390,17 @@ export const FilterViewBB = Backbone.View.extend({
             groupName: "Scores",
             tooltipIntro: "Filter out matches with scores"
         });
+
         initFDRPlaceholder.call(this);
+
         addFilterGroup.call(this, {
             id: "navFilters",
             groupName: "Protein"
-        }, ["pepSeq", "protNames", "protDesc", "protPDB"]);
-        addFilterGroup.call(this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["runName", "scanNumber"]);
-        addFilterGroup.call(this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
+        }, ["protNames", "protDesc", "protPDB"]);
+
         addFilterGroup.call(this, {id: "navNumberFilters", groupName: "PPI"}, ["urpPpi"]);
+        addFilterGroup.call(this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
+        addFilterGroup.call(this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["runName", "scanNumber"]);
         addScrollRightButton.call(this);
 
 
@@ -523,11 +529,17 @@ export const FilterViewBB = Backbone.View.extend({
     },
 
     processBooleanFilter: function (evt) {
+        // alert("hello?");
         const target = evt.target;
         const data = this.datumFromTarget(target);
         const id = data.id;
+        if (id == "crosslinks") {
+            d3.select("#crosslinkGroup").style("display", target.checked ? "flex" : "none");
+            const selfLinksShown = this.model.get("selfLinks");
+            d3.select("#self").style("display", target.checked && selfLinksShown? "flex" : "none");
+        }
         if (id == "selfLinks") {
-            d3.select("#aaApart").attr("disabled", target.checked ? null : "disabled");
+            d3.select("#self").style("display", target.checked ? "flex" : "none");
         }
         this.model.set(id, target.checked);
     },
@@ -614,7 +626,7 @@ export const FilterViewBB = Backbone.View.extend({
     }
 });
 
-
+//todo - move to separate file?
 export const FDRViewBB = Backbone.View.extend({
     initialize: function () {
 

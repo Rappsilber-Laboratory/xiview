@@ -78,12 +78,6 @@ export const xiNetControlsViewBB = Backbone.View.extend({
 
         const mainDivSel = d3.select(this.el);
 
-        //todo
-        // if (!CLMSUI.loggedIn){
-        //     d3.select(".saveLayoutName").style("display", "none");
-        //     d3.select(".saveLayoutButton").style("display", "none");
-        // }
-
         const buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
             "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
             "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
@@ -96,6 +90,11 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         mainDivSel.html(
             buttonHtml
         );
+
+        if (window.loggedIn == false){
+            const saveButtonSel = d3.select(".saveLayoutButton");
+            saveButtonSel.style("display", "none");
+        }
 
         if (this.model.get("clmsModel").get("xiNETLayout")) {
             d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
