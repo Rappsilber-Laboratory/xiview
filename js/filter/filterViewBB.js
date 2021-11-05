@@ -45,7 +45,7 @@ export const FilterViewBB = Backbone.View.extend({
                     tooltip: "Show matches to crosslinked peptides",
                 },
                 {
-                    label: "Ambig. Position",
+                    label: "Redundant",
                     id: "ambig",
                     tooltip: "Show matches to peptides with ambiguous position",
                 },
@@ -60,7 +60,7 @@ export const FilterViewBB = Backbone.View.extend({
                     tooltip: "Show crosslinks with both ends in the same type of protein",
                 },
                 {
-                    label: "overlap",
+                    label: "Overlap",
                     id: "homomultimericLinks",
                     tooltip: "Show matches with overlapping linked peptides",
                 },
@@ -76,7 +76,7 @@ export const FilterViewBB = Backbone.View.extend({
                     inequality: "&ge;",
                 },
                 {
-                    label: "Pep. length",
+                    label: "Length",
                     id: "pepLength",
                     tooltip: "Only show matches where both linked peptides are at least N amino acids long e.g. 4",
                     inequality: "&ge;",
@@ -105,7 +105,7 @@ export const FilterViewBB = Backbone.View.extend({
                     tooltip: "Show target matches"
                 },
                 {
-                    label: "Pep Seq",
+                    label: "Sequence",
                     id: "pepSeq",
                     chars: 7,
                     tooltip: "Filter to matches whose linked peptides include this AA sequence at either end e.g. FAKR, or define both ends e.g. FAKR-KKE",
@@ -364,6 +364,11 @@ export const FilterViewBB = Backbone.View.extend({
         }, ["pepSeq", "pepLength", "ambig"]);
 
         addFilterGroup.call(this, {
+            id: "navFilters",
+            groupName: "Protein"
+        }, ["protNames", "protDesc", "protPDB"]);
+
+        addFilterGroup.call(this, {
             id: "product",
             groupName: "Product"
         }, ["linears", "monolinks", "crosslinks"]);
@@ -392,11 +397,6 @@ export const FilterViewBB = Backbone.View.extend({
         });
 
         initFDRPlaceholder.call(this);
-
-        addFilterGroup.call(this, {
-            id: "navFilters",
-            groupName: "Protein"
-        }, ["protNames", "protDesc", "protPDB"]);
 
         addFilterGroup.call(this, {id: "navNumberFilters", groupName: "PPI"}, ["urpPpi"]);
         addFilterGroup.call(this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
