@@ -860,7 +860,7 @@ init.viewsEssential = function (options) {
             const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
             loadSpectrum(match, randId, this.model);
         } else {
-            window.xiSPEC.setData({});
+            //window.xiSPEC.setData({});
         }
     });
 
