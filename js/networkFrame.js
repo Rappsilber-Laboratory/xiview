@@ -809,7 +809,7 @@ init.viewsEssential = function (options) {
                         const returnedMatchID = json.matchid;
 
                         //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
-                        if (returnedMatchID === self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
+                        if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
                             const altModel = new SearchResultsModel();
                             altModel.parseJSON(json);
