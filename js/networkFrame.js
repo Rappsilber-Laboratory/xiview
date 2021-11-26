@@ -130,7 +130,7 @@ init.postDataLoaded = function () {
     const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
     window.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
-    window.vent.trigger("buildAsyncViews");
+    window.vent.trigger("buildAsyncViews"); // not sure how necessary event for this is
     //init.viewsThatNeedAsyncData();
 
     window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
@@ -284,13 +284,13 @@ init.modelsEssential = function (options) {
     }
     let filterSettings = {
         decoys: clmsModelInst.get("decoysPresent"),
-        betweenLinks: true, //clmsModelInst.targetProteinCount > 1,
+        selfLinks: clmsModelInst.targetProteinCount < 50,
         A: clmsModelInst.get("manualValidatedPresent"),
         B: clmsModelInst.get("manualValidatedPresent"),
         C: clmsModelInst.get("manualValidatedPresent"),
         Q: clmsModelInst.get("manualValidatedPresent"),
         // AUTO: !clmsModelInst.get("manualValidatedPresent"),
-        ambig: clmsModelInst.get("ambiguousPresent"),
+        ambig: clmsModelInst.get("ambiguousPresent") &&  clmsModelInst.targetProteinCount < 50,
         linears: clmsModelInst.get("linearsPresent"),
         //matchScoreCutoff: [undefined, undefined],
         matchScoreCutoff: scoreExtentInstance.slice(),
@@ -805,10 +805,7 @@ init.viewsEssential = function (options) {
                         console.log("error", error, "for", url, arguments);
                     } else {
                         // this works if first item in array has the same id, might in future send matchid to php to return for reliability
-                        //var thisMatchID = json.rawMatches && json.rawMatches[0] ? json.rawMatches[0].id : -1;
                         const returnedMatchID = json.matchid;
-
-                        //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
                         if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
                             const altModel = new SearchResultsModel();
@@ -1163,7 +1160,7 @@ init.viewsThatNeedAsyncData = function () {
     });
 
     //make sure things that should be hidden are hidden
-    compModel.trigger("hiddenChanged");
+    compModel.trigger("hiddenChanged"); // think this isn't needed? todo - check
 
     // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the KeyView is too late to be picked up
     // so we run it again here, doesn't do any harm
