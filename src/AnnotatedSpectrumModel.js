@@ -464,7 +464,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         $.ajax({
             type: "GET",
             datatype: "json",
-            async: false,
+            // async: false,
             url: modifications_url,
             success: function (data) {
                 for (let i = 0; i < data.modifications.length; i++) {
