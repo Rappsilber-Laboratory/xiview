@@ -103,7 +103,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             },
             {
                 class: "swissmodelWindowButton",
-                text: "SWISSMODEL lookup (SELECT ONE PROTEIN) ",
+                text: "SWISS-MODEL lookup (SELECT ONE PROTEIN) ",
                 tooltip: "Queries SWISS-MODEL with Uniprot accession number - select exactly one protein"
             },
             // {
