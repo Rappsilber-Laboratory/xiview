@@ -16,6 +16,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         }
         return _.extend({}, parentEvents, {
             "click .pdbWindowButton": "launchExternalPDBWindow",
+            "click .swissmodelWindowButton": "launchExternalSwissmodelWindow",
             // "click .ebiPdbWindowButton": "launchExternalEBIPDBWindow",
             "change .selectPdbButton": "selectPDBFile",
             "keyup .inputPDBCode": "enteringPDBCode",
@@ -99,6 +100,11 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 class: "pdbWindowButton",
                 text: "Show PDBs Matching UniProt Accessions @ RCSB.org",
                 tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"
+            },
+            {
+                class: "swissmodelWindowButton",
+                text: "SWISS-MODEL lookup (SELECT ONE PROTEIN) ",
+                tooltip: "Queries SWISS-MODEL with Uniprot accession number - select exactly one protein"
             },
             // {
             //     class: "ebiPdbWindowButton",
@@ -287,6 +293,16 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             newtab.location = "https://www.rcsb.org/search?request=" + encodeURI(JSON.stringify(query));
         } else {
             newtab.document.body.innerHTML = "No legal Accession IDs are in the current dataset. These are required to query the PDB service.";
+        }
+    },
+
+    launchExternalSwissmodelWindow: function () {
+        const newtab = window.open("", "_blank");
+        const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
+        if (accessionIDs.length === 1) {
+            newtab.location = "https://swissmodel.expasy.org/repository/uniprot/" + accessionIDs[0];
+        } else {
+            newtab.document.body.innerHTML = "Select exactly one protein with legal Accession ID in the current dataset. SWISS-MODEL service can only query single protein.";
         }
     },
 
