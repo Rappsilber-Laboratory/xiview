@@ -553,13 +553,16 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel) {
         const groupMap = new Map();
         for (let participant of proteins.values()) {
             if (participant.meta && participant.meta.complex) {
-                let group = participant.meta.complex;
-                if (groupMap.get(group)) {
-                    groupMap.get(group).add(participant.id);
-                } else {
-                    const groupParticipants = new Set();
-                    groupParticipants.add(participant.id);
-                    groupMap.set(group, groupParticipants);
+                const groupMeta = participant.meta.complex;
+                const groups = groupMeta.split(',');
+                for (let group of groups) {
+                    if (groupMap.get(group)) {
+                        groupMap.get(group).add(participant.id);
+                    } else {
+                        const groupParticipants = new Set();
+                        groupParticipants.add(participant.id);
+                        groupMap.set(group, groupParticipants);
+                    }
                 }
             }
         }
