@@ -140,15 +140,16 @@ export class FilterModel extends Backbone.Model {
         this.resetValues = this.toJSON(); // Store copy of original values if needed to restore later
     }
 
-    // resetFilter() {
-    //     this
-    //         .clear({
-    //             silent: true
-    //         })
-    //         .set(this.resetValues);
-    //
-    //     return this;
-    // }
+    // only used by tests
+    resetFilter() {
+        this
+            .clear({
+                silent: true
+            })
+            .set(this.resetValues);
+
+        return this;
+    }
 
     getMinExtent(attrID) {
         const extents = this.extents[attrID];
