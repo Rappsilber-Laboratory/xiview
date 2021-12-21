@@ -276,7 +276,7 @@ export class ProtAlignCollection extends Backbone.Collection {
             //console.log ("entry", entry);
             this.add([{
                 id: prot.id,
-                displayLabel: prot.name.replace("_", " "),
+                displayLabel: prot.name,//.replace("_", " "),
                 refID: "Search",
                 refSeq: prot.sequence,
             }]);
