@@ -18,7 +18,7 @@ import {testCallback} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
 import {repopulateNGL} from "./views/ngl/RepopulateNGL";
 
-export function main() {
+export function main(dataPath) {
 
     const spinnerOpts = {
         // lines: 13, // The number of lines to draw
@@ -111,7 +111,7 @@ export function main() {
         // var phpProps = _.pick (urlChunkMap, "upload", "sid", "auto",  "unval", "linears", "lowestScore", "highestScore", "decoys");
         // var newQueryString = d3.entries(phpProps).map(function (entry) { return entry.key+"="+entry.value; }).join("&");
         // console.log ("ucm", urlChunkMap, newQueryString);
-        const url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
+        const url = dataPath + window.location.search;
 
         d3.json(url, function (error, json) {
             spinner.stop(); // stop spinner on request returning
