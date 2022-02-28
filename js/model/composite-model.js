@@ -32,9 +32,9 @@ export class CompositeModel extends Backbone.Model {
             groups: new Map(),
         });
 
-        this.listenTo(this.get("clmsModel"), "change:matches", function () {
-            this.calcAndStoreTTCrossLinkCount();
-        });
+        // this.listenTo(this.get("clmsModel"), "change:matches", function () {
+        //     this.calcAndStoreTTCrossLinkCount();
+        // });
 
         // Clear fdr information from crosslinks when switching out of fdr mode
         this.listenTo(this.get("filterModel"), "change:fdrMode", function (filterModel) {

@@ -45,7 +45,7 @@ export const FilterViewBB = Backbone.View.extend({
                     tooltip: "Show matches to crosslinked peptides",
                 },
                 {
-                    label: "Redundant",
+                    label: "Ambig.",
                     id: "ambig",
                     tooltip: "Show matches to peptides with ambiguous position",
                 },
