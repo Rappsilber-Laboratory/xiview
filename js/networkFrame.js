@@ -284,13 +284,13 @@ init.modelsEssential = function (options) {
     }
     let filterSettings = {
         decoys: clmsModelInst.get("decoysPresent"),
-        selfLinks: clmsModelInst.targetProteinCount < 50,
+        // selfLinks: clmsModelInst.targetProteinCount < 50,
         A: clmsModelInst.get("manualValidatedPresent"),
         B: clmsModelInst.get("manualValidatedPresent"),
         C: clmsModelInst.get("manualValidatedPresent"),
         Q: clmsModelInst.get("manualValidatedPresent"),
         // AUTO: !clmsModelInst.get("manualValidatedPresent"),
-        ambig: clmsModelInst.get("ambiguousPresent") &&  clmsModelInst.targetProteinCount < 50,
+        // ambig: clmsModelInst.get("ambiguousPresent") &&  clmsModelInst.targetProteinCount < 50,
         linears: clmsModelInst.get("linearsPresent"),
         //matchScoreCutoff: [undefined, undefined],
         matchScoreCutoff: scoreExtentInstance.slice(),
