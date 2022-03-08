@@ -25,7 +25,7 @@ export class DefaultLinkColourModel extends ColourModel {
     }
 
     getColour(obj) {  // obj is generally a crosslink, but is non-specific at this point
-        if (obj.crosslinks) {
+        if (obj.isAggregateLink) {
             return "#202020";
         }
         const val = this.getValue(obj);
