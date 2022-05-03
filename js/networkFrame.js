@@ -93,7 +93,7 @@ init.postDataLoaded = function () {
         }),
         new AnnotationType({
             category: "AA",
-            type: "Cross-linkable-2",
+            type: "Crosslinkable-2",
             tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
             source: "Search",
             colour: "#a6cee3",
