@@ -2,7 +2,7 @@ import * as _ from "underscore";
 import * as $ from "jquery";
 import * as d3 from "d3";
 import {octree as d3octree} from "../vendor/d3-octree";
-import {commonRegexes} from "./utils";
+import {commonRegexes, xilog} from "./utils";
 
 //used by networkframe for setting up minigram
 export function flattenMatches(matchesArr) {
@@ -226,14 +226,16 @@ export function reinflateSequenceMap(matchMatrix, sequences, filteredSeqInfo) {
 
 //used by nglutils
 export function matrixPairings(matrix, sequenceObjs) {
+    xilog("MATRIX PAIRINGS", matrix, sequenceObjs);
     const entries = d3.entries(matrix);
+    xilog("D3 ENTRIES", entries);
     const pairings = [];
 
     for (let n = 0; n < sequenceObjs.length; n++) {
         const max = {
             key: undefined,
             seqObj: undefined,
-            bestScore: 2 //1e-25
+            bestScore: 1 //1e-25
         };
         const seqObj = sequenceObjs[n];
         entries.forEach(function (entry) {
@@ -256,6 +258,7 @@ export function matrixPairings(matrix, sequenceObjs) {
         }
     }
 
+    xilog("PAIRINGS", pairings);
     return pairings;
 }
 
