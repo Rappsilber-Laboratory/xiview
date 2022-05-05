@@ -1,3 +1,7 @@
+#validationStatus{
+    display: none;
+}
+
 #filterPlaceholder {
     display: inline-flex;
 	position: fixed;

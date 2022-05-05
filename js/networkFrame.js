@@ -263,7 +263,7 @@ init.models = function (options) {
 init.modelsEssential = function (options) {
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
-    const hasNoMatches = _.isEmpty(options.rawMatches);
+    const hasNoMatches = _.isEmpty(options.matches);
 
     displayError(function () {
         return hasMissing || hasIncorrect || hasNoMatches;

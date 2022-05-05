@@ -92,7 +92,7 @@ export class FilterModel extends Backbone.Model {
             B: true,
             C: true,
             Q: true,
-            unval: false,
+            unval: true,
             AUTO: false, // if u change this to true one of the unit tests will fail
             decoys: true,
             targets: true,
