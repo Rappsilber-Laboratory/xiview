@@ -837,7 +837,7 @@ init.viewsEssential = function (options) {
         targetDiv: "modular_xispec",
         baseDir: window.xiSpecBaseDir,
         xiAnnotatorBaseURL: window.xiAnnotRoot,
-        knownModificationsURL: window.xiAnnotRoot + "annotate/knownModifications",
+        knownModificationsURL: false, //window.xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: true,
         showQualityControl: "min",
         colorScheme: "PRGn"
