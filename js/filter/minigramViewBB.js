@@ -1,13 +1,13 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as c3 from "../../vendor/c3.js";
-import {declutterAxis, niceRound, niceValueAxis, xilog} from '../utils';
+import {declutterAxis, niceRound, niceValueAxis, xilog} from "../utils";
 import d3 from "d3";
 
 export const MinigramViewBB = Backbone.View.extend({
     events: {},
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         const defaultOptions = {
             maxX: 80,
             height: 60,
@@ -32,11 +32,11 @@ export const MinigramViewBB = Backbone.View.extend({
         this.chart = c3.generate({
             bindto: bid,
             data: {
-                x: 'x', // x is now declared as a column to account for possible negative values
+                x: "x", // x is now declared as a column to account for possible negative values
                 columns: [
                     [this.options.seriesName],
                 ],
-                type: 'bar',
+                type: "bar",
                 colors: this.options.colours || {
                     actual: "#555",
                     random: "#aaa"
@@ -87,7 +87,7 @@ export const MinigramViewBB = Backbone.View.extend({
             },
             subchart: {
                 show: true,
-                onbrush: function(domain) {
+                onbrush: function (domain) {
                     // eventually do snapping: http://bl.ocks.org/mbostock/6232620
 
                     // the below fires one change:domainStart event, one change:domainEnd event and one change event (if we want to process both changes together)
@@ -117,7 +117,7 @@ export const MinigramViewBB = Backbone.View.extend({
                     height: this.options.height - this.options.xAxisHeight // subchart doesnt seem to account for x axis height and sometimes we lose tops of bars
                 },
             },
-            onrendered: function() {
+            onrendered: function () {
                 // for some reason setting extent in the x axis configuration isn't working, so get it to run once and once only when the chart is rendered
                 if (self.runOnce) {
                     self.runOnce = false;
@@ -131,7 +131,7 @@ export const MinigramViewBB = Backbone.View.extend({
                         .attr("y", svg.attr("height") / 2)
                         .attr("x", svg.attr("width") - 7)
                         .text("?")
-                        .on("click", function() {
+                        .on("click", function () {
                             self.toggleLegend.call(self);
                         })
                         .append("title")
@@ -150,7 +150,7 @@ export const MinigramViewBB = Backbone.View.extend({
         const brush = d3.select(this.el).selectAll("svg .c3-brush");
         const flip = {e: 1, w: -1};
         brush.selectAll(".resize").append("path")
-            .attr("transform", function(d) {
+            .attr("transform", function (d) {
                 return "translate(0,0) scale(" + (flip[d]) + ",1)";
             })
             .attr("d", "M 1 0 V 20 L 10 10 Z");
@@ -162,7 +162,7 @@ export const MinigramViewBB = Backbone.View.extend({
         return this;
     },
 
-    render: function() {
+    render: function () {
         const self = this;
         const seriesData = this.model.data();
 
@@ -180,7 +180,7 @@ export const MinigramViewBB = Backbone.View.extend({
 			*/
 
         // add names to front of arrays as c3 demands (need to wait until after we calc max otherwise the string gets returned as max)
-        countArrays.forEach(function(countArray, i) {
+        countArrays.forEach(function (countArray, i) {
             countArray.unshift(self.options.seriesNames[i]);
         });
         thresholds.unshift("x");
@@ -198,32 +198,32 @@ export const MinigramViewBB = Backbone.View.extend({
             columns: countArrays
         });
 
-        this.makeBarsSitBetweenTicks (this.chart.internal, "subXAxis");
+        this.makeBarsSitBetweenTicks(this.chart.internal, "subXAxis");
         d3.select(this.el).select(".c3-brush").attr("clip-path", "");
-        
-        window.setTimeout (function () { 
+
+        window.setTimeout(function () {
             self.tidyXAxis();   // i think I'm having to wait for c3 to finish setting up before the size calculates properly
         }, 500);
 
         //xilog ("data", distArr, binnedData);
         return this;
     },
-    
+
     getAxisRange: function () {
         const extent = d3.extent(this.chart.internal.orgXDomain);
-        return Math.abs (extent[1] - extent[0]);
+        return Math.abs(extent[1] - extent[0]);
     },
-    
+
     // make x tick text values the rounder numbers, and remove any that overlap afterwards
     tidyXAxis: function () {
         const xaxis = d3.select(d3.select(this.el).selectAll(".c3-axis-x").filter(function (d, i) {
             return i === 1;
         }).node());
-        niceValueAxis (xaxis, this.getAxisRange());
-        declutterAxis (xaxis, true);
+        niceValueAxis(xaxis, this.getAxisRange());
+        declutterAxis(xaxis, true);
         return this;
     },
-    
+
     // Hack to move bars right by half a bar width so they sit between correct values rather than over the start of an interval
     makeBarsSitBetweenTicks: function (chartObj, whichXAxis) {  // can be xAxis or subXAxis
         const internal = chartObj || this.chart.internal;
@@ -233,13 +233,13 @@ export const MinigramViewBB = Backbone.View.extend({
     },
 
     getBinThresholds: function (series, accessor) {
-        accessor = accessor || function(d) {
+        accessor = accessor || function (d) {
             return d;
         }; // return object/variable/number as is as standard accessor
 
         const seriesCopy = series.slice();
         if (this.model.get("extent")) {
-            seriesCopy.push (this.model.get("extent"));
+            seriesCopy.push(this.model.get("extent"));
         }
         // get extents of all arrays, concatenate them, then get extent of that array
         const extent = d3.extent([].concat.apply([], seriesCopy.map(function (singleSeries) {
@@ -281,7 +281,7 @@ export const MinigramViewBB = Backbone.View.extend({
         };
     },
 
-    brushRecalc: function() {
+    brushRecalc: function () {
         //xilog ("changed brushExtent", this.model.get("domainStart"), this.model.get("domainEnd"));
         // Have to go via c3 chart internal properties as it isn't exposed via API
 
@@ -289,20 +289,19 @@ export const MinigramViewBB = Backbone.View.extend({
             this.chart.internal.brush
                 .clamp(true)
                 .extent([this.model.get("domainStart"), this.model.get("domainEnd")])
-                .update()
-            ;
+                .update();
         }
         return this;
     },
 
-    redrawBrush: function() {
+    redrawBrush: function () {
         if (!this.stopRebounds) {
             this.brushRecalc();
         }
         return this;
     },
 
-    relayout: function() {
+    relayout: function () {
         // fix c3 setting max-height to current height so it never gets bigger y-wise
         // See https://github.com/masayuki0812/c3/issues/1450
         //d3.select(this.el).select(".c3").style("max-height", this.options.height+"px");
@@ -313,7 +312,7 @@ export const MinigramViewBB = Backbone.View.extend({
         return this;
     },
 
-    toggleLegend: function() {
+    toggleLegend: function () {
         const legendBackground = d3.select(this.el).select(".c3-legend-background");
         if (legendBackground.node()) {
             const curState = legendBackground.style("visibility");
@@ -332,7 +331,7 @@ export const MinigramViewBB = Backbone.View.extend({
 
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy c3 view just to be sure)
-    remove: function() {
+    remove: function () {
         // this line destroys the c3 chart and it's events and points the this.chart reference to a dead end
         this.chart = this.chart.destroy();
 

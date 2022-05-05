@@ -1,14 +1,14 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
-import colorbrewer from 'colorbrewer';
+import colorbrewer from "colorbrewer";
 
-export class AnnotationType extends Backbone.Model{
+export class AnnotationType extends Backbone.Model {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
-    defaults(){
+    defaults() {
         return {
             id: undefined,
             category: undefined,
@@ -18,14 +18,13 @@ export class AnnotationType extends Backbone.Model{
         };
     }
 
-    initialize (options) {
+    initialize(options) {
         const defaultOptions = {};
         this.options = _.extend(defaultOptions, options);
         this
             .set("id", (options.category + "-" + options.type).toLocaleLowerCase())
             .set("category", options.category)
-            .set("type", options.type)
-        ;
+            .set("type", options.type);
     }
 
 }
@@ -48,12 +47,12 @@ export class AnnotationTypeCollection extends Backbone.Collection {
 
         this.baseScale = d3.scale.ordinal()
             .range(colorbrewer.Set3[11])
-            .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"])
-        ;
+            .domain(["aa", "alignment", "molecule processing", "regions", "sites", "amino acid modifications", "natural variations", "experimental info", "secondary structure", "undefined"]);
     }
 
-    initialize (models, options) {
-        this.listenTo(vent, "userAnnotationsUpdated", function (details) {
+    // eslint-disable-next-line no-unused-vars
+    initialize(models, options) {
+        this.listenTo(window.vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
                 this.add(details.types);
@@ -61,15 +60,15 @@ export class AnnotationTypeCollection extends Backbone.Collection {
         });
     }
 
-    modelId (attrs) {
+    modelId(attrs) {
         return (attrs.category + "-" + attrs.type).toLocaleLowerCase();
     }
 
-    comparator (model) {
+    comparator(model) {
         return model.get("id");
     }
 
-    getColour (catName, typeName) {
+    getColour(catName, typeName) {
         catName = catName || "undefined";
         typeName = typeName || "undefined";
         const id = this.modelId({category: catName, type: typeName});

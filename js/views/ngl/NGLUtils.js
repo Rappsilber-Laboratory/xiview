@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import * as $ from "jquery";
 // const workerpool = require('workerpool');
 import {xilog} from "../../utils";
@@ -7,7 +7,7 @@ import d3 from "d3";
 // import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
 // import {NGLModelWrapperBB} from "./ngl-wrapper-model"; // cyclic dependency, hack it into bottom of this file
 
-export function getChainSequencesFromNGLStructure (structureComponent) {
+export function getChainSequencesFromNGLStructure(structureComponent) {
     const sequences = [];
     const structure = structureComponent.structure;
     const chainToOriginalStructureMap = structure.chainToOriginalStructureIDMap || {};
@@ -40,7 +40,7 @@ export function getChainSequencesFromNGLStructure (structureComponent) {
 }
 
 //exported for tests
-export function getChainSequencesFromNGLStage (stage) {
+export function getChainSequencesFromNGLStage(stage) {
     const sequences = [];
     //console.log ("stage", stage);
 
@@ -55,7 +55,7 @@ export function getChainSequencesFromNGLStage (stage) {
 // Nice web-servicey way of doing ngl chain to clms protein matching (can be N-to-1)
 // Except it depends on having pdb codes, not a standalone file, and all the uniprot ids present too
 // Therefore, we need to return umatched sequences so we can fallback to using our own pairing algorithm if necessary
-function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback) {
+function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback) {
 
     let count = nglSequences.length;//pdbUris.length;
     const dataArr = [];
@@ -106,7 +106,7 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
                 const pdbName = (dotIndex >= 0 ? mapping.pdb.slice(0, dotIndex) : mapping.pdb.slice(-1)).toLocaleLowerCase();
                 const chainName = dotIndex >= 0 ? mapping.pdb.slice(dotIndex + 1) : mapping.pdb.slice(-1); // bug fix 27/01/17
                 const matchSeqs = nglSequences.filter(function (seqObj) {
-                    return seqObj.chainName == chainName //&& seqObj.structureID === pdbName;
+                    return seqObj.chainName == chainName; //&& seqObj.structureID === pdbName;
                 });
                 //console.log ("SEQOBJS", matchSeqs);
                 mapping.seqObj = matchSeqs[0];
@@ -132,12 +132,12 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
     // pdbUris.forEach(function (pdbUri) {
     for (let nglSequence of nglSequences) {
         // alert(pdbUri.id);
-        const pdbId = nglSequence.structureID.toUpperCase() + '.' + nglSequence.chainName;
-        const url = 'https://1d-coordinates.rcsb.org/graphql?query=' + encodeURI('{ alignment(from:PDB_INSTANCE, to:UNIPROT, queryId:"'
-            + pdbId + '") { target_alignment { target_id } } }');
+        const pdbId = nglSequence.structureID.toUpperCase() + "." + nglSequence.chainName;
+        const url = "https://1d-coordinates.rcsb.org/graphql?query=" + encodeURI("{ alignment(from:PDB_INSTANCE, to:UNIPROT, queryId:\""
+            + pdbId + "\") { target_alignment { target_id } } }");
         $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
             function (data, status, xhr) {
-                if (status === "success"){//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
+                if (status === "success") {//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
 
                     // console.log("YO:", url, data,  nglSequence.structureId + '.' + nglSequence.chainName );
 
@@ -145,7 +145,7 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
                     if (target_alignment) {
                         const target = target_alignment[0].target_id;
                         dataArr.push({
-                            pdb: nglSequence.structureID.toUpperCase() + '.' + nglSequence.chainName,
+                            pdb: nglSequence.structureID.toUpperCase() + "." + nglSequence.chainName,
                             uniprot: target
                         });
                     }
@@ -172,14 +172,13 @@ function matchPDBChainsToUniprot (pdbUris, nglSequences, interactorArr, callback
 }
 
 // Fallback protein-to-pdb chain matching routines for when we don't have a pdbcode to query the pdb web services or it's offline or we still have sequences in the pdb unmatched to proteins
-export function matchSequencesToExistingProteins (protAlignCollection, sequenceObjs, proteins, extractFunc) {
+export function matchSequencesToExistingProteins(protAlignCollection, sequenceObjs, proteins, extractFunc) {
     xilog("SEQS TO PAIR INTERNALLY", sequenceObjs);
 
     proteins = filterOutDecoyInteractors(proteins)
         .filter(function (protein) {
             return protAlignCollection.get(protein.id);
-        })
-    ;
+        });
     const matchMatrix = {};
     const seqs = extractFunc ? sequenceObjs.map(extractFunc) : sequenceObjs;
 
@@ -188,7 +187,7 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
 
     function finished(matchMatrix) {
         // inflate score matrix to accommodate repeated sequences that were found and filtered out above
-        vent.trigger("sequenceMatchingDone", reinflateSequenceMap(matchMatrix, seqs, filteredSeqInfo));
+        window.vent.trigger("sequenceMatchingDone", reinflateSequenceMap(matchMatrix, seqs, filteredSeqInfo));
     }
 
     function updateMatchMatrix(protID, alignResults) {
@@ -197,7 +196,7 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
     }
 
     const totalAlignments = filteredSeqInfo.uniqSeqs.length * proteins.length;
-    vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
+    window.vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
 
     const start = performance.now();
     // webworker way, only do if enough proteins and cores to make it worthwhile
@@ -241,8 +240,8 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
         const alignResults = protAlignModel.alignWithoutStoring(filteredSeqInfo.uniqSeqs, {
             semiLocal: true
         });
-        console.log("alignResults", /*alignResults,*/ prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
-        updateMatchMatrix(prot.id, alignResults)
+        xilog("alignResults", alignResults, prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
+        updateMatchMatrix(prot.id, alignResults);
     });
 
     finished(matchMatrix);
@@ -250,14 +249,14 @@ export function matchSequencesToExistingProteins (protAlignCollection, sequenceO
 }
 
 //used by crosslinikrepresentaion, matrixview,
-export function make3DAlignID (baseID, chainName, chainIndex) {
+export function make3DAlignID(baseID, chainName, chainIndex) {
     return baseID + ":" + chainName + ":" + chainIndex;
 }
 
 
 //matrixview
 // this avoids going via the ngl functions using data in a chainMap
-export function getChainNameFromChainIndex (chainMap, chainIndex) {
+export function getChainNameFromChainIndex(chainMap, chainIndex) {
     const chainsPerProt = d3.values(chainMap);
     const allChains = d3.merge(chainsPerProt);
     const matchChains = allChains.filter(function (entry) {
@@ -267,7 +266,7 @@ export function getChainNameFromChainIndex (chainMap, chainIndex) {
 }
 
 
-export function getRangedCAlphaResidueSelectionForChain (chainProxy) { // chainProxy is NGL Object
+export function getRangedCAlphaResidueSelectionForChain(chainProxy) { // chainProxy is NGL Object
     let min, max;
     chainProxy.eachResidue(function (rp) {
         const rno = rp.resno;
@@ -301,13 +300,13 @@ function getReasonableDistanceLimit (nglStageModel) {
 */
 
 // test to ignore short chains and those that aren't polymer chains (such as water molecules)
-export function isViableChain (chainProxy) {
+export function isViableChain(chainProxy) {
     //console.log ("cp", chainProxy.entity, chainProxy.residueCount, chainProxy);
     // should be chainProxy.entity.isPolymer() but some hand-built ngl models muff these settings up
     return chainProxy.residueCount > 10 && (!chainProxy.entity || (!chainProxy.entity.isWater() && !chainProxy.entity.isMacrolide()));
 }
 
-export function copyEntities (combinedStructure, originalStructures) {
+export function copyEntities(combinedStructure, originalStructures) {
     let gci = 0;
 
     originalStructures.forEach(function (s) {
@@ -328,7 +327,7 @@ export function copyEntities (combinedStructure, originalStructures) {
     //console.log (combinedStructure.entityList);
 }
 
-export function makeChainToOriginalStructureIDMap (combinedStructure, originalStructures) {
+export function makeChainToOriginalStructureIDMap(combinedStructure, originalStructures) {
     let gci = 0;
     const chainToOriginalStructureIDMap = [];
 
@@ -344,6 +343,6 @@ export function makeChainToOriginalStructureIDMap (combinedStructure, originalSt
     return chainToOriginalStructureIDMap;
 }
 
-export function not3DHomomultimeric (crosslink, chain1ID, chain2ID) {
+export function not3DHomomultimeric(crosslink, chain1ID, chain2ID) {
     return chain1ID !== chain2ID || !crosslink.confirmedHomomultimer;
 }

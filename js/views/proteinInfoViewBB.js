@@ -1,5 +1,5 @@
-import '../../css/proteinInfoViewBB.css';
-import * as _ from 'underscore';
+import "../../css/proteinInfoViewBB.css";
+import * as _ from "underscore";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -23,6 +23,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
         orderedKeys: ["name", "id", "accession", "description", "size", "sequence"],
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         ProteinInfoViewBB.__super__.initialize.apply(this, arguments);
 
@@ -81,8 +82,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     self.displayedProt = d;
                     self.updateTabs();
                     self.updateTable(d);
-                })
-            ;
+                });
             protJoin.exit().remove();
             protJoin.order();
 
@@ -122,7 +122,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
 
             for (let key in protein) {
                 if (this.options.orderedKeys.indexOf(key) === -1 && typeof protein[key] !== "function"
-                        && !this.options.removeTheseKeys.has(key)) {
+                    && !this.options.removeTheseKeys.has(key)) {
                     if (this.options.expandTheseKeys.has(key)) {
                         addMetaRows(key);
                     } else {
@@ -131,7 +131,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 }
             }
 
-            function addRow(key) {
+            function addRow (key) {
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
                 cell1.textContent = key;
@@ -145,11 +145,11 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     cell2.textContent = value;
                 }
                 if (key.indexOf("seq") !== -1) {
-                    cell2.classList.add('fixedSizeFont');
+                    cell2.classList.add("fixedSizeFont");
                 }
             }
 
-            function addMetaRows(key) {
+            function addMetaRows (key) {
                 const metaObj = protein[key];
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
@@ -171,10 +171,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                             for (let subValue of value) {
                                 let row = innerInnerTBody.insertRow();
                                 let cell1 = row.insertCell();
-                                if (subkey === "go"){
+                                if (subkey === "go") {
                                     cell1.textContent = subValue + " : " + goTermsMap.get(subValue).name;
-                                }
-                                else {
+                                } else {
                                     cell1.textContent = subValue.toString();
                                 }
                             }
@@ -183,12 +182,12 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                             subCell2.textContent = value;
                         }
                         if (subkey.indexOf("seq") !== -1) {
-                            subCell2.classList.add('fixedSizeFont');
+                            subCell2.classList.add("fixedSizeFont");
                         }
                     }
                 }
                 cell2.append(innerTable);
-            }
+            };
 
             div.appendChild(table);
 

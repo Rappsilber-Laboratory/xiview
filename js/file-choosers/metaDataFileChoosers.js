@@ -1,6 +1,6 @@
-import '../../css/csvUpload.css';
+import "../../css/csvUpload.css";
 
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -13,7 +13,7 @@ import {
 
 const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -28,7 +28,8 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         removeTheseKeys: d3.set(["sectionName", "id"]),
     },
 
-    initialize: function(viewOptions) {
+    // eslint-disable-next-line no-unused-vars
+    initialize: function (viewOptions) {
         AbstractMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
 
         const self = this;
@@ -36,7 +37,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el);
 
-        mainDivSel.classed ("metaLoadPanel", true);
+        mainDivSel.classed("metaLoadPanel", true);
 
         const wrapperPanel = mainDivSel.append("div")
             .attr("class", "panelInner");
@@ -59,15 +60,14 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         const formatPanel = wrapperPanel.append("div").attr("class", "expectedFormatPanel");
 
         formatPanel.append("a")
-            .text ("Click to open XiDocs for CSV format details")
-            .attr ("href", self.options.docUrl)
-            .attr ("target", "_blank")
-        ;
+            .text("Click to open XiDocs for CSV format details")
+            .attr("href", self.options.docUrl)
+            .attr("target", "_blank");
     },
 
     setUpCompletionListener: function () {
         const self = this;
-        this.listenToOnce (vent, self.options.loadedEventName, function(metaMetaData, sourceData) {
+        this.listenToOnce(window.vent, self.options.loadedEventName, function (metaMetaData, sourceData) {
             if (sourceData && sourceData.source === "file") {
                 const columns = metaMetaData.columns;
                 const matchedItemCount = metaMetaData.matchedItemCount;
@@ -81,7 +81,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         });
     },
 
-    setStatusText: function(msg, success) {
+    setStatusText: function (msg, success) {
         const mbar = d3.select(this.el).select(".messagebar").style("display", null);
         const t = mbar.html(msg).transition().delay(0).duration(1000).style("color", (success === false ? "red" : (success ? "blue" : null)));
         if (success !== undefined) {
@@ -89,7 +89,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         }
     },
 
-    selectMetaDataFile: function(evt) {
+    selectMetaDataFile: function (evt) {
         const fileObj = evt.target.files[0];
         this.setStatusText("Please Wait...");
         this.lastFileName = fileObj.name;
@@ -102,7 +102,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 
 export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         const myDefaults = {
             buttonText: "Select Protein MetaData CSV File",
             loadedEventName: "proteinMetadataUpdated",
@@ -113,9 +113,9 @@ export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend
         ProteinMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
     },
 
-    onLoadFunction: function(fileContents) {
-        this.setUpCompletionListener ();
-        updateProteinMetadata (fileContents, this.model.get("clmsModel"));
+    onLoadFunction: function (fileContents) {
+        this.setUpCompletionListener();
+        updateProteinMetadata(fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "Protein MetaData File Chooser",
@@ -124,7 +124,7 @@ export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend
 
 export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         const myDefaults = {
             buttonText: "Select Cross-Link or PPI MetaData CSV File",
             loadedEventName: "linkMetadataUpdated",
@@ -135,9 +135,9 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
         LinkMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
     },
 
-    onLoadFunction: function(fileContents) {
-        this.setUpCompletionListener ();
-        updateLinkMetadata (fileContents, this.model.get("clmsModel"));
+    onLoadFunction: function (fileContents) {
+        this.setUpCompletionListener();
+        updateLinkMetadata(fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "Cross-Link MetaData File Chooser",
@@ -146,7 +146,7 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
 export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         const myDefaults = {
             buttonText: "Select User-Defined Annotations CSV File",
             loadedEventName: "userAnnotationsUpdated",
@@ -157,12 +157,12 @@ export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserB
         UserAnnotationsMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
     },
 
-    onLoadFunction: function(fileContents) {
-        this.setUpCompletionListener ();
-        updateUserAnnotationsMetadata (fileContents, this.model.get("clmsModel"));
+    onLoadFunction: function (fileContents) {
+        this.setUpCompletionListener();
+        updateUserAnnotationsMetadata(fileContents, this.model.get("clmsModel"));
     },
 
     identifier: "User Annotations File Chooser",
 });
 
-const MetaLoaderViewRegistry = [ProteinMetaDataFileChooserBB, LinkMetaDataFileChooserBB, UserAnnotationsMetaDataFileChooserBB];
+// const MetaLoaderViewRegistry = [ProteinMetaDataFileChooserBB, LinkMetaDataFileChooserBB, UserAnnotationsMetaDataFileChooserBB];

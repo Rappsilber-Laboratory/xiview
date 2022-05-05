@@ -229,12 +229,12 @@ function bsa_gen_score_matrix(n, a, b) {
  * @return query profile. It is a two-dimensional integer matrix.
  */
 function bsa_gen_query_profile(_s, _m, table) {
-    const s = typeof _s == 'string' ? bsg_enc_seq(_s, table) : _s;
+    const s = typeof _s == "string" ? bsg_enc_seq(_s, table) : _s;
     const qp = [];
     let matrix;
-    if (_m.length >= 2 && typeof _m[0] == 'number' && typeof _m[1] == 'number') { // match/mismatch score
+    if (_m.length >= 2 && typeof _m[0] == "number" && typeof _m[1] == "number") { // match/mismatch score
         if (table == null) return null;
-        const n = typeof table == 'number' ? table : table[table.length - 1] + 1;
+        const n = typeof table == "number" ? table : table[table.length - 1] + 1;
         matrix = bsa_gen_score_matrix(n, _m[0], _m[1]);
         //console.log ("matrix", matrix);
     } else matrix = _m; // _m is already a matrix; FIXME: check if it is really a square matrix!
@@ -282,7 +282,7 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
 
     // set gap score
     let gapo, gape; // these are penalties which should be non-negative
-    if (typeof gapsc == 'number') {
+    if (typeof gapsc == "number") {
         gapo = 0, gape = Math.abs(gapsc);
     } else {
         gapo = Math.abs(gapsc[0]), gape = Math.abs(gapsc[1]);
@@ -465,8 +465,8 @@ function indexOfMax(arr) { // mjg
 }
 
 function bsa_cigar2gaps(target, query, start, cigar) {
-    let oq = '',
-        ot = '',
+    let oq = "",
+        ot = "",
         lq = 0,
         lt = start;
     for (let k = 0; k < cigar.length; ++k) {
@@ -558,8 +558,8 @@ function arrayMax(arr) {
 }
 
 function align (query, target, myScores, isLocal, isSemiLocal, windowSize) {
-    var target = target || 'ATAGCTAGCTAGCATAAGC';
-    var query  = query || 'AGCTAcCGCAT';
+    var target = target || "ATAGCTAGCTAGCATAAGC";
+    var query  = query || "AGCTAcCGCAT";
     var isLocal = isLocal || false;
     const defaults = {match: 1, mis: -1, gapOpen: -1, gapExt: -1};
     let scores = myScores || {};
@@ -585,7 +585,7 @@ function align (query, target, myScores, isLocal, isSemiLocal, windowSize) {
         rst = bsa_align (isLocal, isSemiLocal, target, query, matrix.scoreMatrix || [scores.match,scores.mis], [scores.gapOpen,scores.gapExt], windowSize, table);
     }
     const cigarString = bsa_cigar2str(rst[2]);
-    const str = 'score=' + rst[0] + '; pos=' + rst[1] + '; cigar=' + cigarString + "\n";
+    const str = "score=" + rst[0] + "; pos=" + rst[1] + "; cigar=" + cigarString + "\n";
     const fmt = bsa_cigar2gaps(target, query, rst[1], rst[2]);
     const indx = bsa_cigar2indexArrays(target, query, rst[1], rst[2]);
     const alignment = {res: rst, fmt: fmt, str: str, indx: indx, cigar: cigarString};
@@ -597,9 +597,9 @@ function align (query, target, myScores, isLocal, isSemiLocal, windowSize) {
 //     module.exports = combine;
 // } else {
 //     this.CLMSUI = this.CLMSUI || {};
-    export const GotohAligner = {
-        align: align
-    };
+export const GotohAligner = {
+    align: align
+};
 // }
 
 function combine() {

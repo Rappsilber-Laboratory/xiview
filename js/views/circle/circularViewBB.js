@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import '../../../css/circularViewBB.css';
-import * as $ from 'jquery';
-import * as _ from 'underscore';
+import "../../../css/circularViewBB.css";
+import * as $ from "jquery";
+import * as _ from "underscore";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {getResidueType} from "../../modelUtils";
@@ -11,7 +11,7 @@ import d3 from "d3";
 import {circleArrange} from "./circleArrange";
 import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
 
-const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
+const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
 
     const defaults = {
         gap: 5,
@@ -23,6 +23,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
                 toNodeID: link.toNodeID
             };
         },
+        // eslint-disable-next-line no-unused-vars
         featureParse: function (feature, node) {
             return {
                 fromPos: feature.start - 1,
@@ -46,10 +47,10 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
     const dgap = _options.gap * ratio;
     totalLength += dgap * noOfGaps;
     const scale = d3.scale.linear().domain([0, totalLength]).range(range);
-    var total = dgap / 2; // start with half gap, so gap at top is symmetrical (like a double top)
+    let total = dgap / 2; // start with half gap, so gap at top is symmetrical (like a double top)
 
     const nodeCoordMap = d3.map();
-    nodeArr.forEach(function(node) {
+    nodeArr.forEach(function (node) {
         const size = node.size || 1; // again size is sometimes not there for some artificial protein (usually an ambiguous placeholder)
         // start ... end goes from scale (0 ... size), 1 bigger than 1-indexed size
         nodeCoordMap.set(node.id, {
@@ -66,10 +67,10 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
 
     const featureCoords = [];
     let fid = 0;
-    featureArrs.forEach(function(farr, i) {
+    featureArrs.forEach(function (farr, i) {
         const nodeID = nodeArr[i].id;
         const nodeCoord = nodeCoordMap.get(nodeID);
-        farr.forEach(function(feature) {
+        farr.forEach(function (feature) {
             const tofrom = _options.featureParse(feature, nodeID);
             //xilog (nodeArr[i].name, "nc", nodeCoord, farr, tofrom, "ORIG FEATURE", feature);
             if (tofrom) {
@@ -113,7 +114,7 @@ const circleLayout = function(nodeArr, linkArr, featureArrs, range, options) {
 };
 
 export const CircularViewBB = BaseFrameView.extend({
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -134,7 +135,7 @@ export const CircularViewBB = BaseFrameView.extend({
         tickWidth: 23,
         tickLabelCycle: 5, // show label every nth tick
         gap: 5,
-        linkParse: function(link) {
+        linkParse: function (link) {
             // turn toPos and fromPos to zero-based index
             return {
                 fromPos: link.fromResidue - 1,
@@ -156,17 +157,18 @@ export const CircularViewBB = BaseFrameView.extend({
         canTakeImage: true,
     },
 
-    initialize: function(viewOptions) {
+    // eslint-disable-next-line no-unused-vars
+    initialize: function (viewOptions) {
         const self = this;
 
-        this.defaultOptions.featureParse = function(feature, nodeid) {
+        this.defaultOptions.featureParse = function (feature, nodeid) {
             // feature.start and .end are 1-indexed, and so are the returned convStart and convEnd values
-            if (feature.start == undefined) {
+            if (!feature.start) {
                 feature.start = +feature.begin;
             }
             let convStart = +feature.start;
             let convEnd = +feature.end;
-            const type = feature.type.toLowerCase();
+            // const type = feature.type.toLowerCase();
             const protAlignModel = self.model.get("alignColl").get(nodeid);
 
             const annotationColl = self.model.get("annotationTypes");
@@ -206,7 +208,9 @@ export const CircularViewBB = BaseFrameView.extend({
 
         // if protein default colour model use this instead for legibility
         this.replacementDefaultNodeColourModel = {
-            getColour: function () { return "#dde"; }
+            getColour: function () {
+                return "#dde";
+            }
         };
 
         CircularViewBB.__super__.initialize.apply(this, arguments);
@@ -221,15 +225,10 @@ export const CircularViewBB = BaseFrameView.extend({
                 template({
                     svgClass: "circularView",
                 })
-            )
-        ;
-
+            );
         mainDivSel.select(".backdrop")
             // can replace .backdrop class colouring with this option if defined
-            .style("background-color", this.options.background)
-        ;
-
-
+            .style("background-color", this.options.background);
         const buttonData = [{
             class: "downloadButton",
             label: commonLabels.downloadImg + "SVG",
@@ -251,40 +250,40 @@ export const CircularViewBB = BaseFrameView.extend({
             type: "radio",
             group: "sort"
         },
-            {
-                class: "circRadio",
-                label: "By Length",
-                id: "size",
-                raw_id: "size",
-                type: "radio",
-                group: "sort"
-            },
-            {
-                class: "circRadio",
-                label: "To Reduce Crossings",
-                id: "best",
-                raw_id: "best",
-                type: "radio",
-                group: "sort",
-                sectionEnd: true,
-                d3tooltip: "Order proteins to reduce visual crosslink intersections in the circle - making it easier to comprehend"
-            },
-            {
-                class: "niceButton",
-                label: "Redo Current Ordering",
-                id: "nice",
-                raw_id: "nice",
-                type: "button"
-            },
+        {
+            class: "circRadio",
+            label: "By Length",
+            id: "size",
+            raw_id: "size",
+            type: "radio",
+            group: "sort"
+        },
+        {
+            class: "circRadio",
+            label: "To Reduce Crossings",
+            id: "best",
+            raw_id: "best",
+            type: "radio",
+            group: "sort",
+            sectionEnd: true,
+            d3tooltip: "Order proteins to reduce visual crosslink intersections in the circle - making it easier to comprehend"
+        },
+        {
+            class: "niceButton",
+            label: "Redo Current Ordering",
+            id: "nice",
+            raw_id: "nice",
+            type: "button"
+        },
         ];
         orderOptionsButtonData
-            .filter(function(d) {
+            .filter(function (d) {
                 return d.type === "radio";
             })
-            .forEach(function(d) {
+            .forEach(function (d) {
                 d.initialState = this.options.sort === d.id;
                 d.inputFirst = true;
-                d.func = function() {
+                d.func = function () {
                     self.options.sort = d.raw_id;
                     self.reOrderAndRender({
                         reverseConsecutive: true
@@ -300,7 +299,7 @@ export const CircularViewBB = BaseFrameView.extend({
             model: self.model.get("clmsModel"),
             myOptions: {
                 title: "Order Proteins ▼",
-                menu: orderOptionsButtonData.map(function(d) {
+                menu: orderOptionsButtonData.map(function (d) {
                     d.id = self.el.id + d.id;
                     d.tooltip = d.d3tooltip;
                     return d;
@@ -318,37 +317,37 @@ export const CircularViewBB = BaseFrameView.extend({
             initialState: this.options.showLinkless,
             d3tooltip: "Keep showing proteins with no current crosslinks for a steadier layout"
         },
-            {
-                class: "showResLabelsButton",
-                label: "Residue Labels (If Few Links)",
-                id: "resLabels",
-                initialState: this.options.showResLabels,
-                d3tooltip: "If only a few crosslinks, show the residue letters at the ends of the cross-links"
-            },
-            {
-                class: "flipIntraButton",
-                label: "Self Links on Outside",
-                id: "flip",
-                initialState: this.options.intraOutside,
-                d3tooltip: "Flips the display of Self crosslinks between inside and outside"
-            },
-            {
-                class: "toggleHomomOpposition",
-                label: "Links with Overlapping Peptides Opposite to Self Links",
-                id: "homomOpposite",
-                initialState: this.options.homomOpposite,
-                d3tooltip: "Show crosslinks with overlapping peptides on the opposite side (in/out) to Self crosslinks. Often these may be homomultimeric - links between different copies of the same protein."
-            },
-            {
-                class: "showSelectedOnly",
-                label: "Selected Crosslinks Only",
-                id: "showSelectedOnly",
-                initialState: this.options.showSelectedOnly,
-                d3tooltip: "Show selected crosslinks only (yellow highlighting is removed also.)"
-            },
+        {
+            class: "showResLabelsButton",
+            label: "Residue Labels (If Few Links)",
+            id: "resLabels",
+            initialState: this.options.showResLabels,
+            d3tooltip: "If only a few crosslinks, show the residue letters at the ends of the cross-links"
+        },
+        {
+            class: "flipIntraButton",
+            label: "Self Links on Outside",
+            id: "flip",
+            initialState: this.options.intraOutside,
+            d3tooltip: "Flips the display of Self crosslinks between inside and outside"
+        },
+        {
+            class: "toggleHomomOpposition",
+            label: "Links with Overlapping Peptides Opposite to Self Links",
+            id: "homomOpposite",
+            initialState: this.options.homomOpposite,
+            d3tooltip: "Show crosslinks with overlapping peptides on the opposite side (in/out) to Self crosslinks. Often these may be homomultimeric - links between different copies of the same protein."
+        },
+        {
+            class: "showSelectedOnly",
+            label: "Selected Crosslinks Only",
+            id: "showSelectedOnly",
+            initialState: this.options.showSelectedOnly,
+            d3tooltip: "Show selected crosslinks only (yellow highlighting is removed also.)"
+        },
         ];
         showOptionsButtonData
-            .forEach(function(d) {
+            .forEach(function (d) {
                 d.type = "checkbox";
                 d.inputFirst = true;
             });
@@ -361,7 +360,7 @@ export const CircularViewBB = BaseFrameView.extend({
             model: self.model.get("clmsModel"),
             myOptions: {
                 title: "Show ▼",
-                menu: showOptionsButtonData.map(function(d) {
+                menu: showOptionsButtonData.map(function (d) {
                     d.id = self.el.id + d.id;
                     d.tooltip = d.d3tooltip;
                     return d;
@@ -378,27 +377,25 @@ export const CircularViewBB = BaseFrameView.extend({
 
         // Lets user rotate diagram
         const backgroundDrag = d3.behavior.drag();
-        backgroundDrag.on("dragstart", function() {
-                d3.event.sourceEvent.stopPropagation();
-                d3.event.sourceEvent.stopImmediatePropagation();
-                d3.event.sourceEvent.preventDefault();
+        backgroundDrag.on("dragstart", function () {
+            d3.event.sourceEvent.stopPropagation();
+            d3.event.sourceEvent.stopImmediatePropagation();
+            d3.event.sourceEvent.preventDefault();
             const curTheta = d3.transform(svg.select("g g").attr("transform")).rotate * degToRad;
             const mc = d3.mouse(this);
             const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             backgroundDrag.offTheta = curTheta - dragStartTheta;
-            })
-            .on("drag", function() {
+        })
+            .on("drag", function () {
                 const dmc = d3.mouse(this);
                 let theta = Math.atan2(dmc[1] - self.radius, dmc[0] - self.radius);
                 theta += backgroundDrag.offTheta;
                 svg.select("g g").attr("transform", "rotate(" + (theta / degToRad) + ")");
-            })
-        ;
-
-        var svg = mainDivSel.select("svg");//.call(backgroundDrag);
+            });
+        let svg = mainDivSel.select("svg");//.call(backgroundDrag);
 
         this.nodeDrag = d3.behavior.drag();
-        this.nodeDrag.reOrder = function(d) {
+        this.nodeDrag.reOrder = function (d) {
             const mc = d3.mouse(svg.node());
             const dragTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             const deg = (((dragTheta / degToRad) + 90) + 360) % 360;
@@ -421,7 +418,7 @@ export const CircularViewBB = BaseFrameView.extend({
             thisNode.start = newStart;
             thisNode.end = newEnd;
 
-            nodeData.sort(function(a, b) {
+            nodeData.sort(function (a, b) {
                 const aMid = (a.start + a.end + (a.end < a.start ? 360 : 0)) % 720; // add 360 to end values smaller than start (zero wraparound)
                 const bMid = (b.start + b.end + (b.end < b.start ? 360 : 0)) % 720;
                 return aMid - bMid;
@@ -439,25 +436,25 @@ export const CircularViewBB = BaseFrameView.extend({
                 });
             }
         };
-        this.nodeDrag.on("dragstart", function() {
-                d3.event.sourceEvent.stopPropagation();
-                d3.event.sourceEvent.preventDefault();
+        this.nodeDrag.on("dragstart", function () {
+            d3.event.sourceEvent.stopPropagation();
+            d3.event.sourceEvent.preventDefault();
             const mc = d3.mouse(svg.node());
             self.nodeDrag.startClick = mc;
             const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             self.nodeDrag.startDeg = (((dragStartTheta / degToRad) + 90) + 360) % 360;
-                // draw drag representation if >1 protein displayed
-                if (self.filterInteractors(self.model.get("clmsModel").get("participants")).length > 1) {
-                    d3.select(this).classed("draggedNode", true);
-                }
-                self.nodeDrag.visited = true;
-            })
-            .on("drag", function(d) {
+            // draw drag representation if >1 protein displayed
+            if (self.filterInteractors(self.model.get("clmsModel").get("participants")).length > 1) {
+                d3.select(this).classed("draggedNode", true);
+            }
+            self.nodeDrag.visited = true;
+        })
+            .on("drag", function (d) {
                 d3.event.sourceEvent.stopPropagation();
                 d3.event.sourceEvent.preventDefault();
                 self.nodeDrag.reOrder(d);
             })
-            .on("dragend", function(d) {
+            .on("dragend", function (d) {
                 d3.event.sourceEvent.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
                 d3.event.sourceEvent.preventDefault();
                 d3.select(this).classed("draggedNode", false);
@@ -465,7 +462,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 const mc = d3.mouse(svg.node());
                 const movementSq = Math.pow(mc[0] - self.nodeDrag.startClick[0], 2) + Math.pow(mc[1] - self.nodeDrag.startClick[1], 2);
                 if (movementSq < 9) {
-                    self.selectNode.call (self, d);
+                    self.selectNode.call(self, d);
                 }
                 d3.event.sourceEvent.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
                 d3.event.sourceEvent.stopImmediatePropagation();
@@ -477,10 +474,10 @@ export const CircularViewBB = BaseFrameView.extend({
         this.line = d3.svg.line.radial()
             .interpolate("bundle")
             .tension(0.45)
-            .radius(function(d) {
+            .radius(function (d) {
                 return d.rad;
             })
-            .angle(function(d) {
+            .angle(function (d) {
                 return d.ang * degToRad;
             });
 
@@ -488,31 +485,31 @@ export const CircularViewBB = BaseFrameView.extend({
         this.outsideLine = d3.svg.line.radial()
             .interpolate("basis")
             .tension(0.45)
-            .radius(function(d) {
+            .radius(function (d) {
                 return d.rad;
             })
-            .angle(function(d) {
+            .angle(function (d) {
                 return d.ang * degToRad;
             });
 
         const arcs = ["arc", "textArc", "featureArc", "resLabelArc"];
-        arcs.forEach(function(arc) {
+        arcs.forEach(function (arc) {
             this[arc] = d3.svg.arc()
                 .innerRadius(90)
                 .outerRadius(100)
-                .startAngle(function(d) {
+                .startAngle(function (d) {
                     return d.start * degToRad;
                 }) // remembering to convert from degs to radians
-                .endAngle(function(d) {
+                .endAngle(function (d) {
                     return d.end * degToRad;
                 });
         }, this);
 
-        this.clearTip = function() {
+        this.clearTip = function () {
             self.model.get("tooltipModel").set("contents", null);
         };
 
-        this.nodeTip = function(d) {
+        this.nodeTip = function (d) {
             const interactor = self.model.get("clmsModel").get("participants").get(d.id);
             self.model.get("tooltipModel")
                 .set("header", makeTooltipTitle.interactor(interactor))
@@ -523,7 +520,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 });
         };
 
-        this.linkTip = function(d) {
+        this.linkTip = function (d) {
             const xlink = self.model.get("clmsModel").get("crosslinks").get(d.id);
             self.model.get("tooltipModel")
                 .set("header", makeTooltipTitle.link())
@@ -534,7 +531,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 });
         };
 
-        this.featureTip = function(d) {
+        this.featureTip = function (d) {
             self.model.get("tooltipModel")
                 .set("header", makeTooltipTitle.feature())
                 .set("contents", makeTooltipContents.feature(d))
@@ -550,7 +547,7 @@ export const CircularViewBB = BaseFrameView.extend({
         let alignCall = 0;
 
         // listen to custom filteringDone event from model
-        this.listenTo(this.model, "filteringDone", function() {
+        this.listenTo(this.model, "filteringDone", function () {
             // filtering can change node and thus feature positioning too if proteins are hidden or rearranged by sorting
             if (!self.options.showLinkless || self.options.sort === "best") {
                 self.render();
@@ -558,32 +555,32 @@ export const CircularViewBB = BaseFrameView.extend({
                 self.renderPartial(["links", "nodes"]);
             }
         });
-        this.listenTo(this.model, "change:selection", function() {
+        this.listenTo(this.model, "change:selection", function () {
             this.options.showSelectedOnly ? this.renderPartial(["links"]) : this.showAccentedLinks("selection");
         });
-        this.listenTo(this.model, "change:highlights", function() {
+        this.listenTo(this.model, "change:highlights", function () {
             this.showAccentedLinks("highlights");
         });
-        this.listenTo(this.model, "change:selectedProteins", function() {
+        this.listenTo(this.model, "change:selectedProteins", function () {
             this.showAccentedNodes("selection");
         });
-        this.listenTo(this.model, "change:highlightedProteins", function() {
+        this.listenTo(this.model, "change:highlightedProteins", function () {
             this.showAccentedNodes("highlights");
         });
-        this.listenTo(this.model.get("alignColl"), "bulkAlignChange", function() {
+        this.listenTo(this.model.get("alignColl"), "bulkAlignChange", function () {
             xilog(++alignCall, ". CIRCULAR VIEW AWARE OF ALIGN CHANGES", arguments);
             self.renderPartial(["features"]);
         });
-        this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function() {
+        this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function () {
             self.renderPartial(["links"]);
         }); // either colour change or new colour model
-        this.listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function() {
+        this.listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function () {
             self.renderPartial(["nodes"]);
         }); // either colour change or new colour model
-        this.listenTo(vent, "proteinMetadataUpdated", function() {   // generally a name change
+        this.listenTo(window.vent, "proteinMetadataUpdated", function () {   // generally a name change
             self.renderPartial(["nodes"]);
         });
-        this.listenTo(this.model.get("annotationTypes"), "change:shown", function() {
+        this.listenTo(this.model.get("annotationTypes"), "change:shown", function () {
             self.renderPartial(["features"]);
         });
         //this.listenTo (this.model.get("clmsModel"), "change:matches", this.reOrder);
@@ -592,7 +589,7 @@ export const CircularViewBB = BaseFrameView.extend({
         return this;
     },
 
-    reOrder: function(orderOptions) {
+    reOrder: function (orderOptions) {
         orderOptions = orderOptions || {};
         //xilog ("this", this, this.options);
         if (orderOptions.reverseConsecutive) {
@@ -631,52 +628,52 @@ export const CircularViewBB = BaseFrameView.extend({
         return this;
     },
 
-    reOrderAndRender: function(localOptions) {
+    reOrderAndRender: function (localOptions) {
         return this.reOrder(localOptions).render(localOptions);
     },
 
-    flipIntra: function() {
+    flipIntra: function () {
         this.options.intraOutside = !this.options.intraOutside;
         this.render(); // nodes move position too (radially)
         return this;
     },
 
-    showResLabelsIfRoom: function() {
+    showResLabelsIfRoom: function () {
         this.options.showResLabels = !this.options.showResLabels;
         this.renderPartial(["linkLabels"]);
         return this;
     },
 
-    toggleLinklessVisibility: function() {
+    toggleLinklessVisibility: function () {
         this.options.showLinkless = !this.options.showLinkless;
         this.render();
         return this;
     },
 
-    toggleHomomOppositeIntra: function() {
+    toggleHomomOppositeIntra: function () {
         this.options.homomOpposite = !this.options.homomOpposite;
         this.renderPartial(["links"]);
         return this;
     },
 
-    toggleSelectedOnly: function() {
+    toggleSelectedOnly: function () {
         this.options.showSelectedOnly = !this.options.showSelectedOnly;
         this.renderPartial(["links"]);
         return this;
     },
 
-    idFunc: function(d) {
+    idFunc: function (d) {
         return d.id;
     },
 
-    showAccentedLinks: function(accentType) {
+    showAccentedLinks: function (accentType) {
         if (this.isVisible()) {
             this.showAccentOnTheseLinks(d3.select(this.el).selectAll(".circleGhostLink"), accentType);
         }
         return this;
     },
 
-    showAccentOnTheseLinks: function(d3Selection, accentType) {
+    showAccentOnTheseLinks: function (d3Selection, accentType) {
         let accentedLinkList = this.model.getMarkedCrossLinks(accentType);
         if (accentType === "selection" && this.options.showSelectedOnly) {
             accentedLinkList = [];
@@ -689,26 +686,27 @@ export const CircularViewBB = BaseFrameView.extend({
             const linkType = linkTypes[accentType] || "link";
             const accentedLinkIDs = _.pluck(accentedLinkList, "id");
             const idset = d3.set(accentedLinkIDs);
-            d3Selection.filter("."+linkType)
-                .filter(function(d) { return !idset.has(d.id); })
-                .classed(linkType, false)
-            ;
-
-            d3Selection.filter(function(d) { return idset.has(d.id); })
-                .classed(linkType, true)
-            ;
+            d3Selection.filter("." + linkType)
+                .filter(function (d) {
+                    return !idset.has(d.id);
+                })
+                .classed(linkType, false);
+            d3Selection.filter(function (d) {
+                return idset.has(d.id);
+            })
+                .classed(linkType, true);
         }
         return this;
     },
 
-    showAccentedNodes: function(accentType) {
+    showAccentedNodes: function (accentType) {
         if (this.isVisible()) {
             this.showAccentOnTheseNodes(d3.select(this.el).selectAll(".circleNode"), accentType);
         }
         return this;
     },
 
-    showAccentOnTheseNodes: function(d3Selection, accentType) {
+    showAccentOnTheseNodes: function (d3Selection, accentType) {
         const accentedNodeList = this.model.get(accentType === "selection" ? "selectedProteins" : "highlightedProteins");
         if (accentedNodeList) {
             const linkType = {
@@ -717,7 +715,7 @@ export const CircularViewBB = BaseFrameView.extend({
             };
             const accentedLinkIDs = _.pluck(accentedNodeList, "id");
             const idset = d3.set(accentedLinkIDs);
-            d3Selection.classed(linkType[accentType], function(d) {
+            d3Selection.classed(linkType[accentType], function (d) {
                 return idset.has(d.id);
             });
         }
@@ -725,7 +723,7 @@ export const CircularViewBB = BaseFrameView.extend({
     },
 
 
-    actionNodeLinks: function(nodeId, actionType, add, startPos, endPos) {
+    actionNodeLinks: function (nodeId, actionType, add, startPos, endPos) {
         const filteredCrossLinks = this.model.getFilteredCrossLinks();
         const anyPos = startPos == undefined && endPos == undefined;
         startPos = startPos || 0;
@@ -739,22 +737,22 @@ export const CircularViewBB = BaseFrameView.extend({
         return this;
     },
 
-    clearSelection: function(evt) {
+    clearSelection: function (evt) {
         evt = evt || {};
         //console.log ("evt", evt);
         if (!this.nodeDrag.visited) {
             // don't cancel if any of alt/ctrl/shift held down as it's probably a mis-aimed attempt at adding to an existing search
             // this is also logically consistent as it's adding 'nothing' to the existing selection
             if (!evt.altKey && !evt.ctrlKey && !evt.shiftKey) {
-                this.model.setMarkedCrossLinks ("selection", [], false, false);
-                this.model.setSelectedProteins ([], false);
+                this.model.setMarkedCrossLinks("selection", [], false, false);
+                this.model.setSelectedProteins([], false);
             }
         }
         this.nodeDrag.visited = false;
         return this;
     },
 
-    convertLinks: function(links, rad1, rad2) {
+    convertLinks: function (links, rad1, rad2) {
         const xlinks = this.model.get("clmsModel").get("crosslinks");
         const intraOutside = this.options.intraOutside;
         const homomOpposite = this.options.homomOpposite;
@@ -839,15 +837,15 @@ export const CircularViewBB = BaseFrameView.extend({
         return newLinks;
     },
 
-    getMaxRadius: function(d3sel) {
+    getMaxRadius: function (d3sel) {
         const zelem = $(d3sel.node());
         return Math.min(zelem.width(), zelem.height()) / 2;
     },
 
-    filterInteractors: function(interactors) {  // interactors is a native map
+    filterInteractors: function (interactors) {  // interactors is a native map
         const filteredInteractors = [];
         const showLinkless = this.options.showLinkless;
-        interactors.forEach(function(value) {
+        interactors.forEach(function (value) {
             if (!value.is_decoy && (showLinkless || !value.hidden)) {
                 filteredInteractors.push(value);
             }
@@ -855,7 +853,7 @@ export const CircularViewBB = BaseFrameView.extend({
         return filteredInteractors;
     },
 
-    renderPartial: function(renderPartArr) {
+    renderPartial: function (renderPartArr) {
         this.render({
             changed: d3.set(renderPartArr)
         });
@@ -881,7 +879,7 @@ export const CircularViewBB = BaseFrameView.extend({
             let filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
             if (this.options.showSelectedOnly) {
                 const selectedIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
-                filteredCrossLinks = filteredCrossLinks.filter(function(xlink) {
+                filteredCrossLinks = filteredCrossLinks.filter(function (xlink) {
                     return selectedIDs.has(xlink.id);
                 });
             }
@@ -909,15 +907,15 @@ export const CircularViewBB = BaseFrameView.extend({
 
             // reset filteredInteractors to same order as interactor order
             filteredInteractors = this.interactorOrder
-                .filter(function(interactorId) {
+                .filter(function (interactorId) {
                     return fmap.has(interactorId);
                 })
-                .map(function(interactorId) {
+                .map(function (interactorId) {
                     return fmap.get(interactorId);
                 });
 
             // After rearrange interactors, because filtered features depends on the interactor order
-            const alignColl = this.model.get("alignColl");
+            // const alignColl = this.model.get("alignColl");
             const filteredFeatures = filteredInteractors.map(function (inter) {
                 return this.model.getFilteredFeatures(inter);
             }, this);
@@ -936,23 +934,23 @@ export const CircularViewBB = BaseFrameView.extend({
                 inner: innerNodeRadius,
                 outer: tickRadius
             },
-                {
-                    arc: "featureArc",
-                    inner: innerFeatureRadius,
-                    outer: tickRadius
-                }, // both radii same for textArc
-                {
-                    arc: "textArc",
-                    inner: textRadius,
-                    outer: textRadius
-                }, // both radii same for textArc
-                {
-                    arc: "resLabelArc",
-                    inner: innerNodeRadius,
-                    outer: textRadius
-                },
+            {
+                arc: "featureArc",
+                inner: innerFeatureRadius,
+                outer: tickRadius
+            }, // both radii same for textArc
+            {
+                arc: "textArc",
+                inner: textRadius,
+                outer: textRadius
+            }, // both radii same for textArc
+            {
+                arc: "resLabelArc",
+                inner: innerNodeRadius,
+                outer: textRadius
+            },
             ];
-            arcRadii.forEach(function(arcData) {
+            arcRadii.forEach(function (arcData) {
                 this[arcData.arc].innerRadius(arcData.inner).outerRadius(arcData.outer);
             }, this);
 
@@ -974,8 +972,7 @@ export const CircularViewBB = BaseFrameView.extend({
             if (!changed || changed.has("nodes")) {
                 this
                     .drawNodes(gRot, nodes) // draw nodes (around edge)
-                    .drawNodeTicks(gRot, nodes, tickRadius) // draw scales on nodes - adapted from http://bl.ocks.org/mbostock/4062006
-                ;
+                    .drawNodeTicks(gRot, nodes, tickRadius); // draw scales on nodes - adapted from http://bl.ocks.org/mbostock/4062006
             }
             if (!changed || changed.has("features")) {
                 this.drawFeatures(gRot, features);  // draw features
@@ -991,7 +988,7 @@ export const CircularViewBB = BaseFrameView.extend({
         return this;
     },
 
-    addOrGetGroupLayer: function(g, layerClass) {
+    addOrGetGroupLayer: function (g, layerClass) {
         let groupLayer = g.select("g." + layerClass);
         if (groupLayer.empty()) {
             groupLayer = g.append("g").attr("class", layerClass);
@@ -999,7 +996,7 @@ export const CircularViewBB = BaseFrameView.extend({
         return groupLayer;
     },
 
-    drawLinks: function(g, links) {
+    drawLinks: function (g, links) {
         const self = this;
         const crosslinks = this.model.get("clmsModel").get("crosslinks");
         //xilog ("clinks", crosslinks);
@@ -1016,15 +1013,15 @@ export const CircularViewBB = BaseFrameView.extend({
             .append("path")
             .attr("class", "circleLink");
         linkJoin
-            .attr("d", function(d) {
+            .attr("d", function (d) {
                 const path = (d.outside ? self.outsideLine : self.line)(d.coords);
                 lineCopy[d.id] = path;
                 return path;
             })
-            .style("stroke", function(d) {
+            .style("stroke", function (d) {
                 return colourScheme.getColour(crosslinks.get(d.id));
             })
-            .classed("ambiguous", function(d) {
+            .classed("ambiguous", function (d) {
                 return crosslinks.get(d.id).ambiguous;
             });
 
@@ -1036,29 +1033,27 @@ export const CircularViewBB = BaseFrameView.extend({
         ghostLinkJoin.enter()
             .append("path")
             .attr("class", "circleGhostLink")
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function (d) {
                 self.linkTip(d);
                 self.model.setMarkedCrossLinks("highlights", [crosslinks.get(d.id)], true, false);
             })
-            .on("mouseleave", function() {
+            .on("mouseleave", function () {
                 self.clearTip();
                 self.model.setMarkedCrossLinks("highlights", [], false, false);
             })
-            .on("click", function(d) {
+            .on("click", function (d) {
                 d3.event.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
                 const add = d3.event.ctrlKey || d3.event.shiftKey;
                 self.model.setMarkedCrossLinks("selection", [crosslinks.get(d.id)], false, add);
             });
         ghostLinkJoin
-            .attr("d", function(d) {
+            .attr("d", function (d) {
                 const path = lineCopy[d.id] || (d.outside ? self.outsideLine : self.line)(d.coords);
                 return path;
             })
-            .call(function() {
+            .call(function () {
                 self.showAccentOnTheseLinks.call(self, this, "selection");
-            })
-        ;
-
+            });
         return this;
     },
 
@@ -1070,7 +1065,7 @@ export const CircularViewBB = BaseFrameView.extend({
         return this;
     },
 
-    drawNodes: function(g, nodes) {
+    drawNodes: function (g, nodes) {
         const self = this;
 
         const multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").get("participants")).length > 1;
@@ -1086,37 +1081,35 @@ export const CircularViewBB = BaseFrameView.extend({
         nodeJoin.exit().remove();
 
         nodeJoin.enter()
-            .append('path')
+            .append("path")
             .attr("class", "circleNode")
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function (d) {
                 self.nodeTip(d);
                 self.actionNodeLinks(d.id, "highlights", false);
                 const interactor = self.model.get("clmsModel").get("participants").get(d.id);
                 self.model.setHighlightedProteins([interactor]);
             })
-            .on("mouseleave", function() {
+            .on("mouseleave", function () {
                 self.clearTip();
                 self.model.setHighlightedProteins([]);
                 self.model.setMarkedCrossLinks("highlights", [], false, false);
             })
-            .call(function(sel) {
+            .call(function (sel) {
                 if (multipleNodes) {
                     sel.call(self.nodeDrag);
                 }
-            })
-        ;
-
+            });
         nodeJoin
             .attr("d", this.arc)
-            .style("fill", function(d) { return colourScheme.getColour(interactors.get(d.id)); })
-        ;
-
+            .style("fill", function (d) {
+                return colourScheme.getColour(interactors.get(d.id));
+            });
         this.showAccentOnTheseNodes(nodeJoin, "selection");
 
         return this;
     },
 
-    drawNodeTicks: function(g, nodes, radius) {
+    drawNodeTicks: function (g, nodes, radius) {
         const self = this;
         const tot = nodes.reduce(function (total, node) {
             return total + (node.size || 1);
@@ -1181,25 +1174,25 @@ export const CircularViewBB = BaseFrameView.extend({
             .attr("dy", ".35em");
 
         indTickJoin
-            .attr("transform", function(d) {
+            .attr("transform", function (d) {
                 return "rotate(" + (d.angle - 90) + ")" + "translate(" + radius + ",0)";
             })
             .select("text")
-            .text(function(d) {
+            .text(function (d) {
                 return d.label;
             })
             //.classed ("justifyTick", function(d) { return d.angle > 180; })   // must wait for inkscape/illustrator to catch up with css3 so have to use following code instead
-            .attr("transform", function(d) {
+            .attr("transform", function (d) {
                 return d.angle > 180 ? "rotate(180) translate(-16 0)" : null;
             })
-            .attr("text-anchor", function(d) {
+            .attr("text-anchor", function (d) {
                 return d.angle > 180 ? "end" : null;
             });
 
         return this;
     },
 
-    drawNodeText: function(g, nodes) {
+    drawNodeText: function (g, nodes) {
         const self = this;
 
         const defs = d3.select(this.el).select("svg defs");
@@ -1217,7 +1210,7 @@ export const CircularViewBB = BaseFrameView.extend({
         pathJoin.enter().append("path")
             .attr("id", pathId);
         pathJoin
-            .attr("d", function(d) {
+            .attr("d", function (d) {
                 let pathd = self.textArc(d);
                 // xilog ("pathd", pathd);
                 // only want one curve, not solid arc shape, so chop path string
@@ -1244,25 +1237,24 @@ export const CircularViewBB = BaseFrameView.extend({
             .attr("dy", "0.3em")
             .append("textPath")
             .attr("startOffset", "50%")
-            .attr("xlink:href", function(d) {
+            .attr("xlink:href", function (d) {
                 return "#" + pathId(d);
-            })
+            });
         //.text (function(d) { return d.name.replace("_", " "); })
-        ;
 
         // this lets names update for existing nodes
-        textJoin.select("text textPath").text(function(d) {
+        textJoin.select("text textPath").text(function (d) {
             return d.name.replace("_", " ");
         });
 
         return this;
     },
 
-    drawFeatures: function(g, features) {
+    drawFeatures: function (g, features) {
         const self = this;
 
         // Sort so features are drawn biggest first, smallest last (trying to avoid small features being occluded)
-        features.sort(function(a, b) {
+        features.sort(function (a, b) {
             const diff = (b.end - b.start) - (a.end - a.start);
             return (diff < 0 ? -1 : (diff > 0 ? 1 : 0));
         });
@@ -1273,17 +1265,17 @@ export const CircularViewBB = BaseFrameView.extend({
         featureJoin.exit().remove();
 
         featureJoin.enter()
-            .append('path')
+            .append("path")
             .attr("class", "circleFeature")
-            .on("mouseenter", function(d) {
+            .on("mouseenter", function (d) {
                 self.featureTip(d);
                 self.actionNodeLinks(d.nodeID, "highlights", false, d.fstart, d.fend);
             })
-            .on("mouseleave", function() {
+            .on("mouseleave", function () {
                 self.clearTip();
                 self.model.setMarkedCrossLinks("highlights", [], false, false);
             })
-            .on("click", function(d) {
+            .on("click", function (d) {
                 d3.event.stopPropagation(); // stop event getting picked up by backdrop listener which cancels all selections
                 const add = d3.event.ctrlKey || d3.event.shiftKey;
                 self.actionNodeLinks(d.nodeID, "selection", add, d.fstart, d.fend);
@@ -1296,15 +1288,15 @@ export const CircularViewBB = BaseFrameView.extend({
         featureJoin
             .order()
             .attr("d", this.featureArc)
-            .style("fill", function(d) {
-                return annotColl.getColour (d.category, d.type);
+            .style("fill", function (d) {
+                return annotColl.getColour(d.category, d.type);
             });
 
         return this;
     },
 
 
-    drawResidueLetters: function(g, links) {
+    drawResidueLetters: function (g, links) {
 
         const circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
         //xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
@@ -1314,7 +1306,7 @@ export const CircularViewBB = BaseFrameView.extend({
 
         const crosslinks = this.model.get("clmsModel").get("crosslinks");
         const resMap = d3.map();
-        links.forEach(function(link) {
+        links.forEach(function (link) {
             const xlink = crosslinks.get(link.id);
             resMap.set(xlink.fromProtein.id + "-" + xlink.fromResidue, {
                 polar: link.coords[0],
@@ -1337,12 +1329,12 @@ export const CircularViewBB = BaseFrameView.extend({
         resJoin.enter()
             .append("text")
             .attr("class", "residueLetter")
-            .text(function(d) {
+            .text(function (d) {
                 return d.value.res;
             });
 
         resJoin
-            .attr("transform", function(d) {
+            .attr("transform", function (d) {
                 const polar = d.value.polar;
                 const rang = (polar.ang - 90) * degToRad;
                 const x = polar.rad * Math.cos(rang);
@@ -1350,7 +1342,7 @@ export const CircularViewBB = BaseFrameView.extend({
                 const rot = (polar.ang < 90 || polar.ang > 270) ? polar.ang : polar.ang + 180;
                 return "rotate (" + rot + " " + x + " " + y + ") translate(" + x + " " + y + ")";
             })
-            .attr("dy", function(d) {
+            .attr("dy", function (d) {
                 const polar = d.value.polar;
                 return (polar.ang < 90 || polar.ang > 270) ? "0.8em" : "-0.1em";
             });
@@ -1358,7 +1350,7 @@ export const CircularViewBB = BaseFrameView.extend({
         return this;
     },
 
-    relayout: function(descriptor) {
+    relayout: function (descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render();
         }
@@ -1367,7 +1359,7 @@ export const CircularViewBB = BaseFrameView.extend({
 
     identifier: "Circular View",
 
-    optionsToString: function() {
+    optionsToString: function () {
         const abbvMap = {
             showResLabels: "RESLBLS",
             intraOutside: "SELFOUTER",
@@ -1385,7 +1377,7 @@ export const CircularViewBB = BaseFrameView.extend({
 
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy c3 view just to be sure)
-    remove: function() {
+    remove: function () {
         CircularViewBB.__super__.remove.apply(this, arguments);
     }
 });

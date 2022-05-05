@@ -1,11 +1,10 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
+import d3 from "d3";
 import * as NGL from "../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {filterOutDecoyInteractors, getLegalAccessionIDs, loadUserFile} from "../modelUtils";
-import {addMultipleSelectControls, commonRegexes} from "../utils";
-import {NGLUtils} from "../views/ngl/NGLUtils";
-import d3 from "d3";
+import {getLegalAccessionIDs, loadUserFile} from "../modelUtils";
+import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 
 export const PDBFileChooserBB = BaseFrameView.extend({
@@ -17,7 +16,8 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         }
         return _.extend({}, parentEvents, {
             "click .pdbWindowButton": "launchExternalPDBWindow",
-            "click .ebiPdbWindowButton": "launchExternalEBIPDBWindow",
+            "click .swissmodelWindowButton": "launchExternalSwissmodelWindow",
+            // "click .ebiPdbWindowButton": "launchExternalEBIPDBWindow",
             "change .selectPdbButton": "selectPDBFile",
             "keyup .inputPDBCode": "enteringPDBCode",
             "click button.PDBSubmit": "loadPDBCode",
@@ -71,14 +71,10 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 accept: ".txt,.cif,.pdb",
                 class: "selectPdbButton"
             })
-            .property("multiple", true)
-        ;
-
+            .property("multiple", true);
         const pdbCodeSpan = box.append("span")
-                .attr("class", "btn nopadLeft")
-                .text("or Enter 4-character PDB IDs")
-            //.append("div")
-        ;
+            .attr("class", "btn nopadLeft")
+            .text("or Enter 4-character PDB IDs");
 
         pdbCodeSpan.append("input")
             .attr({
@@ -92,9 +88,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 title: "Enter PDB IDs here e.g. 1AO6 for one structure, 1YSX 1BKE to merge two",
                 //placeholder: "eg 1AO6"
             })
-            .property("required", true)
-        ;
-
+            .property("required", true);
         pdbCodeSpan.append("span").text("& Press Enter");
 
         const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
@@ -108,10 +102,15 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"
             },
             {
-                class: "ebiPdbWindowButton",
-                text: "Show PDBs Matching a Protein Sequence @ EBI",
-                tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"
-            }
+                class: "swissmodelWindowButton",
+                text: "SWISS-MODEL lookup (SELECT ONE PROTEIN) ",
+                tooltip: "Queries SWISS-MODEL with Uniprot accession number - select exactly one protein"
+            },
+            // {
+            //     class: "ebiPdbWindowButton",
+            //     text: "Show PDBs Matching a Protein Sequence @ EBI",
+            //     tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"
+            // }
         ];
         queryBox.selectAll("button").data(qButtonData, function (d) {
             return d.text;
@@ -126,17 +125,14 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             })
             .attr("title", function (d) {
                 return d.tooltip;
-            })
-        ;
-
+            });
         queryBox.selectAll("button")
             .classed("btn btn-1 btn-1a", true)
-            .append("i").attr("class", "fa fa-xi fa-external-link")
-        ;
+            .append("i").attr("class", "fa fa-xi fa-external-link");
+        //
+        // this.updateProteinDropdown(queryBox);
 
-        this.updateProteinDropdown(queryBox);
-
-        wrapperPanel.append("p").attr("class", "smallHeading").text("Load Results");
+        wrapperPanel.append("p").attr("class", "smallHeading").text("Results:");
         wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
 
         d3.select(this.el).selectAll(".smallHeading").classed("smallHeadingBar", true);
@@ -149,16 +145,16 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         //console.log("STAGE", this.stage);
 
         function sanitise(str) {
-            return str.replace(/[^a-z0-9 ,.?!]/ig, '');
+            return str.replace(/[^a-z0-9 ,.?!]/ig, "");
         }
 
-        function updatePD() {
-            this.updateProteinDropdown(d3.select(this.el).select(".queryBox"));
-        }
-
-        // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
-        this.listenTo(this.model, "change:selectedProteins", updatePD);
-        this.listenTo(vent, "proteinMetadataUpdated", updatePD);
+        // function updatePD() {
+        //     this.updateProteinDropdown(d3.select(this.el).select(".queryBox"));
+        // }
+        //
+        // // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
+        // this.listenTo(this.model, "change:selectedProteins", updatePD);
+        // this.listenTo(vent, "proteinMetadataUpdated", updatePD);
 
         this.listenTo(this.model, "3dsync", function (newSequences) {
             const count = _.isEmpty(newSequences) ? 0 : newSequences.length;
@@ -170,9 +166,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             const pdbString = nameArr ?
                 d3.set(nameArr.map(function (name) {
                     return name.substr(0, _./*last*/indexOf(name, ":"));
-                })).values().join(", ") : "?"
-            ;
-
+                })).values().join(", ") : "?";
             let msg = newSequences.failureReason ? "" : "Completed Loading " + sanitise(pdbString) + ".<br>";
             msg += success ? "✓ Success! " + count + " sequence" + (count > 1 ? "s" : "") + " mapped between this search and the PDB file." :
                 sanitise((newSequences.failureReason || "No sequence matches found between this search and the PDB file") +
@@ -183,7 +177,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             this.setStatusText(msg, success);
         });
 
-        this.listenTo(vent, "alignmentProgress", this.setStatusText);
+        this.listenTo(window.vent, "alignmentProgress", this.setStatusText);
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {
@@ -198,7 +192,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         const selectedProteins = this.model.get("selectedProteins");
         return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").get("participants").values()) : selectedProteins;
     },
-
+    /*
     updateProteinDropdown: function (parentElem) {
         const proteins = this.getSelectedProteins();
 
@@ -225,7 +219,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         });
 
     },
-
+*/
     launchExternalPDBWindow: function () {
         // http://stackoverflow.com/questions/15818892/chrome-javascript-window-open-in-new-tab
         // annoying workaround whereby we need to open a blank window here and set the location later
@@ -302,6 +296,16 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         }
     },
 
+    launchExternalSwissmodelWindow: function () {
+        const newtab = window.open("", "_blank");
+        const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
+        if (accessionIDs.length === 1) {
+            newtab.location = "https://swissmodel.expasy.org/repository/uniprot/" + accessionIDs[0];
+        } else {
+            newtab.document.body.innerHTML = "Select exactly one protein with legal Accession ID in the current dataset. SWISS-MODEL service can only query single protein.";
+        }
+    },
+
     getSelectedOption: function (higherElem, selectName) {
         let funcMeta;
 
@@ -317,18 +321,17 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             })
             .each(function (d) {
                 funcMeta = d;
-            })
-        ;
-
+            });
         return funcMeta;
     },
 
+    /*
     launchExternalEBIPDBWindow: function () {
         const chosenSeq = (this.getSelectedOption(d3.select(this.el).select(".columnbar"), "Proteins") || {
             sequence: ""
         }).sequence;
         window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
-    },
+    },*/
 
     selectPDBFile: function (evt) {
         this.setWaitingEffect();
@@ -339,12 +342,12 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         const fileCount = evt.target.files.length;
 
         const onLastLoad = _.after(fileCount, function () {
-                repopulateNGL({
-                    pdbSettings: pdbSettings,
-                    stage: self.stage,
-                    compositeModel: self.model
-                });
-            }
+            repopulateNGL({
+                pdbSettings: pdbSettings,
+                stage: self.stage,
+                compositeModel: self.model
+            });
+        }
         );
 
         for (let n = 0; n < fileCount; n++) {
@@ -354,7 +357,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 fileObj,
                 function (fileContents, associatedData) {
                     const blob = new Blob([fileContents], {
-                        type: 'application/text'
+                        type: "application/text"
                     });
                     const name = associatedData.name;
                     pdbSettings.push({
@@ -362,7 +365,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                         uri: blob,
                         local: true,
                         params: {
-                            ext: name.substr(name.lastIndexOf('.') + 1),
+                            ext: name.substr(name.lastIndexOf(".") + 1),
                             cAlphaOnly: self.cAlphaOnly,
                         }
                     });

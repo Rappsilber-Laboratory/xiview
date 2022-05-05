@@ -1,6 +1,6 @@
 import Backbone from "backbone";
-import * as _ from 'underscore';
-import {makeLegalDomID} from '../utils';
+import * as _ from "underscore";
+import {makeLegalDomID} from "../utils";
 import d3 from "d3";
 
 export const checkBoxView = Backbone.View.extend({
@@ -25,12 +25,10 @@ export const checkBoxView = Backbone.View.extend({
         }
 
         const labs = sel.append("label")
-            .attr("class", "btn")
-        ;
+            .attr("class", "btn");
         labs.append("input")
             .attr("id", sel.attr("id") + "ChkBx")
-            .attr("type", "checkbox")
-        ;
+            .attr("type", "checkbox");
         const labelText = this.options.labelFirst ? labs.insert("span", ":first-child") : labs.append("span");
         labelText.text(this.options.label);
 
@@ -43,6 +41,7 @@ export const checkBoxView = Backbone.View.extend({
         }
     },
 
+    // eslint-disable-next-line no-unused-vars
     showState: function (args) {
         const boolVal = arguments.length > 1 ? arguments[1] : arguments[0];
         d3.select(this.el).select("input").property("checked", boolVal);

@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 
 // Model for one sequence pairing
 import Backbone from "backbone";
@@ -14,12 +14,14 @@ class SeqModel extends Backbone.Model {
         //     }
         // });
     }
+
     defaults() {
         return {
             local: false,
             semiLocal: false,
         };
     }
+
     align() {
         const fullResult = this.collection.containingModel.alignWithoutStoring(
             [this.get("compSeq")], {local: this.get("local"), semiLocal: this.get("semiLocal")}

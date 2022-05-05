@@ -1,4 +1,5 @@
 import _ from "underscore";
+import * as NGL from "../../../vendor/ngl.dev";
 import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./RepopulateNGL";
 import d3 from "d3";
@@ -76,8 +77,7 @@ export const NGLExportUtils = {
 
             return "distance " + name1 + "-" + name2 +
                 ", resi " + link.residueA.resno + " and name CA and chain " + chainA + " and " + pdbIdA +
-                ", resi " + link.residueB.resno + " and name CA and chain " + chainB + " and " + pdbIdB
-                ;
+                ", resi " + link.residueB.resno + " and name CA and chain " + chainB + " and " + pdbIdB;
         });
 
         const lines = remarkLines.concat(pdbLines, crosslinkLines);
@@ -122,6 +122,40 @@ export const NGLExportUtils = {
         return header.concat(crosslinkLines);
     },
 
+
+    exportHalfInLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
+        const crosslinks = nglModelWrapper.getHalfLinks();
+        const linkExportArray = NGLExportUtils.makeHalfInLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
+        const fileName = downloadFilename("half-in-NGL", "csv");
+        download(linkExportArray.join("\r\n"), "plain/text", fileName);
+    },
+
+    makeHalfInLinkSyntax: function (structure, links, nglModelWrapper, selectedOnly) {
+        const pdbIds = structure.chainToOriginalStructureIDMap || {};
+        const chainProxy = structure.getChainProxy();
+        const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
+
+        const header = ["model,protein1,chain1,res1,protein2"];
+        const crosslinkLines = [];
+        for (let link of links) {
+            if (!selectedOnly || selectedLinkIds.indexOf(link.origId) !== -1) {
+                chainProxy.index = link.residue.chainIndex;
+                const chainA = chainProxy.chainname;
+
+                const xiviewLink = crosslinkMap.get(link.origId);
+                const p1 = xiviewLink.fromProtein.accession;
+                const p2 = xiviewLink.toProtein.accession;
+
+                crosslinkLines.push((pdbIds[link.residue.chainIndex] || structure.name) + ","
+                    + p1 + "," + chainA + "," + link.residue.resno + ","
+                    + p2);
+            }
+        }
+
+        return header.concat(crosslinkLines);
+    },
+
     exportChimeraPseudobonds: function (structure, nglModelWrapper, name, selectedOnly) {
         const chainProxy = structure.getChainProxy();
         const bondArray = [];
@@ -137,7 +171,7 @@ export const NGLExportUtils = {
             const xiviewLink = crosslinkMap.get(link.origId);
             const color = colorScheme.getColour(xiviewLink);
 
-            bondArray.push("/" + chainA + ":" + link.residueA.resno + "@CA /" + chainB + ":" + link.residueB.resno + "@CA " + color);
+            bondArray.push("#1/" + chainA + ":" + link.residueA.resno + "@CA #1/" + chainB + ":" + link.residueB.resno + "@CA " + color);
         }
         const fileName = downloadFilename("ChimeraX", "pb");
         download(bondArray.join("\r\n"), "plain/text", fileName);
@@ -226,7 +260,7 @@ export const NGLExportUtils = {
         //json.subunits = Array.from(subunits.keys());
 
         for (let subunit of subunits.entries()) {
-            const chainIdArr = Array.from(subunit[1].values())
+            const chainIdArr = Array.from(subunit[1].values());
             const selString = ":." + chainIdArr.join(",.");
             const su = {
                 "chainIds": chainIdArr,
@@ -297,8 +331,7 @@ export const NGLExportUtils = {
                 })).values() : [])
                     .map(function (clid) {
                         return clid === "undefined" ? "default" : clid;
-                    })
-            ;
+                    });
             if (_.isEmpty(crosslinkerIDs)) {
                 crosslinkerIDs = ["default"];
             }
@@ -310,8 +343,7 @@ export const NGLExportUtils = {
                 const line = "assign" +
                     " (segid " + String.fromCharCode(65 + link.residueA.modelIndex) + " and name CA and resi " + link.residueA.resno + ")" +
                     " (segid " + String.fromCharCode(65 + link.residueB.modelIndex) + " and name CA and resi " + link.residueB.resno + ")" +
-                    " " + clRestraints
-                ;
+                    " " + clRestraints;
                 crosslinkLines[clid].push(line);
             });
         });

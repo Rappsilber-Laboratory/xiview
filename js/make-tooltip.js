@@ -223,7 +223,7 @@ export const makeTooltipContents = {
         // }
         return contents;
     },
-}
+};
 export const makeTooltipTitle = {
     link: function (linkCount) {
         return "Linked Residue Pair" + (linkCount > 1 ? "s" : "");
@@ -244,4 +244,4 @@ export const makeTooltipTitle = {
     complex: function (interactor) {
         return interactor.name.replace("_", " ");
     },
-}
+};

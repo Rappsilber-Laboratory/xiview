@@ -1,14 +1,13 @@
 import {ColourModel} from "./color-model";
 
 export class DefaultProteinColourModel extends ColourModel {
-    initialize  () {
+    initialize() {
         this
             .set("labels", this.get("colScale").copy().range(["Protein"]))
-            .set("type", "ordinal")
-        ;
+            .set("type", "ordinal");
     }
 
-    getValue  () {
+    getValue() {
         return 0;
     }
 }

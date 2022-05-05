@@ -1,4 +1,4 @@
-# Xi View
+# xiVIEW
 
 Interactive visualisation of protein Cross-Link data sets.
 

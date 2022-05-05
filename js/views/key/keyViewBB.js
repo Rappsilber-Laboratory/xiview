@@ -1,5 +1,5 @@
-import '../../../css/key.css';
-import * as _ from 'underscore';
+import "../../../css/key.css";
+import * as _ from "underscore";
 import d3 from "d3";
 import * as jscolor from "@eastdesire/jscolor";
 
@@ -36,18 +36,15 @@ export const KeyViewBB = BaseFrameView.extend({
         ],
     },
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         KeyViewBB.__super__.initialize.apply(this, arguments);
 
         const topDiv = d3.select(this.el).append("div")
-            .attr("class", "verticalFlexContainer keyPanel")
-        ;
-
+            .attr("class", "verticalFlexContainer keyPanel");
         const chartDiv = topDiv.append("div")
             .attr("class", "panelInner")
-            .attr("flex-grow", "1")
-        ;
-
+            .attr("flex-grow", "1");
         this.setupColourSection(chartDiv);
         this.setupLegendSection(chartDiv);
         this.sliderSubViews = [];
@@ -108,16 +105,14 @@ export const KeyViewBB = BaseFrameView.extend({
         sectionDiv.selectAll("section")
             .classed("colourKeyBottomGap", true)
             .insert("label", ":first-child").attr("id", function (d) {
-            return d.controlPlaceholderID;
-        })
-        ;
+                return d.controlPlaceholderID;
+            });
 
         // add download colour scheme svg button
         sectionDiv.selectAll("section")
             .append("button")
             .attr("class", "downloadButton3 btn btn-1 btn-1a")
-            .text("Download This Colour Scheme as SVG")
-        ;
+            .text("Download This Colour Scheme as SVG");
     },
 
     setupLegendSection: function (chartDiv) {
@@ -188,41 +183,41 @@ export const KeyViewBB = BaseFrameView.extend({
                 return [row, texts[row]];
             })
         },
-            {
-                id: "residueKey",
-                header: "XiNet Residue Level Legend",
-                rows: ["clinkr", "selflinkr", "homom", "ambigr", "highlight", "annotr"].map(function (row) {
-                    return [row, texts[row]];
-                })
-            },
-            {
-                id: "circularKey",
-                header: "Circular View Legend",
-                rows: ["circleCrossLink", "homom", "ambigr", "circleAnnot"].map(function (row) {
-                    return [row, texts[row]];
-                })
-            },
-            {
-                id: "matrixKey",
-                header: "Matrix View Legend",
-                rows: ["scatterNormal", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function (row) {
-                    return [row, texts[row]];
-                })
-            },
-            {
-                id: "scatterplotKey",
-                header: "Scatterplot Legend",
-                rows: ["scatterNormal", "scatterDecoy", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function (row) {
-                    return [row, texts[row]];
-                })
-            },
-            {
-                id: "alignmentKey",
-                header: "Alignment Legend",
-                rows: ["alignMatch", "alignMissing", "alignExtra", "alignVariation"].map(function (row) {
-                    return [row, texts[row]];
-                })
-            },
+        {
+            id: "residueKey",
+            header: "XiNet Residue Level Legend",
+            rows: ["clinkr", "selflinkr", "homom", "ambigr", "highlight", "annotr"].map(function (row) {
+                return [row, texts[row]];
+            })
+        },
+        {
+            id: "circularKey",
+            header: "Circular View Legend",
+            rows: ["circleCrossLink", "homom", "ambigr", "circleAnnot"].map(function (row) {
+                return [row, texts[row]];
+            })
+        },
+        {
+            id: "matrixKey",
+            header: "Matrix View Legend",
+            rows: ["scatterNormal", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function (row) {
+                return [row, texts[row]];
+            })
+        },
+        {
+            id: "scatterplotKey",
+            header: "Scatterplot Legend",
+            rows: ["scatterNormal", "scatterDecoy", "scatterAmbig", "scatterHighlighted", "scatterSelected"].map(function (row) {
+                return [row, texts[row]];
+            })
+        },
+        {
+            id: "alignmentKey",
+            header: "Alignment Legend",
+            rows: ["alignMatch", "alignMissing", "alignExtra", "alignVariation"].map(function (row) {
+                return [row, texts[row]];
+            })
+        },
         ];
 
         const headerFunc = function (d) {
@@ -353,7 +348,7 @@ export const KeyViewBB = BaseFrameView.extend({
                 colourSection.rows = labelColourPairings.map(function (val, i) {
                     const rgbCol = val[1];
                     const rgbHex = d3.rgb(rgbCol).toString();
-                    const span =  "<input class='color-chooser' data-jscolor='{}' value='" + rgbHex + "FF' title='Press to change colour for " + val[0] + "'/>";
+                    const span = "<input class='color-chooser' data-jscolor='{}' value='" + rgbHex + "FF' title='Press to change colour for " + val[0] + "'/>";
                     return [span, val[0], i];
                 });
             }
@@ -372,8 +367,7 @@ export const KeyViewBB = BaseFrameView.extend({
                 return d.rows;
             }, function (d) {
                 return !d.rows ? d.join(",") : "";
-            }) // key function = all fields joined
-        ;
+            }); // key function = all fields joined
         rowSel.exit().remove();
         rowSel.enter().append("tr");
         rowSel.sort(function (a, b) {
@@ -432,9 +426,7 @@ export const KeyViewBB = BaseFrameView.extend({
                         absolutePosition: false,
                         sliderThickness: 25,
                     })
-                        .show(true)
-                    ;
-
+                        .show(true);
                     d3.select("#" + pid).selectAll(".brushValueText").style("display", "none");
                 }
             }

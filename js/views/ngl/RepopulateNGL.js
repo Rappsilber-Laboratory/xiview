@@ -20,8 +20,6 @@ export function repopulateNGL(pdbInfo) {
     const stage = pdbInfo.stage;
     const compositeModel = pdbInfo.compositeModel;
 
-    const self = this;
-
     console.log("CLEAR STAGE");
     stage.removeAllComponents(); // necessary to remove old stuff so old sequences don't pop up in sequence finding
 
@@ -69,7 +67,7 @@ export function repopulateNGL(pdbInfo) {
                 // match by alignment func for searches where we don't know uniprot ids, don't have pdb codes, or when matching by uniprot ids returns no matches
                 function matchByXiAlignment(whichNGLSequences, pdbUniProtMap) {
                     const protAlignCollection = compositeModel.get("alignColl");
-                    vent.listenToOnce(vent, "sequenceMatchingDone", function (matchMatrix) {
+                    window.vent.listenToOnce(window.vent, "sequenceMatchingDone", function (matchMatrix) {
                         const pdbXiProtMap = matrixPairings(matchMatrix, whichNGLSequences);
                         xilog("XI PAIRED", pdbXiProtMap);
                         sequenceMapsAvailable(pdbXiProtMap.concat(pdbUniProtMap));    // concat uniprot service and xi matched pdb-protein pairs
@@ -84,7 +82,7 @@ export function repopulateNGL(pdbInfo) {
 
                 const nglSequences = getChainSequencesFromNGLStructure(structureComp);
                 const interactorMap = compositeModel.get("clmsModel").get("participants");
-                var interactorArr = Array.from(interactorMap.values());
+                const interactorArr = Array.from(interactorMap.values());
 
                 // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                 // between ngl protein chains and clms proteins. This is asynchronous so we use a callback

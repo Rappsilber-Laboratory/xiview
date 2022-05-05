@@ -15,51 +15,51 @@ export function downloadFilename(type, suffix) {
 }
 
 export function downloadMatches() {
-    download(getMatchesCSV(), 'text/csv', downloadFilename("matches"));
+    download(getMatchesCSV(), "text/csv", downloadFilename("matches"));
 }
 
 export function downloadSSL() {
 
-// $("#newGroupName").dialog({
-//   modal: true,
-//   buttons: {
-//     'OK': function () {
-//       var newGroupName = $('input[name="newGroupName"]').val();
-//       alert(name);
-    download(getSSL(newGroupName), 'text/csv', "test.ssl"); //downloadFilename("ssl"));
-//       // storeData(name);
-//       $(this).dialog('close');
-//     },
-//     'Cancel': function () {
-//       $(this).dialog('close');
-//     }
-//   }
-// });
+    // $("#newGroupName").dialog({
+    //   modal: true,
+    //   buttons: {
+    //     'OK': function () {
+    //       var newGroupName = $('input[name="newGroupName"]').val();
+    //       alert(name);
+    download(getSSL(), "text/csv", "test.ssl"); //downloadFilename("ssl"));
+    //       // storeData(name);
+    //       $(this).dialog('close');
+    //     },
+    //     'Cancel': function () {
+    //       $(this).dialog('close');
+    //     }
+    //   }
+    // });
 
 }
 
 export function downloadLinks() {
-    download(getLinksCSV(), 'text/csv', downloadFilename("links"));
+    download(getLinksCSV(), "text/csv", downloadFilename("links"));
 }
 
 export function downloadPPIs() {
-    download(getPPIsCSV(), 'text/csv', downloadFilename("PPIs"));
+    download(getPPIsCSV(), "text/csv", downloadFilename("PPIs"));
 }
 
 export function downloadResidueCount() {
-    download(getResidueCount(), 'text/csv', downloadFilename("residueCount"));
+    download(getResidueCount(), "text/csv", downloadFilename("residueCount"));
 }
 
 export function downloadModificationCount() {
-    download(getModificationCount(), 'text/csv', downloadFilename("modificationCount"));
+    download(getModificationCount(), "text/csv", downloadFilename("modificationCount"));
 }
 
 export function downloadProteinAccessions() {
-    download(getProteinAccessions(), 'text/csv', downloadFilename("proteinAccessions"));
+    download(getProteinAccessions(), "text/csv", downloadFilename("proteinAccessions"));
 }
 
 export function downloadGroups() {
-    download(getGroups(), 'text/csv', downloadFilename("groups"));
+    download(getGroups(), "text/csv", downloadFilename("groups"));
 }
 
 export function download(content, contentType, fileName) {
@@ -95,8 +95,8 @@ export function download(content, contentType, fileName) {
                         0x80 | ((charcode >> 6) & 0x3f),
                         0x80 | (charcode & 0x3f));
                 }
-                // surrogate pair
-                else {
+
+                else {// surrogate pair
                     i++;
                     // UTF-16 encodes 0x10000-0x10FFFF by
                     // subtracting 0x10000 and splitting the
@@ -121,11 +121,11 @@ export function download(content, contentType, fileName) {
     if (navigator.msSaveOrOpenBlob) {
         navigator.msSaveOrOpenBlob(blob, fileName);
     } else {
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = window.URL.createObjectURL(blob);
         // Give filename you wish to download
         a.download = fileName;
-        a.style.display = 'none';
+        a.style.display = "none";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -160,7 +160,7 @@ export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
 
 
 export function getMatchesCSV() {
-    let csv = '"Id","Protein1","SeqPos1","PepPos1","PepSeq1","LinkPos1","Protein2","SeqPos2","PepPos2","PepSeq2","LinkPos2","Score","Charge","ExpMz","ExpMass","CalcMz","CalcMass","MassError","Missing Peaks","AutoValidated","Validated","Search","RawFileName","PeakListFileName","ScanNumber","ScanIndex","CrossLinkerModMass","FragmentTolerance","IonTypes","Decoy1","Decoy2","3D Distance","From Chain","To Chain","LinkType","DecoyType","Retention Time"\r\n';
+    let csv = "\"Id\",\"Protein1\",\"SeqPos1\",\"PepPos1\",\"PepSeq1\",\"LinkPos1\",\"Protein2\",\"SeqPos2\",\"PepPos2\",\"PepSeq2\",\"LinkPos2\",\"Score\",\"Charge\",\"ExpMz\",\"ExpMass\",\"CalcMz\",\"CalcMass\",\"MassError\",\"Missing Peaks\",\"AutoValidated\",\"Validated\",\"Search\",\"RawFileName\",\"PeakListFileName\",\"ScanNumber\",\"ScanIndex\",\"CrossLinkerModMass\",\"FragmentTolerance\",\"IonTypes\",\"Decoy1\",\"Decoy2\",\"3D Distance\",\"From Chain\",\"To Chain\",\"LinkType\",\"DecoyType\",\"Retention Time\"\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");
     const participants = clmsModel.get("participants");
     const distance2dp = d3.format(".2f");
@@ -222,9 +222,9 @@ export function getMatchesCSV() {
         const retentionTime = match.retentionTime !== undefined ? match.retentionTime : (match.elution_time_end === -1 ? match.elution_time_start : "");
 
         const data = [
-            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.autovalidated, match.validated, match.searchId, match.runName(), match.peakListFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, distancesJoined.join('","'), linkType, decoyType, retentionTime
+            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.autovalidated, match.validated, match.searchId, match.runName(), match.peakListFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, distancesJoined.join("\",\""), linkType, decoyType, retentionTime
         ];
-        csv += '"' + data.join('","') + '"\r\n';
+        csv += "\"" + data.join("\",\"") + "\"\r\n";
         /*
         }
     }
@@ -238,7 +238,7 @@ export function getMatchesCSV() {
 }
 
 function getSSL() {
-    let csv = 'file\tscan\tcharge\tsequence\tscore-type\tscore\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n';
+    let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");
     //var mass6dp = d3.format(".6f");
 
@@ -288,13 +288,13 @@ function getSSL() {
         notUpperCase.lastIndex = 0;
         if (notUpperCase.test(seq)) {
             for (let modInfo of modificationDeltasMap.entries()) {
-                seq = seq.replace(new RegExp(modInfo[0], 'g'), modInfo[1]);
+                seq = seq.replace(new RegExp(modInfo[0], "g"), modInfo[1]);
             }
         }
         const sslSeqLinkIndex = findIndexofNthUpperCaseLetter(seq, linkPos);
         return seq.slice(0, sslSeqLinkIndex + 1) + "[+1.008]" + seq.slice(sslSeqLinkIndex + 1, seq.length);
     };
-    var findIndexofNthUpperCaseLetter = function (str, n) { // n is 1-indexed here
+    const findIndexofNthUpperCaseLetter = function (str, n) { // n is 1-indexed here
         str = str || "";
         let i = -1;
         while (n > 0 && i < str.length) {
@@ -375,7 +375,7 @@ function getSSL() {
                 match.fragmentToleranceString(),
                 match.ionTypesString()
             ];
-            csv += data.join('\t') + '\r\n';
+            csv += data.join("\t") + "\r\n";
         }
     });
 
@@ -397,7 +397,7 @@ export function getLinksCSV() {
     const metaColumns = (clmsModel.get("crosslinkMetaRegistry") || d3.set()).values();
     headerArray = headerArray.concat(metaColumns);
 
-    const headerRow = '"' + headerArray.join('","') + '"';
+    const headerRow = "\"" + headerArray.join("\",\"") + "\"";
 
     const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
 
@@ -414,8 +414,8 @@ export function getLinksCSV() {
         const linear = crosslink.isLinearLink();
         const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
         row.push(
-            mostReadableId(crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
-            (linear ? "" : mostReadableId(crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
+            mostReadableId(crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence ? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
+            (linear ? "" : mostReadableId(crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence ? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
         );
 
         let highestScore = null;
@@ -476,11 +476,11 @@ export function getLinksCSV() {
             row.push(mval === undefined ? "" : mval);
         }
 
-        return '"' + row.join('","') + '"';
+        return "\"" + row.join("\",\"") + "\"";
     }, this);
 
     rows.unshift(headerRow);
-    return rows.join("\r\n") + '\r\n';
+    return rows.join("\r\n") + "\r\n";
 }
 
 function getPPIsCSV() {
@@ -491,7 +491,7 @@ function getPPIsCSV() {
         headerArray.push("Search_" + sid);
     });
 
-    const headerRow = '"' + headerArray.join('","') + '"';
+    const headerRow = "\"" + headerArray.join("\",\"") + "\"";
     const rows = [headerRow];
 
     const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
@@ -519,7 +519,7 @@ function getPPIsCSV() {
         const decoyType = getDecoyTypeFromCrosslink(aCrosslink);
 
         const searchesFound = new Set();
-        for (let crosslink of ppi){
+        for (let crosslink of ppi) {
             const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
             for (let fm_pp of filteredMatchesAndPepPos) {
                 const match = fm_pp.match;
@@ -540,14 +540,14 @@ function getPPIsCSV() {
         //     row.push(mval === undefined ? "" : mval);
         // }
 
-        rows.push('"' + row.join('","') + '"');
+        rows.push("\"" + row.join("\",\"") + "\"");
 
     }
 
-    return rows.join("\r\n") + '\r\n';
+    return rows.join("\r\n") + "\r\n";
 }
 
-function getDecoyTypeFromCrosslink (aCrosslink) {
+function getDecoyTypeFromCrosslink(aCrosslink) {
     let decoyType;
     if (aCrosslink.isLinearLink()) {
         if (aCrosslink.fromProtein.is_decoy) {
@@ -570,7 +570,7 @@ function getDecoyTypeFromCrosslink (aCrosslink) {
 }
 
 export function getResidueCount() {
-    let csv = '"Residue(s)","Occurences(in_unique_links)"\r\n';
+    let csv = "\"Residue(s)\",\"Occurences(in_unique_links)\"\r\n";
     //~ var matches = xlv.matches;//.values();
     //~ var matchCount = matches.length;
     const residueCountMap = d3.map();
@@ -588,12 +588,12 @@ export function getResidueCount() {
     });
 
     residuePairCountMap.forEach(function (k, v) {
-        csv += '"' + k + '","' +
-            v + '"\r\n';
+        csv += "\"" + k + "\",\"" +
+            v + "\"\r\n";
     });
     residueCountMap.forEach(function (k, v) {
-        csv += '"' + k + '","' +
-            v + '"\r\n';
+        csv += "\"" + k + "\",\"" +
+            v + "\"\r\n";
     });
 
     function incrementCount(map, res) {
@@ -610,7 +610,7 @@ export function getResidueCount() {
 }
 
 function getModificationCount() {
-    let csv = '"Modification(s)","TT","TD","DD"\r\n';
+    let csv = "\"Modification(s)\",\"TT\",\"TD\",\"DD\"\r\n";
     const matches = window.compositeModelInst.get("clmsModel").get("matches");
 
     const modCountMap = new Map();
@@ -644,7 +644,7 @@ function getModificationCount() {
 
             countMods(match.matchedPeptides[0].seq_mods, decoyTypeIndex);
             if (match.matchedPeptides[1]) {
-                countMods(match.matchedPeptides[1].seq_mods, decoyTypeIndex)
+                countMods(match.matchedPeptides[1].seq_mods, decoyTypeIndex);
             }
         }
     }
@@ -662,7 +662,7 @@ function getModificationCount() {
             for (let mod of modSet) {
                 const modCount = modCountMap.get(mod);
                 if (typeof modCount == "undefined") {
-                    var counts = [0, 0, 0];
+                    let counts = [0, 0, 0];
                     modCountMap.set(mod, counts);
                     counts[decoyIndex] = counts[decoyIndex] + 1;
                 } else {
@@ -672,7 +672,7 @@ function getModificationCount() {
             for (let modByRes of modByResSet) {
                 const modByResCount = modByResCountMap.get(modByRes);
                 if (!modByResCount) {
-                    var counts = [0, 0, 0];
+                    let counts = [0, 0, 0];
                     modByResCountMap.set(modByRes, counts);
                     ++counts[decoyIndex];
                 } else {
@@ -685,15 +685,15 @@ function getModificationCount() {
     // var mapSort1 = new Map([...modCountMap.entries()].sort((a, b) => b[1] - a[1]));
     // var mapSort2 = new Map([...modByResCountMap.entries()].sort((a, b) => b[1] - a[1]));
 
-    for (var e of modCountMap.entries()) {
-        csv += '"' + e[0] + '","' + e[1][0] + '","' + e[1][1] + '","' + e[1][2] + '"\r\n';
+    for (let e of modCountMap.entries()) {
+        csv += "\"" + e[0] + "\",\"" + e[1][0] + "\",\"" + e[1][1] + "\",\"" + e[1][2] + "\"\r\n";
     }
 
 
-    csv += '"",,,""\r\n"",,,""\r\n"",,,""\r\n';
+    csv += "\"\",,,\"\"\r\n\"\",,,\"\"\r\n\"\",,,\"\"\r\n";
 
-    for (var e of modByResCountMap.entries()) {
-        csv += '"' + e[0] + '","' + e[1][0] + '","' + e[1][1] + '","' + e[1][2] + '"\r\n';
+    for (let e of modByResCountMap.entries()) {
+        csv += "\"" + e[0] + "\",\"" + e[1][0] + "\",\"" + e[1][1] + "\",\"" + e[1][2] + "\"\r\n";
     }
 
 
@@ -713,7 +713,7 @@ function getProteinAccessions() {
 
 function getGroups() {
     const headerArray = ["ProteinID", "Name", "Complex"];
-    const headerRow = '"' + headerArray.join('","') + '"';
+    const headerRow = "\"" + headerArray.join("\",\"") + "\"";
     const rows = [headerRow];
 
     const clmsModel = window.compositeModelInst.get("clmsModel");
@@ -730,8 +730,8 @@ function getGroups() {
                 }
             }
             row.push(protGroups.join(","));
-            rows.push('"' + row.join('","') + '"');
+            rows.push("\"" + row.join("\",\"") + "\"");
         }
     }
-    return rows.join("\r\n") + '\r\n';
+    return rows.join("\r\n") + "\r\n";
 }

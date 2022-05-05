@@ -1,6 +1,7 @@
-import '../../../css/threeColourSlider.css';
+import "../../../css/threeColourSlider.css";
 
-import * as _ from 'underscore';
+import * as $ from "jquery";
+import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 
@@ -71,9 +72,9 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         const cutoffs = [{
             class: "vmin"
         },
-            {
-                class: "vmax"
-            },
+        {
+            class: "vmax"
+        },
         ];
         const numberInputs = top.selectAll("div.inputWrapper")
             .data(cutoffs)

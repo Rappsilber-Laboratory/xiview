@@ -6,37 +6,38 @@ export class GoTerm {
         //this.part_of = new Set();
         //this.parts = new Set();
         //this.interactors = new Set();
+
         this.filtInteractorCount = 0;
     }
 
-// GoTerm.prototype.getInteractors = function(interactorSet) {
-//     var go = window.compositeModelInst.get("go");
-//     if (!interactorSet) {
-//         interactorSet = new Set();
-//     }
-//     if (this.parts) {
-//         for (let partId of this.parts) {
-//             go.get(partId).getInteractors(interactorSet);
-//         }
-//     }
-//     if (this.subclasses) {
-//         for (let subclassId of this.subclasses) {
-//             go.get(subclassId).getInteractors(interactorSet);
-//         }
-//     }
-//     if (this.interactors) {
-//         for (let i of this.interactors) {
-//             if (i.hidden == false) {
-//                 interactorSet.add(i);
-//             }
-//         }
-//     }
-//     return interactorSet;
-// }
+    // getInteractors (interactorSet) {
+    //     var go = window.compositeModelInst.get("go");
+    //     if (!interactorSet) {
+    //         interactorSet = new Set();
+    //     }
+    //     if (this.parts) {
+    //         for (let partId of this.parts) {
+    //             go.get(partId).getInteractors(interactorSet);
+    //         }
+    //     }
+    //     if (this.subclasses) {
+    //         for (let subclassId of this.subclasses) {
+    //             go.get(subclassId).getInteractors(interactorSet);
+    //         }
+    //     }
+    //     if (this.interactors) {
+    //         for (let i of this.interactors) {
+    //             if (i.hidden == false) {
+    //                 interactorSet.add(i);
+    //             }
+    //         }
+    //     }
+    //     return interactorSet;
+    // }
 
-    getInteractors (storeCount) {
+    getInteractors(storeCount) {
         const go = window.compositeModelInst.get("go");
-        GoTerm.prototype.getCount++;
+        // GoTerm.prototype.getCount++;
 
         let subTreeSet; // = new Set();
 
@@ -45,7 +46,7 @@ export class GoTerm {
 
             if (this.parts) {
                 for (let partId of this.parts) {
-                    var sub = go.get(partId).getInteractors(storeCount);
+                    let sub = go.get(partId).getInteractors(storeCount);
                     if (sub) {
                         sub.forEach(subTreeSet.add, subTreeSet);
                     }
@@ -53,7 +54,7 @@ export class GoTerm {
             }
             if (this.subclasses) {
                 for (let subclassId of this.subclasses) {
-                    var sub = go.get(subclassId).getInteractors(storeCount);
+                    let sub = go.get(subclassId).getInteractors(storeCount);
                     if (sub) {
                         sub.forEach(subTreeSet.add, subTreeSet);
                     }
@@ -62,7 +63,7 @@ export class GoTerm {
 
             if (this.interactors) {
                 for (let i of this.interactors) {
-                    if (i.hidden == false) {
+                    if (i.hidden === false) {
                         subTreeSet.add(i);
                     }
                 }
@@ -81,20 +82,20 @@ export class GoTerm {
     }
 
     isDirectRelation(anotherGoTerm) {
-        const agoid = anotherGoTerm.id;
+        const aGoId = anotherGoTerm.id;
         return (
-            (this == anotherGoTerm) ||
-            (this.is_a && this.is_a.has(agoid)) ||
-            (this.subclasses && this.subclasses.has(agoid)) ||
-            (this.part_of && this.part_of.has(agoid)) ||
-            (this.parts && this.parts.has(agoid))
+            (this === anotherGoTerm) ||
+            (this.is_a && this.is_a.has(aGoId)) ||
+            (this.subclasses && this.subclasses.has(aGoId)) ||
+            (this.part_of && this.part_of.has(aGoId)) ||
+            (this.parts && this.parts.has(aGoId))
         );
     }
 
 
     isDescendantOf(anotherGoTermId) {
         const go = window.compositeModelInst.get("go");
-        if (anotherGoTermId == this.id) {
+        if (anotherGoTermId === this.id) {
             return true;
         }
         if (this.part_of) {

@@ -1,12 +1,13 @@
-import {clearObjectMetaData} from "../modelUtils";
+import * as _ from "underscore";
 import d3 from "d3";
+import {clearObjectMetaData} from "../modelUtils";
 
 export const clearFdr = function (crosslinksArr) {
     // clear fdr information from crosslinks (usually because we've gone into none-fdr mode and don't want it showing in tooltips)
-    clearObjectMetaData (crosslinksArr, ["fdr", "linkScore"]);
+    clearObjectMetaData(crosslinksArr, ["fdr", "linkScore"]);
 };
 
-export const fdr = function(crosslinksArr, options) {
+export const fdr = function (crosslinksArr, options) {
 
     const defaultScoreCalcFunc = function (crosslink) { // default function is based on quadratic mean (rms)
         const filtered = crosslink.matches_pp
@@ -26,7 +27,7 @@ export const fdr = function(crosslinksArr, options) {
         filterLinears: false
     }, options);
 
-    var filterModel = options.filterModel;
+    const filterModel = options.filterModel;
     const clmsModel = options.CLMSModel;
     if (!filterModel || !clmsModel) {
         return null;
@@ -35,13 +36,13 @@ export const fdr = function(crosslinksArr, options) {
     // Work out link score based on a function of the related match scores
     const clCount = crosslinksArr.length;
     for (let i = 0; i < clCount; ++i) {
-        var crosslink = crosslinksArr[i];
+        const crosslink = crosslinksArr[i];
         crosslink.setMeta("linkScore", options.scoreCalcFunc(crosslink));
     }
 
     // filter out linears
     if (options.filterLinears) {
-        crosslinksArr = crosslinksArr.filter(function(link) {
+        crosslinksArr = crosslinksArr.filter(function (link) {
             return !link.isLinearLink();
         });
     }
@@ -51,8 +52,8 @@ export const fdr = function(crosslinksArr, options) {
     const linkArrs = _.partition(crosslinksArr, function (xLink) {
         return !xLink.isSelfLink();
     });
-    linkArrs.forEach(function(linkArr) {
-        linkArr.sort(function(a, b) {
+    linkArrs.forEach(function (linkArr) {
+        linkArr.sort(function (a, b) {
             return a.getMeta("linkScore") - b.getMeta("linkScore");
         });
     }); // in ascending order (lowest first)
@@ -115,11 +116,11 @@ export const fdr = function(crosslinksArr, options) {
             const lastLink = linkArr[cutoffIndex];
             fdrScoreCutoff = nonzero ? lastLink.getMeta("linkScore") : 0.001;
 
-            if (false) {
+            /*if (false) {
                 console.log(arrLabels[index] + " post totals tt td dd (should be zero)", t);
                 console.log("runningFdr", runningFdr, "final fdr", fdr);
                 console.log(fdr, "fdr of", options.threshold, "met or lower at index", cutoffIndex, "link", lastLink, "and fdr score", fdrScoreCutoff);
-            }
+            }*/
         }
 
         return {

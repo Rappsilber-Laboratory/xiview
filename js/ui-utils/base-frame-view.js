@@ -1,4 +1,4 @@
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 
@@ -12,8 +12,8 @@ import {
     updateColourKey,
     xilog
 } from "../utils";
-import * as Spinner from 'spin';
-import {download} from  "../downloads";
+import * as Spinner from "spin";
+import {download} from "../downloads";
 import d3 from "d3";
 
 // https://stackoverflow.com/questions/32065257/having-a-static-variable-in-backbone-js-views#32820288
@@ -67,16 +67,12 @@ export const BaseFrameView = Backbone.View.extend({
 
             parentBar
                 .append("span")
-                .attr("class", "dynTitle")
-            //.text ("Title")
-            ;
+                .attr("class", "dynTitle");
 
             parentBar
                 .append("i")
                 .attr("class", "fa fa-times-circle closeButton panelMenuButton")
-                .attr("title", "Hide View")
-            ;
-
+                .attr("title", "Hide View");
             return parentBar;
         }
 
@@ -100,20 +96,17 @@ export const BaseFrameView = Backbone.View.extend({
         if (this.options.canMaximise) {
             mainDivSel.select(".dynDiv_moveParentDiv").append("i")
                 .attr("class", "fa fa-expand maximiseButton panelMenuButton")
-                .attr("title", "Maximise / Restore Panel Size")
-            ;
+                .attr("title", "Maximise / Restore Panel Size");
         }
         if (this.options.canHideToolbarArea) {
             mainDivSel.select(".dynDiv_moveParentDiv").append("i")
                 .attr("class", "fa fa-wrench hideToolbarButton panelMenuButton")
-                .attr("title", "Hide/Show the View Toolbar")
-            ;
+                .attr("title", "Hide/Show the View Toolbar");
         }
         if (this.options.canTakeImage) {
             mainDivSel.select(".dynDiv_moveParentDiv").append("i")
                 .attr("class", "fa fa-photo takeImageButton panelMenuButton")
-                .attr("title", "Download Image")
-            ;
+                .attr("title", "Download Image");
         }
         mainDivSel.select(".dynTitle").text(this.identifier);
 
@@ -187,7 +180,7 @@ export const BaseFrameView = Backbone.View.extend({
         //console.log ("xml", svgXML);
 
         const fileName = this.filenameStateString().substring(0, 240);
-        download(svgXML, 'application/svg', fileName + ".svg");
+        download(svgXML, "application/svg", fileName + ".svg");
         this.removeKey();
 
         return this;
@@ -215,13 +208,12 @@ export const BaseFrameView = Backbone.View.extend({
             self.removeKey();
         });
 
-        d3canvases.each(function (d) {
+        d3canvases.each(function () {
             const d3canvas = d3.select(this);
             // Add image to existing clip in svg, (as first-child so sibling group holding links appears on top of it)
             const img = detachedSVGD3
                 .select(self.canvasImageParent) // where to add image
-                .insert("svg:image", ":first-child")
-            ;
+                .insert("svg:image", ":first-child");
 
             // Add a rule to stop the image being anti-aliased (i.e. blurred)
             img.attr("class", "sharpImage");
@@ -247,8 +239,7 @@ export const BaseFrameView = Backbone.View.extend({
                     .attr("class", "imageOrigin")
                     .attr("xlink:href", this.model.generateUrlString())
                     .attr("target", "_blank")
-                : tempSVG
-            ;
+                : tempSVG;
             link.append("text").text(this.imageOriginString().substring(0, 240)).attr("dy", "1em").attr("class", "imageOrigin");
         }
         return tempSVG;
@@ -340,8 +331,8 @@ export const BaseFrameView = Backbone.View.extend({
     setVisible: function (show) {
         this.visible = show;
         d3.select(this.el)
-            .style('display', show ? 'block' : 'none')
-            .classed('dynDivVisible', show);
+            .style("display", show ? "block" : "none")
+            .classed("dynDivVisible", show);
 
         if (show) {
             this
@@ -389,7 +380,7 @@ export const BaseFrameView = Backbone.View.extend({
         titleElem.text(titleText);
 
         const self = this;
-        titleElem.on("mouseenter", function (d) {
+        titleElem.on("mouseenter", function () {
             self.model.get("tooltipModel")
                 .set("header", self.identifier + ": " + totalStr + itemStr)
                 .set("contents", linkCountStr)
@@ -400,9 +391,7 @@ export const BaseFrameView = Backbone.View.extend({
         })
             .on("mouseleave", function () {
                 self.model.get("tooltipModel").set("contents", null);
-            })
-        ;
-
+            });
         return this;
     },
 
@@ -426,7 +415,7 @@ export const BaseFrameView = Backbone.View.extend({
     setSpinner: function (state) {
         const target = d3.select(this.el).node();
         if (state) {
-            this.spinner = new Spinner().spin(target)
+            this.spinner = new Spinner().spin(target);
         } else if (!state && this.spinner) {
             this.spinner.stop();
         }

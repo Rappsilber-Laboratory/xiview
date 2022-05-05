@@ -1,15 +1,14 @@
-import * as _ from 'underscore';
-// import Backbone from "backbone";
+import * as _ from "underscore";
+import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {STRINGUtils} from "./stringUtils";
 import {commonRegexes} from "../utils";
 import {updateLinkMetadata} from "../modelUtils";
-import d3 from "d3";
 
 export const STRINGFileChooserBB = BaseFrameView.extend({
 
-    events: function() {
+    events: function () {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -19,7 +18,7 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         });
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         STRINGFileChooserBB.__super__.initialize.apply(this, arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
@@ -40,30 +39,29 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         ];
 
         box.append("label")
-            .text ("Either Choose Organism")
-            .attr ("class", "btn nopadLeft")
-            .attr ("title", "Select an organism to search STRING scores on")
+            .text("Either Choose Organism")
+            .attr("class", "btn nopadLeft")
+            .attr("title", "Select an organism to search STRING scores on")
             .append("select").attr("class", "selectTaxonID withSideMargins")
-                .on ("change", function () {
-                    const optionSelected = $("option:selected", this);
-                    const valueSelected = this.value;
-                    d3.select(self.el).select(".inputTaxonID").property ("value", valueSelected);
-                    self.enteringTaxonID({keyCode: 13});
-                })
-                .selectAll("option")
-                .data (common)
-                .enter()
-                .append("option")
-                .attr ("value", function (d) { return d.value; })
-                .text (function(d) { return d.name + " (" + d.value + ")"; })
-        ;
-
-
+            .on("change", function () {
+                // const optionSelected = $("option:selected", this);
+                const valueSelected = this.value;
+                d3.select(self.el).select(".inputTaxonID").property("value", valueSelected);
+                self.enteringTaxonID({keyCode: 13});
+            })
+            .selectAll("option")
+            .data(common)
+            .enter()
+            .append("option")
+            .attr("value", function (d) {
+                return d.value;
+            })
+            .text(function (d) {
+                return d.name + " (" + d.value + ")";
+            });
         const taxonSpan = box.append("div")
             .attr("class", "btn nopadLeft")
-            .html("or Enter <a href='https://www.ncbi.nlm.nih.gov/taxonomy' target='_blank'>NCBI Taxon ID</a>")
-        ;
-
+            .html("or Enter <a href='https://www.ncbi.nlm.nih.gov/taxonomy' target='_blank'>NCBI Taxon ID</a>");
         taxonSpan.append("input")
             .attr({
                 type: "text",
@@ -74,25 +72,21 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
                 title: "Enter NCBI Taxon ID here for use in STRING search",
                 //placeholder: "eg 1AO6"
             })
-            .property("required", true)
-        ;
-
+            .property("required", true);
         taxonSpan.append("span").text("& Press Enter");
 
 
         box.append("p").attr("class", "smallHeading").text("Other Actions");
 
         box.append("button")
-            .attr ("class", "btn btn-1 btn-1a irreversible")
-            .text ("Purge cache")
-            .attr ("title", "If local storage reports as full, you can purge cached STRING interactions by pressing this button.")
-            .on ("click", function () {
+            .attr("class", "btn btn-1 btn-1a irreversible")
+            .text("Purge cache")
+            .attr("title", "If local storage reports as full, you can purge cached STRING interactions by pressing this button.")
+            .on("click", function () {
                 if (localStorage) {
                     STRINGUtils.purgeCache();
                 }
-            })
-        ;
-
+            });
         wrapperPanel.append("p").attr("class", "smallHeading").text("Results");
         wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
 
@@ -100,19 +94,19 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {
-            this.setVisible (true);
+            this.setVisible(true);
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
     },
 
-    enteringTaxonID: function(evt) {
+    enteringTaxonID: function (evt) {
         if (this.isTaxaIDValid() && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
             this.loadSTRINGData();
         }
     },
 
-    loadSTRINGData: function() {
+    loadSTRINGData: function () {
         const taxonID = d3.select(this.el).select(".inputTaxonID").property("value");
 
         this.setWaitingEffect();
@@ -133,10 +127,10 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             }
             self.setStatusText(errorReason || statusText, !errorReason);
         };
-        STRINGUtils.loadStringDataFromModel (this.model.get("clmsModel"), taxonID, callback);
+        STRINGUtils.loadStringDataFromModel(this.model.get("clmsModel"), taxonID, callback);
     },
 
-    isTaxaIDValid: function() {
+    isTaxaIDValid: function () {
         const elem = d3.select(this.el).select(".inputTaxonID");
         return elem.node().checkValidity();
     },

@@ -1,10 +1,8 @@
-import '../../css/filter.css';
+import "../../css/filter.css";
 import Backbone from "backbone";
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import d3 from "d3";
-// import {utils} from './utils';
-
 
 export const FilterViewBB = Backbone.View.extend({
     tagName: "span",
@@ -16,43 +14,40 @@ export const FilterViewBB = Backbone.View.extend({
         "mouseup input.filterTypeNumber": "processNumberFilter",
         "click input.filterTypeToggle": "processBooleanFilter",
         "click input.groupToggleFilter": "processGroupToggleFilter",
-        "dblclick button.filterReset": function() {
-            this.model.resetFilter();
-        },
     },
 
-    initialize: function(viewOptions) {
+    initialize: function (viewOptions) {
         const defaultOptions = {
             config: [
                 {
-                    label: "Manual",
+                    label: "Stored validation",
                     id: "manualMode",
-                    tooltip: "Filter using crosslink metadata",
+                    tooltip: "Filter using stored metadata",
                 },
                 {
-                    label: "FDR",
+                    label: "In-browser FDR",
                     id: "fdrMode",
-                    tooltip: "Filter using a False Discovery Rate cutoff",
+                    tooltip: "Filter using False Discovery Rate cutoff calculated in browser.",
                 },
                 {
                     label: "Linear",
                     id: "linears",
-                    tooltip: "Show linear peptides",
+                    tooltip: "Show matches to linear (uncrosslinked) peptides",
                 },
                 {
                     label: "Monolinks",
                     id: "monolinks",
-                    tooltip: "Show monolinks",
+                    tooltip: "Show matches to linker modified peptides (monolinks)",
                 },
                 {
-                    label: "Crosslinks",
+                    label: "Crosslink",
                     id: "crosslinks",
-                    tooltip: "Show crosslinks",
+                    tooltip: "Show matches to crosslinked peptides",
                 },
                 {
                     label: "Ambig.",
                     id: "ambig",
-                    tooltip: "Show ambiguous crosslinks",
+                    tooltip: "Show matches to peptides with ambiguous position",
                 },
                 {
                     label: "Heteromeric",
@@ -62,23 +57,28 @@ export const FilterViewBB = Backbone.View.extend({
                 {
                     label: "Self",
                     id: "selfLinks",
-                    tooltip: "Show crosslinks between the same protein",
+                    tooltip: "Show crosslinks with both ends in the same type of protein",
                 },
                 {
-                    label: "Homomultimeric",
+                    label: "Overlap",
                     id: "homomultimericLinks",
-                    tooltip: "Show crosslinks with overlapping linked peptides",
+                    tooltip: "Show matches with overlapping linked peptides",
+                },
+                {
+                    label: "Don't Overlap",
+                    id: "notHomomult",
+                    tooltip: "Show matches for self links without overlapping peptides",
                 },
                 {
                     label: "AA apart",
                     id: "aaApart",
-                    tooltip: "Only show crosslinks separated by at least N amino acids e.g. 10",
+                    tooltip: "Only show self links separated by at least N amino acids e.g. 10",
                     inequality: "&ge;",
                 },
                 {
-                    label: "Pep. length",
+                    label: "Length",
                     id: "pepLength",
-                    tooltip: "Only show crosslinks where both linked peptides are at least N amino acids long e.g. 4",
+                    tooltip: "Only show matches where both linked peptides are at least N amino acids long e.g. 4",
                     inequality: "&ge;",
                 },
                 {
@@ -94,29 +94,30 @@ export const FilterViewBB = Backbone.View.extend({
                     id: "C"
                 },
                 {
-                    label: "?",
-                    id: "Q"
-                },
-                {
                     label: "Auto",
                     id: "AUTO",
-                    tooltip: "Show autovalidated crosslinks"
+                    tooltip: "Show autovalidated matches"
                 },
                 {
                     label: "Unval.",
                     id: "unval",
-                    tooltip: "Show unvalidated crosslinks"
+                    tooltip: "Show unvalidated matches"
                 },
                 {
                     label: "Decoy",
                     id: "decoys",
-                    tooltip: "Show passing decoy crosslinks"
+                    tooltip: "Show decoy matches"
                 },
                 {
-                    label: "Pep Seq",
+                    label: "Target",
+                    id: "targets",
+                    tooltip: "Show target matches"
+                },
+                {
+                    label: "Sequence",
                     id: "pepSeq",
                     chars: 7,
-                    tooltip: "Filter to crosslinks with matches whose linked peptides include this AA sequence at either end e.g. FAKR, or define both ends e.g. FAKR-KKE",
+                    tooltip: "Filter to matches whose linked peptides include this AA sequence at either end e.g. FAKR, or define both ends e.g. FAKR-KKE",
                 },
                 {
                     label: "Name / Acc.",
@@ -139,13 +140,13 @@ export const FilterViewBB = Backbone.View.extend({
                     label: "Run",
                     id: "runName",
                     chars: 5,
-                    tooltip: "Filter to crosslinks with matches whose run name includes this text e.g. 07_Lumos"
+                    tooltip: "Filter to matches whose run name includes this text e.g. 07_Lumos"
                 },
                 {
                     label: "Scan",
                     id: "scanNumber",
                     chars: 5,
-                    tooltip: "Filter to crosslinks with matches with this scan number e.g. 44565",
+                    tooltip: "Filter to matches with this scan number e.g. 44565",
                 },
                 {
                     label: "Multi",
@@ -160,22 +161,24 @@ export const FilterViewBB = Backbone.View.extend({
                 }
             ]
         };
-        defaultOptions.searchGroupToggles = this.model.possibleSearchGroups.map (function (group) {
+        defaultOptions.searchGroupToggles = this.model.possibleSearchGroups.map(function (group) {
             return {
                 id: group,
                 label: group,
-                tooltip: "Pass matches from Group "+group,
+                tooltip: "Pass matches from Group " + group,
                 inputClass: "groupToggleFilter",
                 type: "boolean",
             };
         });
-        defaultOptions.config.push.apply (defaultOptions.config, defaultOptions.searchGroupToggles);
+        defaultOptions.config.push.apply(defaultOptions.config, defaultOptions.searchGroupToggles);
 
         // Make options into a map referenced by filter attribute id
         //todo get rid d3 Map
-        this.configMap = d3.map (defaultOptions.config, function(d) { return d.id; });
+        this.configMap = d3.map(defaultOptions.config, function (d) {
+            return d.id;
+        });
 
-        ["manualMode", "fdrMode"].forEach (function (item) {
+        ["manualMode", "fdrMode"].forEach(function (item) {
             const entry = this.configMap.get(item);
             entry.overrideType = "radio";
             entry.inputClass = "modeToggle";
@@ -190,10 +193,12 @@ export const FilterViewBB = Backbone.View.extend({
         const mainDivSel = d3.select(this.el);
 
 
-        function makeFilterControlDiv (options) {
+        function makeFilterControlDiv(options) {
             options = options || {};
             const div = mainDivSel.append("div").attr("class", "filterControlGroup").style("display", options.hide ? "none" : null);
-            if (options.id) { div.attr("id", options.id); }
+            if (options.id) {
+                div.attr("id", options.id);
+            }
 
             if (options.expandable !== false) {
                 const setPanelState = function (divSel, collapsed) {
@@ -202,73 +207,55 @@ export const FilterViewBB = Backbone.View.extend({
                         .select(".verticalTextContainer")
                         .attr("title", (collapsed ? "Expand" : "Collapse") + " this filter section")
                         .select(".verticalText")
-                        .text((collapsed ? "+ " : "- ") + options.groupName)
-                    ;
+                        .text((collapsed ? "+ " : "- ") + options.groupName);
                 };
 
                 div.append("div")
-                    .attr ("class", "verticalTextContainer btn-1a")
-                    .on("click", function() {
+                    .attr("class", "verticalTextContainer btn-1a")
+                    .on("click", function () {
                         const div = d3.select(this.parentNode);
                         const panel = div.select(".filterControlSpan");
                         const collapse = panel.style("display") !== "none";
-                        div.call (setPanelState, collapse);
+                        div.call(setPanelState, collapse);
                     })
-                    .append ("div")
-                        .attr ("class", "verticalText")
-                ;
-
-                div.call (setPanelState, false);
+                    .append("div")
+                    .attr("class", "verticalText");
+                div.call(setPanelState, false);
             }
 
             const nestedDiv = div.append("div").attr("class", "filterControlSpan");
-            if (options.class) { nestedDiv.classed (options.class, true); }
+            if (options.class) {
+                nestedDiv.classed(options.class, true);
+            }
             return nestedDiv;
         }
 
-
-
-        function initResetGroup() {
-            const resetDivSel = makeFilterControlDiv({class: "verticalFlexContainer", expandable: false});
-            resetDivSel.append("p").attr("class", "smallHeading").text("Filter Bar");
-            resetDivSel.append("button")
-                .attr("class", "filterReset btn btn-1a btn-tight")
-                .attr("title", "Double-click to reset filter to originally set values")
-                .text("Reset")
-            ;
-        }
-
-
-        function addFilterGroup (config, filterIDs) {
+        function addFilterGroup(config, filterIDs) {
             const divSel = makeFilterControlDiv(config);
             const filters = filterIDs.map(function (id) {
                 return this.configMap.get(id);
             }, this);
             const self = this;
             divSel.selectAll("div.filterItem")
-                .data(filters, function(d) {
+                .data(filters, function (d) {
                     return d.id;
                 })
                 .enter()
                 .append("div")
-                .attr ("class", "filterItem")
-                .each (function (d) {
+                .attr("class", "filterItem")
+                .each(function (d) {
                     const type = d.type || self.model.types[d.id];
                     if (type === "boolean") {
-                        self.addBooleanFilter (d3.select(this));
+                        self.addBooleanFilter(d3.select(this));
+                    } else if (type === "number") {
+                        self.addNumberFilter(d3.select(this));
+                    } else {
+                        self.addTextFilter(d3.select(this));
                     }
-                    else if (type === "number") {
-                        self.addNumberFilter (d3.select(this));
-                    }
-                    else {
-                        self.addTextFilter (d3.select(this));
-                    }
-                })
-            ;
+                });
         }
 
-
-        function initMinigramFilterGroup (config) {
+        function initMinigramFilterGroup(config) {
             if (config && config.attr) {
                 const cutoffDivSel = makeFilterControlDiv(config);
 
@@ -277,49 +264,47 @@ export const FilterViewBB = Backbone.View.extend({
                 const tpl = _.template("<div><p>" + config.label + "</p><P class='vmin cutoffLabel'><span>&gt;</span></P><P>Min</P></div><div id='<%= eid %>'></div><div><p>" + config.label + "</p><P class='cutoffLabel vmax'><span>&lt;</span></P><P>Max</P></div><div class='undef'></div>");
                 sliderSection.html(tpl({
                     eid: self.el.id + config.id + "SliderHolder"
-            }));
-            // sliderSection.style('display', (self.model.get("scores") === null) ? 'none' : null);
-            sliderSection.selectAll("p.cutoffLabel")
-                .attr("title", function() {
-                    const isMinInput = d3.select(this).classed("vmin");
-                    return config.tooltipIntro+" " + (isMinInput ? "less than" : "greater than") + " X e.g. " + (isMinInput ? "8.0" : "20.0");
-                })
-                .append("input")
-                .attr({
-                    type: "number",
-                        step: config.step || 0.1,
-                    //min: 0,
-                })
-                .property("value", function() {
-                    const isMinInput = d3.select(this.parentNode).classed("vmin");
-                    const cutoff = self.model.get(config.attr);
-                    const val = cutoff[isMinInput ? 0 : 1];
-                    return val !== undefined ? val : "";
-                })
-                .on("change", function() { // "input" activates per keypress which knackers typing in anything >1 digit
-                    //console.log ("model", self.model);
-                    const val = +this.value;
-                    const isMinInput = d3.select(this.parentNode).classed("vmin");
-                    const cutoff = self.model.get(config.attr);
-                    const extent = self.model[config.extentProperty];
-                    // take new values, along with score extents, sort them and discard extremes for new cutoff settings
-                    let newVals = [isMinInput ? val : (cutoff[0] !== undefined ? cutoff[0] : extent[0]),
-                        isMinInput ? (cutoff[1] !== undefined ? cutoff[1] : extent[1]) : val,
-                        extent[0], extent[1]
-                    ]
-                        .filter(function (v) {
-                            return v !== undefined;
-                        })
-                        .sort(function (a, b) {
-                            return a - b;
-                        });
-                    //console.log ("newVals", newVals);
-                    newVals = newVals.slice((newVals.length / 2) - 1, (newVals.length / 2) + 1);
-
-                        self.model.set (config.attr, newVals);
+                }));
+                // sliderSection.style('display', (self.model.get("scores") === null) ? 'none' : null);
+                sliderSection.selectAll("p.cutoffLabel")
+                    .attr("title", function () {
+                        const isMinInput = d3.select(this).classed("vmin");
+                        return config.tooltipIntro + " " + (isMinInput ? "less than" : "greater than") + " X e.g. " + (isMinInput ? "8.0" : "20.0");
                     })
-                ;
+                    .append("input")
+                    .attr({
+                        type: "number",
+                        step: config.step || 0.1,
+                        //min: 0,
+                    })
+                    .property("value", function () {
+                        const isMinInput = d3.select(this.parentNode).classed("vmin");
+                        const cutoff = self.model.get(config.attr);
+                        const val = cutoff[isMinInput ? 0 : 1];
+                        return val !== undefined ? val : "";
+                    })
+                    .on("change", function () { // "input" activates per keypress which knackers typing in anything >1 digit
+                        //console.log ("model", self.model);
+                        const val = +this.value;
+                        const isMinInput = d3.select(this.parentNode).classed("vmin");
+                        const cutoff = self.model.get(config.attr);
+                        const extent = self.model[config.extentProperty];
+                        // take new values, along with score extents, sort them and discard extremes for new cutoff settings
+                        let newVals = [isMinInput ? val : (cutoff[0] !== undefined ? cutoff[0] : extent[0]),
+                            isMinInput ? (cutoff[1] !== undefined ? cutoff[1] : extent[1]) : val,
+                            extent[0], extent[1]
+                        ]
+                            .filter(function (v) {
+                                return v !== undefined;
+                            })
+                            .sort(function (a, b) {
+                                return a - b;
+                            });
+                        //console.log ("newVals", newVals);
+                        newVals = newVals.slice((newVals.length / 2) - 1, (newVals.length / 2) + 1);
 
+                        self.model.set(config.attr, newVals);
+                    });
                 if (config.undefAttr) {
                     const cbox = new checkBoxView({
                         el: sliderSection.select("div.undef").node(),
@@ -331,16 +316,15 @@ export const FilterViewBB = Backbone.View.extend({
                         },
                     });
                     d3.select(cbox.$el[0])
-                        .attr("title", "Show Cross-Links of Unknown "+config.label)
-                        .select("label").classed("btn", false)
-                    ;
+                        .attr("title", "Show Cross-Links of Unknown " + config.label)
+                        .select("label").classed("btn", false);
                 }
 
-                this.listenTo (this.model, "change:"+config.attr, function (model, val) {
+                this.listenTo(this.model, "change:" + config.attr, function (model, val) {
                     sliderSection.select(".vmin input").property("value", val[0]); // min label
                     sliderSection.select(".vmax input").property("value", val[1]); // max label
                 });
-                    }
+            }
         }
 
 
@@ -366,27 +350,69 @@ export const FilterViewBB = Backbone.View.extend({
                     mainDivSel.style("right", rightSet ? "auto" : "20px");
 
                     d3.select(this).select("i").attr("class", rightSet ? "fa fa-angle-double-right" : "fa fa-angle-double-left");
-                })
-            ;
-
+                });
             button.append("i")
                 .attr("class", "fa fa-angle-double-right");
         }
 
         const groupIDs = _.pluck(defaultOptions.searchGroupToggles, "id");
-        groupIDs.push ("multipleGroup");
+        groupIDs.push("multipleGroup");
 
-        initResetGroup.call(this);
-        addFilterGroup.call (this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
-        addFilterGroup.call (this, {groupName: "Crosslinks"}, ["linears", "crosslinks", "ambig", "betweenLinks", "selfLinks", "homomultimericLinks", "aaApart", "pepLength"]);
-        initMinigramFilterGroup.call(this, {attr: "distanceCutoff", extentProperty: "distanceExtent", undefAttr: "distanceUndef", label: "Distance", id: "distanceFilter", groupName: "Distances", tooltipIntro: "Filter out crosslinks with distance"});
-        addFilterGroup.call (this, {id: "validationStatus", groupName: "Auto Val"}, ["A", "B", "C", "Q", "AUTO", "unval", "decoys"]);
-        initMinigramFilterGroup.call(this, {attr: "matchScoreCutoff", extentProperty: "scoreExtent", label: "Match Score", id: "matchScore", groupName: "Scores", tooltipIntro: "Filter out matches with scores"});
+        addFilterGroup.call(this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
+
+        addFilterGroup.call(this, {
+            id: "validationStatus",
+            groupName: "Validation"
+        }, ["A", "B", "C", "AUTO", "unval"]);
+
+        addFilterGroup.call(this, {
+            id: "targetDecoy",
+            groupName: "TD"
+        }, ["decoys", "targets"]);
+
+        addFilterGroup.call(this, {
+            id: "peptide",
+            groupName: "Peptide"
+        }, ["pepSeq", "pepLength", "ambig"]);
+
+        addFilterGroup.call(this, {
+            id: "navFilters",
+            groupName: "Protein"
+        }, ["protNames", "protDesc", "protPDB"]);
+
+        addFilterGroup.call(this, {
+            id: "product",
+            groupName: "Product"
+        }, ["linears", "monolinks", "crosslinks"]);
+
+        addFilterGroup.call(this, {groupName: "Crosslink", id:"crosslinkGroup"}, ["betweenLinks", "selfLinks"]);
+
+        addFilterGroup.call(this, {id:"self", groupName: "Self Links"}, ["aaApart", "notHomomult", "homomultimericLinks"]);
+
+        initMinigramFilterGroup.call(this, {
+            attr: "distanceCutoff",
+            extentProperty: "distanceExtent",
+            undefAttr: "distanceUndef",
+            label: "Distance",
+            id: "distanceFilter",
+            groupName: "Distances",
+            tooltipIntro: "Filter out crosslinks with distance"
+        });
+
+        initMinigramFilterGroup.call(this, {
+            attr: "matchScoreCutoff",
+            extentProperty: "scoreExtent",
+            label: "Match Score",
+            id: "matchScore",
+            groupName: "Scores",
+            tooltipIntro: "Filter out matches with scores"
+        });
+
         initFDRPlaceholder.call(this);
-        addFilterGroup.call (this, {id: "navFilters", groupName: "Protein"}, ["pepSeq", "protNames", "protDesc", "protPDB"]);
-        addFilterGroup.call (this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["runName", "scanNumber"]);
-        addFilterGroup.call (this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
-        addFilterGroup.call (this, {id: "navNumberFilters", groupName: "PPI"}, ["urpPpi"]);
+
+        addFilterGroup.call(this, {id: "navNumberFilters", groupName: "PPI"}, ["urpPpi"]);
+        addFilterGroup.call(this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
+        addFilterGroup.call(this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["runName", "scanNumber"]);
         addScrollRightButton.call(this);
 
 
@@ -398,7 +424,7 @@ export const FilterViewBB = Backbone.View.extend({
             });
             const hideEntrySet = d3.set(_.pluck(hideEntries, "key"));
             mainDivSel.selectAll(".filterItem")
-                .filter(function(d) {
+                .filter(function (d) {
                     return hideEntrySet.has(d.id);
                 })
                 .style("display", "none");
@@ -422,13 +448,11 @@ export const FilterViewBB = Backbone.View.extend({
             .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
             })
-            .append("label")
-        ;
+            .append("label");
         textFilter.append("span")
-            .text(function(d) {
+            .text(function (d) {
                 return d.label;
-            })
-        ;
+            });
         const tfilters = textFilter.append("input")
             .attr("class", "filterTypeText")
             .attr("type", function (d) {
@@ -436,18 +460,16 @@ export const FilterViewBB = Backbone.View.extend({
             })
             .attr("size", function (d) {
                 return d.chars;
-            })
-        ;
+            });
 
         // add patterns to inputs that have them
         const patterns = this.model.patterns;
-        tfilters.filter(function(d) {
+        tfilters.filter(function (d) {
+            return patterns[d.id];
+        })
+            .attr("pattern", function (d) {
                 return patterns[d.id];
-            })
-            .attr("pattern", function(d) {
-                return patterns[d.id];
-            })
-        ;
+            });
     },
 
     addNumberFilter: function (d3sel) {
@@ -455,29 +477,33 @@ export const FilterViewBB = Backbone.View.extend({
             .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
             })
-            .append("label")
-        ;
+            .append("label");
         numberFilter.append("span")
-            .text(function(d) {
+            .text(function (d) {
                 return d.label;
-            })
-        ;
-
-        numberFilter.append("p").classed("cutoffLabel", true).append("span").html(function(d) { return d.inequality; });
+            });
+        numberFilter.append("p").classed("cutoffLabel", true).append("span").html(function (d) {
+            return d.inequality;
+        });
 
         const self = this;
         numberFilter.append("input")
             .attr({
                 class: "filterTypeNumber",
                 type: "number",
-                min: function(d) { return self.model.getMinExtent (d.id); },
-                max: function(d) { return self.model.getMaxExtent (d.id); },
+                min: function (d) {
+                    return self.model.getMinExtent(d.id);
+                },
+                max: function (d) {
+                    return self.model.getMaxExtent(d.id);
+                },
             })
-            .filter(function(d) { return d.chars !== undefined; })
-            .style ("width", function (d) {
+            .filter(function (d) {
+                return d.chars !== undefined;
+            })
+            .style("width", function (d) {
                 return d.chars + "em";
-            })
-        ;
+            });
     },
 
 
@@ -490,21 +516,24 @@ export const FilterViewBB = Backbone.View.extend({
             .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
             })
-            .append("label")
-        ;
+            .append("label");
         toggle.append("span")
-            .text(function(d) {
+            .text(function (d) {
                 return d.label;
-            })
-        ;
+            });
         toggle.append("input")
-            .attr("class", function(d) {
+            .attr("class", function (d) {
                 return d.inputClass || "filterTypeToggle";
             })
-            .attr("type", function(d) { return d.overrideType || "checkbox"; })
-            .filter(function (d) { return d.name; })
-            .attr("name", function (d) { return d.name; })
-        ;
+            .attr("type", function (d) {
+                return d.overrideType || "checkbox";
+            })
+            .filter(function (d) {
+                return d.name;
+            })
+            .attr("name", function (d) {
+                return d.name;
+            });
     },
 
     datumFromTarget: function (target) {
@@ -512,11 +541,17 @@ export const FilterViewBB = Backbone.View.extend({
     },
 
     processBooleanFilter: function (evt) {
+        // alert("hello?");
         const target = evt.target;
         const data = this.datumFromTarget(target);
         const id = data.id;
+        if (id == "crosslinks") {
+            d3.select("#crosslinkGroup").style("display", target.checked ? "flex" : "none");
+            const selfLinksShown = this.model.get("selfLinks");
+            d3.select("#self").style("display", target.checked && selfLinksShown? "flex" : "none");
+        }
         if (id == "selfLinks") {
-            d3.select("#aaApart").attr("disabled", target.checked ? null : "disabled");
+            d3.select("#self").style("display", target.checked ? "flex" : "none");
         }
         this.model.set(id, target.checked);
     },
@@ -525,7 +560,7 @@ export const FilterViewBB = Backbone.View.extend({
         const target = evt.target;
         if (evt.target.checkValidity()) {
             const data = this.datumFromTarget(target);
-            this.model.set (data.id, target.value);
+            this.model.set(data.id, target.value);
         }
     },
 
@@ -550,7 +585,7 @@ export const FilterViewBB = Backbone.View.extend({
         }
     },
 
-    processModeChanged: function() {
+    processModeChanged: function () {
         const checked = d3.select(this.el).selectAll("input[name='modeSelect']").filter(":checked");
         if (checked.size() === 1) {
             const fdrMode = checked.datum().id === "fdrMode";
@@ -568,23 +603,18 @@ export const FilterViewBB = Backbone.View.extend({
         const mainDiv = d3.select(this.el);
 
         mainDiv.selectAll("input.filterTypeText, input.filterTypeNumber")
-            .property("value", function(d) {
+            .property("value", function (d) {
                 return model.get(d.id);
-            })
-        ;
-
+            });
         mainDiv.selectAll("input.modeToggle, input.filterTypeToggle")
-            .property("checked", function(d) {
+            .property("checked", function (d) {
                 return Boolean(model.get(d.id));
-            })
-        ;
-
+            });
         const groupSet = d3.set(model.get("searchGroups"));
         mainDiv.selectAll("input.groupToggleFilter")
-            .property("checked", function(d) {
+            .property("checked", function (d) {
                 return Boolean(groupSet.has(d.id));
-            })
-        ;
+            });
 
         // hide parts of the filter panel if mode (manual/fdr) setting has changed, or if setInputValuesFromModelcalled directly (change is empty)
         if (options.showHide || model.changed.manualMode !== undefined || model.changed.fdrMode !== undefined) {
@@ -598,19 +628,19 @@ export const FilterViewBB = Backbone.View.extend({
             d3el.select("#toggles_ambig").property("disabled", fdrMode == true);
 
             // hide groups control if only 1 group
-            d3el.select("#groupFilters").style ("display", this.model.possibleSearchGroups && this.model.possibleSearchGroups.length < 2 ? "none" : null);
-            d3el.select("#distanceFilter").style ("display", this.model.distanceExtent[0] == undefined ? "none" : null);    // == matches null as well
+            d3el.select("#groupFilters").style("display", this.model.possibleSearchGroups && this.model.possibleSearchGroups.length < 2 ? "none" : null);
+            d3el.select("#distanceFilter").style("display", this.model.distanceExtent[0] == undefined ? "none" : null);    // == matches null as well
         }
     },
 
-    render: function() {
+    render: function () {
         return this;
     }
 });
 
-
+//todo - move to separate file?
 export const FDRViewBB = Backbone.View.extend({
-    initialize: function() {
+    initialize: function () {
 
         const chartDiv = d3.select(this.el);
         chartDiv.html("<div class='fdrCalculation'><p>Basic link-level FDR calculation</p><span></span></div>");
@@ -629,15 +659,13 @@ export const FDRViewBB = Backbone.View.extend({
             .text(labelFunc)
             .append("input")
             .attr("type", "radio")
-            .attr("value", function(d) {
+            .attr("value", function (d) {
                 return d;
             })
             .attr("name", "fdrPercent")
-            .on("click", function(d) {
+            .on("click", function (d) {
                 self.model.set("fdrThreshold", d);
-            })
-        ;
-
+            });
         chartDiv.select("span")
             .append("label")
             .attr("class", "horizontalFlow noBreak2")
@@ -646,30 +674,28 @@ export const FDRViewBB = Backbone.View.extend({
             .text("Other %")
             .append("input")
             .attr("type", "number")
-            .attr("min", this.model.getMinExtent ("fdrThreshold"))
-            .attr("max", this.model.getMaxExtent ("fdrThreshold"))
+            .attr("min", this.model.getMinExtent("fdrThreshold"))
+            .attr("max", this.model.getMaxExtent("fdrThreshold"))
             .attr("step", 1)
             .attr("class", "fdrValue")
-            .on("change", function() { // "input" activates per keypress which knackers typing in anything >1 digit
+            .on("change", function () { // "input" activates per keypress which knackers typing in anything >1 digit
                 self.model.set("fdrThreshold", (+this.value) / 100);
-            })
-        ;
-
+            });
         this.listenTo(this.model, "change:fdrThreshold", this.setInputValuesFromModel);
         this.model.trigger("change:fdrThreshold", this.model);
 
         return this;
     },
 
-    setInputValuesFromModel: function(model) {
+    setInputValuesFromModel: function (model) {
         model = model || this.model;
         const fdrThreshold = model.get("fdrThreshold");
         const d3el = d3.select(this.el);
         //d3el.style("display", model.get("fdrMode") ? null : "none");
-        d3el.selectAll("input[name='fdrPercent']").property("checked", function(d) {
+        d3el.selectAll("input[name='fdrPercent']").property("checked", function (d) {
             return d === fdrThreshold;
         });
-        d3el.selectAll(".fdrValue").property("value", function() {
+        d3el.selectAll(".fdrValue").property("value", function () {
             return fdrThreshold * 100;
         });
     }
@@ -678,17 +704,16 @@ export const FDRViewBB = Backbone.View.extend({
 export const FilterSummaryViewBB = Backbone.View.extend({
     events: {},
 
-    initialize: function() {
+    initialize: function () {
         const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Cross-Links";
         this.targetTemplate = _.template(targetTemplateString);
         this.allTemplate = _.template(targetTemplateString + " ( + <%= decoysTD %> TD; <%= decoysDD %> DD Decoys)");
 
         this.listenTo(this.model, "filteringDone", this.render)
-            .render()
-        ;
+            .render();
     },
 
-    render: function() {
+    render: function () {
         const commaFormat = d3.format(",");
         const model = this.model;
         const decoysPresent = model.get("clmsModel").get("decoysPresent");
@@ -707,23 +732,22 @@ export const FilterSummaryViewBB = Backbone.View.extend({
 export const FDRSummaryViewBB = Backbone.View.extend({
     events: {},
 
-    initialize: function() {
+    initialize: function () {
         const fdrTypes = ["interFdrCut", "intraFdrCut"];
         d3.select(this.el).selectAll("p").data(fdrTypes)
             .enter()
             .append("p")
-            .attr("class", function(d) {
+            .attr("class", function (d) {
                 return d + "Elem";
             });
 
         this.pctFormat = d3.format("%");
 
         this.listenTo(this.model, "filteringDone", this.render)
-            .render()
-        ;
+            .render();
     },
 
-    render: function() {
+    render: function () {
         const fdrTypes = {
             "interFdrCut": "Between",
             "intraFdrCut": "Within"
@@ -740,7 +764,7 @@ export const FDRSummaryViewBB = Backbone.View.extend({
         const self = this;
 
         d3.select(this.el).selectAll("p")
-            .text(function(d, i) {
+            .text(function (d, i) {
                 if (fdrMode) {
                     const cut = filterModel.get(d);
                     return "• " + fdrTypes[d] + " score cutoff for " + self.pctFormat(threshold) + " is " + (cut ? cut.toFixed(2) : cut);
@@ -753,7 +777,7 @@ export const FDRSummaryViewBB = Backbone.View.extend({
                 }
             })
             // Hide between protein score if only 1 real protein (will always be an undefined score)
-            .style("display", function(d) {
+            .style("display", function (d) {
                 return fdrMode && decoysPresent && d === "interFdrCut" && singleTargetProtein ? "none" : null;
             });
 

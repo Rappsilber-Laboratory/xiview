@@ -1,13 +1,15 @@
-import '../css/networkPage.css';
+import "../css/networkPage.css";
+import "../css/xispecAdjust.css";
 
-import * as _ from 'underscore';
+import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
+import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
-import {displayError, getLocalStorage, setLocalStorage} from './utils';
+import {displayError, getLocalStorage, setLocalStorage} from "./utils";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 import {flattenMatches, getSearchGroups, matchScoreRange, parseURLQueryString} from "./modelUtils";
 import {FilterModel} from "./filter/filter-model";
@@ -20,7 +22,6 @@ import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
 
-const colorbrewer = require('colorbrewer');
 import {xiSPEC_wrapper} from "../../spectrum/src/Wrapper";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
@@ -55,7 +56,6 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {loadSpectrum} from "./loadSpectrum";
-import d3 from "d3";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
@@ -93,7 +93,7 @@ init.postDataLoaded = function () {
         }),
         new AnnotationType({
             category: "AA",
-            type: "Cross-linkable-2",
+            type: "Crosslinkable-2",
             tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
             source: "Search",
             colour: "#a6cee3",
@@ -109,7 +109,7 @@ init.postDataLoaded = function () {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of window.compositeModelInst.get("clmsModel").get("participants")) { //todo - remove static ref?
+    for (let participant of window.compositeModelInst.get("clmsModel").get("participants").values()) { //todo - remove static ref?
         if (participant.uniprot) {
             const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
@@ -118,8 +118,7 @@ init.postDataLoaded = function () {
                     const annotationType = new AnnotationType(feature);
                     annotationType
                         .set("source", "Uniprot")
-                        .set("typeAlignmentID", "Canonical")
-                    ;
+                        .set("typeAlignmentID", "Canonical");
                     uniprotFeatureTypes.set(key, annotationType);
                 }
             });
@@ -131,12 +130,12 @@ init.postDataLoaded = function () {
     const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
     window.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
-    vent.trigger("buildAsyncViews");
+    window.vent.trigger("buildAsyncViews"); // not sure how necessary event for this is
     //init.viewsThatNeedAsyncData();
 
     window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
-    vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
+    window.vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
     if (window.compositeModelInst.get("clmsModel").get("searches").size > 1) {
@@ -177,7 +176,7 @@ init.models = function (options) {
     options.alignmentCollectionInst = alignmentCollectionInst;
 
     // HACK - does nothing at moment anyway because uniprot annotations aren't available //todo - this comment is wrong, right
-    alignmentCollectionInst.listenToOnce(vent, "uniprotDataParsed", function (clmsModel) {
+    alignmentCollectionInst.listenToOnce(window.vent, "uniprotDataParsed", function (clmsModel) {
         this.addNewProteins(Array.from(clmsModel.get("participants").values()));
         // console.log("ASYNC. uniprot sequences poked to collection", this);
         allDataLoaded();
@@ -257,8 +256,7 @@ init.models = function (options) {
         .set("linkColourAssignment",
             window.compositeModelInst.get("clmsModel").get("searches").size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
         )
-        .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB)
-    ;
+        .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB);
 };
 
 //only inits stuff required by validation page
@@ -268,9 +266,9 @@ init.modelsEssential = function (options) {
     const hasNoMatches = _.isEmpty(options.rawMatches);
 
     displayError(function () {
-            return hasMissing || hasIncorrect || hasNoMatches;
-        },
-        (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
+        return hasMissing || hasIncorrect || hasNoMatches;
+    },
+    (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
         (hasIncorrect ? "Wrong ID Key for Search ID" + (options.incorrectSearchIDs.length > 1 ? "s " : " ") + options.incorrectSearchIDs.join(", ") + ".<br>" : "") +
         (!hasMissing && !hasIncorrect && hasNoMatches ? "No cross-links detected for this search.<br>" : "")
     );
@@ -286,13 +284,13 @@ init.modelsEssential = function (options) {
     }
     let filterSettings = {
         decoys: clmsModelInst.get("decoysPresent"),
-        betweenLinks: true, //clmsModelInst.targetProteinCount > 1,
+        // selfLinks: clmsModelInst.targetProteinCount < 50,
         A: clmsModelInst.get("manualValidatedPresent"),
         B: clmsModelInst.get("manualValidatedPresent"),
         C: clmsModelInst.get("manualValidatedPresent"),
         Q: clmsModelInst.get("manualValidatedPresent"),
         // AUTO: !clmsModelInst.get("manualValidatedPresent"),
-        ambig: clmsModelInst.get("ambiguousPresent"),
+        // ambig: clmsModelInst.get("ambiguousPresent") &&  clmsModelInst.targetProteinCount < 50,
         linears: clmsModelInst.get("linearsPresent"),
         //matchScoreCutoff: [undefined, undefined],
         matchScoreCutoff: scoreExtentInstance.slice(),
@@ -324,8 +322,7 @@ init.modelsEssential = function (options) {
                     domainStart: newCutoff[0],
                     domainEnd: newCutoff[1]
                 });
-            })
-        ;
+            });
 
         // When the range changes on these models pass the values onto the appropriate value in the filter model
         filterModelInst.listenTo(miniModel, "change", function (model) {
@@ -347,8 +344,7 @@ init.modelsEssential = function (options) {
             })
             .filter(function (dist) {
                 return dist !== undefined;
-            })
-        ;
+            });
         return [distances];
     };
 
@@ -361,11 +357,8 @@ init.modelsEssential = function (options) {
             filterModelInst.distanceExtent = [0, max];
             filterModelInst
                 .trigger("change:distanceCutoff", filterModelInst, [this.get("domainStart"), this.get("domainEnd")])
-                .trigger("change", filterModelInst, {showHide: true})
-            ;
-        })
-    ;
-
+                .trigger("change", filterModelInst, {showHide: true});
+        });
 
     // overarching model
     window.compositeModelInst = new CompositeModel({
@@ -413,13 +406,14 @@ init.views = function () {
     });
 
     // Generate checkboxes for view dropdown
-    const checkBoxData = [{
-        id: "keyChkBxPlaceholder",
-        label: "Legend & Colours",
-        eventName: "keyViewShow",
-        tooltip: "Explains and allows changing of current colour scheme",
-        sectionEnd: true
-    },
+    const checkBoxData = [
+        {
+            id: "keyChkBxPlaceholder",
+            label: "Legend & Colours",
+            eventName: "keyViewShow",
+            tooltip: "Explains and allows changing of current colour scheme",
+            sectionEnd: true
+        },
         {
             id: "circularChkBxPlaceholder",
             label: "Circular",
@@ -539,29 +533,31 @@ init.views = function () {
                 context: compModel,
                 tooltip: "Hide selected proteins",
             },
-                {
-                    name: "Hide Unselected",
-                    func: compModel.hideUnselectedProteins,
-                    context: compModel,
-                    tooltip: "Hide unselected proteins",
-                    sectionEnd: true
-                },
-                {
-                    name: "+Neighbours",
-                    func: compModel.stepOutSelectedProteins,
-                    context: compModel,
-                    tooltip: "Select proteins which are crosslinked to already selected proteins",
-                    categoryTitle: "Change Selection",
-                    sectionBegin: true
-                },
-                {
-                    id: "proteinSelectionFilter",
-                    func: compModel.proteinSelectionTextFilter,
-                    closeOnClick: false,
-                    context: compModel,
-                    tooltip: "Select proteins whose descriptions include input text",
-                    sectionEnd: true
-                }
+            {
+                name: "Hide Unselected",
+                func: compModel.hideUnselectedProteins,
+                context: compModel,
+                tooltip: "Hide unselected proteins",
+                sectionEnd: true
+            },
+            {
+                name: "+Neighbours",
+                func: compModel.stepOutSelectedProteins,
+                context: compModel,
+                tooltip: "Select proteins which are crosslinked to already selected proteins",
+                categoryTitle: "Change Selection",
+                sectionBegin: true
+            },
+            {
+                sectionBegin: true,
+                id: "proteinSelectionFilter",
+                func: compModel.proteinSelectionTextFilter,
+                closeOnClick: false,
+                context: compModel,
+                tooltip: "Select proteins whose descriptions include input text",
+                categoryTitle: "Select by text filter:",
+                sectionEnd: true
+            }
             ],
             //tooltipModel: compModel.get("tooltipModel")
             sectionHeader: function (d) {
@@ -582,7 +578,8 @@ init.views = function () {
             title: "Groups",
             menu: [
                 {
-                    categoryTitle: "Group Selected",
+                    sectionBegin: true,
+                    categoryTitle: "Group Selected - enter name:",
                     id: "groupSelected",
                     func: compModel.groupSelectedProteins,
                     closeOnClick: false,
@@ -599,7 +596,7 @@ init.views = function () {
                     name: "Auto Group",
                     func: compModel.autoGroup,
                     context: compModel,
-                    tooltip: "Experimental - Attempts to group protein complexes based on GO terms. (Will clear old groups.)",
+                    tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
                     sectionEnd: true
                 },
                 {
@@ -632,30 +629,30 @@ init.views = function () {
         eventName: "pdbFileChooserShow",
         tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
     },
-        {
-            name: "STRING",
-            eventName: "stringDataChooserShow",
-            tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
-        },
-        {
-            name: "Edge Metadata",
-            eventName: "linkMetaDataFileChooserShow",
-            tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
-        },
-        {
-            name: "Node Metadata",
-            eventName: "proteinMetaDataFileChooserShow",
-            tooltip: "Load node (protein) meta-data from a local CSV file"
-        },
-        {
-            name: "Sequence Annotations",
-            eventName: "userAnnotationsMetaDataFileChooserShow",
-            tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
-        },
+    {
+        name: "STRING",
+        eventName: "stringDataChooserShow",
+        tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
+    },
+    {
+        name: "Edge Metadata",
+        eventName: "linkMetaDataFileChooserShow",
+        tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
+    },
+    {
+        name: "Node Metadata",
+        eventName: "proteinMetaDataFileChooserShow",
+        tooltip: "Load node (protein) meta-data from a local CSV file"
+    },
+    {
+        name: "Sequence Annotations",
+        eventName: "userAnnotationsMetaDataFileChooserShow",
+        tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
+    },
     ];
     loadButtonData.forEach(function (bdata) {
         bdata.func = function () {
-            vent.trigger(bdata.eventName, true);
+            window.vent.trigger(bdata.eventName, true);
         };
     });
     new DropDownMenuViewBB({
@@ -671,8 +668,7 @@ init.views = function () {
         .listenTo(compModel.get("clmsModel"), "change:matches", function () {
             this.enableItemsByIndex([0, 2, 3], true);
         })
-        .setVis(!matchesFound) // open as default if empty search
-    ;
+        .setVis(!matchesFound); // open as default if empty search
 
     // new URLSearchBoxViewBB({
     //     el: "#urlSearchBox",
@@ -689,7 +685,7 @@ init.views = function () {
     // Set up a one-time event listener that is then called from allDataLoaded
     // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
     // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
-    compModel.listenToOnce(vent, "buildAsyncViews", function () {
+    compModel.listenToOnce(window.vent, "buildAsyncViews", function () {
         init.viewsThatNeedAsyncData();
     });
 };
@@ -705,17 +701,10 @@ init.viewsEssential = function (options) {
         model: filterModel,
         myOptions: {
             hide: {
-                //todo: reinstate sensible hiding of controls, need listeners on these attributes
-                //temp hack - dont hide anything, data may change when csv uploaded
-                /*
-                "selfLinks": singleTargetProtein,
-                "betweenLinks": singleTargetProtein,
                 "AUTO": !compModel.get("clmsModel").get("autoValidatedPresent"),
                 "ambig": !compModel.get("clmsModel").get("ambiguousPresent"),
                 "unval": !compModel.get("clmsModel").get("unvalidatedPresent"),
-                "linear": !compModel.get("clmsModel").get("linearsPresent"),
-                "protNames": singleTargetProtein,
-                */
+                "linears": !compModel.get("clmsModel").get("linearsPresent"),
             }
         }
     });
@@ -725,8 +714,13 @@ init.viewsEssential = function (options) {
         model: compModel,
     });
 
-    if (compModel.get("clmsModel").get("unvalidatedPresent") !== true) {
+    const unvalidatedPresent = compModel.get("clmsModel").get("unvalidatedPresent");
+    if (unvalidatedPresent !== true) {
         d3.select("#filterModeDiv").style("display", "none");
+    }
+    const linearsPresent = compModel.get("clmsModel").get("linearsPresent");
+    if (linearsPresent !== true) {
+        d3.select("#product").style("display", "none");
     }
 
 
@@ -764,16 +758,14 @@ init.viewsEssential = function (options) {
             // If the clmsModel matches attribute changes then tell the mini histogram view
             .listenTo(compModel.get("clmsModel"), "change:matches", function () {
                 this.render().redrawBrush();
-            }) // if the matches change (likely?) need to re-render the view too
-            ;
+            }); // if the matches change (likely?) need to re-render the view too
     });
 
     // redraw brush when distancesObj is changed, extent is likely to be different
     minigramViews[1]
         .listenTo(compModel.get("clmsModel"), "change:distancesObj", function (clmsModel, distObj) {
             this.render().redrawBrush();
-        }) // if the distances change (likely?) need to re-render the view too
-    ;
+        }); // if the distances change (likely?) need to re-render the view too
 
 
     // World of code smells vol.1
@@ -799,7 +791,7 @@ init.viewsEssential = function (options) {
             canBringToTop: options.spectrumToTop
         }
     })
-        .listenTo(vent, "individualMatchSelected", function (match) {
+        .listenTo(window.vent, "individualMatchSelected", function (match) {
             if (match) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
@@ -813,11 +805,8 @@ init.viewsEssential = function (options) {
                         console.log("error", error, "for", url, arguments);
                     } else {
                         // this works if first item in array has the same id, might in future send matchid to php to return for reliability
-                        //var thisMatchID = json.rawMatches && json.rawMatches[0] ? json.rawMatches[0].id : -1;
                         const returnedMatchID = json.matchid;
-
-                        //console.log ("json", json, self.lastRequestedID, thisMatchID, returnedMatchID);
-                        if (returnedMatchID === self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
+                        if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
                             const altModel = new SearchResultsModel();
                             altModel.parseJSON(json);
@@ -835,7 +824,7 @@ init.viewsEssential = function (options) {
                             d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
                             //self.alternativesModel.set("selection", allCrossLinks);
                             self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
-                            vent.trigger("resizeSpectrumSubViews", true);
+                            window.vent.trigger("resizeSpectrumSubViews", true);
                         }
                     }
                 });
@@ -845,30 +834,30 @@ init.viewsEssential = function (options) {
         });
 
     const xiSPEC_options = {
-        targetDiv: 'modular_xispec',
+        targetDiv: "modular_xispec",
         baseDir: window.xiSpecBaseDir,
         xiAnnotatorBaseURL: window.xiAnnotRoot,
         knownModificationsURL: window.xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: true,
         showQualityControl: "min",
-        colorScheme: colorbrewer.PRGn[8],
+        colorScheme: "PRGn"
     };
 
-    window.xiSPEC = new xiSPEC_wrapper(xiSPEC_options)
+    window.xiSPEC = new xiSPEC_wrapper(xiSPEC_options);
 
     // Update spectrum view when external resize event called
-    window.xiSPEC.activeSpectrum.listenTo(vent, "resizeSpectrumSubViews", function () {
-        window.xiSPECUI.vent.trigger('resize:spectrum');
+    window.xiSPEC.activeSpectrum.listenTo(window.vent, "resizeSpectrumSubViews", function () {
+        window.xiSPECUI.vent.trigger("resize:spectrum");
     });
 
     // "individualMatchSelected" in vent is link event between selection table view and spectrum view
     // used to transport one Match between views
-    window.xiSPEC.activeSpectrum.listenTo(vent, "individualMatchSelected", function (match) {
+    window.xiSPEC.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
             const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
             loadSpectrum(match, randId, this.model);
         } else {
-            // xiSPEC.clear(); //todo - maybe it is better to clear it, but xiSPEC currently has no clear function
+            //window.xiSPEC.setData({});
         }
     });
 
@@ -878,13 +867,14 @@ init.viewsEssential = function (options) {
         model: compModel.get("clmsModel"),
         myOptions: {
             title: "Export",
-            menu: [{
-                name: "Filtered Matches",
-                func: downloadMatches,
-                tooltip: "Produces a CSV File of Filtered Matches data",
-                categoryTitle: "As a CSV File",
-                sectionBegin: true
-            },
+            menu: [
+                {
+                    name: "Filtered Matches",
+                    func: downloadMatches,
+                    tooltip: "Produces a CSV File of Filtered Matches data",
+                    categoryTitle: "As a CSV File",
+                    sectionBegin: true
+                },
                 {
                     name: "Filtered Crosslinks",
                     func: downloadLinks,
@@ -922,17 +912,17 @@ init.viewsEssential = function (options) {
                     tooltip: "Produces an SSL file for quantitation in SkyLine",
                     categoryTitle: "As an SSL File",
                     sectionBegin: true,
-                    sectionEnd: true
+                    // sectionEnd: true
                 },
-                {
-                    name: "Make Filtered XI URL",
-                    func: function () {
-                        vent.trigger("shareURLViewShow", true);
-                    },
-                    tooltip: "Produces a URL that embeds the current filter state within it for later reproducibility",
-                    categoryTitle: "As a URL",
-                    sectionBegin: true,
-                },
+                // {
+                //     name: "Make Filtered XI URL",
+                //     func: function () {
+                //         vent.trigger("shareURLViewShow", true);
+                //     },
+                //     tooltip: "Produces a URL that embeds the current filter state within it for later reproducibility",
+                //     categoryTitle: "As a URL",
+                //     sectionBegin: true,
+                // },
             ],
             //tooltipModel: compModel.get("tooltipModel"),
             sectionHeader: function (d) {
@@ -960,7 +950,7 @@ init.viewsEssential = function (options) {
             }, {
                 name: "Online Videos",
                 func: function () {
-//                    window.open("https://vimeo.com/user64900020", "_blank");
+                    //                    window.open("https://vimeo.com/user64900020", "_blank");
                     window.open("https://rappsilberlab.org/software/xiview/", "_blank");
                 },
                 tooltip: "A number of how-to videos are available via this link to the lab homepage",
@@ -1100,6 +1090,10 @@ init.viewsThatNeedAsyncData = function () {
         el: "#nglPanel",
         model: compModel,
         displayEventName: "nglViewShow",
+        myOptions: {
+            showAllProteins: false,
+            initialColourScheme: "chainname",
+        }
     });
 
     const urlChunkMap = parseURLQueryString(window.location.search.slice(1));
@@ -1166,7 +1160,7 @@ init.viewsThatNeedAsyncData = function () {
     });
 
     //make sure things that should be hidden are hidden
-    compModel.trigger("hiddenChanged");
+    compModel.trigger("hiddenChanged"); // think this isn't needed? todo - check
 
     // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the KeyView is too late to be picked up
     // so we run it again here, doesn't do any harm

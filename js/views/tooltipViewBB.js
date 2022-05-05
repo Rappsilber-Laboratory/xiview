@@ -1,4 +1,4 @@
-import "../../css/tooltip.css"
+import "../../css/tooltip.css";
 
 import Backbone from "backbone";
 import d3 from "d3";
@@ -11,7 +11,7 @@ export const TooltipViewBB = Backbone.View.extend({
         tooltip.style("visibility", "hidden");
         tooltip.append("h2");
         tooltip.append("p");
-        this.holdDuration = 10000;
+        // this.holdDuration = 10000;
         this.fadeDuration = 200;
         this.mouseOffset = 60;
         this.numberFormat = function (val) {
@@ -65,12 +65,12 @@ export const TooltipViewBB = Backbone.View.extend({
         tooltip
             .transition()
             .style("visibility", "visible")
-            .style("opacity", null)
-            .transition()
-            .duration(self.holdDuration)
-            .each("end", function () {
-                self.setToFade();
-            });
+            .style("opacity", null);
+        // .transition()
+        // .duration(self.holdDuration)
+        // .each("end", function () {
+        //     self.setToFade();
+        // });
 
         return this;
     },
@@ -91,8 +91,8 @@ export const TooltipViewBB = Backbone.View.extend({
 
         const tx = e.pageX;
         const ty = e.pageY;
-        const tw = $.zepto ? this.$el.width() : this.$el.outerWidth(); // outerWidth in JQuery, width in Zepto
-        const th = $.zepto ? this.$el.height() : this.$el.outerHeight(); // ditto, but for height
+        const tw = this.$el.outerWidth(); // outerWidth in JQuery, width in Zepto
+        const th = this.$el.outerHeight(); // ditto, but for height
 
         const allDefinedAndNonZero = (dw && dh && tw && th && ww && wh); // test all widths/heights are non-zero and defined
         let newtx, newty;

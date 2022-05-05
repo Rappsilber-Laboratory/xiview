@@ -209,15 +209,13 @@ export class ProtAlignModel extends Backbone.Model {
         const featuresPerSeq = this.get("seqCollection")
             .map(function (seqModel) {
                 return seqModel.PDBAlignmentAsFeatures();
-            }, this)
-        ;
+            }, this);
 
         // flatten this array and remove canonical sequences if requested
         return d3.merge(featuresPerSeq)
             .filter(function (alignFeature) {
                 return includeCanonical || alignFeature.name !== "Canonical";
-            })
-            ;
+            });
     }
 }
 
@@ -233,28 +231,26 @@ export class ProtAlignCollection extends Backbone.Collection {
             label: "Name",
             compFunc: "displayLabel"
         },
-            {
-                label: "No. of Aligned Sequences",
-                compFunc: function (m) {
-                    return m.get("seqCollection").length;
-                },
-                reverse: true
+        {
+            label: "No. of Aligned Sequences",
+            compFunc: function (m) {
+                return m.get("seqCollection").length;
             },
-            {
-                label: "Total Alignment Score",
-                compFunc: function (m) {
-                    return d3.sum(m.get("seqCollection").pluck("compAlignment").map(function (ca) {
-                        return ca.score;
-                    }));
-                },
-                reverse: true
-            }
+            reverse: true
+        },
+        {
+            label: "Total Alignment Score",
+            compFunc: function (m) {
+                return d3.sum(m.get("seqCollection").pluck("compAlignment").map(function (ca) {
+                    return ca.score;
+                }));
+            },
+            reverse: true
+        }
         ];
 
         this.nonTrivialChange = undefined;
     }
-
-
 
 
     initialize() {
@@ -280,7 +276,7 @@ export class ProtAlignCollection extends Backbone.Collection {
             //console.log ("entry", entry);
             this.add([{
                 id: prot.id,
-                displayLabel: prot.name.replace("_", " "),
+                displayLabel: prot.name,//.replace("_", " "),
                 refID: "Search",
                 refSeq: prot.sequence,
             }]);
