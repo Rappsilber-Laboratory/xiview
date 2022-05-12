@@ -1,6 +1,6 @@
 import * as _ from "underscore";
 import * as $ from "jquery";
-import * as NGL from "../../../vendor/ngl.dev";
+import * as NGL from "../../../vendor/ngl";
 import {xilog} from "../../utils";
 import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
