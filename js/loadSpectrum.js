@@ -13,9 +13,9 @@ export const loadSpectrum = function (match, randId) {
     // formatted_data.crossLinkerModMass = match.crosslinkerModMass();
     // formatted_data.modifications = xiSPEC.activeSpectrum.models.Spectrum.knownModifications;
     formatted_data.precursorCharge = match.precursorCharge;
-    formatted_data.fragmentTolerance = match.fragmentTolerance();
+    // formatted_data.fragmentTolerance = match.fragmentTolerance();
 
-    formatted_data.searchConfig = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).config;
+    formatted_data.config = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).config;
     // formatted_data.customConfig = search.customsettings.split("\n");
 
     // for (let cl of search.crosslinkers) {
