@@ -1,5 +1,5 @@
 import _ from "underscore";
-import * as NGL from "../../../vendor/ngl";
+import * as NGL from "../../../vendor/ngl.dev";
 import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./RepopulateNGL";
 import d3 from "d3";

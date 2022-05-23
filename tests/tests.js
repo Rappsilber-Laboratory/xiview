@@ -1,6 +1,6 @@
 import * as $ from "jquery";
 import * as _ from "underscore";
-import * as NGL from "../vendor/ngl.dev";
+import * as NGL from "../vendor/ngl.dev.dev";
 
 import {mostReadableMultipleId, } from "../js/downloads";
 import {GotohAligner} from "../js/align/bioseq32";

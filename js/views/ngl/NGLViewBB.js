@@ -3,7 +3,7 @@ import "../../../css/nglViewBB.css";
 import * as _ from "underscore";
 import * as $ from "jquery";
 
-import * as NGL from "../../../vendor/ngl";
+import * as NGL from "../../../vendor/ngl.dev";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {
