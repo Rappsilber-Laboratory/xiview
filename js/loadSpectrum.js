@@ -68,7 +68,7 @@ export const loadSpectrum = function (match, randId) {
                 const peakList = [];
                 const peakCount = intensity.length;
                 for (let i = 0; i < peakCount; i++){
-                    peakList.push([intensity[i], mz[i]]);
+                    peakList.push([mz[i], intensity[i]]);
                 }
                 formatted_data.peakList = peakList;
                 // = JSON.parse(text).map(function (p) {
