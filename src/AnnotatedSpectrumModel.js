@@ -168,7 +168,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             output += this.peakList[i].mz + "	";
             output += this.peakList[i].intensity + "\n";
         }
-        return output.slice(0, -2);
+        return output.trim();
     },
 
     clear: function () {
