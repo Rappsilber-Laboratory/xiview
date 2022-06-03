@@ -114,13 +114,42 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.highlights = Array();
         let JSONdata = this.get("JSONdata");
 
+        // read annotation information from JSON
+        // ToDo: currently converts xi2 into xi1 annotator style. Could change to using own format
         if (JSONdata.annotation) {
-            this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
-            this.fragmentIons = JSONdata.annotation.ions;
-            this.customConfig = JSONdata.annotation.custom;
+
             if (JSONdata.annotation.crosslinker)
                 this.crossLinkerModMass = JSONdata.annotation.crosslinker.modMass;
-            this.annotationModifications = JSONdata.annotation.modifications;
+
+            if (JSONdata.annotation.config){
+                let config = JSONdata.annotation.config;
+                // MsnTolerance
+                let ms2tolRegexp = RegExp(/([\d.]+)\s?(ppm|Da)/);
+                let ms2tolMatch = config.ms2_tol.match(ms2tolRegexp);
+                this.MSnTolerance = {
+                    "tolerance": ms2tolMatch[1],
+                    "unit": ms2tolMatch[2]
+                };
+                // fragmentIons
+                let ionTypes = config.fragmentation.cterm_ions.concat(config.fragmentation.nterm_ions);
+                if (config.fragmentation.add_precursor){
+                    ionTypes.push("peptide");
+                }
+                let ions = [];
+                for (let it = 0; it < ionTypes.length; it++) {
+                    let ionType = ionTypes[it];
+                    ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+                }
+                this.fragmentIons = ions;
+                // modifications - currently xi2 annotator gives them also in annotation block
+                this.annotationModifications = JSONdata.annotation.modifications;
+
+            } else { // xi1 style annotator
+                this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
+                this.fragmentIons = JSONdata.annotation.ions;
+                this.customConfig = JSONdata.annotation.custom;
+                this.annotationModifications = JSONdata.annotation.modifications;
+            }
         }
 
         this.peakList = JSONdata.peaks || [];
@@ -276,21 +305,21 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.set("colorScheme", schemeStr);
         this.colorPalette = colorbrewer.RdBu[8]; // default
         switch (schemeStr) {
-            case "RdBu":
-                this.colorPalette = colorbrewer.RdBu[8];
-                break;
-            case "BrBG":
-                this.colorPalette = colorbrewer.BrBG[8];
-                break;
-            case "PiYG":
-                this.colorPalette = colorbrewer.PiYG[8];
-                break;
-            case "PRGn":
-                this.colorPalette = colorbrewer.PRGn[8];
-                break;
-            case "PuOr":
-                this.colorPalette = colorbrewer.PuOr[8];
-                break;
+        case "RdBu":
+            this.colorPalette = colorbrewer.RdBu[8];
+            break;
+        case "BrBG":
+            this.colorPalette = colorbrewer.BrBG[8];
+            break;
+        case "PiYG":
+            this.colorPalette = colorbrewer.PiYG[8];
+            break;
+        case "PRGn":
+            this.colorPalette = colorbrewer.PRGn[8];
+            break;
+        case "PuOr":
+            this.colorPalette = colorbrewer.PuOr[8];
+            break;
         }
 
         this.updateColors();
@@ -299,30 +328,30 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
     updateColors: function () {
         switch (this.get("visFragments")) {
-            case "both":
-                this.p1color = this.colorPalette[0];
-                this.p1color_cluster = this.colorPalette[2];
-                this.p1color_loss = this.colorPalette[1];
-                this.p2color = this.colorPalette[7];
-                this.p2color_cluster = this.colorPalette[5];
-                this.p2color_loss = this.colorPalette[6];
-                break;
-            case "pep1":
-                this.p1color = this.colorPalette[0];
-                this.p1color_cluster = this.colorPalette[2];
-                this.p1color_loss = this.colorPalette[1];
-                this.p2color = this.get("peakColor");
-                this.p2color_cluster = this.get("peakColor");
-                this.p2color_loss = this.get("peakColor");
-                break;
-            case "pep2":
-                this.p1color = this.get("peakColor");
-                this.p1color_cluster = this.get("peakColor");
-                this.p1color_loss = this.get("peakColor");
-                this.p2color = this.colorPalette[7];
-                this.p2color_cluster = this.colorPalette[5];
-                this.p2color_loss = this.colorPalette[6];
-                break;
+        case "both":
+            this.p1color = this.colorPalette[0];
+            this.p1color_cluster = this.colorPalette[2];
+            this.p1color_loss = this.colorPalette[1];
+            this.p2color = this.colorPalette[7];
+            this.p2color_cluster = this.colorPalette[5];
+            this.p2color_loss = this.colorPalette[6];
+            break;
+        case "pep1":
+            this.p1color = this.colorPalette[0];
+            this.p1color_cluster = this.colorPalette[2];
+            this.p1color_loss = this.colorPalette[1];
+            this.p2color = this.get("peakColor");
+            this.p2color_cluster = this.get("peakColor");
+            this.p2color_loss = this.get("peakColor");
+            break;
+        case "pep2":
+            this.p1color = this.get("peakColor");
+            this.p1color_cluster = this.get("peakColor");
+            this.p1color_loss = this.get("peakColor");
+            this.p2color = this.colorPalette[7];
+            this.p2color_cluster = this.colorPalette[5];
+            this.p2color_loss = this.colorPalette[6];
+            break;
         }
         this.trigger("change:colors");
     },
