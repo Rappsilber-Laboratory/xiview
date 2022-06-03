@@ -8,7 +8,7 @@ import "datatables.net";
 import {SettingsView} from "./SettingsView";
 import {PepInputView} from "./PepInputView";
 import d3 from "d3";
-import Spinner from "spin";
+import {trim} from "core-js/internals/string-trim";
 
 export const DataSettingsView = SettingsView.extend({
 
@@ -137,7 +137,7 @@ export const DataSettingsView = SettingsView.extend({
         this.toleranceUnit.append("option").attr("value", "ppm").text("ppm");
         this.toleranceUnit.append("option").attr("value", "Da").text("Da");
 
-        this.crossLinkerModMassWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("Cross-linker mod mass: ");
+        this.crossLinkerModMassWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("Crosslinker mod mass: ");
 
         this.crossLinkerModMass = this.crossLinkerModMassWrapper.append("div").attr("class", "xispec_flex-grow")
             .append("input")
@@ -399,38 +399,123 @@ export const DataSettingsView = SettingsView.extend({
             console.log("Invalid character found in form");
             return false;
         }
-        let self = this;
-        let formData = new FormData($(form)[0]);
-        $("#xispec_settingsForm").hide();
-        let spinner = new Spinner({scale: 5}).spin(d3.select("#xispec_settings_main").node());
+        // convert the form data into a JSON request
+        let json_request = this.form_to_json_request(form);
 
-        $.ajax({
-            url: self.model.get("baseDir") + "php/formToJson.php",
-            type: "POST",
-            data: formData,
-            async: false,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function (response) {
-                let json = JSON.parse(response);
-// 				json['annotation']['custom'] = self.displayModel.customConfig;
-                json["annotation"]["custom"] = self.displayModel.get("JSONdata").annotation.custom;
-                json["annotation"]["precursorMZ"] = self.displayModel.precursor.expMz;
-                json["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
-                window.xiSPECUI.vent.trigger("requestAnnotation", json, self.displayModel.get("annotatorURL"));
-                self.displayModel.set("changedAnnotation", true);
-                self.displayModel.knownModifications = $.extend(true, [], self.model.knownModifications);
-                spinner.stop();
-                $("#xispec_settingsForm").show();
-            }
-        });
+        // json['annotation']['custom'] = self.displayModel.customConfig;
+        json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
+        json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
+        json_request["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
+        window.xiSPECUI.vent.trigger("requestAnnotation", json_request, this.displayModel.get("annotatorURL"));
+        this.displayModel.set("changedAnnotation", true);
+        this.displayModel.knownModifications = $.extend(true, [], this.model.knownModifications);
+
         return false;
+    },
+
+    form_to_json_request: function (form) {
+        // convert form to json
+        // peptides & linkSites block
+        let linkSitesJSON = Array();
+        let peptidesJSON = Array();
+
+        let formData = new FormData(form);
+
+        function pep_to_array(pep_str){
+            let pepArray = Array();
+            let pep = pep_str.replace(/#\d?/g , "");
+            let matches = pep.matchAll(/([A-Z][^A-Z\\-]*)/g);
+            for (let AAmod of matches){
+                pepArray.push({"aminoAcid": AAmod[0][0], "Modification": AAmod[0].slice(1)});
+            }
+            return {"sequence": pepArray};
+        }
+        let peps = formData.get("peps").split(";");
+        for (let i = 0; i < peps.length; i++) {
+            // create peptide JSON
+            peptidesJSON.push(pep_to_array(peps[i]));
+            // create linkSite JSON
+            let pep_noMods = peps[i].replace(/[^A-Z#]+/g , "");
+            let link_pos = pep_noMods.indexOf("#")-1;
+            let linkSite = {"id": 0, "peptideId": i, "linkSite": link_pos};
+            linkSitesJSON.push(linkSite);
+        }
+        // peak block
+        let peaks = formData.get("peaklist").trim().split(/[\r\n]/);
+        let peaksJSON = peaks.map(function(p){
+            p = p.split(/\s/);
+            return {"mz": p[0], "intensity": p[1]};
+        });
+        // annotation block - modifications
+        let modsJSON = Array();
+        let mods = formData.getAll("mods[]");
+        let modSpecs = formData.getAll("modSpecificities[]");
+        let modMasses = formData.getAll("modMasses[]");
+        for (let i = 0; i < mods.length; i++) {
+            // split after , and trim whitespaces
+            let modSpec = modSpecs[i].split(",").map(function(l){
+                return l.trim();
+            });
+            modsJSON.push({
+                "id": mods[i],
+                "aminoAcids": modSpec,
+                "mass": modMasses[i]
+            });
+        }
+        // annotation block - losses
+        let lossJSON = Array();
+        let losses = formData.getAll("losses[]");
+        let lossSpecs = formData.getAll("lossSpecificities[]");
+        let lossMasses = formData.getAll("lossMasses[]");
+        for (let i = 0; i < losses.length; i++) {
+            // split after , and trim whitespaces
+            let lossSpec = lossSpecs[i].split(",").map(function(l){
+                return l.trim();
+            });
+            lossJSON.push({
+                "id": losses[i],
+                "specificity": lossSpec,
+                "mass": lossMasses[i]
+            });
+        }
+        // annotation block - ions
+        let ionTypes = formData.getAll("ions[]");
+        let ionsJSON = [];
+        for (let it = 0; it < ionTypes.length; it++) {
+            let ionType = ionTypes[it];
+            ionsJSON.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+        }
+        // annotation block - crosslinker
+        let crosslinkerJSON = {"modMass": form["clModMass"].value};
+        // annotation block - tolerance
+        let toleranceJSON = {
+            "tolerance": parseFloat(form["ms2Tol"].value),
+            "unit": form["tolUnit"].value
+        };
+        // annotation block - JSON assembly
+        let annotationJSON = {
+            "fragmentTolerance": toleranceJSON,
+            "modifications": modsJSON,
+            "ions": ionsJSON,
+            "crosslinker": crosslinkerJSON,
+            "precursorCharge": parseInt(form["preCharge"].value),
+            "losses": lossJSON
+        };
+        
+        // final JSON assembly
+        return {
+            "Peptides": peptidesJSON,
+            "LinkSite": linkSitesJSON,
+            "peaks": peaksJSON,
+            "annotation": annotationJSON
+        };
     },
 
     //ToDo: improve error handling to be more informative - display outside of console
     checkInputsForValidity: function (formData) {
 
+        let formDataSpecificities;
+        let formDataMods;
         let invalidChars = function (input, unknownCharPattern) {
             let match = input.match(unknownCharPattern);
             if (match) {
@@ -440,32 +525,32 @@ export const DataSettingsView = SettingsView.extend({
         };
 
         // peptideStr
-        var invalidChar = invalidChars(formData["peps"].value, /([^GALMFWKQESPVICYHRNDTXa-z:;#0-9(.)\-+]+)/);
+        let invalidChar = invalidChars(formData["peps"].value, /([^GALMFWKQESPVICYHRNDTXa-z:;#\d(.)\-+]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in peptide sequence: " + invalidChar);
             return false;
         }
 
         // peakList
-        var invalidChar = invalidChars(formData["peaklist"].value, /([^0-9\.\s]+)/);
+        invalidChar = invalidChars(formData["peaklist"].value, /([^\d.\s]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in peak list: " + invalidChar);
             return false;
         }
         // clModMass
-        var invalidChar = invalidChars(formData["clModMass"].value, /([^0-9\.\-]+)/);
+        invalidChar = invalidChars(formData["clModMass"].value, /([^\d.-]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in cros-linker modmass: " + invalidChar);
             return false;
         }
         // precursor charge state
-        var invalidChar = invalidChars(formData["preCharge"].value, /([^0-9]+)/);
+        invalidChar = invalidChars(formData["preCharge"].value, /([^\d]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in charge state: " + invalidChar);
             return false;
         }
         // ms2Tolerance
-        var invalidChar = invalidChars(formData["ms2Tol"].value, /([^0-9\.]+)/);
+        invalidChar = invalidChars(formData["ms2Tol"].value, /([^\d.]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in ms2Tolerance: " + invalidChar);
             return false;
@@ -477,11 +562,11 @@ export const DataSettingsView = SettingsView.extend({
             const inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(""));
 
             if (formData["mods[]"][0] === undefined) {
-                var formDataMods = new Array(formData["mods[]"]);
-                var formDataSpecificities = new Array(formData["modSpecificities[]"]);
+                formDataMods = new Array(formData["mods[]"]);
+                formDataSpecificities = new Array(formData["modSpecificities[]"]);
             } else {
-                var formDataMods = formData["mods[]"];
-                var formDataSpecificities = formData["modSpecificities[]"];
+                formDataMods = formData["mods[]"];
+                formDataSpecificities = formData["modSpecificities[]"];
             }
 
             for (let i = 0; i < formDataMods.length; i++) {
@@ -537,7 +622,7 @@ export const DataSettingsView = SettingsView.extend({
                     "targets": 0,
                 },
                 {
-                    "render": function (data, type, row, meta) {
+                    "render": function (data, type, row) {
                         return row[0] + "<i class=\"fa fa-undo xispec_resetMod\" title=\"reset modification to default\" aria-hidden=\"true\"></i></span>";
                     },
                     "targets": 1,
