@@ -838,7 +838,7 @@ init.viewsEssential = function (options) {
         baseDir: window.xiSpecBaseDir,
         xiAnnotatorBaseURL: window.xiAnnotRoot,
         knownModificationsURL: false, //window.xiAnnotRoot + "annotate/knownModifications",
-        showCustomConfig: true,
+        showCustomConfig: false,
         showQualityControl: "min",
         colorScheme: "PRGn"
     };

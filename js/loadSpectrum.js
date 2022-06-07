@@ -16,7 +16,7 @@ export const loadSpectrum = function (match, randId) {
     // formatted_data.fragmentTolerance = match.fragmentTolerance();
 
     formatted_data.config = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).config;
-    formatted_data.crosslinker_id = match.crosslinker_id;
+    formatted_data.crosslinkerID = match.crosslinker_id;
     // formatted_data.customConfig = search.customsettings.split("\n");
 
     // for (let cl of search.crosslinkers) {
