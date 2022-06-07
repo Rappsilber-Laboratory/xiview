@@ -234,6 +234,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         annotationRequest.annotation.modifications = data.modifications;
         annotationRequest.annotation.custom = data.customConfig;
         annotationRequest.annotation.precursorMZ = +data.precursorMZ;
+        annotationRequest.annotation.returnModSyntax = "Xmod";
 
         // check if it's xi1 or xi2 style annotation
         if(data.config !== undefined){

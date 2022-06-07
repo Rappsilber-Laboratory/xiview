@@ -28,8 +28,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
     },
 
     initialize: function () {
-
-        if (this.get("knownModificationsURL") !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {    // in tells difference between variable existing and having the undefined value and it not being defined at all
+        // in tells difference between variable existing and having the undefined value and it not being defined at all
+        if (this.get("knownModificationsURL") !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {
             this.getKnownModifications(this.get("knownModificationsURL"));
             AnnotatedSpectrumModel.prototype.cachedKnownModifications = this.knownModifications;
         } else {
@@ -93,21 +93,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             return;
         }
 
-        let JSONrequest = this.get("JSONrequest");
-
-        // if knownModifications are not set get them from the JSONrequest
-        if (this.knownModifications.length === 0 && JSONrequest && JSONrequest.annotation && JSONrequest.annotation.modifications) {
-            this.knownModifications = JSONrequest.annotation.modifications.map(function (mod) {
-                let obj = {};
-                obj.id = mod.id;
-                obj.mass = parseFloat(mod.mass);
-                obj.aminoAcids = mod.aminoAcids;
-                obj.changed = false;
-                obj.userMod = true;
-                return obj;
-            });
-        }
-
         $("#xispec_measuringTool").prop("checked", false);
         $("#xispec_moveLabels").prop("checked", false);
         this.sticky = Array();
@@ -141,16 +126,36 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                     ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
                 }
                 this.fragmentIons = ions;
-                // modifications - currently xi2 annotator gives them also in annotation block
+                // modifications - xi2 annotator return mods with masses in annotation block
+                // (config.modification.modifications can have only composition defined)
                 this.annotationModifications = JSONdata.annotation.modifications;
 
             } else { // xi1 style annotator
                 this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
                 this.fragmentIons = JSONdata.annotation.ions;
                 this.customConfig = JSONdata.annotation.custom;
-                this.annotationModifications = JSONdata.annotation.modifications;
+                // xi1 modifications in annotation need to be reformatted
+                this.annotationModifications = JSONdata.annotation.modifications.map(function(m){
+                    return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
+                });
             }
         }
+
+        // if knownModifications are not set use annotation modifications
+        if (this.knownModifications.length === 0) {
+            this.knownModifications = this.annotationModifications;
+        }
+        // else {
+        //     // concat the knownModifications and annotationModifications (overwrite known on same id)
+        //     let annModIds = this.annotationModifications.map(function(m){
+        //         return m.id;
+        //     });
+        //     // filter out those that are also in annotationModifications
+        //     let filtered_knownMods = this.knownModifications.filter(function(kMod){
+        //         return !annModIds.indexOf(kMod.id);
+        //     });
+        //     this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
+        // }
 
         this.peakList = JSONdata.peaks || [];
 
@@ -406,9 +411,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
     },
 
     checkForValidModification: function (mod, aminoAcid) {
-
         for (let i = 0; i < this.knownModifications.length; i++) {
-            if (this.knownModifications[i].id == mod) {
+            if (this.knownModifications[i].id === mod) {
                 let knownMod_aminoAcids = this.knownModifications[i].aminoAcids;
                 return knownMod_aminoAcids.indexOf("*") !== -1 || knownMod_aminoAcids.indexOf(aminoAcid) !== -1;
             }

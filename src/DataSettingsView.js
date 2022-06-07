@@ -8,7 +8,6 @@ import "datatables.net";
 import {SettingsView} from "./SettingsView";
 import {PepInputView} from "./PepInputView";
 import d3 from "d3";
-import {trim} from "core-js/internals/string-trim";
 
 export const DataSettingsView = SettingsView.extend({
 
@@ -33,7 +32,7 @@ export const DataSettingsView = SettingsView.extend({
         // load default options and super initialize the parent view
         const defaultOptions = {
             showCustomCfg: true,
-            tabs: ["general", "custom config", "annotator"]
+            tabs: ["general", "custom config"] //, "annotator"] disabled, all xi2 for now
         };
         this.options = _.extend(defaultOptions, options);
         arguments[0] = this.options;
@@ -349,7 +348,7 @@ export const DataSettingsView = SettingsView.extend({
         this.model.trigger("change:JSONdata");
     },
 
-    applyCustomCfg: function (e) {
+    applyCustomCfg: function () {
         let json = this.model.get("JSONrequest");
         json.annotation.custom = $("#xispec_settingsCustomCfg-input").val().split("\n");
         window.xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
@@ -406,6 +405,7 @@ export const DataSettingsView = SettingsView.extend({
         json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
         json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
         json_request["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
+        json_request["annotation"]["returnModSyntax"] = "Xmod";
         window.xiSPECUI.vent.trigger("requestAnnotation", json_request, this.displayModel.get("annotatorURL"));
         this.displayModel.set("changedAnnotation", true);
         this.displayModel.knownModifications = $.extend(true, [], this.model.knownModifications);
@@ -455,6 +455,11 @@ export const DataSettingsView = SettingsView.extend({
             // split after , and trim whitespaces
             let modSpec = modSpecs[i].split(",").map(function(l){
                 return l.trim();
+            });
+            // remove empty elements
+            modSpec = modSpec.filter(function(ms){
+                if (ms !== "")
+                    return ms;
             });
             modsJSON.push({
                 "id": mods[i],
@@ -512,10 +517,9 @@ export const DataSettingsView = SettingsView.extend({
     },
 
     //ToDo: improve error handling to be more informative - display outside of console
-    checkInputsForValidity: function (formData) {
+    checkInputsForValidity: function (form) {
 
-        let formDataSpecificities;
-        let formDataMods;
+        let formData = new FormData(form);
         let invalidChars = function (input, unknownCharPattern) {
             let match = input.match(unknownCharPattern);
             if (match) {
@@ -525,78 +529,54 @@ export const DataSettingsView = SettingsView.extend({
         };
 
         // peptideStr
-        let invalidChar = invalidChars(formData["peps"].value, /([^GALMFWKQESPVICYHRNDTXa-z:;#\d(.)\-+]+)/);
+        let invalidChar = invalidChars(formData.get("peps"), /([^GALMFWKQESPVICYHRNDTXa-z:;#\d(.)\-+]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in peptide sequence: " + invalidChar);
             return false;
         }
 
         // peakList
-        invalidChar = invalidChars(formData["peaklist"].value, /([^\d.\s]+)/);
+        invalidChar = invalidChars(formData.get("peaklist"), /([^\d.\s]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in peak list: " + invalidChar);
             return false;
         }
         // clModMass
-        invalidChar = invalidChars(formData["clModMass"].value, /([^\d.-]+)/);
+        invalidChar = invalidChars(formData.get("clModMass"), /([^\d.-]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in cros-linker modmass: " + invalidChar);
             return false;
         }
         // precursor charge state
-        invalidChar = invalidChars(formData["preCharge"].value, /([^\d]+)/);
+        invalidChar = invalidChars(formData.get("preCharge"), /([^\d]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in charge state: " + invalidChar);
             return false;
         }
         // ms2Tolerance
-        invalidChar = invalidChars(formData["ms2Tol"].value, /([^\d.]+)/);
+        invalidChar = invalidChars(formData.get("ms2Tol"), /([^\d.]+)/);
         if (invalidChar) {
             alert("Invalid character(s) in ms2Tolerance: " + invalidChar);
             return false;
         }
 
+        // // modifications specificities
+        // let formModSpecs = formData.getAll("modSpecificities[]");
+        // formModSpecs.forEach(function(spec{
+        //     spec = spec.split(',');
+        //     // check for each specificity if it's valid
+        //     spec.forEach(function(s){
+        //         s = s.trim();
+        //         let invalidChar = invalidChars(s, /([^GALMFWKQESPVICYHRNDTXa-z:;#\d(.)\-+]+)/);
+        //         if (invalidChar) {
+        //             alert("Invalid specificity string for mod:" + );
+        //             return false;
+        //         }
+        //     })
+        //
+        // })
 
-        // modifications
-        if (formData["mods[]"]) {
-            const inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(""));
-
-            if (formData["mods[]"][0] === undefined) {
-                formDataMods = new Array(formData["mods[]"]);
-                formDataSpecificities = new Array(formData["modSpecificities[]"]);
-            } else {
-                formDataMods = formData["mods[]"];
-                formDataSpecificities = formData["modSpecificities[]"];
-            }
-
-            for (let i = 0; i < formDataMods.length; i++) {
-                let formDataAminoAcidsArr = formDataSpecificities[i].value.split("");
-
-                let inputMod = inputMods.filter(function (mod) {
-                    return mod.id == formDataMods[i].value;
-                })[0];
-                let inputAminoAcidsArr = inputMod.aminoAcids.split("");
-
-                if (formDataAminoAcidsArr.indexOf("*") !== -1) {
-                    console.log("ok", formDataMods[i].value);
-                    // return true;
-                } else {
-                    for (let j = 0; j < inputAminoAcidsArr.length; j++) {
-                        if (formDataAminoAcidsArr.indexOf(inputAminoAcidsArr[j]) === -1) {
-                            console.log("not ok", formDataMods[i].value);
-                            alert("Invalid modification specificity for: " + formDataMods[i].value);
-                            return false;
-                        }
-                        // else{
-                        // 	console.log('ok', formDataMods[i].value);
-                        // 	return true;
-                        // };
-                    }
-                }
-            }
-        }
         return true;
-
     },
 
     initializeModTable: function () {
@@ -616,7 +596,7 @@ export const DataSettingsView = SettingsView.extend({
             "columnDefs": [
                 {
                     "render": function (data, type, row, meta) {
-                        return "<input class=\"xispec_form-control\" id=\"modName_" + meta.row + "\" title=\"modification code\" name=\"mods[]\" readonly type=\"text\" value=" + data + ">";
+                        return "<input class=\"xispec_form-control\" id=\"modName_" + meta.row + "\" title=\"modification code\" name=\"mods[]\" readonly type=\"text\" value=\"" + data + "\">";
                     },
                     "class": "invisible",
                     "targets": 0,
@@ -644,7 +624,7 @@ export const DataSettingsView = SettingsView.extend({
                         //     let stepSize = '0.' + '0'.repeat(data.toString().split('.')[1].length - 1) + 1;
                         // else
                         //     let stepSize = 1;
-                        return "<input class=\"xispec_form-control stepInput\" id=\"modMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"modification mass\" name=\"modMasses[]\" type=\"text\" required value=" + data + " autocomplete=off>";
+                        return "<input class=\"xispec_form-control stepInput\" id=\"modMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"modification mass\" name=\"modMasses[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
                     },
                     "targets": 2,
                 },
@@ -652,21 +632,17 @@ export const DataSettingsView = SettingsView.extend({
                     "render": function (data, type, row, meta) {
                         if (self.model.knownModifications !== undefined) {
                             for (let i = 0; i < self.model.knownModifications.length; i++) {
-                                if (self.model.knownModifications[i].id == row[0]) {
-                                    data = data.split("");
-                                    if (self.model.knownModifications[i].aminoAcids == "*")
-                                        data = "*";
+                                if (self.model.knownModifications[i].id === row[0]) {
+                                    if (self.model.knownModifications[i].aminoAcids === ["*"])
+                                        data = ["*"];
                                     else {
                                         data = _.union(data, self.model.knownModifications[i].aminoAcids);
-                                        data.sort();
-                                        data = data.join("");
                                     }
-                                    // let found = true;
                                 }
                             }
                         }
-                        data = data.split(",").join("");
-                        return "<input class=\"xispec_form-control\" id=\"modSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"amino acids that can be modified\" name=\"modSpecificities[]\" type=\"text\" required value=" + data + " autocomplete=off>";
+                        data = data.join(", ");
+                        return "<input class=\"xispec_form-control\" id=\"modSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"comma separated list of amino acids that can be modified\" name=\"modSpecificities[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
                     },
                     "targets": 3,
                 }
@@ -681,9 +657,13 @@ export const DataSettingsView = SettingsView.extend({
             let row = this.getAttribute("row");
             let modName = $("#modName_" + row).val();
             let modMass = parseFloat($("#modMass_" + row).val());
-            let modSpec = $("#modSpec_" + row).val();
-
-            let mod = {"id": modName, "mass": modMass, "aminoAcids": modSpec.split("")};
+            // extract specificities from input
+            let modSpecInput = $("#modSpec_" + row).val();
+            let modSpec = [];
+            [... modSpecInput.matchAll(/([^\s,]+),?/g)].forEach(function (s){
+                modSpec.push(s[1]);
+            });
+            let mod = {"id": modName, "mass": modMass, "aminoAcids": modSpec};
 
             let updatedMod = self.model.updateModification(mod);
             if (!updatedMod.userMod)
@@ -723,20 +703,20 @@ export const DataSettingsView = SettingsView.extend({
             ],
             "columnDefs": [
                 {
-                    "render": function (data, type, row, meta) {
+                    "render": function () {
                         return "<i class=\"fa fa-trash xispec_deleteLoss\" title=\"delete neutral loss\" aria-hidden=\"true\">";
                     },
                     "targets": 0,
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return "<input class=\"xispec_form-control\" style=\"width:100px\" id=\"lossName_" + meta.row + "\" title=\"neutral loss name\" name=\"losses[]\" type=\"text\" value=" + data + ">";
+                        return "<input class=\"xispec_form-control\" style=\"width:100px\" id=\"lossName_" + meta.row + "\" title=\"neutral loss name\" name=\"losses[]\" type=\"text\" value=\"" + data + "\">";
                     },
                     "targets": 1,
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return "<input class=\"xispec_form-control stepInput\" style=\"width:120px\" id=\"lossMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss mass\" name=\"lossMasses[]\" type=\"text\" required value=" + data + " autocomplete=off>";
+                        return "<input class=\"xispec_form-control stepInput\" style=\"width:120px\" id=\"lossMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss mass\" name=\"lossMasses[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
                     },
                     "targets": 2,
                 },
@@ -752,6 +732,7 @@ export const DataSettingsView = SettingsView.extend({
 
         this.lossTable = $("#xispec_lossTable").DataTable(tableVars);
 
+        // ToDo: should be moved to BB event handling
         $("#xispec_lossTable ").on("click", ".xispec_deleteLoss", function () {
             self.lossTable
                 .row($(this).parents("tr"))
@@ -776,14 +757,14 @@ export const DataSettingsView = SettingsView.extend({
 
             let new_mod = {};
             new_mod.id = result[0];
-            new_mod.aminoAcids = pepStrMods[result.index - 1];
+            new_mod.aminoAcids = Array(pepStrMods[result.index - 1]);
 
             let found = false;
             for (let i = 0; i < modifications.length; i++) {
                 if (modifications[i].id === new_mod.id) {
                     found = true;
-                    if (modifications[i].aminoAcids.indexOf(new_mod.aminoAcids) === -1)
-                        modifications[i].aminoAcids += new_mod.aminoAcids;
+                    if (modifications[i].aminoAcids.indexOf(new_mod.aminoAcids[0]) === -1)
+                        modifications[i].aminoAcids.concat(new_mod.aminoAcids);
                     break;
                 }
             }
@@ -795,12 +776,11 @@ export const DataSettingsView = SettingsView.extend({
 
     renderModTable: function () {
 
-        // ToDo: modifications might be better placed inside model
+        // extract modification from peptide input
         let modifications = this.extractModsFromPepStr(this.model.pepStrsMods.join(""));
 
         let self = this;
         this.modTable.clear();
-
         if (modifications.length === 0) {
             this.modTable.draw(false);
             this.hideModTable();
@@ -813,7 +793,8 @@ export const DataSettingsView = SettingsView.extend({
                     0,
                     mod.aminoAcids,
                 ];
-                let annotation_mod_match = self.model.annotationModifications.filter(
+                // check if the modification is one of the ones from the JSON annotation
+                let annotation_mod_match = self.model.knownModifications.filter(
                     function (m) {
                         return m.id === mod.id;
                     });
@@ -821,8 +802,8 @@ export const DataSettingsView = SettingsView.extend({
                     add_mod = [
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].id,
-                        annotation_mod_match[0].massDifference,
-                        annotation_mod_match[0].aminoacid,
+                        annotation_mod_match[0].mass,
+                        annotation_mod_match[0].aminoAcids,
                     ];
                 }
 
