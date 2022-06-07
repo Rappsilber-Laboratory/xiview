@@ -44,7 +44,7 @@ export const DataSettingsView = SettingsView.extend({
         this.listenTo(window.xiSPECUI.vent, "dataSettingsToggle", this.toggleView);
 
         if (!this.options.showCustomCfg) {
-            this.menu.selectAll("#custom_config").style("display", "none");
+            this.menu.selectAll("#xispec_custom_config_Btn").style("display", "none");
         }
 
         // general tab
