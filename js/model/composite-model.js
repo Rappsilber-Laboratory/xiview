@@ -266,7 +266,12 @@ export class CompositeModel extends Backbone.Model {
                 const ppiMap = new Map();
                 for (let crosslink of crosslinksArr) {
                     if (crosslink.filteredMatches_pp.length) {
-                        key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
+                        let key;
+                        if (crosslink.toProtein) {
+                            key = crosslink.fromProtein.id + " - " + crosslink.toProtein.id;
+                        } else {
+                            key = crosslink.fromProtein.id + " - linear";
+                        }
                         value = ppiMap.get(key);
                         if (typeof value == "undefined") {
                             value = 1;
@@ -277,7 +282,12 @@ export class CompositeModel extends Backbone.Model {
                     }
                 }
                 for (let crosslink of this.getAllCrossLinks()) {
-                    key = crosslink.toProtein.id + " - " + crosslink.fromProtein.id;
+                    let key;
+                    if (crosslink.toProtein) {
+                        key = crosslink.fromProtein.id + " - " + crosslink.toProtein.id;
+                    } else {
+                        key = crosslink.fromProtein.id + " - linear";
+                    }
                     value = ppiMap.get(key);
                     if (value < uniqueResiduePairsPerPPI) {
                         crosslink.filteredMatches_pp = [];
