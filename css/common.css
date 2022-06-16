@@ -40,13 +40,14 @@ body, html{
     -o-user-select: none;
     user-select: none; */
 }
+
 body, input, select, textarea {
     Font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
     font-size: 10pt;
     font-weight: 300;
     line-height: 1.75em;
     color: #888;
-    -webkit-text-stroke: .15px;
+    /*-webkit-text-stroke: .15px;*/
 }
 
 
