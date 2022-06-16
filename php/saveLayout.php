@@ -48,10 +48,10 @@ if (isset($_SESSION['session_name'])) {
         or die('Query failed: ' . pg_last_error());
         $line = pg_fetch_array($res, null, PGSQL_ASSOC);
 
-//        if ($line["random_id"] != $randId || $line["user_name"] != $user) {
-//            echo "no";
-//            exit();
-//        }
+        if ($line["random_id"] != $randId || $line["user_name"] != $user) {
+            echo "no";
+            exit();
+        }
 
     }
 
