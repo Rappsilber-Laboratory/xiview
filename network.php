@@ -25,6 +25,14 @@
 
         <title>network</title>
     </head>
+    <style>
+
+/* temp hack to remove .ssl export */
+#expDropdownPlaceholder > div > ul > li:nth-child(8){
+display: none;
+}
+
+    </style>
 
     <body>
         <!-- Main -->
