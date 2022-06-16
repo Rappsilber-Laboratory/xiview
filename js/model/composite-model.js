@@ -797,13 +797,13 @@ export class CompositeModel extends Backbone.Model {
             features = d3.merge([mergedFeatures, features]);
         }
 
-        if (featureFilterSet.has("Cross-linkable-1")) {
+        if (featureFilterSet.has("Crosslinkable-1")) {
             const crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
             const mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
-        if (featureFilterSet.has("Cross-linkable-2")) {
+        if (featureFilterSet.has("Crosslinkable-2")) {
             const crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
             const mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);

@@ -171,7 +171,7 @@ export const NGLExportUtils = {
             const xiviewLink = crosslinkMap.get(link.origId);
             const color = colorScheme.getColour(xiviewLink);
 
-            bondArray.push("/" + chainA + ":" + link.residueA.resno + "@CA /" + chainB + ":" + link.residueB.resno + "@CA " + color);
+            bondArray.push("#1/" + chainA + ":" + link.residueA.resno + "@CA #1/" + chainB + ":" + link.residueB.resno + "@CA " + color);
         }
         const fileName = downloadFilename("ChimeraX", "pb");
         download(bondArray.join("\r\n"), "plain/text", fileName);

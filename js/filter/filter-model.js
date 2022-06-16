@@ -334,6 +334,14 @@ export class FilterModel extends Backbone.Model {
                             for (let p = 0; p < pidCount; p++) {
                                 const interactor = participants.get(pids[p]);
                                 let toSearch = interactor[dataField];// + " " + interactor.description;
+
+                                //hacky
+                                if (dataField === "description") {
+                                    if (interactor.uniprot){
+                                        toSearch += interactor.uniprot.keywords;
+                                    }
+                                }
+
                                 if (dataField == "name" && interactor.accession) {  // hacky nevermind
                                     toSearch = toSearch + " " + interactor.accession;
                                 }

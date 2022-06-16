@@ -240,7 +240,7 @@ export function matchSequencesToExistingProteins(protAlignCollection, sequenceOb
         const alignResults = protAlignModel.alignWithoutStoring(filteredSeqInfo.uniqSeqs, {
             semiLocal: true
         });
-        console.log("alignResults", /*alignResults,*/ prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
+        xilog("alignResults", alignResults, prot.id); // printing alignResults uses lots of memory in console (prevents garbage collection)
         updateMatchMatrix(prot.id, alignResults);
     });
 
