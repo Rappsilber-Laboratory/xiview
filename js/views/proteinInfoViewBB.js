@@ -172,7 +172,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                                 let row = innerInnerTBody.insertRow();
                                 let cell1 = row.insertCell();
                                 if (subkey === "go") {
-                                    cell1.textContent = subValue + " : " + goTermsMap.get(subValue).name;
+                                    const goTerm = goTermsMap.get(subValue);
+                                    const goTermName = goTerm? goTerm.name : "GO term not found";
+                                    cell1.textContent = subValue + " : " + goTermName;
                                 } else {
                                     cell1.textContent = subValue.toString();
                                 }
