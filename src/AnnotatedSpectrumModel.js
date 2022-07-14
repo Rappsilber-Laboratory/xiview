@@ -135,9 +135,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 this.fragmentIons = JSONdata.annotation.ions;
                 this.customConfig = JSONdata.annotation.custom;
                 // xi1 modifications in annotation need to be reformatted
-                this.annotationModifications = JSONdata.annotation.modifications.map(function(m){
-                    return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
-                });
+                if ("modifications" in JSONdata.annotation) {
+                    this.annotationModifications = JSONdata.annotation.modifications.map(function (m) {
+                        return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
+                    });
+                } else{
+                    this.annotationModifications = Array();
+                }
             }
         }
 
