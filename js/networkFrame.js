@@ -61,10 +61,8 @@ import {loadSpectrum} from "./loadSpectrum";
 window.vent = {};
 _.extend(window.vent, Backbone.Events);
 
-export const init = {};
-
 // only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
-init.postDataLoaded = function () {
+export function postDataLoaded () {
     console.log("DATA LOADED AND WINDOW LOADED");
 
     window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
@@ -130,11 +128,25 @@ init.postDataLoaded = function () {
     const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
     window.compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
-    window.vent.trigger("buildAsyncViews"); // not sure how necessary event for this is
-    //init.viewsThatNeedAsyncData();
+    window.vent.trigger("buildAsyncViews");
+
+
+    // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
+    // console.log("saved!", savedConfig);
+    // let proteinPositions, groups;
+    // // for backwards compatibility (after groups added to layout)
+    // if (layout.proteins) {
+    //     proteinPositions = layout.proteins;
+    //     groups = layout.groups;
+    // } else {
+    //     proteinPositions = layout;
+    // }
+    //
+    // loadConfig();
 
     window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
+    //folowing only used by tests
     window.vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
@@ -142,18 +154,94 @@ init.postDataLoaded = function () {
         d3.select("#linkColourSelect").property("value", "Group");
     }
 
-};
+}
 
-// This bar function calls postDataLoaded on the 4th go, ensuring all data is in place from various data loading ops
-export const allDataLoaded = _.after(4, init.postDataLoaded);
+// function loadConfig(layout) {
+//
+//     let layoutIsDodgy = false;
+//     let namesChanged = false;
+//     for (let protLayout of proteinPositions) {
+//         const protein = this.renderedProteins.get(protLayout.id);
+//         if (protein !== undefined) {
+//             protein.setPositionFromXinet(protLayout["x"], protLayout["y"]);
+//             if (typeof protLayout["rot"] !== "undefined") {
+//                 protein.rotation = protLayout["rot"] - 0;
+//             }
+//             protein.ix = protLayout["x"];
+//             protein.iy = protLayout["y"];
+//             protein.newForm = protLayout["expanded"];
+//             if (CrosslinkViewer.barScales.indexOf(+protLayout["stickZoom"]) > -1) {
+//                 protein.stickZoom = protLayout["stickZoom"];
+//             }
+//             protein.rotation = protLayout["rot"] - 0;
+//             protein.flipped = protLayout["flipped"];
+//             protein.participant.manuallyHidden = protLayout["manuallyHidden"];
+//
+//             if (protLayout["name"]) {
+//                 protein.participant.name = protLayout["name"];
+//                 namesChanged = true;
+//             }
+//
+//         } else {
+//             layoutIsDodgy = true;
+//             console.log("! protein in layout but not search:" + protLayout.id);
+//         }
+//     }
+//
+//     for (let rp of this.renderedProteins.values()) {
+//         rp.setEverything();
+//     }
+//
+//     if (groups && typeof groups[Symbol.iterator] === "function") {
+//         const modelGroupMap = new Map();
+//         for (const savedGroup of groups) {
+//             //gonna need to check for proteins now missing from results
+//             const presentProteins = new Set();
+//             for (let pId of savedGroup.participantIds) {
+//                 if (this.renderedProteins.get(pId)) {
+//                     presentProteins.add(pId);
+//                 }
+//             }
+//             modelGroupMap.set(savedGroup.id, presentProteins);
+//         }
+//         this.model.set("groups", modelGroupMap);
+//         this.model.trigger("change:groups");
+//
+//         for (const savedGroup of groups) {
+//             const xiNetGroup = this.groupMap.get(savedGroup.id);
+//             if (savedGroup.expanded === false) {
+//                 xiNetGroup.setExpanded(savedGroup.expanded);
+//                 xiNetGroup.setPositionFromXinet(savedGroup.x, savedGroup.y);
+//             }
+//         }
+//     }
+//
+//     this.model.get("filterModel").trigger("change", this.model.get("filterModel"));
+//
+//     // this.zoomToFullExtent();
+//
+//     if (layoutIsDodgy) {
+//         alert("Looks like something went wrong with the saved layout, if you can't see your proteins click Auto layout");
+//     }
+//
+//     if (namesChanged) {
+//         // vent.trigger("proteinMetadataUpdated", {}); //aint gonna work
+//         for (let renderedParticipant of this.renderedProteins.values()) {
+//             renderedParticipant.updateName();
+//         }
+//     }
+// }
+
+// This bar function calls postDataLoaded on the 3rd go, ensuring all data is in place from various data loading ops
+export const allDataLoaded = _.after(3, postDataLoaded);
 
 // for qunit testing
-init.pretendLoad = function () {
+export function pretendLoad () {
     allDataLoaded();
     allDataLoaded();
-};
+}
 
-init.blosumLoading = function (options) {
+export function blosumLoading (options) {
     options = options || {};
 
     // Collection of blosum matrices that will be fetched from a json file
@@ -167,23 +255,16 @@ init.blosumLoading = function (options) {
 
     // Start the asynchronous blosum fetching after the above events have been set up
     window.blosumCollInst.fetch(options);
-};
+}
 
-init.models = function (options) {
+export function models (options) {
 
     // define alignment model and listeners first, so they're ready to pick up events from other models
     const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
-    // HACK - does nothing at moment anyway because uniprot annotations aren't available //todo - this comment is wrong, right
-    alignmentCollectionInst.listenToOnce(window.vent, "uniprotDataParsed", function (clmsModel) {
-        this.addNewProteins(Array.from(clmsModel.get("participants").values()));
-        // console.log("ASYNC. uniprot sequences poked to collection", this);
-        allDataLoaded();
-    });
-
-    this.modelsEssential(options);
-
+    modelsEssential(options);
+    alignmentCollectionInst.addNewProteins(Array.from(window.compositeModelInst.get("clmsModel").get("participants").values()));
     // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
     // this listener adds new sequences obtained from pdb files to existing alignment sequence models
@@ -209,18 +290,6 @@ init.models = function (options) {
 
             console.log("3D sequences poked to collection", this);
         }
-    });
-
-
-    // this listener makes new alignment sequence models based on the current participant set (this usually gets called after a csv file is loaded)
-    // it uses the same code as that used when a xi search is the source of data, see earlier in this code (roughly line 96'ish)
-    alignmentCollectionInst.listenTo(window.compositeModelInst.get("clmsModel"), "change:matches", function () {
-        this.addNewProteins(Array.from(window.compositeModelInst.get("clmsModel").get("participants").values()));
-        // this triggers an event to say loads has changed in the alignment collection
-        // more efficient to listen to that then redraw/recalc for every seq addition
-        this.bulkAlignChangeFinished();
-
-        console.log("CSV sequences poked to collection", this);
     });
 
     // Set up colour models, some (most) of which depend on data properties
@@ -257,10 +326,10 @@ init.models = function (options) {
             window.compositeModelInst.get("clmsModel").get("searches").size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
         )
         .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB);
-};
+}
 
 //only inits stuff required by validation page
-init.modelsEssential = function (options) {
+export function modelsEssential (options) {
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
     const hasNoMatches = _.isEmpty(options.rawMatches);
@@ -370,7 +439,7 @@ init.modelsEssential = function (options) {
     });
 
     //moving this to end of allDataLoaded - think validation page needs this, TODO, check
-    window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
+    //window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
     // instead of views listening to changes in filter directly, we listen to any changes here, update filtered stuff
     // and then tell the views that filtering has occurred via a custom event ("filtering Done") in applyFilter().
@@ -380,16 +449,11 @@ init.modelsEssential = function (options) {
         this.applyFilter();
     });
 
-};
+}
 
-init.views = function () {
+export function views () {
 
     const compModel = window.compositeModelInst;
-    const matchesFound = !_.isEmpty(compModel.get("clmsModel").get("matches"));
-    //console.log("MODEL", compModel);
-
-    //todo: only if there is validated {
-    // compModel.get("filterModel").set("unval", false); // set to false in filter model defaults
 
     const windowIds = ["spectrumPanelWrapper", "spectrumSettingsWrapper", "keyPanel", "nglPanel", "distoPanel", "matrixPanel", "alignPanel", "circularPanel", "proteinInfoPanel", "pdbPanel", "stringPanel", "csvPanel", "searchSummaryPanel", "linkMetaLoadPanel", "proteinMetaLoadPanel", "userAnnotationsMetaLoadPanel", "gafAnnotationsMetaLoadPanel", "scatterplotPanel", "urlSearchBox", "listPanel", "goTermsPanel"];
     // something funny happens if I do a data join and enter with d3 instead
@@ -401,7 +465,7 @@ init.views = function () {
             .attr("class", "dynDiv dynDiv_bodyLimit");
     });
 
-    init.viewsEssential({
+    viewsEssential({
         "specWrapperDiv": "#spectrumPanelWrapper"
     });
 
@@ -505,22 +569,15 @@ init.views = function () {
     })
         // hide/disable view choices that depend on certain data being present until that data arrives
         .enableItemsByID(maybeViews, false)
-        .enableItemsByID(mostViews, matchesFound)
+        .enableItemsByID(mostViews, true)
         .listenTo(compModel.get("clmsModel"), "change:distancesObj", function (model, newDistancesObj) {
             this.enableItemsByID(maybeViews, !!newDistancesObj);
-        })
-        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-            this.enableItemsByID(mostViews, true);
         });
-
 
     // Generate protein selection drop down
     d3.select("body").append("input")
         .attr("type", "text")
         .attr("id", "proteinSelectionFilter");
-    d3.select("body").append("input")
-        .attr("type", "text")
-        .attr("id", "groupSelected");
 
     new DropDownMenuViewBB({
         el: "#proteinSelectionDropdownPlaceholder",
@@ -565,11 +622,11 @@ init.views = function () {
             },
         }
     })
-        .wholeMenuEnabled(matchesFound)
-        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-            this.wholeMenuEnabled(true);
-        });
+        .wholeMenuEnabled(true);
 
+    d3.select("body").append("input")
+        .attr("type", "text")
+        .attr("id", "groupSelected");
 
     new DropDownMenuViewBB({
         el: "#groupsDropdownPlaceholder",
@@ -618,10 +675,7 @@ init.views = function () {
             },
         }
     })
-        .wholeMenuEnabled(matchesFound)
-        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-            this.wholeMenuEnabled(true);
-        });
+        .wholeMenuEnabled(true);
 
     // Generate buttons for load dropdown
     const loadButtonData = [{
@@ -663,19 +717,7 @@ init.views = function () {
             menu: loadButtonData,
             //tooltipModel: compModel.get("tooltipModel"),
         }
-    }) // hide/disable view choices that depend on certain data being present until that data arrives
-        .enableItemsByIndex([0, 2, 3], matchesFound)
-        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-            this.enableItemsByIndex([0, 2, 3], true);
-        })
-        .setVis(!matchesFound); // open as default if empty search
-
-    // new URLSearchBoxViewBB({
-    //     el: "#urlSearchBox",
-    //     model: compModel,
-    //     displayEventName: "shareURLViewShow",
-    //     myOptions: {}
-    // });
+    });
 
     new xiNetControlsViewBB({
         el: "#xiNetButtonBar",
@@ -686,11 +728,11 @@ init.views = function () {
     // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
     // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
     compModel.listenToOnce(window.vent, "buildAsyncViews", function () {
-        init.viewsThatNeedAsyncData();
+        viewsThatNeedAsyncData();
     });
-};
+}
 
-init.viewsEssential = function (options) {
+export function viewsEssential (options) {
 
     const compModel = window.compositeModelInst;
     const filterModel = compModel.get("filterModel");
@@ -723,7 +765,6 @@ init.viewsEssential = function (options) {
         d3.select("#product").style("display", "none");
     }
 
-
     // Generate minigram views
     const minigramViewConfig = [
         {
@@ -754,11 +795,11 @@ init.viewsEssential = function (options) {
                 height: 65,
                 colours: _.object(_.zip(config.seriesNames, config.colours)), // [a,b],[c,d] -> [a,c],[b,d] -> {a:c, b:d}
             }
-        })
-            // If the clmsModel matches attribute changes then tell the mini histogram view
-            .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-                this.render().redrawBrush();
-            }); // if the matches change (likely?) need to re-render the view too
+        });
+        // If the clmsModel matches attribute changes then tell the mini histogram view
+        // .listenTo(compModel.get("clmsModel"), "change:matches", function () {
+        //     this.render().redrawBrush();
+        // }); // if the matches change (likely?) need to re-render the view too
     });
 
     // redraw brush when distancesObj is changed, extent is likely to be different
@@ -912,28 +953,14 @@ init.viewsEssential = function (options) {
                     tooltip: "Produces an SSL file for quantitation in SkyLine",
                     categoryTitle: "As an SSL File",
                     sectionBegin: true,
-                    // sectionEnd: true
                 },
-                // {
-                //     name: "Make Filtered XI URL",
-                //     func: function () {
-                //         vent.trigger("shareURLViewShow", true);
-                //     },
-                //     tooltip: "Produces a URL that embeds the current filter state within it for later reproducibility",
-                //     categoryTitle: "As a URL",
-                //     sectionBegin: true,
-                // },
             ],
-            //tooltipModel: compModel.get("tooltipModel"),
             sectionHeader: function (d) {
                 return (d.categoryTitle ? d.categoryTitle.replace(/_/g, " ") : "");
             },
         }
     })
-        .wholeMenuEnabled(!_.isEmpty(compModel.get("clmsModel").get("matches")))
-        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-            this.wholeMenuEnabled(true);
-        });
+        .wholeMenuEnabled(true);
 
     // Generate help drop down
     new DropDownMenuViewBB({
@@ -955,7 +982,6 @@ init.viewsEssential = function (options) {
                 },
                 tooltip: "A number of how-to videos are available via this link to the lab homepage",
             }],
-            //tooltipModel: compModel.get("tooltipModel"),
         }
     });
     d3.select("#helpDropdownPlaceholder > div").append("img")
@@ -974,9 +1000,9 @@ init.viewsEssential = function (options) {
         el: "#tooltip2",
         model: compModel.get("tooltipModel")
     });
-};
+}
 
-init.viewsThatNeedAsyncData = function () {
+function viewsThatNeedAsyncData () {
 
     const compModel = window.compositeModelInst;
 
@@ -1021,11 +1047,7 @@ init.viewsThatNeedAsyncData = function () {
             },
         }
     })
-        .wholeMenuEnabled(!_.isEmpty(compModel.get("clmsModel").get("matches")))
-        .listenTo(compModel.get("clmsModel"), "change:matches", function () {
-            this.wholeMenuEnabled(true);
-        });
-
+        .wholeMenuEnabled(true);
 
     new ColourCollectionOptionViewBB({
         el: "#linkColourDropdownPlaceholder",
@@ -1045,13 +1067,6 @@ init.viewsThatNeedAsyncData = function () {
         },
         label: "Protein Colour Scheme"
     });
-
-    new CrosslinkViewer({
-        el: "#networkDiv",
-        model: compModel,
-        //     myOptions: {layout: storedLayout}
-    });
-
 
     // Alignment View
     new AlignCollectionViewBB({
@@ -1160,10 +1175,20 @@ init.viewsThatNeedAsyncData = function () {
     });
 
     //make sure things that should be hidden are hidden
-    compModel.trigger("hiddenChanged"); // think this isn't needed? todo - check
+    // compModel.trigger("hiddenChanged"); // think this isn't needed? todo - check
 
     // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the KeyView is too late to be picked up
     // so we run it again here, doesn't do any harm
     ByRei_dynDiv.init.main();
     //ByRei_dynDiv.db (1, d3.select("#subPanelLimiter").node());
-};
+
+    const crosslinkViewer = new CrosslinkViewer({
+        el: "#networkDiv",
+        model: window.compositeModelInst,
+        //     myOptions: {layout: storedLayout}
+    });
+
+    // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
+    // console.log("saved!", savedConfig);
+    // crosslinkViewer.loadLayout(savedConfig.layout);
+}

@@ -9,7 +9,15 @@ import * as Spinner from "spin";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 import * as NGL from "../vendor/ngl.dev"; // only used here for test setup
 import * as d3 from "d3";
-import {init, allDataLoaded} from "./networkFrame";
+import {
+    allDataLoaded,
+    models,
+    views,
+    blosumLoading,
+    modelsEssential,
+    viewsEssential,
+    pretendLoad
+} from "./networkFrame";
 import {commonRegexes, displayError} from "./utils";
 import {loadGOAnnotations} from "./loadGO";
 import Split from "split.js";
@@ -20,30 +28,14 @@ import {repopulateNGL} from "./views/ngl/RepopulateNGL";
 export function main() {
 
     const spinnerOpts = {
-        // lines: 13, // The number of lines to draw
         length: 38, // The length of each line
         width: 17, // The line thickness
         radius: 45, // The radius of the inner circle
-        // scale: 5, // Scales overall size of the spinner
-        // corners: 1, // Corner roundness (0..1)
-        // speed: 1, // Rounds per second
-        // rotate: 0, // The rotation offset
-        // animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
-        // direction: 1, // 1: clockwise, -1: counterclockwise
-        // color: '#000000', // CSS color or array of colors
-        // fadeColor: 'transparent', // CSS color or array of colors
-        // top: '50%', // Top position relative to parent
-        // left: '50%', // Left position relative to parent
-        // shadow: '0 0 1px transparent', // Box-shadow for the lines
-        // zIndex: 2000000000, // The z-index (defaults to 2e9)
-        // className: 'spinner', // The CSS class to assign to the spinner
-        // position: 'absolute', // Element positioning
     };
 
     const spinTarget = d3.select("#main").node();
     console.log("spinTarget", spinTarget);
     const spinner = new Spinner(spinnerOpts).spin(spinTarget);
-    // let z;
 
     const success = function (json) {
         // try {
@@ -64,7 +56,7 @@ export function main() {
             }, "Warning <p class='errorReason'>" + json.warn + "</p>");
         }
 
-        init.models(json);
+        models(json);
         const searches = window.compositeModelInst.get("clmsModel").get("searches");
         document.title = Array.from(searches.keys()).join();
 
@@ -89,7 +81,7 @@ export function main() {
             }, "Returned search results were generated at " + returnedTimeStamp + " and are likely from cache.<p class='errorReason'>If you have revalidated results since, press CTRL + F5 to refresh.</p>");
         }
 
-        init.views();
+        views();
         allDataLoaded();
 
         //   } catch (err) {
@@ -144,7 +136,7 @@ export function main() {
     });
 
     // 3. Can load BLOSUM matrices in parallel - saves a little bit of initialisation
-    init.blosumLoading();
+    blosumLoading();
 }
 
 export function validationPage() {
@@ -154,7 +146,7 @@ export function validationPage() {
     const success = function (text) {
         spinner.stop(); // stop spinner on request returning
         const json = JSON.parse(text);
-        init.modelsEssential(json);
+        modelsEssential(json);
 
         const searches = window.compositeModelInst.get("clmsModel").get("searches");
         document.title = "Validate " + Array.from(searches.keys()).join();
@@ -170,7 +162,7 @@ export function validationPage() {
         d3.select("body").append("div")
             .attr("id", "spectrumSettingsWrapper")
             .attr("class", "dynDiv");
-        init.viewsEssential({"specWrapperDiv": "#topDiv", spectrumToTop: false});
+        viewsEssential({"specWrapperDiv": "#topDiv", spectrumToTop: false});
 
         window.vent.trigger("spectrumShow", true);
 
@@ -241,9 +233,9 @@ function testSetupNew(cbfunc) {
             console.log("here");
         });
 
-        init.blosumLoading({url: "../R/blosums.json"});
-        init.pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
-        init.models(options);
+        blosumLoading({url: "../R/blosums.json"});
+        models(options);
+        pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
     });
 }
 
