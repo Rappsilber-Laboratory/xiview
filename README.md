@@ -37,6 +37,13 @@ var options = {
   highlightColor: '#FFFF00',                  // initial highlight color (can be changed in settings)
   highlightWidth: 8,                          // highlight width
   peakColor: "#a6a6a6",                       // color for not annotated peaks
+  // The following options define the default settings for the appearance settings menu
+  labelFragmentCharge: false,                 // display the fragment charge states in annotation labels
+  labelCutoff: 0,                             // cut-off for displaying labels of annotations (in % of base peak)
+  labelFontSize: 10,                          // font-size of the annotation labels
+  accentuateCrossLinkContainingFragments: false,  // accentuate crosslink-containing fragments in the fragmentation key
+  hideNotSelectedFragments: false,            // show/hide not currently selected fragments
+  showLossLabels: false,                      // show/hide neutral loss annotation labels
 };
 
 var xiSPEC = xispec.createApp(options);
