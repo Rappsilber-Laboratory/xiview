@@ -190,7 +190,6 @@ export const AppearanceSettingsView = SettingsView.extend({
     accentuateCLcontainingToggle: function (e) {
         let selected = $(e.target).is(":checked");
         this.displayModel.set("accentuateCrossLinkContainingFragments", selected);
-        // window.xiSPECUI.vent.trigger('accentuateCrossLinkContainingFragments', selected);
     },
 
     changePepFragmentsVis: function (e) {

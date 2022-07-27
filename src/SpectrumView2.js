@@ -25,7 +25,6 @@ export const SpectrumView = Backbone.View.extend({
             ylabelLeft: "Intensity",
             ylabelRight: "% of base Peak",
             butterfly: false,
-            accentuateCLcontainingFragments: false,
         };
 
         this.options = _.extend(defaultOptions, viewOptions);
@@ -50,10 +49,10 @@ export const SpectrumView = Backbone.View.extend({
         this.listenTo(this.model, "change:colors", this.setColors);
         this.listenTo(this.model, "change:mzRange", this.updateMzRange);
         this.listenTo(this.model, "butterflySwap", this.butterflySwap);
-        this.listenTo(this.model, "change:labelFragmentCharge", this.labelFragmentChargeToggle);
+        this.listenTo(this.model, "change:labelFragmentCharge", this.render);
         this.listenTo(this.model, "change:labelCutoff", this.labelCutoff);
         this.listenTo(this.model, "change:labelFontSize", this.changeLabelFontSize);
-        this.listenTo(this.model, "change:accentuateCrossLinkContainingFragments", this.accentuateCLcontainingToggle);
+        this.listenTo(this.model, "change:accentuateCrossLinkContainingFragments", this.render);
         this.listenTo(this.model, "change:hideNotSelectedFragments", this.updatePeakHighlighting);
         this.listenTo(this.model, "change:showLossLabels", this.showLossy);
 
@@ -174,16 +173,6 @@ export const SpectrumView = Backbone.View.extend({
         this.options.invert = !this.options.invert;
         this.render();
         this.updateHighlights();
-    },
-
-    accentuateCLcontainingToggle: function () {
-        this.options.accentuateCLcontainingFragments = this.model.get("accentuateCrossLinkContainingFragments");
-        this.render();
-    },
-
-    labelFragmentChargeToggle: function () {
-        this.options.labelFragmentCharge = this.model.get("labelFragmentCharge");
-        this.render();
     },
 
     moveLabels: function () {

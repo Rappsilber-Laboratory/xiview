@@ -19,9 +19,9 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
 
     this.yfrag_index = this.peptide.sequence.length - (index + 1);
     this.bfrag_index = (index + 1);
-    if (this.peptideId == 0)
+    if (this.peptideId === 0)
         var color = this.FragKey.model.p1color;
-    else if (this.peptideId == 1)
+    else if (this.peptideId === 1)
         var color = this.FragKey.model.p2color;
 
 
@@ -29,9 +29,9 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     // var xStep = 23;
 
     this.x = (xStep * (index + offset)) + (xStep / 2);
-    if (this.peptideId == 0)
+    if (this.peptideId === 0)
         var y = 25;
-    if (this.peptideId == 1)
+    if (this.peptideId === 1)
         var y = 75;
     const barHeight = 18, tailX = 5, tailY = 5;
 
@@ -96,16 +96,16 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     }
 
     // # bions; either normal or lossy; have different colors
-    if (fragments.b.length != 0) { // really a, b, or c , see get_fragment_annotation()
+    if (fragments.b.length !== 0) { // really a, b, or c , see get_fragment_annotation()
 
         // check for Crosslink containing fragment - checking first is sufficient
         // fragments.b.filter(function(b){return b.type.crossLinkContaining})
         var fragLineClass = "xispec_fragBar";
-        if (this.FragKey.options.accentuateCLcontainingFragments && fragments.b[0].crossLinkContaining) {
+        if (this.FragKey.model.get("accentuateCrossLinkContainingFragments") && fragments.b[0].crossLinkContaining) {
             fragLineClass = "xispec_fragBarThick";
         }
 
-        if (fragments.y.length == 0)	//highlightPath full length of the fragbar
+        if (fragments.y.length === 0)	//highlightPath full length of the fragbar
             var highlightPath = "M" + this.x + "," + (y - barHeight)
                 + " L" + this.x + "," + y
                 + " L" + (this.x - tailX) + "," + (y + tailY);
@@ -203,7 +203,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
         //check if only lossy fragments
         var blossy = true;
         for (var i = 0; i < fragments.b.length; i++) {
-            if (fragments.b[i].class != "lossy")
+            if (fragments.b[i].class !== "lossy")
                 blossy = false;
         }
         if (blossy) {
@@ -214,14 +214,14 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     }
 
     // # yions; either normal or lossy; have different colors
-    if (fragments.y.length != 0) {
+    if (fragments.y.length !== 0) {
 
         var fragLineClass = "xispec_fragBar";
-        if (this.FragKey.options.accentuateCLcontainingFragments && fragments.y[0].crossLinkContaining) {
+        if (this.FragKey.model.get("accentuateCrossLinkContainingFragments") && fragments.y[0].crossLinkContaining) {
             fragLineClass = "xispec_fragBarThick";
         }
 
-        if (fragments.b.length == 0)	//highlight full length of the fragbar
+        if (fragments.b.length === 0)	//highlight full length of the fragbar
             var highlightPath = "M" + this.x + "," + y
                 + " L" + this.x + "," + (y - barHeight)
                 + " L" + (this.x + tailX) + "," + (y - barHeight - tailY);
@@ -316,7 +316,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
         //check if only lossy fragments
         var ylossy = true;
         for (var i = 0; i < fragments.y.length; i++) {
-            if (fragments.y[i].class != "lossy")
+            if (fragments.y[i].class !== "lossy")
                 ylossy = false;
         }
         if (ylossy) {
@@ -336,7 +336,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
         .attr("class", "xispec_fragBar");
 
     //if all fragments are lossy
-    if ((fragments.y.length == 0 || ylossy) && (fragments.b.length == 0 || blossy)) {
+    if ((fragments.y.length === 0 || ylossy) && (fragments.b.length === 0 || blossy)) {
         this.fragBar.attr("stroke", this.FragKey.model.get("peakColor"));
     } else {
         this.fragBar.attr("stroke", "black");
@@ -348,24 +348,24 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
 KeyFragment.prototype.highlight = function (show, fragments) {
     if (show === true) {
         for (let f = 0; f < fragments.length; f++) {
-            if (this.b.indexOf(fragments[f]) != -1 && this.bHighlight) {
+            if (this.b.indexOf(fragments[f]) !== -1 && this.bHighlight) {
                 this.bHighlight.attr("opacity", 1);
-                if (fragments[f].type.indexOf("AIon") != -1)
+                if (fragments[f].type.indexOf("AIon") !== -1)
                     this.bText.text("a" + this.bfrag_index);
-                if (fragments[f].type.indexOf("BIon") != -1)
+                if (fragments[f].type.indexOf("BIon") !== -1)
                     this.bText.text("b" + this.bfrag_index);
-                if (fragments[f].type.indexOf("CIon") != -1)
+                if (fragments[f].type.indexOf("CIon") !== -1)
                     this.bText.text("c" + this.bfrag_index);
                 //if (fragments[f].type.indexOf("AIon") != -1 || fragments[f].type.indexOf("BIon") != -1 || fragments[f].type.indexOf("CIon") != -1)
                 this.bText.attr("opacity", 1);
             }
-            if (this.y.indexOf(fragments[f]) != -1 && this.yHighlight) {
+            if (this.y.indexOf(fragments[f]) !== -1 && this.yHighlight) {
                 this.yHighlight.attr("opacity", 1);
-                if (fragments[f].type.indexOf("XIon") != -1)
+                if (fragments[f].type.indexOf("XIon") !== -1)
                     this.yText.text("x" + this.yfrag_index);
-                if (fragments[f].type.indexOf("YIon") != -1)
+                if (fragments[f].type.indexOf("YIon") !== -1)
                     this.yText.text("y" + this.yfrag_index);
-                if (fragments[f].type.indexOf("ZIon") != -1)
+                if (fragments[f].type.indexOf("ZIon") !== -1)
                     this.yText.text("z" + this.yfrag_index);
                 //if (fragments[f].type.indexOf("XIon") != -1 || fragments[f].type.indexOf("YIon") != -1 || fragments[f].type.indexOf("ZIon") != -1)
                 this.yText.attr("opacity", 1);
