@@ -21,8 +21,8 @@ window.linkColor = {};//todo - get rid
 
 export const setupColourModels = function (userConfig) {
     const defaultConfig = {
-        default: {domain: [0, 1, 2], range: ["#7570b3", "#d95f02", "#1b9e77"]},
-        distance: {domain: [15, 25], range: ["#5AAE61", "#FDB863", "#9970AB"]}
+        default: {domain: [0, 1, 2], range: ["#7570b3FF", "#d95f02FF", "#1b9e77FF"]},
+        distance: {domain: [15, 25], range: ["#5AAE61FF", "#FDB863FF", "#9970ABFF"]}
     };
     const config = $.extend(true, {}, defaultConfig, userConfig);    // true = deep merging
 
@@ -134,7 +134,7 @@ export const setupColourModels = function (userConfig) {
     // Protein colour schemes
 
     window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({
-        colScale: d3.scale.ordinal().domain([0]).range(["#fff"]),
+        colScale: d3.scale.ordinal().domain([0]).range(["#ffffffff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
         id: "Default Protein"
@@ -240,7 +240,7 @@ const makeColourModel = function (field, label, objs) {
         });
     } else {
         // make normal categorical
-        const range = ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"];
+        const range = ["#4e79a7FF", "#f28e2cFF", "#e15759FF", "#76b7b2FF", "#59a14fFF", "#edc949FF", "#af7aa1FF", "#ff9da7FF", "#9c755fFF", "#bab0abFF"];
 
         return new MetaDataColourModel({
             colScale: d3.scale.ordinal().domain(Array.from(categories)).range(range),

@@ -65,17 +65,17 @@ export class GroupColourModel extends ColourModel {
         const groupCount = groups.size;
         let colScale;
 
-        const multiGroupColour = "#202020"; // default colour for links involved in multiple groups
+        const multiGroupColour = "#202020FF"; // default colour for links involved in multiple groups
         if (groupCount < 11) {
-            const colArr = [multiGroupColour].concat(groupCount < 6 ? ["#1b9e77",
-                "#7570b3",
-                "#e7298a",
-                "#66a61e",
-                "#d95f02"
+            const colArr = [multiGroupColour].concat(groupCount < 6 ? ["#1b9e77FF",
+                "#7570b3FF",
+                "#e7298aFF",
+                "#66a61eFF",
+                "#d95f02FF"
             ] : colorbrewer.Paired[10]);
             colScale = d3.scale.ordinal().range(colArr).domain(groupDomain);
         } else { // more than 10 groups, not really feasible to find colour scale that works - a d3.scale that always returns gray?
-            colScale = d3.scale.linear().domain([-1, 0]).range([multiGroupColour, "#448866"]).clamp(true);
+            colScale = d3.scale.linear().domain([-1, 0]).range([multiGroupColour, "#448866FF"]).clamp(true);
             labelRange = ["Multiple Groups", "Single Group"];
         }
         this
