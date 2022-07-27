@@ -338,7 +338,7 @@ Peak.prototype.draw = function () {
                     .attr("text-anchor", "middle")
                     .style("font-size", self.graph.model.get("labelFontSize"))
                     .attr("font-weight", function (d) {
-                        if (self.graph.options.accentuateCLcontainingFragments && d.crossLinkContaining)
+                        if (self.graph.model.get("accentuateCrossLinkContainingFragments") && d.crossLinkContaining)
                             return "900";
                         return "normal";
                     })
@@ -350,7 +350,7 @@ Peak.prototype.draw = function () {
                         const pepIndex = d.peptideId + 1;
                         return self.graph.model["p" + pepIndex + partition.colourClass];
                     });
-                if (self.graph.options.labelFragmentCharge) {
+                if (self.graph.model.get("labelFragmentCharge")) {
                     label.selectAll("text").append("tspan")
                         .text(function (d) {
                             return d.get_charge(self.id) + "+";
@@ -385,7 +385,7 @@ Peak.prototype.draw = function () {
     }
 
     let peakStrokeWidth = 1;
-    if (this.graph.options.accentuateCLcontainingFragments
+    if (this.graph.model.get("accentuateCrossLinkContainingFragments")
         && this.fragments.filter(function (f) {
             return f.crossLinkContaining;
         }).length > 0) {

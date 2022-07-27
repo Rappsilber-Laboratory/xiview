@@ -22,7 +22,6 @@ export const FragmentationKeyView = Backbone.View.extend({
             invert: false,
             hidden: false,
             disabled: false,
-            accentuateCLcontainingFragments: false,
         };
         this.options = _.extend(defaultOptions, viewOptions);
 
@@ -52,7 +51,7 @@ export const FragmentationKeyView = Backbone.View.extend({
         this.listenTo(this.model, "butterflySwap", this.butterflySwap);
         this.listenTo(window, "resize", _.debounce(this.resize));
         this.listenTo(window.xiSPECUI.vent, "resize:spectrum", this.resize);
-        this.listenTo(this.model, "change:accentuateCrossLinkContainingFragments", this.accentuateCLcontainingToggle);
+        this.listenTo(this.model, "change:accentuateCrossLinkContainingFragments", this.render);
 
         this.tooltip = d3.select("body").append("span")
             .attr("class", "xispec_tooltip");
@@ -842,11 +841,6 @@ export const FragmentationKeyView = Backbone.View.extend({
         this.options.invert = !this.options.invert;
         this.render();
         this.updateHighlights();
-    },
-
-    accentuateCLcontainingToggle: function () {
-        this.options.accentuateCLcontainingFragments = this.model.get("accentuateCrossLinkContainingFragments");
-        this.render();
     },
 
     hide: function () {
