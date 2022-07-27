@@ -12,7 +12,7 @@ export class ColourModel extends Backbone.Model {
             longDescription: undefined,
             type: "linear",
             fixed: false,
-            undefinedColour: "#aaa",
+            undefinedColour: "#aaaaaaff",
             undefinedLabel: "Unknown",
             unit: "",
         };
