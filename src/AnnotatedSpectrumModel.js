@@ -120,7 +120,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             this.customConfig = JSONdata.annotation.custom;
             if (JSONdata.annotation.crosslinker)
                 this.crossLinkerModMass = JSONdata.annotation.crosslinker.modMass;
-            this.annotationModifications = JSONdata.annotation.modifications;
+            this.annotationModifications = JSONdata.annotation.modifications? JSONdata.annotation.modifications : [];
         }
 
         this.peakList = JSONdata.peaks || [];
@@ -464,7 +464,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         $.ajax({
             type: "GET",
             datatype: "json",
-            async: false,
+            // async: false,
             url: modifications_url,
             success: function (data) {
                 for (let i = 0; i < data.modifications.length; i++) {
