@@ -881,7 +881,14 @@ export function viewsEssential (options) {
         knownModificationsURL: window.xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: true,
         showQualityControl: "min",
-        colorScheme: "PRGn"
+        colorScheme: "PRGn",
+        labelFragmentCharge: false,
+        labelCutoff: 0,
+        labelFontSize: 10,
+        accentuateCrossLinkContainingFragments: true,
+        hideNotSelectedFragments: false,
+        showLossLabels: false,
+        QCabsErr: false
     };
 
     window.xiSPEC = new xiSPEC_wrapper(xiSPEC_options);
