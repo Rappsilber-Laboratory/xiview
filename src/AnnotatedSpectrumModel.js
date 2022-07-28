@@ -28,8 +28,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
     },
 
     initialize: function () {
-
-        if (this.get("knownModificationsURL") !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {    // in tells difference between variable existing and having the undefined value and it not being defined at all
+        // in tells difference between variable existing and having the undefined value and it not being defined at all
+        if (this.get("knownModificationsURL") !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {
             this.getKnownModifications(this.get("knownModificationsURL"));
             AnnotatedSpectrumModel.prototype.cachedKnownModifications = this.knownModifications;
         } else {
@@ -93,35 +93,73 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             return;
         }
 
-        let JSONrequest = this.get("JSONrequest");
-
-        // if knownModifications are not set get them from the JSONrequest
-        if (this.knownModifications.length === 0 && JSONrequest && JSONrequest.annotation && JSONrequest.annotation.modifications) {
-            this.knownModifications = JSONrequest.annotation.modifications.map(function (mod) {
-                let obj = {};
-                obj.id = mod.id;
-                obj.mass = parseFloat(mod.mass);
-                obj.aminoAcids = mod.aminoAcids;
-                obj.changed = false;
-                obj.userMod = true;
-                return obj;
-            });
-        }
-
         $("#xispec_measuringTool").prop("checked", false);
         $("#xispec_moveLabels").prop("checked", false);
         this.sticky = Array();
         this.highlights = Array();
         let JSONdata = this.get("JSONdata");
 
+        // read annotation information from JSON
+        // ToDo: currently converts xi2 into xi1 annotator style. Could change to using own format
         if (JSONdata.annotation) {
-            this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
-            this.fragmentIons = JSONdata.annotation.ions;
-            this.customConfig = JSONdata.annotation.custom;
+
             if (JSONdata.annotation.crosslinker)
                 this.crossLinkerModMass = JSONdata.annotation.crosslinker.modMass;
-            this.annotationModifications = JSONdata.annotation.modifications? JSONdata.annotation.modifications : [];
+
+            if (JSONdata.annotation.config){
+                let config = JSONdata.annotation.config;
+                // MsnTolerance
+                let ms2tolRegexp = RegExp(/([\d.]+)\s?(ppm|Da)/);
+                let ms2tolMatch = config.ms2_tol.match(ms2tolRegexp);
+                this.MSnTolerance = {
+                    "tolerance": ms2tolMatch[1],
+                    "unit": ms2tolMatch[2]
+                };
+                // fragmentIons
+                let ionTypes = config.fragmentation.cterm_ions.concat(config.fragmentation.nterm_ions);
+                if (config.fragmentation.add_precursor){
+                    ionTypes.push("peptide");
+                }
+                let ions = [];
+                for (let it = 0; it < ionTypes.length; it++) {
+                    let ionType = ionTypes[it];
+                    ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+                }
+                this.fragmentIons = ions;
+                // modifications - xi2 annotator return mods with masses in annotation block
+                // (config.modification.modifications can have only composition defined)
+                this.annotationModifications = JSONdata.annotation.modifications;
+
+            } else { // xi1 style annotator
+                this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
+                this.fragmentIons = JSONdata.annotation.ions;
+                this.customConfig = JSONdata.annotation.custom;
+                // xi1 modifications in annotation need to be reformatted
+                if ("modifications" in JSONdata.annotation) {
+                    this.annotationModifications = JSONdata.annotation.modifications.map(function (m) {
+                        return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
+                    });
+                } else{
+                    this.annotationModifications = Array();
+                }
+            }
         }
+
+        // if knownModifications are not set use annotation modifications
+        if (this.knownModifications.length === 0) {
+            this.knownModifications = this.annotationModifications;
+        }
+        // else {
+        //     // concat the knownModifications and annotationModifications (overwrite known on same id)
+        //     let annModIds = this.annotationModifications.map(function(m){
+        //         return m.id;
+        //     });
+        //     // filter out those that are also in annotationModifications
+        //     let filtered_knownMods = this.knownModifications.filter(function(kMod){
+        //         return !annModIds.indexOf(kMod.id);
+        //     });
+        //     this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
+        // }
 
         this.peakList = JSONdata.peaks || [];
 
@@ -168,7 +206,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             output += this.peakList[i].mz + "	";
             output += this.peakList[i].intensity + "\n";
         }
-        return output.slice(0, -2);
+        return output.trim();
     },
 
     clear: function () {
@@ -276,21 +314,21 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.set("colorScheme", schemeStr);
         this.colorPalette = colorbrewer.RdBu[8]; // default
         switch (schemeStr) {
-            case "RdBu":
-                this.colorPalette = colorbrewer.RdBu[8];
-                break;
-            case "BrBG":
-                this.colorPalette = colorbrewer.BrBG[8];
-                break;
-            case "PiYG":
-                this.colorPalette = colorbrewer.PiYG[8];
-                break;
-            case "PRGn":
-                this.colorPalette = colorbrewer.PRGn[8];
-                break;
-            case "PuOr":
-                this.colorPalette = colorbrewer.PuOr[8];
-                break;
+        case "RdBu":
+            this.colorPalette = colorbrewer.RdBu[8];
+            break;
+        case "BrBG":
+            this.colorPalette = colorbrewer.BrBG[8];
+            break;
+        case "PiYG":
+            this.colorPalette = colorbrewer.PiYG[8];
+            break;
+        case "PRGn":
+            this.colorPalette = colorbrewer.PRGn[8];
+            break;
+        case "PuOr":
+            this.colorPalette = colorbrewer.PuOr[8];
+            break;
         }
 
         this.updateColors();
@@ -299,30 +337,30 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
     updateColors: function () {
         switch (this.get("visFragments")) {
-            case "both":
-                this.p1color = this.colorPalette[0];
-                this.p1color_cluster = this.colorPalette[2];
-                this.p1color_loss = this.colorPalette[1];
-                this.p2color = this.colorPalette[7];
-                this.p2color_cluster = this.colorPalette[5];
-                this.p2color_loss = this.colorPalette[6];
-                break;
-            case "pep1":
-                this.p1color = this.colorPalette[0];
-                this.p1color_cluster = this.colorPalette[2];
-                this.p1color_loss = this.colorPalette[1];
-                this.p2color = this.get("peakColor");
-                this.p2color_cluster = this.get("peakColor");
-                this.p2color_loss = this.get("peakColor");
-                break;
-            case "pep2":
-                this.p1color = this.get("peakColor");
-                this.p1color_cluster = this.get("peakColor");
-                this.p1color_loss = this.get("peakColor");
-                this.p2color = this.colorPalette[7];
-                this.p2color_cluster = this.colorPalette[5];
-                this.p2color_loss = this.colorPalette[6];
-                break;
+        case "both":
+            this.p1color = this.colorPalette[0];
+            this.p1color_cluster = this.colorPalette[2];
+            this.p1color_loss = this.colorPalette[1];
+            this.p2color = this.colorPalette[7];
+            this.p2color_cluster = this.colorPalette[5];
+            this.p2color_loss = this.colorPalette[6];
+            break;
+        case "pep1":
+            this.p1color = this.colorPalette[0];
+            this.p1color_cluster = this.colorPalette[2];
+            this.p1color_loss = this.colorPalette[1];
+            this.p2color = this.get("peakColor");
+            this.p2color_cluster = this.get("peakColor");
+            this.p2color_loss = this.get("peakColor");
+            break;
+        case "pep2":
+            this.p1color = this.get("peakColor");
+            this.p1color_cluster = this.get("peakColor");
+            this.p1color_loss = this.get("peakColor");
+            this.p2color = this.colorPalette[7];
+            this.p2color_cluster = this.colorPalette[5];
+            this.p2color_loss = this.colorPalette[6];
+            break;
         }
         this.trigger("change:colors");
     },
@@ -377,9 +415,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
     },
 
     checkForValidModification: function (mod, aminoAcid) {
-
         for (let i = 0; i < this.knownModifications.length; i++) {
-            if (this.knownModifications[i].id == mod) {
+            if (this.knownModifications[i].id === mod) {
                 let knownMod_aminoAcids = this.knownModifications[i].aminoAcids;
                 return knownMod_aminoAcids.indexOf("*") !== -1 || knownMod_aminoAcids.indexOf(aminoAcid) !== -1;
             }

@@ -54,7 +54,7 @@ export const SettingsView = Backbone.View.extend({
             self.menu.append("button")
                 .attr("class", "xispec_settingsTab xispec_btn xispec_btn-1a")
                 .attr("data-tab", b_id)
-                // .attr("id", "xispec_" + b_id)
+                .attr("id", "xispec_" + b_id + "_Btn")
                 .attr("style", "z-index: " + zIndex)
                 .text(b);
         });

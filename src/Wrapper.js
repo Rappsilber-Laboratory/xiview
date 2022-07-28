@@ -207,6 +207,9 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         if (data.requestID === undefined) {
             data.requestID = -1;
         }
+        // if (data.crosslinkerID === undefined) {
+        //     data.crosslinkerID = -1;
+        // }
 
         let annotationRequest = {};
         let peptides = [];
@@ -232,24 +235,32 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         annotationRequest.LinkSite = linkSites;
         annotationRequest.peaks = peaks;
         annotationRequest.annotation = {};
-
-        let ionTypes = data.ionTypes.split(";");
-        //remove empty strings from list
-        ionTypes = ionTypes.filter(Boolean);
-        let ions = [];
-        for (let it = 0; it < ionTypes.length; it++) {
-            let ionType = ionTypes[it];
-            ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-        }
-        annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
-        annotationRequest.annotation.modifications = data.modifications;
-        annotationRequest.annotation.ions = ions;
-        annotationRequest.annotation.crosslinker = {"modMass": data.crossLinkerModMass};
-        annotationRequest.annotation.precursorMZ = +data.precursorMZ;
-        annotationRequest.annotation.precursorCharge = +data.precursorCharge;
-        annotationRequest.annotation.losses = data.losses;
         annotationRequest.annotation.requestID = data.requestID.toString();
+        annotationRequest.annotation.crosslinkerID = data.crosslinkerID;
+        annotationRequest.annotation.precursorCharge = +data.precursorCharge;
+        annotationRequest.annotation.modifications = data.modifications;
         annotationRequest.annotation.custom = data.customConfig;
+        annotationRequest.annotation.precursorMZ = +data.precursorMZ;
+        annotationRequest.annotation.returnModSyntax = "Xmod";
+
+        // check if it's xi1 or xi2 style annotation
+        if(data.config !== undefined){
+            annotationRequest.annotation.config = data.config;
+        } else {
+
+            let ionTypes = data.ionTypes.split(";");
+            //remove empty strings from list
+            ionTypes = ionTypes.filter(Boolean);
+            let ions = [];
+            for (let it = 0; it < ionTypes.length; it++) {
+                let ionType = ionTypes[it];
+                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+            }
+            annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
+            annotationRequest.annotation.ions = ions;
+            annotationRequest.annotation.crosslinker = {"modMass": data.crossLinkerModMass};
+            annotationRequest.annotation.losses = data.losses;
+        }
 
         console.log("request", annotationRequest);
         return annotationRequest;
