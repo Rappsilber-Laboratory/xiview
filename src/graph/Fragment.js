@@ -14,6 +14,7 @@ export function Fragment(fragment, all_clusters) {
     this.range = fragment.range;
     this.sequence = fragment.sequence;
     this.type = fragment.type;
+    this.range = fragment.range;
 
     let ion = this.name.split("")[0];
     if (ion === "a" || ion === "b" || ion === "c") {
@@ -30,8 +31,8 @@ export function Fragment(fragment, all_clusters) {
 
     this.lossy = this.class === "lossy";
 
-    let crossLinkContainingRegex = /CrossLink\(.*n\|PeptideIon\)/g;
-    this.crossLinkContaining = crossLinkContainingRegex.test(this.type);
+    // if we have a range on more than one peptide for the fragment it's crossLinkContaining
+    this.crossLinkContaining = this.range.length > 1;
 
     this.idStr = this.peptideId + this.name;
 
