@@ -257,6 +257,9 @@ export const svgUtils = {
         let xmlStr = xmls.serializeToString(svgDoc);
         // serializing adds an xmlns attribute to the style element ('cos it thinks we want xhtml), which knackers it for inkscape, here we chop it out
         xmlStr = xmlStr.split("xmlns=\"http://www.w3.org/1999/xhtml\"").join("");
+
+        xmlStr = xmlStr.replace(/(#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])([0-9A-Fa-f][0-9A-Fa-f])/g, "$1")
+
         return xmlStr;
     },
 

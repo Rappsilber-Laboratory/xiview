@@ -201,7 +201,7 @@ export class FilterModel extends Backbone.Model {
     }
 
     subsetFilter(match) {
-        const linear = match.isLinear();
+        const linear = match.isNotCrosslinked();
         const mono = match.isMonoLink();
         const ambig = match.isAmbig();
 
