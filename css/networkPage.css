@@ -11,6 +11,51 @@
     /* padding-left:15px; */
 }
 
+#xiNetButtonBar p div ul li label{
+    display: block;
+}
+
+
+#ppiMessage{
+    /*display: none;*/
+    z-index: 1;
+    position: fixed;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: #091D42;
+    color: #fff;
+    padding:10px;
+    /*margin: 10px;*/
+    bottom:77px;
+    left: 0px;
+    text-align: right;
+}
+
+
+#hiddenProteinsMessage{
+    display: none;
+    z-index: 1;
+    position: fixed;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: #091D42;
+    color: #fff;
+    padding:10px;
+    /*margin: 10px;*/
+    top: 46px;
+    left: 0px;
+    text-align: right;
+}
+
+#newGroupName{
+    display: none;
+}
+
+.showHidden{
+    margin: 0;
+}
+
+
 #autoLayoutButton{
     margin-left: 0;
 }

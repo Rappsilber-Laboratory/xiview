@@ -7,6 +7,7 @@ import webpack_jquery_ui from "webpack-jquery-ui";
 // eslint-disable-next-line no-unused-vars
 import webpack_jquery_ui0 from "webpack-jquery-ui/css";  //ommit, if you don't want to load basic css theme
 
+//todo - this wrapping object is unnecessary
 export const jqdialogs = {
     constructDialogMessage: function (dialogID, msg, title) {
         let dialogParas = d3.select("body").select("#" + dialogID);

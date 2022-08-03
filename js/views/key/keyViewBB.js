@@ -347,7 +347,6 @@ export const KeyViewBB = BaseFrameView.extend({
 
                 colourSection.rows = labelColourPairings.map(function (val, i) {
                     const rgbaCol = val[1];
-                    // const rgbHex = d3.rgb(rgbCol).toString();
                     const span = "<input class='color-chooser' data-jscolor='{}' value='" + rgbaCol + "' title='Press to change colour for " + val[0] + "'/>";
                     return [span, val[0], i];
                 });
