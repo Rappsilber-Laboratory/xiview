@@ -257,7 +257,6 @@ export class CompositeModel extends Backbone.Model {
         // console.log("ser filtering time", (b - a), "ms");
 
 
-        //hack for francis, take out protein-protein links with only one supporting cross-link
         if (filterModel) {
             const uniqueResiduePairsPerPPI = filterModel.get("urpPpi");
             if (uniqueResiduePairsPerPPI > 1) {
@@ -305,12 +304,8 @@ export class CompositeModel extends Backbone.Model {
             decoysDD: [], // links with decoy proteins at both ends
         };
 
-        this.filteredStats = {
-            ppi: 0
-        };
         // all = targets + linearTargets + decoysTD + decoysDD
         // count of decoy linears = linears - linearTargets
-
 
         for (let crosslink of crosslinksArr) {
             if (crosslink.filteredMatches_pp.length) {
@@ -331,6 +326,7 @@ export class CompositeModel extends Backbone.Model {
         }
         //console.log ("xlinks", this.filteredXLinks);
 
+        let visibleProteinCount = 0;
         //hiding linkless participants
         for (let participant of clmsModel.get("participants").values()) {
             participant.hidden = true;
@@ -339,19 +335,30 @@ export class CompositeModel extends Backbone.Model {
                     !pCrossLink.isDecoyLink() &&
                     !pCrossLink.isLinearLink()) {
                     participant.hidden = false;
+                    visibleProteinCount++;
                     break;
                 }
             }
         }
 
-        /*
-        var cfilter = crossfilter (clmsModel.get("matches"));
-        var subsetDimension = cfilter.dimension (function (match) {
-            return filterModel.subsetFilter (match);
-        });
-        subsetDimension.filterExact (true);
-        console.log (cfilter.allFiltered());
-        */
+        const ppiSet = new Set();
+        let heteromericLinks = 0, selfLinks = 0;//, homomultimericLinks = 0, ambiguous = 0;
+        for (let crosslink of this.getFilteredCrossLinks()){ // will return non-decoy non-linear links
+            if (crosslink.isSelfLink()){
+                selfLinks++;
+            } else {
+                heteromericLinks++;
+                ppiSet.add(crosslink.fromProtein.id + "-" + crosslink.toProtein.id);
+            }
+        }
+
+        let summaryHtmlString = "Proteins: " + visibleProteinCount + "<br/>";
+        summaryHtmlString += "PPIs: " + ppiSet.size + "<br/>";
+        summaryHtmlString += "Het. links: " + heteromericLinks + "<br/>";
+        summaryHtmlString += "Self links: " + selfLinks;
+        const pSel = d3.select("#ppiText");
+        pSel.html(summaryHtmlString);
+
         this.trigger("hiddenChanged");
         this.trigger("filteringDone");
 
@@ -360,10 +367,6 @@ export class CompositeModel extends Backbone.Model {
 
     getFilteredCrossLinks(type) { // if type of crosslinks not declared, make it 'targets' by default
         return this.filteredXLinks[type || "targets"];
-    }
-
-    getFilteredDatum(key) {
-        return this.filteredStats[key];
     }
 
     getAllCrossLinks() {

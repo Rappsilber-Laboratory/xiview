@@ -56,6 +56,7 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {loadSpectrum} from "./loadSpectrum";
+import {networkPageSpinner} from "./main";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
@@ -64,6 +65,7 @@ _.extend(window.vent, Backbone.Events);
 // only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
 export function postDataLoaded () {
     console.log("DATA LOADED AND WINDOW LOADED");
+    networkPageSpinner.stop();
 
     window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
     window.go = null;//todo - get rid of use of window.*

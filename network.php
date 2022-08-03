@@ -67,6 +67,10 @@ display: none;
                 <button class='btn btn-1 btn-1a showHidden' onclick="window.compositeModelInst.showHiddenProteins()">Show</button>
             </div>"
 
+            <div id='ppiMessage'>
+                <p id='ppiText'></p>
+            </div>"
+
             <div id='newGroupName'  title="Enter group name">
                 <input type="text" style="z-index:10000" name="newGroupName" value="" size=20><br>
             </div>"

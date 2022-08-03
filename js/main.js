@@ -25,17 +25,16 @@ import {testCallback} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
 import {repopulateNGL} from "./views/ngl/RepopulateNGL";
 
+export const networkPageSpinner = new Spinner({
+    length: 38, // The length of each line
+    width: 17, // The line thickness
+    radius: 45, // The radius of the inner circle
+});
+
 export function main() {
 
-    const spinnerOpts = {
-        length: 38, // The length of each line
-        width: 17, // The line thickness
-        radius: 45, // The radius of the inner circle
-    };
-
     const spinTarget = d3.select("#main").node();
-    console.log("spinTarget", spinTarget);
-    const spinner = new Spinner(spinnerOpts).spin(spinTarget);
+    networkPageSpinner.spin(spinTarget);
 
     const success = function (json) {
         // try {
@@ -107,8 +106,6 @@ export function main() {
         const url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
 
         d3.json(url, function (error, json) {
-            spinner.stop(); // stop spinner on request returning
-
             if (!error) {
                 success(json);
             } else {
@@ -122,7 +119,7 @@ export function main() {
         });
 
     } else {
-        spinner.stop(); // stop spinner
+        networkPageSpinner.stop(); // stop spinner
         success({times: {}});   // bug fix for empty searches
     }
 
@@ -146,7 +143,6 @@ export function validationPage() {
     const spinner = new Spinner({scale: 5}).spin(d3.select("#topDiv").node());
 
     const success = function (text) {
-        spinner.stop(); // stop spinner on request returning
         const json = JSON.parse(text);
         modelsEssential(json);
 
@@ -186,6 +182,8 @@ export function validationPage() {
         window.onresize = resize;
 
         resize();
+        spinner.stop(); // all done, stop spinner
+
     };
 
     const url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
