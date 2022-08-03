@@ -18,33 +18,6 @@
 	/*background-color: #eee;*/
 }
 
-#xiNetButtonBar p div ul li label{
-  display: block;
-}
-
-#hiddenProteinsMessage{
-  display: none;
-  z-index: 1;
-  position: fixed;
-  overflow: hidden;
-  white-space: nowrap;
-  background-color: #091D42;
-  color: #fff;
-  padding:10px;
-  margin: 10px;
-  top: 46px;
-  left: 10px;
-  text-align: right;
-}
-
-#newGroupName{
-  display: none;
-}
-
-.showHidden{
-  margin: 0;
-}
-
 /* fa */
 .fa-xi {
     font-size:1.5em!important;
