@@ -134,7 +134,7 @@ export const setupColourModels = function (userConfig) {
     // Protein colour schemes
 
     window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({
-        colScale: d3.scale.ordinal().domain([0]).range(["#ffffffff"]),
+        colScale: d3.scale.ordinal().domain([0]).range(["#ffffff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
         id: "Default Protein"

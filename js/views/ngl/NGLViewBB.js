@@ -416,7 +416,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 const protein = self.model.get("clmsModel").get("participants").get(proteinID);
 
                 if (protein !== undefined) {
-                    const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein).substring(0, 7));
+                    const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein));//.substring(0, 7));
                     this.lastColour = (rgb.r << 16) + (rgb.g << 8) + rgb.b;
                 } else {
                     this.lastColour = 0xcccccc;
