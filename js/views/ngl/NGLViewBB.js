@@ -352,7 +352,7 @@ export const NGLViewBB = BaseFrameView.extend({
         });
 
         // Protein view type dropdown
-        const allReps = NGL.RepresentationRegistry.names.slice().sort();
+        /*const allReps = NGL.RepresentationRegistry.names.slice().sort();
         const ignoreReps = ["axes", "base", "contact", "distance", "helixorient", "hyperball", "label", "rocket", "trace", "unitcell", "validation", "angle", "dihedral"];
         const mainReps = _.difference(allReps, ignoreReps);
         addMultipleSelectControls({
@@ -370,7 +370,7 @@ export const NGLViewBB = BaseFrameView.extend({
             initialSelectionFunc: function (d) {
                 return d === self.options.chainRep;
             }
-        });
+        });*/
 
 
         // Residue colour scheme
