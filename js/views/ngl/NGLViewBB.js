@@ -352,7 +352,7 @@ export const NGLViewBB = BaseFrameView.extend({
         });
 
         // Protein view type dropdown
-        const allReps = NGL.RepresentationRegistry.names.slice().sort();
+        /*const allReps = NGL.RepresentationRegistry.names.slice().sort();
         const ignoreReps = ["axes", "base", "contact", "distance", "helixorient", "hyperball", "label", "rocket", "trace", "unitcell", "validation", "angle", "dihedral"];
         const mainReps = _.difference(allReps, ignoreReps);
         addMultipleSelectControls({
@@ -370,7 +370,7 @@ export const NGLViewBB = BaseFrameView.extend({
             initialSelectionFunc: function (d) {
                 return d === self.options.chainRep;
             }
-        });
+        });*/
 
 
         // Residue colour scheme
@@ -416,7 +416,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 const protein = self.model.get("clmsModel").get("participants").get(proteinID);
 
                 if (protein !== undefined) {
-                    const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein).substring(0, 7));
+                    const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein));//.substring(0, 7));
                     this.lastColour = (rgb.r << 16) + (rgb.g << 8) + rgb.b;
                 } else {
                     this.lastColour = 0xcccccc;

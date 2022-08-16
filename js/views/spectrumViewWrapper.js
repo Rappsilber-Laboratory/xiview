@@ -152,10 +152,10 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         //console.log ("MATCH selected", match, forceShow);
         if (this.isVisible() || forceShow) {
             this.newestSelectionShown = true;
-            const visible = !!match;
-            if (this.isVisible() !== visible) {
+            // const visible = !!match;
+            if (!this.isVisible()){ //} !== visible) {
                 //console.log ("CHANGE VISIBILITY");
-                window.vent.trigger("spectrumShow", visible);
+                window.vent.trigger("spectrumShow", true); // visible);
             }
             window.vent.trigger("individualMatchSelected", match);
             this.enableControls(match);

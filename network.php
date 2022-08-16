@@ -49,7 +49,7 @@ display: none;
             <div class="page-header">
 <!--                <input data-jscolor='{}' value="#3399FF80"/>-->
                 <i class="fa fa-home fa-xi"
-                        onclick="window.open('../history/history.html');"
+                        onclick="window.open('../history/history.html');" 
                         title="Return to search history / Login"></i>
                     <p id="loadDropdownPlaceholder"></p>
                     <p id="viewDropdownPlaceholder"></p>
@@ -65,15 +65,15 @@ display: none;
                 <p id='hiddenProteinsText'>Manually Hidden Message</p>
                 <!-- not very backbone but its only a button -->
                 <button class='btn btn-1 btn-1a showHidden' onclick="window.compositeModelInst.showHiddenProteins()">Show</button>
-            </div>"
+            </div>
 
             <div id='ppiMessage'>
                 <p id='ppiText'></p>
-            </div>"
+            </div>
 
             <div id='newGroupName'  title="Enter group name">
                 <input type="text" style="z-index:10000" name="newGroupName" value="" size=20><br>
-            </div>"
+            </div>
 
             <div class="controls">
                 <div id="filterPlaceholder"></div>
