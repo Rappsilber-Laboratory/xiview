@@ -352,12 +352,10 @@ export class CompositeModel extends Backbone.Model {
             }
         }
 
-        let summaryHtmlString = "Proteins: " + visibleProteinCount + "<br/>";
-        summaryHtmlString += "PPIs: " + ppiSet.size + "<br/>";
-        summaryHtmlString += "Het. links: " + heteromericLinks + "<br/>";
-        summaryHtmlString += "Self links: " + selfLinks;
-        const pSel = d3.select("#ppiText");
-        pSel.html(summaryHtmlString);
+        this.set("proteinCount", visibleProteinCount);
+        this.set("ppiCount", ppiSet.size);
+        this.set("hetLinkCount", heteromericLinks);
+        this.set("selfLinkCount", selfLinks);
 
         this.trigger("hiddenChanged");
         this.trigger("filteringDone");

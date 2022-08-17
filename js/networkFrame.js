@@ -16,7 +16,7 @@ import {FilterModel} from "./filter/filter-model";
 import {TooltipModel} from "./model/models";
 import {MinigramModel} from "./model/models";
 import {CompositeModel} from "./model/composite-model";
-import {FDRSummaryViewBB, FDRViewBB, FilterViewBB} from "./filter/filterViewBB";
+import {FDRSummaryViewBB, FDRViewBB, FilterViewBB, ProteinSummaryViewBB} from "./filter/filterViewBB";
 import {FilterSummaryViewBB} from "./filter/filterViewBB";
 import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
@@ -751,6 +751,11 @@ export function viewsEssential (options) {
                 "linears": !compModel.get("clmsModel").get("linearsPresent"),
             }
         }
+    });
+
+    new ProteinSummaryViewBB({
+        el: "#ppiText",
+        model: compModel,
     });
 
     new FilterSummaryViewBB({

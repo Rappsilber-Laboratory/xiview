@@ -52,7 +52,13 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
 
     render: function () {
         const searches = this.model.get("searches");
-        $(".searchSummaryDiv").JSONView(Array.from(searches.values()));
+        const objForJsonView = {};
+        for (let search of searches.values()) {
+            const keyString = "GROUP " + search.group + " (" + search.id + ")";
+            objForJsonView[keyString] = search;
+        }
+        // $(".searchSummaryDiv").JSONView(Array.from(searches.values()));
+        $(".searchSummaryDiv").JSONView(objForJsonView);
         $(".searchSummaryDiv").JSONView("collapse", 2);
 
         return this;

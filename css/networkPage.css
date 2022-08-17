@@ -26,9 +26,10 @@
     color: #fff;
     padding:10px;
     /*margin: 10px;*/
-    bottom:77px;
+    top:47px;
     left: 0px;
     text-align: right;
+    width:125px;
 }
 
 
@@ -42,9 +43,10 @@
     color: #fff;
     padding:10px;
     /*margin: 10px;*/
-    top: 46px;
+    top: 171px;
     left: 0px;
     text-align: right;
+    width:125px;
 }
 
 #newGroupName{
