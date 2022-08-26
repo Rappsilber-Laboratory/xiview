@@ -61,14 +61,14 @@ display: none;
                     <div id="xiNetButtonBar"></div>
             </div>
 
+            <div id='ppiMessage'>
+                <p id='ppiText'></p>
+            </div>
+
             <div id='hiddenProteinsMessage'>
                 <p id='hiddenProteinsText'>Manually Hidden Message</p>
                 <!-- not very backbone but its only a button -->
                 <button class='btn btn-1 btn-1a showHidden' onclick="window.compositeModelInst.showHiddenProteins()">Show</button>
-            </div>
-
-            <div id='ppiMessage'>
-                <p id='ppiText'></p>
             </div>
 
             <div id='newGroupName'  title="Enter group name">
