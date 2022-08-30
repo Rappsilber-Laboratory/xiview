@@ -257,7 +257,7 @@ export const FragmentationKeyView = Backbone.View.extend({
 
             // #==========================================================================
             // #	account for crosslink shift
-            // #	this alings the peptide sequences at the crosslink site
+            // #	this aligns the peptide sequences at the crosslink site
             // #==========================================================================
             let shift = this.linkPos[0].linkSite - this.linkPos[1].linkSite;
             let spaceArray = arrayOfHashes(Math.abs(shift));
@@ -282,7 +282,7 @@ export const FragmentationKeyView = Backbone.View.extend({
     drawFragmentationEvents: function (pepIndex) {
         for (let i = 0; i < this.annotations[pepIndex].length; i++) {
             let frags = this.annotations[pepIndex][i];
-            if (frags.b.length != 0 || frags.y.length != 0) {
+            if (frags.b.length !== 0 || frags.y.length !== 0) {
                 this.fraglines.push(new KeyFragment(frags, i, this.pepoffset[pepIndex], pepIndex, this));
             }
         }

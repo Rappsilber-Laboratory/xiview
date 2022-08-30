@@ -1,6 +1,14 @@
 import d3 from "d3";
 
 export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
+    let bOnlyLoss;
+    let yOnlyLoss;
+    let clContFrags;
+    let color;
+    let highlightPath;
+    let y_coord;
+    let x_coord;
+    
     this.FragKey = FragKey;
     this.peptideId = peptideId;
     this.peptide = FragKey.model.peptides[peptideId];
@@ -19,20 +27,18 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
 
     this.yfrag_index = this.peptide.sequence.length - (index + 1);
     this.bfrag_index = (index + 1);
-    if (this.peptideId === 0)
-        var color = this.FragKey.model.p1color;
-    else if (this.peptideId === 1)
-        var color = this.FragKey.model.p2color;
+    if (this.peptideId === 0) {
+        color = this.FragKey.model.p1color;}
+    else if (this.peptideId === 1) {
+        color = this.FragKey.model.p2color;}
 
 
-    const xStep = FragKey.xStep;
-    // var xStep = 23;
-
-    this.x = (xStep * (index + offset)) + (xStep / 2);
-    if (this.peptideId === 0)
-        var y = 25;
-    if (this.peptideId === 1)
-        var y = 75;
+    let xStep = FragKey.xStep;
+    x_coord = (xStep * (index + offset)) + (xStep / 2);
+    if (this.peptideId === 0) {
+        y_coord = 25;}
+    if (this.peptideId === 1) {
+        y_coord = 75;}
     const barHeight = 18, tailX = 5, tailY = 5;
 
     const self = this;
@@ -40,52 +46,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     //svg elements
     this.g = this.FragKey.scaleSvgGroup.append("g");
 
-    /*	var group = this.g
-            .on("mouseover", function() {
-                var evt = d3.event;
-                if(!self.FragKey.changeMod && !self.FragKey.changeCL){
-                    if (evt.ctrlKey){
-                        self.fragBar.style("cursor", "copy");
-                        if(self.yTail){
-                            self.yTail.style("cursor", "copy");
-                            self.yHighlight.style("cursor", "copy");
-                        }
-                        if(self.bTail){
-                            self.bTail.style("cursor", "copy");
-                            self.bHighlight.style("cursor", "copy");
-                        }
-                    }
-                    else{
-                        self.fragBar.style("cursor", "pointer");
-                        if(self.yTail){
-                            self.yTail.style("cursor", "pointer");
-                            self.yHighlight.style("cursor", "pointer");
-                        }
-                        if(self.bTail){
-                            self.bTail.style("cursor", "pointer");
-                            self.bHighlight.style("cursor", "pointer");
-                        }
-                    }
-                }
-                //startHighlight();
-            })
-            .on("mouseout", function() {
-                endHighlight();
-            })
-            .on("touchstart", function() {
-                startHighlight();
-            })
-            .on("touchend", function() {
-                endHighlight();
-            })
-            .on("click", function() {
-                var evt = d3.event;
-                self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
-            })
-        ;*/
-
     function startHighlight(fragments) {
-
         if (!self.FragKey.changeCL && !self.FragKey.changeMod)
             self.FragKey.model.addHighlight(fragments);
     }
@@ -98,24 +59,42 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     // # bions; either normal or lossy; have different colors
     if (fragments.b.length !== 0) { // really a, b, or c , see get_fragment_annotation()
 
-        // check for Crosslink containing fragment - checking first is sufficient
-        // fragments.b.filter(function(b){return b.type.crossLinkContaining})
-        var fragLineClass = "xispec_fragBar";
-        if (this.FragKey.model.get("accentuateCrossLinkContainingFragments") && fragments.b[0].crossLinkContaining) {
+        let bLikeLossFragments = fragments.b.filter(function(f) {
+            return f.lossy;
+        });
+        let bLikePrimFragments = fragments.b.filter(function (f) {
+            return f.lossy !== true;
+        });
+
+        // only lossy fragments?
+        bOnlyLoss = bLikePrimFragments.length === 0;
+
+        // Crosslink containing fragment accentuation
+        // Only consider losses for accentuation if there are no primary fragments
+        if (bOnlyLoss){
+            clContFrags = bLikeLossFragments.filter(function(f){return f.crossLinkContaining})
+        }
+        else{
+            clContFrags = bLikePrimFragments.filter(function(f){return f.crossLinkContaining})
+        }
+        let clContaining = clContFrags.length !== 0;
+        let fragLineClass = "xispec_fragBar";
+        if (self.FragKey.model.get("accentuateCrossLinkContainingFragments") && clContaining) {
             fragLineClass = "xispec_fragBarThick";
         }
 
-        if (fragments.y.length === 0)	//highlightPath full length of the fragbar
-            var highlightPath = "M" + this.x + "," + (y - barHeight)
-                + " L" + this.x + "," + y
-                + " L" + (this.x - tailX) + "," + (y + tailY);
+        // define the highlight path - if there are no yLike fragments it's the full length of the fragBar...
+        if (fragments.y.length === 0) {
+            highlightPath = "M" + x_coord + "," + (y_coord - barHeight)
+                + " L" + x_coord + "," + y_coord
+                + " L" + (x_coord - tailX) + "," + (y_coord + tailY);
+        } else { // .. else it's half-length of the fragBar
+            highlightPath = "M" + x_coord + "," + (y_coord - barHeight / 2)
+                + " L" + x_coord + "," + y_coord
+                + " L" + (x_coord - tailX) + "," + (y_coord + tailY);
+        }
 
-        else ////highlightPath half length of the fragbar
-            var highlightPath = "M" + this.x + "," + (y - barHeight / 2)
-                + " L" + this.x + "," + y
-                + " L" + (this.x - tailX) + "," + (y + tailY);
-
-        this.bgroup = this.g.append("g")
+        self.bgroup = self.g.append("g")
             .on("mouseover", function () {
                 const evt = d3.event;
                 if (!self.FragKey.changeMod && !self.FragKey.changeCL) {
@@ -145,40 +124,41 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
                 self.FragKey.model.updateStickyHighlight(self.b, evt.ctrlKey);
             });
 
-        this.bHighlight = this.bgroup.append("path")
+        self.bHighlight = self.bgroup.append("path")
             .attr("d", highlightPath)
-            .attr("stroke", this.FragKey.model.get("highlightColor"))
-            .attr("stroke-width", this.FragKey.model.get("highlightWidth"))
+            .attr("stroke", self.FragKey.model.get("highlightColor"))
+            .attr("stroke-width", self.FragKey.model.get("highlightWidth"))
             .attr("opacity", 0)
             .style("cursor", "pointer");
 
-        this.bTail = this.bgroup.append("line")
-            .attr("x1", this.x)
-            .attr("y1", y)
-            .attr("x2", this.x - tailX)
-            .attr("y2", y + tailY)
+        self.bTail = self.bgroup.append("line")
+            .attr("x1", x_coord)
+            .attr("y1", y_coord)
+            .attr("x2", x_coord - tailX)
+            .attr("y2", y_coord + tailY)
             .style("cursor", "pointer")
-            .attr("class", fragLineClass);
+            .attr("class", fragLineClass)
+            .attr("stroke", "black");
 
 
-        var ion = fragments.b[0].type.toLowerCase()[0] + fragments.b[0].ionNumber;
+        let ion = fragments.b[0].type.toLowerCase()[0] + fragments.b[0].ionNumber;
 
 
-//Idea for multiple texts, could be to crowded
-        /*		this.bTexts = []	//Array of d3 selections
+        // Idea for multiple texts, could be to crowded
+        /*		self.bTexts = []	//Array of d3 selections
                 bions = []
                 for (var i = 0; i < fragments.b.length; i++) {
-                    if(fragments.b[i].type.indexOf("AIon") != -1 && bions.indexOf("a"+this.bfrag_index) == -1)
-                        bions.push("a"+this.bfrag_index);
-                    if(fragments.b[i].type.indexOf("BIon") != -1 && bions.indexOf("b"+this.bfrag_index) == -1)
-                        bions.push("b"+this.bfrag_index);
-                    if(fragments.b[i].type.indexOf("CIon") != -1 && bions.indexOf("c"+this.bfrag_index) == -1)
-                        bions.push("c"+this.bfrag_index);
+                    if(fragments.b[i].type.indexOf("AIon") != -1 && bions.indexOf("a"+self.bfrag_index) == -1)
+                        bions.push("a"+self.bfrag_index);
+                    if(fragments.b[i].type.indexOf("BIon") != -1 && bions.indexOf("b"+self.bfrag_index) == -1)
+                        bions.push("b"+self.bfrag_index);
+                    if(fragments.b[i].type.indexOf("CIon") != -1 && bions.indexOf("c"+self.bfrag_index) == -1)
+                        bions.push("c"+self.bfrag_index);
                 }
 
                 for (var i = 0; i < bions.length; i++) {
-                    bText = this.g.append("text")
-                    .attr("x", this.x - 7)
+                    bText = self.g.append("text")
+                    .attr("x", self.x - 7)
                     .attr("y", y + 15)
                     .style("font-size", "0.6em")
                     .style("fill", color)
@@ -186,13 +166,13 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
                     //.attr("text-anchor", "end")
                     .text(bions[i])
                     .attr("opacity", 0);
-                    this.bTexts.push(bText);
+                    self.bTexts.push(bText);
                 }
         */
 
-        this.bText = this.g.append("text")
-            .attr("x", this.x - 7)
-            .attr("y", y + 15)
+        self.bText = self.g.append("text")
+            .attr("x", x_coord - 7)
+            .attr("y", y_coord + 15)
             .style("font-size", "0.6em")
             .style("fill", color)
             .style("cursor", "default")
@@ -200,13 +180,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
             .text(ion)
             .attr("opacity", 0);
 
-        //check if only lossy fragments
-        var blossy = true;
-        for (var i = 0; i < fragments.b.length; i++) {
-            if (fragments.b[i].class !== "lossy")
-                blossy = false;
-        }
-        if (blossy) {
+        if (bOnlyLoss) {
             this.bTail.attr("stroke", this.FragKey.model.get("peakColor"));
         } else {
             this.bTail.attr("stroke", "black");
@@ -216,19 +190,42 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     // # yions; either normal or lossy; have different colors
     if (fragments.y.length !== 0) {
 
-        var fragLineClass = "xispec_fragBar";
-        if (this.FragKey.model.get("accentuateCrossLinkContainingFragments") && fragments.y[0].crossLinkContaining) {
+        let yLikeLossFragments = fragments.y.filter(function(f) {
+            return f.lossy;
+        });
+        let yLikePrimFragments = fragments.y.filter(function (f) {
+            return f.lossy !== true;
+        });
+
+        // only lossy fragments?
+        yOnlyLoss = yLikePrimFragments.length === 0;
+
+        // Crosslink containing fragment accentuation
+        // Only consider losses for accentuation if there are no primary fragments
+        if (yOnlyLoss){
+            clContFrags = yLikeLossFragments.filter(function(f){return f.crossLinkContaining})
+        }
+        else{
+            clContFrags = yLikePrimFragments.filter(function(f){return f.crossLinkContaining})
+        }
+        let clContaining = clContFrags.length !== 0;
+        let fragLineClass = "xispec_fragBar";
+        if (self.FragKey.model.get("accentuateCrossLinkContainingFragments") && clContaining) {
             fragLineClass = "xispec_fragBarThick";
         }
 
         if (fragments.b.length === 0)	//highlight full length of the fragbar
-            var highlightPath = "M" + this.x + "," + y
-                + " L" + this.x + "," + (y - barHeight)
-                + " L" + (this.x + tailX) + "," + (y - barHeight - tailY);
+        {
+            highlightPath = "M" + x_coord + "," + y_coord
+                + " L" + x_coord + "," + (y_coord - barHeight)
+                + " L" + (x_coord + tailX) + "," + (y_coord - barHeight - tailY);
+        }
         else
-            var highlightPath = "M" + this.x + "," + (y - barHeight / 2)
-                + " L" + this.x + "," + (y - barHeight)
-                + " L" + (this.x + tailX) + "," + (y - barHeight - tailY);
+        {
+            highlightPath = "M" + x_coord + "," + (y_coord - barHeight / 2)
+                + " L" + x_coord + "," + (y_coord - barHeight)
+                + " L" + (x_coord + tailX) + "," + (y_coord - barHeight - tailY);
+        }
 
         this.ygroup = this.g.append("g")
             .on("mouseover", function () {
@@ -269,10 +266,10 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
             .style("cursor", "pointer");
 
         this.yTail = this.ygroup.append("line")
-            .attr("x1", this.x)
-            .attr("y1", y - barHeight)
-            .attr("x2", this.x + tailX)
-            .attr("y2", y - barHeight - tailY)
+            .attr("x1", x_coord)
+            .attr("y1", y_coord - barHeight)
+            .attr("x2", x_coord + tailX)
+            .attr("y2", y_coord - barHeight - tailY)
             .style("cursor", "pointer")
             .attr("class", fragLineClass);
 
@@ -304,8 +301,8 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
                 }*/
 
         this.yText = this.g.append("text")
-            .attr("x", this.x - 2)
-            .attr("y", y - barHeight - 10)
+            .attr("x", x_coord - 2)
+            .attr("y", y_coord - barHeight - 10)
             .style("font-size", "0.6em")
             .style("fill", color)
             .style("cursor", "default")
@@ -313,13 +310,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
             .text(ion)
             .attr("opacity", 0);
 
-        //check if only lossy fragments
-        var ylossy = true;
-        for (var i = 0; i < fragments.y.length; i++) {
-            if (fragments.y[i].class !== "lossy")
-                ylossy = false;
-        }
-        if (ylossy) {
+        if (yOnlyLoss) {
             this.yTail.attr("stroke", this.FragKey.model.get("peakColor"));
         } else {
             this.yTail.attr("stroke", "black");
@@ -327,16 +318,16 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     }
 
     this.fragBar = this.g.append("line")
-        .attr("x1", this.x)
-        .attr("y1", y)
-        .attr("x2", this.x)
-        .attr("y2", y - barHeight)
+        .attr("x1", x_coord)
+        .attr("y1", y_coord)
+        .attr("x2", x_coord)
+        .attr("y2", y_coord - barHeight)
         .style("cursor", "pointer")
         .style("pointer-events", "none")
         .attr("class", "xispec_fragBar");
 
     //if all fragments are lossy
-    if ((fragments.y.length === 0 || ylossy) && (fragments.b.length === 0 || blossy)) {
+    if ((fragments.y.length === 0 || yOnlyLoss) && (fragments.b.length === 0 || bOnlyLoss)) {
         this.fragBar.attr("stroke", this.FragKey.model.get("peakColor"));
     } else {
         this.fragBar.attr("stroke", "black");
