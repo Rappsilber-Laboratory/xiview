@@ -145,21 +145,16 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             }
         }
 
-        // if knownModifications are not set use annotation modifications
-        if (this.knownModifications.length === 0) {
-            this.knownModifications = this.annotationModifications;
-        }
-        // else {
-        //     // concat the knownModifications and annotationModifications (overwrite known on same id)
-        //     let annModIds = this.annotationModifications.map(function(m){
-        //         return m.id;
-        //     });
-        //     // filter out those that are also in annotationModifications
-        //     let filtered_knownMods = this.knownModifications.filter(function(kMod){
-        //         return !annModIds.indexOf(kMod.id);
-        //     });
-        //     this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
-        // }
+        // ToDo: whole knownModifications stuff is still somewhat messy and could be cleaned up
+        // concat the knownModifications and annotationModifications (overwrite known on same id)
+        let annModIds = this.annotationModifications.map(function(m){
+            return m.id;
+        });
+        // filter out those that are also in annotationModifications
+        let filtered_knownMods = this.knownModifications.filter(function(kMod){
+            return annModIds.indexOf(kMod.id);
+        });
+        this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
 
         this.peakList = JSONdata.peaks || [];
 
