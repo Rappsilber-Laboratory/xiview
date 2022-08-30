@@ -35,7 +35,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
             labelFragmentCharge: false,
             labelCutoff: 0,
             labelFontSize: 10,
-            accentuateCrossLinkContainingFragments: false,
+            accentuateCrossLinkContainingFragments: true,
             hideNotSelectedFragments: false,
             showLossLabels: false,
             QCabsErr: false,
