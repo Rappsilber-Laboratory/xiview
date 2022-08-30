@@ -341,24 +341,12 @@ KeyFragment.prototype.highlight = function (show, fragments) {
         for (let f = 0; f < fragments.length; f++) {
             if (this.b.indexOf(fragments[f]) !== -1 && this.bHighlight) {
                 this.bHighlight.attr("opacity", 1);
-                if (fragments[f].type.indexOf("AIon") !== -1)
-                    this.bText.text("a" + this.bfrag_index);
-                if (fragments[f].type.indexOf("BIon") !== -1)
-                    this.bText.text("b" + this.bfrag_index);
-                if (fragments[f].type.indexOf("CIon") !== -1)
-                    this.bText.text("c" + this.bfrag_index);
-                //if (fragments[f].type.indexOf("AIon") != -1 || fragments[f].type.indexOf("BIon") != -1 || fragments[f].type.indexOf("CIon") != -1)
+                this.bText.text(fragments[f].ionSeries + this.bfrag_index);
                 this.bText.attr("opacity", 1);
             }
             if (this.y.indexOf(fragments[f]) !== -1 && this.yHighlight) {
                 this.yHighlight.attr("opacity", 1);
-                if (fragments[f].type.indexOf("XIon") !== -1)
-                    this.yText.text("x" + this.yfrag_index);
-                if (fragments[f].type.indexOf("YIon") !== -1)
-                    this.yText.text("y" + this.yfrag_index);
-                if (fragments[f].type.indexOf("ZIon") !== -1)
-                    this.yText.text("z" + this.yfrag_index);
-                //if (fragments[f].type.indexOf("XIon") != -1 || fragments[f].type.indexOf("YIon") != -1 || fragments[f].type.indexOf("ZIon") != -1)
+                this.yText.text(fragments[f].ionSeries + this.bfrag_index);
                 this.yText.attr("opacity", 1);
             }
         }

@@ -15,11 +15,11 @@ export function Fragment(fragment, all_clusters) {
     this.sequence = fragment.sequence;
     this.type = fragment.type;
     this.range = fragment.range;
+    this.ionSeries = this.name.split("")[0];
 
-    let ion = this.name.split("")[0];
-    if (ion === "a" || ion === "b" || ion === "c") {
+    if (this.ionSeries === "a" || this.ionSeries === "b" || this.ionSeries === "c") {
         this.byType = "bLike";
-    } else if (ion === "x" || ion === "y" || ion === "z") {
+    } else if (this.ionSeries === "x" || this.ionSeries === "y" || this.ionSeries === "z") {
         this.byType = "yLike";
     } else {
         this.byType = null;
