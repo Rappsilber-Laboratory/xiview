@@ -46,7 +46,7 @@ export class CompositeModel extends Backbone.Model {
 
 
         this.listenTo(window.vent, "recalcLinkDistances", function () {
-            if (this.get("clmsModel")) {    // bar the alternative model from doing this because it has no crosslinks and will crash
+            if (this.get("clmsModel")) { //how does this work? may be mistake. // bar the alternative model from doing this because it has no crosslinks and will crash
                 this.getCrossLinkDistances(this.getAllCrossLinks());
             }
         });
@@ -535,15 +535,21 @@ export class CompositeModel extends Backbone.Model {
     }
 
     setSelectedProteins(pArr, add) {
-        let toSelect = add ? this.get("selectedProteins").slice() : []; //see note below
-        if (add && pArr.length == 1 && toSelect.indexOf(pArr[0]) > -1) { // if ctrl/shift click and already selected the remove
-            toSelect = toSelect.filter(function (el) {
-                return el !== pArr[0];
-            });
-        } else {
+        let toSelect;
+        if (!add){
+            toSelect = [...new Set(pArr)];
+        }
+        else{
+            const alreadySelected = this.get("selectedProteins");
+            toSelect = [];
+            for (let a = 0; a < alreadySelected.length; a++){
+                if (pArr.indexOf(alreadySelected[a]) == -1) {
+                    toSelect.push(alreadySelected[a]);
+                }
+            }
             for (let p = 0; p < pArr.length; p++) {
                 const protein = pArr[p];
-                if (toSelect.indexOf(protein) == -1) {
+                if (alreadySelected.indexOf(protein) == -1) {
                     toSelect.push(protein);
                 }
             }
