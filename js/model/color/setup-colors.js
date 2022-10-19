@@ -13,7 +13,7 @@ import {
     MetaDataHexValuesColourModel,
     ThresholdColourModel
 } from "./color-model";
-import {DefaultProteinColourModel} from "./protein-color-model";
+import {DefaultProteinColourModel, ManualProteinColourModel} from "./protein-color-model";
 import {commonRegexes} from "../../utils";
 import d3 from "d3";
 
@@ -133,16 +133,24 @@ export const setupColourModels = function (userConfig) {
 
     // Protein colour schemes
 
-    window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({
+    window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({ //todo - linkColor looks wrong here
         colScale: d3.scale.ordinal().domain([0]).range(["#ffffff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
         id: "Default Protein"
     });
 
+    window.linkColor.manualProteinColoursBB = new ManualProteinColourModel({
+        colScale: null,//d3.scale.ordinal().domain([0]).range(["#00ffff"]),
+        title: "Manual Protein Colour",
+        longDescription: "Manually assigned protein colour.",
+        id: "Manual Protein"
+    });
+
     // Can add other metadata-based schemes to this collection later
     const proteinColourCollection = new ColourModelCollection([
         window.linkColor.defaultProteinColoursBB,
+        window.linkColor.manualProteinColoursBB
     ]);
 
     // If necessary, swap in newly added colour scale with same id as removed (but current) scale pointed to by linkColourAssignment

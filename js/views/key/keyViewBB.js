@@ -55,6 +55,8 @@ export const KeyViewBB = BaseFrameView.extend({
         }).join(" ");
         this.listenTo(this.model, changeString, this.render);
 
+        this.listenTo(this.model, "currentProteinColourModelChanged", this.render);
+
         // update is only triggered once when adding/removing multiple models to/from a collection
         this.options.colourConfigs.forEach(function (config) {
             this.listenTo(window.linkColor[config.collectionID], "update", this.render);

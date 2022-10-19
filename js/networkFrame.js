@@ -656,8 +656,14 @@ export function views () {
                     func: compModel.autoGroup,
                     context: compModel,
                     tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
-                    sectionEnd: true
                 },
+                // {
+                //     name: "Auto Group Compartments",
+                //     func: compModel.autoGroupCompartments,
+                //     context: compModel,
+                //     tooltip: "Group protein into compartmenst based on GO terms.",
+                //     sectionEnd: true
+                // },
                 {
                     name: "Collapse All",
                     func: compModel.collapseGroups,
@@ -724,6 +730,22 @@ export function views () {
     new xiNetControlsViewBB({
         el: "#xiNetButtonBar",
         model: compModel
+    });
+
+    //initialise the color chooser dialog
+    const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
+    const colorCancelButton = document.getElementById("colorCancel");
+    colorCancelButton.addEventListener('click', () => {
+        dialog.returnValue = "cancel";
+        dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+        const checkedColor = document.querySelector('input[name="aColor"]:checked');
+        if (!checkedColor){
+            alert("No colour selected.");
+        } else if (dialog.returnValue != "cancel"){
+            compModel.setInteractorColor(dialog.returnValue, checkedColor.value);
+        }
     });
 
     // Set up a one-time event listener that is then called from allDataLoaded

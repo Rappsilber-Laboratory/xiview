@@ -1,6 +1,5 @@
 <?php
     session_start();
-    $cacheBuster = '';//'?v='.microtime(true);
 ?>
 
 <!DOCTYPE html>
@@ -39,9 +38,8 @@
             </div>
 
             <div class="page-header">
-<!--                <input data-jscolor='{}' value="#3399FF80"/>-->
                 <i class="fa fa-home fa-xi"
-                        onclick="window.open('../history/history.html');" 
+                        onclick="window.open('../history/history.html');"
                         title="Return to search history / Login"></i>
                     <p id="loadDropdownPlaceholder"></p>
                     <p id="viewDropdownPlaceholder"></p>
@@ -78,6 +76,77 @@
 			<div id="subPanelLimiter"></div>
         </div><!-- MAIN -->
 
+        <!-- Simple pop-up dialog box, containing a form, used to manually set colors -->
+        <dialog id="colorDialog">
+            <form method="dialog">
+                <fieldset id="chooseColor">
+                    <legend id="chooseColorLabel">Select a Colour:</legend>
+                        <label for="c1">
+                            <div style="background:#4e79a7" >
+                                <input type="radio" id="c1" name="aColor" value="#4e79a7">
+                                #4e79a7
+                            </div>
+                        </label>
+                        <label for="c2">
+                            <div style="background:#f28e2c"><input type="radio" id="c2" name="aColor" value="#f28e2c">
+                                #f28e2c
+                            </div>
+                        </label>
+                        <label for="c3">
+                            <div style="background:#e15759">
+                                <input type="radio" id="c3" name="aColor" value="#e15759">
+                                #e15759
+                            </div>
+                        </label>
+                        <label for="c4">
+                            <div style="background:#76b7b2">
+                                <input type="radio" id="c4" name="aColor" value="#76b7b2">
+                                #76b7b2
+                            </div>
+                        </label>
+                        <label for="c5">
+                            <div style="background:#59a14f">
+                                <input type="radio" id="c5" name="aColor" value="#59a14f">
+                                #59a14f
+                            </div>
+                        </label>
+                        <label for="c6">
+                            <div style="background:#edc949">
+                                <input type="radio" id="c6" name="aColor" value="#edc949">
+                                #edc949
+                            </div>
+                        </label>
+                        <label for="c7">
+                            <div style="background:#af7aa1">
+                                <input type="radio" id="c7" name="aColor" value="#af7aa1">
+                                #af7aa1
+                            </div>
+                        </label>
+                        <label for="c8">
+                            <div style="background:#ff9da7">
+                                <input type="radio" id="c8" name="aColor" value="#ff9da7">
+                                #ff9da7
+                            </div>
+                        </label>
+                        <label for="c9">
+                            <div style="background:#9c755f">
+                                <input type="radio" id="c9" name="aColor" value="#9c755f">
+                                #9c755f
+                            </div>
+                        </label>
+                        <label for="c10">
+                            <div style="background:#bab0ab">
+                                <input type="radio" id="c10" name="aColor" value="#bab0ab">
+                                #bab0ab
+                            </div>
+                        </label>
+                </fieldset>
+                <menu>
+                    <button id="colorCancel">Cancel</button>
+                    <button type="submit">Confirm</button>
+                </menu>
+            </form>
+        </dialog>
 
     <script>
     //<![CDATA[
