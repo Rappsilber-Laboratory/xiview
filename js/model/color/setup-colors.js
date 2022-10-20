@@ -13,7 +13,7 @@ import {
     MetaDataHexValuesColourModel,
     ThresholdColourModel
 } from "./color-model";
-import {DefaultProteinColourModel, ManualProteinColourModel} from "./protein-color-model";
+import {DefaultProteinColourModel, ManualColourModel} from "./protein-color-model";
 import {commonRegexes} from "../../utils";
 import d3 from "d3";
 
@@ -140,7 +140,7 @@ export const setupColourModels = function (userConfig) {
         id: "Default Protein"
     });
 
-    window.linkColor.manualProteinColoursBB = new ManualProteinColourModel({
+    window.linkColor.manualProteinColoursBB = new ManualColourModel({
         colScale: null,//d3.scale.ordinal().domain([0]).range(["#00ffff"]),
         title: "Manual Protein Colour",
         longDescription: "Manually assigned protein colour.",

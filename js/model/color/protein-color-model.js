@@ -12,18 +12,18 @@ export class DefaultProteinColourModel extends ColourModel {
     }
 }
 
-export class ManualProteinColourModel extends ColourModel {
+export class ManualColourModel extends ColourModel {
 
     initialize() {
         this.colourAssignment = new Map();
-        // this
-        //     .set("labels", this.get("colScale").copy().range(["Protein"]))
-        //     .set("type", "ordinal");
     }
 
-    // getValue() {
-    //     return 0;
-    // }
+    setMap(obj) {
+        this.colourAssignment.clear();
+        for (let [key, value] of Object.entries(obj)) {
+            this.colourAssignment.set(key, value);
+        }
+    }
 
     getColour(obj) {
         console.log(obj.id, this.colourAssignment.get(obj.id));
@@ -38,14 +38,16 @@ export class ManualProteinColourModel extends ColourModel {
         this.colourAssignment.set(interactorId, colour);
     }
 
+    hasManualAssignment(interactorId) {
+        return this.colourAssignment.has(interactorId);
+    }
+
+    removeManualAssignment(interactorId) {
+        this.colourAssignment.delete(interactorId);
+    }
+
     // called by utils.updateColourKey & keyViewBB.render
     getLabelColourPairings() {
-        // const colScale = this.get("colScale");
-        // const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
-        // const minLength = Math.min(colScale.range().length, this.get("labels").range().length);  // restrict range used when ordinal scale
-        // const colScaleRange = colScale.range().slice(0, minLength).concat(this.get("undefinedColour"));
-        // return d3.zip(labels, colScaleRange);
-
         return Array.from(this.colourAssignment.entries());
     }
 }

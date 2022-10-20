@@ -7,7 +7,7 @@ import {jqdialogs} from "../dialogs";
 import {makeURLQueryPairs, mergeContiguousFeatures} from "../modelUtils";
 import d3 from "d3";
 import {xilog} from "../utils";
-import {DefaultProteinColourModel, ManualProteinColourModel} from "./color/protein-color-model";
+import {DefaultProteinColourModel, ManualColourModel} from "./color/protein-color-model";
 import {MetaDataHexValuesColourModel} from "./color/color-model";
 
 export class CompositeModel extends Backbone.Model {
@@ -639,7 +639,7 @@ export class CompositeModel extends Backbone.Model {
 
     setInteractorColor(interactorId, color) {
         const proteinColourModel = window.compositeModelInst.get("proteinColourAssignment");
-        if (!(proteinColourModel instanceof ManualProteinColourModel)) {
+        if (!(proteinColourModel instanceof ManualColourModel)) {
             this.set("proteinColourAssignment", window.linkColor.manualProteinColoursBB);
         }
         window.linkColor.manualProteinColoursBB.setInteractorColour(interactorId, color);
