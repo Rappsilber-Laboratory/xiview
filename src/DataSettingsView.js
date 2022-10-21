@@ -424,7 +424,7 @@ export const DataSettingsView = SettingsView.extend({
         function pep_to_array(pep_str){
             let pepArray = Array();
             let pep = pep_str.replace(/#\d?/g , "");
-            let matches = pep.matchAll(/([A-Z][^A-Z\\-]*)/g);
+            let matches = pep.matchAll(/([A-Z][^A-Z]*)/g);
             for (let AAmod of matches){
                 pepArray.push({"aminoAcid": AAmod[0][0], "Modification": AAmod[0].slice(1)});
             }
