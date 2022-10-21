@@ -205,13 +205,13 @@ Peak.prototype.draw = function () {
                 const coords = d3.mouse(this);
                 const fragId = d.id;
                 const filteredLabels = self.labels.filter(function (d) {
-                    return d.id == fragId;
+                    return d.id === fragId;
                 });
                 const filteredHighlights = self.labelHighlights.filter(function (d) {
-                    return d.id == fragId;
+                    return d.id === fragId;
                 });
                 const filteredLabelLines = self.labelLines.filter(function (d) {
-                    return d.id == fragId;
+                    return d.id === fragId;
                 });
 
                 filteredLabels.attr("x", coords[0]).attr("y", coords[1]);
@@ -239,7 +239,7 @@ Peak.prototype.draw = function () {
             });
         const lossy = [];
         const nonlossy = this.fragments.filter(function (frag) {
-            const bool = frag.class != "lossy";
+            const bool = frag.class !== "lossy";
             if (!bool) {
                 lossy.push(frag);
             }
@@ -261,7 +261,6 @@ Peak.prototype.draw = function () {
             const peakFrags = partition.frags;
 
             if (peakFrags.length > 0) {
-                const group = partition.group;
                 const labelgroup = self.lineLabelGroup.selectAll("g.xispec_label").data(peakFrags, makeIdentityID);
                 const labelLines = self.lineLabelGroup.selectAll("line.xispec_labelLine").data(peakFrags, makeIdentityID);
 

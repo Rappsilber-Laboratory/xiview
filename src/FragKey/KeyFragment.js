@@ -273,7 +273,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
             .style("cursor", "pointer")
             .attr("class", fragLineClass);
 
-        var ion = fragments.y[0].type.toLowerCase()[0] + fragments.y[0].ionNumber;
+        let ion = fragments.y[0].type.toLowerCase()[0] + fragments.y[0].ionNumber;
 
 //Idea for multiple texts, could be to crowded
         /*		this.yTexts = []	//Array of d3 selections

@@ -16,15 +16,7 @@ export function Fragment(fragment, all_clusters) {
     this.type = fragment.type;
     this.range = fragment.range;
     this.ionSeries = this.name.split("")[0];
-
-    if (this.ionSeries === "a" || this.ionSeries === "b" || this.ionSeries === "c") {
-        this.byType = "bLike";
-    } else if (this.ionSeries === "x" || this.ionSeries === "y" || this.ionSeries === "z") {
-        this.byType = "yLike";
-    } else {
-        this.byType = null;
-    }
-
+    
     let fragRegex = /[abcxyz]([0-9]+)(?:_.*)?/g;
     let regexMatch = fragRegex.exec(this.name);
     this.ionNumber = (regexMatch) ? regexMatch[1] - 0 : null;
