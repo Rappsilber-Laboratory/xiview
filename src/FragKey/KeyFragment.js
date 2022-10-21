@@ -346,7 +346,7 @@ KeyFragment.prototype.highlight = function (show, fragments) {
             }
             if (this.y.indexOf(fragments[f]) !== -1 && this.yHighlight) {
                 this.yHighlight.attr("opacity", 1);
-                this.yText.text(fragments[f].ionSeries + this.bfrag_index);
+                this.yText.text(fragments[f].ionSeries + this.yfrag_index);
                 this.yText.attr("opacity", 1);
             }
         }
