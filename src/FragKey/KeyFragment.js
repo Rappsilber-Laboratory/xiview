@@ -28,17 +28,18 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
     this.yfrag_index = this.peptide.sequence.length - (index + 1);
     this.bfrag_index = (index + 1);
     if (this.peptideId === 0) {
-        color = this.FragKey.model.p1color;}
-    else if (this.peptideId === 1) {
-        color = this.FragKey.model.p2color;}
+        color = this.FragKey.model.p1color;
+    } else if (this.peptideId === 1) {
+        color = this.FragKey.model.p2color;
+    }
 
 
     let xStep = FragKey.xStep;
     x_coord = (xStep * (index + offset)) + (xStep / 2);
-    if (this.peptideId === 0) {
-        y_coord = 25;}
-    if (this.peptideId === 1) {
-        y_coord = 75;}
+    if (this.peptideId === 0)
+        y_coord = 25;
+    if (this.peptideId === 1)
+        y_coord = 75;
     const barHeight = 18, tailX = 5, tailY = 5;
 
     const self = this;
@@ -72,10 +73,13 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
         // Crosslink containing fragment accentuation
         // Only consider losses for accentuation if there are no primary fragments
         if (bOnlyLoss){
-            clContFrags = bLikeLossFragments.filter(function(f){return f.crossLinkContaining})
-        }
-        else{
-            clContFrags = bLikePrimFragments.filter(function(f){return f.crossLinkContaining})
+            clContFrags = bLikeLossFragments.filter(function(f){
+                return f.crossLinkContaining;
+            });
+        } else{
+            clContFrags = bLikePrimFragments.filter(function(f){
+                return f.crossLinkContaining;
+            });
         }
         let clContaining = clContFrags.length !== 0;
         let fragLineClass = "xispec_fragBar";
@@ -203,10 +207,13 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
         // Crosslink containing fragment accentuation
         // Only consider losses for accentuation if there are no primary fragments
         if (yOnlyLoss){
-            clContFrags = yLikeLossFragments.filter(function(f){return f.crossLinkContaining})
-        }
-        else{
-            clContFrags = yLikePrimFragments.filter(function(f){return f.crossLinkContaining})
+            clContFrags = yLikeLossFragments.filter(function(f){
+                return f.crossLinkContaining;
+            });
+        } else{
+            clContFrags = yLikePrimFragments.filter(function(f){
+                return f.crossLinkContaining;
+            });
         }
         let clContaining = clContFrags.length !== 0;
         let fragLineClass = "xispec_fragBar";
@@ -214,14 +221,11 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
             fragLineClass = "xispec_fragBarThick";
         }
 
-        if (fragments.b.length === 0)	//highlight full length of the fragbar
-        {
+        if (fragments.b.length === 0){	//highlight full length of the fragbar
             highlightPath = "M" + x_coord + "," + y_coord
                 + " L" + x_coord + "," + (y_coord - barHeight)
                 + " L" + (x_coord + tailX) + "," + (y_coord - barHeight - tailY);
-        }
-        else
-        {
+        } else {
             highlightPath = "M" + x_coord + "," + (y_coord - barHeight / 2)
                 + " L" + x_coord + "," + (y_coord - barHeight)
                 + " L" + (x_coord + tailX) + "," + (y_coord - barHeight - tailY);
@@ -275,7 +279,7 @@ export function KeyFragment(fragments, index, offset, peptideId, FragKey) {
 
         let ion = fragments.y[0].type.toLowerCase()[0] + fragments.y[0].ionNumber;
 
-//Idea for multiple texts, could be to crowded
+        //Idea for multiple texts, could be to crowded
         /*		this.yTexts = []	//Array of d3 selections
                 yions = []
                 for (var i = 0; i < fragments.y.length; i++) {
