@@ -26,7 +26,7 @@ export class ManualColourModel extends ColourModel {
     }
 
     getColour(obj) {
-        console.log(obj.id, this.colourAssignment.get(obj.id));
+        // console.log(obj.id, this.colourAssignment.get(obj.id));
         if (this.colourAssignment.has(obj.id)) {
             return this.colourAssignment.get(obj.id);
         } else {
