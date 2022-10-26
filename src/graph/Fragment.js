@@ -9,6 +9,7 @@ export function Fragment(fragment, all_clusters) {
     this.id = fragment.id;
     this.isMonoisotopic = fragment.isMonoisotopic;
     this.mass = fragment.mass;
+    this.stub = fragment.stub || "";
     this.name = fragment.name.trim();
     this.peptideId = fragment.peptideId;
     this.range = fragment.range;
@@ -16,10 +17,14 @@ export function Fragment(fragment, all_clusters) {
     this.type = fragment.type;
     this.range = fragment.range;
     this.ionSeries = this.name.split("")[0];
-    
-    let fragRegex = /[abcxyz]([0-9]+)(?:_.*)?/g;
-    let regexMatch = fragRegex.exec(this.name);
-    this.ionNumber = (regexMatch) ? regexMatch[1] - 0 : null;
+
+    this.ionNumber = fragment.ionNumber;
+    // xi1 annotator doesn't report ionNumber directly
+    if (this.ionNumber === undefined) {
+        let fragRegex = /[abcxyz]([0-9]+)(?:_.*)?/g;
+        let regexMatch = fragRegex.exec(this.name);
+        this.ionNumber = (regexMatch) ? regexMatch[1] - 0 : null;
+    }
 
     this.lossy = this.class === "lossy";
 
