@@ -103,8 +103,10 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         // ToDo: currently converts xi2 into xi1 annotator style. Could change to using own format
         if (JSONdata.annotation) {
 
-            if (JSONdata.annotation.crosslinker)
+            if (JSONdata.annotation.crosslinker) {
                 this.crossLinkerModMass = JSONdata.annotation.crosslinker.modMass;
+                this.crosslinker = JSONdata.annotation.crosslinker;
+            }
 
             if (JSONdata.annotation.config){
                 let config = JSONdata.annotation.config;
@@ -200,6 +202,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.sticky = Array();
         this.precursor = {};
         this.crossLinkerModMass = null;
+        this.crosslinker = null;
         this.fragmentIons = Array();
         this.fragments = Array();
 

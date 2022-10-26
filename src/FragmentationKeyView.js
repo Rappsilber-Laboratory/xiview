@@ -1,9 +1,10 @@
-import {KeyFragment} from "./FragKey/KeyFragment";
+import {PeptideKeyFragment, CrosslinkKeyFragment} from "./FragKey/KeyFragment";
 
 import Backbone from "backbone";
 import * as _ from "underscore";
 import d3 from "d3";
 import * as $ from "jquery";
+import {hasOwnProperty} from "underscore/modules/_setup";
 
 
 //TODO: find a better place for this?
@@ -85,6 +86,17 @@ export const FragmentationKeyView = Backbone.View.extend({
         this.peptideStrs = self.model.pepStrs;	//contains the aa sequences of the peptides in string form without modifications
         let fragments = self.model.fragments;
         this.annotations = [];
+        this.ccl_annotations = [];
+        this.ccl_stub_combinations = [];
+        if (this.model.crosslinker !== undefined && this.model.crosslinker.cleavage_stubs !== undefined){
+            for (let stub of this.model.crosslinker.cleavage_stubs) {
+                if (Object.prototype.hasOwnProperty.call(stub, "pairs_with")
+                    && this.ccl_stub_combinations.indexOf(stub.pairs_with.join("")) === -1) {
+                    this.ccl_stub_combinations.push(stub.pairs_with.join(""));
+                    this.ccl_annotations.push([]);
+                }
+            }
+        }
         this.peptides = [];
         for (let i = 0; i < this.peptideStrs.length; i++) {
             this.peptides[i] = this.peptideStrs[i];
@@ -96,7 +108,7 @@ export const FragmentationKeyView = Backbone.View.extend({
         this.pepoffset = [0, 0];
         for (let p = 0; p < pepCount; p++) {
             this.annotations[p] = [];
-            for (let i = 0; i < self.model.peptides[p].sequence.length; i++) {
+            for (let i = 0; i < this.model.peptides[p].sequence.length; i++) {
                 let ions = {
                     b: [],
                     y: []
@@ -108,12 +120,19 @@ export const FragmentationKeyView = Backbone.View.extend({
             this.pepLetterHighlights[p] = [];
             this.modLetterHighlights[p] = [];
             this.pepModsArray[p] = [];
-            for (let i = 0; i < self.model.peptides[p].sequence.length; i++) {
-                if (self.model.peptides[p].sequence[i].Modification !== "")
-                    this.pepModsArray[p][i] = self.model.peptides[p].sequence[i].Modification;
+            for (let i = 0; i < this.model.peptides[p].sequence.length; i++) {
+                if (this.model.peptides[p].sequence[i].Modification !== "")
+                    this.pepModsArray[p][i] = this.model.peptides[p].sequence[i].Modification;
             }
         }
 
+        if (this.linkPos.length > 0) {
+            this.CLpos = this.linkPos[0].linkSite;
+            if (this.linkPos[1].linkSite > this.linkPos[0].linkSite)
+                this.CLpos = this.linkPos[1].linkSite;
+        } else {
+            this.CLpos = -1;
+        }
 
         this.tooltip.style("opacity", 0);
 
@@ -126,59 +145,73 @@ export const FragmentationKeyView = Backbone.View.extend({
         */
         this.fraglines = [];
 
+        // populate annotation b and y arrays (actually N/C-terminal)
         if (fragments !== undefined) {
-            for (let i = 0; i < fragments.length; i++) {
-                for (let r = 0; r < fragments[i].range.length; r++) {
-                    let pepId = fragments[i].range[r].peptideId;
-                    if (fragments[i].range[r].from !== 0) //N-terminal fragment
-                        this.annotations[pepId][fragments[i].range[r].from - 1].y.push(fragments[i]);
-                    if (fragments[i].range[r].to !== this.peptideStrs[pepId].length - 1) //C-terminal fragment
-                        this.annotations[pepId][fragments[i].range[r].to].b.push(fragments[i]);
+            for (let fragment of fragments) {
+                let pepId = fragment.peptideId;
+                let range = fragment.range.filter(function(r){
+                    return r.peptideId === pepId;
+                });
+                if (range[0].from !== 0) // N-terminal fragment
+                    this.annotations[pepId][range[0].from - 1].y.push(fragment);
+                else if (range[0].to !== this.peptideStrs[pepId].length - 1) // C-terminal fragment
+                    this.annotations[pepId][range[0].to].b.push(fragment);
+                else if (fragment.stub !== ""){ // peptide stub fragment
+                    let ccl_annotations_idx = -1;
+                    // get the index into the ccl_annotations array
+                    if (pepId === 0){
+                        ccl_annotations_idx = this.ccl_stub_combinations.indexOf(fragment.stub);
+                    } else if (pepId === 1){
+                        let pairs_with = this.model.crosslinker.cleavage_stubs.filter(function(s) {
+                            return s.name === fragment.stub;
+                        })[0].pairs_with.join("");
+                        ccl_annotations_idx = this.ccl_stub_combinations.indexOf(pairs_with);
+                    }
+                    if (ccl_annotations_idx !== -1)
+                        this.ccl_annotations[ccl_annotations_idx].push(fragment);
                 }
             }
 
             this.drawFragmentationEvents(0);
             if (this.peptides[1])
                 this.drawFragmentationEvents(1);
+            this.drawCleavedCrosslinkerFragmentationEvents();
         }
 
         // the letters
         this.drawPeptides();
 
-        //CL line svg elements
+        // CL line svg elements
         if (this.linkPos.length > 0) {
-            let CLpos = this.linkPos[0].linkSite + 1;
-            if (this.linkPos[1].linkSite > this.linkPos[0].linkSite)
-                CLpos = this.linkPos[1].linkSite + 1;
 
             this.CL = this.scaleSvgGroup.append("g");
 
-            //highlight
+            // highlight
             this.CLlineHighlight = this.CL.append("line")
-                .attr("x1", this.xStep * (CLpos - 1))
+                .attr("x1", this.xStep * this.CLpos)
                 .attr("y1", 25)
-                .attr("x2", this.xStep * (CLpos - 1))
+                .attr("x2", this.xStep * this.CLpos)
                 .attr("y2", 55)
                 .attr("stroke", self.model.get("highlightColor"))
                 .attr("stroke-width", 10)
                 .attr("opacity", 0)
                 .style("cursor", this.cursor);
 
-            // the the link line
+            // the link line
             this.CLline = this.CL.append("line")
-                .attr("x1", this.xStep * (CLpos - 1))
+                .attr("x1", this.xStep * this.CLpos)
                 .attr("y1", 25)
-                .attr("x2", this.xStep * (CLpos - 1))
+                .attr("x2", this.xStep * this.CLpos)
                 .attr("y2", 55)
                 .attr("stroke", "black")
                 .attr("stroke-width", 2.3)
                 .style("cursor", this.cursor);
 
-            //line for changing
+            // line for changing
             this.changeCLline = this.CL.append("line")
-                .attr("x1", this.xStep * (CLpos - 1))
+                .attr("x1", this.xStep * this.CLpos)
                 .attr("y1", 25)
-                .attr("x2", this.xStep * (CLpos - 1))
+                .attr("x2", this.xStep * this.CLpos)
                 .attr("y2", 55)
                 .attr("stroke", "black")
                 .attr("stroke-width", 2.3)
@@ -272,8 +305,18 @@ export const FragmentationKeyView = Backbone.View.extend({
     drawFragmentationEvents: function (pepIndex) {
         for (let i = 0; i < this.annotations[pepIndex].length; i++) {
             let frags = this.annotations[pepIndex][i];
-            if (frags.b.length !== 0 || frags.y.length !== 0) {
-                this.fraglines.push(new KeyFragment(frags, i, this.pepoffset[pepIndex], pepIndex, this));
+            if (frags.b.length > 0 || frags.y.length > 0) {
+                this.fraglines.push(new PeptideKeyFragment(frags, i, this.pepoffset[pepIndex], pepIndex, this));
+            }
+        }
+    },
+
+    drawCleavedCrosslinkerFragmentationEvents: function (){
+        for (let i = 0; i < this.ccl_annotations.length; i++) {
+            let frags = this.ccl_annotations[i];
+            let offset = (30 / (this.ccl_annotations.length + 1)) * (i+1);
+            if (frags.length > 0) {
+                this.fraglines.push(new CrosslinkKeyFragment(frags, offset, this));
             }
         }
     },
