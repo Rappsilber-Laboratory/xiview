@@ -668,6 +668,23 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
+    removeProteinFromGroup (groupName, participantId) { // todo: sort out inconsistent use of "participant"/"protein"/"interactor", its an historical artefact
+        const groups = this.get("groups");
+        const group = groups.get(groupName);
+        group.delete(participantId);
+        if (group.size === 0) {
+            groups.delete(groupName);
+        }
+        this.trigger("change:groups");
+    }
+
+    addProteinToGroup (groupName, participantId) {
+        const groups = this.get("groups");
+        const group = groups.get(groupName);
+        group.add(participantId);
+        this.trigger("change:groups");
+    }
+
     clearGroups() {
         const self = this;
         jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
