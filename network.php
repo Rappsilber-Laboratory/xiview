@@ -148,6 +148,21 @@
             </form>
         </dialog>
 
+
+        <!-- Simple pop-up dialog box, containing a form, used to manually set colors -->
+        <dialog id="groupDialog">
+            <form method="dialog">
+                <fieldset id="groupListDialog">
+
+                </fieldset>
+                <menu>
+<!--                    <button>Cancel</button>-->
+                    <button type="submit">Confirm</button>
+                </menu>
+            </form>
+        </dialog>
+
+
     <script>
     //<![CDATA[
 
