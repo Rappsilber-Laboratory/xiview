@@ -540,8 +540,7 @@ export class CompositeModel extends Backbone.Model {
         let toSelect;
         if (!add){
             toSelect = [...new Set(pArr)];
-        }
-        else{
+        } else{
             const alreadySelected = this.get("selectedProteins");
             toSelect = [];
             for (let a = 0; a < alreadySelected.length; a++){

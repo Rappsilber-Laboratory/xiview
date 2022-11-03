@@ -189,7 +189,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     }
                 }
                 cell2.append(innerTable);
-            };
+            }
 
             div.appendChild(table);
 

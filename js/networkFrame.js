@@ -735,7 +735,7 @@ export function views () {
     //initialise the color chooser dialog
     const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
     const colorCancelButton = document.getElementById("colorCancel");
-    colorCancelButton.addEventListener('click', () => {
+    colorCancelButton.addEventListener("click", () => {
         dialog.returnValue = "cancel";
         dialog.close();
     });
@@ -1218,13 +1218,8 @@ function viewsThatNeedAsyncData () {
     ByRei_dynDiv.init.main();
     //ByRei_dynDiv.db (1, d3.select("#subPanelLimiter").node());
 
-    const crosslinkViewer = new CrosslinkViewer({
+    new CrosslinkViewer({
         el: "#networkDiv",
         model: window.compositeModelInst,
-        //     myOptions: {layout: storedLayout}
     });
-
-    // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
-    // console.log("saved!", savedConfig);
-    // crosslinkViewer.loadLayout(savedConfig.layout);
 }

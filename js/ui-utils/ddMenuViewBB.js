@@ -5,7 +5,7 @@ import * as $ from "jquery";
 
 import {makeLegalDomID, makeLegalFileName, searchesToString, updateAnnotationColourKey} from "../utils";
 import {checkBoxView} from "./checkbox-view";
-import {svgUtils} from "../../vendor/svgexp";
+import {capture, makeXMLStr} from "../svgexp";
 import d3 from "d3";
 import {download} from "../downloads";
 
@@ -449,8 +449,8 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
     downloadSVG: function (event, thisSVG) {
         const svgSel = thisSVG || d3.select(this.el).selectAll("svg");
         const svgArr = [svgSel.node()];
-        const svgStrings = svgUtils.capture(svgArr);
-        const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+        const svgStrings = capture(svgArr);
+        const svgXML = makeXMLStr(new XMLSerializer(), svgStrings[0]);
 
         const fileName = this.filenameStateString().substring(0, 240);
         download(svgXML, "application/svg", fileName + ".svg");

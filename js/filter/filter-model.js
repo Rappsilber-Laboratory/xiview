@@ -214,10 +214,10 @@ export class FilterModel extends Backbone.Model {
         } if (!linear && !this.get("crosslinks")){
             return false;
         }
-        //self-links? - if self links's not selected and match is self link return false
-        // possible an ambiguous self link will still get displayed
-        else if (!linear && !mono && !((match.couldBelongToSelfLink && this.get("selfLinks")) ||
+       else if (!linear && !mono && !((match.couldBelongToSelfLink && this.get("selfLinks")) ||
             (match.couldBelongToBetweenLink && this.get("betweenLinks")))) {
+            //self-links? - if self links's not selected and match is self link return false
+            // possible an ambiguous self link will still get displayed
             return false;
         }
 
