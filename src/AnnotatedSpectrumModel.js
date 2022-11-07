@@ -130,19 +130,18 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 // (config.modification.modifications can have only composition defined)
                 this.annotationModifications = JSONdata.annotation.modifications;
 
-            }
-            else { // xi1 style annotator
+            } else { // xi1 style annotator
                 this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
                 this.fragmentIons = JSONdata.annotation.ions;
                 this.customConfig = JSONdata.annotation.custom;
                 // xi1 modifications in annotation need to be reformatted
-                // if ("modifications" in JSONdata.annotation) {
-                //     this.annotationModifications = JSONdata.annotation.modifications.map(function (m) {
-                //         return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
-                //     });
-                // } else{
-                this.annotationModifications = Array();
-                // }
+                if ("modifications" in JSONdata.annotation) {
+                    this.annotationModifications = JSONdata.annotation.modifications.map(function (m) {
+                        return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
+                    });
+                } else{
+                    this.annotationModifications = Array();
+                }
             }
         }
 
