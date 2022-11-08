@@ -94,9 +94,7 @@ export function download(content, contentType, fileName) {
                     array.push(0xe0 | (charcode >> 12),
                         0x80 | ((charcode >> 6) & 0x3f),
                         0x80 | (charcode & 0x3f));
-                }
-
-                else {// surrogate pair
+                } else {// surrogate pair
                     i++;
                     // UTF-16 encodes 0x10000-0x10FFFF by
                     // subtracting 0x10000 and splitting the

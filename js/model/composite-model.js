@@ -7,6 +7,8 @@ import {jqdialogs} from "../dialogs";
 import {makeURLQueryPairs, mergeContiguousFeatures} from "../modelUtils";
 import d3 from "d3";
 import {xilog} from "../utils";
+import {DefaultProteinColourModel, ManualColourModel} from "./color/protein-color-model";
+import {MetaDataHexValuesColourModel} from "./color/color-model";
 
 export class CompositeModel extends Backbone.Model {
     constructor(attributes, options) {
@@ -46,7 +48,7 @@ export class CompositeModel extends Backbone.Model {
 
 
         this.listenTo(window.vent, "recalcLinkDistances", function () {
-            if (this.get("clmsModel")) {    // bar the alternative model from doing this because it has no crosslinks and will crash
+            if (this.get("clmsModel")) { //how does this work? may be mistake. // bar the alternative model from doing this because it has no crosslinks and will crash
                 this.getCrossLinkDistances(this.getAllCrossLinks());
             }
         });
@@ -352,12 +354,10 @@ export class CompositeModel extends Backbone.Model {
             }
         }
 
-        let summaryHtmlString = "Proteins: " + visibleProteinCount + "<br/>";
-        summaryHtmlString += "PPIs: " + ppiSet.size + "<br/>";
-        summaryHtmlString += "Het. links: " + heteromericLinks + "<br/>";
-        summaryHtmlString += "Self links: " + selfLinks;
-        const pSel = d3.select("#ppiText");
-        pSel.html(summaryHtmlString);
+        this.set("proteinCount", visibleProteinCount);
+        this.set("ppiCount", ppiSet.size);
+        this.set("hetLinkCount", heteromericLinks);
+        this.set("selfLinkCount", selfLinks);
 
         this.trigger("hiddenChanged");
         this.trigger("filteringDone");
@@ -537,15 +537,20 @@ export class CompositeModel extends Backbone.Model {
     }
 
     setSelectedProteins(pArr, add) {
-        let toSelect = add ? this.get("selectedProteins").slice() : []; //see note below
-        if (add && pArr.length == 1 && toSelect.indexOf(pArr[0]) > -1) { // if ctrl/shift click and already selected the remove
-            toSelect = toSelect.filter(function (el) {
-                return el !== pArr[0];
-            });
-        } else {
+        let toSelect;
+        if (!add){
+            toSelect = [...new Set(pArr)];
+        } else{
+            const alreadySelected = this.get("selectedProteins");
+            toSelect = [];
+            for (let a = 0; a < alreadySelected.length; a++){
+                if (pArr.indexOf(alreadySelected[a]) == -1) {
+                    toSelect.push(alreadySelected[a]);
+                }
+            }
             for (let p = 0; p < pArr.length; p++) {
                 const protein = pArr[p];
-                if (toSelect.indexOf(protein) == -1) {
+                if (alreadySelected.indexOf(protein) == -1) {
                     toSelect.push(protein);
                 }
             }
@@ -620,6 +625,26 @@ export class CompositeModel extends Backbone.Model {
         this.setSelectedProteins(toSelect);
     }
 
+    chooseInteractorColor(interactorId) {
+        const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
+        dialog.returnValue = interactorId;
+        const chooseColorLabel = document.getElementById("chooseColorLabel");
+        chooseColorLabel.innerHTML = "Select Colour for " + interactorId;
+        dialog.showModal();
+        const cancelChooseColorButton = document.getElementById("colorCancel");
+        cancelChooseColorButton.focus();
+
+    }
+
+    setInteractorColor(interactorId, color) {
+        const proteinColourModel = window.compositeModelInst.get("proteinColourAssignment");
+        if (!(proteinColourModel instanceof ManualColourModel)) {
+            this.set("proteinColourAssignment", window.linkColor.manualProteinColoursBB);
+        }
+        window.linkColor.manualProteinColoursBB.setInteractorColour(interactorId, color);
+        this.trigger("currentProteinColourModelChanged", window.linkColor.manualProteinColoursBB);
+    }
+
     groupSelectedProteins(d3target, evt) {
         const self = this;
         evt = evt.originalEvent;
@@ -640,6 +665,23 @@ export class CompositeModel extends Backbone.Model {
                 }
             }
         }
+    }
+
+    removeProteinFromGroup (groupName, participantId) { // todo: sort out inconsistent use of "participant"/"protein"/"interactor", its an historical artefact
+        const groups = this.get("groups");
+        const group = groups.get(groupName);
+        group.delete(participantId);
+        if (group.size === 0) {
+            groups.delete(groupName);
+        }
+        this.trigger("change:groups");
+    }
+
+    addProteinToGroup (groupName, participantId) {
+        const groups = this.get("groups");
+        const group = groups.get(groupName);
+        group.add(participantId);
+        this.trigger("change:groups");
     }
 
     clearGroups() {
@@ -679,46 +721,106 @@ export class CompositeModel extends Backbone.Model {
 
             self.set("groups", groupMap);
             self.trigger("change:groups");
-
-
-            // var proteins = this.model.get("clmsModel").get("participants").values();
-            // for (var protein of proteins) {
-            //
-            //     if (protein.uniprot) {
-            //         var peri = false;
-            //         var intr = false;
-            //         for (var goId of protein.uniprot.go) {
-            //             var goTerm = go.get(goId);
-            //             if (goTerm) {
-            //                 //GO0071944
-            //                 if (goTerm.isDescendantOf("GO0071944") == true) {
-            //                     peri = true;
-            //                 } //GO0071944
-            //                 if (goTerm.isDescendantOf("GO0005622") == true) {
-            //                     intr = true;
-            //                 }
-            //             }
-            //
-            //         }
-            //
-            //         if (peri == true && intr == true) {
-            //             both.add(protein.id);
-            //         } else if (peri == true) {
-            //             periphery.add(protein.id);
-            //         } else if (intr == true) {
-            //             intracellular.add(protein.id);
-            //         } else {
-            //             uncharacterised.add(protein.id);
-            //         }
-            //     }
-            //
-            // }
-            // this.model.set("groups", groupMap);
-
-
         });
     }
 
+    autoGroupCompartments() {
+        // const self = this;
+        // jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
+        //     const groupMap = new Map();
+        const go = this.get("go");
+        //     for (let goTerm of go.values()) {
+        //         if (!goTerm.subclasses && !goTerm.parts) {
+        //             const interactors = goTerm.getInteractors();
+        //             if (interactors && interactors.size > 1) {
+        //                 // console.log("*"+ goTerm.name);
+        //                 if (goTerm.isDescendantOf("GO0032991")) {
+        //                     console.log(">" + goTerm.name);
+        //
+        //                     const participantIds = new Set();
+        //                     for (let p of interactors) {
+        //                         participantIds.add(p.id);
+        //                     }
+        //                     groupMap.set(goTerm.name, participantIds);
+        //
+        //                 } else {
+        //                     // console.log("!" + goTerm.name);
+        //                 }
+        //
+        //             }
+        //         }
+        //     }
+        //
+        //     self.set("groups", groupMap);
+        //     self.trigger("change:groups");
+
+
+        // plasma membrane 0005886 n
+        // peroxysomes 0005777
+        // lysomes 0005764
+        // golgi 0005794 y
+        // cytosol 5829
+        // cytoskeleton 5856
+        // er 0005783 ?
+        // mitochondria 0005739
+        // nucleus 0005634
+        const groupMap = this.get("groups");
+        const termOfInterest = ["0005634"];//, "0005886", "0005783", "0005737", "0005634", "0005829", "0005739", "0005634"];
+        for (let term of termOfInterest) {
+            const goTerm = this.get("go").get("GO"+term);
+            const interactors = goTerm.getInteractors();
+            if (interactors && interactors.size > 1) {
+                console.log("Compartment>" + goTerm.name);
+                const participantIds = new Set();
+                // for (let p of interactors) {
+                //     participantIds.add(p.id);
+                // }
+                groupMap.set(goTerm.name, participantIds);
+            }
+        }
+
+        const proteins = this.get("clmsModel").get("participants").values();
+        for (let protein of proteins) {
+
+            if (protein.uniprot) {
+                // var peri = false;
+                // var intr = false;
+                for (let goId of protein.uniprot.go) {
+                    const goTerm = go.get(goId);
+                    if (goTerm) {
+                        for (let term of termOfInterest) {
+                            const termOfInterest = this.get("go").get("GO"+term);
+                            if (goTerm.isDescendantOf(termOfInterest.id)) {
+                                // console.log(">" + goTerm.name);
+                                groupMap.get(termOfInterest.name).add(protein.id);
+                            }
+                        }
+                    // if (goTerm.isDescendantOf("GO0071944") == true) {
+                    //     peri = true;
+                    // }
+                    // if (goTerm.isDescendantOf("GO0005622") == true) {
+                    //     intr = true;
+                    // }
+                    }
+                }
+
+                //GO0071944
+                //GO0005622
+                // if (peri == true && intr == true) {
+                //     both.add(protein.id);
+                // } else if (peri == true) {
+                //     periphery.add(protein.id);
+                // } else if (intr == true) {
+                //     intracellular.add(protein.id);
+                // } else {
+                //     uncharacterised.add(protein.id);
+                // }
+            }
+
+        }
+        this.set("groups", groupMap);
+        this.trigger("change:groups");
+    }
 
     collapseGroups() {
         window.vent.trigger("collapseGroups", true);
@@ -727,7 +829,6 @@ export class CompositeModel extends Backbone.Model {
     expandGroups() {
         window.vent.trigger("expandGroups", true);
     }
-
 
     // Things that can cause a cross-link's minimum distance to change:
     // 1. New PDB File loaded

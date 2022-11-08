@@ -16,7 +16,7 @@ import {FilterModel} from "./filter/filter-model";
 import {TooltipModel} from "./model/models";
 import {MinigramModel} from "./model/models";
 import {CompositeModel} from "./model/composite-model";
-import {FDRSummaryViewBB, FDRViewBB, FilterViewBB} from "./filter/filterViewBB";
+import {FDRSummaryViewBB, FDRViewBB, FilterViewBB, ProteinSummaryViewBB} from "./filter/filterViewBB";
 import {FilterSummaryViewBB} from "./filter/filterViewBB";
 import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
@@ -656,8 +656,14 @@ export function views () {
                     func: compModel.autoGroup,
                     context: compModel,
                     tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
-                    sectionEnd: true
                 },
+                // {
+                //     name: "Auto Group Compartments",
+                //     func: compModel.autoGroupCompartments,
+                //     context: compModel,
+                //     tooltip: "Group protein into compartmenst based on GO terms.",
+                //     sectionEnd: true
+                // },
                 {
                     name: "Collapse All",
                     func: compModel.collapseGroups,
@@ -726,6 +732,22 @@ export function views () {
         model: compModel
     });
 
+    //initialise the color chooser dialog
+    const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
+    const colorCancelButton = document.getElementById("colorCancel");
+    colorCancelButton.addEventListener("click", () => {
+        dialog.returnValue = "cancel";
+        dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+        const checkedColor = document.querySelector('input[name="aColor"]:checked');
+        if (!checkedColor){
+            alert("No colour selected.");
+        } else if (dialog.returnValue != "cancel"){
+            compModel.setInteractorColor(dialog.returnValue, checkedColor.value);
+        }
+    });
+
     // Set up a one-time event listener that is then called from allDataLoaded
     // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
     // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
@@ -751,6 +773,11 @@ export function viewsEssential (options) {
                 "linears": !compModel.get("clmsModel").get("linearsPresent"),
             }
         }
+    });
+
+    new ProteinSummaryViewBB({
+        el: "#ppiText",
+        model: compModel,
     });
 
     new FilterSummaryViewBB({
@@ -1192,13 +1219,8 @@ function viewsThatNeedAsyncData () {
     ByRei_dynDiv.init.main();
     //ByRei_dynDiv.db (1, d3.select("#subPanelLimiter").node());
 
-    const crosslinkViewer = new CrosslinkViewer({
+    new CrosslinkViewer({
         el: "#networkDiv",
         model: window.compositeModelInst,
-        //     myOptions: {layout: storedLayout}
     });
-
-    // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
-    // console.log("saved!", savedConfig);
-    // crosslinkViewer.loadLayout(savedConfig.layout);
 }

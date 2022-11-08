@@ -69,7 +69,7 @@ export class ColourModel extends Backbone.Model {
         return this.get("type") !== "linear";
     }
 
-    // over-ridden by HighestScoreColourModel, called by utils.updateColourKey & keyViewBB.render
+    // over-ridden by HighestScoreColourModel, ManualProteinColorModel, called by utils.updateColourKey & keyViewBB.render
     getLabelColourPairings() {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range().concat(this.get("undefinedLabel"));
@@ -89,7 +89,7 @@ export class MetaDataHexValuesColourModel extends ColourModel {
         this.set("labels", this.get("colScale").copy());
     }
 
-    getValue(obj) {  // obj can be anything with a getMeta function - crosslink or, now, proteins
+    getValue(obj) {
         if (obj.isAggregateLink) { //} obj.crosslinks) {
             return obj.getCrosslinks()[0].id;
         }

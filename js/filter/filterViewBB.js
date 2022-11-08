@@ -701,6 +701,28 @@ export const FDRViewBB = Backbone.View.extend({
     }
 });
 
+
+export const ProteinSummaryViewBB = Backbone.View.extend({
+    events: {},
+
+    initialize: function () {
+        this.listenTo(this.model, "filteringDone", this.render)
+            .render();
+    },
+
+    render: function () {
+        const model = this.model;
+        let summaryHtmlString = "Proteins: " + model.get("proteinCount") + "<br/>";
+        summaryHtmlString += "PPIs: " + model.get("ppiCount") + "<br/>";
+        summaryHtmlString += "Het. links: " + model.get("hetLinkCount") + "<br/>";
+        summaryHtmlString += "Self links: " + model.get("selfLinkCount");
+        const pSel = d3.select(this.el);
+        pSel.html(summaryHtmlString);
+        return this;
+    },
+});
+
+
 export const FilterSummaryViewBB = Backbone.View.extend({
     events: {},
 
