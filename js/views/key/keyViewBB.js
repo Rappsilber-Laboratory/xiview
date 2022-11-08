@@ -7,6 +7,7 @@ import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
 import {updateColourKey} from "../../utils";
+import {ManualColourModel} from "../../model/color/protein-color-model";
 
 export const KeyViewBB = BaseFrameView.extend({
     events: function () {
@@ -55,6 +56,8 @@ export const KeyViewBB = BaseFrameView.extend({
         }).join(" ");
         this.listenTo(this.model, changeString, this.render);
 
+        this.listenTo(this.model, "currentProteinColourModelChanged", this.render);
+
         // update is only triggered once when adding/removing multiple models to/from a collection
         this.options.colourConfigs.forEach(function (config) {
             this.listenTo(window.linkColor[config.collectionID], "update", this.render);
@@ -99,7 +102,7 @@ export const KeyViewBB = BaseFrameView.extend({
             }
         };
 
-        sectionTable.call(this, sectionDiv, sectionData, "colourInfo", ["Colour (Editable)", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], clickFunc);
+        sectionTable.call(this, sectionDiv, sectionData, "colourInfo", ["Colour", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], clickFunc);
 
         // add colour scheme selection placeholders (added in networkFrame.js)
         sectionDiv.selectAll("section")
@@ -342,12 +345,12 @@ export const KeyViewBB = BaseFrameView.extend({
         colourSections.forEach(function (colourSection) {
 
             const colourAssign = this.model.get(colourSection.colourModelKey);
-            if (colourAssign) {
+            if (colourAssign && !(colourAssign instanceof ManualColourModel)) { // todo: this is actually taking out whole section if ManualProteinColourModel
                 const labelColourPairings = colourAssign.getLabelColourPairings();
 
                 colourSection.rows = labelColourPairings.map(function (val, i) {
                     const rgbaCol = val[1];
-                    const span = "<input class='color-chooser' data-jscolor='{}' value='" + rgbaCol + "' title='Press to change colour for " + val[0] + "'/>";
+                    const span = "<input class='color-chooser' data-jscolor='{}' value='" + rgbaCol + "' readonly title='Press to change colour for " + val[0] + "'/>";
                     return [span, val[0], i];
                 });
             }

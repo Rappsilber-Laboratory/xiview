@@ -2,7 +2,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 
-import {svgUtils} from "../../vendor/svgexp";
+import {capture, makeXMLStr} from "../svgexp";
 import {
     drawCanvasToSVGImage,
     filterStateToString,
@@ -149,7 +149,7 @@ export const BaseFrameView = Backbone.View.extend({
 
         const svgSel = thisSVG || d3.select(this.el).selectAll("svg");
         const svgArr = [svgSel.node()];
-        const svgStrings = svgUtils.capture(svgArr);
+        const svgStrings = capture(svgArr);
         const detachedSVG = svgStrings[0];
         const detachedSVGD3 = d3.select(detachedSVG);
         const height = parseFloat(detachedSVGD3.attr("height"));
@@ -176,7 +176,7 @@ export const BaseFrameView = Backbone.View.extend({
         // const detachedSVGD3 = detachedSVG.detachedSVGD3;
         const svgStrings = detachedSVG.allSVGs;
 
-        const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+        const svgXML = makeXMLStr(new XMLSerializer(), svgStrings[0]);
         //console.log ("xml", svgXML);
 
         const fileName = this.filenameStateString().substring(0, 240);
@@ -203,7 +203,7 @@ export const BaseFrameView = Backbone.View.extend({
         const fileName = this.filenameStateString().substring(0, 240);
         // _.after means finalDownload only gets called after all canvases finished converting to svg images
         const finalDownload = _.after(d3canvases.size(), function () {
-            const svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+            const svgXML = makeXMLStr(new XMLSerializer(), svgStrings[0]);
             download(svgXML, "application/svg", fileName + ".svg");
             self.removeKey();
         });
