@@ -61,10 +61,6 @@
     border-left: 3px solid #bbb;
 }
 
-.selectView TD {
-    text-transform: capitalize;
-}
-
 .selectView TD.number {
     text-align: right;
 }
