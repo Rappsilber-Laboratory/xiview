@@ -557,7 +557,7 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel) {
         for (let participant of proteins.values()) {
             if (participant.meta && participant.meta.complex) {
                 const groupMeta = participant.meta.complex;
-                const groups = groupMeta.split(',');
+                const groups = groupMeta.split(",");
                 for (let group of groups) {
                     if (groupMap.get(group)) {
                         groupMap.get(group).add(participant.id);
