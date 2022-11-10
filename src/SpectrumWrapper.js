@@ -304,16 +304,20 @@ export const SpectrumWrapper = Backbone.View.extend({
                     //ToDo: Error handling -> https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/330
                     console.log("annotation response:", data);
 
-                    if (isOriginalMatchRequest) {
-                        self.models["originalSpectrum"].set({"JSONdata": data, "JSONrequest": json_request});
-                        self.originalMatchRequest = $.extend(true, {}, json_request);
-                        self.originalAnnotator = annotatorURL;
-                    }
-
                     self.models["Spectrum"].set({"JSONdata": data, "JSONrequest": json_request});
                     self.models["SettingsSpectrum"].set({"JSONdata": data, "JSONrequest": json_request});
                     self.models["SettingsSpectrum"].trigger("change:JSONdata");
                     self.models["Spectrum"].trigger("requestAnnotation:done");
+
+                    if (isOriginalMatchRequest) {
+                        self.models["originalSpectrum"].set({"JSONdata": data, "JSONrequest": json_request});
+                        self.models["originalSpectrum"].updateKnownModifications();
+                        self.models["Spectrum"].updateKnownModifications();
+                        self.originalMatchRequest = $.extend(true, {}, json_request);
+                        self.originalAnnotator = annotatorURL;
+                    }
+
+
                 }
 
             }

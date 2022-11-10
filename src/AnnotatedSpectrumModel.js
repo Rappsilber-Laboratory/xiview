@@ -133,20 +133,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 this.customConfig = JSONdata.annotation.custom;
             }
         }
-        this.annotationModifications = JSONdata.annotation.modifications.map(function(m){
-            m["userMod"] = false;
-            m["changed"] = false;
-            return m;
-        });
-        // concat the knownModifications and annotationModifications (overwrite known on same id)
-        let annModIds = this.annotationModifications.map(function(m){
-            return m.id;
-        });
-        // filter out those that are also in annotationModifications
-        let filtered_knownMods = this.knownModifications.filter(function(kMod){
-            return annModIds.indexOf(kMod.id);
-        });
-        this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
 
         this.peakList = JSONdata.peaks || [];
 
@@ -503,6 +489,23 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 alert("xiAnnotator could not be reached. Please try again later!");
             },
         });
+    },
+
+    updateKnownModifications: function () {
+        this.annotationModifications = this.get("JSONdata").annotation.modifications.map(function(m){
+            m["userMod"] = false;
+            m["changed"] = false;
+            return m;
+        });
+        // concat the knownModifications and annotationModifications (overwrite known on same id)
+        let annModIds = this.annotationModifications.map(function(m){
+            return m.id;
+        });
+        // filter out those that are also in annotationModifications
+        let filtered_knownMods = this.knownModifications.filter(function(kMod){
+            return annModIds.indexOf(kMod.id);
+        });
+        this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
     },
 
     updateModification: function (update_mod) {
