@@ -133,8 +133,11 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 this.customConfig = JSONdata.annotation.custom;
             }
         }
-        // ToDo: whole knownModifications stuff is still somewhat messy and could be cleaned up
-        this.annotationModifications = JSONdata.annotation.modifications;
+        this.annotationModifications = JSONdata.annotation.modifications.map(function(m){
+            m["userMod"] = false;
+            m["changed"] = false;
+            return m;
+        });
         // concat the knownModifications and annotationModifications (overwrite known on same id)
         let annModIds = this.annotationModifications.map(function(m){
             return m.id;
