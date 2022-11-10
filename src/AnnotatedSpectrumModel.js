@@ -126,36 +126,24 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                     ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
                 }
                 this.fragmentIons = ions;
-                // modifications - xi2 annotator return mods with masses in annotation block
-                // (config.modification.modifications can have only composition defined)
-                this.annotationModifications = JSONdata.annotation.modifications;
 
             } else { // xi1 style annotator
                 this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
                 this.fragmentIons = JSONdata.annotation.ions;
                 this.customConfig = JSONdata.annotation.custom;
-                // xi1 modifications in annotation need to be reformatted
-                if ("modifications" in JSONdata.annotation) {
-                    this.annotationModifications = JSONdata.annotation.modifications.map(function (m) {
-                        return {"id": m.id, "mass": m.massDifference, "aminoAcids": [m.aminoacid]};
-                    });
-                } else{
-                    this.annotationModifications = Array();
-                }
             }
         }
-
         // ToDo: whole knownModifications stuff is still somewhat messy and could be cleaned up
+        this.annotationModifications = JSONdata.annotation.modifications;
         // concat the knownModifications and annotationModifications (overwrite known on same id)
-        // let annModIds = this.annotationModifications.map(function(m){
-        //     return m.id;
-        // });
-        // // filter out those that are also in annotationModifications
-        // let filtered_knownMods = this.knownModifications.filter(function(kMod){
-        //     return annModIds.indexOf(kMod.id);
-        // });
-        // this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
-        this.knownModifications = this.annotationModifications.concat(this.knownModifications);
+        let annModIds = this.annotationModifications.map(function(m){
+            return m.id;
+        });
+        // filter out those that are also in annotationModifications
+        let filtered_knownMods = this.knownModifications.filter(function(kMod){
+            return annModIds.indexOf(kMod.id);
+        });
+        this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
 
         this.peakList = JSONdata.peaks || [];
 
