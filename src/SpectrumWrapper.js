@@ -316,8 +316,6 @@ export const SpectrumWrapper = Backbone.View.extend({
                         self.originalMatchRequest = $.extend(true, {}, json_request);
                         self.originalAnnotator = annotatorURL;
                     }
-
-
                 }
 
             }

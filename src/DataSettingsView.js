@@ -343,7 +343,7 @@ export const DataSettingsView = SettingsView.extend({
         if (this.displayModel.get("JSONdata") == null) return;
         let json_data_copy = $.extend({}, this.displayModel.get("JSONdata"));
         let json_request_copy = $.extend({}, this.displayModel.get("JSONrequest"));
-        this.knownModifications = $.extend(true, [], this.displayModel.knownModifications);
+        this.model.knownModifications = $.extend(true, [], this.displayModel.knownModifications);
         this.model.set({"JSONdata": json_data_copy, "JSONrequest": json_request_copy});
         this.model.trigger("change:JSONdata");
     },
