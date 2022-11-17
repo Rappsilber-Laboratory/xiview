@@ -123,7 +123,7 @@ export class CrosslinkKeyFragment extends KeyFragment{
                 .style("cursor", "default")
                 //.attr("text-anchor", "middle")
                 .text([... new Set(this.pep1_frags.map(s => s.stub))].join(","))
-                .attr("opacity", 1);
+                .attr("opacity", 0);
 
             if (pep1OnlyLoss) {
                 this.pep1Tail.attr("stroke", this.FragKey.model.get("peakColor"));
@@ -208,7 +208,7 @@ export class CrosslinkKeyFragment extends KeyFragment{
                 .style("cursor", "default")
                 .attr("text-anchor", "end")
                 .text([... new Set(this.pep2_frags.map(s => s.stub))].join(","))
-                .attr("opacity", 1);
+                .attr("opacity", 0);
 
             if (pep2OnlyLoss) {
                 this.pep2Tail.attr("stroke", this.FragKey.model.get("peakColor"));
