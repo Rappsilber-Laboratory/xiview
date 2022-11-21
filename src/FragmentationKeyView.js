@@ -156,7 +156,7 @@ export const FragmentationKeyView = Backbone.View.extend({
                     this.annotations[pepId][range[0].from - 1].y.push(fragment);
                 else if (range[0].to !== this.peptideStrs[pepId].length - 1) // C-terminal fragment
                     this.annotations[pepId][range[0].to].b.push(fragment);
-                else if (fragment.stub !== ""){ // peptide stub fragment
+                else if (fragment.stub !== "" && this.ccl_stub_combinations.length > 0){ // peptide stub fragment
                     let ccl_annotations_idx = -1;
                     // get the index into the ccl_annotations array
                     if (pepId === 0){
