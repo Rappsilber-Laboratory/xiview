@@ -736,15 +736,16 @@ export function views () {
     const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
     const colorCancelButton = document.getElementById("colorCancel");
     colorCancelButton.addEventListener("click", () => {
-        dialog.returnValue = "cancel";
+        dialog.interactorId = "cancel";
         dialog.close();
     });
     dialog.addEventListener("close", () => {
+        const iId = document.getElementById("colorDialog").interactorId;
         const checkedColor = document.querySelector('input[name="aColor"]:checked');
         if (!checkedColor){
             alert("No colour selected.");
-        } else if (dialog.returnValue != "cancel"){
-            compModel.setInteractorColor(dialog.returnValue, checkedColor.value);
+        } else if (iId !== "cancel"){
+            compModel.setInteractorColor(iId, checkedColor.value);
         }
     });
 
