@@ -5,13 +5,13 @@ export const loadSpectrum = function (match, randId) {
     const formatted_data = {};
 
     formatted_data.sequence1 = match.matchedPeptides[0].seq_mods;
-    formatted_data.mod_ids = match.matchedPeptides[0].mod_ids;
-    formatted_data.mod_pos = match.matchedPeptides[0].mod_pos;
+    formatted_data.mod_ids1 = match.matchedPeptides[0].mod_ids;
+    formatted_data.mod_pos1 = match.matchedPeptides[0].mod_pos;
     formatted_data.linkPos1 = match.linkPos1 - 1;
     if (match.matchedPeptides[1]) {
         formatted_data.sequence2 = match.matchedPeptides[1].seq_mods;
-        formatted_data.mod_ids = match.matchedPeptides[1].mod_ids;
-        formatted_data.mod_pos = match.matchedPeptides[1].mod_pos;
+        formatted_data.mod_ids2 = match.matchedPeptides[1].mod_ids;
+        formatted_data.mod_pos2 = match.matchedPeptides[1].mod_pos;
         formatted_data.linkPos2 = match.linkPos2 - 1;
     }
     // formatted_data.crossLinkerModMass = match.crosslinkerModMass();
