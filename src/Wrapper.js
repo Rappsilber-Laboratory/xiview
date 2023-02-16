@@ -75,8 +75,7 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         this.spectraWrapperDiv = spectrumPanelDiv
             .append("div")
             .attr("class", "xispec_spectra")
-            .attr("id", "xispec_spectra")
-        ;
+            .attr("id", "xispec_spectra");
 
         // create the initial spectrum
         this.spectra = [];
@@ -215,6 +214,19 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         let peptides = [];
         let linkSites = [];
         peptides[0] = this.arrayifyPeptide(data.sequence1);
+
+        if (data.mod_pos1 !== undefined) {
+            peptides[0]["modification_positions"] = data.mod_ids1;
+        }
+        if (data.mod_pos2 !== undefined) {
+            peptides[1]["modification_positions"] = data.mod_ids2;
+        }
+        if (data.mod_ids1 !== undefined) {
+            peptides[0]["modification_ids"] = data.mod_ids1;
+        }
+        if (data.mod_ids2 !== undefined) {
+            peptides[1]["modification_ids"] = data.mod_ids2;
+        }
 
         if (data.linkPos1 !== undefined) {
             linkSites[0] = {"id": 0, "peptideId": 0, "linkSite": data.linkPos1};
