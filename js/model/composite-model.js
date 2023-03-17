@@ -627,13 +627,12 @@ export class CompositeModel extends Backbone.Model {
 
     chooseInteractorColor(interactorId) {
         const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
-        dialog.returnValue = interactorId;
+        dialog.interactorId = interactorId;
         const chooseColorLabel = document.getElementById("chooseColorLabel");
         chooseColorLabel.innerHTML = "Select Colour for " + interactorId;
         dialog.showModal();
         const cancelChooseColorButton = document.getElementById("colorCancel");
         cancelChooseColorButton.focus();
-
     }
 
     setInteractorColor(interactorId, color) {
