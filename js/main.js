@@ -3,7 +3,6 @@ import "../css/common.css";
 import "../vendor/byrei-dyndiv_0.5.css";
 import "../css/style.css";
 import "../css/xiView.css";
-import "../css/multiple-select.css"; //? where is this used?
 
 import * as Spinner from "spin";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
