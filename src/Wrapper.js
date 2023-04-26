@@ -213,13 +213,24 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         let annotationRequest = {};
         let peptides = [];
         let linkSites = [];
+        // xi1annotator style modified peptides
         peptides[0] = this.arrayifyPeptide(data.sequence1);
-
+        if (data.sequence2 !== undefined) {
+            peptides[1] = this.arrayifyPeptide(data.sequence2);
+            linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
+        }
+        // xi2annotator style modified peptides
+        if (data.base_sequence1 !== undefined){
+            peptides[0]["base_sequence"] = data.base_sequence1;
+        }
+        if (data.base_sequence2 !== undefined){
+            peptides[1]["base_sequence"] = data.base_sequence2;
+        }
         if (data.mod_pos1 !== undefined) {
-            peptides[0]["modification_positions"] = data.mod_ids1;
+            peptides[0]["modification_positions"] = data.mod_pos1;
         }
         if (data.mod_pos2 !== undefined) {
-            peptides[1]["modification_positions"] = data.mod_ids2;
+            peptides[1]["modification_positions"] = data.mod_pos2;
         }
         if (data.mod_ids1 !== undefined) {
             peptides[0]["modification_ids"] = data.mod_ids1;
@@ -230,10 +241,6 @@ export const xiSPEC_wrapper = Backbone.View.extend({
 
         if (data.linkPos1 !== undefined) {
             linkSites[0] = {"id": 0, "peptideId": 0, "linkSite": data.linkPos1};
-        }
-        if (data.sequence2 !== undefined) {
-            peptides[1] = this.arrayifyPeptide(data.sequence2);
-            linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
         }
 
         let peaks = [];
