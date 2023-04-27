@@ -172,7 +172,7 @@
             }
         ?>
 
-        xiview.main();
+        xiview.main("../CLMS-model/php/spectrumMatches.php");
 
     //]]>
     </script>
