@@ -85,42 +85,36 @@ export class GroupColourModel extends ColourModel {
     }
 
     getValue(link) {
+        // choose value if link definitely belongs to just one group or set as undefined (-1)
+        let value = null;
         if (link.isAggregateLink) {
             for (let crosslink of link.getCrosslinks()) {
                 const filteredMatchesAndPepPositions = crosslink.filteredMatches_pp;
-
-                let value = null;
-                for (let fm_pp = filteredMatchesAndPepPositions.length; --fm_pp >= 0;) {
-                    const match = filteredMatchesAndPepPositions[fm_pp].match;
+                for (let fm_pp of filteredMatchesAndPepPositions) {
+                    const match = fm_pp.match;
                     const group = this.searchMap.get(match.searchId).group;
                     if (!value) {
                         value = group;
-                    } else if (value !== group) {
+                    } else if (value !== group) { //check if link uniquely belongs to one group
                         value = -1;    //undefined;
                         break;
                     }
                 }
-                // choose value if link definitely belongs to just one group or set as undefined (-1)
-                return value;
             }
         } else {
-            //check if link uniquely belongs to one group
             const filteredMatchesAndPepPositions = link.filteredMatches_pp;
-
-            let value = null;
             for (let fm_pp = filteredMatchesAndPepPositions.length; --fm_pp >= 0;) {
                 const match = filteredMatchesAndPepPositions[fm_pp].match;
                 const group = this.searchMap.get(match.searchId).group;
                 if (!value) {
                     value = group;
-                } else if (value !== group) {
+                } else if (value !== group) { //check if link uniquely belongs to one group
                     value = -1;    //undefined;
                     break;
                 }
             }
-            // choose value if link definitely belongs to just one group or set as undefined (-1)
-            return value;
         }
+        return value;
     }
 
     getColourByValue(val) {
