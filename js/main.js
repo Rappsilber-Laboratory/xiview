@@ -30,7 +30,7 @@ export const networkPageSpinner = new Spinner({
     radius: 45, // The radius of the inner circle
 });
 
-export function main() {
+export function main(dataPath) {
 
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -57,7 +57,6 @@ export function main() {
             window.loggedIn = json.loggedIn;
 
             models(json);
-
             const searches = window.compositeModelInst.get("clmsModel").get("searches");
             if (!window.compositeModelInst.get("clmsModel").isAggregatedData()) {
                 const id_file_names = [];
@@ -94,7 +93,10 @@ export function main() {
             allDataLoaded();
 
         } catch (err) {
+<<<<<<< HEAD
             //console.log ("ERR", err);
+=======
+>>>>>>> 5eb6ab6f3419cc58667944da29e67c3b03283c50
             displayError(function () {
                 return true;
             }, "An error has occurred. \t&#9785;<p class='errorReason'>"
@@ -115,7 +117,7 @@ export function main() {
         // var phpProps = _.pick (urlChunkMap, "upload", "sid", "auto",  "unval", "linears", "lowestScore", "highestScore", "decoys");
         // var newQueryString = d3.entries(phpProps).map(function (entry) { return entry.key+"="+entry.value; }).join("&");
         // console.log ("ucm", urlChunkMap, newQueryString);
-        const url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
+        const url = dataPath + window.location.search;
 
         d3.json(url, function (error, json) {
             if (!error) {
