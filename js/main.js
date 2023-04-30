@@ -93,10 +93,6 @@ export function main(dataPath) {
             allDataLoaded();
 
         } catch (err) {
-<<<<<<< HEAD
-            //console.log ("ERR", err);
-=======
->>>>>>> 5eb6ab6f3419cc58667944da29e67c3b03283c50
             displayError(function () {
                 return true;
             }, "An error has occurred. \t&#9785;<p class='errorReason'>"
