@@ -29,6 +29,7 @@ export class CompositeModel extends Backbone.Model {
             xinetShowLabels: true,
             xinetShowExpandedGroupLabels: true,
             xinetFixedSize: true,
+            xinetCropLabels: true,
             xinetThickLinks: true,
             xinetPpiSteps: [2, 3],
             groups: new Map(),

@@ -353,9 +353,11 @@ export function filterSequenceByResidueSet(seq, residueSet, all) {
 function makeMultiKeyProteinMap(clmsModel) {
     const protMap = d3.map();
     clmsModel.get("participants").forEach(function (value, key) {
-        protMap.set(value.accession, key);
-        protMap.set(value.name, key);
-        protMap.set(value.id, key);
+        if (!value.is_decoy) {
+            protMap.set(value.accession, key);
+            protMap.set(value.name, key);
+            protMap.set(value.id, key);
+        }
     });
     return protMap;
 }

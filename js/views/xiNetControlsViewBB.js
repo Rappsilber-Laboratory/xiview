@@ -25,6 +25,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             "click .saveLayoutButton": "saveLayout",
             "change .showLabels": "setShowLabels",
             "change .fixedSize": "setFixedSize",
+            "change .cropLabels": "setCropLabels",
             "change .thickLinks": "setThickLinksShown",
             "change .xinetPpiStep": "updatePpiSteps",
         });
@@ -146,6 +147,16 @@ export const xiNetControlsViewBB = Backbone.View.extend({
                 sectionEnd: true,
             },
             {
+                initialState: this.model.get("xinetCropLabels"),
+                class: "cropLabels",
+                label: "Crop at _",
+                id: "cropLabels",
+                tooltip: "Crop node labels at first underscore",
+                header: "Labels",
+                sectionBegin: true,
+                sectionEnd: true,
+            },
+            {
                 initialState: this.model.get("xinetShowExpandedGroupLabels"),
                 class: "showExpandedGroupLabels",
                 label: "Label Expanded Groups",
@@ -239,6 +250,10 @@ export const xiNetControlsViewBB = Backbone.View.extend({
 
     setFixedSize: function () {
         this.model.set("xinetFixedSize", d3.select("input.fixedSize").property("checked"));
+    },
+
+    setCropLabels: function () {
+        this.model.set("xinetCropLabels", d3.select("input.cropLabels").property("checked"));
     },
 
     setThickLinksShown: function () {

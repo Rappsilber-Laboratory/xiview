@@ -3,7 +3,6 @@ import "../css/common.css";
 import "../vendor/byrei-dyndiv_0.5.css";
 import "../css/style.css";
 import "../css/xiView.css";
-import "../css/multiple-select.css"; //? where is this used?
 
 import * as Spinner from "spin";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
@@ -37,58 +36,70 @@ export function main(dataPath) {
     networkPageSpinner.spin(spinTarget);
 
     const success = function (json) {
-        // try {
-        if (json.error) {
-            throw "Error from server";
-        }
-        if (json.times) {
-            json.times.io = (Date.now() / 1000) - json.times.endAbsolute;
-            json.times.overall = json.times.io + (json.times.endAbsolute - json.times.startAbsolute);
-        }
-        console.log("TIME t2", performance.now(), json.times);
-        //console.log (JSON.stringify(json));
-        //console.log (json);
+        try {
+            if (json.error) {
+                throw "Error from server";
+            }
+            if (json.times) {
+                json.times.io = (Date.now() / 1000) - json.times.endAbsolute;
+                json.times.overall = json.times.io + (json.times.endAbsolute - json.times.startAbsolute);
+            }
+            console.log("TIME t2", performance.now(), json.times);
+            //console.log (JSON.stringify(json));
+            //console.log (json);
 
-        if (json.warn) {
-            displayError(function () {
-                return true;
-            }, "Warning <p class='errorReason'>" + json.warn + "</p>");
-        }
+            if (json.warn) {
+                displayError(function () {
+                    return true;
+                }, "Warning <p class='errorReason'>" + json.warn + "</p>");
+            }
 
-        models(json);
-        const searches = window.compositeModelInst.get("clmsModel").get("searches");
-        document.title = Array.from(searches.keys()).join();
+            models(json);
+            const searches = window.compositeModelInst.get("clmsModel").get("searches");
+            if (!window.compositeModelInst.get("clmsModel").isAggregatedData()) {
+                const id_file_names = [];
+                searches.forEach(function (search) {
+                    id_file_names.push(search.id + ": "
+                        + (search.identification_file_name? search.identification_file_name : search.name));
+                });
+                document.title = id_file_names.join(", ");
+            } else {
+                document.title = Array.from(searches.keys()).join(", ");
+            }
 
-        window.split = Split(["#topDiv", "#bottomDiv"], //yuk, todo - get rid
-            {
-                direction: "vertical", sizes: [80, 20], minSize: [200, 0],
-                onDragEnd: function () {
-                    window.oldSplitterProportions = window.split.getSizes();
+            window.split = Split(["#topDiv", "#bottomDiv"], //yuk, todo - get rid
+                {
+                    direction: "vertical", sizes: [80, 20], minSize: [200, 0],
+                    onDragEnd: function () {
+                        window.oldSplitterProportions = window.split.getSizes();
+                    },
+                    gutterStyle: function () {
+                        return {"margin": "0 10px", "height": "10px"};
+                    }
                 },
-                gutterStyle: function () {
-                    return {"margin": "0 10px", "height": "10px"};
-                }
-            },
-        );
-        d3.select(".gutter").attr("title", "Drag to change space available to selection table");
+            );
+            d3.select(".gutter").attr("title", "Drag to change space available to selection table");
 
-        const returnedTimeStamp = new Date(json.timeStamp * 1000);
-        console.log(new Date(), returnedTimeStamp, new Date() - returnedTimeStamp);
-        if (Math.abs(new Date() - returnedTimeStamp) > 60 * 5 * 1000) { // if out by 5 minutes...
+            const returnedTimeStamp = new Date(json.timeStamp * 1000);
+            console.log(new Date(), returnedTimeStamp, new Date() - returnedTimeStamp);
+            if (Math.abs(new Date() - returnedTimeStamp) > 60 * 5 * 1000) { // if out by 5 minutes...
+                displayError(function () {
+                    return true;
+                }, "Returned search results were generated at " + returnedTimeStamp + " and are likely from cache.<p class='errorReason'>If you have revalidated results since, press CTRL + F5 to refresh.</p>");
+            }
+
+            views();
+            allDataLoaded();
+
+        } catch (err) {
             displayError(function () {
                 return true;
-            }, "Returned search results were generated at " + returnedTimeStamp + " and are likely from cache.<p class='errorReason'>If you have revalidated results since, press CTRL + F5 to refresh.</p>");
+            }, "An error has occurred. \t&#9785;<p class='errorReason'>"
+                + (json.error ? json.error : err.stack)
+                + "</p>");
+            console.error("Error", err);
+            networkPageSpinner.stop();
         }
-
-        views();
-        allDataLoaded();
-
-        //   } catch (err) {
-        //     //console.log ("ERR", err);
-        // 	displayError (function() { return true; }, "An error has occurred. \t&#9785;<p class='errorReason'>"
-        //         + (json.error? json.error : err.stack)
-        //         +"</p>");
-        // }
     };
 
 

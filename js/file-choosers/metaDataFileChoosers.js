@@ -150,7 +150,7 @@ export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserB
         const myDefaults = {
             buttonText: "Select User-Defined Annotations CSV File",
             loadedEventName: "userAnnotationsUpdated",
-            parseMsgTemplate: "Parsed <%= attrCount %> Annotation Types across <%= itemCount %> Annotations",
+            parseMsgTemplate: "Parsed <%= attrCount %> Annotation Types across <%= itemCount %> Annotations, these have been added to the 'ANNOTATIONS' menu and can be enabled there.",
             docUrl: "../xidocs/html/import/userannotations.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
