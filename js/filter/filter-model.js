@@ -477,7 +477,7 @@ export class FilterModel extends Backbone.Model {
     // If activated, this only passes matches whose search ids belong to particular groups
     groupFilter(match) {
         if (this.possibleSearchGroups.length > 1) {
-            const matchGroup = this.precalcedSearchToGroupMap.get(match.searchId);
+            const matchGroup = this.precalcedSearchToGroupMap.get(match.resultSetId);
             return this.precalcedSearchGroupsSet.has(matchGroup);
         }
         return true;
@@ -487,9 +487,9 @@ export class FilterModel extends Backbone.Model {
     groupFilter2(matchArr) {
         if (matchArr.length > 1 && this.possibleSearchGroups.length > 1 && !this.get("multipleGroup")) {
             const smap = this.precalcedSearchToGroupMap;
-            const firstMatchGroup = smap.get(matchArr[0].match.searchId);
+            const firstMatchGroup = smap.get(matchArr[0].match.resultSetId);
             return matchArr.every(function (match) {
-                return smap.get(match.match.searchId) === firstMatchGroup;
+                return smap.get(match.match.resultSetId) === firstMatchGroup;
             }, this);
         }
         return true;
