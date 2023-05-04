@@ -1,6 +1,6 @@
 import d3 from "d3";
 
-export const loadSpectrum = function (match, randId) {
+export const loadSpectrum = function (match) {
 
     const formatted_data = {};
 
@@ -21,7 +21,7 @@ export const loadSpectrum = function (match, randId) {
     formatted_data.precursorCharge = match.precursorCharge;
     // formatted_data.fragmentTolerance = match.fragmentTolerance();
 
-    formatted_data.config = window.compositeModelInst.get("clmsModel").get("searches").get(match.searchId).config;
+    formatted_data.config = window.compositeModelInst.get("clmsModel").get("searches").get(match.datasetId).s_config;
     formatted_data.crosslinkerID = match.crosslinker_id;
     // formatted_data.customConfig = search.customsettings.split("\n");
 

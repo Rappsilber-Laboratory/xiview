@@ -933,8 +933,8 @@ export function viewsEssential (options) {
     // used to transport one Match between views
     window.xiSPEC.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
-            const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
-            loadSpectrum(match, randId, this.model);
+            //const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
+            loadSpectrum(match);//, randId, this.model);
         } else {
             // window.xiSPEC.clear();
         }
