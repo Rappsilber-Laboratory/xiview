@@ -122,7 +122,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return window.compositeModelInst.get("clmsModel").get("autoValidatedPresent");
             },
             validated: function () {
-                return true;
+                return false;
             } //CLMS.model.manualValidatedFound; },
         };
 
@@ -243,6 +243,9 @@ export const SelectionTableViewBB = Backbone.View.extend({
             modificationCount: function (d) {
                 return d.modificationCount();
             },
+            scanNumber: function (d) {
+                return d.scanNumber;
+            }
         };
 
         this.page = 1;
