@@ -572,7 +572,9 @@ export const SelectionTableViewBB = Backbone.View.extend({
 
         // Within each tbody section, match table rows up to matches within each crosslink
         const tjoin = xlinkTBodyJoin.selectAll("TR.matchRow").data(function (d, i) {
-            let md = d.matches; //self.getMatches (d.link);
+            let md = d.matches.sort(function (a, b) {
+                return b.score() - a.score();
+            }); //self.getMatches (d.link);
             // paging by matches means we may begin part way through a link's matches and end partway through a link's matches
             if (i === 0 || i === selectedLinkArray.length - 1) {
                 md = md.slice(
