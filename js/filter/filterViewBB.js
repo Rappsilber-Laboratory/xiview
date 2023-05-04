@@ -82,21 +82,12 @@ export const FilterViewBB = Backbone.View.extend({
                     inequality: "&ge;",
                 },
                 {
-                    label: "A",
-                    id: "A"
+                    label: "pass",
+                    id: "pass"
                 },
                 {
-                    label: "B",
-                    id: "B"
-                },
-                {
-                    label: "C",
-                    id: "C"
-                },
-                {
-                    label: "Auto",
-                    id: "AUTO",
-                    tooltip: "Show autovalidated matches"
+                    label: "fail",
+                    id: "fail"
                 },
                 {
                     label: "Unval.",
@@ -360,10 +351,7 @@ export const FilterViewBB = Backbone.View.extend({
 
         addFilterGroup.call(this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
 
-        addFilterGroup.call(this, {
-            id: "validationStatus",
-            groupName: "Validation"
-        }, ["A", "B", "C", "AUTO", "unval"]);
+        addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
 
         addFilterGroup.call(this, {
             id: "targetDecoy",
