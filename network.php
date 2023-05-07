@@ -1,3 +1,7 @@
+<?php
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -20,6 +24,14 @@
 
         <title>network</title>
     </head>
+    <style>
+
+/* temp hack to remove .ssl export */
+#expDropdownPlaceholder > div > ul > li:nth-child(8){
+display: none;
+}
+
+    </style>
 
     <body>
         <!-- Main -->
@@ -161,10 +173,14 @@
 
     <script>
     //<![CDATA[
-    //     window.xiSpecBaseDir = "/spectrum/"; // you may need to edit this depending on where xiView_container is in web server folder
-    window.xiAnnotRoot = "/xiAnnotator/";
-    window.peakListUrl = "/get_peaklist";
-    xiview.main("XIVIEW.ORG", "/get_data");
+
+        <?php
+            if (file_exists('../xiSpecConfig.php')) {
+                include('../xiSpecConfig.php');
+            }
+        ?>
+
+        xiview.main("XIVIEW.ORG", "../CLMS-model/php/spectrumMatches.php");
 
     //]]>
     </script>
