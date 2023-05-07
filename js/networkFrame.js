@@ -864,7 +864,7 @@ export function viewsEssential (options) {
         }
     })
         .listenTo(window.vent, "individualMatchSelected", function (match) {
-            if (match && compModel.get("serverFlavour") === "XIVIEW.ORG") {
+            if (match && (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1") {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match
@@ -933,7 +933,7 @@ export function viewsEssential (options) {
     // used to transport one Match between views
     window.xiSPEC.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
-            if (compModel.get("serverFlavour") === "XIVIEW.ORG") {
+            if (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1") {
                 const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
                 loadSpectrum(match, randId);
             } else {
