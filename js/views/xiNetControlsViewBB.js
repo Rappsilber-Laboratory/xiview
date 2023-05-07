@@ -32,42 +32,66 @@ export const xiNetControlsViewBB = Backbone.View.extend({
     },
 
     saveLayout: function () {
-        // const xmlhttp = new XMLHttpRequest();
-        // const url = "./php/isLoggedIn.php";
-        // xmlhttp.open("POST", url, true);
-        // //Send the proper header information along with the request
-        // xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        // xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-        //     if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-        //         if (xmlhttp.responseText === "false") {
-        //             alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
-        //             window.open("../userGUI/userLogin.html", "_blank");
-        //         } else {
-
-        const callback = function (layoutJson) {
+        if (window.compositeModelInst.get("searchFlavour") === "XIVIEW.ORG") {
             const xmlhttp = new XMLHttpRequest();
-            const url = "/save_layout"; // todo - fix
+            const url = "./php/isLoggedIn.php";
             xmlhttp.open("POST", url, true);
             //Send the proper header information along with the request
             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    console.log("Saving layout result: " + xmlhttp.responseText);
-                    alert(xmlhttp.responseText);
+                    if (xmlhttp.responseText === "false") {
+                        alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
+                        window.open("../userGUI/userLogin.html", "_blank");
+                    } else if (xmlhttp.responseText === "no") {
+                        alert("Didn't save - not your search.");
+                    } else {
+                        const callback = function (layoutJson) {
+                            const xmlhttp = new XMLHttpRequest();
+                            const url = "./php/saveLayout.php";
+                            xmlhttp.open("POST", url, true);
+                            //Send the proper header information along with the request
+                            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                            xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+                                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                                    console.log("Saved layout " + xmlhttp.responseText, true);
+                                    alert("Layout Saved");
+                                }
+                            };
+                            const sid = window.compositeModelInst.get("clmsModel").get("sid");
+                            const params = "sid=" + sid +
+                                "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
+                                "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
+                            xmlhttp.send(params);
+                        };
+
+                        window.vent.trigger("xinetSaveLayout", callback);
+                    }
                 }
             };
-            const sid = window.compositeModelInst.get("clmsModel").get("sid");
-            const params = "uuid=" + sid +
-                "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
-                "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
-            xmlhttp.send(params);
-        };
+            xmlhttp.send();
+        } else if (window.compositeModelInst.get("searchFlavour") === "XI2") {
+            const callback = function (layoutJson) {
+                const xmlhttp = new XMLHttpRequest();
+                const url = "/save_layout"; // todo - fix
+                xmlhttp.open("POST", url, true);
+                //Send the proper header information along with the request
+                xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+                    if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                        console.log("Saving layout result: " + xmlhttp.responseText);
+                        alert(xmlhttp.responseText);
+                    }
+                };
+                const sid = window.compositeModelInst.get("clmsModel").get("sid");
+                const params = "sid=" + sid +
+                    "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
+                    "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
+                xmlhttp.send(params);
+            };
 
-        window.vent.trigger("xinetSaveLayout", callback);
-        //         }
-        //     }
-        // };
-        // xmlhttp.send();
+            window.vent.trigger("xinetSaveLayout", callback);
+        }
     },
 
     initialize: function (viewOptions) {
@@ -89,6 +113,12 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         mainDivSel.html(
             buttonHtml
         );
+
+        //!XI2
+        if (window.loggedIn == false) {
+            const saveButtonSel = d3.select(".saveLayoutButton");
+            saveButtonSel.style("display", "none");
+        }
 
         if (this.model.get("clmsModel").get("xiNETLayout")) {
             d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
@@ -294,7 +324,10 @@ const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
         xiNetLayoutListViewBB.__super__.setVis.call(self, show);
         if (show) {
             const xmlhttp = new XMLHttpRequest();
-            const url = "/load_layout";
+            let url = "./php/loadLayout.php";
+            if (window.compositeModelInst.get("serverFlavour)" === "XI2")){
+                url = "/load_layout";
+            }
             xmlhttp.open("POST", url, true);
             //Send the proper header information along with the request
             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -311,7 +344,7 @@ const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
                 // xiNetLayoutListViewBB.__super__.setVis.call(self, show);
             };
             const sid = window.compositeModelInst.get("clmsModel").get("sid");
-            const params = "uuid=" + sid;
+            const params = "sid=" + sid;
             xmlhttp.send(params);
             return this;
         }

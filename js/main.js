@@ -23,6 +23,7 @@ import Split from "split.js";
 import {testCallback} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
 import {repopulateNGL} from "./views/ngl/RepopulateNGL";
+import * as assert from "assert";
 
 export const networkPageSpinner = new Spinner({
     length: 38, // The length of each line
@@ -30,7 +31,10 @@ export const networkPageSpinner = new Spinner({
     radius: 45, // The radius of the inner circle
 });
 
-export function main(dataPath) {
+export function main(serverFlavour, dataPath, loadGoTerms=true) {
+    console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "loadGoTerms:", loadGoTerms);
+    assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
+        "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
 
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -54,7 +58,10 @@ export function main(dataPath) {
                 }, "Warning <p class='errorReason'>" + json.warn + "</p>");
             }
 
-            models(json);
+            // !XI2
+            window.loggedIn = json.loggedIn;
+
+            models(serverFlavour, json);
             const searches = window.compositeModelInst.get("clmsModel").get("searches");
             if (!window.compositeModelInst.get("clmsModel").isAggregatedData()) {
                 const id_file_names = [];

@@ -92,7 +92,7 @@ export class GroupColourModel extends ColourModel {
                 const filteredMatchesAndPepPositions = crosslink.filteredMatches_pp;
                 for (let fm_pp of filteredMatchesAndPepPositions) {
                     const match = fm_pp.match;
-                    const group = this.searchMap.get(match.resultSetId).group;
+                    const group = this.searchMap.get(match.datasetId).group;
                     if (!value) {
                         value = group;
                     } else if (value !== group) { //check if link uniquely belongs to one group
@@ -105,7 +105,7 @@ export class GroupColourModel extends ColourModel {
             const filteredMatchesAndPepPositions = link.filteredMatches_pp;
             for (let fm_pp = filteredMatchesAndPepPositions.length; --fm_pp >= 0;) {
                 const match = filteredMatchesAndPepPositions[fm_pp].match;
-                const group = this.searchMap.get(match.resultSetId).group;
+                const group = this.searchMap.get(match.datasetId).group;
                 if (!value) {
                     value = group;
                 } else if (value !== group) { //check if link uniquely belongs to one group

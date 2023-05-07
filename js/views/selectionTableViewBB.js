@@ -61,7 +61,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         const tableDataPropOrder = [
             "id", "ambiguity", "protein1", /*"pos1",*/ "pepPos1", "pepSeq1raw", "linkPos1",
             "protein2", /*"pos2",*/ "pepPos2", "pepSeq2raw", "linkPos2", "score",
-            "autovalidated", "validated", "homom", "group", "searchId", "runName", "scanNumber",
+            "validated", "homom", "group", "searchId", "runName", "scanNumber",
             "precursorCharge", "expMZ", "expMass", "calcMZ", "calcMass", "massError",
             "precursorIntensity", "elutionStart", "elutionEnd", "expMissedCleavages",
             "searchMissedCleavages", "missingPeaks", "modificationCount",
@@ -81,7 +81,6 @@ export const SelectionTableViewBB = Backbone.View.extend({
             pepSeq2raw: "Pep 2 Sequence",
             linkPos2: "Link Pos",
             score: "Score",
-            autovalidated: "Auto",
             validated: "Manual",
             homom: "Homom",
             group: "Group",
@@ -118,12 +117,24 @@ export const SelectionTableViewBB = Backbone.View.extend({
             ambiguity: function () {
                 return false;
             },
-            autovalidated: function () {
-                return window.compositeModelInst.get("clmsModel").get("autoValidatedPresent");
-            },
-            validated: function () {
+            "validated": function() {
                 return false;
-            } //CLMS.model.manualValidatedFound; },
+            }, //CLMS.model.manualValidatedFound; },
+            "precursorIntensity": function() {
+                return false;
+            },
+            "elutionStart": function() {
+                return true;
+            },
+            "elutionEnd": function() {
+                return false;
+            },
+            "expMissedCleavages": function() {
+                return false;
+            },
+            "searchMissedCleavages": function() {
+                return false;
+            }
         };
 
         this.filteredProps = tableDataPropOrder.filter(

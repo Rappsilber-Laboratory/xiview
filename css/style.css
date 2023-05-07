@@ -547,10 +547,6 @@ A.btn {
 	border-top: 1px solid black;
 }
 
-.sectionTable table td:first-child, .sectionTable table th {
-    /*text-transform: capitalize;*/
-}
-
 .sectionTable tbody tr > td {
     border-top: 1px solid #ccc;
     border-bottom: 1px solid transparent;

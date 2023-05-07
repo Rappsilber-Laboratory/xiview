@@ -307,7 +307,7 @@ export const FilterViewBB = Backbone.View.extend({
                         },
                     });
                     d3.select(cbox.$el[0])
-                        .attr("title", "Show Cross-Links of Unknown " + config.label)
+                        .attr("title", "Show Crosslinks of Unknown " + config.label)
                         .select("label").classed("btn", false);
                 }
 
@@ -715,7 +715,7 @@ export const FilterSummaryViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function () {
-        const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Cross-Links";
+        const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Crosslinks";
         this.targetTemplate = _.template(targetTemplateString);
         this.allTemplate = _.template(targetTemplateString + " ( + <%= decoysTD %> TD; <%= decoysDD %> DD Decoys)");
 

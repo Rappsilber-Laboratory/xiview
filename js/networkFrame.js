@@ -55,7 +55,7 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
-import {loadSpectrum} from "./loadSpectrum";
+import {loadSpectrum} from "../../CLMS-model/src/loadSpectrum";
 import {networkPageSpinner} from "./main";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
@@ -259,13 +259,13 @@ export function blosumLoading (options) {
     window.blosumCollInst.fetch(options);
 }
 
-export function models (options) {
+export function models (serverFlavour, options) {
 
     // define alignment model and listeners first, so they're ready to pick up events from other models
     const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
-    modelsEssential(options);
+    modelsEssential(serverFlavour, options);
     alignmentCollectionInst.addNewProteins(Array.from(window.compositeModelInst.get("clmsModel").get("participants").values()));
     // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
@@ -331,7 +331,7 @@ export function models (options) {
 }
 
 //only inits stuff required by validation page
-export function modelsEssential (options) {
+export function modelsEssential (serverFlavour, options) {
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
     const hasNoMatches = _.isEmpty(options.matches);
@@ -345,7 +345,7 @@ export function modelsEssential (options) {
     );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = new SearchResultsModel();
+    const clmsModelInst = new SearchResultsModel(serverFlavour);
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -438,6 +438,7 @@ export function modelsEssential (options) {
         tooltipModel: tooltipModelInst,
         alignColl: options.alignmentCollectionInst,
         minigramModels: {distance: minigramModels[1], score: minigramModels[0]},
+        serverFlavour: serverFlavour,
     });
 
     //moving this to end of allDataLoaded - think validation page needs this, TODO, check
@@ -863,46 +864,45 @@ export function viewsEssential (options) {
         }
     })
         .listenTo(window.vent, "individualMatchSelected", function (match) {
-            d3.select("#alternatives").style("display", "none");
-            // if (match) {
-            //     this.lastRequestedID = match.id; // async catch
-            //     //console.log ("MATCH ID", this, match.id);
-            //     this.primaryMatch = match; // the 'dynamic_rank = true' match
-            //     const url = "../CLMS-model/php/spectrumMatches.php?sid=" + //todo - fix
-            //         this.model.get("clmsModel").get("sid") +
-            //         "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
-            //     const self = this;
-            //     d3.json(url, function (error, json) {
-            //         if (error) {
-            //             console.log("error", error, "for", url, arguments);
-            //         } else {
-            //             // this works if first item in array has the same id, might in future send matchid to php to return for reliability
-            //             const returnedMatchID = json.matchid;
-            //             if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a string and self.lastRequestedID is a number
-            //                 //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-            //                 const altModel = new SearchResultsModel();
-            //                 altModel.parseJSON(json);
-            //                 const allCrossLinks = Array.from(altModel.get("crosslinks").values());
-            //                 // empty selection first
-            //                 // (important or it will crash coz selection contains links to proteins not in clms model)
-            //                 self.alternativesModel
-            //                     .set("selection", [])
-            //                     .set("clmsModel", altModel)
-            //                     .applyFilter()
-            //                     .set("lastSelectedMatch", {
-            //                         match: match,
-            //                         directSelection: true
-            //                     });
-            //                 d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
-            //                 //self.alternativesModel.set("selection", allCrossLinks);
-            //                 self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
-            //                 window.vent.trigger("resizeSpectrumSubViews", true);
-            //             }
-            //         }
-            //     });
-            // } else {
-            //     //~ //this.model.clear();
-            // }
+            if (match && compModel.get("serverFlavour") === "XIVIEW.ORG") {
+                this.lastRequestedID = match.id; // async catch
+                //console.log ("MATCH ID", this, match.id);
+                this.primaryMatch = match; // the 'dynamic_rank = true' match
+                const url = "../CLMS-model/php/spectrumMatches.php?upload=" +
+                    this.model.get("clmsModel").get("sid") +
+                    "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
+                const self = this;
+                d3.json(url, function (error, json) {
+                    if (error) {
+                        console.log("error", error, "for", url, arguments);
+                    } else {
+                        // this works if first item in array has the same id, might in future send matchid to php to return for reliability
+                        const returnedMatchID = json.matchid;
+                        if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
+                            //console.log (":-)", json, self.lastRequestedID, thisSpecID);
+                            const altModel = new SearchResultsModel();
+                            altModel.parseJSON(json);
+                            const allCrossLinks = Array.from(altModel.get("crosslinks").values());
+                            // empty selection first
+                            // (important or it will crash coz selection contains links to proteins not in clms model)
+                            self.alternativesModel
+                                .set("selection", [])
+                                .set("clmsModel", altModel)
+                                .applyFilter()
+                                .set("lastSelectedMatch", {
+                                    match: match,
+                                    directSelection: true
+                                });
+                            d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
+                            //self.alternativesModel.set("selection", allCrossLinks);
+                            self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
+                            window.vent.trigger("resizeSpectrumSubViews", true);
+                        }
+                    }
+                });
+            } else {
+                //~ //this.model.clear();
+            }
         });
 
     const xiSPEC_options = {
@@ -910,7 +910,7 @@ export function viewsEssential (options) {
         baseDir: window.xiSpecBaseDir,
         xiAnnotatorBaseURL: window.xiAnnotRoot,
         knownModificationsURL: false, //window.xiAnnotRoot + "annotate/knownModifications",
-        showCustomConfig: false,
+        showCustomConfig: compModel.get("serverFlavour") !== "XI2",
         showQualityControl: "min",
         colorScheme: "PRGn",
         labelFragmentCharge: false,
@@ -933,8 +933,12 @@ export function viewsEssential (options) {
     // used to transport one Match between views
     window.xiSPEC.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
-            //const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
-            loadSpectrum(match);//, randId, this.model);
+            if (compModel.get("serverFlavour") === "XIVIEW.ORG") {
+                const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
+                loadSpectrum(match, randId);
+            } else {
+                loadSpectrum(match);
+            }
         } else {
             // window.xiSPEC.clear();
         }
