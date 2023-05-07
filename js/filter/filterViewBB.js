@@ -90,6 +90,23 @@ export const FilterViewBB = Backbone.View.extend({
                     id: "fail"
                 },
                 {
+                    label: "A",
+                    id: "A"
+                },
+                {
+                    label: "B",
+                    id: "B"
+                },
+                {
+                    label: "C",
+                    id: "C"
+                },
+                {
+                    label: "Auto",
+                    id: "AUTO",
+                    tooltip: "Show autovalidated matches"
+                },
+                {
                     label: "Unval.",
                     id: "unval",
                     tooltip: "Show unvalidated matches"
@@ -350,9 +367,14 @@ export const FilterViewBB = Backbone.View.extend({
         groupIDs.push("multipleGroup");
 
         addFilterGroup.call(this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
-
-        addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
-
+        if (window.compositeModelInst.get("serverFlavour") !== "XI1") {
+            addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
+        } else {
+            addFilterGroup.call(this, {
+                id: "validationStatus",
+                groupName: "Validation"
+            }, ["A", "B", "C", "AUTO", "unval"]);
+        }
         addFilterGroup.call(this, {
             id: "targetDecoy",
             groupName: "TD"
@@ -373,9 +395,12 @@ export const FilterViewBB = Backbone.View.extend({
             groupName: "Product"
         }, ["linears", "monolinks", "crosslinks"]);
 
-        addFilterGroup.call(this, {groupName: "Crosslink", id:"crosslinkGroup"}, ["betweenLinks", "selfLinks"]);
+        addFilterGroup.call(this, {groupName: "Crosslink", id: "crosslinkGroup"}, ["betweenLinks", "selfLinks"]);
 
-        addFilterGroup.call(this, {id:"self", groupName: "Self Links"}, ["aaApart", "notHomomult", "homomultimericLinks"]);
+        addFilterGroup.call(this, {
+            id: "self",
+            groupName: "Self Links"
+        }, ["aaApart", "notHomomult", "homomultimericLinks"]);
 
         initMinigramFilterGroup.call(this, {
             attr: "distanceCutoff",
@@ -536,7 +561,7 @@ export const FilterViewBB = Backbone.View.extend({
         if (id == "crosslinks") {
             d3.select("#crosslinkGroup").style("display", target.checked ? "flex" : "none");
             const selfLinksShown = this.model.get("selfLinks");
-            d3.select("#self").style("display", target.checked && selfLinksShown? "flex" : "none");
+            d3.select("#self").style("display", target.checked && selfLinksShown ? "flex" : "none");
         }
         if (id == "selfLinks") {
             d3.select("#self").style("display", target.checked ? "flex" : "none");

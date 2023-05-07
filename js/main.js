@@ -33,7 +33,7 @@ export const networkPageSpinner = new Spinner({
 
 export function main(serverFlavour, dataPath, loadGoTerms=true) {
     console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "loadGoTerms:", loadGoTerms);
-    assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
+    assert((serverFlavour == "XI1") || (serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
         "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
 
     const spinTarget = d3.select("#main").node();
@@ -58,7 +58,7 @@ export function main(serverFlavour, dataPath, loadGoTerms=true) {
                 }, "Warning <p class='errorReason'>" + json.warn + "</p>");
             }
 
-            // !XI2
+            // !XI2 !X1
             window.loggedIn = json.loggedIn;
 
             models(serverFlavour, json);
@@ -250,7 +250,7 @@ function testSetupNew(cbfunc) {
         });
 
         blosumLoading({url: "../R/blosums.json"});
-        models(options);
+        models("XI1", options);
         pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
     });
 }

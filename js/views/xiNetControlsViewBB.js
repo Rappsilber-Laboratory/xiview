@@ -114,7 +114,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             buttonHtml
         );
 
-        //!XI2
+        //!XI2 !XI1
         if (window.loggedIn == false) {
             const saveButtonSel = d3.select(".saveLayoutButton");
             saveButtonSel.style("display", "none");
