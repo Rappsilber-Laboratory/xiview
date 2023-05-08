@@ -864,7 +864,7 @@ export function viewsEssential (options) {
         }
     })
         .listenTo(window.vent, "individualMatchSelected", function (match) {
-            if (match && (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1") {
+            if (match && (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1")) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match

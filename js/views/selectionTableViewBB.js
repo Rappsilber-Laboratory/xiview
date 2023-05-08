@@ -34,7 +34,6 @@ export const SelectionTableViewBB = Backbone.View.extend({
                     window.split.setSizes(window.oldSplitterProportions);
                 } else {
                     d3.select(".gutter").style("display", "none");
-                    window.oldSplitterProportions = window.split.getSizes();
                     window.split.setSizes([100, 0]);
                 }
             }
@@ -122,7 +121,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return window.compositeModelInst.get("clmsModel").get("autoValidatedPresent");
             },
             "validated": function() {
-                return false; !XI2
+                return !window.compositeModelInst.get("serverFlavour") === "XI2";
             }, //CLMS.model.manualValidatedFound; },
             "precursorIntensity": function() {
                 return false;
