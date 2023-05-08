@@ -180,7 +180,7 @@ display: none;
             }
         ?>
 
-        xiview.main("XIVIEW.ORG", "../CLMS-model/php/spectrumMatches.php");
+        xiview.main("XI1", "../CLMS-model/php/spectrumMatches.php");
 
     //]]>
     </script>
