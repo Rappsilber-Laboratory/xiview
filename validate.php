@@ -55,12 +55,12 @@ header('Content-type: text/html; charset=utf-8');
         <script>
         //<![CDATA[
 
-            xiview.validationPage();
             <?php
                 if (file_exists('../xiSpecConfig.php')) {
                     include('../xiSpecConfig.php');
                 }
             ?>
+            xiview.validationPage("XI1", "../CLMS-model/php/spectrumMatches.php");
 
         //]]>
         </script>
