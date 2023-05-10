@@ -32,7 +32,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
     },
 
     saveLayout: function () {
-        if (window.compositeModelInst.get("searchFlavour") === "XIVIEW.ORG") {
+        if (window.compositeModelInst.get("serverFlavour") === "XIVIEW.ORG" || window.compositeModelInst.get("serverFlavour") === "XI1") {
             const xmlhttp = new XMLHttpRequest();
             const url = "./php/isLoggedIn.php";
             xmlhttp.open("POST", url, true);
@@ -70,7 +70,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
                 }
             };
             xmlhttp.send();
-        } else if (window.compositeModelInst.get("searchFlavour") === "XI2") {
+        } else if (window.compositeModelInst.get("serverFlavour") === "XI2") {
             const callback = function (layoutJson) {
                 const xmlhttp = new XMLHttpRequest();
                 const url = "/save_layout"; // todo - fix

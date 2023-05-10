@@ -22,41 +22,6 @@ if (isset($_SESSION['session_name'])) {
     include('../../connectionString.php');
     $dbconn = pg_connect($connectionString)
             or die('Could not connect: ' . pg_last_error());
-
-    $uploadId = $_POST["sid"];
-    $pattern = '/[^0-9,\-_]/';
-    if (preg_match($pattern, $uploadId)) {
-        exit();
-    }
-    $user = $_SESSION['session_name'];
-
-    $id_rands = explode(",", $uploadId);
-    $searchId_randomId = [];
-    for ($i = 0; $i < count($id_rands); $i++) {
-        $dashSeperated = explode("-", $id_rands[$i]);
-        $randId = implode('-', array_slice($dashSeperated, 1, 4));
-        $id = $dashSeperated[0];
-//        echo "hello ".$user." ".$id;
-
-
-        $searchDataQuery = "SELECT user_name, random_id FROM uploads inner JOIN users on (uploads.user_id = users.id) where uploads.id =  '".$id."';";
-
-//        echo $searchDataQuery;
-
-
-        $res = pg_query($searchDataQuery)
-        or die('Query failed: ' . pg_last_error());
-        $line = pg_fetch_array($res, null, PGSQL_ASSOC);
-
-        if ($line["random_id"] != $randId || $line["user_name"] != $user) {
-            echo "no";
-            exit();
-        }
-
-    }
-
-
-
     // Prepare a query for execution
     pg_prepare($dbconn, "my_query", 'INSERT INTO layouts (search_id, user_id, layout, description) VALUES ($1, -1, $2, $3)');
     // Execute the prepared query

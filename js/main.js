@@ -34,7 +34,7 @@ export const networkPageSpinner = new Spinner({
 export function main(serverFlavour, dataPath, loadGoTerms=true) {
     console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "loadGoTerms:", loadGoTerms);
     assert((serverFlavour == "XI1") || (serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
-        "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
+        "serverFlavour must be one of XIVIEW.ORG, XI1, XI2 or PRIDE");
 
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
