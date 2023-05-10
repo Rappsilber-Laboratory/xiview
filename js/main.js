@@ -62,6 +62,7 @@ export function main(serverFlavour, dataPath, loadGoTerms=true) {
             window.loggedIn = json.loggedIn;
 
             models(serverFlavour, json);
+            window.compositeModelInst.set("dataPath", dataPath);
             const searches = window.compositeModelInst.get("clmsModel").get("searches");
             if (!window.compositeModelInst.get("clmsModel").isAggregatedData()) {
                 const id_file_names = [];
@@ -154,17 +155,18 @@ export function main(serverFlavour, dataPath, loadGoTerms=true) {
     blosumLoading();
 }
 
-export function validationPage() {
+export function validationPage(serverFlavour, dataPath, loadGoTerms=false) {
 
     const spinner = new Spinner({scale: 5}).spin(d3.select("#topDiv").node());
 
     const success = function (text) {
         const json = JSON.parse(text);
-        modelsEssential(json);
-
+        modelsEssential(serverFlavour, json);
+        window.compositeModelInst.set("serverFlavour", serverFlavour);
+        window.compositeModelInst.set("dataPath", dataPath);
         const searches = window.compositeModelInst.get("clmsModel").get("searches");
         document.title = "Validate " + Array.from(searches.keys()).join();
-        Split(["#topDiv", "#bottomDiv"], {
+        window.split = Split(["#topDiv", "#bottomDiv"], {
             direction: "vertical",
             sizes: [60, 40], minSize: [200, 10],
             onDragEnd: function () {
@@ -202,7 +204,7 @@ export function validationPage() {
 
     };
 
-    const url = "../CLMS-model/php/spectrumMatches.php" + window.location.search;
+    const url = dataPath + window.location.search;
 
 
     d3.text(url, function (error, text) {
