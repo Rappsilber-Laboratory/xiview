@@ -502,7 +502,7 @@ export class FilterModel extends Backbone.Model {
             const smap = this.precalcedSearchToGroupMap;
             const firstMatchGroup = smap.get(matchArr[0].match.datasetId);
             return matchArr.every(function (match) {
-                return smap.get(match.match.datasetetId) === firstMatchGroup;
+                return smap.get(match.match.datasetId) === firstMatchGroup;
             }, this);
         }
         return true;
