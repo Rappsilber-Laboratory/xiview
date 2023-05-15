@@ -302,8 +302,10 @@ export const DataSettingsView = SettingsView.extend({
     render: function () {
         if (!this.isVisible) return;
 
-        this.pepInputView.render();
+        // make sure the knownModifications are in sync
+        this.model.knownModifications = $.extend(true, [], this.displayModel.knownModifications);
 
+        this.pepInputView.render();
         this.renderModTable();
         this.renderLossTable();
 
