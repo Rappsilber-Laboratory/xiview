@@ -62,6 +62,7 @@ var data = {
       linkPos2: linkPos2,                       // crosslinked residue on peptide 2 (for crosslinked peptide)
       crossLinkerModMass: crossLinkerModMass    // modification mass of the crosslinker (for crosslinked peptide)
       modifications: modifications,             // modification definitions
+      losses: losses,                           // neutral-loss definitions
       precursorMz: precursorMz,                 // m/z of the precursor
       precursorCharge: precursorCharge,         // charge state of the precursor
       fragmentTolerance: fragmentTolerance;,    // tolerance for fragment annotation in the MS2 scan
@@ -84,7 +85,12 @@ modifications: Array of modification definitions with id, mass and amino acid sp
   {id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['K', 'H', 'C', 'D', 'E', 'S', 'T', 'Y']},
 ];
 ```
-
+losses: Array of loss definitions with id, mass and amino acid specificity e.g.
+```
+[
+  {id: 'H2O', mass: 18.01056027, specificity: ['S', 'T', 'D', 'E', 'CTerm']}
+];
+```
 precursorMz: The m/z of the precursor ion. (optional)
 
 precursorCharge: Charge state of the precursor ion.
