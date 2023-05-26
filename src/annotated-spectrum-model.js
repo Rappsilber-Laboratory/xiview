@@ -33,7 +33,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.set("zoomLocked", false);
         this.set("butterfly", false);
         this.set("changedAnnotation", false);
-        // this.keepCustomConfig = false;
 
         this.set("visFragments", "both");
         this.changeColorScheme(this.get("colorScheme"));
@@ -46,7 +45,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.peakList = [];
         this.precursor = {};
         this.precursor.charge = null;
-        this.customConfig = [];
         this.sticky = [];
         this.annotationModifications = [];
         this.knownModifications = [];
@@ -107,7 +105,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             } else { // xi1 style annotator
                 this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
                 this.fragmentIons = JSONdata.annotation.ions;
-                this.customConfig = JSONdata.annotation.custom;
             }
         }
 
@@ -174,7 +171,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.precursor = {};
         this.precursor.charge = null;
         this.MSnTolerance = {};
-        this.customConfig = [];
 
         this.set("JSONdata", null);
         // Backbone.Model.prototype.clear.call(this);

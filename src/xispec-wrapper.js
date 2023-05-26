@@ -122,9 +122,6 @@ export const XispecWrapper = Backbone.View.extend({
         // }
         let json_request = this.convert_to_json_request(data);
 
-        if (this.customConfigOverwrite)
-            json_request.annotation.custom = this.customConfigOverwrite;
-
         let activeSpecModel = this.activeSpectrum.spectrumModel;
         activeSpecModel.set("butterfly", false);
         activeSpecModel.set("changedAnnotation", false);
@@ -157,10 +154,6 @@ export const XispecWrapper = Backbone.View.extend({
         // }
 
         return true;
-    },
-
-    setCustomConfigOverwrite: function (customConfig) {
-        this.customConfigOverwrite = customConfig;
     },
 
     arrayifyPeptide: function (seq_mods) {
@@ -256,7 +249,6 @@ export const XispecWrapper = Backbone.View.extend({
         annotationRequest.annotation.crosslinkerID = data.crosslinkerID;
         annotationRequest.annotation.precursorCharge = +data.precursorCharge;
         annotationRequest.annotation.modifications = data.modifications;
-        annotationRequest.annotation.custom = data.customConfig;
         annotationRequest.annotation.precursorMZ = +data.precursorMZ;
         annotationRequest.annotation.returnModSyntax = "Xmod";
 

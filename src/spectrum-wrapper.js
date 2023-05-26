@@ -2,7 +2,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 
-import {AnnotatedSpectrumModel} from "./AnnotatedSpectrumModel";
+import {AnnotatedSpectrumModel} from "./annotated-spectrum-model";
 import {SpectrumView} from "./SpectrumView2";
 import {FragmentationKeyView} from "./FragmentationKeyView";
 import {PrecursorInfoView} from "./PrecursorInfoView";

@@ -1,7 +1,7 @@
 import {XispecWrapper} from "./xispec-wrapper";
 import {PepInputView} from "./PepInputView";
 import {PrecursorInfoView} from "./PrecursorInfoView";
-import {AnnotatedSpectrumModel} from "./AnnotatedSpectrumModel";
+import {AnnotatedSpectrumModel} from "./annotated-spectrum-model";
 
 export function createApp(options) {
     return new XispecWrapper(options);

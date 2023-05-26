@@ -193,61 +193,6 @@ export const DataSettingsView = SettingsView.extend({
         let cancelxispec_btn = dataBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
-            .attr("type", "button")
-        ;
-
-        //custom config
-        let customConfigTab = this.mainDiv.append("div")
-            .attr("class", "xispec_settings-tab xispec_flex-column")
-            .attr("id", "xispec_custom_config_tab")
-            .style("display", "none");
-        let customConfigHelpToggle = customConfigTab.append("div")
-            .attr("id", "xispec_toggleCustomCfgHelp")
-            .attr("class", "pointer")
-            .text("Help ")
-            .append("i").attr("class", "fa fa-question-circle").attr("aria-hidden", "true");
-        customConfigTab.append("textarea")
-            .attr("id", "xispec_customCfgHelp")
-            .attr("class", "xispec_form-control")
-            .attr("style", "display:none")
-            .text("# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# also match peaks if they are one Dalton off\n# assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)");
-        let customConfigInputLabel = customConfigTab.append("label")
-            .attr("for", "xispec_settingsCustomCfg-input")
-            .text("Custom config input:");
-        this.customConfigInput = customConfigTab.append("textarea")
-            .attr("id", "xispec_settingsCustomCfg-input")
-            .attr("class", "xispec_form-control");
-
-        let customConfigBottom = customConfigTab.append("div")
-            .attr("class", "xispec_settings-bottom");
-
-        // customConfigBottom.append("label").text("keep config")
-        // 	.append("input")
-        // 		.attr("type", "checkbox")
-        // 		.attr("name", "keepCustomCfg")
-        // 		.attr("id", "xispec_keepCustomCfg")
-        // ;
-        let customConfigSubmit = customConfigBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
-            .attr("value", "Apply")
-            .attr("title", "Apply custom config to current spectrum.")
-            .attr("id", "xispec_settingsCustomCfgApply")
-            .attr("type", "submit");
-
-
-        let customConfigDbSave = customConfigBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
-            .attr("value", "Save for whole dataset")
-            .attr("title", "Write the current custom config to the database.")
-            .attr("id", "xispec_settingsCustomCfgDbSave")
-            .attr("type", "submit");
-        if (window.dbView !== "true") {
-            customConfigDbSave.style("display", "none");
-        }
-
-        let customConfigCancel = customConfigBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
-            .attr("value", "Cancel")
             .attr("type", "button");
 
         // annotatorTab
@@ -331,10 +276,6 @@ export const DataSettingsView = SettingsView.extend({
         else
             $(this.crossLinkerModMassWrapper[0][0]).show();
 
-        if (this.model.customConfig !== undefined)
-            this.customConfigInput[0][0].value = this.model.customConfig.join("\n");
-        else
-            this.customConfigInput[0][0].value = "";
         // this.updateStepSize($(this.toleranceValue[0][0]));
         // this.updateStepSize($(this.crossLinkerModMass[0][0]));
     },
@@ -358,30 +299,6 @@ export const DataSettingsView = SettingsView.extend({
         // this.render();
     },
 
-    saveCustomCfg: function (e) {
-        let self = this;
-        e.preventDefault();
-        let customConfig = $("#xispec_settingsCustomCfg-input").val();
-        let post_data = {
-            custom_config: customConfig,
-        };
-        $.ajax({
-            url: "/php/saveCustomCfg.php",
-            type: "POST",
-            data: post_data,
-            success: function (data) {
-                customConfig = customConfig.split("\n");
-                // add custom config to current json request
-                let json = self.model.get("JSONrequest");
-                json.annotation.custom = customConfig;
-                // overwrite customConfig on current wrapper
-                window.xiSPECUI.vent.trigger("setCustomConfigOverwrite", customConfig);
-                // request current spectrum with updated custom config as original annotation
-                window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.displayModel.get("annotatorURL"), true);
-            }
-        });
-    },
-
     applyAnnotator: function (e) {
         e.preventDefault();
         let json = this.model.get("JSONrequest");
@@ -403,7 +320,6 @@ export const DataSettingsView = SettingsView.extend({
         // convert the form data into a JSON request
         let json_request = this.form_to_json_request(form);
 
-        // json['annotation']['custom'] = self.displayModel.customConfig;
         json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
         json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
         json_request["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
