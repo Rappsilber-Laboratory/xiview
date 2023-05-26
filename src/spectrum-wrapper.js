@@ -35,108 +35,103 @@ export const SpectrumWrapper = Backbone.View.extend({
         this.id = options.id;
 
         // init models
-        let SpectrumModel = new AnnotatedSpectrumModel(model_options);
-        let SettingsSpectrumModel = new AnnotatedSpectrumModel(model_options);
-        let originalSpectrumModel = new AnnotatedSpectrumModel(model_options);
-        this.models = {
-            "Spectrum": SpectrumModel,
-            "SettingsSpectrum": SettingsSpectrumModel,
-            "originalSpectrum": originalSpectrumModel,
-        };
+        this.spectrumModel = new AnnotatedSpectrumModel(model_options);
+        this.settingsSpectrumModel = new AnnotatedSpectrumModel(model_options);
+        this.originalSpectrumModel = new AnnotatedSpectrumModel(model_options);
 
         // event listeners
         this.listenTo(window.xiSPECUI.vent, "activateSpecPanel", this.updateHeader);
-        this.listenTo(SpectrumModel, "activate", this.toggleActive);
+        this.listenTo(this.spectrumModel, "activate", this.toggleActive);
 
         // ToDo: create SpectrumPanel model to have these synced
         // sync model event listeners between original and spectrumModel
-        originalSpectrumModel.listenTo(SpectrumModel, "change:moveLabels",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:moveLabels",
             function (spectrumModel) {
                 this.set("moveLabels", spectrumModel.get("moveLabels"));
             }
         );
         // sync measureMode
-        originalSpectrumModel.listenTo(SpectrumModel, "change:measureMode",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:measureMode",
             function (spectrumModel) {
                 this.set("measureMode", spectrumModel.get("measureMode"));
             }
         );
         // sync zoomLock
-        originalSpectrumModel.listenTo(SpectrumModel, "change:zoomLocked",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:zoomLocked",
             function (spectrumModel) {
                 this.set("zoomLocked", spectrumModel.get("zoomLocked"));
             }
         );
         // sync butterfly
-        originalSpectrumModel.listenTo(SpectrumModel, "change:butterfly",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:butterfly",
             function (spectrumModel) {
                 this.set("butterfly", spectrumModel.get("butterfly"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "butterflySwap",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "butterflySwap",
             function () {
                 this.trigger("butterflySwap");
             }
         );
         // sync mzRange
-        originalSpectrumModel.listenTo(SpectrumModel, "change:mzRange",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:mzRange",
             function (spectrumModel) {
                 this.setZoom(spectrumModel.get("mzRange"));
             }
         );
-        SpectrumModel.listenTo(originalSpectrumModel, "change:mzRange",
+        this.spectrumModel.listenTo(this.originalSpectrumModel, "change:mzRange",
             function (spectrumModel) {
                 this.setZoom(spectrumModel.get("mzRange"));
             }
         );
         // sync appearanceSettings
-        originalSpectrumModel.listenTo(SpectrumModel, "change:showDecimals",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:showDecimals",
             function (spectrumModel) {
                 this.set("showDecimals", spectrumModel.get("showDecimals"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:visFragments",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:visFragments",
             function (spectrumModel) {
                 this.set("visFragments", spectrumModel.get("visFragments"));
                 this.updateColors();
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:colorScheme",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:colorScheme",
             function (spectrumModel) {
                 this.changeColorScheme(spectrumModel.get("colorScheme"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:highlightColor",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:highlightColor",
             function (spectrumModel) {
                 this.set("highlightColor", spectrumModel.get("highlightColor"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:hideNotSelectedFragments",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:hideNotSelectedFragments",
             function (spectrumModel) {
                 this.set("hideNotSelectedFragments", spectrumModel.get("hideNotSelectedFragments"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:accentuateCrossLinkContainingFragments",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:accentuateCrossLinkContainingFragments",
             function (spectrumModel) {
                 this.set("accentuateCrossLinkContainingFragments", spectrumModel.get("accentuateCrossLinkContainingFragments"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:showLossLabels",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:showLossLabels",
             function (spectrumModel) {
                 this.set("showLossLabels", spectrumModel.get("showLossLabels"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:labelFragmentCharge",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:labelFragmentCharge",
             function (spectrumModel) {
                 this.set("labelFragmentCharge", spectrumModel.get("labelFragmentCharge"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:labelCutoff",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:labelCutoff",
             function (spectrumModel) {
                 this.set("labelCutoff", spectrumModel.get("labelCutoff"));
             }
         );
-        originalSpectrumModel.listenTo(SpectrumModel, "change:labelFontSize",
+        this.originalSpectrumModel.listenTo(this.spectrumModel, "change:labelFontSize",
             function (spectrumModel) {
                 this.set("labelFontSize", spectrumModel.get("labelFontSize"));
             }
@@ -161,9 +156,8 @@ export const SpectrumWrapper = Backbone.View.extend({
         this.thumbTackIcon = specPanelControls.append("i")
             .attr("class", "fa fa-thumb-tack xispec_toggleActiveSpecPanel")
             .attr("id", "xispec_toggleActiveSpecPanel" + this.id)
-            .attr("aria-hidden", "true")
-        // .style('opacity', 0)
-        ;
+            .attr("aria-hidden", "true");
+        // .style('opacity', 0);
         if (this.id !== 0) {
             let closeIcon = specPanelControls.append("i")
                 .attr("class", "fa fa-times xispec_closeSpecPanel")
@@ -176,8 +170,7 @@ export const SpectrumWrapper = Backbone.View.extend({
         // Main plot div
         let plotDiv = specPanelDiv.append("div")
             .attr("class", "xispec_spectrumMainPlotDiv")
-            .attr("id", "xispec_spectrumMainPlotDiv" + this.id)
-        ;
+            .attr("id", "xispec_spectrumMainPlotDiv" + this.id);
         // svg elements
         let specSVG = plotDiv.append("svg")
             .attr("class", "xispec_Svg")
@@ -185,8 +178,7 @@ export const SpectrumWrapper = Backbone.View.extend({
         specSVG.append("g")
             .attr("id", "xispec_spectrumSvgGroup" + this.id);
         specSVG.append("g")
-            .attr("id", "xispec_measureTooltipSvgGroup" + this.id)
-        ;
+            .attr("id", "xispec_measureTooltipSvgGroup" + this.id);
         // QC elements
         let _QC_html = "" +
             "<div class='xispec_subViewHeader'></div>" +
@@ -201,18 +193,17 @@ export const SpectrumWrapper = Backbone.View.extend({
         let qcDiv = specPanelDiv.append("div")
             .attr("class", "xispec_QCdiv")
             .attr("id", "xispec_QCdiv" + this.id)
-            .html(_QC_html)
-        ;
+            .html(_QC_html);
 
         // create Views
         let Spectrum = new SpectrumView({
-            model: SpectrumModel,
+            model: this.spectrumModel,
             el: "#xispec_spectrumSvgGroup" + this.id,
             measureTooltipSvgG: "#xispec_measureTooltipSvgGroup" + this.id,
             id: "curSpectrum",
         });
         let originalSpectrum = new SpectrumView({
-            model: originalSpectrumModel,
+            model: this.originalSpectrumModel,
             el: "#xispec_spectrumSvgGroup" + this.id,
             measureTooltipSvgG: "#xispec_measureTooltipSvgGroup" + this.id,
             invert: true,
@@ -220,12 +211,12 @@ export const SpectrumWrapper = Backbone.View.extend({
             id: "originalSpectrum",
         });
         let FragmentationKey = new FragmentationKeyView({
-            model: SpectrumModel,
+            model: this.spectrumModel,
             el: "#xispec_Svg" + this.id,
             id: "curFragmentationKey",
         });
         let originalFragmentationKey = new FragmentationKeyView({
-            model: originalSpectrumModel,
+            model: this.originalSpectrumModel,
             el: "#xispec_Svg" + this.id,
             invert: true,
             hidden: true,
@@ -233,12 +224,12 @@ export const SpectrumWrapper = Backbone.View.extend({
             id: "originalFragmentationKey",
         });
         let PrecursorInfo = new PrecursorInfoView({
-            model: SpectrumModel,
+            model: this.spectrumModel,
             el: "#xispec_Svg" + this.id,
             id: "curPrecursorInfo",
         });
         let originalPrecursorInfo = new PrecursorInfoView({
-            model: originalSpectrumModel,
+            model: this.originalSpectrumModel,
             el: "#xispec_Svg" + this.id,
             invert: true,
             hidden: true,
@@ -251,7 +242,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             specPanelId: this.id,
         });
         let ErrorIntensityPlot = new ErrorPlotView({
-            model: SpectrumModel,
+            model: this.spectrumModel,
             el: "#xispec_subViewContent-left" + this.id,
             xData: "Intensity",
             margin: {top: 10, right: 30, bottom: 20, left: 65},
@@ -259,7 +250,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             specPanelId: this.id,
         });
         let ErrorMzPlot = new ErrorPlotView({
-            model: SpectrumModel,
+            model: this.spectrumModel,
             el: "#xispec_subViewContent-right" + this.id,
             xData: "m/z",
             margin: {top: 10, right: 30, bottom: 20, left: 65},
@@ -287,7 +278,7 @@ export const SpectrumWrapper = Backbone.View.extend({
         if (json_request.annotation.requestID)
             window.xiSPECUI.lastRequestedID = json_request.annotation.requestID;
 
-        this.models["Spectrum"].trigger("requestAnnotation:pending");
+        this.spectrumModel.trigger("requestAnnotation:pending");
         console.log("annotation request:", json_request);
         let self = this;
         $.ajax({
@@ -304,15 +295,15 @@ export const SpectrumWrapper = Backbone.View.extend({
                     //ToDo: Error handling -> https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/330
                     console.log("annotation response:", data);
 
-                    self.models["Spectrum"].set({"JSONdata": data, "JSONrequest": json_request});
-                    self.models["SettingsSpectrum"].set({"JSONdata": data, "JSONrequest": json_request});
-                    self.models["SettingsSpectrum"].trigger("change:JSONdata");
-                    self.models["Spectrum"].trigger("requestAnnotation:done");
+                    self.spectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+                    self.settingsSpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+                    self.settingsSpectrumModel.trigger("change:JSONdata");
+                    self.spectrumModel.trigger("requestAnnotation:done");
 
                     if (isOriginalMatchRequest) {
-                        self.models["originalSpectrum"].set({"JSONdata": data, "JSONrequest": json_request});
-                        self.models["originalSpectrum"].updateKnownModifications();
-                        self.models["Spectrum"].updateKnownModifications();
+                        self.originalSpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+                        self.originalSpectrumModel.updateKnownModifications();
+                        self.spectrumModel.updateKnownModifications();
                         self.originalMatchRequest = $.extend(true, {}, json_request);
                         self.originalAnnotator = annotatorURL;
                     }
@@ -323,12 +314,12 @@ export const SpectrumWrapper = Backbone.View.extend({
     },
 
     revertAnnotation: function () {
-        if (this.models["Spectrum"].get("changedAnnotation")) {
-            this.models["Spectrum"].reset_all_modifications();
-            this.models["SettingsSpectrum"].reset_all_modifications();
-            this.models["Spectrum"].set("annotatorURL", this.originalAnnotator);
-            this.requestAnnotation(this.originalMatchRequest, this.models["Spectrum"].get("annotatorURL"));
-            this.models["Spectrum"].set("changedAnnotation", false);
+        if (this.spectrumModel.get("changedAnnotation")) {
+            this.spectrumModel.reset_all_modifications();
+            this.settingsSpectrumModel.reset_all_modifications();
+            this.spectrumModel.set("annotatorURL", this.originalAnnotator);
+            this.requestAnnotation(this.originalMatchRequest, this.spectrumModel.get("annotatorURL"));
+            this.spectrumModel.set("changedAnnotation", false);
         }
     },
 
@@ -379,8 +370,8 @@ export const SpectrumWrapper = Backbone.View.extend({
 
     butterflyHighlight: function () {
         // get fragments from original and re-annotated spectrum and highlight non-overlap
-        let spec_frags = this.models["Spectrum"].fragments;
-        let orig_frags = this.models["originalSpectrum"].fragments;
+        let spec_frags = this.spectrumModel.fragments;
+        let orig_frags = this.this.originalSpectrumModel.fragments;
         let spec_fragIdStrs = _.pluck(spec_frags, "idStr");
         let orig_fragIdStrs = _.pluck(orig_frags, "idStr");
 
@@ -391,9 +382,9 @@ export const SpectrumWrapper = Backbone.View.extend({
             return spec_fragIdStrs.indexOf(f.idStr) === -1;
         });
 
-        this.models["Spectrum"].addHighlight(spec_highlightFrags);
-        this.models["Spectrum"].updateStickyHighlight(spec_highlightFrags, false);
-        this.models["originalSpectrum"].addHighlight(orig_highlightFrags);
-        this.models["originalSpectrum"].updateStickyHighlight(orig_highlightFrags, false);
+        this.spectrumModel.addHighlight(spec_highlightFrags);
+        this.spectrumModel.updateStickyHighlight(spec_highlightFrags, false);
+        this.this.originalSpectrumModel.addHighlight(orig_highlightFrags);
+        this.this.originalSpectrumModel.updateStickyHighlight(orig_highlightFrags, false);
     }
 });

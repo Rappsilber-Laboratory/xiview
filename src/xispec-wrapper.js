@@ -6,7 +6,7 @@ import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 // import "../vendor/byrei-dyndiv_0.5.css"
 
-import {SpectrumWrapper} from "./SpectrumWrapper";
+import {SpectrumWrapper} from "./spectrum-wrapper";
 import {SpectrumControlsView} from "./SpectrumControlsView";
 import {DataSettingsView} from "./DataSettingsView";
 import {AppearanceSettingsView} from "./AppearanceSettingsView";
@@ -83,19 +83,19 @@ export const XispecWrapper = Backbone.View.extend({
 
         // create the SpectrumControls and Settings views
         this.spectrumControlsView = new SpectrumControlsView({
-            model: this.activeSpectrum.models["Spectrum"],
+            model: this.activeSpectrum.spectrumModel,
             el: "#xispec_spectrumControls",
         });
         this.dataSettingsView = new DataSettingsView({
-            model: this.activeSpectrum.models["SettingsSpectrum"],
-            displayModel: this.activeSpectrum.models["Spectrum"],
+            model: this.activeSpectrum.settingsSpectrumModel,
+            displayModel: this.activeSpectrum.spectrumModel,
             el: "#xispec_dataSettingsWrapper",
             showCustomCfg: this.options.showCustomConfig,
             title: "Data Settings"
         });
         this.appearanceSettingsView = new AppearanceSettingsView({
-            model: this.activeSpectrum.models["SettingsSpectrum"],
-            displayModel: this.activeSpectrum.models["Spectrum"],
+            model: this.activeSpectrum.settingsSpectrumModel,
+            displayModel: this.activeSpectrum.spectrumModel,
             el: "#xispec_appearanceSettingsWrapper",
             showCustomCfg: this.options.showCustomConfig,
             title: "Appearance Settings"
@@ -126,14 +126,14 @@ export const XispecWrapper = Backbone.View.extend({
         if (this.customConfigOverwrite)
             json_request.annotation.custom = this.customConfigOverwrite;
 
-        let activeSpecModel = this.activeSpectrum.models["Spectrum"];
+        let activeSpecModel = this.activeSpectrum.spectrumModel;
         activeSpecModel.set("butterfly", false);
         activeSpecModel.set("changedAnnotation", false);
         activeSpecModel.reset_all_modifications();
         activeSpecModel.set("spectrum_id", data.spectrum_id);
         activeSpecModel.set("spectrum_title", data.spectrum_title);
         this.activeSpectrum.originalMatchRequest = $.extend(true, {}, json_request);
-        let originalAnnotator = this.activeSpectrum.models["originalSpectrum"].get("annotatorURL");
+        let originalAnnotator = this.activeSpectrum.originalSpectrumModel.get("annotatorURL");
         activeSpecModel.set("annotatorURL", originalAnnotator);
         this.activeSpectrum.requestAnnotation(json_request, activeSpecModel.get("annotatorURL"), true);
         this.activeSpectrum.setTitle(data.spectrum_title);
@@ -329,8 +329,7 @@ export const XispecWrapper = Backbone.View.extend({
         // append a div for the new spectrum
         this.spectraWrapperDiv.append("div")
             .attr("class", "xispec_plotsDiv")
-            .attr("id", "xispec_spec" + specId)
-        ;
+            .attr("id", "xispec_spec" + specId);
 
         // create new SpectrumWrapper
         let newSpec = new SpectrumWrapper({
@@ -381,11 +380,11 @@ export const XispecWrapper = Backbone.View.extend({
             return x.id;
         }).indexOf(id);
         this.activeSpectrum = this.spectra[specIndex];
-        this.spectrumControlsView.model = this.activeSpectrum.models["Spectrum"];
-        this.dataSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
-        this.dataSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
-        this.appearanceSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
-        this.appearanceSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
+        this.spectrumControlsView.model = this.activeSpectrum.spectrumModel;
+        this.dataSettingsView.model = this.activeSpectrum.settingsSpectrumModel;
+        this.dataSettingsView.displayModel = this.activeSpectrum.spectrumModel;
+        this.appearanceSettingsView.model = this.activeSpectrum.settingsSpectrumModel;
+        this.appearanceSettingsView.displayModel = this.activeSpectrum.spectrumModel;
         window.xiSPECUI.vent.trigger("activeSpecPanel:changed");
     },
 
