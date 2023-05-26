@@ -1,10 +1,10 @@
-import {xiSPEC_wrapper} from "./Wrapper";
+import {XispecWrapper} from "./xispec-wrapper";
 import {PepInputView} from "./PepInputView";
 import {PrecursorInfoView} from "./PrecursorInfoView";
 import {AnnotatedSpectrumModel} from "./AnnotatedSpectrumModel";
 
 export function createApp(options) {
-    return new xiSPEC_wrapper(options);
+    return new XispecWrapper(options);
 }
 
 export function createPepInputView(view_options) {

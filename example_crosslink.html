@@ -224,12 +224,9 @@
 			[1991.0004, 2241.505]
 		];
 
+	xiSPEC = xispec.createApp({targetDiv: "xispec_wrapper"});
 
-	// $(document).ready(function () {
-
-	window.xiSPEC = xispec.createApp({targetDiv: "xispec_wrapper"});
-
-	window.xiSPEC.setData({
+	xiSPEC.setData({
 		sequence1: sequence1,
 		sequence2: sequence2,
 		linkPos1: linkPos1,
@@ -242,7 +239,6 @@
 		losses: losses,
 		peakList: peaks
 	});
-	// });
 </script>
 
 </body>

@@ -20,7 +20,7 @@ window.onresize = function () {
     window.trigger("resize");
 };
 
-export const xiSPEC_wrapper = Backbone.View.extend({
+export const XispecWrapper = Backbone.View.extend({
 
     initialize: function (options) {
 
@@ -49,7 +49,6 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         }
 
         // event listeners
-        this.listenTo(window.xiSPECUI.vent, "loadSpectrum", this.setData);
         this.listenTo(window.xiSPECUI.vent, "requestAnnotation", this.requestAnnotation);
         this.listenTo(window.xiSPECUI.vent, "revertAnnotation", this.revertAnnotation);
         this.listenTo(window.xiSPECUI.vent, "setCustomConfigOverwrite", this.setCustomConfigOverwrite);
@@ -83,18 +82,18 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         this.activeSpectrum = this.addSpectrum();
 
         // create the SpectrumControls and Settings views
-        this.SpectrumControlsView = new SpectrumControlsView({
+        this.spectrumControlsView = new SpectrumControlsView({
             model: this.activeSpectrum.models["Spectrum"],
             el: "#xispec_spectrumControls",
         });
-        this.DataSettingsView = new DataSettingsView({
+        this.dataSettingsView = new DataSettingsView({
             model: this.activeSpectrum.models["SettingsSpectrum"],
             displayModel: this.activeSpectrum.models["Spectrum"],
             el: "#xispec_dataSettingsWrapper",
             showCustomCfg: this.options.showCustomConfig,
             title: "Data Settings"
         });
-        this.AppearanceSettingsView = new AppearanceSettingsView({
+        this.appearanceSettingsView = new AppearanceSettingsView({
             model: this.activeSpectrum.models["SettingsSpectrum"],
             displayModel: this.activeSpectrum.models["Spectrum"],
             el: "#xispec_appearanceSettingsWrapper",
@@ -317,6 +316,10 @@ export const xiSPEC_wrapper = Backbone.View.extend({
         });
     },
 
+    /**
+     * Adds a new SpectrumWrapper to this.spectra and its it to this.specIds.
+     * @returns {*} the new SpectrumWrapper
+     */
     addSpectrum: function () {
 
         // create an unused id and append it to the plotIds arr
@@ -378,11 +381,11 @@ export const xiSPEC_wrapper = Backbone.View.extend({
             return x.id;
         }).indexOf(id);
         this.activeSpectrum = this.spectra[specIndex];
-        this.SpectrumControlsView.model = this.activeSpectrum.models["Spectrum"];
-        this.DataSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
-        this.DataSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
-        this.AppearanceSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
-        this.AppearanceSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
+        this.spectrumControlsView.model = this.activeSpectrum.models["Spectrum"];
+        this.dataSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
+        this.dataSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
+        this.appearanceSettingsView.model = this.activeSpectrum.models["SettingsSpectrum"];
+        this.appearanceSettingsView.displayModel = this.activeSpectrum.models["Spectrum"];
         window.xiSPECUI.vent.trigger("activeSpecPanel:changed");
     },
 

@@ -192,29 +192,24 @@
 		[1490.74206543, 6166.33935547]
 	]
 
+    xiSPEC = xispec.createApp({
+        targetDiv: "xispec_wrapper",
+        showQualityControl: "side",
+        highlightColor: '#F9DB15',
+        peakColor: "#666",
+    });
 
+    xiSPEC.setData({
+                sequence1: sequence1,
+                modifications: modifications,
+                precursorCharge: precursorCharge,
+                fragmentTolerance: fragmentTolerance,
+                ionTypes: ionTypes,
+                losses: losses,
+                peakList: peaks
+            }
+    );
 
-	// $(document).ready(function () {
-		window.xiSPEC = xispec.createApp({
-			targetDiv: "xispec_wrapper",
-			showQualityControl: "side",
-			highlightColor: '#F9DB15',
-			peakColor: "#666",
-		});
-
-		xiSPEC.setData({
-					sequence1: sequence1,
-					modifications: modifications,
-					precursorCharge: precursorCharge,
-					fragmentTolerance: fragmentTolerance,
-					ionTypes: ionTypes,
-					losses: losses,
-					peakList: peaks
-				}
-
-		);
-
-	// });
 
  </script>
 
