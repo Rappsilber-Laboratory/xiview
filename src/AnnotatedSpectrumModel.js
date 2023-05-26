@@ -11,7 +11,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         return {
             baseDir: "./",
             knownModifications: [],
-            knownModificationsURL: false,
             highlightColor: "#FFFF00",
             highlightWidth: 8,
             peakColor: "#a6a6a6",
@@ -28,14 +27,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
     },
 
     initialize: function () {
-        // in tells difference between variable existing and having the undefined value and it not being defined at all
-        if (this.get("knownModificationsURL") !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {
-            this.getKnownModifications(this.get("knownModificationsURL"));
-            AnnotatedSpectrumModel.prototype.cachedKnownModifications = this.knownModifications;
-        } else {
-            this.knownModifications = AnnotatedSpectrumModel.prototype.cachedKnownModifications || this.get("knownModifications");
-        }
-
         this.set("showDecimals", 2);
         this.set("moveLabels", false);
         this.set("measureMode", false);
@@ -58,9 +49,8 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.customConfig = [];
         this.sticky = [];
         this.annotationModifications = [];
+        this.knownModifications = [];
 
-        //ToDo: change JSONdata gets called 3 times for some reason?
-        // define event triggers and listeners better
         this.on("change:JSONdata", function () {
             let json = this.get("JSONdata");
             if (typeof json !== "undefined") {
@@ -68,21 +58,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             } else
                 this.trigger("cleared");
         });
-
-        // //used for manual data input -- calcPrecursorMass disable for now
-        // this.on("change:clModMass", function(){
-        // 	if(this.peptides !== undefined && this.knownModifications !== undefined)
-        // 		this.calcPrecursorMass();
-        // });
-        // this.on("change:charge", function(){
-        // 	this.precursorCharge = parseInt(this.get("charge"));
-        // 	this.trigger("changed:charge");
-        // });
-        // this.on("change:modifications", function(){
-        // 	this.updateKnownModifications();
-        // 	if(this.peptides !== undefined && this.knownModifications !== undefined)
-        // 		this.calcPrecursorMass();
-        // });
 
     },
 
@@ -470,28 +445,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.precursor.calcMass = totalMass;
         this.precursor.calcMz = (totalMass / this.precursor.charge) + proton_mass;
         this.trigger("changed:mass");
-    },
-
-    getKnownModifications: function (modifications_url) {
-        let self = this;
-        $.ajax({
-            type: "GET",
-            datatype: "json",
-            async: false,
-            url: modifications_url,
-            success: function (data) {
-                for (let i = 0; i < data.modifications.length; i++) {
-                    data.modifications[i].changed = false;
-                    data.modifications[i].userMod = false;
-                    // data.modifications[i].original = false;
-                }
-                self.knownModifications = data.modifications;
-
-            },
-            error: function (xhr, status, error) {
-                alert("xiAnnotator could not be reached. Please try again later!");
-            },
-        });
     },
 
     updateKnownModifications: function () {

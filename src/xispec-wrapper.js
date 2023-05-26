@@ -31,7 +31,6 @@ export const XispecWrapper = Backbone.View.extend({
             baseDir: "./",
             xiAnnotatorBaseURL: "https://spectrumviewer.org/xiAnnotator/",
             knownModifications: [],
-            knownModificationsURL: false,
             labelFragmentCharge: false,
             labelCutoff: 0,
             labelFontSize: 10,
