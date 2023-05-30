@@ -619,6 +619,7 @@ export const DataSettingsView = SettingsView.extend({
                                 if (self.model.knownModifications[i].changed) {
                                     displayModified(rowNode);
                                 }
+                                break;
                             }
                         }
                         data = parseFloat(parseFloat(data).toFixed(10).toString()); // limit to 10 decimal places and get rid of tailing zeroes
@@ -640,6 +641,7 @@ export const DataSettingsView = SettingsView.extend({
                                     else {
                                         data = _.union(data, self.model.knownModifications[i].aminoAcids);
                                     }
+                                    break;
                                 }
                             }
                         }
