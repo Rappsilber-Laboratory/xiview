@@ -22,7 +22,7 @@ import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
 
-import {xiSPEC_wrapper} from "../../spectrum/src/Wrapper";
+import {XispecWrapper} from "../../spectrum/src/xispec-wrapper";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
     downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
@@ -910,7 +910,6 @@ export function viewsEssential (options) {
         targetDiv: "modular_xispec",
         baseDir: window.xiSpecBaseDir,
         xiAnnotatorBaseURL: window.xiAnnotRoot,
-        knownModificationsURL: false, //window.xiAnnotRoot + "annotate/knownModifications",
         showCustomConfig: compModel.get("serverFlavour") !== "XI2",
         showQualityControl: "min",
         colorScheme: "PRGn",
@@ -923,16 +922,16 @@ export function viewsEssential (options) {
         QCabsErr: false
     };
 
-    window.xiSPEC = new xiSPEC_wrapper(xiSPEC_options);
+    const xispec_wrapper = new XispecWrapper(xiSPEC_options);
 
     // Update spectrum view when external resize event called
-    window.xiSPEC.activeSpectrum.listenTo(window.vent, "resizeSpectrumSubViews", function () {
+    xispec_wrapper.activeSpectrum.listenTo(window.vent, "resizeSpectrumSubViews", function () {
         window.xiSPECUI.vent.trigger("resize:spectrum");
     });
 
     // "individualMatchSelected" in vent is link event between selection table view and spectrum view
     // used to transport one Match between views
-    window.xiSPEC.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
+    xispec_wrapper.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
             if (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1") {
                 const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
@@ -941,9 +940,11 @@ export function viewsEssential (options) {
                 loadSpectrum(match);
             }
         } else {
-            // window.xiSPEC.clear();
+            // xispec_wrapper.clear();
         }
     });
+
+    window.compositeModelInst.set("xispec_wrapper", xispec_wrapper);
 
     // Generate data export drop down
     new DropDownMenuViewBB({
