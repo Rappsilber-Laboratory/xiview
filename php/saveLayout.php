@@ -39,7 +39,7 @@ if (isset($_SESSION['session_name'])) {
 //        echo "hello ".$user." ".$id;
 
 
-        $searchDataQuery = "SELECT user_name, random_id FROM uploads inner JOIN users on (uploads.user_id = users.id) where uploads.id =  '".$id."';";
+        $searchDataQuery = "SELECT user_name, random_id FROM upload inner JOIN useraccount on (upload.user_id = useraccount.id) where upload.id =  '".$id."';";
 
 //        echo $searchDataQuery;
 
