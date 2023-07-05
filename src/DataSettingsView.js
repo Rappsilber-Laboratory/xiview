@@ -317,8 +317,16 @@ export const DataSettingsView = SettingsView.extend({
             console.log("Invalid character found in form");
             return false;
         }
-        // convert the form data into a JSON request
-        let json_request = this.form_to_json_request(form);
+
+        // If xi2 config is defined modify the config and send the JSON request
+        let json_request;
+        if (this.model.get("JSONrequest").annotation.config !== undefined){
+            json_request = this.form_to_json_request_xi2(form);
+        } else {
+            // convert the form data into a JSON request
+            json_request = this.form_to_json_request(form);
+        }
+
 
         json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
         json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
@@ -329,6 +337,118 @@ export const DataSettingsView = SettingsView.extend({
         this.displayModel.knownModifications = $.extend(true, [], this.model.knownModifications);
 
         return false;
+    },
+
+    form_to_json_request_xi2: function (form) {
+
+        let xi2_request = this.model.get("JSONrequest");
+        let xi2_config = xi2_request.annotation.config;
+        // convert form to json
+        // peptides & linkSites block
+        let linkSitesJSON = Array();
+        let peptidesJSON = Array();
+
+        let formData = new FormData(form);
+
+        function pep_to_array(pep_str){
+            let pepArray = Array();
+            let pep = pep_str.replace(/#\d?/g , "");
+            let matches = pep.matchAll(/([A-Z][^A-Z]*)/g);
+            for (let AAmod of matches){
+                pepArray.push({"aminoAcid": AAmod[0][0], "Modification": AAmod[0].slice(1)});
+            }
+            return {"sequence": pepArray};
+        }
+        let peps = formData.get("peps").split(";");
+        for (let i = 0; i < peps.length; i++) {
+            // create peptide JSON
+            peptidesJSON.push(pep_to_array(peps[i]));
+            // create linkSite JSON
+            let pep_noMods = peps[i].replace(/[^A-Z#]+/g , "");
+            let link_pos = pep_noMods.indexOf("#")-1;
+            let linkSite = {"id": 0, "peptideId": i, "linkSite": link_pos};
+            linkSitesJSON.push(linkSite);
+        }
+        // peak block
+        let peaks = formData.get("peaklist").trim().split(/[\r\n]/);
+        let peaksJSON = peaks.map(function(p){
+            p = p.split(/\s/);
+            return {"mz": p[0], "intensity": p[1]};
+        });
+        // xi2 config - modifications
+        let mods_xi2 = Array();
+        let mods = formData.getAll("mods[]");
+        let modSpecs = formData.getAll("modSpecificities[]");
+        let modMasses = formData.getAll("modMasses[]");
+        for (let i = 0; i < mods.length; i++) {
+            // split after , and trim whitespaces
+            let modSpec = modSpecs[i].split(",").map(function(l){
+                return l.trim();
+            });
+            // remove empty elements
+            modSpec = modSpec.filter(function(ms){
+                if (ms !== "")
+                    return ms;
+            });
+            mods_xi2.push({
+                "name": mods[i],
+                "specificity": modSpec,
+                "mass": modMasses[i]
+            });
+        }
+        xi2_config.modification.modifications = mods_xi2;
+
+        // xi2 config - losses
+        let loss_xi2 = Array();
+        let losses = formData.getAll("losses[]");
+        let lossSpecs = formData.getAll("lossSpecificities[]");
+        let lossMasses = formData.getAll("lossMasses[]");
+        for (let i = 0; i < losses.length; i++) {
+            // split after , and trim whitespaces
+            let lossSpec = lossSpecs[i].split(",").map(function(l){
+                return l.trim();
+                // let ret = l.trim();
+                // if (['CTerm', 'NTerm'])
+                // return ret;
+            });
+            loss_xi2.push({
+                "name": losses[i],
+                "specificity": lossSpec,
+                "mass": lossMasses[i]
+            });
+        }
+        xi2_config.fragmentation.losses = loss_xi2;
+
+        // xi2 config - ions
+        let ions_nterm_xi2 = [];
+        let ions_cterm_xi2 = [];
+        let ions_precursor_xi2 = false;
+        let ionTypes = formData.getAll("ions[]");
+        for (let it = 0; it < ionTypes.length; it++) {
+            let ionType = ionTypes[it];
+            if (ionType === "peptide") ions_precursor_xi2 = true;
+            else if (["a", "b", "c"].indexOf(ionType) !== -1){
+                ions_nterm_xi2.push(ionType);
+            } else if (["x", "y", "z"].indexOf(ionType) !== -1){
+                ions_cterm_xi2.push(ionType);
+            }
+        }
+        xi2_config.fragmentation.nterm_ions = ions_nterm_xi2;
+        xi2_config.fragmentation.cterm_ions = ions_cterm_xi2;
+        xi2_config.fragmentation.add_precursor = ions_precursor_xi2;
+        // xi2 config - crosslinker # ToDo crosslinkerID
+        let cl_id = xi2_request.annotation.crosslinkerID;
+        xi2_config.crosslinker[cl_id].mass = parseFloat(form["clModMass"].value);
+        // xi2 config - tolerance
+        xi2_config.ms2_tol = form["ms2Tol"].value + form["tolUnit"].value;
+        
+        // annotation block - JSON assembly
+        xi2_request.Peptides = peptidesJSON;
+        xi2_request.LinkSite = linkSitesJSON;
+        xi2_request.peaks = peaksJSON;
+
+        return xi2_request;
+
     },
 
     form_to_json_request: function (form) {
