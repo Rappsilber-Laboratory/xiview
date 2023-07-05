@@ -193,61 +193,6 @@ export const DataSettingsView = SettingsView.extend({
         let cancelxispec_btn = dataBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
-            .attr("type", "button")
-        ;
-
-        //custom config
-        let customConfigTab = this.mainDiv.append("div")
-            .attr("class", "xispec_settings-tab xispec_flex-column")
-            .attr("id", "xispec_custom_config_tab")
-            .style("display", "none");
-        let customConfigHelpToggle = customConfigTab.append("div")
-            .attr("id", "xispec_toggleCustomCfgHelp")
-            .attr("class", "pointer")
-            .text("Help ")
-            .append("i").attr("class", "fa fa-question-circle").attr("aria-hidden", "true");
-        customConfigTab.append("textarea")
-            .attr("id", "xispec_customCfgHelp")
-            .attr("class", "xispec_form-control")
-            .attr("style", "display:none")
-            .text("# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# also match peaks if they are one Dalton off\n# assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)");
-        let customConfigInputLabel = customConfigTab.append("label")
-            .attr("for", "xispec_settingsCustomCfg-input")
-            .text("Custom config input:");
-        this.customConfigInput = customConfigTab.append("textarea")
-            .attr("id", "xispec_settingsCustomCfg-input")
-            .attr("class", "xispec_form-control");
-
-        let customConfigBottom = customConfigTab.append("div")
-            .attr("class", "xispec_settings-bottom");
-
-        // customConfigBottom.append("label").text("keep config")
-        // 	.append("input")
-        // 		.attr("type", "checkbox")
-        // 		.attr("name", "keepCustomCfg")
-        // 		.attr("id", "xispec_keepCustomCfg")
-        // ;
-        let customConfigSubmit = customConfigBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
-            .attr("value", "Apply")
-            .attr("title", "Apply custom config to current spectrum.")
-            .attr("id", "xispec_settingsCustomCfgApply")
-            .attr("type", "submit");
-
-
-        let customConfigDbSave = customConfigBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
-            .attr("value", "Save for whole dataset")
-            .attr("title", "Write the current custom config to the database.")
-            .attr("id", "xispec_settingsCustomCfgDbSave")
-            .attr("type", "submit");
-        if (window.dbView !== "true") {
-            customConfigDbSave.style("display", "none");
-        }
-
-        let customConfigCancel = customConfigBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
-            .attr("value", "Cancel")
             .attr("type", "button");
 
         // annotatorTab
@@ -331,10 +276,6 @@ export const DataSettingsView = SettingsView.extend({
         else
             $(this.crossLinkerModMassWrapper[0][0]).show();
 
-        if (this.model.customConfig !== undefined)
-            this.customConfigInput[0][0].value = this.model.customConfig.join("\n");
-        else
-            this.customConfigInput[0][0].value = "";
         // this.updateStepSize($(this.toleranceValue[0][0]));
         // this.updateStepSize($(this.crossLinkerModMass[0][0]));
     },
@@ -358,30 +299,6 @@ export const DataSettingsView = SettingsView.extend({
         // this.render();
     },
 
-    saveCustomCfg: function (e) {
-        let self = this;
-        e.preventDefault();
-        let customConfig = $("#xispec_settingsCustomCfg-input").val();
-        let post_data = {
-            custom_config: customConfig,
-        };
-        $.ajax({
-            url: "/php/saveCustomCfg.php",
-            type: "POST",
-            data: post_data,
-            success: function (data) {
-                customConfig = customConfig.split("\n");
-                // add custom config to current json request
-                let json = self.model.get("JSONrequest");
-                json.annotation.custom = customConfig;
-                // overwrite customConfig on current wrapper
-                window.xiSPECUI.vent.trigger("setCustomConfigOverwrite", customConfig);
-                // request current spectrum with updated custom config as original annotation
-                window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.displayModel.get("annotatorURL"), true);
-            }
-        });
-    },
-
     applyAnnotator: function (e) {
         e.preventDefault();
         let json = this.model.get("JSONrequest");
@@ -400,10 +317,17 @@ export const DataSettingsView = SettingsView.extend({
             console.log("Invalid character found in form");
             return false;
         }
-        // convert the form data into a JSON request
-        let json_request = this.form_to_json_request(form);
 
-        // json['annotation']['custom'] = self.displayModel.customConfig;
+        // If xi2 config is defined modify the config and send the JSON request
+        let json_request;
+        if (this.model.get("JSONrequest").annotation.config !== undefined){
+            json_request = this.form_to_json_request_xi2(form);
+        } else {
+            // convert the form data into a JSON request
+            json_request = this.form_to_json_request(form);
+        }
+
+
         json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
         json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
         json_request["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
@@ -413,6 +337,118 @@ export const DataSettingsView = SettingsView.extend({
         this.displayModel.knownModifications = $.extend(true, [], this.model.knownModifications);
 
         return false;
+    },
+
+    form_to_json_request_xi2: function (form) {
+
+        let xi2_request = this.model.get("JSONrequest");
+        let xi2_config = xi2_request.annotation.config;
+        // convert form to json
+        // peptides & linkSites block
+        let linkSitesJSON = Array();
+        let peptidesJSON = Array();
+
+        let formData = new FormData(form);
+
+        function pep_to_array(pep_str){
+            let pepArray = Array();
+            let pep = pep_str.replace(/#\d?/g , "");
+            let matches = pep.matchAll(/([A-Z][^A-Z]*)/g);
+            for (let AAmod of matches){
+                pepArray.push({"aminoAcid": AAmod[0][0], "Modification": AAmod[0].slice(1)});
+            }
+            return {"sequence": pepArray};
+        }
+        let peps = formData.get("peps").split(";");
+        for (let i = 0; i < peps.length; i++) {
+            // create peptide JSON
+            peptidesJSON.push(pep_to_array(peps[i]));
+            // create linkSite JSON
+            let pep_noMods = peps[i].replace(/[^A-Z#]+/g , "");
+            let link_pos = pep_noMods.indexOf("#")-1;
+            let linkSite = {"id": 0, "peptideId": i, "linkSite": link_pos};
+            linkSitesJSON.push(linkSite);
+        }
+        // peak block
+        let peaks = formData.get("peaklist").trim().split(/[\r\n]/);
+        let peaksJSON = peaks.map(function(p){
+            p = p.split(/\s/);
+            return {"mz": p[0], "intensity": p[1]};
+        });
+        // xi2 config - modifications
+        let mods_xi2 = Array();
+        let mods = formData.getAll("mods[]");
+        let modSpecs = formData.getAll("modSpecificities[]");
+        let modMasses = formData.getAll("modMasses[]");
+        for (let i = 0; i < mods.length; i++) {
+            // split after , and trim whitespaces
+            let modSpec = modSpecs[i].split(",").map(function(l){
+                return l.trim();
+            });
+            // remove empty elements
+            modSpec = modSpec.filter(function(ms){
+                if (ms !== "")
+                    return ms;
+            });
+            mods_xi2.push({
+                "name": mods[i],
+                "specificity": modSpec,
+                "mass": modMasses[i]
+            });
+        }
+        xi2_config.modification.modifications = mods_xi2;
+
+        // xi2 config - losses
+        let loss_xi2 = Array();
+        let losses = formData.getAll("losses[]");
+        let lossSpecs = formData.getAll("lossSpecificities[]");
+        let lossMasses = formData.getAll("lossMasses[]");
+        for (let i = 0; i < losses.length; i++) {
+            // split after , and trim whitespaces
+            let lossSpec = lossSpecs[i].split(",").map(function(l){
+                return l.trim();
+                // let ret = l.trim();
+                // if (['CTerm', 'NTerm'])
+                // return ret;
+            });
+            loss_xi2.push({
+                "name": losses[i],
+                "specificity": lossSpec,
+                "mass": lossMasses[i]
+            });
+        }
+        xi2_config.fragmentation.losses = loss_xi2;
+
+        // xi2 config - ions
+        let ions_nterm_xi2 = [];
+        let ions_cterm_xi2 = [];
+        let ions_precursor_xi2 = false;
+        let ionTypes = formData.getAll("ions[]");
+        for (let it = 0; it < ionTypes.length; it++) {
+            let ionType = ionTypes[it];
+            if (ionType === "peptide") ions_precursor_xi2 = true;
+            else if (["a", "b", "c"].indexOf(ionType) !== -1){
+                ions_nterm_xi2.push(ionType);
+            } else if (["x", "y", "z"].indexOf(ionType) !== -1){
+                ions_cterm_xi2.push(ionType);
+            }
+        }
+        xi2_config.fragmentation.nterm_ions = ions_nterm_xi2;
+        xi2_config.fragmentation.cterm_ions = ions_cterm_xi2;
+        xi2_config.fragmentation.add_precursor = ions_precursor_xi2;
+        // xi2 config - crosslinker # ToDo crosslinkerID
+        let cl_id = xi2_request.annotation.crosslinkerID;
+        xi2_config.crosslinker[cl_id].mass = parseFloat(form["clModMass"].value);
+        // xi2 config - tolerance
+        xi2_config.ms2_tol = form["ms2Tol"].value + form["tolUnit"].value;
+        
+        // annotation block - JSON assembly
+        xi2_request.Peptides = peptidesJSON;
+        xi2_request.LinkSite = linkSitesJSON;
+        xi2_request.peaks = peaksJSON;
+
+        return xi2_request;
+
     },
 
     form_to_json_request: function (form) {
