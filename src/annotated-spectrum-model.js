@@ -92,7 +92,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 };
                 // fragmentIons
                 let ionTypes = config.fragmentation.cterm_ions.concat(config.fragmentation.nterm_ions);
-                if (config.fragmentation.add_precursor){
+                if (config.fragmentation.add_precursor !== false){
                     ionTypes.push("peptide");
                 }
                 let ions = [];
