@@ -31,9 +31,9 @@ export const networkPageSpinner = new Spinner({
     radius: 45, // The radius of the inner circle
 });
 
-export function main(serverFlavour, dataPath, loadGoTerms=true) {
+export function main(serverFlavour, dataPath, loadGoTerms = true) {
     console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "loadGoTerms:", loadGoTerms);
-    assert((serverFlavour == "XI1") || (serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
+    assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
         "serverFlavour must be one of XIVIEW.ORG, XI1, XI2 or PRIDE");
 
     const spinTarget = d3.select("#main").node();
@@ -68,7 +68,7 @@ export function main(serverFlavour, dataPath, loadGoTerms=true) {
                 const id_file_names = [];
                 searches.forEach(function (search) {
                     id_file_names.push(search.id + ": "
-                        + (search.identification_file_name? search.identification_file_name : search.name));
+                        + (search.identification_file_name ? search.identification_file_name : search.name));
                 });
                 document.title = id_file_names.join(", ");
             } else {
@@ -155,63 +155,107 @@ export function main(serverFlavour, dataPath, loadGoTerms=true) {
     blosumLoading();
 }
 
-export function validationPage(serverFlavour, dataPath, loadGoTerms=false) {
+export function validationPage(serverFlavour, dataPath, loadGoTerms = false) {
 
-    const spinner = new Spinner({scale: 5}).spin(d3.select("#topDiv").node());
+    const spinTarget = d3.select("#main").node();
+    networkPageSpinner.spin(spinTarget);
 
-    const success = function (text) {
-        const json = JSON.parse(text);
-        modelsEssential(serverFlavour, json);
-        window.compositeModelInst.set("serverFlavour", serverFlavour);
-        window.compositeModelInst.set("dataPath", dataPath);
-        const searches = window.compositeModelInst.get("clmsModel").get("searches");
-        document.title = "Validate " + Array.from(searches.keys()).join();
-        window.split = Split(["#topDiv", "#bottomDiv"], {
-            direction: "vertical",
-            sizes: [60, 40], minSize: [200, 10],
-            onDragEnd: function () {
+    const success = function (json) {
+        try {
+            if (json.error) {
+                throw "Error from server";
+            }
+            if (json.times) {
+                json.times.io = (Date.now() / 1000) - json.times.endAbsolute;
+                json.times.overall = json.times.io + (json.times.endAbsolute - json.times.startAbsolute);
+            }
+            console.log("TIME t2", performance.now(), json.times);
+            //console.log (JSON.stringify(json));
+            //console.log (json);
+
+            if (json.warn) {
+                displayError(function () {
+                    return true;
+                }, "Warning <p class='errorReason'>" + json.warn + "</p>");
+            }
+
+            modelsEssential(serverFlavour, json);
+            window.compositeModelInst.set("serverFlavour", serverFlavour);
+            window.compositeModelInst.set("dataPath", dataPath);
+            const searches = window.compositeModelInst.get("clmsModel").get("searches");
+            document.title = "Validate " + Array.from(searches.keys()).join();
+            window.split = Split(["#topDiv", "#bottomDiv"], {
+                direction: "vertical",
+                sizes: [60, 40], minSize: [200, 10],
+                onDragEnd: function () {
+                    window.vent.trigger("resizeSpectrumSubViews", true);
+                }
+            });
+
+            // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
+            d3.select("body").append("div")
+                .attr("id", "spectrumSettingsWrapper")
+                .attr("class", "dynDiv");
+            viewsEssential({"specWrapperDiv": "#topDiv", spectrumToTop: false});
+
+            window.vent.trigger("spectrumShow", true);
+
+            const allMatches = window.compositeModelInst.get("clmsModel").get("matches");
+            window.compositeModelInst.setMarkedMatches("selection", allMatches);
+
+            // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
+            // so we run it again here, doesn't do any harm
+            ByRei_dynDiv.init.main();
+
+            // eslint-disable-next-line no-unused-vars
+            const resize = function (event) {
                 window.vent.trigger("resizeSpectrumSubViews", true);
+                const alts = d3.select("#alternatives");
+                const w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
+                alts.attr("style", "width:" + w + "px;"); //dont know why d3 style() aint working
+            };
+
+            window.onresize = resize;
+
+            resize();
+            networkPageSpinner.stop(); // stop spinner
+
+        } catch (err) {
+            displayError(function () {
+                return true;
+            }, "An error has occurred. \t&#9785;<p class='errorReason'>"
+                + (json.error ? json.error : err.stack)
+                + "</p>");
+            console.error("Error", err);
+            networkPageSpinner.stop();
+        }
+    };
+
+    if (window.location.search) {
+        // 1. Load spectrum matches, dont send all query string to php (ostensibly to help with caching)
+        // var urlChunkMap = parseURLQueryString (window.location.search.slice(1));
+        // var phpProps = _.pick (urlChunkMap, "upload", "sid", "auto",  "unval", "linears", "lowestScore", "highestScore", "decoys");
+        // var newQueryString = d3.entries(phpProps).map(function (entry) { return entry.key+"="+entry.value; }).join("&");
+        // console.log ("ucm", urlChunkMap, newQueryString);
+        const url = dataPath + window.location.search;
+
+        d3.json(url, function (error, json) {
+            if (!error) {
+                success(json);
+            } else {
+                displayError(function () {
+                    return true;
+                }, "An error has occurred. \t&#9785;<p class='errorReason'>"
+                    + (error.statusText ? error.statusText : error) + "</p>"
+                    + "<a href='" + url + "'>Try loading data only.</a>");
+                console.error("Error", error);
             }
         });
 
-        // need to make #spectrumSettingsWrapper before we can turn it into a backbone view later. mjg 27/11/17
-        d3.select("body").append("div")
-            .attr("id", "spectrumSettingsWrapper")
-            .attr("class", "dynDiv");
-        viewsEssential({"specWrapperDiv": "#topDiv", spectrumToTop: false});
-
-        window.vent.trigger("spectrumShow", true);
-
-        const allMatches = window.compositeModelInst.get("clmsModel").get("matches");
-        window.compositeModelInst.setMarkedMatches("selection", allMatches);
-
-        // ByRei_dynDiv by default fires this on window.load (like this whole block), but that means the SpectrumSettingsView is too late to be picked up
-        // so we run it again here, doesn't do any harm
-        ByRei_dynDiv.init.main();
-
-        // eslint-disable-next-line no-unused-vars
-        const resize = function (event) {
-            window.vent.trigger("resizeSpectrumSubViews", true);
-            const alts = d3.select("#alternatives");
-            const w = alts.node().parentNode.parentNode.getBoundingClientRect().width - 20;
-            alts.attr("style", "width:" + w + "px;"); //dont know why d3 style() aint working
-        };
-
-        window.onresize = resize;
-
-        resize();
-        spinner.stop(); // all done, stop spinner
-
-    };
-
-    const url = dataPath + window.location.search;
-
-
-    d3.text(url, function (error, text) {
-        if (!error) {
-            success(text);
-        }
-    });
+    } else {
+        networkPageSpinner.stop(); // stop spinner
+        success({times: {}});   // bug fix for empty searches
+    }
 
 }
 
