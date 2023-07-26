@@ -140,16 +140,20 @@ export function main(serverFlavour, dataPath, loadGoTerms = true) {
         success({times: {}});   // bug fix for empty searches
     }
 
-    // 2. Can load GO file in parallel - saves I/O time on initialising (whichever is shorter, go terms or spectrum matches)
-    const goUrl = "./go.obo";
-    d3.text(goUrl, function (error, txt) {
-        if (error) {
-            console.log("error", error, "for", goUrl, arguments);
-        } else {
-            window.go = loadGOAnnotations(txt);  // temp store until CLMS model is built
-            allDataLoaded();
-        }
-    });
+    if (serverFlavour != "PRIDE") {
+        // 2. Can load GO file in parallel - saves I/O time on initialising (whichever is shorter, go terms or spectrum matches)
+        const goUrl = "./go.obo";
+        d3.text(goUrl, function (error, txt) {
+            if (error) {
+                console.log("error", error, "for", goUrl, arguments);
+            } else {
+                window.go = loadGOAnnotations(txt);  // temp store until CLMS model is built
+                allDataLoaded();
+            }
+        });
+    } else {
+        allDataLoaded();
+    }
 
     // 3. Can load BLOSUM matrices in parallel - saves a little bit of initialisation
     blosumLoading();
