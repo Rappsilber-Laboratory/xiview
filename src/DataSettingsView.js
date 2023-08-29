@@ -843,7 +843,7 @@ export const DataSettingsView = SettingsView.extend({
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].mass,
-                        annotation_mod_match[0].aminoAcids,
+                        _.union(annotation_mod_match[0].aminoAcids, mod.aminoAcids),
                     ];
                 }
 
