@@ -393,7 +393,8 @@ export const DataSettingsView = SettingsView.extend({
             mods_xi2.push({
                 "name": mods[i],
                 "specificity": modSpec,
-                "mass": modMasses[i]
+                "mass": modMasses[i],
+                "type": "variable",  // type doesn't matter for annotation but is required
             });
         }
         xi2_config.modification.modifications = mods_xi2;
