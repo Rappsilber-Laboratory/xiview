@@ -415,7 +415,7 @@ export const FilterViewBB = Backbone.View.extend({
         initMinigramFilterGroup.call(this, {
             attr: "matchScoreCutoff",
             extentProperty: "scoreExtent",
-            label: "Match Score",
+            label: window.compositeModelInst.get("clmsModel").get("primaryScore").score_name,
             id: "matchScore",
             groupName: "Scores",
             tooltipIntro: "Filter out matches with scores"

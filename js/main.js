@@ -104,7 +104,8 @@ export function main(serverFlavour, dataPath, loadGoTerms = true) {
                 return true;
             }, "An error has occurred. \t&#9785;<p class='errorReason'>"
                 + (json.error ? json.error : err.stack)
-                + "</p>");
+                + "</p>"
+                + "<a href='" + dataPath + window.location.search + "'>Try loading data only.</a>");
             console.error("Error", err);
             networkPageSpinner.stop();
         }

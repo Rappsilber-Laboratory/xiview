@@ -367,6 +367,7 @@ export function modelsEssential (serverFlavour, options) {
         matchScoreCutoff: scoreExtentInstance.slice(),
         //distanceCutoff: [0, 250],
         searchGroups: getSearchGroups(clmsModelInst),
+        primaryScore: clmsModelInst.get("primaryScore"),
     };
     // const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
     // filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
