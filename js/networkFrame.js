@@ -55,7 +55,8 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
-import {loadSpectrum} from "../../CLMS-model/src/loadSpectrum";
+import {prideLoadSpectrum} from "../../CLMS-model/src/pride-load-spectrum";
+import {xi2LoadSpectrum} from "../../CLMS-model/src/xi2-load-spectrum";
 import {networkPageSpinner} from "./main";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
@@ -66,6 +67,14 @@ _.extend(window.vent, Backbone.Events);
 export function postDataLoaded () {
     console.log("DATA LOADED AND WINDOW LOADED");
     networkPageSpinner.stop();
+
+    // check server flavour
+    const serverFlavour = window.compositeModelInst.get("clmsModel").get("serverFlavour");
+    if (serverFlavour === "PRIDE") {
+        window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
+    } else if (serverFlavour === "XI2") {
+        window.compositeModelInst.loadSpectrum = xi2LoadSpectrum;
+    }
 
     window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
     window.go = null;//todo - get rid of use of window.*
@@ -345,7 +354,7 @@ export function modelsEssential (serverFlavour, options) {
     );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = new SearchResultsModel(serverFlavour);
+    const clmsModelInst = new SearchResultsModel({serverFlavour: serverFlavour});
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -936,9 +945,9 @@ export function viewsEssential (options) {
         if (match) {
             if (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1") {
                 const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
-                loadSpectrum(match, randId);
+                window.compositeModelInst.loadSpectrum(match, randId);
             } else {
-                loadSpectrum(match);
+                window.compositeModelInst.loadSpectrum(match);
             }
         } else {
             // xispec_wrapper.clear();
