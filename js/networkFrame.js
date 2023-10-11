@@ -57,6 +57,7 @@ import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {prideLoadSpectrum} from "../../CLMS-model/src/pride-load-spectrum";
 import {xi2LoadSpectrum} from "../../CLMS-model/src/xi2-load-spectrum";
+import {oldLoadSpectrum} from "../../CLMS-model/src/old-load-spectrum";
 import {networkPageSpinner} from "./main";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
@@ -74,6 +75,8 @@ export function postDataLoaded () {
         window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
     } else if (serverFlavour === "XI2") {
         window.compositeModelInst.loadSpectrum = xi2LoadSpectrum;
+    } else if (serverFlavour === "XIVIEW.ORG") {
+        window.compositeModelInst.loadSpectrum = oldLoadSpectrum;
     }
 
     window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
@@ -86,27 +89,27 @@ export function postDataLoaded () {
 
     //init annotation types
     let annotationTypes = [
-        new AnnotationType({
-            category: "AA",
-            type: "Digestible",
-            tooltip: "Mark Digestible Residues",
-            source: "Search",
-            colour: "#1f78b4",
-        }),
-        new AnnotationType({
-            category: "AA",
-            type: "Crosslinkable-1",
-            tooltip: "Mark CrossLinkable residues (first or only reactive group)",
-            source: "Search",
-            colour: "#a6cee3",
-        }),
-        new AnnotationType({
-            category: "AA",
-            type: "Crosslinkable-2",
-            tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
-            source: "Search",
-            colour: "#a6cee3",
-        }),
+        // new AnnotationType({
+        //     category: "AA",
+        //     type: "Digestible",
+        //     tooltip: "Mark Digestible Residues",
+        //     source: "Search",
+        //     colour: "#1f78b4",
+        // }),
+        // new AnnotationType({
+        //     category: "AA",
+        //     type: "Crosslinkable-1",
+        //     tooltip: "Mark CrossLinkable residues (first or only reactive group)",
+        //     source: "Search",
+        //     colour: "#a6cee3",
+        // }),
+        // new AnnotationType({
+        //     category: "AA",
+        //     type: "Cross-linkable-2",
+        //     tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
+        //     source: "Search",
+        //     colour: "#a6cee3",
+        // }),
         new AnnotationType({
             category: "Alignment",
             type: "PDB aligned region",
@@ -874,7 +877,7 @@ export function viewsEssential (options) {
         }
     })
         .listenTo(window.vent, "individualMatchSelected", function (match) {
-            if (match && (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1")) {
+            if (match && (compModel.get("serverFlavour") === "XIVIEW.ORG")) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match
@@ -943,7 +946,7 @@ export function viewsEssential (options) {
     // used to transport one Match between views
     xispec_wrapper.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
-            if (compModel.get("serverFlavour") === "XIVIEW.ORG" || compModel.get("serverFlavour") === "XI1") {
+            if (compModel.get("serverFlavour") === "XIVIEW.ORG") {
                 const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
                 window.compositeModelInst.loadSpectrum(match, randId);
             } else {

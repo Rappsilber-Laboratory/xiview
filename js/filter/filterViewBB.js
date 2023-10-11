@@ -90,23 +90,6 @@ export const FilterViewBB = Backbone.View.extend({
                     id: "fail"
                 },
                 {
-                    label: "A",
-                    id: "A"
-                },
-                {
-                    label: "B",
-                    id: "B"
-                },
-                {
-                    label: "C",
-                    id: "C"
-                },
-                {
-                    label: "Auto",
-                    id: "AUTO",
-                    tooltip: "Show autovalidated matches"
-                },
-                {
                     label: "Unval.",
                     id: "unval",
                     tooltip: "Show unvalidated matches"
@@ -367,14 +350,9 @@ export const FilterViewBB = Backbone.View.extend({
         groupIDs.push("multipleGroup");
 
         addFilterGroup.call(this, {id: "filterModeDiv", groupName: "Mode"}, ["manualMode", "fdrMode"]);
-        if (window.compositeModelInst.get("serverFlavour") !== "XI1") {
-            addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
-        } else {
-            addFilterGroup.call(this, {
-                id: "validationStatus",
-                groupName: "Validation"
-            }, ["A", "B", "C", "AUTO", "unval"]);
-        }
+
+        addFilterGroup.call(this, {id: "validationStatus", groupName: "Threshhold"}, ["pass", "fail"]);
+
         addFilterGroup.call(this, {
             id: "targetDecoy",
             groupName: "TD"

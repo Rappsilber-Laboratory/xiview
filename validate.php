@@ -11,14 +11,12 @@ header('Content-type: text/html; charset=utf-8');
 <html>
     <head>
         <?php
-            $sid = urldecode($_GET["sid"]);
-
-            $pattern = '/[^0-9,\-]/';
-            if (preg_match($pattern, $sid)){
-                header();
-                echo ("<!DOCTYPE html>\n<html><head></head><body>404.</body></html>");
-                exit;
-            }
+            // $sid = urldecode($_GET["upload"]);
+            //
+            // $pattern = '/[^0-9,\-]/';
+            // if (preg_match($pattern, $sid)){
+            //     exit();
+            // }
             $pageName = "Validation";
         ?>
         <title><?php echo $pageName ?></title>
@@ -36,13 +34,14 @@ header('Content-type: text/html; charset=utf-8');
         <!-- Main -->
         <div id="main">
             <div class="mainContent">
-                <div class="page-header" style="position:relative">
+
+                <div class="page-header">
                     <i class="fa fa-home fa-xi" onclick="window.location = '../history/history.html';" title="Return to search history"></i>
                     <span class="headerLabel">
                         <?php echo $_SESSION['session_name'] ?>
                     </span>
                     <p id="expDropdownPlaceholder"></p>
-                    <button class='btn btn-1 btn-1a' onclick=<?php echo '"window.location = \'./network.php?sid='.$sid.'\'";' ?> title="View results">Done</button>
+                    <button class='btn btn-1 btn-1a' onclick="window.location = './network.php'+window.location.search;" title="View results">Done</button>
                 </div> <!-- page-header -->
                 <div id="topDiv"></div>
                 <div id="bottomDiv"></div>
@@ -60,7 +59,7 @@ header('Content-type: text/html; charset=utf-8');
                     include('../xiSpecConfig.php');
                 }
             ?>
-            xiview.validationPage("XI1", "../CLMS-model/php/spectrumMatches.php");
+            xiview.validationPage("XIVIEW.ORG", "../CLMS-model/php/spectrumMatches.php");
 
         //]]>
         </script>

@@ -47,12 +47,6 @@ export class FilterModel extends Backbone.Model {
             //validation status
             pass: "boolean",
             fail: "boolean",
-            A: "boolean",
-            B: "boolean",
-            C: "boolean",
-            Q: "boolean",
-            unval: "boolean",
-            AUTO: "boolean",
             decoys: "boolean",
             targets: "boolean",
             //distance
@@ -92,12 +86,6 @@ export class FilterModel extends Backbone.Model {
             //validation status
             pass: true,
             fail: false,
-            A: true,
-            B: true,
-            C: true,
-            Q: true,
-            unval: false,
-            AUTO: false, // if u change this to true one of the unit tests will fail
             decoys: true,
             targets: true,
             //distance
@@ -291,23 +279,13 @@ export class FilterModel extends Backbone.Model {
     }
 
     validationStatusFilter(match) {
-        if (window.compositeModelInst.get("serverFlavour") !== "XI1") {
-            if (this.get("pass") && match.passThreshold == true) {
-                return true;
-            }
-            if (this.get("fail") && match.passThreshold == false) {
-                return true;
-            }
-            return false;
-        } else {
-            const vChar = match.validated;
-            if (vChar != "R") {
-                if (this.get(vChar) || this.get(this.valMap.get(vChar))) return true;
-                if (match.autovalidated && this.get("AUTO")) return true;
-                if (!match.autovalidated && !vChar && this.get("unval")) return true;
-            }
-            return false;
+        if (this.get("pass") && match.passThreshold == true) {
+            return true;
         }
+        if (this.get("fail") && match.passThreshold == false) {
+            return true;
+        }
+        return false;
     }
 
     // Test if there are proteins at both ends of a match that are in the current pdb file.
@@ -490,7 +468,7 @@ export class FilterModel extends Backbone.Model {
     // If activated, this only passes matches whose search ids belong to particular groups
     groupFilter(match) {
         if (this.possibleSearchGroups.length > 1) {
-            const matchGroup = this.precalcedSearchToGroupMap.get(match.datasetId);
+            const matchGroup = this.precalcedSearchToGroupMap.get(match.primaryDataSetId);
             return this.precalcedSearchGroupsSet.has(matchGroup);
         }
         return true;
@@ -500,9 +478,9 @@ export class FilterModel extends Backbone.Model {
     groupFilter2(matchArr) {
         if (matchArr.length > 1 && this.possibleSearchGroups.length > 1 && !this.get("multipleGroup")) {
             const smap = this.precalcedSearchToGroupMap;
-            const firstMatchGroup = smap.get(matchArr[0].match.datasetId);
+            const firstMatchGroup = smap.get(matchArr[0].match.primaryDataSetId);
             return matchArr.every(function (match) {
-                return smap.get(match.match.datasetId) === firstMatchGroup;
+                return smap.get(match.match.primaryDataSetId) === firstMatchGroup;
             }, this);
         }
         return true;
