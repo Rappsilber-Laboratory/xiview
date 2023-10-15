@@ -1,9 +1,5 @@
 <?php
 session_start();
-if (!$_SESSION['session_name']) {
-    header("location:login.html");
-    exit;
-}
 header('Content-type: text/html; charset=utf-8');
 ?>
 
