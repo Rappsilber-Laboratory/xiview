@@ -94,7 +94,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
             calcMass: "Calc Mass",
             massError: "Mass Error (ppm)",
             missingPeaks: "Missing Peaks",
-            precursorIntensity: "Intensity",
+            precursorIntensity: "PC Intensity",
             elutionStart: "Elut. Start",
             elutionEnd: "Elut. End",
             expMissedCleavages: "Experimental Max. Missed Cleavages",
@@ -124,7 +124,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return !window.compositeModelInst.get("serverFlavour") === "XI2";
             }, //CLMS.model.manualValidatedFound; },
             "precursorIntensity": function() {
-                return false;
+                return window.compositeModelInst.get("serverFlavour") === "XI2";
             },
             "elutionStart": function() {
                 return true;
