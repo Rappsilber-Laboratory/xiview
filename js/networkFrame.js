@@ -31,7 +31,7 @@ import {
 import {TooltipViewBB} from "./views/tooltipViewBB";
 import {checkBoxView} from "./ui-utils/checkbox-view";
 import {xiNetControlsViewBB} from "./views/xiNetControlsViewBB";
-import {CrosslinkViewer} from "../../crosslink-viewer/src/crosslink-viewer-BB";
+import {CrosslinkViewer} from "../../crosslink-viewer/js/views/xinet/crosslink-viewer-BB";
 import {AnnotationType} from "./model/annotation-model-collection";
 import {AnnotationTypeCollection} from "./model/annotation-model-collection";
 import {KeyViewBB} from "./views/key/keyViewBB";
