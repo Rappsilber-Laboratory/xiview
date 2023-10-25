@@ -69,16 +69,6 @@ export function postDataLoaded () {
     console.log("DATA LOADED AND WINDOW LOADED");
     networkPageSpinner.stop();
 
-    // check server flavour
-    const serverFlavour = window.compositeModelInst.get("clmsModel").get("serverFlavour");
-    if (serverFlavour === "PRIDE") {
-        window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
-    } else if (serverFlavour === "XI2") {
-        window.compositeModelInst.loadSpectrum = xi2LoadSpectrum;
-    } else if (serverFlavour === "XIVIEW.ORG") {
-        window.compositeModelInst.loadSpectrum = oldLoadSpectrum;
-    }
-
     window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
     window.go = null;//todo - get rid of use of window.*
 
@@ -453,6 +443,16 @@ export function modelsEssential (serverFlavour, options) {
         minigramModels: {distance: minigramModels[1], score: minigramModels[0]},
         serverFlavour: serverFlavour,
     });
+    // check server flavour
+    // const serverFlavour = window.compositeModelInst.get("clmsModel").get("serverFlavour");
+    if (serverFlavour === "PRIDE") {
+        window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
+    } else if (serverFlavour === "XI2") {
+        window.compositeModelInst.loadSpectrum = xi2LoadSpectrum;
+    } else if (serverFlavour === "XIVIEW.ORG") {
+        window.compositeModelInst.loadSpectrum = oldLoadSpectrum;
+    }
+
 
     //moving this to end of allDataLoaded - think validation page needs this, TODO, check
     //window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
@@ -882,7 +882,7 @@ export function viewsEssential (options) {
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match
                 const dataPath = window.compositeModelInst.get("dataPath");
-                const url = dataPath + "?sid=" +
+                const url = dataPath + "?upload=" +
                     this.model.get("clmsModel").get("sid") +
                     "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
                 const self = this;
@@ -894,7 +894,7 @@ export function viewsEssential (options) {
                         const returnedMatchID = json.matchid;
                         if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-                            const altModel = new SearchResultsModel();
+                            const altModel = new SearchResultsModel({serverFlavour: compModel.get("serverFlavour")});
                             altModel.parseJSON(json);
                             const allCrossLinks = Array.from(altModel.get("crosslinks").values());
                             // empty selection first
@@ -1028,7 +1028,7 @@ export function viewsEssential (options) {
             menu: [{
                 name: "Xi Docs",
                 func: function () {
-                    window.open("../xidocs/html/xiview.html", "_blank");
+                    window.open("./docs/html/xiview.html", "_blank");
                 },
                 tooltip: "Documentation for xiVIEW"
             }, {
