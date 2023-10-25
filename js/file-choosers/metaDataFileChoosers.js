@@ -107,7 +107,7 @@ export const ProteinMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend
             buttonText: "Select Protein MetaData CSV File",
             loadedEventName: "proteinMetadataUpdated",
             parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Proteins",
-            docUrl: "../xidocs/html/import/proteinmeta.html",
+            docUrl: "./docs/html/import/proteinmeta.html",
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
         ProteinMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
@@ -129,7 +129,7 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
             buttonText: "Select Cross-Link or PPI MetaData CSV File",
             loadedEventName: "linkMetadataUpdated",
             parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Cross-Links",
-            docUrl: "../xidocs/html/import/crossmeta.html"
+            docUrl: "./docs/html/import/crossmeta.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
         LinkMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
@@ -151,7 +151,7 @@ export const UserAnnotationsMetaDataFileChooserBB = AbstractMetaDataFileChooserB
             buttonText: "Select User-Defined Annotations CSV File",
             loadedEventName: "userAnnotationsUpdated",
             parseMsgTemplate: "Parsed <%= attrCount %> Annotation Types across <%= itemCount %> Annotations, these have been added to the 'ANNOTATIONS' menu and can be enabled there.",
-            docUrl: "../xidocs/html/import/userannotations.html"
+            docUrl: "./docs/html/import/userannotations.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
         UserAnnotationsMetaDataFileChooserBB.__super__.initialize.apply(this, arguments);
