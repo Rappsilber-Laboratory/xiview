@@ -82,7 +82,7 @@ export function main(serverFlavour, dataPath, loadGoTerms = true) {
                         window.oldSplitterProportions = window.split.getSizes();
                     },
                     gutterStyle: function () {
-                        return {"margin": "0 10px", "height": "10px"};
+                        return {/*"margin": "0 10px",*/ "height": "10px"};
                     }
                 },
             );
