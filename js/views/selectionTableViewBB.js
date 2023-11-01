@@ -123,14 +123,26 @@ export const SelectionTableViewBB = Backbone.View.extend({
             "validated": function() {
                 return !window.compositeModelInst.get("serverFlavour") === "XI2";
             }, //CLMS.model.manualValidatedFound; },
+            homom: function () {
+                return false;
+            },
+            group: function () {
+                return window.compositeModelInst.get("serverFlavour") !== "PRIDE";
+            },
             "precursorIntensity": function() {
                 return window.compositeModelInst.get("serverFlavour") === "XI2";
             },
             "elutionStart": function() {
-                return true;
+                return window.compositeModelInst.get("serverFlavour") === "XI2";
             },
             "elutionEnd": function() {
                 return false;
+            },
+            "missingPeaks": function() {
+                return window.compositeModelInst.get("serverFlavour") === "XI2";
+            },
+            "modificationCount": function() {
+                return window.compositeModelInst.get("serverFlavour") === "XI2";
             },
             "expMissedCleavages": function() {
                 return false;
@@ -168,7 +180,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         };
         this.cellFuncs = {
             id: function (d) {
-                return d.id;
+                return d.psmId;
             },
             ambiguity: function (d) {
                 return d.matchedPeptides[0].prt.length *
@@ -205,12 +217,12 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return pepPosConcat(d, 1);
             },
             pepSeq1raw: function (d) {
-                const seqMods = d.matchedPeptides[0].seq_mods;
+                const seqMods = d.pepSeq1_mods;
                 return emphasiseLinkedResidue(seqMods, d.linkPos1);
             },
             pepSeq2raw: function (d) {
-                const dmp1 = d.matchedPeptides[1];
-                return dmp1 ? emphasiseLinkedResidue(dmp1 ? dmp1.seq_mods : "", d.linkPos2) : "";
+                const dmp1 = d.pepSeq2_mods;
+                return dmp1 ? emphasiseLinkedResidue(dmp1 ? dmp1 : "", d.linkPos2) : "";
             },
             linkPos1: function (d) {
                 return d.linkPos1;
