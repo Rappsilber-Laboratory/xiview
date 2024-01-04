@@ -80,7 +80,7 @@ export class FilterModel extends Backbone.Model {
             selfLinks: true,
             homomultimericLinks: true,
             notHomomult: true,
-            ambig: false,
+            ambig: true,
             aaApart: 0,
             pepLength: 1,
             //validation status
