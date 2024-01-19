@@ -55,9 +55,9 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
-import {prideLoadSpectrum} from "../../CLMS-model/src/pride-load-spectrum";
-import {xi2LoadSpectrum} from "../../CLMS-model/src/xi2-load-spectrum";
-import {oldLoadSpectrum} from "../../CLMS-model/src/old-load-spectrum";
+import {prideLoadSpectrum} from "../../CLMS-model/src/load-spectrum/pride-load-spectrum";
+import {xi2LoadSpectrum} from "../../CLMS-model/src/load-spectrum/xi2-load-spectrum";
+import {oldLoadSpectrum} from "../../CLMS-model/src/load-spectrum/old-load-spectrum";
 import {networkPageSpinner} from "./main";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
