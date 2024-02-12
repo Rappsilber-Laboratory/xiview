@@ -34,7 +34,7 @@ export const networkPageSpinner = new Spinner({
 export function main(serverFlavour, dataPath, loadGoTerms = true) {
     console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "loadGoTerms:", loadGoTerms);
     assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
-        "serverFlavour must be one of XIVIEW.ORG, XI1, XI2 or PRIDE");
+        "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
 
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -301,7 +301,53 @@ function testSetupNew(cbfunc) {
         });
 
         blosumLoading({url: "../R/blosums.json"});
-        models("XI1", options);
+        models("XIVIEW.ORG", options);
+
+        window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
+
+
+
+            {
+            "wrong mass SDA ": {
+            "searches": ["24070"],
+            "linkables": [
+                new Set([
+                    "R",
+                    "H",
+                    "K",
+                    "D",
+                    "E",
+                    "S",
+                    "T",
+                    "N",
+                    "Q",
+                    "C",
+                    "U",
+                    "G",
+                    "P",
+                    "A",
+                    "V",
+                    "I",
+                    "L",
+                    "M",
+                    "F",
+                    "Y",
+                    "W"
+                ]),
+                new Set([
+                    "K",
+                    "S",
+                    "Y",
+                    "T",
+                    "NTERM"
+                ])
+            ],
+                "name": "wrong mass SDA ",
+                "id": 13,
+                "heterobi": true
+        }
+        });
+
         pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
     });
 }

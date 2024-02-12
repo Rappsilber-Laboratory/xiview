@@ -59,6 +59,7 @@ import {prideLoadSpectrum} from "../../CLMS-model/src/load-spectrum/pride-load-s
 import {xi2LoadSpectrum} from "../../CLMS-model/src/load-spectrum/xi2-load-spectrum";
 import {oldLoadSpectrum} from "../../CLMS-model/src/load-spectrum/old-load-spectrum";
 import {networkPageSpinner} from "./main";
+import assert from "assert";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
@@ -262,6 +263,8 @@ export function blosumLoading (options) {
 }
 
 export function models (serverFlavour, options) {
+    assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
+        "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
 
     // define alignment model and listeners first, so they're ready to pick up events from other models
     const alignmentCollectionInst = new ProtAlignCollection();
