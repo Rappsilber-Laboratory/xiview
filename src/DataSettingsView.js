@@ -393,7 +393,8 @@ export const DataSettingsView = SettingsView.extend({
             mods_xi2.push({
                 "name": mods[i],
                 "specificity": modSpec,
-                "mass": modMasses[i]
+                "mass": modMasses[i],
+                "type": "variable",  // type doesn't matter for annotation but is required
             });
         }
         xi2_config.modification.modifications = mods_xi2;
@@ -406,10 +407,10 @@ export const DataSettingsView = SettingsView.extend({
         for (let i = 0; i < losses.length; i++) {
             // split after , and trim whitespaces
             let lossSpec = lossSpecs[i].split(",").map(function(l){
-                return l.trim();
-                // let ret = l.trim();
-                // if (['CTerm', 'NTerm'])
-                // return ret;
+                let ret = l.trim();
+                if (["nterm", "cterm"].indexOf(ret.toLowerCase()) !== -1)
+                    ret = ret.toLowerCase();
+                return ret;
             });
             loss_xi2.push({
                 "name": losses[i],
@@ -843,7 +844,7 @@ export const DataSettingsView = SettingsView.extend({
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].id,
                         annotation_mod_match[0].mass,
-                        annotation_mod_match[0].aminoAcids,
+                        _.union(annotation_mod_match[0].aminoAcids, mod.aminoAcids),
                     ];
                 }
 
