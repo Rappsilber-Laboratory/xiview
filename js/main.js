@@ -31,10 +31,14 @@ export const networkPageSpinner = new Spinner({
     radius: 45, // The radius of the inner circle
 });
 
-export function main(serverFlavour, dataPath, loadGoTerms = true) {
-    console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "loadGoTerms:", loadGoTerms);
+export function main(serverFlavour, dataPath, peakListPath, annotatorURL, loadLayoutPath, saveLayoutPath) {
+    console.log("serverFlavour:", serverFlavour, "dataPath:", dataPath, "peakListPath:", peakListPath,
+        "annotatorURL:", annotatorURL, "loadLayoutPath:", loadLayoutPath, "saveLayoutPath:", saveLayoutPath);
     assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
         "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
+
+    window.xiAnnotRoot = annotatorURL;
+    window.peakListUrl = peakListPath;
 
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -63,6 +67,11 @@ export function main(serverFlavour, dataPath, loadGoTerms = true) {
 
             models(serverFlavour, json);
             window.compositeModelInst.set("dataPath", dataPath);
+            window.compositeModelInst.set("peakListPath", peakListPath);
+            window.compositeModelInst.set("annotatorURL", annotatorURL);
+            window.compositeModelInst.set("loadLayoutPath", loadLayoutPath);
+            window.compositeModelInst.set("saveLayoutPath", saveLayoutPath);
+
             const searches = window.compositeModelInst.get("clmsModel").get("searches");
             if (!window.compositeModelInst.get("clmsModel").isAggregatedData()) {
                 const id_file_names = [];
@@ -160,7 +169,11 @@ export function main(serverFlavour, dataPath, loadGoTerms = true) {
     blosumLoading();
 }
 
-export function validationPage(serverFlavour, dataPath, loadGoTerms = false) {
+export function validationPage(serverFlavour, dataPath, annotatorURL, peakListPath) {
+    assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
+        "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
+    window.xiAnnotRoot = annotatorURL;
+    window.peakListUrl = peakListPath;
 
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -304,49 +317,46 @@ function testSetupNew(cbfunc) {
         models("XIVIEW.ORG", options);
 
         window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
-
-
-
             {
-            "wrong mass SDA ": {
-            "searches": ["24070"],
-            "linkables": [
-                new Set([
-                    "R",
-                    "H",
-                    "K",
-                    "D",
-                    "E",
-                    "S",
-                    "T",
-                    "N",
-                    "Q",
-                    "C",
-                    "U",
-                    "G",
-                    "P",
-                    "A",
-                    "V",
-                    "I",
-                    "L",
-                    "M",
-                    "F",
-                    "Y",
-                    "W"
-                ]),
-                new Set([
-                    "K",
-                    "S",
-                    "Y",
-                    "T",
-                    "NTERM"
-                ])
-            ],
-                "name": "wrong mass SDA ",
-                "id": 13,
-                "heterobi": true
-        }
-        });
+                "wrong mass SDA ": {
+                    "searches": ["24070"],
+                    "linkables": [
+                        new Set([
+                            "R",
+                            "H",
+                            "K",
+                            "D",
+                            "E",
+                            "S",
+                            "T",
+                            "N",
+                            "Q",
+                            "C",
+                            "U",
+                            "G",
+                            "P",
+                            "A",
+                            "V",
+                            "I",
+                            "L",
+                            "M",
+                            "F",
+                            "Y",
+                            "W"
+                        ]),
+                        new Set([
+                            "K",
+                            "S",
+                            "Y",
+                            "T",
+                            "NTERM"
+                        ])
+                    ],
+                    "name": "wrong mass SDA ",
+                    "id": 13,
+                    "heterobi": true
+                }
+            });
 
         pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
     });

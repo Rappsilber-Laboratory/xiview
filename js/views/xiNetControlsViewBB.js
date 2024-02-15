@@ -32,7 +32,10 @@ export const xiNetControlsViewBB = Backbone.View.extend({
     },
 
     saveLayout: function () {
-        if (window.compositeModelInst.get("serverFlavour") === "XIVIEW.ORG" || window.compositeModelInst.get("serverFlavour") === "XI1") {
+        // PRIDE - no saved layouts
+        // XI2 - anyone with url can save layout
+        // XIVIEW.ORG - only logged in users can save layout
+        if (window.compositeModelInst.get("serverFlavour") === "XIVIEW.ORG") {
             const xmlhttp = new XMLHttpRequest();
             const url = "./php/isLoggedIn.php";
             xmlhttp.open("POST", url, true);
@@ -73,7 +76,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         } else if (window.compositeModelInst.get("serverFlavour") === "XI2") {
             const callback = function (layoutJson) {
                 const xmlhttp = new XMLHttpRequest();
-                const url = "/save_layout"; // todo - fix
+                const url = this.model.get("saveLayoutPath");
                 xmlhttp.open("POST", url, true);
                 //Send the proper header information along with the request
                 xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -324,10 +327,7 @@ const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
         xiNetLayoutListViewBB.__super__.setVis.call(self, show);
         if (show) {
             const xmlhttp = new XMLHttpRequest();
-            let url = "./php/loadLayout.php";
-            if (window.compositeModelInst.get("serverFlavour)" === "XI2")){
-                url = "/load_layout";
-            }
+            let url = this.model.get("loadLayoutPath");
             xmlhttp.open("POST", url, true);
             //Send the proper header information along with the request
             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
