@@ -28,7 +28,7 @@ export class FilterModel extends Backbone.Model {
         };
 
         this.patterns = {
-            pepSeq: "[A-Za-z]+-?[A-Za-z]*",
+            pepSeq: "[A-Za-z0-9]+-?[A-Za-z0-9]*",
         };
 
         this.types = {
