@@ -74,9 +74,10 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             };
             xmlhttp.send();
         } else if (window.compositeModelInst.get("serverFlavour") === "XI2") {
+            const self = this;
             const callback = function (layoutJson) {
                 const xmlhttp = new XMLHttpRequest();
-                const url = this.model.get("saveLayoutPath");
+                const url = self.model.get("saveLayoutPath");
                 xmlhttp.open("POST", url, true);
                 //Send the proper header information along with the request
                 xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
