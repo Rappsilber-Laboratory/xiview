@@ -169,7 +169,7 @@ export function main(serverFlavour, dataPath, peakListPath, annotatorURL, loadLa
     blosumLoading();
 }
 
-export function validationPage(serverFlavour, dataPath, annotatorURL, peakListPath) {
+export function validationPage(serverFlavour, dataPath, peakListPath, annotatorURL) {
     assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
         "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
     window.xiAnnotRoot = annotatorURL;
@@ -319,7 +319,7 @@ function testSetupNew(cbfunc) {
         window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
             {
                 "wrong mass SDA ": {
-                    "searches": ["24070"],
+                    "searches": new Set(["24070"]),
                     "linkables": [
                         new Set([
                             "R",
