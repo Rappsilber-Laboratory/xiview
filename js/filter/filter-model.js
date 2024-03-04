@@ -253,7 +253,7 @@ export class FilterModel extends Backbone.Model {
     scoreFilter(match) {
         const score = match.score();
         //defend against not having a score (from a CSV file without such a column)
-        if (score === undefined) {
+        if (isNaN(score)) {
             return true;
         }
         const msc = this.get("matchScoreCutoff");
