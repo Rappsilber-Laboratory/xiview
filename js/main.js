@@ -20,7 +20,7 @@ import {
 import {commonRegexes, displayError} from "./utils";
 import {loadGOAnnotations} from "./loadGO";
 import Split from "split.js";
-import {testCallback} from "../tests/tests";
+import {testCallback, testSetupNew} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
 import {repopulateNGL} from "./views/ngl/RepopulateNGL";
 import * as assert from "assert";
@@ -275,91 +275,6 @@ export function validationPage(serverFlavour, dataPath, peakListPath, annotatorU
         success({times: {}});   // bug fix for empty searches
     }
 
-}
-
-function testSetupNew(cbfunc) {
-    d3.json("10003.json", function (options) {
-        window.vent.listenToOnce(window.vent, "initialSetupDone", function () {
-
-            setupColourModels();
-
-            window.compositeModelInst.get("clmsModel").listenToOnce(window.compositeModelInst.get("clmsModel"), "change:distancesObj", function () {
-                console.log("distances obj changed");
-                cbfunc(window.compositeModelInst);
-            });
-
-            const stage = new NGL.Stage("ngl", {tooltip: false});
-
-            //CLMSUI.NGLUtils.repopulateNGL ({pdbCode: "1AO6", stage: stage, compositeModel: CLMSUI.compositeModelInst});
-
-            const pdbCode = "1AO6";
-
-            const pdbSettings = pdbCode.match(commonRegexes.multiPdbSplitter).map(function (code) {
-                return {
-                    id: code,
-                    pdbCode: code,
-                    uri: "rcsb://" + code,
-                    local: false,
-                    params: {calphaOnly: this.cAlphaOnly}
-                };
-            }, this);
-
-            repopulateNGL({
-                pdbSettings: pdbSettings,
-                stage: stage,
-                compositeModel: window.compositeModelInst
-            });
-
-            console.log("here");
-        });
-
-        blosumLoading({url: "../R/blosums.json"});
-        models("XIVIEW.ORG", options);
-
-        window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
-            {
-                "wrong mass SDA ": {
-                    "searches": new Set(["24070"]),
-                    "linkables": [
-                        new Set([
-                            "R",
-                            "H",
-                            "K",
-                            "D",
-                            "E",
-                            "S",
-                            "T",
-                            "N",
-                            "Q",
-                            "C",
-                            "U",
-                            "G",
-                            "P",
-                            "A",
-                            "V",
-                            "I",
-                            "L",
-                            "M",
-                            "F",
-                            "Y",
-                            "W"
-                        ]),
-                        new Set([
-                            "K",
-                            "S",
-                            "Y",
-                            "T",
-                            "NTERM"
-                        ])
-                    ],
-                    "name": "wrong mass SDA ",
-                    "id": 13,
-                    "heterobi": true
-                }
-            });
-
-        pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
-    });
 }
 
 export function test() {
