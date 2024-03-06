@@ -36,8 +36,7 @@ import {commonRegexes, toNearest} from "../js/utils";
 import {STRINGUtils} from "../js/file-choosers/stringUtils";
 import {getLinksCSV, getMatchesCSV, getResidueCount} from "../js/downloads";
 
-import QUnit from "qunit";
-
+import {start, module, test} from "qunit";
 import {blosumLoading, models, pretendLoad} from "../js/networkFrame";
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
@@ -49,17 +48,17 @@ export function testCallback(model) {
 
     const dseq1AO6 = "SEVAHRFKDLGEENFKALVLIAFAQYLQQCPFEDHVKLVNEVTEFAKTCVADESAENCDKSLHTLFGDKLCTVATLRETYGEMADCCAKQEPERNECFLQHKDDNPNLPRLVRPEVDVMCTAFHDNEETFLKKYLYEIARRHPYFYAPELLFFAKRYKAAFTECCQAADKAACLLPKLDELRDEGKASSAKQRLKCASLQKFGERAFKAWAVARLSQRFPKAEFAEVSKLVTDLTKVHTECCHGDLLECADDRADLAKYICENQDSISSKLKECCEKPLLEKSHCIAEVENDEMPADLPSLAADFVESKDVCKNYAEAKDVFLGMFLYEYARRHPDYSVVLLLRLAKTYETTLEKCCAAADPHECYAKVFDEFKPLVEEPQNLIKQNCELFEQLGEYKFQNALLVRYTKKVPQVSTPTLVEVSRNLGKVGSKCCKHPEAKRMPCAEDYLSVVLNQLCVLHEKTPVSDRVTKCCTESLVNRRPCFSALEVDETYVPKEFNAETFTFHADICTLSEKERQIKKQTALVELVKHKPKATKEQLKAVMDDFAAFVEKCCKADDKETCFAEEGKKLVAASQAA";
 
-    QUnit.start();
+    start();
 
-    QUnit.module("Parsing");
-    QUnit.test("JSON to Model Parsing", function (assert) {
+    module("Parsing");
+    test("JSON to Model Parsing", function (assert) {
         const expectedLinks = 162;
         const expectedMatches = 289;//291; // presuming change was due to change in validation status in xi1 db
         assert.deepEqual(clmsModel.get("crosslinks").size, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
         assert.deepEqual(clmsModel.get("matches").length, expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
     });
 
-    QUnit.test("Decoy Protein Matching", function (assert) {
+    test("Decoy Protein Matching", function (assert) {
         const decoys = [
             {id: "10001001", name: "REV", accession: "REV_P02768-A", is_decoy: true},
             {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
@@ -84,7 +83,7 @@ export function testCallback(model) {
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " decoy to real protein match, Passed!");
     });
 
-    QUnit.test("Search to Protein Mapping", function (assert) {
+    test("Search to Protein Mapping", function (assert) {
         const peptides = [
             {id: "1", prt: ["A"]},
             {id: "2", prt: ["A"]},
@@ -105,7 +104,7 @@ export function testCallback(model) {
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " search to protein map, Passed!");
     });
 
-    QUnit.test("Readable ID Generation", function (assert) {
+    test("Readable ID Generation", function (assert) {
         const decoys = [
             {id: "10001001", name: "REV", accession: "REV_P02768-A", is_decoy: true},
             {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
@@ -126,8 +125,8 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("Filtering");
-    QUnit.test("Filter testing", function (assert) {
+    module("Filtering");
+    test("Filter testing", function (assert) {
         let expectedLinks;// = 5;
         // model.get("filterModel").resetFilter().set ({AUTO: false});
         // // changes to filtermodel changes getFilteredCrossLinks contents via backbone event
@@ -145,7 +144,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("Selecting", {
+    module("Selecting", {
         beforeEach: function () {
             model.get("filterModel").resetFilter().set({AUTO: true}, {pepLength: 0});
             model.setMarkedCrossLinks("selection", [], false, false, false);	// Tidy up. Clear selection.
@@ -157,7 +156,7 @@ export function testCallback(model) {
     // P02768-A_190-P02768-A_425 has 17 matches (2 of which are marked rejected and don't pass filter)
     // 20 matches in total (18 will pass minimal filter state)
 
-    QUnit.test("Empty selection testing", function (assert) {
+    test("Empty selection testing", function (assert) {
         const expectedLinks = 0;
         const expectedMatches = 0;
         model.setMarkedCrossLinks("selection", [], false, false, false);
@@ -169,7 +168,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches on setting empty match selection, Passed!");
     });
 
-    QUnit.test("Cross-link Selection testing", function (assert) {
+    test("Cross-link Selection testing", function (assert) {
         const expectedLinks = 3;
         const expectedMatches = 18;
         const crosslinks = clmsModel.get("crosslinks");
@@ -180,7 +179,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches on setting 3 crosslinks selection, Passed!");
     });
 
-    QUnit.test("Match Selection testing", function (assert) {
+    test("Match Selection testing", function (assert) {
         const expectedLinks = 2;
         const expectedMatches = 3;
         const crosslinks = clmsModel.get("crosslinks");
@@ -191,7 +190,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches on setting 3 matches selection, Passed!");
     });
 
-    QUnit.test("Adding Cross-link selection to prior Cross-link Selection testing", function (assert) {
+    test("Adding Cross-link selection to prior Cross-link Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatches = 17;
         const crosslinks = clmsModel.get("crosslinks");
@@ -207,7 +206,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Adding Match Selection to prior Match Selection testing", function (assert) {
+    test("Adding Match Selection to prior Match Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatchIDs =
             [
@@ -233,7 +232,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Adding Match Selection to prior Cross-link Selection testing", function (assert) {
+    test("Adding Match Selection to prior Cross-link Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatches = 4;	// Two of P02768-A_190-P02768-A_425 matches are marked rejected and don't pass filter
         const crosslinks = clmsModel.get("crosslinks");
@@ -252,7 +251,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches, Passed!");
     });
 
-    QUnit.test("Adding Cross-Link Selection to prior Match Selection testing", function (assert) {
+    test("Adding Cross-Link Selection to prior Match Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatches = 17;
         const crosslinks = clmsModel.get("crosslinks");
@@ -267,7 +266,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches, Passed!");
     });
 
-    QUnit.test("Adding no Cross-Links to prior Cross-link Selection testing", function (assert) {
+    test("Adding no Cross-Links to prior Cross-link Selection testing", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_415-P02768-A_497")];
         model.setMarkedCrossLinks("selection", selectedLinks, false, false, false);
@@ -280,7 +279,7 @@ export function testCallback(model) {
         assert.deepEqual(_.pluck(model.getMarkedMatches("selection").values(), "id").sort(), expectedMatchIDs, "Expected " + JSON.stringify(expectedMatchIDs) + " selected matches, Passed!");
     });
 
-    QUnit.test("Adding no Matches to prior Match Selection testing", function (assert) {
+    test("Adding no Matches to prior Match Selection testing", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const selectedMatches = d3.merge([crosslinks.get("P02768-A_1-P02768-A_11").matches_pp.slice(0, 1), crosslinks.get("P02768-A_415-P02768-A_497").matches_pp.slice(0, 1)]);
         model.setMarkedMatches("selection", selectedMatches, false, false, false);
@@ -294,10 +293,10 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("Alignment Tests");
+    module("Alignment Tests");
 
 
-    QUnit.test("Scoring", function (assert) {
+    test("Scoring", function (assert) {
         const scoringSystem = {
             matrix: window.blosumCollInst.get("Blosum100").attributes,
             match: 10,
@@ -339,7 +338,7 @@ export function testCallback(model) {
         assert.deepEqual(actualScores, expectedScores, "Expected " + JSON.stringify(expectedScores) + JSON.stringify(cigars) + JSON.stringify(fmts) + " when generating scores from bioseq32.js");
     });
 
-    QUnit.test("Sequence generation from PDB chains", function (assert) {
+    test("Sequence generation from PDB chains", function (assert) {
         const expected = [
             {chainName: "A", chainIndex: 0, modelIndex: 0, residueOffset: 0, data: dseq1AO6, structureID: "1ao6"},
             {chainName: "B", chainIndex: 1, modelIndex: 0, residueOffset: 578, data: dseq1AO6, structureID: "1ao6"},
@@ -351,7 +350,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Matrix pairings", function (assert) {
+    test("Matrix pairings", function (assert) {
         const testMatrix = {    // E-values per search sequence per pdb id
             //"1AO6": [0.01, 0.001, 1e-35],
             //"1AO7": [1e-30, 1e-15, 1e-30],
@@ -373,7 +372,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Align test", function (assert) {
+    test("Align test", function (assert) {
         const stageModel = window.compositeModelInst.get("stageModel");
         const chainSequences = getChainSequencesFromNGLStage(stageModel.get("structureComp").stage);
         const alignCollection = window.compositeModelInst.get("alignColl");
@@ -390,9 +389,9 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("NGL Model Wrapper");
+    module("NGL Model Wrapper");
 
-    QUnit.test("Divide protein to ngl chain mapping by intermediate model step", function (assert) {
+    test("Divide protein to ngl chain mapping by intermediate model step", function (assert) {
         const data = {
             10001: [{modelIndex: 1, chain: "A"}, {modelIndex: 1, chain: "B"}, {modelIndex: 2, chain: "C"}],
             10002: [{modelIndex: 1, chain: "4"}]
@@ -411,9 +410,9 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("NGL Selection Language");
+    module("NGL Selection Language");
 
-    QUnit.test("Range Concatenation", function (assert) {
+    test("Range Concatenation", function (assert) {
         const examples = [
             {data: undefined, expected: undefined},
             {data: [], expected: []},
@@ -432,7 +431,7 @@ export function testCallback(model) {
         });
     });
 
-    QUnit.test("Generate Nested Selection", function (assert) {
+    test("Generate Nested Selection", function (assert) {
 
         const expectedValue = "(( /0 AND (( :A AND (107 OR 125 OR 131 OR 161-162 OR 190 OR 415 OR 425 OR 466 OR 497) ) OR ( :B AND (107 OR 125 OR 131 OR 161-162 OR 190 OR 415 OR 425 OR 466 OR 497) )) ) ) AND .CA";
         const data = [
@@ -519,7 +518,7 @@ export function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue4, "Expected " + expectedValue4 + " when mapping from " + JSON.stringify(data2) + " with option chainsOnly");
     });
 
-    QUnit.test("Get Chain Start Positions as Atom Indices (for label representation)", function (assert) {
+    test("Get Chain Start Positions as Atom Indices (for label representation)", function (assert) {
         const stageModel = window.compositeModelInst.get("stageModel");
         const chainStartSele = stageModel.makeFirstAtomPerChainSelectionString(d3.set([0, 1]));
         const expectedValue = "@0,4599";
@@ -527,7 +526,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Get Just Chain Selection", function (assert) {
+    test("Get Just Chain Selection", function (assert) {
         const stageModel = window.compositeModelInst.get("stageModel");
         const chainSele = stageModel.makeChainSelectionString({showAll: false, chainIndices: [0, 1]});
         const expectedValue = "(( /0 AND (:A OR :B) ) )";
@@ -535,9 +534,9 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("3D Distances");
+    module("3D Distances");
 
-    QUnit.test("Mapping to PDB", function (assert) {
+    test("Mapping to PDB", function (assert) {
         const expectedMapping = [411, 493];
 
         const alignCollection = window.compositeModelInst.get("alignColl");
@@ -547,7 +546,7 @@ export function testCallback(model) {
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + expectedMapping + " when mapping from [415,497] to 1ao6 pdb indices, Passed!");
     });
 
-    QUnit.test("Mapping from PDB", function (assert) {
+    test("Mapping from PDB", function (assert) {
         const expectedMapping = [415, 497];
 
         const alignCollection = window.compositeModelInst.get("alignColl");
@@ -557,7 +556,7 @@ export function testCallback(model) {
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + expectedMapping + " when mapping from pdb [411, 493] back to search indices, Passed!");
     });
 
-    QUnit.test("Chain Info", function (assert) {
+    test("Chain Info", function (assert) {
         const expectedMapping = {viableChainIndices: [0, 1], resCount: 1156};
 
         const stageModel = window.compositeModelInst.get("stageModel");
@@ -566,7 +565,7 @@ export function testCallback(model) {
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + JSON.stringify(expectedMapping) + " chain info, Passed!");
     });
 
-    QUnit.test("C-Alpha Atom Selection String", function (assert) {
+    test("C-Alpha Atom Selection String", function (assert) {
         const expectedMapping = ":A/0 AND 5-582.CA";
 
         const stageModel = window.compositeModelInst.get("stageModel");
@@ -577,7 +576,7 @@ export function testCallback(model) {
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + expectedMapping + " NGL Selection String generated, Passed!");
     });
 
-    QUnit.test("C-Alpha Atom Indices [last 20]", function (assert) {
+    test("C-Alpha Atom Indices [last 20]", function (assert) {
         const expectedMapping = {
             0: [4455, 4463, 4472, 4481, 4488, 4494, 4505, 4510, 4519, 4528, 4532, 4541, 4550, 4558, 4565, 4570, 4575, 4581, 4590, 4595],
             1: [9054, 9062, 9071, 9080, 9087, 9093, 9104, 9109, 9118, 9127, 9131, 9140, 9149, 9157, 9164, 9169, 9174, 9180, 9189, 9194]
@@ -593,7 +592,7 @@ export function testCallback(model) {
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + JSON.stringify(expectedMapping) + " NGL C-Alpha atom indices, Passed!");
     });
 
-    QUnit.test("Single Cross-Link Distance validated on NGLViewer", function (assert) {
+    test("Single Cross-Link Distance validated on NGLViewer", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         const expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
@@ -606,7 +605,7 @@ export function testCallback(model) {
         assert.deepEqual(actualDistance, expectedDistance, "Expected " + expectedDistance + " distance (2 d.p.) for A chain 415-497 crosslink, Passed!");
     });
 
-    QUnit.test("Same Cross-Link Distance, different indexing methods 1", function (assert) {
+    test("Same Cross-Link Distance, different indexing methods 1", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         const alignCollection = window.compositeModelInst.get("alignColl");
@@ -622,7 +621,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("2 different functions for returning atom indices", function (assert) {
+    test("2 different functions for returning atom indices", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         const alignCollection = window.compositeModelInst.get("alignColl");
@@ -638,7 +637,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Compare Link-Only Distance Generation with All Distance Generation", function (assert) {
+    test("Compare Link-Only Distance Generation with All Distance Generation", function (assert) {
         const stageModel = window.compositeModelInst.get("stageModel");
         const crosslinks = stageModel.get("linkList");
 
@@ -665,7 +664,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Compare Distances from Atom Coords with All Distance Generation", function (assert) {
+    test("Compare Distances from Atom Coords with All Distance Generation", function (assert) {
         const stageModel = window.compositeModelInst.get("stageModel");
         const crosslinks = stageModel.get("linkList");
 
@@ -694,7 +693,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Octree test with negative match function", function (assert) {
+    test("Octree test with negative match function", function (assert) {
         const octAccessorObj = {
             id: function (d) {
                 return d;
@@ -750,7 +749,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Octree test with negative match function 2", function (assert) {
+    test("Octree test with negative match function 2", function (assert) {
         const octAccessorObj = {
             id: function (d) {
                 return d;
@@ -837,9 +836,9 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("Random Distance Generation");
+    module("Random Distance Generation");
 
-    QUnit.test("Calc Distanceable Sequence MetaData", function (assert) {
+    test("Calc Distanceable Sequence MetaData", function (assert) {
         const expectedValue = [
             {
                 first: 5,
@@ -868,7 +867,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Include Terminal Indices", function (assert) {
+    test("Include Terminal Indices", function (assert) {
         const expected = {ntermList: [], ctermList: []};	// because pdb for 1ao6 is within the larger sequence so neither cterm nor nterm match
 
         const alignCollBB = window.compositeModelInst.get("alignColl");
@@ -881,7 +880,7 @@ export function testCallback(model) {
         assert.deepEqual(alignedTerminalIndices, expected, "Expected " + JSON.stringify(expected) + " as end terminals out of PDB range, Passed!");
     });
 
-    QUnit.test("Filter Sequence By Residue Set = I and W", function (assert) {
+    test("Filter Sequence By Residue Set = I and W", function (assert) {
         const expectedValue = [20, 137, 209, 259, 266, 285, 383, 508, 518];
         const actualValue = filterSequenceByResidueSet(dseq1AO6, new d3.set(["I", "W"]));
 
@@ -889,7 +888,7 @@ export function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as filtered residue indices, Passed!");
     });
 
-    QUnit.test("Filter Sequence By Residue Set = All", function (assert) {
+    test("Filter Sequence By Residue Set = All", function (assert) {
         const expectedValue = d3.range(0, dseq1AO6.length);
         const actualValue = filterSequenceByResidueSet(dseq1AO6, null, true);
 
@@ -898,7 +897,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Filter Multiple Sequences by Cross-Linkable Specificity Setting", function (assert) {
+    test("Filter Multiple Sequences by Cross-Linkable Specificity Setting", function (assert) {
         const expected = [535, 536, 540, 552, 555, 559, 561, 568, 569, 574];	// last 10 KSTY
         const expected2 = d3.range(0, dseq1AO6.length);	// everything
 
@@ -921,7 +920,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Calc Filtered Residue Points from Cross-linker Specificity", function (assert) {
+    test("Calc Filtered Residue Points from Cross-linker Specificity", function (assert) {
         let expectedValue = [535, 536, 540, 552, 555, 559, 561, 568, 569, 574];	// last 10 KSTY
         expectedValue = expectedValue.map(function (v) {
             return {chainIndex: 1, protID: "P02768-A", seqIndex: v + 1, searchIndex: v + 5};	// seqIndex 1-indexed, sdearchIndex 4 on from that, last 10 residues will be chain 1
@@ -960,7 +959,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Sample Distance Generation, 1 Search, rounded to nearest integer", function (assert) {
+    test("Sample Distance Generation, 1 Search, rounded to nearest integer", function (assert) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         const searchArray = Array.from(clmsModel.get("searches").values());
@@ -997,7 +996,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Sample Distance Generation, 1 Search, restricted to same protein id (dimer / full search equivalent), rounded to nearest integer", function (assert) {
+    test("Sample Distance Generation, 1 Search, restricted to same protein id (dimer / full search equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         const searchArray = Array.from(clmsModel.get("searches").values());
@@ -1036,7 +1035,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Sample Distance Generation, 1 Search, restricted to same chain (monomer equivalent), rounded to nearest integer", function (assert) {
+    test("Sample Distance Generation, 1 Search, restricted to same chain (monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         const searchArray = Array.from(clmsModel.get("searches").values());
@@ -1075,7 +1074,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Sample Distance Generation, 1 Search, restricted to same model index (artificially set to make monomer equivalent), rounded to nearest integer", function (assert) {
+    test("Sample Distance Generation, 1 Search, restricted to same model index (artificially set to make monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         const searchArray = Array.from(clmsModel.get("searches").values());
@@ -1121,7 +1120,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Sample Distance Generation, 1 Search, 2 different models, but inter-model distance flag set to true, rounded to nearest integer", function (assert) {
+    test("Sample Distance Generation, 1 Search, 2 different models, but inter-model distance flag set to true, rounded to nearest integer", function (assert) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         const searchArray = Array.from(clmsModel.get("searches").values());
@@ -1167,7 +1166,7 @@ export function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as sampled distances, Passed!");
     });
 
-    QUnit.test("Run through DistancesObj right from getSampleDistances, 1 Search, restricted to same chain (monomer equivalent), rounded to nearest integer", function (assert) {
+    test("Run through DistancesObj right from getSampleDistances, 1 Search, restricted to same chain (monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
 
@@ -1185,7 +1184,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Run through DistancesObj right from getSampleDistances, no crosslinker specified, 1 Search, restricted to same model (artifically set, to make monomer equivalent), rounded to nearest integer", function (assert) {
+    test("Run through DistancesObj right from getSampleDistances, no crosslinker specified, 1 Search, restricted to same model (artifically set, to make monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 44, 13, 43, 51, 60, 28, 44, 24, 44, 29, 35, 44, 44, 37, 49, 51, 55, 13, 24, 37, 30, 41, 51, 43, 44, 49, 30, 38, 48, 51, 29, 51, 41, 38, 11, 60, 35, 55, 51, 48, 11, 29, 45, 13, 43, 51, 60, 29, 44, 25, 44, 29, 35, 45, 44, 38, 49, 51, 55, 13, 25, 38, 30, 41, 50, 43, 44, 49, 30, 38, 48, 51, 29, 51, 41, 38, 11, 60, 35, 55, 50, 48, 11];
 
         const crossSpec = clmsModel.get("crosslinkerSpecificity");
@@ -1205,9 +1204,9 @@ export function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as sampled distances, Passed!");
     });
 
-    QUnit.module("Model Utils Functions");
+    module("Model Utils Functions");
 
-    QUnit.test("Get max score of crosslink matches", function (assert) {
+    test("Get max score of crosslink matches", function (assert) {
         const testCrossLink = {
             filteredMatches_pp: [
                 {
@@ -1247,7 +1246,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Index same sequences to first occurence", function (assert) {
+    test("Index same sequences to first occurence", function (assert) {
         const testSeqs = [
             "ABCDEFGHIJKLM",
             "BABARACUS",
@@ -1264,7 +1263,7 @@ export function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as index array, Passed!");
     });
 
-    QUnit.test("Filter repeated Sequences", function (assert) {
+    test("Filter repeated Sequences", function (assert) {
         const testSeqs = [
             "ABCDEFGHIJKLM",
             "BABARACUS",
@@ -1287,7 +1286,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Reinflate sequence map", function (assert) {
+    test("Reinflate sequence map", function (assert) {
         const testSeqs = [
             "ABCDEFGHIJKLM",
             "BABARACUS",
@@ -1313,7 +1312,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Crosslink count per protein pairing", function (assert) {
+    test("Crosslink count per protein pairing", function (assert) {
         const crosslinks = model.getAllCrossLinks();
         const expectedCrossLinkIDs = _.pluck(crosslinks, "id");
         const expectedValue = {
@@ -1335,7 +1334,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Legal accession ID Filter", function (assert) {
+    test("Legal accession ID Filter", function (assert) {
         const interactors = [
             {is_decoy: true, accession: "Q10276"},  // is decoy, good accession
             {is_decoy: false, accession: "P12345"}, // good accession
@@ -1350,7 +1349,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Merge contiguous features", function (assert) {
+    test("Merge contiguous features", function (assert) {
         const testArrs = [
             [
                 {begin: 1, end: 1},
@@ -1393,7 +1392,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Radix sort", function (assert) {
+    test("Radix sort", function (assert) {
         const testArr = [2, 4, 6, 6, 3, 2, 1, 4, 2, 4, 6, 8, 1, 2, 4, 6, 9, 0];
         const expectedValue = [0, 1, 1, 2, 2, 2, 2, 3, 4, 4, 4, 4, 6, 6, 6, 6, 8, 9];
         const actualValue = radixSort(10, testArr, function (d) {
@@ -1405,7 +1404,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Parse URL Query String", function (assert) {
+    test("Parse URL Query String", function (assert) {
         const testString = "sid=10003-secret&decoys=1&unval=1&linear=1&cats=true&anon=";
         const expectedValue = {sid: "10003-secret", decoys: 1, unval: 1, linear: 1, cats: true, anon: ""};
         const actualValue = parseURLQueryString(testString);
@@ -1415,7 +1414,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Make URL Query String", function (assert) {
+    test("Make URL Query String", function (assert) {
         const testObj = {sid: "10003-secret", decoys: 1, unval: 1, linear: 1, cats: true, anon: ""};
         const expectedValue = ["sid=10003-secret", "decoys=1", "unval=1", "linear=1", "cats=1", "anon="];	// true gets turned to 1, false to 0
         const actualValue = makeURLQueryPairs(testObj, "");
@@ -1425,10 +1424,10 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("Metadata parsing testing");
+    module("Metadata parsing testing");
 
 
-    QUnit.test("Update Protein Metadata", function (assert) {
+    test("Update Protein Metadata", function (assert) {
         const expectedValue = {
             columns: ["proteinid", "cat", "dog"],
             items: clmsModel.get("participants"),
@@ -1447,7 +1446,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Update Crosslink Metadata", function (assert) {
+    test("Update Crosslink Metadata", function (assert) {
         const expectedValue = {
             columns: ["cat", "dog"],
             columnTypes: {cat: "numeric", dog: "numeric"},
@@ -1472,7 +1471,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Parse User Annotations", function (assert) {
+    test("Parse User Annotations", function (assert) {
         model.get("filterModel")
             .resetFilter();
         window.vent.listenToOnce(window.vent, "userAnnotationsUpdated", function (actualValue) {
@@ -1551,9 +1550,9 @@ export function testCallback(model) {
     });
 
 
-    QUnit.module("STRING utils testing");
+    module("STRING utils testing");
 
-    QUnit.test("Compress/Decompress Small", function (assert) {
+    test("Compress/Decompress Small", function (assert) {
 
         const str = "\"Protein1\",\"SeqPos1\",\"LinkedRes1\",\"Protein2\",\"SeqPos2\",\"LinkedRes2\",\"Highest Score\",\"Match Count\",\"DecoyType\",\"AutoValidated\",\"Validated\",\"Link FDR\",\"3D Distance\",\"From Chain\",\"To Chain\",\"PDB SeqPos 1\",\"PDB SeqPos 2\",\"Search_10003\",\"cat\",\"dog\"\r\n\"sp|P02768-A|ALBU\",\"415\",\"V\",\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"19.0000\",\"2\",\"TT\",\"true\",\"B,B\",\"\",\"8.79\",\"B\",\"B\",\"411\",\"493\",\"X\",\"2\",\"4\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"425\",\"E\",\"17.3400\",\"4\",\"TT\",\"true\",\"A,C,A,A\",\"\",\"12.07\",\"B\",\"B\",\"186\",\"421\",\"X\",\"3\",\"5\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"17.3200\",\"1\",\"TT\",\"true\",\"C\",\"\",\"15.26\",\"A\",\"A\",\"121\",\"157\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"131\",\"E\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"17.0300\",\"1\",\"TT\",\"true\",\"?\",\"\",\"8.30\",\"A\",\"A\",\"127\",\"158\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"107\",\"D\",\"sp|P02768-A|ALBU\",\"466\",\"K\",\"13.9400\",\"1\",\"TT\",\"true\",\"B\",\"\",\"8.37\",\"B\",\"B\",\"103\",\"462\",\"X\",\"\",\"\"\r\n";
 
@@ -1564,7 +1563,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Compress/Decompress Large", function (assert) {
+    test("Compress/Decompress Large", function (assert) {
 
 
         const animals = ["ant", "bat", "cat", "dog", "eel", "fox", "gnu", "hen", "iguana", "jay", "kestrel", "llama"];
@@ -1579,9 +1578,9 @@ export function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue.slice(-200)) + " as compressed then decompressed large string, Passed!");
     });
 
-    QUnit.module("File download string generation");
+    module("File download string generation");
 
-    QUnit.test("Residues CSV", function (assert) {
+    test("Residues CSV", function (assert) {
         model.get("filterModel")
             .resetFilter()
             .set({AUTO: false});
@@ -1593,7 +1592,7 @@ export function testCallback(model) {
         model.get("filterModel").resetFilter();
     });
 
-    QUnit.test("Links CSV", function (assert) {
+    test("Links CSV", function (assert) {
         model.get("filterModel")
             .resetFilter().set({pepLength: 6});
         const expectedValue = "\"Protein1\",\"SeqPos1\",\"LinkedRes1\",\"Protein2\",\"SeqPos2\",\"LinkedRes2\",\"Highest Score\",\"Match Count\",\"DecoyType\",\"Self\",\"AutoValidated\",\"Validated\",\"Link FDR\",\"3D Distance\",\"From Chain\",\"To Chain\",\"Search_24070\",\"cat\",\"dog\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"14\",\"L\",\"8.8900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"210\",\"A\",\"sp|P02768-A|ALBU\",\"212\",\"K\",\"8.5600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"70.52\",\"B\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"476\",\"C\",\"sp|P02768-A|ALBU\",\"564\",\"K\",\"11.2000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"49.32\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"151\",\"A\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"13.0000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"13.26\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"182\",\"L\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"10.5100\",\"4\",\"TT\",\"true\",\"false\",\",,,\",\"\",\"25.91\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"425\",\"E\",\"17.3400\",\"15\",\"TT\",\"true\",\"false\",\",,,,,,,,,,,,,,\",\"\",\"12.07\",\"B\",\"B\",\"X\",\"3\",\"5\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"424\",\"V\",\"13.0900\",\"6\",\"TT\",\"true\",\"false\",\",,,,,\",\"\",\"15.75\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"11\",\"F\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"9.5700\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"22.83\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"351\",\"K\",\"sp|P02768-A|ALBU\",\"476\",\"C\",\"10.0500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"17.24\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"433\",\"V\",\"8.2400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"14.51\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"182\",\"L\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"8.3000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.62\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"148\",\"Y\",\"sp|P02768-A|ALBU\",\"198\",\"L\",\"12.0400\",\"4\",\"TT\",\"true\",\"false\",\",,,\",\"\",\"9.35\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"16\",\"E\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"13.3500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.91\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"341\",\"Y\",\"sp|P02768-A|ALBU\",\"373\",\"V\",\"11.7100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"17.52\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"426\",\"V\",\"13.4200\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"12.67\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"12\",\"K\",\"sp|P02768-A|ALBU\",\"164\",\"A\",\"7.8800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"28.83\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"425\",\"E\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"11.5600\",\"11\",\"TT\",\"true\",\"false\",\",,,,,,,,,,\",\"\",\"10.81\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"205\",\"K\",\"sp|P02768-A|ALBU\",\"211\",\"F\",\"10.4500\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"10.22\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"414\",\"K\",\"sp|P02768-A|ALBU\",\"415\",\"V\",\"9.9000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"64.11\",\"B\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"475\",\"K\",\"sp|P02768-A|ALBU\",\"498\",\"V\",\"11.5100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.83\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"155\",\"L\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"11.4600\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"18.68\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"93\",\"K\",\"sp|P02768-A|ALBU\",\"99\",\"N\",\"13.0800\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"8.85\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"499\",\"P\",\"sp|P02768-A|ALBU\",\"508\",\"T\",\"9.6800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.59\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"262\",\"K\",\"sp|P02768-A|ALBU\",\"395\",\"F\",\"11.2500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"35.79\",\"B\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"505\",\"E\",\"sp|P02768-A|ALBU\",\"519\",\"K\",\"10.4600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"48.92\",\"A\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"191\",\"A\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"8.3000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"12.95\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"189\",\"G\",\"sp|P02768-A|ALBU\",\"192\",\"S\",\"13.1100\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"5.15\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"212\",\"K\",\"sp|P02768-A|ALBU\",\"232\",\"S\",\"12.5600\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"8.93\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"5\",\"S\",\"sp|P02768-A|ALBU\",\"11\",\"F\",\"9.2900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"9.91\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"469\",\"V\",\"7.6000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"25.25\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"68\",\"T\",\"sp|P02768-A|ALBU\",\"74\",\"L\",\"9.0700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"9.88\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"71\",\"G\",\"sp|P02768-A|ALBU\",\"76\",\"T\",\"8.5000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"8.49\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"474\",\"T\",\"sp|P02768-A|ALBU\",\"476\",\"C\",\"10.3500\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"5.70\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"209\",\"R\",\"sp|P02768-A|ALBU\",\"351\",\"K\",\"15.9200\",\"5\",\"TT\",\"true\",\"false\",\",,,,\",\"\",\"12.29\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"208\",\"E\",\"sp|P02768-A|ALBU\",\"351\",\"K\",\"12.2000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.63\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"206\",\"F\",\"sp|P02768-A|ALBU\",\"351\",\"K\",\"9.7100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"14.41\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"210\",\"A\",\"sp|P02768-A|ALBU\",\"351\",\"K\",\"12.0300\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"10.98\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"5\",\"S\",\"sp|P02768-A|ALBU\",\"57\",\"E\",\"9.9400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"5.60\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"340\",\"D\",\"sp|P02768-A|ALBU\",\"444\",\"K\",\"11.2900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"5.92\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"435\",\"S\",\"sp|P02768-A|ALBU\",\"437\",\"C\",\"10.7200\",\"5\",\"TT\",\"true\",\"false\",\",,,,\",\"\",\"5.77\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"338\",\"H\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"9.3100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"24.73\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"12\",\"K\",\"11.5800\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"11\",\"F\",\"8.8200\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"420\",\"T\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"7.4100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.22\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"395\",\"F\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"8.6400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"9.63\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"546\",\"A\",\"sp|P02768-A|ALBU\",\"574\",\"K\",\"9.8300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"16.80\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"525\",\"K\",\"sp|P02768-A|ALBU\",\"546\",\"A\",\"10.4100\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"12.50\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"193\",\"S\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"9.1500\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"10.05\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"192\",\"S\",\"sp|P02768-A|ALBU\",\"198\",\"L\",\"8.3100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"10.07\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"338\",\"H\",\"sp|P02768-A|ALBU\",\"478\",\"T\",\"8.1900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"27.86\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"13\",\"D\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"10.1100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"23.08\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"4\",\"K\",\"sp|P02768-A|ALBU\",\"54\",\"V\",\"11.6600\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"571\",\"E\",\"sp|P02768-A|ALBU\",\"574\",\"K\",\"10.7700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"5.12\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"394\",\"L\",\"sp|P02768-A|ALBU\",\"439\",\"K\",\"9.1100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"13.26\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"157\",\"F\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"11.9500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.18\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"12\",\"K\",\"sp|P02768-A|ALBU\",\"54\",\"V\",\"8.2900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"7.47\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"12\",\"K\",\"sp|P02768-A|ALBU\",\"55\",\"A\",\"9.7400\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"10.78\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"54\",\"V\",\"10.7300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"sp|P02768-A|ALBU\",\"539\",\"A\",\"8.2600\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"13.17\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"55\",\"A\",\"11.5500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"56\",\"D\",\"12.4500\",\"4\",\"TT\",\"true\",\"false\",\",,,\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"1\",\"D\",\"sp|P02768-A|ALBU\",\"57\",\"E\",\"10.4600\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"\",\"\",\"\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"137\",\"K\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"8.9300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.91\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"423\",\"L\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"11.9300\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"14.21\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"13\",\"D\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"12.4700\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"18.98\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"17\",\"E\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"12.7400\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"11.85\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"18\",\"N\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"9.7900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.13\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"239\",\"T\",\"sp|P02768-A|ALBU\",\"241\",\"V\",\"13.9900\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"5.23\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"212\",\"K\",\"sp|P02768-A|ALBU\",\"351\",\"K\",\"11.5300\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"13.36\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"14\",\"L\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"12.7200\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"19.45\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"154\",\"L\",\"sp|P02768-A|ALBU\",\"199\",\"K\",\"10.7700\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"15.79\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"203\",\"L\",\"10.8000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"20.19\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"193\",\"S\",\"sp|P02768-A|ALBU\",\"197\",\"R\",\"11.7400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"6.05\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"11\",\"F\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"10.2400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"23.98\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"12\",\"K\",\"sp|P02768-A|ALBU\",\"163\",\"A\",\"8.4900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"25.64\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"415\",\"V\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"9.2700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.69\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"341\",\"Y\",\"sp|P02768-A|ALBU\",\"361\",\"C\",\"15.7300\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"27.38\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"189\",\"G\",\"sp|P02768-A|ALBU\",\"422\",\"T\",\"12.3200\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.90\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"42\",\"L\",\"sp|P02768-A|ALBU\",\"73\",\"K\",\"14.6900\",\"6\",\"TT\",\"true\",\"false\",\",,,,,\",\"\",\"6.40\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"44\",\"N\",\"sp|P02768-A|ALBU\",\"73\",\"K\",\"13.0500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"10.81\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"45\",\"E\",\"sp|P02768-A|ALBU\",\"73\",\"K\",\"13.4000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"8.45\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"14\",\"L\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"12.0900\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"15.46\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"324\",\"D\",\"sp|P02768-A|ALBU\",\"355\",\"T\",\"9.8600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"12.68\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"548\",\"M\",\"sp|P02768-A|ALBU\",\"560\",\"K\",\"11.3900\",\"4\",\"TT\",\"true\",\"false\",\",,,\",\"\",\"19.25\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"11\",\"F\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"10.9000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"19.53\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"323\",\"K\",\"sp|P02768-A|ALBU\",\"357\",\"L\",\"9.0600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"9.72\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"557\",\"K\",\"sp|P02768-A|ALBU\",\"570\",\"E\",\"11.9500\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"12.57\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"496\",\"T\",\"sp|P02768-A|ALBU\",\"537\",\"P\",\"8.4800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.23\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"sp|P02768-A|ALBU\",\"537\",\"P\",\"10.5500\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"8.59\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"504\",\"A\",\"sp|P02768-A|ALBU\",\"525\",\"K\",\"11.3000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"15.63\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"427\",\"S\",\"8.6700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.06\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"54\",\"V\",\"sp|P02768-A|ALBU\",\"73\",\"K\",\"13.1400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"19.28\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"63\",\"D\",\"sp|P02768-A|ALBU\",\"65\",\"S\",\"13.1700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"6.60\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"402\",\"K\",\"sp|P02768-A|ALBU\",\"429\",\"N\",\"10.2800\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"12.83\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"556\",\"E\",\"sp|P02768-A|ALBU\",\"564\",\"K\",\"9.3700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.70\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"415\",\"V\",\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"19.0000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"8.79\",\"B\",\"B\",\"X\",\"2\",\"4\"\r\n\"sp|P02768-A|ALBU\",\"37\",\"E\",\"sp|P02768-A|ALBU\",\"137\",\"K\",\"12.6900\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"9.35\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"13\",\"D\",\"sp|P02768-A|ALBU\",\"51\",\"K\",\"11.4300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"12.88\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"323\",\"K\",\"sp|P02768-A|ALBU\",\"354\",\"E\",\"10.9900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"8.74\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"322\",\"A\",\"sp|P02768-A|ALBU\",\"351\",\"K\",\"11.2100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.90\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"154\",\"L\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"12.6200\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"10.25\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"512\",\"D\",\"sp|P02768-A|ALBU\",\"527\",\"T\",\"9.1100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"16.25\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"506\",\"T\",\"sp|P02768-A|ALBU\",\"526\",\"Q\",\"10.6900\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"12.64\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"505\",\"E\",\"sp|P02768-A|ALBU\",\"525\",\"K\",\"11.7900\",\"4\",\"TT\",\"true\",\"false\",\",,,\",\"\",\"14.99\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"135\",\"L\",\"sp|P02768-A|ALBU\",\"138\",\"Y\",\"10.0500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"4.88\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"11\",\"F\",\"sp|P02768-A|ALBU\",\"64\",\"K\",\"11.1100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"13.99\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"136\",\"K\",\"sp|P02768-A|ALBU\",\"138\",\"Y\",\"9.8000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"5.20\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"182\",\"L\",\"sp|P02768-A|ALBU\",\"190\",\"K\",\"12.7000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"28.27\",\"B\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"416\",\"P\",\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"13.6900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"7.00\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"107\",\"D\",\"sp|P02768-A|ALBU\",\"466\",\"K\",\"13.9400\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"8.37\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"165\",\"F\",\"13.3800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"9.99\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"124\",\"C\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"15.7000\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"10.91\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"398\",\"L\",\"sp|P02768-A|ALBU\",\"432\",\"K\",\"7.4600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"12.43\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"17.3200\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.26\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"190\",\"K\",\"sp|P02768-A|ALBU\",\"452\",\"Y\",\"12.7600\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"12.87\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"132\",\"E\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"14.3700\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"9.88\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"414\",\"K\",\"sp|P02768-A|ALBU\",\"495\",\"E\",\"11.1500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"9.23\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"12\",\"K\",\"sp|P02768-A|ALBU\",\"124\",\"C\",\"9.1700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"32.87\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"499\",\"P\",\"sp|P02768-A|ALBU\",\"506\",\"T\",\"12.4600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.12\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"129\",\"D\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"11.5200\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"13.75\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"130\",\"N\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"12.9100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.99\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"414\",\"K\",\"sp|P02768-A|ALBU\",\"497\",\"Y\",\"15.8300\",\"4\",\"TT\",\"true\",\"false\",\",,,\",\"\",\"9.72\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"135\",\"L\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"15.2300\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"7.22\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"199\",\"K\",\"sp|P02768-A|ALBU\",\"293\",\"V\",\"9.8800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.20\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"11\",\"F\",\"sp|P02768-A|ALBU\",\"136\",\"K\",\"11.0700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.28\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"205\",\"K\",\"sp|P02768-A|ALBU\",\"456\",\"V\",\"10.9100\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"16.62\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"413\",\"K\",\"sp|P02768-A|ALBU\",\"494\",\"D\",\"9.7500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"6.19\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"134\",\"F\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"16.9400\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"9.15\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"124\",\"C\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"15.1600\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"12.22\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"127\",\"F\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"12.3300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"8.96\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"402\",\"K\",\"sp|P02768-A|ALBU\",\"546\",\"A\",\"14.1900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.69\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"131\",\"E\",\"sp|P02768-A|ALBU\",\"161\",\"Y\",\"14.5000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.07\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"93\",\"K\",\"sp|P02768-A|ALBU\",\"104\",\"Q\",\"10.4400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"13.22\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"12.6600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"13.49\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"261\",\"A\",\"sp|P02768-A|ALBU\",\"263\",\"Y\",\"11.0400\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"5.45\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"509\",\"F\",\"sp|P02768-A|ALBU\",\"525\",\"K\",\"11.5900\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"9.02\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"184\",\"E\",\"sp|P02768-A|ALBU\",\"452\",\"Y\",\"9.3300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.57\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"131\",\"E\",\"sp|P02768-A|ALBU\",\"162\",\"K\",\"17.0300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"8.30\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"427\",\"S\",\"sp|P02768-A|ALBU\",\"520\",\"E\",\"13.7800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"14.66\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"199\",\"K\",\"sp|P02768-A|ALBU\",\"301\",\"D\",\"12.1500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"33.63\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"132\",\"E\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"13.8900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.89\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"361\",\"C\",\"sp|P02768-A|ALBU\",\"378\",\"K\",\"13.0200\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"21.67\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"156\",\"F\",\"12.6800\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"22.97\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"363\",\"A\",\"sp|P02768-A|ALBU\",\"378\",\"K\",\"11.8700\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"23.48\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"131\",\"E\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"12.1600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.87\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"12.3900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.60\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"124\",\"C\",\"sp|P02768-A|ALBU\",\"159\",\"K\",\"11.7500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"16.12\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"125\",\"T\",\"sp|P02768-A|ALBU\",\"174\",\"K\",\"10.3300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"11.90\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"359\",\"K\",\"sp|P02768-A|ALBU\",\"377\",\"F\",\"9.6300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"16.12\",\"A\",\"A\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"358\",\"E\",\"sp|P02768-A|ALBU\",\"370\",\"Y\",\"8.7500\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"10.03\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"263\",\"Y\",\"sp|P02768-A|ALBU\",\"294\",\"E\",\"12.2300\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"18.23\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"264\",\"I\",\"sp|P02768-A|ALBU\",\"287\",\"S\",\"16.5000\",\"2\",\"TT\",\"true\",\"false\",\",\",\"\",\"9.82\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"263\",\"Y\",\"sp|P02768-A|ALBU\",\"298\",\"M\",\"10.9200\",\"3\",\"TT\",\"true\",\"false\",\",,\",\"\",\"22.15\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"263\",\"Y\",\"sp|P02768-A|ALBU\",\"293\",\"V\",\"11.5900\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.40\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"263\",\"Y\",\"sp|P02768-A|ALBU\",\"285\",\"E\",\"10.9600\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"15.46\",\"B\",\"B\",\"X\",\"\",\"\"\r\n\"sp|P02768-A|ALBU\",\"263\",\"Y\",\"sp|P02768-A|ALBU\",\"299\",\"P\",\"11.6000\",\"1\",\"TT\",\"true\",\"false\",\"\",\"\",\"22.70\",\"A\",\"A\",\"X\",\"\",\"\"\r\n";
@@ -1612,7 +1611,7 @@ export function testCallback(model) {
     });
 
 
-    QUnit.test("Matches CSV", function (assert) {
+    test("Matches CSV", function (assert) {
         model.get("filterModel")
             .resetFilter()
             .set({pepLength: 13});
