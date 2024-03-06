@@ -150,7 +150,7 @@ export function testCallback(model) {
             model.setMarkedCrossLinks("selection", [], false, false, false);	// Tidy up. Clear selection.
         }
     });
-    // 3 cross links
+    // 3 crosslinks
     // P02768-A_1-P02768-A_11 has 1 match
     // P02768-A_415-P02768-A_497 has 2 matches
     // P02768-A_190-P02768-A_425 has 17 matches (2 of which are marked rejected and don't pass filter)
@@ -323,7 +323,7 @@ export function testCallback(model) {
             {seq: "BY", expScore: 12},   // aligner inserts B (no penalty as at start) and matches Y-Y
         ];
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        // const stageModel = window.compositeModelInst.get("stageModel");
         const actual = tests.map(function (test) {
             return GotohAligner.align(test.seq, refSeq, scoringSystem, false, true, 1000);
         });
@@ -404,7 +404,7 @@ export function testCallback(model) {
             10002: [{key: "1", values: [{modelIndex: 1, chain: "4"}]}]
         };
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        // const stageModel = window.compositeModelInst.get("stageModel");
         const actualValue = makeSubIndexedMap(data, "modelIndex");
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " when mapping from " + JSON.stringify(data));
     });
@@ -593,8 +593,8 @@ export function testCallback(model) {
     });
 
     test("Single Cross-Link Distance validated on NGLViewer", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
-        const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
+        // const crosslinks = clmsModel.get("crosslinks");
+        // const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         const expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
 
         const stageModel = window.compositeModelInst.get("stageModel");
@@ -622,9 +622,9 @@ export function testCallback(model) {
 
 
     test("2 different functions for returning atom indices", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
-        const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
-        const alignCollection = window.compositeModelInst.get("alignColl");
+        // const crosslinks = clmsModel.get("crosslinks");
+        // const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
+        // const alignCollection = window.compositeModelInst.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
         const stageModel = window.compositeModelInst.get("stageModel");
@@ -816,8 +816,8 @@ export function testCallback(model) {
             return not3DHomomultimeric({confirmedHomomultimer: true}, point1.chainIndex, point2.chainIndex);
         };
 
-        const cdist = toNearest((0.25 * 0.25) + (0.4 * 0.4) + (0.4 * 0.4), 0.25);
-        const odddist = toNearest((2.25 * 2.25) + (0.4 * 0.4) + (1.6 * 1.6), 0.25);
+        // const cdist = toNearest((0.25 * 0.25) + (0.4 * 0.4) + (0.4 * 0.4), 0.25);
+        // const odddist = toNearest((2.25 * 2.25) + (0.4 * 0.4) + (1.6 * 1.6), 0.25);
         const expected = [
             [pointsB[0], undefined, NaN],
             [pointsB[1], undefined, NaN],
@@ -1584,7 +1584,7 @@ export function testCallback(model) {
         model.get("filterModel")
             .resetFilter()
             .set({AUTO: false});
-        const expectedValue = `"Residue(s)","Occurences(in_unique_links)"\r\n"D-L","1"\r\n"A-K","13"\r\n"C-K","6"\r\n"K-L","15"\r\n"E-K","17"\r\n"K-V","12"\r\n"F-K","13"\r\n"L-Y","3"\r\n"E-Y","6"\r\n"V-Y","3"\r\n"K-N","5"\r\n"P-T","4"\r\n"G-S","2"\r\n"K-S","3"\r\n"H-S","1"\r\n"H-K","2"\r\n"F-S","1"\r\n"L-T","1"\r\n"G-T","2"\r\n"A-Y","3"\r\n"C-T","1"\r\n"K-R","1"\r\n"E-S","2"\r\n"D-K","9"\r\n"C-S","1"\r\n"D-F","1"\r\n"K-T","4"\r\n"L-S","1"\r\n"H-T","1"\r\n"D-V","1"\r\n"A-D","1"\r\n"D-D","1"\r\n"D-E","1"\r\n"K-K","2"\r\n"T-V","1"\r\n"R-S","1"\r\n"F-Y","1"\r\n"C-Y","2"\r\n"D-T","2"\r\n"K-M","1"\r\n"P-Y","3"\r\n"D-S","1"\r\n"Q-T","1"\r\n"K-Y","3"\r\n"F-T","2"\r\n"T-Y","1"\r\n"K-Q","1"\r\n"I-S","1"\r\n"M-Y","1"\r\n"D","19"\r\n"L","21"\r\n"A","17"\r\n"K","109"\r\n"C","10"\r\n"E","26"\r\n"V","17"\r\n"F","18"\r\n"Y","26"\r\n"N","5"\r\n"P","7"\r\n"T","20"\r\n"G","4"\r\n"S","14"\r\n"H","4"\r\n"R","2"\r\n"M","2"\r\n"Q","2"\r\n"I","1"\r\n`;
+        const expectedValue = "\"Residue(s)\",\"Occurences(in_unique_links)\"\r\n\"D-L\",\"1\"\r\n\"A-K\",\"13\"\r\n\"C-K\",\"6\"\r\n\"K-L\",\"15\"\r\n\"E-K\",\"17\"\r\n\"K-V\",\"12\"\r\n\"F-K\",\"13\"\r\n\"L-Y\",\"3\"\r\n\"E-Y\",\"6\"\r\n\"V-Y\",\"3\"\r\n\"K-N\",\"5\"\r\n\"P-T\",\"4\"\r\n\"G-S\",\"2\"\r\n\"K-S\",\"3\"\r\n\"H-S\",\"1\"\r\n\"H-K\",\"2\"\r\n\"F-S\",\"1\"\r\n\"L-T\",\"1\"\r\n\"G-T\",\"2\"\r\n\"A-Y\",\"3\"\r\n\"C-T\",\"1\"\r\n\"K-R\",\"1\"\r\n\"E-S\",\"2\"\r\n\"D-K\",\"9\"\r\n\"C-S\",\"1\"\r\n\"D-F\",\"1\"\r\n\"K-T\",\"4\"\r\n\"L-S\",\"1\"\r\n\"H-T\",\"1\"\r\n\"D-V\",\"1\"\r\n\"A-D\",\"1\"\r\n\"D-D\",\"1\"\r\n\"D-E\",\"1\"\r\n\"K-K\",\"2\"\r\n\"T-V\",\"1\"\r\n\"R-S\",\"1\"\r\n\"F-Y\",\"1\"\r\n\"C-Y\",\"2\"\r\n\"D-T\",\"2\"\r\n\"K-M\",\"1\"\r\n\"P-Y\",\"3\"\r\n\"D-S\",\"1\"\r\n\"Q-T\",\"1\"\r\n\"K-Y\",\"3\"\r\n\"F-T\",\"2\"\r\n\"T-Y\",\"1\"\r\n\"K-Q\",\"1\"\r\n\"I-S\",\"1\"\r\n\"M-Y\",\"1\"\r\n\"D\",\"19\"\r\n\"L\",\"21\"\r\n\"A\",\"17\"\r\n\"K\",\"109\"\r\n\"C\",\"10\"\r\n\"E\",\"26\"\r\n\"V\",\"17\"\r\n\"F\",\"18\"\r\n\"Y\",\"26\"\r\n\"N\",\"5\"\r\n\"P\",\"7\"\r\n\"T\",\"20\"\r\n\"G\",\"4\"\r\n\"S\",\"14\"\r\n\"H\",\"4\"\r\n\"R\",\"2\"\r\n\"M\",\"2\"\r\n\"Q\",\"2\"\r\n\"I\",\"1\"\r\n";
         const actualValue = getResidueCount();
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as Residues CSV, Passed!");
