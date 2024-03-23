@@ -168,7 +168,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches on setting empty match selection, Passed!");
     });
 
-    test("Cross-link Selection testing", function (assert) {
+    test("Crosslink Selection testing", function (assert) {
         const expectedLinks = 3;
         const expectedMatches = 18;
         const crosslinks = clmsModel.get("crosslinks");
@@ -190,7 +190,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches on setting 3 matches selection, Passed!");
     });
 
-    test("Adding Cross-link selection to prior Cross-link Selection testing", function (assert) {
+    test("Adding Crosslink selection to prior Crosslink Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatches = 17;
         const crosslinks = clmsModel.get("crosslinks");
@@ -232,7 +232,7 @@ export function testCallback(model) {
     });
 
 
-    test("Adding Match Selection to prior Cross-link Selection testing", function (assert) {
+    test("Adding Match Selection to prior Crosslink Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatches = 4;	// Two of P02768-A_190-P02768-A_425 matches are marked rejected and don't pass filter
         const crosslinks = clmsModel.get("crosslinks");
@@ -251,7 +251,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches, Passed!");
     });
 
-    test("Adding Cross-Link Selection to prior Match Selection testing", function (assert) {
+    test("Adding Crosslink Selection to prior Match Selection testing", function (assert) {
         const expectedLinkIDs = ["P02768-A_415-P02768-A_497", "P02768-A_190-P02768-A_425"].sort();
         const expectedMatches = 17;
         const crosslinks = clmsModel.get("crosslinks");
@@ -266,7 +266,7 @@ export function testCallback(model) {
         assert.deepEqual(model.getMarkedMatches("selection").size(), expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " selected matches, Passed!");
     });
 
-    test("Adding no Cross-Links to prior Cross-link Selection testing", function (assert) {
+    test("Adding no Crosslinks to prior Crosslink Selection testing", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const selectedLinks = [crosslinks.get("P02768-A_1-P02768-A_11"), crosslinks.get("P02768-A_415-P02768-A_497")];
         model.setMarkedCrossLinks("selection", selectedLinks, false, false, false);
@@ -592,7 +592,7 @@ export function testCallback(model) {
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + JSON.stringify(expectedMapping) + " NGL C-Alpha atom indices, Passed!");
     });
 
-    test("Single Cross-Link Distance validated on NGLViewer", function (assert) {
+    test("Single Crosslink Distance validated on NGLViewer", function (assert) {
         // const crosslinks = clmsModel.get("crosslinks");
         // const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         const expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
@@ -605,7 +605,7 @@ export function testCallback(model) {
         assert.deepEqual(actualDistance, expectedDistance, "Expected " + expectedDistance + " distance (2 d.p.) for A chain 415-497 crosslink, Passed!");
     });
 
-    test("Same Cross-Link Distance, different indexing methods 1", function (assert) {
+    test("Same Crosslink Distance, different indexing methods 1", function (assert) {
         const crosslinks = clmsModel.get("crosslinks");
         const singleCrossLink = crosslinks.get("P02768-A_415-P02768-A_497");
         const alignCollection = window.compositeModelInst.get("alignColl");
@@ -897,7 +897,7 @@ export function testCallback(model) {
     });
 
 
-    test("Filter Multiple Sequences by Cross-Linkable Specificity Setting", function (assert) {
+    test("Filter Multiple Sequences by Crosslinkable Specificity Setting", function (assert) {
         const expected = [535, 536, 540, 552, 555, 559, 561, 568, 569, 574];	// last 10 KSTY
         const expected2 = d3.range(0, dseq1AO6.length);	// everything
 
@@ -911,16 +911,16 @@ export function testCallback(model) {
         let actualFilteredSubSeqIndices = filterSequenceByResidueSet(seqRange.subSeq, linkableResidues[1], false);	// 1 is KSTY
         actualFilteredSubSeqIndices = actualFilteredSubSeqIndices.slice(-10);	// last 10
 
-        assert.deepEqual(actualFilteredSubSeqIndices, expected, "Expected " + expected.join(", ") + " as last 10 KSTY cross-linkable filtered sequence indices, Passed!");
+        assert.deepEqual(actualFilteredSubSeqIndices, expected, "Expected " + expected.join(", ") + " as last 10 KSTY crosslinkable filtered sequence indices, Passed!");
 
 
         actualFilteredSubSeqIndices = filterSequenceByResidueSet(seqRange.subSeq, linkableResidues[0], false);	// 0 is everything
 
-        assert.deepEqual(actualFilteredSubSeqIndices, expected2, "Expected " + expected2.join(", ") + " as everything cross-linkable filtered sequence indices, Passed!");
+        assert.deepEqual(actualFilteredSubSeqIndices, expected2, "Expected " + expected2.join(", ") + " as everything crosslinkable filtered sequence indices, Passed!");
     });
 
 
-    test("Calc Filtered Residue Points from Cross-linker Specificity", function (assert) {
+    test("Calc Filtered Residue Points from Crosslinker Specificity", function (assert) {
         let expectedValue = [535, 536, 540, 552, 555, 559, 561, 568, 569, 574];	// last 10 KSTY
         expectedValue = expectedValue.map(function (v) {
             return {chainIndex: 1, protID: "P02768-A", seqIndex: v + 1, searchIndex: v + 5};	// seqIndex 1-indexed, sdearchIndex 4 on from that, last 10 residues will be chain 1
@@ -955,7 +955,7 @@ export function testCallback(model) {
         actualValue = actualValue[1]; // the KSTY & NTERM residues
         actualValue = actualValue.slice(-10);	// The last 10 values
 
-        assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as last 10 KSTY cross-linkable filtered residue points, Passed!");
+        assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as last 10 KSTY crosslinkable filtered residue points, Passed!");
     });
 
 
@@ -1605,7 +1605,7 @@ export function testCallback(model) {
 
         const actualValue = getLinksCSV();
 
-        assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as Cross-Links CSV, Passed!");
+        assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as Crosslinks CSV, Passed!");
 
         model.get("filterModel").resetFilter();
     });

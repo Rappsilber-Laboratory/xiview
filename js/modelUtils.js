@@ -190,7 +190,7 @@ export function indexSameSequencesToFirstOccurrence(sequences) {
     });
 }
 
-//use here, nglutils
+//used by nglutils
 export function filterRepeatedSequences(sequences) {
     // Filter out repeated sequences to avoid costly realignment calculation of the same sequences
     const sameSeqIndices = indexSameSequencesToFirstOccurrence(sequences);
@@ -287,28 +287,6 @@ export function getLegalAccessionIDs(interactorCollection) {
             });
     }
     return ids;
-}
-
-//used by pdbfilechooser, metadatafilechooser
-export function loadUserFile(fileObj, successFunc, associatedData) {
-    if (window.File && window.FileReader && window.FileList && window.Blob) {
-        const reader = new FileReader();
-
-        // Closure to capture the file information.
-        reader.onload = (function () {
-            return function (e) {
-                successFunc(e.target.result, associatedData);
-                // hack for https://stackoverflow.com/a/28274454
-                const fileChooserInputs = document.getElementsByClassName("selectMetaDataFileButton");
-                for (let fci of fileChooserInputs) {
-                    fci.value = null;
-                }
-            };
-        })(fileObj);
-
-        // Read in the image file as a data URL.
-        reader.readAsText(fileObj);
-    }
 }
 
 //nglutils, ngl-wrapper-model

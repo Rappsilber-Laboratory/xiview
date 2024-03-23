@@ -5,11 +5,11 @@ import d3 from "d3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {
-    loadUserFile,
     updateLinkMetadata,
     updateProteinMetadata,
     updateUserAnnotationsMetadata
 } from "../modelUtils";
+import {loadUserFile} from "./load-user-file";
 
 const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
 

@@ -24,6 +24,7 @@ import {testCallback, testSetupNew} from "../tests/tests";
 import {setupColourModels} from "./model/color/setup-colors";
 import {repopulateNGL} from "./views/ngl/RepopulateNGL";
 import * as assert from "assert";
+import {testCallback2, testSetup2} from "../tests/tests2";
 
 export const networkPageSpinner = new Spinner({
     length: 38, // The length of each line
@@ -279,4 +280,6 @@ export function validationPage(serverFlavour, dataPath, peakListPath, annotatorU
 
 export function test() {
     testSetupNew(testCallback);
+    // delete window.compositeModelInst;
+    // testSetup2();
 }
