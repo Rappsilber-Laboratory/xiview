@@ -56,7 +56,7 @@ body, input, select, textarea {
     border: none;
     font-family: inherit;
     color: inherit;
-    background: 0 0;/*#091D42;*/
+    background: 0 0;/*var(--main-color);*/
     cursor: pointer;
     padding: 5px 15px;
     margin: 2px 5px 2px 5px;
@@ -88,7 +88,7 @@ body, input, select, textarea {
     color: #fff;
 }
 .btn-1a:active, .btn-1a:hover {
-    color: #091D42;
+    color: var(--main-color);
     background: #fff;
 }
 
@@ -152,7 +152,7 @@ td:last-child{
 }
 tbody tr:hover td, tbody tr:hover td a, .spectrumShown{
     color: #fff;
-    background-color: #091D42;
+    background-color: var(--main-color);
     -webkit-transition: all 200ms ease;
     -moz-transition: all 200ms ease;
     -ms-transition: all 200ms ease;

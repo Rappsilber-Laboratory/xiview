@@ -1,5 +1,5 @@
 #xispec_spectrumControls {
-	background-color: #091d42!important;
+	background-color: var(--main-color)!important;
 	color: #000!important;
 }
 
@@ -15,7 +15,7 @@
 }
 .xispec_settings_menu .xispec_btn{
       background: #e3e3e3!important;
-      color: #091d42!important;
+      color: var(--main-color)!important;
 }
 .xispec_dynDiv_moveParentDiv {
     border: none!important;
@@ -28,7 +28,7 @@
 }
 .xispec_settings_menu .xispec_active:hover{
   background: rgba(192,206,224,1)!important;
-  color: #091d42!important;
+  color: var(--main-color)!important;
 }
 
 .xispec_settings_menu .xispec_btn{
@@ -44,14 +44,14 @@
 
 
 .xispec_settings-bottom .xispec_btn-1 {
-    border: 1px solid #091d42!important;
-    color: #091d42!important;
+    border: 1px solid var(--main-color)!important;
+    color: var(--main-color)!important;
 }
 .xispec_multiSelect_dropdown-content {
-    background-color: #091d42!important;
+    background-color: var(--main-color)!important;
 }
 .xispec_form-control:focus {
-  border-color: #091d42!important;
+  border-color: var(--main-color)!important;
 }
 #xispec_settingsCustomCfgApply{
 	display: inline!important;

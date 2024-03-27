@@ -24,7 +24,7 @@
 }
 
 #spectrumControlsTop, #spectrumControlsBottom {
-    background-color: #091D42;
+    background-color: var(--main-color);
 	display: inline-block;
 	z-index: 51;
 	position: relative;

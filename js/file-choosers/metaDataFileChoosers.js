@@ -85,7 +85,7 @@ const AbstractMetaDataFileChooserBB = BaseFrameView.extend({
         const mbar = d3.select(this.el).select(".messagebar").style("display", null);
         const t = mbar.html(msg).transition().delay(0).duration(1000).style("color", (success === false ? "red" : (success ? "blue" : null)));
         if (success !== undefined) {
-            t.transition().duration(5000).style("color", "#091d42");
+            t.transition().duration(5000).style("color", "var(--main-color)");
         }
     },
 

@@ -23,8 +23,8 @@
 #spectrumControls form {
     vertical-align: top;
     display: inline-block;
-    border-left: 1px solid #091d42;
-    border-right: 1px solid #091d42;
+    border-left: 1px solid var(--main-color);
+    border-right: 1px solid var(--main-color);
 }
 
 #spectrumControls form > * {

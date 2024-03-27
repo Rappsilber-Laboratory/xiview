@@ -103,7 +103,7 @@ changes there are automatically reflected in the legend
 
 .keyPanel img {
     padding: 0.5em;
-    background: #091d42;
+    background: var(--main-color);
     align-self: center;
 }
 

@@ -96,7 +96,7 @@
 }
 
 .selectView .controlBar {
-    background: #091d42;
+    background: var(--main-color);
     color: white;
     padding: 0.25em 0;
     flex-shrink: 0;
@@ -107,7 +107,7 @@
 }
 
 .buttonPressed {
-    color: #091D42;
+    color: var(--main-color);
     background: white;
 }
 

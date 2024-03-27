@@ -441,9 +441,9 @@ export const BaseFrameView = Backbone.View.extend({
         let t = mbar.html(msg);
         if (success !== undefined) {
             t = t.transition().delay(0).duration(1000).style("color", (success === false ? "red" : (success ? "blue" : null)));
-            t.transition().duration(5000).style("color", "#091d42");
+            t.transition().duration(5000).style("color", "var(--main-color)");
         } else {
-            t.style("color", "#091d42");
+            t.style("color", "var(--main-color)");
         }
         return this;
     },

@@ -5,3 +5,10 @@ body {
 #toggles_monolinks {
     display: none;
 }
+
+:root {
+    /*--main-color:#091D42;*/
+    /*--main-color:red;*/
+    --main-color:rgb(55, 58, 54);
+    /*#333;*/
+}

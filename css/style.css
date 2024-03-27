@@ -29,7 +29,7 @@
 	user-select: none;
 }
 .fa-xi:hover {
-    color: #091D42;
+    color: var(--main-color);
     background:white;
 }
 
@@ -49,7 +49,7 @@
 }
 
 .panelMenuButton:hover {
-    color: #091D42;
+    color: var(--main-color);
     background:white;
 }
 
@@ -64,7 +64,7 @@
 .page-header{
     height:37px;
     padding-left: 10px;
-    background-color: #091D42;
+    background-color: var(--main-color);
     color: #fff;
     position: absolute;
     /* increased z-index to 50 so it's children (i.e. drop-down menus) overlay floating windows */
@@ -165,7 +165,7 @@
     padding:20px 10px;
     /*background: rgba(9, 29, 66, 0.9);*/
     overflow: hidden;
-    color:#091d42!important;
+    color:var(--main-color)!important;
     position:fixed;
     pointer-events:all;
     background: rgba(224,224,224,1)!important;
@@ -177,13 +177,13 @@
 }
 .dynDiv_moveParentDiv, .xispec_dynDiv_moveParentDiv{
     height:20px;
-    background:#091D42!important;
+    background:var(--main-color)!important;
 }
 
 .draggableCorner {
     width:20px;
     height:20px;
-    background:#091D42!important;
+    background:var(--main-color)!important;
     border:none;
     background-image:url("../images/tl.png")!important;
 }
@@ -200,8 +200,8 @@
 }
 
 .dynDiv .btn-1 {
-    color: #091d42;
-    border-color: #091d42;
+    color: var(--main-color);
+    border-color: var(--main-color);
 }
 
 /* window drop-down menus should have grey background */
@@ -238,7 +238,7 @@
 }
 
 .panelInner thead td {
-    color: #091D42;
+    color: var(--main-color);
 }
 
 .panelInner td, .helpPanel td {
@@ -258,7 +258,7 @@
 
     width: 100%;
     background:#ecedf2!important;
-    color:#091D42!important;
+    color:var(--main-color)!important;
     /*padding-left: 10px;*/
     /*padding-right: 10px;*/
     -webkit-user-select: none;
@@ -469,7 +469,7 @@ A.btn {
 
 .gutter {
 
-    background-color: #091d42;
+    background-color: var(--main-color);
   background-repeat: no-repeat;
   background-position: 50%;
   position: relative; /* will overlay previous absolute divs i.e. distance slider */
@@ -477,7 +477,7 @@ A.btn {
 
 .gutter:hover {
     background-color: white;
-    border-color: #091d42;
+    border-color: var(--main-color);
 }
 
 .gutter.gutter-horizontal {
@@ -760,13 +760,13 @@ svg.tempKey text {
 }
 
 select {
-	color: #091d42;
-	border-color: #091d42;
+	color: var(--main-color);
+	border-color: var(--main-color);
 	font-family: Lato-Bold;
 }
 
 input {
-	color: #091d42;
+	color: var(--main-color);
 	font-family: Lato-Bold;
 }
 

@@ -19,7 +19,7 @@
     /*color: #000;*/
     /*background: #1c94c4;*/
     color: #ffffff;
-    background: #091D42;
+    background: var(--main-color);
 }
 
 .CLMStooltip p {

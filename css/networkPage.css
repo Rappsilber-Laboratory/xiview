@@ -6,7 +6,7 @@
 #xiNetButtonBar {
     /* border-left: 1px solid #eee; */
     float: right;
-    background-color: #091D42;
+    background-color: var(--main-color);
     text-transform: uppercase;
     /* padding-left:15px; */
 }
@@ -22,7 +22,7 @@
     position: fixed;
     overflow: hidden;
     white-space: nowrap;
-    background-color: #091D42;
+    background-color: var(--main-color);
     color: #fff;
     padding:10px;
     /*margin: 10px;*/
@@ -39,7 +39,7 @@
     position: fixed;
     overflow: hidden;
     white-space: nowrap;
-    background-color: #091D42;
+    background-color: var(--main-color);
     color: #fff;
     padding:10px;
     /*margin: 10px;*/
