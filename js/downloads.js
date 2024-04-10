@@ -134,13 +134,21 @@ export function download(content, contentType, fileName) {
 }
 
 function mostReadableId(protein) {
-    if (protein.accession && protein.name && (protein.accession !== protein.name)) {
-        return "sp|" + protein.accession + "|" + protein.name;
-    } else if (protein.name) {
-        return protein.name;
-    } else if (protein.accession) {
-        return protein.accession;
-    } else {
+
+    //if serverFlavour is XI2
+    if (window.compositeModelInst.get("serverFlavour") === "XI2"){
+        if (protein.accession && protein.name && (protein.accession !== protein.name)) {
+            return protein.accession + "|" + protein.name;
+        } else if (protein.name) {
+            return protein.name;
+        } else if (protein.accession) {
+            return protein.accession;
+        } else {
+            return protein.id;
+        }
+    }
+    else { // not xi2
+        // just use id
         return protein.id;
     }
 }

@@ -7,8 +7,8 @@ body {
 }
 
 :root {
-    /*--main-color:#091D42;*/
+    --main-color:#091D42;
     /*--main-color:red;*/
-    --main-color:rgb(55, 58, 54);
+    /*--main-color:rgb(55, 58, 54);*/
     /*#333;*/
 }
