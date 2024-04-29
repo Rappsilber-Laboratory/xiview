@@ -1,5 +1,6 @@
 import "../css/networkPage.css";
 import "../css/xispecAdjust.css";
+import packageInfo from "../../package.json";
 
 import * as _ from "underscore";
 import Backbone from "backbone";
@@ -66,7 +67,7 @@ window.vent = {};
 _.extend(window.vent, Backbone.Events);
 
 // only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
-export function postDataLoaded () {
+export function postDataLoaded() {
     console.log("DATA LOADED AND WINDOW LOADED");
     networkPageSpinner.stop();
 
@@ -241,12 +242,12 @@ export function postDataLoaded () {
 export const allDataLoaded = _.after(3, postDataLoaded);
 
 // for qunit testing
-export function pretendLoad () {
+export function pretendLoad() {
     allDataLoaded();
     allDataLoaded();
 }
 
-export function blosumLoading (options) {
+export function blosumLoading(options) {
     options = options || {};
 
     // Collection of blosum matrices that will be fetched from a json file
@@ -262,7 +263,7 @@ export function blosumLoading (options) {
     window.blosumCollInst.fetch(options);
 }
 
-export function models (serverFlavour, options) {
+export function models(serverFlavour, options) {
     assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
         "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
 
@@ -336,7 +337,7 @@ export function models (serverFlavour, options) {
 }
 
 //only inits stuff required by validation page
-export function modelsEssential (serverFlavour, options) {
+export function modelsEssential(serverFlavour, options) {
     const hasMissing = !_.isEmpty(options.missingSearchIDs);
     const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
     const hasNoMatches = _.isEmpty(options.matches);
@@ -470,7 +471,7 @@ export function modelsEssential (serverFlavour, options) {
 
 }
 
-export function views () {
+export function views() {
 
     const compModel = window.compositeModelInst;
 
@@ -609,31 +610,31 @@ export function views () {
                 context: compModel,
                 tooltip: "Hide selected proteins",
             },
-            {
-                name: "Hide Unselected",
-                func: compModel.hideUnselectedProteins,
-                context: compModel,
-                tooltip: "Hide unselected proteins",
-                sectionEnd: true
-            },
-            {
-                name: "+Neighbours",
-                func: compModel.stepOutSelectedProteins,
-                context: compModel,
-                tooltip: "Select proteins which are crosslinked to already selected proteins",
-                categoryTitle: "Change Selection",
-                sectionBegin: true
-            },
-            {
-                sectionBegin: true,
-                id: "proteinSelectionFilter",
-                func: compModel.proteinSelectionTextFilter,
-                closeOnClick: false,
-                context: compModel,
-                tooltip: "Select proteins whose descriptions include input text",
-                categoryTitle: "Select by text filter:",
-                sectionEnd: true
-            }
+                {
+                    name: "Hide Unselected",
+                    func: compModel.hideUnselectedProteins,
+                    context: compModel,
+                    tooltip: "Hide unselected proteins",
+                    sectionEnd: true
+                },
+                {
+                    name: "+Neighbours",
+                    func: compModel.stepOutSelectedProteins,
+                    context: compModel,
+                    tooltip: "Select proteins which are crosslinked to already selected proteins",
+                    categoryTitle: "Change Selection",
+                    sectionBegin: true
+                },
+                {
+                    sectionBegin: true,
+                    id: "proteinSelectionFilter",
+                    func: compModel.proteinSelectionTextFilter,
+                    closeOnClick: false,
+                    context: compModel,
+                    tooltip: "Select proteins whose descriptions include input text",
+                    categoryTitle: "Select by text filter:",
+                    sectionEnd: true
+                }
             ],
             //tooltipModel: compModel.get("tooltipModel")
             sectionHeader: function (d) {
@@ -708,26 +709,26 @@ export function views () {
         eventName: "pdbFileChooserShow",
         tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
     },
-    {
-        name: "STRING",
-        eventName: "stringDataChooserShow",
-        tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
-    },
-    {
-        name: "Edge Metadata",
-        eventName: "linkMetaDataFileChooserShow",
-        tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
-    },
-    {
-        name: "Node Metadata",
-        eventName: "proteinMetaDataFileChooserShow",
-        tooltip: "Load node (protein) meta-data from a local CSV file"
-    },
-    {
-        name: "Sequence Annotations",
-        eventName: "userAnnotationsMetaDataFileChooserShow",
-        tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
-    },
+        {
+            name: "STRING",
+            eventName: "stringDataChooserShow",
+            tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
+        },
+        {
+            name: "Edge Metadata",
+            eventName: "linkMetaDataFileChooserShow",
+            tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
+        },
+        {
+            name: "Node Metadata",
+            eventName: "proteinMetaDataFileChooserShow",
+            tooltip: "Load node (protein) meta-data from a local CSV file"
+        },
+        {
+            name: "Sequence Annotations",
+            eventName: "userAnnotationsMetaDataFileChooserShow",
+            tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
+        },
     ];
     loadButtonData.forEach(function (bdata) {
         bdata.func = function () {
@@ -758,10 +759,10 @@ export function views () {
     });
     dialog.addEventListener("close", () => {
         const iId = document.getElementById("colorDialog").interactorId;
-        const checkedColor = document.querySelector('input[name="aColor"]:checked');
-        if (!checkedColor){
+        const checkedColor = document.querySelector("input[name=\"aColor\"]:checked");
+        if (!checkedColor) {
             alert("No colour selected.");
-        } else if (iId !== "cancel"){
+        } else if (iId !== "cancel") {
             compModel.setInteractorColor(iId, checkedColor.value);
         }
     });
@@ -774,7 +775,7 @@ export function views () {
     });
 }
 
-export function viewsEssential (options) {
+export function viewsEssential(options) {
 
     const compModel = window.compositeModelInst;
     const filterModel = compModel.get("filterModel");
@@ -1029,6 +1030,8 @@ export function viewsEssential (options) {
         myOptions: {
             title: "Help",
             menu: [{
+                name: "version " + packageInfo.version,
+            },{
                 name: "Xi Docs",
                 func: function () {
                     window.open("./docs/html/xiview.html", "_blank");
@@ -1062,7 +1065,7 @@ export function viewsEssential (options) {
     });
 }
 
-function viewsThatNeedAsyncData () {
+function viewsThatNeedAsyncData() {
 
     const compModel = window.compositeModelInst;
 
