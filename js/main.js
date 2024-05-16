@@ -283,3 +283,9 @@ export function test() {
     // delete window.compositeModelInst;
     // testSetup2();
 }
+
+export function test2() {
+    // testSetupNew(testCallback2);
+    // delete window.compositeModelInst;
+    testSetup2();
+}

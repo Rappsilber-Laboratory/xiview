@@ -9,7 +9,7 @@ import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
 export function testSetup2() {
     // *callback hell
     d3.json("15884.json", function (options) {
-        console.log("*loaded 15584.json")
+        console.log("*loaded 15584.json");
         window.vent.listenToOnce(window.vent, "initialSetupDone", function () {
             console.log("*initialSetupDone");
             setupColourModels();
@@ -63,7 +63,10 @@ export function testSetup2() {
 }
 
 
-function testParsing(clmsModel) {
+export function testCallback2(model) {
+    qunit.config.notrycatch = true;
+    const clmsModel = model.get("clmsModel");
+    start();
     module("Parsing2");
     test("JSON to Model Parsing", function (assert) {
         const expectedLinks = 904;
@@ -71,30 +74,22 @@ function testParsing(clmsModel) {
         assert.deepEqual(clmsModel.get("crosslinks").size, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
         assert.deepEqual(clmsModel.get("matches").length, expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
     });
-}
-
-function testCallback2(model) {
-    qunit.config.notrycatch = true;
-    const clmsModel = model.get("clmsModel");
-    start();
-    testParsing(clmsModel);
 
     module("3D Alignment and distance calculations");
     test("3D aliignment and distance calculations", function (assert) {
-        let expected, actual;
+        const expected = 520;
         const stageModel = model.get("stageModel"); //(AKA nglWrapperModel?)
-
+        let actual;
         //test by comparing distanceObj
-        // actual = stageModel.get("distancesObj");
-        // console.log(actual);
+        // let actual = stageModel.get("distancesObj").length;
         // assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " distances, Passed!");
 
 
         //test by getting the CSV export
-        // const linkArray3d = NGLExportUtils.export3dLinksCSV(stageModel.get("structureComp").structure, stageModel, "name", false);
-        expected = 520;
-        const crosslinks = stageModel.getFullLinks();
-        const linkExportArray = NGLExportUtils.make3dLinkSyntax(stageModel.get("structureComp").structure, crosslinks, stageModel, false);
+        const linkExportArray = NGLExportUtils.export3dLinksCSV(stageModel.get("structureComp").structure, stageModel, "name", false);
+
+        //const crosslinks = stageModel.getFullLinks();
+        // const linkExportArray = NGLExportUtils.make3dLinkSyntax(stageModel.get("structureComp").structure, crosslinks, stageModel, false);
         console.log(linkExportArray);
         actual = linkExportArray.length;
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " distances, Passed!");
