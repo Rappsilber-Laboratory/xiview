@@ -27,7 +27,7 @@ import {XispecWrapper} from "../../spectrum/src/xispec-wrapper";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
     downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
-    downloadGroups, downloadPPIs, downloadModificationCount, downloadProteinAccessions
+    downloadGroups, downloadPPIs, downloadModificationCount, downloadProteinAccessions, downloadAlphaLink2
 } from "./downloads";
 import {TooltipViewBB} from "./views/tooltipViewBB";
 import {checkBoxView} from "./ui-utils/checkbox-view";
@@ -610,31 +610,31 @@ export function views() {
                 context: compModel,
                 tooltip: "Hide selected proteins",
             },
-                {
-                    name: "Hide Unselected",
-                    func: compModel.hideUnselectedProteins,
-                    context: compModel,
-                    tooltip: "Hide unselected proteins",
-                    sectionEnd: true
-                },
-                {
-                    name: "+Neighbours",
-                    func: compModel.stepOutSelectedProteins,
-                    context: compModel,
-                    tooltip: "Select proteins which are crosslinked to already selected proteins",
-                    categoryTitle: "Change Selection",
-                    sectionBegin: true
-                },
-                {
-                    sectionBegin: true,
-                    id: "proteinSelectionFilter",
-                    func: compModel.proteinSelectionTextFilter,
-                    closeOnClick: false,
-                    context: compModel,
-                    tooltip: "Select proteins whose descriptions include input text",
-                    categoryTitle: "Select by text filter:",
-                    sectionEnd: true
-                }
+            {
+                name: "Hide Unselected",
+                func: compModel.hideUnselectedProteins,
+                context: compModel,
+                tooltip: "Hide unselected proteins",
+                sectionEnd: true
+            },
+            {
+                name: "+Neighbours",
+                func: compModel.stepOutSelectedProteins,
+                context: compModel,
+                tooltip: "Select proteins which are crosslinked to already selected proteins",
+                categoryTitle: "Change Selection",
+                sectionBegin: true
+            },
+            {
+                sectionBegin: true,
+                id: "proteinSelectionFilter",
+                func: compModel.proteinSelectionTextFilter,
+                closeOnClick: false,
+                context: compModel,
+                tooltip: "Select proteins whose descriptions include input text",
+                categoryTitle: "Select by text filter:",
+                sectionEnd: true
+            }
             ],
             //tooltipModel: compModel.get("tooltipModel")
             sectionHeader: function (d) {
@@ -709,26 +709,26 @@ export function views() {
         eventName: "pdbFileChooserShow",
         tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
     },
-        {
-            name: "STRING",
-            eventName: "stringDataChooserShow",
-            tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
-        },
-        {
-            name: "Edge Metadata",
-            eventName: "linkMetaDataFileChooserShow",
-            tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
-        },
-        {
-            name: "Node Metadata",
-            eventName: "proteinMetaDataFileChooserShow",
-            tooltip: "Load node (protein) meta-data from a local CSV file"
-        },
-        {
-            name: "Sequence Annotations",
-            eventName: "userAnnotationsMetaDataFileChooserShow",
-            tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
-        },
+    {
+        name: "STRING",
+        eventName: "stringDataChooserShow",
+        tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
+    },
+    {
+        name: "Edge Metadata",
+        eventName: "linkMetaDataFileChooserShow",
+        tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
+    },
+    {
+        name: "Node Metadata",
+        eventName: "proteinMetaDataFileChooserShow",
+        tooltip: "Load node (protein) meta-data from a local CSV file"
+    },
+    {
+        name: "Sequence Annotations",
+        eventName: "userAnnotationsMetaDataFileChooserShow",
+        tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
+    },
     ];
     loadButtonData.forEach(function (bdata) {
         bdata.func = function () {
@@ -1013,6 +1013,13 @@ export function viewsEssential(options) {
                     func: downloadSSL,
                     tooltip: "Produces an SSL file for quantitation in SkyLine",
                     categoryTitle: "As an SSL File",
+                    sectionBegin: true,
+                },
+                {
+                    name: "AlphaLink2 for selected proteins [DEV]",  // extra space to differentiate from first entry in menu
+                    func: downloadAlphaLink2,
+                    tooltip: "Exports AlphaLink2 csv file and corresponding FASTA. Prototype! Exported FDR values are wrong (all set to 0.1).",
+                    categoryTitle: "AlphaLink2",
                     sectionBegin: true,
                 },
             ],

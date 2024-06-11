@@ -38,6 +38,11 @@ export function downloadSSL() {
 
 }
 
+export function downloadAlphaLink2(){
+    download(getAlphaLink2CSV().csv, "text/csv", "alphalink.txt");
+    download(getAlphaLink2CSV().fasta, "text/csv", "alphalink.fasta");
+}
+
 export function downloadLinks() {
     download(getLinksCSV(), "text/csv", downloadFilename("links"));
 }
@@ -487,6 +492,63 @@ export function getLinksCSV() {
 
     rows.unshift(headerRow);
     return rows.join("\r\n") + "\r\n";
+}
+
+function getAlphaLink2CSV(){
+    const selectedProteins = window.compositeModelInst.get("selectedProteins");
+    const proteins = new Map();
+    let csv = "", fasta = "";
+
+    let chainCharCode = 'A'.charCodeAt(0) - 1; // todo - what if there are more than 26 chains?
+    function getChainCharForProtein(protein, stoich) {
+        const chainKey = protein.id + "-" + stoich;
+        if (proteins.has(chainKey)) {
+            return proteins.get(chainKey).chainChar;
+        }
+        else {
+            chainCharCode++;
+            const ch = String.fromCharCode(chainCharCode);
+            proteins.set(chainKey, {chainChar: ch, seq: protein.sequence});
+            return ch;
+        }
+    }
+
+    const seenCrosslinks = new Set(); // need to eliminate duplicates (het. links will be crosslinks of two proteins)
+    for (let selectedProtein of selectedProteins) {
+        if (selectedProtein.is_decoy !== true) {
+            for (let crosslink of selectedProtein.crosslinks) {
+                if (!seenCrosslinks.has(crosslink) // eliminating duplicates
+                        && !crosslink.fromProtein.isDecoy && !crosslink.toProtein.isDecoy // neither end is decoy
+                        && crosslink.filteredMatches_pp // tests if it has passed all the current filters
+                        // tests if both ends are selected proteins
+                        && selectedProteins.indexOf(crosslink.fromProtein) != -1
+                        && selectedProteins.indexOf(crosslink.toProtein) != -1) {
+                    seenCrosslinks.add(crosslink);
+
+                    //ok, deal with this stoichiometry thing...
+                    const fromStoich = crosslink.fromProtein.alphaLinkStoich? crosslink.fromProtein.alphaLinkStoich : 1;
+                    const toStoich = crosslink.toProtein.alphaLinkStoich? crosslink.toProtein.alphaLinkStoich : 1;
+                    for (let i = 0; i < fromStoich; i++) {
+                        for (let j = 0; j < toStoich; j++) {
+
+                            csv += crosslink.fromResidue + " "
+                                + getChainCharForProtein(crosslink.fromProtein, i) + " "
+                                + crosslink.toResidue + " "
+                                + getChainCharForProtein(crosslink.toProtein, j) + " 0.1\n";
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //make fasta
+    for (let [key, value] of proteins){
+        fasta += ">" + key + "\n" + value.seq + "\n" + "\n";
+    }
+
+    return {csv: csv, fasta: fasta};
 }
 
 function getPPIsCSV() {
