@@ -989,8 +989,6 @@ export const DistogramBB = BaseFrameView.extend({
         return this;
     },
 
-    //identifier: "Histogram View",
-
     optionsToString: function () {
         const seriesIDs = _.pluck(this.chart.data.shown(), "id");
         const funcMeta = this.getSelectedOption("X");

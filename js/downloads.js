@@ -499,15 +499,20 @@ function getAlphaLink2CSV(){
     const proteins = new Map();
     let csv = "", fasta = "";
 
-    let chainCharCode = 'A'.charCodeAt(0) - 1; // todo - what if there are more than 26 chains?
+    const chainChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let chainCharIndex =  -1;
     function getChainCharForProtein(protein, stoich) {
         const chainKey = protein.id + "-" + stoich;
         if (proteins.has(chainKey)) {
             return proteins.get(chainKey).chainChar;
         }
         else {
-            chainCharCode++;
-            const ch = String.fromCharCode(chainCharCode);
+            chainCharIndex++;
+            if (chainCharIndex > chainChars.length) {
+                alert ("Too many chains for Alphalink2 export");
+                return;
+            }
+            const ch = chainChars[chainCharIndex];
             proteins.set(chainKey, {chainChar: ch, seq: protein.sequence});
             return ch;
         }
@@ -534,7 +539,7 @@ function getAlphaLink2CSV(){
                             csv += crosslink.fromResidue + " "
                                 + getChainCharForProtein(crosslink.fromProtein, i) + " "
                                 + crosslink.toResidue + " "
-                                + getChainCharForProtein(crosslink.toProtein, j) + " 0.1\n";
+                                + getChainCharForProtein(crosslink.toProtein, j) + " 0.05\n";
 
                         }
                     }

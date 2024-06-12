@@ -265,7 +265,11 @@ export function makeXMLStr(xmls, svgDoc) {
     // serializing adds an xmlns attribute to the style element ('cos it thinks we want xhtml), which knackers it for inkscape, here we chop it out
     xmlStr = xmlStr.split("xmlns=\"http://www.w3.org/1999/xhtml\"").join("");
 
-    xmlStr = xmlStr.replace(/(#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])([0-9A-Fa-f][0-9A-Fa-f])/g, "$1");
+    // take transparency out of colours (inkscape fix)
+    xmlStr = xmlStr.replace(/(#[0-9A-Fa-f]{6})([0-9A-Fa-f]{2})/g, "$1");
+
+    //  https://github.com/Rappsilber-Laboratory/build-xiview/issues/105
+    xmlStr = xmlStr.replace(/\.distoDiv \.c3-axis\.c3-axis-x \.tick:nth-of-type\(10n\+1\) line { transform: scaleY\(1\.2\); }/gm, "");
 
     return xmlStr;
 }
