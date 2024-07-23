@@ -71,8 +71,8 @@ export const NGLExportUtils = {
             let pdbIdB = (pdbids[link.residueB.chainIndex] || structure.name);
 
             if (localFile) {
-                pdbIdA = pdbIdA.replace(".pdb", "");
-                pdbIdB = pdbIdB.replace(".pdb", "");
+                pdbIdA = pdbIdA.replace(/(\.pdb)|(\.cif)/, "");
+                pdbIdB = pdbIdB.replace(/(\.pdb)|(\.cif)/, "");
             }
 
             return "distance " + name1 + "-" + name2 +
