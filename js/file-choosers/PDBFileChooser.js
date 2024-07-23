@@ -1,6 +1,6 @@
 import * as _ from "underscore";
 import d3 from "d3";
-import * as NGL from "../../vendor/ngl.dev";
+import * as NGL from "ngl";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {getLegalAccessionIDs} from "../modelUtils";

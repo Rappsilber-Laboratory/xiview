@@ -1,6 +1,6 @@
 import * as $ from "jquery";
 import * as _ from "underscore";
-import * as NGL from "../vendor/ngl.dev";
+import * as NGL from "ngl";
 import * as d3 from "d3";
 
 import {mostReadableMultipleId,} from "../js/downloads";
@@ -341,8 +341,8 @@ export function testCallback(model) {
 
     test("Sequence generation from PDB chains", function (assert) {
         const expected = [
-            {chainName: "A", chainIndex: 0, modelIndex: 0, residueOffset: 0, data: dseq1AO6, structureID: "1ao6"},
-            {chainName: "B", chainIndex: 1, modelIndex: 0, residueOffset: 578, data: dseq1AO6, structureID: "1ao6"},
+            {chainName: "A", chainIndex: 0, modelIndex: 0, residueOffset: 0, data: dseq1AO6, structureID: "1ao6.bcif.gz"},
+            {chainName: "B", chainIndex: 1, modelIndex: 0, residueOffset: 578, data: dseq1AO6, structureID: "1ao6.bcif.gz"},
         ];
 
         const stageModel = window.compositeModelInst.get("stageModel");
@@ -542,7 +542,7 @@ export function testCallback(model) {
 
         const alignCollection = window.compositeModelInst.get("alignColl");
         const alignModel = alignCollection.get("P02768-A");
-        const actualMapping = alignModel.bulkMapFromSearch("1AO6:A:0", [415, 497]);
+        const actualMapping = alignModel.bulkMapFromSearch("1AO6.bcif.gz:A:0", [415, 497]);
 
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + expectedMapping + " when mapping from [415,497] to 1ao6 pdb indices, Passed!");
     });
@@ -552,7 +552,7 @@ export function testCallback(model) {
 
         const alignCollection = window.compositeModelInst.get("alignColl");
         const alignModel = alignCollection.get("P02768-A");
-        const actualMapping = alignModel.bulkMapToSearch("1AO6:A:0", [411, 493]);
+        const actualMapping = alignModel.bulkMapToSearch("1AO6.bcif.gz:A:0", [411, 493]);
 
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + expectedMapping + " when mapping from pdb [411, 493] back to search indices, Passed!");
     });
@@ -848,7 +848,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -857,7 +857,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
 
@@ -872,7 +872,7 @@ export function testCallback(model) {
         const expected = {ntermList: [], ctermList: []};	// because pdb for 1ao6 is within the larger sequence so neither cterm nor nterm match
 
         const alignCollBB = window.compositeModelInst.get("alignColl");
-        const alignID = make3DAlignID("1AO6", "A", 0);
+        const alignID = make3DAlignID("1AO6.bcif.gz", "A", 0);
         const seqRange = alignCollBB.getRangeAsSearchSeq("P02768-A", alignID);
         $.extend(seqRange, {alignID: alignID, chainIndex: 0, protID: "P02768-A"});
         const seqMap = d3.map();
@@ -907,7 +907,7 @@ export function testCallback(model) {
         const linkableResidues = residueSets["wrong mass SDA "].linkables;
 
         const alignCollBB = window.compositeModelInst.get("alignColl");
-        const alignID = make3DAlignID("1AO6", "A", 0);
+        const alignID = make3DAlignID("1AO6.bcif.gz", "A", 0);
         const seqRange = alignCollBB.getRangeAsSearchSeq("P02768-A", alignID);
         let actualFilteredSubSeqIndices = filterSequenceByResidueSet(seqRange.subSeq, linkableResidues[1], false);	// 1 is KSTY
         actualFilteredSubSeqIndices = actualFilteredSubSeqIndices.slice(-10);	// last 10
@@ -937,7 +937,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -946,7 +946,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
@@ -973,7 +973,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -982,7 +982,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
@@ -1010,7 +1010,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -1019,7 +1019,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
@@ -1049,7 +1049,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -1058,7 +1058,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
@@ -1088,7 +1088,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -1097,7 +1097,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 1,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
@@ -1134,7 +1134,7 @@ export function testCallback(model) {
                 chainIndex: 0,
                 modelIndex: 0,
                 protID: "P02768-A",
-                alignID: "1AO6:A:0"
+                alignID: "1AO6.bcif.gz:A:0"
             },
             {
                 first: 5,
@@ -1143,7 +1143,7 @@ export function testCallback(model) {
                 chainIndex: 1,
                 modelIndex: 1,
                 protID: "P02768-A",
-                alignID: "1AO6:B:1"
+                alignID: "1AO6.bcif.gz:B:1"
             }
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};

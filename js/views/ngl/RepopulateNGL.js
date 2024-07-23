@@ -1,6 +1,6 @@
 //used by pdbfilechooser, main, nglview
 import * as _ from "underscore";
-import * as NGL from "../../../vendor/ngl.dev";
+import * as NGL from "ngl";
 import {matrixPairings} from "../../modelUtils";
 import {xilog} from "../../utils";
 import {

@@ -1,4 +1,4 @@
-import * as NGL from "../vendor/ngl.dev";
+import * as NGL from "ngl";
 import * as d3 from "d3";
 import qunit, {start, module, test} from "qunit";
 import {blosumLoading, models, pretendLoad} from "../js/networkFrame";

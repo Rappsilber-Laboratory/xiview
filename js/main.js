@@ -6,7 +6,7 @@ import "../css/xiView.css";
 
 import * as Spinner from "spin";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
-import * as NGL from "../vendor/ngl.dev"; // only used here for test setup
+import * as NGL from "ngl"; // only used here for test setup
 import * as d3 from "d3";
 import {
     allDataLoaded,
