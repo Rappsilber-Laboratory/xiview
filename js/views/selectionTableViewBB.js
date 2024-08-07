@@ -231,7 +231,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return d.linkPos2;
             },
             score: function (d) {
-                return twoZeroPadder(d.score());
+                return "" + d.score();//twoZeroPadder(d.score());
             },
             expMZ: function (d) {
                 return massZeroPadder(d.expMZ());

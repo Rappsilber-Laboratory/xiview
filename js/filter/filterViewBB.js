@@ -264,8 +264,9 @@ export const FilterViewBB = Backbone.View.extend({
                     })
                     .append("input")
                     .attr({
-                        type: "number",
-                        step: config.step || 0.1,
+                        // type: "number",
+                        inputMode: "numeric",
+                        // step: config.step || 0.1,
                         //min: 0,
                     })
                     .property("value", function () {

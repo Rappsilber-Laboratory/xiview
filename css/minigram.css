@@ -1,34 +1,34 @@
-.minigram { 
+.minigram {
     display: inline-block;
     vertical-align: middle;
 }
 
-.c3minigram .c3-brush .extent {
-	fill-opacity: 0.2; 
+.minigram .brush .extent {
+	fill-opacity: 0.2;
 }
 
-.c3minigram .c3-brush .resize path {
-    fill: black;
-    fill-opacity: 0.7;
-    stroke: white;
-    stroke-opacity: 0.7;
-    stroke-width: 0.5px;
-}
+/*.c3minigram .c3-brush .resize path {*/
+/*    fill: black;*/
+/*    fill-opacity: 0.7;*/
+/*    stroke: white;*/
+/*    stroke-opacity: 0.7;*/
+/*    stroke-width: 0.5px;*/
+/*}*/
 
-.c3minigram .legendToggler {
-	text-anchor: end;
-	font-size: 1.5em;
-	fill: #888;
-}
+/*.c3minigram .legendToggler {*/
+/*	text-anchor: end;*/
+/*	font-size: 1.5em;*/
+/*	fill: #888;*/
+/*}*/
 
-.c3minigram .legendToggler:hover {
-	font-size: 2em;
-	fill: black;
-}
+/*.c3minigram .legendToggler:hover {*/
+/*	font-size: 2em;*/
+/*	fill: black;*/
+/*}*/
 
-.c3minigram .c3-axis-x .tick text, .c3minigram .c3-legend-item, .c3minigram .legendToggler {
-    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
-}
+/*.c3minigram .c3-axis-x .tick text, .c3minigram .c3-legend-item, .c3minigram .legendToggler {*/
+/*    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;*/
+/*}*/
 
 
 /*

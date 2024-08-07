@@ -355,10 +355,10 @@ export function modelsEssential(serverFlavour, options) {
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
-    const scoreExtentInstance = matchScoreRange(clmsModelInst.get("matches"), true);
-    if (scoreExtentInstance[0]) {
-        scoreExtentInstance[0] = Math.min(0, scoreExtentInstance[0]); // make scoreExtent min zero, if existing min isn't negative
-    }
+    const scoreExtentInstance = matchScoreRange(clmsModelInst.get("matches"), false);
+    // if (scoreExtentInstance[0]) {
+    //     scoreExtentInstance[0] = Math.min(0, scoreExtentInstance[0]); // make scoreExtent min zero, if existing min isn't negative
+    // }
     let filterSettings = {
         decoys: clmsModelInst.get("decoysPresent"),
         // selfLinks: clmsModelInst.targetProteinCount < 50,
