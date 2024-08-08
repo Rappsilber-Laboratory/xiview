@@ -5,145 +5,152 @@ export const MinigramViewBB = Backbone.View.extend({
     events: {},
 
     initialize: function (viewOptions) {
-        // const defaultOptions = {
-        //     maxX: 80,
-        //     height: 60,
-        //     width: 180,
-        //     xAxisHeight: 20,
-        //     maxBars: 50,
-        // };
-        // this.options = _.extend(defaultOptions, viewOptions.myOptions);
-        // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el).attr("class", "minigram");
-        // const bid = "#" + chartDiv.attr("id");
-        const chartDiv = mainDivSel.append("div")
+        this.chartDiv = mainDivSel.append("div")
             .attr("id", this.el.id + "c3Chart")
             .attr("class", "c3minigram");
+
+        const margin = { top: 5, right: 10, bottom: 25, left: 10 };
+        const width = 300 - margin.left - margin.right;
+        const height = 65 - margin.top - margin.bottom;
+
+        this.svg = d3.select("#" + this.el.id + "c3Chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        this.x = d3.scale.linear().range([0, width]);
+        this.y = d3.scale.linear().range([height, 0]);
+
+        this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
+
+        this.svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")");
+
+        // Create the brush
+        this.brush = d3.svg.brush()
+            .x(this.x)
+            .on("brush", this.brushed.bind(this));
+
+        // Append the brush to the SVG
+        this.brushg = this.svg.append("g")
+            .attr("class", "brush")
+            .call(this.brush);
+
+        // Set the height of the brush rect
+        this.brushg.selectAll("rect")
+            .attr("height", height);
+
         this.listenTo(this.model, "change", this.redrawBrush);
         this.render();
         return this;
     },
 
     render: function () {
-        // const self = this;
+        console.log("rendering minigram", this.el.id, "with data: ", this.model.data());
         const seriesData = this.model.data();
 
-        var margin = {top: 5, right: 10, bottom: 25, left: 10},
-            width = 300 - margin.left - margin.right,
-            height = 65 - margin.top - margin.bottom;
+        const min = Math.min(...seriesData.flat());
+        const max = Math.max(...seriesData.flat());
 
-        let min = Math.min(...seriesData[0]);
-        let max = Math.max(...seriesData[0]);
+        this.x.domain([min, max]);
 
-        //defence against no data (distances)
-        if (!min) {
-            min = 0;
-        }
-        if (!max) {
-            max = 1;
-        }
-
-        const x = d3.scale.linear()
-            .domain([min, max])//[d3.min(seriesData[0]), d3.max(seriesData[0])])
-            .range([0, width]);
-
-        // Generate a histogram using twenty uniformly-spaced bins.
         const data = d3.layout.histogram()
-            .bins(x.ticks(30))(seriesData[0]);
+            .bins(this.x.ticks(30))(seriesData[0]);
 
-        const y = d3.scale.linear()
-            .domain([0, d3.max(data, function (d) {
-                return d.y;
-            })])
-            .range([height, 0]);
+        this.y.domain([0, d3.max(data, d => d.y)]);
 
-        const xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
+        const bars = this.svg.selectAll(".bar")
+            .data(data);
 
-        const svg = d3.select("#" + this.el.id + "c3Chart").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        const bar = svg.selectAll(".bar")
-            .data(data)
-            .enter().append("g")
-            .attr("class", "bar")
-            .attr("transform", function (d) {
-                return "translate(" + x(d.x) + "," + y(d.y) + ")";
-            });
+        // Remove old bars
+        bars.exit().remove();
 
         if (data[0]) {
-            bar.append("rect")
+            // Add new bars
+            const barsEnter = bars.enter().append("g")
+                .attr("class", "bar")
+                .attr("transform", d => "translate(" + this.x(d.x) + "," + this.y(d.y) + ")");
+
+            barsEnter.append("rect")
                 .attr("x", 1)
-                .attr("width", x(data[0].dx) - x(0) - 1)
-                .attr("height", function (d) {
-                    return height - y(d.y);
-                });
+                .attr("width", d => this.x(d.dx) - this.x(0) - 1)
+                .attr("height", d => this.y(0) - this.y(d.y));
+
+            // Update existing bars
+            bars.attr("transform", d => "translate(" + this.x(d.x) + "," + this.y(d.y) + ")")
+                .select("rect")
+                .attr("width", d => this.x(d.dx) - this.x(0) - 1)
+                .attr("height", d => this.y(0) - this.y(d.y));
         }
+
         if (seriesData[1]) {
             const decoyData = d3.layout.histogram()
-                .bins(x.ticks(20))(seriesData[1]);
+                .bins(this.x.ticks(20))(seriesData[1]);
 
-            const decoyBar = svg.selectAll(".decoyBar")
-                .data(decoyData)
-                .enter().append("g")
+            const decoyBars = this.svg.selectAll(".decoyBar")
+                .data(decoyData);
+
+            // Remove old decoy bars
+            decoyBars.exit().remove();
+
+            // Add new decoy bars
+            const decoyBarsEnter = decoyBars.enter().append("g")
                 .attr("class", "decoyBar")
                 .style("fill", "red")
-                .attr("transform", function (d) {
-                    return "translate(" + x(d.x) + "," + y(d.y) + ")";
-                });
+                .attr("transform", d => "translate(" + this.x(d.x) + "," + this.y(d.y) + ")");
 
-            decoyBar.append("rect")
+            decoyBarsEnter.append("rect")
                 .attr("x", 1)
-                .attr("width", (x(data[0].dx) - x(0) - 1) / 2)
-                .attr("height", function (d) {
-                    return height - y(d.y);
-                });
+                .attr("width", d => (this.x(d.dx) - this.x(0) - 1) / 2)
+                .attr("height", d => this.y(0) - this.y(d.y));
+
+            // Update existing decoy bars
+            decoyBars.attr("transform", d => "translate(" + this.x(d.x) + "," + this.y(d.y) + ")")
+                .select("rect")
+                .attr("width", d => (this.x(d.dx) - this.x(0) - 1) / 2)
+                .attr("height", d => this.y(0) - this.y(d.y));
         }
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
 
-        // Create the brush
-        this.brush = d3.svg.brush()
-            .x(x)
-            // .extent([this.model.get("domainStart"), this.model.get("domainEnd")])
-            .on("brush", brushed);
+        this.svg.select(".x.axis").call(this.xAxis);
 
-        // Append the brush to the SVG
-        const brushg = svg.append("g")
-            .attr("class", "brush")
-            .call(this.brush);
+        this.brushg.call(this.brush);
 
-        // Set the height of the brush rect
-        brushg.selectAll("rect")
-            .attr("height", height);
+        return this;
+    },
 
-        const self = this;
-        // Function to handle brushing
-        function brushed() {
-            const extent = self.brush.extent();
-            self.model.set({
+    brushed: function () {
+        const extent = this.brush.extent();
+        if (extent[0] === extent[1]) {
+            this.clearBrush();
+        } else {
+            this.model.set({
                 domainStart: extent[0],
                 domainEnd: extent[1]
             });
-            // console.log(extent[0]);
-            // console.log(extent[1]);
         }
+    },
 
-        // brushed();
+    // brushClicked: function () {
+    //     if (d3.event.defaultPrevented) return; // Ignore click events that are part of a brush event
+    //     this.clearBrush();
+    // },
 
-        return this;
+    clearBrush: function () {
+        this.brush.clear();
+        this.brushg.call(this.brush);
+        this.model.set({
+            domainStart: null,
+            domainEnd: null
+        });
     },
 
     brushRecalc: function () {
         if (this.model.get("domainStart") !== undefined) {
             this.brush.extent([this.model.get("domainStart"), this.model.get("domainEnd")]);
-            d3.select("#" + this.el.id + "c3Chart").select(".brush").call(this.brush);
+            this.brushg.call(this.brush);
         }
         return this;
     },

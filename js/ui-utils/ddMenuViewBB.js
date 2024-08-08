@@ -351,8 +351,6 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
         const self = this;
         const items = d3.select(this.el).selectAll("li");
 
-        console.log("render hello", items);
-
         function colourChange(d) {
             const value = d3.select(this).property("value");
             const model = self.collection.get(d.id); // d3 id's are same as model id's ('cos ddmenu generates the d3 elements using the collection)

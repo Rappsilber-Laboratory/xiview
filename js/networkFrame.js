@@ -410,6 +410,8 @@ export function modelsEssential(serverFlavour, options) {
         return miniModel;
     });
 
+    // minigramModels[0].set("extent", scoreExtentInstance);
+
     // Data generation routines for minigram models
     minigramModels[0].data = function () {
         return flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];

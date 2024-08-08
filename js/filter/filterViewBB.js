@@ -313,8 +313,13 @@ export const FilterViewBB = Backbone.View.extend({
                 }
 
                 this.listenTo(this.model, "change:" + config.attr, function (model, val) {
-                    sliderSection.select(".vmin input").property("value", val[0]); // min label
-                    sliderSection.select(".vmax input").property("value", val[1]); // max label
+                    console.log("***change:" + config.attr, val);
+                    const extent = self.model[config.extentProperty];
+                    const min = val[0]? val[0] : extent[0];
+                    const max = val[1]? val[1] : extent[1];
+                    console.log("***change:" + config.attr, min, max);
+                    sliderSection.select(".vmin input").property("value", min); // min label
+                    sliderSection.select(".vmax input").property("value", max); // max label
                 });
             }
         }
