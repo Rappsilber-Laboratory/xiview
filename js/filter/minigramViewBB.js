@@ -23,7 +23,7 @@ export const MinigramViewBB = Backbone.View.extend({
         this.x = d3.scale.linear().range([0, width]);
         this.y = d3.scale.linear().range([height, 0]);
 
-        this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
+        this.xAxis = d3.svg.axis().scale(this.x).orient("bottom").ticks(5);//.subticks(5);
 
         this.svg.append("g")
             .attr("class", "x axis")
@@ -88,7 +88,7 @@ export const MinigramViewBB = Backbone.View.extend({
 
         if (seriesData[1]) {
             const decoyData = d3.layout.histogram()
-                .bins(this.x.ticks(20))(seriesData[1]);
+                .bins(this.x.ticks(30))(seriesData[1]);
 
             const decoyBars = this.svg.selectAll(".decoyBar")
                 .data(decoyData);
