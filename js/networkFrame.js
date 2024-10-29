@@ -59,7 +59,7 @@ import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {prideLoadSpectrum} from "../../CLMS-model/src/load-spectrum/pride-load-spectrum";
 import {xi2LoadSpectrum} from "../../CLMS-model/src/load-spectrum/xi2-load-spectrum";
 import {oldLoadSpectrum} from "../../CLMS-model/src/load-spectrum/old-load-spectrum";
-import {networkPageSpinner} from "./main";
+import {networkPageSpinner} from "./promises-load";
 import assert from "assert";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
@@ -263,7 +263,7 @@ export function blosumLoading(options) {
     window.blosumCollInst.fetch(options);
 }
 
-export function models(serverFlavour, options) {
+export function models(serverFlavour, options, clmsModel) {
     assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
         "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
 
@@ -271,7 +271,7 @@ export function models(serverFlavour, options) {
     const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
-    modelsEssential(serverFlavour, options);
+    modelsEssential(serverFlavour, options, clmsModel);
     alignmentCollectionInst.addNewProteins(Array.from(window.compositeModelInst.get("clmsModel").get("participants").values()));
     // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
@@ -337,21 +337,21 @@ export function models(serverFlavour, options) {
 }
 
 //only inits stuff required by validation page
-export function modelsEssential(serverFlavour, options) {
-    const hasMissing = !_.isEmpty(options.missingSearchIDs);
-    const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
-    const hasNoMatches = _.isEmpty(options.matches);
-
-    displayError(function () {
-        return hasMissing || hasIncorrect || hasNoMatches;
-    },
-    (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
-        (hasIncorrect ? "Wrong ID Key for Search ID" + (options.incorrectSearchIDs.length > 1 ? "s " : " ") + options.incorrectSearchIDs.join(", ") + ".<br>" : "") +
-        (!hasMissing && !hasIncorrect && hasNoMatches ? "No crosslinks detected for this search.<br>" : "")
-    );
+export function modelsEssential(serverFlavour, options, clmsModel) {
+    // const hasMissing = !_.isEmpty(options.missingSearchIDs);
+    // const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
+    // const hasNoMatches = _.isEmpty(options.matches);
+    //
+    // displayError(function () {
+    //     return hasMissing || hasIncorrect || hasNoMatches;
+    // },
+    // (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
+    //     (hasIncorrect ? "Wrong ID Key for Search ID" + (options.incorrectSearchIDs.length > 1 ? "s " : " ") + options.incorrectSearchIDs.join(", ") + ".<br>" : "") +
+    //     (!hasMissing && !hasIncorrect && hasNoMatches ? "No crosslinks detected for this search.<br>" : "")
+    // );
 
     // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = new SearchResultsModel({serverFlavour: serverFlavour});
+    const clmsModelInst = clmsModel; //new SearchResultsModel({serverFlavour: serverFlavour});
     //console.log ("options", options, JSON.stringify(options));
     clmsModelInst.parseJSON(options);
 
@@ -928,7 +928,7 @@ export function viewsEssential(options) {
     const xiSPEC_options = {
         targetDiv: "modular_xispec",
         baseDir: window.xiSpecBaseDir,
-        xiAnnotatorBaseURL: window.xiAnnotRoot,
+        xiAnnotatorBaseURL: window.compositeModelInst.get("annotatorURL"),
         showCustomConfig: compModel.get("serverFlavour") !== "XI2",
         showQualityControl: "min",
         colorScheme: "PRGn",

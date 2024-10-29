@@ -5,6 +5,7 @@ import {blosumLoading, models, pretendLoad} from "../js/networkFrame";
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
+import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 
 export function testSetup2() {
     // *callback hell
@@ -57,7 +58,13 @@ export function testSetup2() {
         });
 
         blosumLoading({url: "../R/blosums.json"});
-        models("PRIDE", options);
+        const clmsModel = new SearchResultsModel();
+        clmsModel.processMetadata(options.metadata);
+        clmsModel.processMatches(options.matches);
+        clmsModel.processPeptides(options.peptides);
+        clmsModel.processProteins(options.proteins);
+
+        models("PRIDE", {}, clmsModel);
         pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
     });
 }
