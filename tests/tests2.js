@@ -86,10 +86,10 @@ export function testCallback2(model) {
 
 
         //test by getting the CSV export
-        const linkExportArray = NGLExportUtils.export3dLinksCSV(stageModel.get("structureComp").structure, stageModel, "name", false);
+        // const linkExportArray = NGLExportUtils.export3dLinksCSV(stageModel.get("structureComp").structure, stageModel, "name", false);
 
-        //const crosslinks = stageModel.getFullLinks();
-        // const linkExportArray = NGLExportUtils.make3dLinkSyntax(stageModel.get("structureComp").structure, crosslinks, stageModel, false);
+        const crosslinks = stageModel.getFullLinks();
+        const linkExportArray = NGLExportUtils.make3dLinkSyntax(stageModel.get("structureComp").structure, crosslinks, stageModel, false);
         console.log(linkExportArray);
         actual = linkExportArray.length;
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " distances, Passed!");
