@@ -48,21 +48,6 @@ const fetchDataFromUrl = (url) => {
         });
 };
 
-// const fetchDataAndSetInClmsModel = (url) => {
-//     return fetchDataFromUrl(url)
-//         .then((data) => {
-//             //get first key and value pair from data
-//             const key = Object.keys(data)[0];
-//             const value = data[key];
-//             console.log(`Setting model data from ${url}:`, data);
-//             window.compositeModelInst.get("clmsModel").set(key, value);
-//         })
-//         .catch((error) => {
-//             console.error(`Error setting model data from ${url}:`, error);
-//             throw error;
-//         });
-// };
-
 const fetchDataAndProcess = (url, processFunction) => {
     return fetchDataFromUrl(url)
         .then((data) => {
@@ -90,9 +75,9 @@ export function main(apiBase, annotatorURL) {
 
     const tasks = [
         fetchDataAndProcess(metadataUrl, (data) => clmsModel.processMetadata(data)),
-        fetchDataAndProcess(matchesUrl, (data) => clmsModel.processMatches(data)),
-        fetchDataAndProcess(peptidesUrl, (data) => clmsModel.processPeptides(data)),
         fetchDataAndProcess(proteinUrl, (data) => clmsModel.processProteins(data)),
+        fetchDataAndProcess(peptidesUrl, (data) => clmsModel.processPeptides(data)),
+        fetchDataAndProcess(matchesUrl, (data) => clmsModel.processMatches(data)),
         fetchDataAndProcess(blosumUrl, blosumLoading),
         // initPage()
     ];
@@ -139,6 +124,12 @@ export function main(apiBase, annotatorURL) {
             console.error(error);
             networkPageSpinner.stop();
         });
+}
+
+export function test() {
+    testSetupNew(testCallback);
+    // delete window.compositeModelInst;
+    // testSetup2();
 }
 
 export function test2() {
