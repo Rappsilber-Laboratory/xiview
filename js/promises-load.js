@@ -64,7 +64,14 @@ export function main(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
 
-    const metadataUrl = `${apiBase}get_xiview_metadata${window.location.search}`;
+    const mzIdentMLUrl = `${apiBase}get_xiview_mzidentml_files${window.location.search}`;
+    const analysisCollection_spectrum_identificationsUrl
+        = `${apiBase}get_xiview_analysis_collection_spectrum_identifications${window.location.search}`;
+    const spectrumIdentificationProtocolUrl
+        = `${apiBase}get_xiview_spectrum_identification_protocol${window.location.search}`;
+    const spectraDataUrl = `${apiBase}get_xiview_spectra_data${window.location.search}`;
+    const enzymesUrl = `${apiBase}get_xiview_enzymes${window.location.search}`;
+    const searchModificationsUrl = `${apiBase}get_xiview_search_modifications${window.location.search}`;
     const matchesUrl = `${apiBase}get_xiview_matches${window.location.search}`;
     const peptidesUrl = `${apiBase}get_xiview_peptides${window.location.search}`;
     const proteinUrl = `${apiBase}get_xiview_proteins${window.location.search}`;
@@ -74,8 +81,13 @@ export function main(apiBase, annotatorURL) {
     // };
 
     const tasks = [
-        fetchDataAndProcess(metadataUrl, (data) => clmsModel.processMetadata(data)),
-        fetchDataAndProcess(proteinUrl, (data) => clmsModel.processProteins(data)),
+        fetchDataAndProcess(mzIdentMLUrl, (data) => clmsModel.processMzIdentMLFiles(data)),
+        fetchDataAndProcess(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.processAnalysisCollectionSpectrumIdentifications(data)),
+        fetchDataAndProcess(spectrumIdentificationProtocolUrl, (data) => clmsModel.processSpectrumIdentificationProtocols(data)),
+        fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.processSpectraData(data)),
+        fetchDataAndProcess(enzymesUrl, (data) => clmsModel.processEnzymes(data)),
+        fetchDataAndProcess(searchModificationsUrl, (data) => clmsModel.processSearchModifications(data)),
+        fetchDataAndProcess(proteinUrl, (data) => clmsModel.processProteins(data)), // .then(() => {fetchUniprotKB(accessions);}),
         fetchDataAndProcess(peptidesUrl, (data) => clmsModel.processPeptides(data)),
         fetchDataAndProcess(matchesUrl, (data) => clmsModel.processMatches(data)),
         fetchDataAndProcess(blosumUrl, blosumLoading),
@@ -123,6 +135,51 @@ export function main(apiBase, annotatorURL) {
             }, (error.stack || (error.message || error)));
             console.error(error);
             networkPageSpinner.stop();
+        });
+}
+
+async function fetchAccessionsInBatches(accessions, batchSize = 5) {
+    const baseURL = 'https://rest.uniprot.org/uniprotkb/search';
+    let allResults = []; // To store results from all batches
+
+    // Split the accessions into chunks/batches
+    for (let i = 0; i < accessions.length; i += batchSize) {
+        const batch = accessions.slice(i, i + batchSize);
+        const query = `accession:${batch.join(' OR accession:')}`;
+        const url = `${baseURL}?query=${encodeURIComponent(query)}&format=json`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to fetch data for batch: ${batch}`);
+
+            const data = await response.json();
+            allResults.push(...data.results); // Collect results from each batch
+            console.log(`Fetched batch: ${batch}`);
+        } catch (error) {
+            console.error('Error fetching batch:', error);
+        }
+
+        // Optional: Pause between batches to avoid hitting rate limits
+        await new Promise(resolve => setTimeout(resolve, 400)); // Wait 1 second
+    }
+
+    return allResults;
+}
+
+// Example usage with a list of accession IDs
+const accessions = [
+    'O35004', 'P12345', 'Q67890', 'A12345', 'B67890', 'C13579',
+    'D24680', 'E11223', 'F33445', 'G55667', 'H77889', 'I99001'
+];
+
+function fetchUniprotKB(accessions){
+    fetchAccessionsInBatches(accessions, 50)
+        .then(results => {
+            console.log('All Fetched Data:', results);
+            // Process or use results here
+        })
+        .catch(error => {
+            console.error('Batch Fetch Error:', error);
         });
 }
 
