@@ -34,6 +34,8 @@ export const checkBoxView = Backbone.View.extend({
 
         // Remember to listen to changes to model or global event state that come from outside the view (keeps it in sync with models)
         if (this.model && this.options.toggleAttribute) {
+            const initialState = this.options.initialState? true : false;
+            this.model.set(this.options.toggleAttribute, initialState);
             this.showState(this.model.get(this.options.toggleAttribute)); // initial state
             this.listenTo(this.model, "change:" + this.options.toggleAttribute, this.showState);
         } else if (this.options.eventName) {

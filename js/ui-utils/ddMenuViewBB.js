@@ -121,6 +121,10 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                         options.tooltipModel = self.options.tooltipModel;
                     }
 
+                    if (cbdata.category == "User Defined"){
+                        options.initialState = true;
+                    }
+
                     const cbView = new checkBoxView({
                         model: model,
                         myOptions: options,
