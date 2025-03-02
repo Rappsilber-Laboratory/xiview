@@ -298,7 +298,7 @@ function getSSL() {
             const pep2sslSeq = makeSslPepSeq(peptide2.seq_mods);
             const crosslinkerModMass = match.crosslinkerModMass();
             let sequence = pep1sslSeq + "-" + pep2sslSeq + "-[" +
-                (crosslinkerModMass > 0? "" : "+") + crosslinkerModMass +
+                (crosslinkerModMass > 0? "+" : "") + crosslinkerModMass +
                 "@"+ match.linkPos1 + "," + match.linkPos2 + "]";
 
             const data = [
