@@ -253,8 +253,7 @@ function getSSL() {
     let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\r\n";
     // "\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");
-    //var mass6dp = d3.format(".6f");
-
+    var mass6dp = d3.format(".6f");
     const modifications = clmsModel.get("modifications");
     console.log("*modifications", modifications);
 
@@ -272,7 +271,7 @@ function getSSL() {
     const makeSslPepSeq = function (seq){//}, linkPos) {
         for (let modInfo of modifications) {
             seq = seq.replace(new RegExp(`\\(?${modInfo.id}\\)?`, "g"),
-                modInfo.mass > 0 ? "[+" + modInfo.mass + "]" : "[" + modInfo.mass + "]");
+                modInfo.mass > 0 ? "[+" + mass6dp(modInfo.mass) + "]" : "[" + mass6dp(modInfo.mass) + "]");
         }
         return seq;
     };
@@ -298,7 +297,7 @@ function getSSL() {
             const pep2sslSeq = makeSslPepSeq(peptide2.seq_mods);
             const crosslinkerModMass = match.crosslinkerModMass();
             let sequence = pep1sslSeq + "-" + pep2sslSeq + "-[" +
-                (crosslinkerModMass > 0? "+" : "") + crosslinkerModMass +
+                (crosslinkerModMass > 0? "+" : "") + mass6dp(crosslinkerModMass) +
                 "@"+ match.linkPos1 + "," + match.linkPos2 + "]";
 
             const data = [
