@@ -249,41 +249,16 @@ export function getMatchesCSV() {
 }
 
 function getSSL() {
-    let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
+    const self = this;
+    let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\r\n";
+    // "\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");
     //var mass6dp = d3.format(".6f");
 
-    const deltaMassRegex = /DELTAMASS:(.*)/;
-    const massRegex = /MASS:(.*)/;
-    const modifiedRegex = /MODIFIED:(.*);/;
-    const modificationDeltasMap = new Map();
-    for (let search of clmsModel.get("searches").values()) {
-        for (let mod of search.modifications) {
-            const sym = mod.symbol;
-            let delta;
-            const desc = mod.description;
-            const deltaMatch = +deltaMassRegex.exec(desc);
-            if (deltaMatch) {
-                delta = deltaMatch[1];
-            } else {
-                const modified = modifiedRegex.exec(desc)[1];
-                delta = massRegex.exec(desc)[1] - amino1toMass[modified];
-            }
+    const modifications = clmsModel.get("modifications");
+    console.log("*modifications", modifications);
 
-            if (delta > 0) {
-                delta = "[+" + delta + "]";
-            } else {
-                delta = "[" + delta + "]";
-            }
-
-            modificationDeltasMap.set(sym, delta);
-
-        }
-    }
-
-    console.log("modDeltas", modificationDeltasMap);
-
-
+    // its this filtering that necessitates the strange way of building the match list below
     const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
     const matchMap = d3.map();
 
@@ -294,26 +269,12 @@ function getSSL() {
         });
     });
 
-    const notUpperCase = /[^A-Z]/g;
-    const makeSslPepSeq = function (seq, linkPos) {
-        notUpperCase.lastIndex = 0;
-        if (notUpperCase.test(seq)) {
-            for (let modInfo of modificationDeltasMap.entries()) {
-                seq = seq.replace(new RegExp(modInfo[0], "g"), modInfo[1]);
-            }
+    const makeSslPepSeq = function (seq){//}, linkPos) {
+        for (let modInfo of modifications) {
+            seq = seq.replace(new RegExp(`\\(?${modInfo.id}\\)?`, "g"),
+                modInfo.mass > 0 ? "[+" + modInfo.mass + "]" : "[" + modInfo.mass + "]");
         }
-        const sslSeqLinkIndex = findIndexofNthUpperCaseLetter(seq, linkPos);
-        return seq.slice(0, sslSeqLinkIndex + 1) + "[+1.008]" + seq.slice(sslSeqLinkIndex + 1, seq.length);
-    };
-    const findIndexofNthUpperCaseLetter = function (str, n) { // n is 1-indexed here
-        str = str || "";
-        let i = -1;
-        while (n > 0 && i < str.length) {
-            i++;
-            const c = str[i];
-            if (c >= "A" && c <= "Z") n--;
-        }
-        return i === str.length ? undefined : i;
+        return seq;
     };
 
     matchMap.values().forEach(function (match) {
@@ -321,7 +282,6 @@ function getSSL() {
         const peptide2 = match.matchedPeptides[1];
 
         const decoy1 = clmsModel.get("participants").get(peptide1.prt[0]).is_decoy;
-        // TODO: looks to rely on "" == false, prob doesn't give right result for linears
         const decoy2 = peptide2 ? clmsModel.get("participants").get(peptide2.prt[0]).is_decoy : "";
 
         let decoyType;
@@ -334,22 +294,12 @@ function getSSL() {
         }
 
         if (decoyType === "TT") {
-            const pep1sslSeq = makeSslPepSeq(peptide1.seq_mods, match.linkPos1);
-            const pep2sslSeq = makeSslPepSeq(peptide2.seq_mods, match.linkPos2);
+            const pep1sslSeq = makeSslPepSeq(peptide1.seq_mods);
+            const pep2sslSeq = makeSslPepSeq(peptide2.seq_mods);
             const crosslinkerModMass = match.crosslinkerModMass();
-            //var sequence = pep1sslSeq + "K[+" + (crosslinkerModMass - 112.099857) + "]" + pep2sslSeq;
-            const joiningAAModMass = (crosslinkerModMass - 112.099857);
-            let sequence = pep1sslSeq;
-            if (joiningAAModMass > 0) {
-                sequence = sequence + "K[+" + joiningAAModMass + "]" + pep2sslSeq;
-            } else {
-                sequence = sequence + "K[" + joiningAAModMass + "]" + pep2sslSeq;
-            }
-
-            const pp1 = pepPosConcat(match, 0);
-            const pp2 = pepPosConcat(match, 1);
-            const lp1 = fullPosConcat(match, 0);
-            const lp2 = fullPosConcat(match, 1);
+            let sequence = pep1sslSeq + "-" + pep2sslSeq + "-[" +
+                (crosslinkerModMass > 0? "" : "+") + crosslinkerModMass +
+                "@"+ match.linkPos1 + "," + match.linkPos2 + "]";
 
             const data = [
                 match.peakListFileName(),
@@ -358,33 +308,6 @@ function getSSL() {
                 sequence,
                 "UNKNOWN",
                 match.score(),
-                match.id,
-                proteinConcat(match, 0, clmsModel),
-                lp1,
-                pp1,
-                peptide1.seq_mods,
-                match.linkPos1,
-                (peptide1 ? proteinConcat(match, 1, clmsModel) : ""),
-                lp2,
-                pp2,
-                (peptide2 ? peptide2.seq_mods : ""),
-                match.linkPos2,
-                match.precursorCharge,
-                match.expMZ(),
-                match.expMass(),
-                match.calcMZ(),
-                match.calcMass(),
-                match.massError(),
-                match.autovalidated,
-                match.validated,
-                match.searchId,
-                match.runName(),
-                match.peakListFileName(),
-                match.scanNumber,
-                match.scanIndex,
-                match.crosslinkerModMass(),
-                match.fragmentToleranceString(),
-                match.ionTypesString()
             ];
             csv += data.join("\t") + "\r\n";
         }
