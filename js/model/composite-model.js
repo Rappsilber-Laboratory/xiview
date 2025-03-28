@@ -621,7 +621,10 @@ export class CompositeModel extends Backbone.Model {
         const participantsArr = Array.from(this.get("clmsModel").get("participants").values());
 
         const toSelect = participantsArr.filter(function (p) {
-            return (p.name.toLowerCase().indexOf(filterText) != -1 || p.description.toLowerCase().indexOf(filterText) != -1);
+            if (p.description) {
+                return (p.name.toLowerCase().indexOf(filterText) != -1 || p.description.toLowerCase().indexOf(filterText) != -1);
+            }
+            return p.name.toLowerCase().indexOf(filterText) != -1;
         });
         this.setSelectedProteins(toSelect);
     }
