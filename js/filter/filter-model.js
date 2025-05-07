@@ -345,7 +345,7 @@ export class FilterModel extends Backbone.Model {
                                 if (dataField == "name" && interactor.accession) {  // hacky nevermind
                                     toSearch = toSearch + " " + interactor.accession;
                                 }
-                                if (toSearch.toLowerCase().indexOf(partString) != -1) {
+                                if (toSearch && toSearch.toLowerCase().indexOf(partString) != -1) {
                                     found = true;
                                     used[i] = true; // so can't match two strings to same peptide e.g. "dog-cat" to protein associated with same peptide
                                     break;
