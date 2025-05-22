@@ -68,7 +68,7 @@ export function main(apiBase, annotatorURL) {
     const analysisCollection_spectrum_identificationsUrl
         = `${apiBase}get_xiview_analysis_collection_spectrum_identifications${window.location.search}`;
     const spectrumIdentificationProtocolUrl
-        = `${apiBase}get_xiview_spectrum_identification_protocol${window.location.search}`;
+        = `${apiBase}get_xiview_spectrum_identification_protocols${window.location.search}`;
     const spectraDataUrl = `${apiBase}get_xiview_spectra_data${window.location.search}`;
     const enzymesUrl = `${apiBase}get_xiview_enzymes${window.location.search}`;
     const searchModificationsUrl = `${apiBase}get_xiview_search_modifications${window.location.search}`;
