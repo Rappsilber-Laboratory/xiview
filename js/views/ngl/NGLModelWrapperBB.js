@@ -297,39 +297,39 @@ export class NGLModelWrapperBB extends Backbone.Model {
                         let alternativeCount = fromPDBResidues.length * toPDBResidues.length;
                         //console.log ("FTpdbr", fromPDBResidues, toPDBResidues, alternativeCount);
 
-                        if (alternativeCount > 4) { // if more than a certain number of possible pairings whittle it down to the closest one
-                            addAtomPoints.call(this, fromPDBResidues);
-                            addAtomPoints.call(this, toPDBResidues);
-                            let results = getMinimumDistance(fromPDBResidues, toPDBResidues, octAccessorObj, 2000, octreeIgnoreFunc);
-                            results = results.filter(function (res) {
-                                return res[2] !== undefined;
-                            });
-                            if (results.length) {
-                                results.forEach(function (r) {
-                                    r[2] = toNearest(Math.sqrt(r[2]), 1);
-                                });
-                                //console.log ("res", results);
-
-                                let prime = results[0];
-                                results.forEach(function (res, i) {
-                                    if (i > 0) {
-                                        let d = prime[2] - res[2];
-                                        if (d === 0) {
-                                            d = tieBreakerFunc(prime[0], prime[1], res[0], res[1]);
-                                        }
-                                        if (d > 0) {
-                                            prime = res;
-                                        }
-                                    }
-                                });
-
-                                //console.log ("aa", alternativeCount, results, prime);
-                                fromPDBResidues = [prime[0]];  // take top result for new fromPDBResidues array
-                                toPDBResidues = [prime[1]];    // take top result for new toPDBResidues array
-                            } else {
-                                alternativeCount = 0;   // no valid distances found
-                            }
-                        }
+                        // if (alternativeCount > 4) { // if more than a certain number of possible pairings whittle it down to the closest one
+                        //     addAtomPoints.call(this, fromPDBResidues);
+                        //     addAtomPoints.call(this, toPDBResidues);
+                        //     let results = getMinimumDistance(fromPDBResidues, toPDBResidues, octAccessorObj, 2000, octreeIgnoreFunc);
+                        //     results = results.filter(function (res) {
+                        //         return res[2] !== undefined;
+                        //     });
+                        //     if (results.length) {
+                        //         results.forEach(function (r) {
+                        //             r[2] = toNearest(Math.sqrt(r[2]), 1);
+                        //         });
+                        //         //console.log ("res", results);
+                        //
+                        //         let prime = results[0];
+                        //         results.forEach(function (res, i) {
+                        //             if (i > 0) {
+                        //                 let d = prime[2] - res[2];
+                        //                 if (d === 0) {
+                        //                     d = tieBreakerFunc(prime[0], prime[1], res[0], res[1]);
+                        //                 }
+                        //                 if (d > 0) {
+                        //                     prime = res;
+                        //                 }
+                        //             }
+                        //         });
+                        //
+                        //         //console.log ("aa", alternativeCount, results, prime);
+                        //         fromPDBResidues = [prime[0]];  // take top result for new fromPDBResidues array
+                        //         toPDBResidues = [prime[1]];    // take top result for new toPDBResidues array
+                        //     } else {
+                        //         alternativeCount = 0;   // no valid distances found
+                        //     }
+                        // }
 
                         addResidueListsExtraInfo([fromPDBResidues, toPDBResidues]);
 

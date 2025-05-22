@@ -41,7 +41,7 @@ export class DistancesObj {
             const distance = this.getXLinkDistanceFromPDBCoords(
                 this.matrices, linkWrapper.residueA.seqIndex, linkWrapper.residueB.seqIndex, linkWrapper.residueA.chainIndex, linkWrapper.residueB.chainIndex
             );
-            linkWrapper.distance = toNearest(distance, angstromAccuracy);
+            linkWrapper.distance = distance;// toNearest(distance, angstromAccuracy);
         }, this);
 
         nglLinkWrappers = nglLinkWrappers.filter(function (wrappedLink) {
