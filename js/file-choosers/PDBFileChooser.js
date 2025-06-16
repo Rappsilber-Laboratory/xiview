@@ -368,6 +368,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                         params: {
                             ext: name.substr(name.lastIndexOf(".") + 1),
                             cAlphaOnly: self.cAlphaOnly,
+                            firstModelOnly: true
                         }
                     });
                     onLastLoad();
@@ -398,7 +399,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 pdbCode: code,
                 uri: "rcsb://" + code,
                 local: false,
-                params: {calphaOnly: this.cAlphaOnly}
+                params: {calphaOnly: this.cAlphaOnly, firstModelOnly: true}
             };
         }, this);
 
