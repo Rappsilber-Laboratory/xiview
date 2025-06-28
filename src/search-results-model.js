@@ -1,12 +1,8 @@
 import * as d3 from "d3";
 import * as Backbone from "backbone";
 
-import {PrideSpectrumMatch} from "./spectrum-match/pride-spectrum-match";
-import {Xi2SpectrumMatch} from "./spectrum-match/xi2-spectrum-match";
-import {OldSpectrumMatch} from "./spectrum-match/old-spectrum-match";
+import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
-
-//import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -347,7 +343,7 @@ export class SearchResultsModel extends Backbone.Model {
             var l = this.matches.length;
             for (var i = 0; i < l; i++) {
                 let match;
-                match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
+                match = new SpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
                 matches.push(match);
 
                 if (maxScore === undefined || match.score() > maxScore) {
