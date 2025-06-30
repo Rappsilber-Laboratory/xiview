@@ -6,7 +6,7 @@ import * as _ from "underscore";
 import * as c3 from "../../vendor/c3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
+import {attributeOptions} from "../../../CLMS-model/src/attribute-options";
 import {
     addMultipleSelectControls,
     commonLabels,
@@ -74,7 +74,7 @@ export const DistogramBB = BaseFrameView.extend({
             }
         };
 
-        this.options.attributeOptions = SearchResultsModel.attributeOptions;
+        this.options.attributeOptions = attributeOptions;
 
         this.precalcedDistributions = {
             Random: {

@@ -3,7 +3,7 @@ import * as _ from "underscore";
 import * as $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {SearchResultsModel} from "../../../CLMS-model/src/search-results-model";
+import {attributeOptions} from "../../../CLMS-model/src/attribute-options";
 import {
     addMultipleSelectControls, ceil, commonLabels,
     crossBrowserElementX,
@@ -56,7 +56,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
     initialize: function (viewOptions) {
         ScatterplotViewBB.__super__.initialize.apply(this, arguments);
 
-        this.options.attributeOptions = SearchResultsModel.attributeOptions;
+        this.options.attributeOptions = attributeOptions;
 
         const self = this;
 

@@ -51,7 +51,7 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
     },
 
     render: function () {
-        const searches = this.model.get("searches");
+        const searches = this.model.get("mzidentmlFiles");
         const objForJsonView = {};
         for (let search of searches.values()) {
             const keyString = "GROUP " + search.group + " (" + search.id + ")";

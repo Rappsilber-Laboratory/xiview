@@ -212,8 +212,6 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
                 model: model,
             });
 
-            console.log("new modelView", this.modelView);
-
             this.alignViewBlosumSelector
                 .setSelected(model.get("scoreMatrix"))
                 .listenTo(model, "change:scoreMatrix", function (protAlignModel, scoreMatrix) { // and then make it track it thereafter

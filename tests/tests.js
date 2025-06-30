@@ -37,7 +37,7 @@ import {STRINGUtils} from "../js/file-choosers/stringUtils";
 import {getLinksCSV, getMatchesCSV, getResidueCount} from "../js/downloads";
 
 import {start, module, test} from "qunit";
-import {blosumLoading, models, pretendLoad} from "../js/networkFrame";
+import {blosumLoading, models} from "../js/networkFrame";
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 

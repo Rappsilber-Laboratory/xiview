@@ -45,8 +45,6 @@ export const BlosumCollection = Backbone.Collection.extend({
             entry.value.name = entry.key;
             return entry.value;
         });
-
-        console.log("response", response, values);
         return values;
     }
 });

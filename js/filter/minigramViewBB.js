@@ -49,7 +49,6 @@ export const MinigramViewBB = Backbone.View.extend({
     },
 
     render: function () {
-        console.log("rendering minigram", this.el.id, "with data: ", this.model.data());
         const seriesData = this.model.data();
 
         const min = Math.min(...seriesData.flat());

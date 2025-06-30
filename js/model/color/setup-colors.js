@@ -82,7 +82,6 @@ export const setupColourModels = function (userConfig) {
     const quantiles = hiScoresColScale.quantiles();
 
     const range = [minScore, quantiles[0], quantiles[1], maxScore];
-    console.log(quantiles, range);
 
     window.linkColor.highestScoreColoursBB = new HighestScoreColourModel({
         colScale: d3.scale.threshold().domain(quantiles).range(colorbrewer.Dark2[3].reverse()),

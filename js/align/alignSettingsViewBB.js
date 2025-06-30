@@ -135,7 +135,6 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
     },
 
     render: function () {
-        console.log("blosum select control rerendering");
         const self = this;
 
         const options = d3.select(this.el).select("select").selectAll("option")
@@ -164,7 +163,6 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
 
     // In case the selected score matrix is set from another view or model, we should reflect that choice here
     setSelected: function (aModel) {
-        console.log("aModel", aModel);
         if (aModel && aModel.cid !== this.lastSelected) {
             this.lastSelected = aModel.cid;
             this.render();

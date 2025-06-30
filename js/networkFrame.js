@@ -10,7 +10,7 @@ import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
 import {BlosumCollection} from "./model/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
-import {displayError, getLocalStorage, setLocalStorage} from "./utils";
+import {getLocalStorage, setLocalStorage} from "./utils";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 import {flattenMatches, getSearchGroups, matchScoreRange, parseURLQueryString} from "./modelUtils";
 import {FilterModel} from "./filter/filter-model";
@@ -57,51 +57,42 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {prideLoadSpectrum} from "../../CLMS-model/src/load-spectrum/pride-load-spectrum";
-import {xi2LoadSpectrum} from "../../CLMS-model/src/load-spectrum/xi2-load-spectrum";
-import {oldLoadSpectrum} from "../../CLMS-model/src/load-spectrum/old-load-spectrum";
-import {networkPageSpinner} from "./promises-load";
-import assert from "assert";
 
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
 _.extend(window.vent, Backbone.Events);
 
 // only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
-export function postDataLoaded() {
-    console.log("DATA LOADED AND WINDOW LOADED");
-    networkPageSpinner.stop();
-
-    window.compositeModelInst.set("go", window.go); // add pre-parsed go terms to compositeModel from placeholder
-    window.go = null;//todo - get rid of use of window.*
+export function postDataLoaded(compositeModelInst) {
 
     // Now we have blosum models and sequences, we can set blosum defaults for alignment models
-    window.compositeModelInst.get("alignColl").models.forEach(function (protAlignModel) {
+    compositeModelInst.get("alignColl").models.forEach(function (protAlignModel) {
         protAlignModel.set("scoreMatrix", window.blosumCollInst.get("Blosum100"));
     });
 
     //init annotation types
     let annotationTypes = [
-        // new AnnotationType({
-        //     category: "AA",
-        //     type: "Digestible",
-        //     tooltip: "Mark Digestible Residues",
-        //     source: "Search",
-        //     colour: "#1f78b4",
-        // }),
-        // new AnnotationType({
-        //     category: "AA",
-        //     type: "Crosslinkable-1",
-        //     tooltip: "Mark CrossLinkable residues (first or only reactive group)",
-        //     source: "Search",
-        //     colour: "#a6cee3",
-        // }),
-        // new AnnotationType({
-        //     category: "AA",
-        //     type: "Cross-linkable-2",
-        //     tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
-        //     source: "Search",
-        //     colour: "#a6cee3",
-        // }),
+        new AnnotationType({
+            category: "AA",
+            type: "Digestible",
+            tooltip: "Mark Digestible Residues",
+            source: "Search",
+            colour: "#1f78b4",
+        }),
+        new AnnotationType({
+            category: "AA",
+            type: "Crosslinkable-1",
+            tooltip: "Mark CrossLinkable residues (first or only reactive group)",
+            source: "Search",
+            colour: "#a6cee3",
+        }),
+        new AnnotationType({
+            category: "AA",
+            type: "Cross-linkable-2",
+            tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
+            source: "Search",
+            colour: "#a6cee3",
+        }),
         new AnnotationType({
             category: "Alignment",
             type: "PDB aligned region",
@@ -113,7 +104,7 @@ export function postDataLoaded() {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of window.compositeModelInst.get("clmsModel").get("participants").values()) { //todo - remove static ref?
+    for (let participant of compositeModelInst.get("clmsModel").get("participants").values()) { //todo - remove static ref?
         if (participant.uniprot) {
             const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
@@ -132,9 +123,9 @@ export function postDataLoaded() {
     // add uniprot feature types
     annotationTypes = annotationTypes.concat(Array.from(uniprotFeatureTypes.values()));
     const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
-    window.compositeModelInst.set("annotationTypes", annotationTypeCollection);
+    compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
-    window.vent.trigger("buildAsyncViews");
+    viewsThatNeedAsyncData(compositeModelInst);
 
 
     // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
@@ -150,13 +141,13 @@ export function postDataLoaded() {
     //
     // loadConfig();
 
-    window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
+    compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
     //folowing only used by tests
     window.vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
-    if (window.compositeModelInst.get("clmsModel").get("searches").size > 1) {
+    if (compositeModelInst.get("clmsModel").get("searches").size > 1) {
         d3.select("#linkColourSelect").property("value", "Group");
     }
 
@@ -238,14 +229,6 @@ export function postDataLoaded() {
 //     }
 // }
 
-// This bar function calls postDataLoaded on the 3rd go, ensuring all data is in place from various data loading ops
-export const allDataLoaded = _.after(3, postDataLoaded);
-
-// for qunit testing
-export function pretendLoad() {
-    allDataLoaded();
-    allDataLoaded();
-}
 
 export function blosumLoading(options) {
     options = options || {};
@@ -256,27 +239,24 @@ export function blosumLoading(options) {
     // when the blosum Collection is fetched (an async process), we select one of its models as being selected
     window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
         console.log("ASYNC. blosum models loaded");
-        allDataLoaded();
+        // allDataLoaded();
     });
 
     // Start the asynchronous blosum fetching after the above events have been set up
     window.blosumCollInst.fetch(options);
 }
 
-export function models(serverFlavour, options, clmsModel) {
-    assert((serverFlavour == "XIVIEW.ORG") || (serverFlavour == "XI2") || (serverFlavour == "PRIDE"),
-        "serverFlavour must be one of XIVIEW.ORG, XI2 or PRIDE");
-
+export function models(options, clmsModelInst) {
     // define alignment model and listeners first, so they're ready to pick up events from other models
     const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
-    modelsEssential(serverFlavour, options, clmsModel);
-    alignmentCollectionInst.addNewProteins(Array.from(window.compositeModelInst.get("clmsModel").get("participants").values()));
+    const compositeModelInst = modelsEssential(options, clmsModelInst);
+    alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").get("participants").values()));
     // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
     // this listener adds new sequences obtained from pdb files to existing alignment sequence models
-    alignmentCollectionInst.listenTo(window.compositeModelInst, "3dsync", function (sequences, removeThese) {
+    alignmentCollectionInst.listenTo(compositeModelInst, "3dsync", function (sequences, removeThese) {
         if (!_.isEmpty(sequences)) { // if sequences passed and it has a non-zero length...
             console.log("3dsync", arguments);
             // remove before add so if someone decides to reload the same file/code (why, but possible) we don't end up removing what we've just added
@@ -301,7 +281,7 @@ export function models(serverFlavour, options, clmsModel) {
     });
 
     // Set up colour models, some (most) of which depend on data properties
-    const crosslinkerKeys = d3.keys(window.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
+    const crosslinkerKeys = d3.keys(compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
     const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
     setupColourModels({distance: storedDistanceColourSettings});
 
@@ -314,14 +294,14 @@ export function models(serverFlavour, options, clmsModel) {
     }
 
     // A colour model's attributes have changed - is it the currently used model? If so, fire the currentColourModelChanged event
-    window.compositeModelInst.listenTo(window.linkColor.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
+    compositeModelInst.listenTo(window.linkColor.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("linkColourAssignment").id === colourModel.id) {
             this.trigger("currentColourModelChanged", colourModel, changedAttrs);
         }
     });
 
     // same for protein colour models
-    window.compositeModelInst.listenTo(window.linkColor.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
+    compositeModelInst.listenTo(window.linkColor.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("proteinColourAssignment").id === colourModel.id) {
             this.trigger("currentProteinColourModelChanged", colourModel, changedAttrs);
         }
@@ -329,30 +309,17 @@ export function models(serverFlavour, options, clmsModel) {
 
     // Set initial colour scheme choices
     // If more than one search, set group colour scheme to be default. https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/72
-    window.compositeModelInst
+    compositeModelInst
         .set("linkColourAssignment",
             window.compositeModelInst.get("clmsModel").get("searches").size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
         )
         .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB);
+
+    return compositeModelInst;
 }
 
 //only inits stuff required by validation page
-export function modelsEssential(serverFlavour, options, clmsModel) {
-    // const hasMissing = !_.isEmpty(options.missingSearchIDs);
-    // const hasIncorrect = !_.isEmpty(options.incorrectSearchIDs);
-    // const hasNoMatches = _.isEmpty(options.matches);
-    //
-    // displayError(function () {
-    //     return hasMissing || hasIncorrect || hasNoMatches;
-    // },
-    // (hasMissing ? "Cannot find Search ID" + (options.missingSearchIDs.length > 1 ? "s " : " ") + options.missingSearchIDs.join(", ") + ".<br>" : "") +
-    //     (hasIncorrect ? "Wrong ID Key for Search ID" + (options.incorrectSearchIDs.length > 1 ? "s " : " ") + options.incorrectSearchIDs.join(", ") + ".<br>" : "") +
-    //     (!hasMissing && !hasIncorrect && hasNoMatches ? "No crosslinks detected for this search.<br>" : "")
-    // );
-
-    // This SearchResultsModel is what fires (sync or async) the uniprotDataParsed event we've set up a listener for above ^^^
-    const clmsModelInst = clmsModel; //new SearchResultsModel({serverFlavour: serverFlavour});
-    //console.log ("options", options, JSON.stringify(options));
+export function modelsEssential(options, clmsModelInst) {
     clmsModelInst.parseJSON(options);
 
     const scoreExtentInstance = matchScoreRange(clmsModelInst.get("matches"), false);
@@ -385,7 +352,6 @@ export function modelsEssential(serverFlavour, options, clmsModel) {
     });
 
     const tooltipModelInst = new TooltipModel();
-
 
     // Make score and distance minigram models, and add listeners to make sure they synchronise to attributes in filter model
     const minigramModels = ["matchScoreCutoff", "distanceCutoff"].map(function (filterAttrName) {
@@ -441,23 +407,15 @@ export function modelsEssential(serverFlavour, options, clmsModel) {
         });
 
     // overarching model
-    window.compositeModelInst = new CompositeModel({
+    const compositeModel = new CompositeModel({
         clmsModel: clmsModelInst,
         filterModel: filterModelInst,
         tooltipModel: tooltipModelInst,
         alignColl: options.alignmentCollectionInst,
         minigramModels: {distance: minigramModels[1], score: minigramModels[0]},
-        serverFlavour: serverFlavour,
     });
-    // check server flavour
-    // const serverFlavour = window.compositeModelInst.get("clmsModel").get("serverFlavour");
-    if (serverFlavour === "PRIDE") {
-        window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
-    } else if (serverFlavour === "XI2") {
-        window.compositeModelInst.loadSpectrum = xi2LoadSpectrum;
-    } else if (serverFlavour === "XIVIEW.ORG") {
-        window.compositeModelInst.loadSpectrum = oldLoadSpectrum;
-    }
+    window.compositeModelInst = compositeModel;
+    window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
 
 
     //moving this to end of allDataLoaded - think validation page needs this, TODO, check
@@ -466,17 +424,15 @@ export function modelsEssential(serverFlavour, options, clmsModel) {
     // instead of views listening to changes in filter directly, we listen to any changes here, update filtered stuff
     // and then tell the views that filtering has occurred via a custom event ("filtering Done") in applyFilter().
     // This ordering means the views are only notified once the changed data is ready.
-    window.compositeModelInst.listenTo(filterModelInst, "change", function () {
+    compositeModel.listenTo(filterModelInst, "change", function () {
         // console.log("filterChange");
         this.applyFilter();
     });
 
+    return compositeModel;
 }
 
-export function views() {
-
-    const compModel = window.compositeModelInst;
-
+export function views(compositeModelInst) {
     const windowIds = ["spectrumPanelWrapper", "spectrumSettingsWrapper", "keyPanel", "nglPanel", "distoPanel", "matrixPanel", "alignPanel", "circularPanel", "proteinInfoPanel", "pdbPanel", "stringPanel", "csvPanel", "searchSummaryPanel", "linkMetaLoadPanel", "proteinMetaLoadPanel", "userAnnotationsMetaLoadPanel", "gafAnnotationsMetaLoadPanel", "scatterplotPanel", "urlSearchBox", "listPanel", "goTermsPanel"];
     // something funny happens if I do a data join and enter with d3 instead
     // ('distoPanel' datum trickles down into chart axes due to unintended d3 select.select inheritance)
@@ -487,7 +443,7 @@ export function views() {
             .attr("class", "dynDiv dynDiv_bodyLimit");
     });
 
-    viewsEssential({
+    viewsEssential(compositeModelInst, {
         "specWrapperDiv": "#spectrumPanelWrapper"
     });
 
@@ -582,7 +538,7 @@ export function views() {
     });
     new DropDownMenuViewBB({
         el: "#viewDropdownPlaceholder",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
         myOptions: {
             title: "Views",
             menu: checkBoxData,
@@ -592,7 +548,7 @@ export function views() {
         // hide/disable view choices that depend on certain data being present until that data arrives
         .enableItemsByID(maybeViews, false)
         .enableItemsByID(mostViews, true)
-        .listenTo(compModel.get("clmsModel"), "change:distancesObj", function (model, newDistancesObj) {
+        .listenTo(compositeModelInst.get("clmsModel"), "change:distancesObj", function (model, newDistancesObj) {
             this.enableItemsByID(maybeViews, !!newDistancesObj);
         });
 
@@ -603,26 +559,26 @@ export function views() {
 
     new DropDownMenuViewBB({
         el: "#proteinSelectionDropdownPlaceholder",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
         myOptions: {
             title: "Protein-Selection",
             menu: [{
                 name: "Hide Selected",
-                func: compModel.hideSelectedProteins,
-                context: compModel,
+                func: compositeModelInst.hideSelectedProteins,
+                context: compositeModelInst,
                 tooltip: "Hide selected proteins",
             },
             {
                 name: "Hide Unselected",
-                func: compModel.hideUnselectedProteins,
-                context: compModel,
+                func: compositeModelInst.hideUnselectedProteins,
+                context: compositeModelInst,
                 tooltip: "Hide unselected proteins",
                 sectionEnd: true
             },
             {
                 name: "+Neighbours",
-                func: compModel.stepOutSelectedProteins,
-                context: compModel,
+                func: compositeModelInst.stepOutSelectedProteins,
+                context: compositeModelInst,
                 tooltip: "Select proteins which are crosslinked to already selected proteins",
                 categoryTitle: "Change Selection",
                 sectionBegin: true
@@ -630,9 +586,9 @@ export function views() {
             {
                 sectionBegin: true,
                 id: "proteinSelectionFilter",
-                func: compModel.proteinSelectionTextFilter,
+                func: compositeModelInst.proteinSelectionTextFilter,
                 closeOnClick: false,
-                context: compModel,
+                context: compositeModelInst,
                 tooltip: "Select proteins whose descriptions include input text",
                 categoryTitle: "Select by text filter:",
                 sectionEnd: true
@@ -652,7 +608,7 @@ export function views() {
 
     new DropDownMenuViewBB({
         el: "#groupsDropdownPlaceholder",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
         myOptions: {
             title: "Groups",
             menu: [
@@ -660,21 +616,21 @@ export function views() {
                     sectionBegin: true,
                     categoryTitle: "Group Selected - enter name:",
                     id: "groupSelected",
-                    func: compModel.groupSelectedProteins,
+                    func: compositeModelInst.groupSelectedProteins,
                     closeOnClick: false,
-                    context: compModel,
+                    context: compositeModelInst,
                     tooltip: "Enter group name",
                 },
                 {
                     name: "Clear Groups",
-                    func: compModel.clearGroups,
-                    context: compModel,
+                    func: compositeModelInst.clearGroups,
+                    context: compositeModelInst,
                     tooltip: "Clears all groups"
                 },
                 {
                     name: "Auto Group",
-                    func: compModel.autoGroup,
-                    context: compModel,
+                    func: compositeModelInst.autoGroup,
+                    context: compositeModelInst,
                     tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
                 },
                 // {
@@ -686,14 +642,14 @@ export function views() {
                 // },
                 {
                     name: "Collapse All",
-                    func: compModel.collapseGroups,
-                    context: compModel,
+                    func: compositeModelInst.collapseGroups,
+                    context: compositeModelInst,
                     tooltip: "Collapse all groups",
                 },
                 {
                     name: "Expand All",
-                    func: compModel.expandGroups,
-                    context: compModel,
+                    func: compositeModelInst.expandGroups,
+                    context: compositeModelInst,
                     tooltip: "Expand all groups",
                 }
             ],
@@ -739,7 +695,7 @@ export function views() {
     });
     new DropDownMenuViewBB({
         el: "#loadDropdownPlaceholder",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
         myOptions: {
             title: "Import",
             menu: loadButtonData,
@@ -749,7 +705,7 @@ export function views() {
 
     new xiNetControlsViewBB({
         el: "#xiNetButtonBar",
-        model: compModel
+        model: compositeModelInst
     });
 
     //initialise the color chooser dialog
@@ -765,22 +721,14 @@ export function views() {
         if (!checkedColor) {
             alert("No colour selected.");
         } else if (iId !== "cancel") {
-            compModel.setInteractorColor(iId, checkedColor.value);
+            compositeModelInst.setInteractorColor(iId, checkedColor.value);
         }
-    });
-
-    // Set up a one-time event listener that is then called from allDataLoaded
-    // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
-    // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
-    compModel.listenToOnce(window.vent, "buildAsyncViews", function () {
-        viewsThatNeedAsyncData();
     });
 }
 
-export function viewsEssential(options) {
+export function viewsEssential(compositeModelInst, options) {
 
-    const compModel = window.compositeModelInst;
-    const filterModel = compModel.get("filterModel");
+    const filterModel = compositeModelInst.get("filterModel");
 
     // var singleTargetProtein = compModel.get("clmsModel").targetProteinCount < 2;
     new FilterViewBB({
@@ -788,29 +736,29 @@ export function viewsEssential(options) {
         model: filterModel,
         myOptions: {
             hide: {
-                "AUTO": !compModel.get("clmsModel").get("autoValidatedPresent"),
-                "ambig": !compModel.get("clmsModel").get("ambiguousPresent"),
-                "unval": !compModel.get("clmsModel").get("unvalidatedPresent"),
-                "linears": !compModel.get("clmsModel").get("linearsPresent"),
+                "AUTO": !compositeModelInst.get("clmsModel").get("autoValidatedPresent"),
+                "ambig": !compositeModelInst.get("clmsModel").get("ambiguousPresent"),
+                "unval": !compositeModelInst.get("clmsModel").get("unvalidatedPresent"),
+                "linears": !compositeModelInst.get("clmsModel").get("linearsPresent"),
             }
         }
     });
 
     new ProteinSummaryViewBB({
         el: "#ppiText",
-        model: compModel,
+        model: compositeModelInst,
     });
 
     new FilterSummaryViewBB({
         el: "#filterReportPlaceholder",
-        model: compModel,
+        model: compositeModelInst,
     });
 
-    const unvalidatedPresent = compModel.get("clmsModel").get("unvalidatedPresent");
+    const unvalidatedPresent = compositeModelInst.get("clmsModel").get("unvalidatedPresent");
     if (unvalidatedPresent !== true) {
         d3.select("#filterModeDiv").style("display", "none");
     }
-    const linearsPresent = compModel.get("clmsModel").get("linearsPresent");
+    const linearsPresent = compositeModelInst.get("clmsModel").get("linearsPresent");
     if (linearsPresent !== true) {
         d3.select("#product").style("display", "none");
     }
@@ -835,7 +783,7 @@ export function viewsEssential(options) {
     const minigramViews = minigramViewConfig.map(function (config) {
         return new MinigramViewBB({
             el: config.el,
-            model: compModel.get("minigramModels")[config.id],
+            model: compositeModelInst.get("minigramModels")[config.id],
             myOptions: {
                 maxX: 0, // let data decide
                 seriesNames: config.seriesNames,
@@ -854,7 +802,7 @@ export function viewsEssential(options) {
 
     // redraw brush when distancesObj is changed, extent is likely to be different
     minigramViews[1]
-        .listenTo(compModel.get("clmsModel"), "change:distancesObj", function (clmsModel, distObj) {
+        .listenTo(compositeModelInst.get("clmsModel"), "change:distancesObj", function (clmsModel, distObj) {
             this.render().redrawBrush();
         }); // if the distances change (likely?) need to re-render the view too
 
@@ -867,7 +815,7 @@ export function viewsEssential(options) {
     // 4. Thus selectionViewer must do its routine for event A before spectrumWrapper, so we initialise it first
     const selectionViewer = new SelectionTableViewBB({
         el: "#bottomDiv",
-        model: compModel,
+        model: compositeModelInst,
     });
 
     selectionViewer.lastCount = 1;
@@ -875,7 +823,7 @@ export function viewsEssential(options) {
 
     new SpectrumViewWrapper({
         el: options.specWrapperDiv,
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "spectrumShow",
         myOptions: {
             wrapperID: "spectrumPanel",
@@ -883,11 +831,11 @@ export function viewsEssential(options) {
         }
     })
         .listenTo(window.vent, "individualMatchSelected", function (match) {
-            if (match && (compModel.get("serverFlavour") === "XIVIEW.ORG")) {
+            if (match && (compositeModelInst.get("serverFlavour") === "XIVIEW.ORG")) {
                 this.lastRequestedID = match.id; // async catch
                 //console.log ("MATCH ID", this, match.id);
                 this.primaryMatch = match; // the 'dynamic_rank = true' match
-                const dataPath = window.compositeModelInst.get("dataPath");
+                const dataPath = compositeModelInst.get("dataPath");
                 const url = dataPath + "?upload=" +
                     this.model.get("clmsModel").get("sid") +
                     "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
@@ -900,7 +848,7 @@ export function viewsEssential(options) {
                         const returnedMatchID = json.matchid;
                         if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
                             //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-                            const altModel = new SearchResultsModel({serverFlavour: compModel.get("serverFlavour")});
+                            const altModel = new SearchResultsModel({serverFlavour: compositeModelInst.get("serverFlavour")});
                             altModel.parseJSON(json);
                             const allCrossLinks = Array.from(altModel.get("crosslinks").values());
                             // empty selection first
@@ -928,8 +876,8 @@ export function viewsEssential(options) {
     const xiSPEC_options = {
         targetDiv: "modular_xispec",
         baseDir: window.xiSpecBaseDir,
-        xiAnnotatorBaseURL: window.compositeModelInst.get("annotatorURL"),
-        showCustomConfig: compModel.get("serverFlavour") !== "XI2",
+        xiAnnotatorBaseURL: compositeModelInst.get("annotatorURL"),
+        showCustomConfig: true,
         showQualityControl: "min",
         colorScheme: "PRGn",
         labelFragmentCharge: false,
@@ -952,23 +900,18 @@ export function viewsEssential(options) {
     // used to transport one Match between views
     xispec_wrapper.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
         if (match) {
-            if (compModel.get("serverFlavour") === "XIVIEW.ORG") {
-                const randId = window.compositeModelInst.get("clmsModel").getSearchRandomId(match);
-                window.compositeModelInst.loadSpectrum(match, randId);
-            } else {
-                window.compositeModelInst.loadSpectrum(match);
-            }
+            compositeModelInst.loadSpectrum(match);
         } else {
             // xispec_wrapper.clear();
         }
     });
 
-    window.compositeModelInst.set("xispec_wrapper", xispec_wrapper);
+    compositeModelInst.set("xispec_wrapper", xispec_wrapper);
 
     // Generate data export drop down
     new DropDownMenuViewBB({
         el: "#expDropdownPlaceholder",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
         myOptions: {
             title: "Export",
             menu: [
@@ -1035,7 +978,7 @@ export function viewsEssential(options) {
     // Generate help drop down
     new DropDownMenuViewBB({
         el: "#helpDropdownPlaceholder",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
         myOptions: {
             title: "Help",
             menu: [{
@@ -1070,19 +1013,17 @@ export function viewsEssential(options) {
     });
     new TooltipViewBB({
         el: "#tooltip2",
-        model: compModel.get("tooltipModel")
+        model: compositeModelInst.get("tooltipModel")
     });
 }
 
-function viewsThatNeedAsyncData() {
-
-    const compModel = window.compositeModelInst;
+function viewsThatNeedAsyncData(compositeModelInst) {
 
     // This generates the legend div, we don't keep a handle to it - the event object has one
     new KeyViewBB({
         el: "#keyPanel",
         displayEventName: "keyViewShow",
-        model: compModel,
+        model: compositeModelInst,
     });
     //if (window.compositeModelInst.get("clmsModel").get("searches").size > 1) {
     //     d3.select("#linkColourSelect").property("value","Group");
@@ -1091,21 +1032,21 @@ function viewsThatNeedAsyncData() {
     new SearchSummaryViewBB({
         el: "#searchSummaryPanel",
         displayEventName: "searchesViewShow",
-        model: compModel.get("clmsModel"),
+        model: compositeModelInst.get("clmsModel"),
     });
 
     /* 'cos circle listens to annotation model which is formed from uniprot async data */
     new CircularViewBB({
         el: "#circularPanel",
         displayEventName: "circularViewShow",
-        model: compModel,
+        model: compositeModelInst,
     });
 
 
     // Make a drop down menu constructed from the annotations collection
     new AnnotationDropDownMenuViewBB({
         el: "#annotationsDropdownPlaceholder",
-        collection: compModel.get("annotationTypes"),
+        collection: compositeModelInst.get("annotationTypes"),
         myOptions: {
             title: "Annotations",
             closeOnClick: false,
@@ -1125,7 +1066,7 @@ function viewsThatNeedAsyncData() {
         el: "#linkColourDropdownPlaceholder",
         model: window.linkColor.Collection,
         storeSelectedAt: {
-            model: compModel,
+            model: compositeModelInst,
             attr: "linkColourAssignment"
         },
     });
@@ -1134,7 +1075,7 @@ function viewsThatNeedAsyncData() {
         el: "#proteinColourDropdownPlaceholder",
         model: window.linkColor.ProteinCollection,
         storeSelectedAt: {
-            model: compModel,
+            model: compositeModelInst,
             attr: "proteinColourAssignment"
         },
         label: "Protein Colour Scheme"
@@ -1143,15 +1084,15 @@ function viewsThatNeedAsyncData() {
     // Alignment View
     new AlignCollectionViewBB({
         el: "#alignPanel",
-        collection: compModel.get("alignColl"),
+        collection: compositeModelInst.get("alignColl"),
         displayEventName: "alignViewShow",
-        tooltipModel: compModel.get("tooltipModel")
+        tooltipModel: compositeModelInst.get("tooltipModel")
     });
 
 
     new DistogramBB({
         el: "#distoPanel",
-        model: compModel,
+        model: compositeModelInst,
         //colourScaleModel: window.linkColor.distanceColoursBB,
         //colourScaleModel: window.linkColor.defaultColoursBB,
         colourScaleModel: window.linkColor.groupColoursBB,
@@ -1165,7 +1106,7 @@ function viewsThatNeedAsyncData() {
     // This makes a matrix viewer
     new DistanceMatrixViewBB({
         el: "#matrixPanel",
-        model: compModel,
+        model: compositeModelInst,
         colourScaleModel: window.linkColor.distanceColoursBB,
         displayEventName: "matrixViewShow",
     });
@@ -1175,7 +1116,7 @@ function viewsThatNeedAsyncData() {
     // event that other views are waiting for.
     new NGLViewBB({
         el: "#nglPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "nglViewShow",
         myOptions: {
             showAllProteins: false,
@@ -1186,64 +1127,64 @@ function viewsThatNeedAsyncData() {
     const urlChunkMap = parseURLQueryString(window.location.search.slice(1));
     new PDBFileChooserBB({
         el: "#pdbPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "pdbFileChooserShow",
         initPDBs: urlChunkMap.pdb,
     });
 
     new STRINGFileChooserBB({
         el: "#stringPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "stringDataChooserShow",
         //initPDBs: urlChunkMap.pdb,
     });
 
     new ScatterplotViewBB({
         el: "#scatterplotPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "scatterplotViewShow",
     });
 
     new LinkMetaDataFileChooserBB({
         el: "#linkMetaLoadPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "linkMetaDataFileChooserShow",
     });
 
     new ProteinMetaDataFileChooserBB({
         el: "#proteinMetaLoadPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "proteinMetaDataFileChooserShow",
     });
 
     new UserAnnotationsMetaDataFileChooserBB({
         el: "#userAnnotationsMetaLoadPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "userAnnotationsMetaDataFileChooserShow",
     });
 
     new GoTermsViewBB({
         el: "#goTermsPanel",
-        model: compModel,
+        model: compositeModelInst,
         displayEventName: "goTermsViewShow",
     });
 
     new ProteinInfoViewBB({
         el: "#proteinInfoPanel",
         displayEventName: "proteinInfoViewShow",
-        model: compModel,
+        model: compositeModelInst,
     });
 
     new FDRViewBB({
         el: "#fdrPanel",
         //displayEventName: "fdrShow",
-        model: compModel.get("filterModel"),
+        model: compositeModelInst.get("filterModel"),
     });
 
     new FDRSummaryViewBB({
         el: "#fdrSummaryPlaceholder",
         //displayEventName: "fdrShow",
-        model: compModel,
+        model: compositeModelInst,
     });
 
     //make sure things that should be hidden are hidden
@@ -1256,6 +1197,6 @@ function viewsThatNeedAsyncData() {
 
     new CrosslinkViewer({
         el: "#networkDiv",
-        model: window.compositeModelInst,
+        model: compositeModelInst,
     });
 }
