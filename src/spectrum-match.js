@@ -4,7 +4,7 @@ export class SpectrumMatch {
 
     constructor(containingModel, participants, crosslinks, peptides, identification) {
         this.containingModel = containingModel; //containing BB model
-        this.identification = identification;
+        this._identification = identification;
         // this.precursor_intensity = null;
         // this.spectrumId = identification.sp;
         // this.searchId = identification.si.toString();
@@ -443,7 +443,7 @@ export class SpectrumMatch {
     }
 
     get psmId() {
-        return this.identification.id;
+        return this._identification.id;
     }
 
     get datasetId() {
@@ -457,11 +457,11 @@ export class SpectrumMatch {
     }
 
     get spectrumId() {
-        return this.identification.sp;
+        return this._identification.sp;
     }
 
     get searchId() {
-        return this.identification.si.toString();
+        return this._identification.si.toString();
     }
 
     get precursor_intensity() {
@@ -477,29 +477,29 @@ export class SpectrumMatch {
     }
 
     get _scores() {
-        return this.identification.sc;
+        return this._identification.sc;
     }
 
     get precursorCharge() {
-        const c = +this.identification.pc_c;
+        const c = +this._identification.pc_c;
         return c === -1 ? undefined : c;
     }
 
     get precursorMZ() {
-        return +this.identification.pc_mz;
+        return +this._identification.pc_mz;
     }
 
     get calc_mz() {
-        return +this.identification.c_mz;
+        return +this._identification.c_mz;
     }
 
     get passThreshold() {
-        return !!this.identification.p;
+        return !!this._identification.p;
     }
 
     get ions() {
-        if (this.identification.ions) {
-            var ionTypes = this.identification.ions.split(";");
+        if (this._identification.ions) {
+            var ionTypes = this._identification.ions.split(";");
             var ionTypeCount = ionTypes.length;
             var ions = [];
             for (var it = 0; it < ionTypeCount; it++) {
@@ -513,7 +513,7 @@ export class SpectrumMatch {
     }
 
     get spectrum() {
-        return this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
+        return this.containingModel.get("spectraData").get(this.searchId + "_" + this.spectrumId);
     }
 }
 

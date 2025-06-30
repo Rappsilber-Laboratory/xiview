@@ -3,6 +3,10 @@ import * as Backbone from "backbone";
 
 import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
+import {MzidentmlFile} from "./mzidentml-file";
+import {AnalysisCollectionSpectrumIdentifcation} from "./analysis-collection-spectrum-identifcation";
+import {SpectrumIdentificationProtocol} from "./spectrum-identification-protocol";
+import {SpectraData} from "./spectra-data";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -28,54 +32,39 @@ export class SearchResultsModel extends Backbone.Model {
         };
     }
 
-    processMzIdentMLFiles(data) {
-        this.mzIdentMlFiles = data;
-        //search meta data
-        const searches = new Map();
-        // for (let propertyName in json.searches) {
-        //     const search = json.searches[propertyName];
-        //     searches.set(propertyName, search);
-        // }
-        this.set("searches", searches);
+    processMzIdentMLFiles(json) {
+        const mzidentmlFiles = new Map();
+        for (let mzid of json){
+            mzidentmlFiles.set(mzid.id, new MzidentmlFile(mzid, this));
+        }
+        this.set("mzidentmlFiles", mzidentmlFiles);
     }
 
-    processAnalysisCollectionSpectrumIdentifications(data) {
-        this.analysisCollectionSpectrumIdentifications = data;
+    processAnalysisCollectionSpectrumIdentifications(json) {
+        const analysisCollectionSpectrumIdentifications = new Map();
+        for (let acsi of json) {
+            const id = acsi.id;
+            analysisCollectionSpectrumIdentifications.set(id, new AnalysisCollectionSpectrumIdentifcation(
+                acsi, this));
+        }
+        this.set("analysisCollectionSpectrumIdentifications", analysisCollectionSpectrumIdentifications);
     }
 
-    processSpectrumIdentificationProtocols(data) {
-        this.spectrumIdentificationProtocols = data;
+    processSpectrumIdentificationProtocols(json) {
+        const spectrumIdentificationProtocols = new Map();
+        for (let siProtocol of json) {
+            const id = siProtocol.id;
+            spectrumIdentificationProtocols.set(id, new SpectrumIdentificationProtocol(siProtocol, this));
+        }
+        this.set("spectrumIdentificationProtocols", spectrumIdentificationProtocols);
     }
 
-    processSpectraData(data) {
-        this.spectraData = data;
+    processSpectraData(json) {
         const spectrumSources = new Map();
-        // if (this.get("serverFlavour") === "XI2") {
-        //     //spectrum sources
-        //     let specSource;
-        //     for (let propertyName in json.spectrumSources) {
-        //         specSource = json.spectrumSources[propertyName];
-        //         spectrumSources.set(+specSource.id, specSource.name);
-        //     }
-        //
-        //     //peak list files
-        //     const peakListFiles = new Map();
-        //     let plFile;
-        //     for (let propertyName in json.peakListFiles) {
-        //         plFile = json.peakListFiles[propertyName];
-        //         peakListFiles.set(+plFile.id, plFile.name);
-        //     }
-        //     this.set("peakListFiles", peakListFiles);
-        // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-        //     //spectrum sources
-        //     var specSource;
-        //     var specCount = json.spectra.length;
-        //     for (var sp = 0; sp < specCount; sp++) {
-        //         specSource = json.spectra[sp];
-        //         spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
-        //     }
-        // }
-        this.set("spectrumSources", spectrumSources);
+        for (let specSource of json) {
+            spectrumSources.set(specSource.up_id + "_" + specSource.id, new SpectraData(specSource, this));
+        }
+        this.set("spectraData", spectrumSources);
     }
 
     processEnzymes(data) {
@@ -244,7 +233,6 @@ export class SearchResultsModel extends Backbone.Model {
 
     //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
     parseJSON(json) {
-        const self = this;
         this.set("primaryScore", {score_name: "Match Score"});
         // //saved config should end up including filter settings not just xiNET layout
         // this.set("xiNETLayout", json.xiNETLayout);
@@ -266,7 +254,7 @@ export class SearchResultsModel extends Backbone.Model {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                     peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-                    for (var p = 0; p < peptide.prt.length; p++) {
+                    for (let p = 0; p < peptide.prt.length; p++) {
                         if (peptide.dec[p]) {
                             const protein = participants.get(peptide.prt[p]);
                             if (!protein) {
@@ -279,7 +267,7 @@ export class SearchResultsModel extends Backbone.Model {
                 }
             }
         } else {
-            var tempParticipants = new Map();
+            const tempParticipants = new Map();
             if (this.proteins) {
                 for (let participant of json.proteins) {
                     this.initProtein(participant, json);
@@ -293,22 +281,22 @@ export class SearchResultsModel extends Backbone.Model {
                     peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                     peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
 
-                    for (var p = 0; p < peptide.prt.length; p++) {
-                        const protein = tempParticipants.get(peptide.prt[p]);
+                    for (let pe = 0; pe < peptide.prt.length; pe++) {
+                        const protein = tempParticipants.get(peptide.prt[pe]);
                         if (!protein) {
-                            console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
+                            console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[pe]);
                         }
-                        if (peptide.dec[p]) {
+                        if (peptide.dec[pe]) {
                             const decoyId = "DECOY_" + protein.accession;
                             protein.is_decoy = true;
                             protein.id = decoyId;
                             // how to get prot acc after id has been changed?
-                            peptide.prt[p] = decoyId;
+                            peptide.prt[pe] = decoyId;
                             this.set("decoysPresent", true);
                         } else {
                             // fix ids for target in aggregated data
                             protein.id = protein.accession;
-                            peptide.prt[p] = protein.accession;
+                            peptide.prt[pe] = protein.accession;
 
                         }
 
@@ -332,16 +320,16 @@ export class SearchResultsModel extends Backbone.Model {
 
         // moved from modelUtils 05/08/19
         // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-        var searchMap = this.getProteinSearchMap(this.peptides, this.matches);
+        const searchMap = this.getProteinSearchMap(this.peptides, this.matches);
         this.get("searches").forEach(function (value, key) {
             value.participantIDSet = searchMap[key];
         });
 
         if (this.matches) {
-            var matches = this.get("matches");
+            const matches = this.get("matches");
 
-            var l = this.matches.length;
-            for (var i = 0; i < l; i++) {
+            const l = this.matches.length;
+            for (let i = 0; i < l; i++) {
                 let match;
                 match = new SpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
                 matches.push(match);
@@ -353,8 +341,6 @@ export class SearchResultsModel extends Backbone.Model {
                 }
             }
         }
-
-        console.log("score sets:", this.get("scoreSets"));
 
         this.set("minScore", minScore);
         this.set("maxScore", maxScore);
@@ -410,7 +396,7 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     //adds some attributes we want to protein object
-    initProtein(protObj, json) {
+    initProtein(protObj) {
         if (!protObj.crosslinks) {
             protObj.crosslinks = [];
         }
@@ -561,275 +547,7 @@ export class SearchResultsModel extends Backbone.Model {
     isAggregatedData() {
         return this.get("searches").size > 1;
     }
-
-    getSearchRandomId(match) {
-        const searchId = match.searchId;
-        const searchMap = this.get("searches");
-        const searchData = searchMap.get(searchId);
-        return searchData.random_id;
-    }
 }
-
-SearchResultsModel.attributeOptions =
-    [
-        {
-            linkFunc: function (link) {
-                return [link.filteredMatches_pp.length];
-            },
-            unfilteredLinkFunc: function (link) {
-                return [link.matches_pp.length];
-            },
-            id: "MatchCount",
-            label: "Crosslink Match Count",
-            decimalPlaces: 0
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.score();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.score();
-                });
-            },
-            id: "Score",
-            label: "Match Score",
-            decimalPlaces: 2,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                const scores = link.filteredMatches_pp.map(function (m) {
-                    return m.match.score();
-                });
-                return [Math.max.apply(Math, scores)];
-            },
-            unfilteredLinkFunc: function (link) {
-                const scores = link.matches_pp.map(function (m) {
-                    return m.match.score();
-                });
-                return [Math.max.apply(Math, scores)];
-            },
-            id: "Highest Score",
-            label: "Highest Match Score per Crosslink",
-            decimalPlaces: 2,
-            matchLevel: false
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.precursorMZ;
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.precursorMZ;
-                });
-            },
-            id: "MZ",
-            label: "Match Precursor m/z",
-            decimalPlaces: 4,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.precursorCharge;
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.precursorCharge;
-                });
-            },
-            id: "Charge",
-            label: "Match Precursor Charge (z)",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.calcMass();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.calcMass();
-                });
-            },
-            id: "CalcMass",
-            label: "Match Calculated Mass (m)",
-            decimalPlaces: 4,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.massError();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.massError();
-                });
-            },
-            id: "MassError",
-            label: "Match Mass Error",
-            decimalPlaces: 4,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.missingPeaks();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.missingPeaks();
-                });
-            },
-            id: "MissingPeaks",
-            label: "Missing Peaks",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return Math.min(m.pepPos[0].length, m.pepPos[1].length);
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return Math.min(m.pepPos[0].length, m.pepPos[1].length);
-                });
-            },
-            id: "SmallPeptideLen",
-            label: "Match Smaller Peptide Length (AA)",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    const p = m.match.precursor_intensity;
-                    return isNaN(p) ? undefined : p;
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    const p = m.match.precursor_intensity;
-                    return isNaN(p) ? undefined : p;
-                });
-            },
-            id: "PrecursorIntensity",
-            label: "Match Precursor Intensity",
-            decimalPlaces: 0,
-            matchLevel: true,
-            valueFormat: d3.format(".1e"),
-            logAxis: true,
-            logStart: 1000
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.elution_time_start;
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.elution_time_start;
-                });
-            },
-            id: "ElutionTimeStart",
-            label: "Elution Time Start",
-            decimalPlaces: 2,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.elution_time_end;
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.elution_time_end;
-                });
-            },
-            id: "ElutionTimeEnd",
-            label: "Elution Time End",
-            decimalPlaces: 2,
-            matchLevel: true
-        },
-        {
-            //watch out for the 'this' reference
-            linkFunc: function (link) {
-                //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
-                return link.isLinearLink() ? [] : [link.getMeta("distance")];
-            },
-            unfilteredLinkFunc: function (link) {
-                //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
-                return link.isLinearLink() ? [] : [link.getMeta("distance")];
-            },
-            id: "Distance",
-            label: "Crosslink Cα-Cα Distance (Å)",
-            decimalPlaces: 2,
-            maxVal: 90,
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.experimentalMissedCleavageCount();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.experimentalMissedCleavageCount();
-                });
-            },
-            id: "ExpMissedCleavages",
-            label: "Experimental Max. Missed Cleavages",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.searchMissedCleavageCount();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.searchMissedCleavageCount();
-                });
-            },
-            id: "SearchMissedCleavages",
-            label: "Search Max. Missed Cleavages",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.modificationCount();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.modificationCount();
-                });
-            },
-            id: "ModificationCount",
-            label: "Modification Count",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-    ];
 
 SearchResultsModel.commonRegexes = {
     uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
