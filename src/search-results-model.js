@@ -59,12 +59,28 @@ export class SearchResultsModel extends Backbone.Model {
         this.set("spectrumIdentificationProtocols", spectrumIdentificationProtocols);
     }
 
+    getSpectrumIdentificationProtocolById(uploadId, id) {
+        const spectrumIdentificationProtocols = this.get("spectrumIdentificationProtocols");
+
+
+    }
+
     processSpectraData(json) {
         const spectrumSources = new Map();
         for (let specSource of json) {
             spectrumSources.set(specSource.up_id + "_" + specSource.id, new SpectraData(specSource, this));
         }
         this.set("spectraData", spectrumSources);
+    }
+
+    getSpectraDataById(uploadId, id) {
+        const spectraData = this.get("spectraData");
+        if (spectraData) {
+            return spectraData.get(uploadId + "_" + id);
+        } else {
+            console.error("No spectra data found for uploadId:", uploadId, "and id:", id);
+            return null;
+        }
     }
 
     processEnzymes(data) {
