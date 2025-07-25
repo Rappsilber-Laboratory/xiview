@@ -2,7 +2,7 @@ import {SearchResultsModel} from "./search-results-model";
 
 export class Peptide {
     constructor(pep){ //}, containingModel) {
-        // console.assert(pep.mod_mass.length == pep.mod_acc.length &&  pep.mod_acc.length == pep.mod_pos.length, "Inconsistent mod data on peptide", pep);
+        console.assert(pep.m_as.length == pep.m_ms.length &&  pep.m_ms.length == pep.m_as.length, "Inconsistent mod data on peptide", pep);
         this._pep = pep;
         // this.modificationNames = containingModel.get("modificationNames");
         // SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
@@ -40,6 +40,8 @@ export class Peptide {
         return this._pep.ls1;
     }
 
+    //todo - link site 2 for internally linked peptides
+
     get prt(){
         return this._pep.prt;
     }
@@ -57,25 +59,23 @@ export class Peptide {
     }
 
     get seq_mods() {
-        return this._pep.seq;
-        // let seq_mods = "";
-        // let lastIndex = 0;
-        // for (let i = 0; i < this._pep.mod_pos.length; i++){
-        //     const pos = this._pep.mod_pos[i] + 1;
-        //     seq_mods = seq_mods + this._pep.base_seq.slice(lastIndex, pos);
-        //     let mod_name = this._pep.mod_acc[i];
-        //     if (!mod_name){
-        //         mod_name = this._pep.mod_mass[i];
-        //     } else if (this.modificationNames.has(mod_name)) {
-        //         mod_name = this.modificationNames.get(mod_name).toLowerCase().substring(0,4);
-        //     }
-        //     mod_name = mod_name.toLowerCase();
-        //     console.log("!", mod_name);
-        //     seq_mods = seq_mods + mod_name;
-        //     lastIndex = pos;
-        // }
-        // seq_mods = seq_mods + this._pep.base_seq.slice(lastIndex);
-        // return seq_mods;
+        let seq_mods = "";
+        let lastIndex = 0;
+        for (let i = 0; i < this._pep.m_ps.length; i++){
+            const pos = this._pep.m_ps[i];
+            seq_mods = seq_mods + this._pep.seq.slice(lastIndex, pos);
+            let mod_name = this._pep.m_as[i];
+            //     if (!mod_name){
+            //         mod_name = this._pep.mod_mass[i];
+            //     } else if (this.modificationNames.has(mod_name)) {
+            //         mod_name = this.modificationNames.get(mod_name).toLowerCase().substring(0,4);
+            //     }
+            mod_name = (Object.values(mod_name)[0]).toLowerCase();
+            seq_mods = seq_mods + mod_name;
+            lastIndex = pos;
+        }
+        seq_mods = seq_mods + this._pep.seq.slice(lastIndex);
+        return seq_mods;
     }
 
     get mod_pos() {

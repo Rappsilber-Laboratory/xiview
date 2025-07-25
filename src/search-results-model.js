@@ -3,8 +3,6 @@ import * as Backbone from "backbone";
 
 import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
-import {MzidentmlFile} from "./mzidentml-file";
-import {AnalysisCollectionSpectrumIdentifcation} from "./analysis-collection-spectrum-identifcation";
 import {SpectrumIdentificationProtocol} from "./spectrum-identification-protocol";
 import {SpectraData} from "./spectra-data";
 
@@ -32,15 +30,15 @@ export class SearchResultsModel extends Backbone.Model {
         };
     }
 
-    processMzIdentMLFiles(json) {
+    /*processMzIdentMLFiles(json) {
         const mzidentmlFiles = new Map();
         for (let mzid of json){
             mzidentmlFiles.set(mzid.id, new MzidentmlFile(mzid, this));
         }
         this.set("mzidentmlFiles", mzidentmlFiles);
-    }
+    }*/
 
-    processAnalysisCollectionSpectrumIdentifications(json) {
+    /* processAnalysisCollectionSpectrumIdentifications(json) {
         const analysisCollectionSpectrumIdentifications = new Map();
         for (let acsi of json) {
             const id = acsi.id;
@@ -48,27 +46,32 @@ export class SearchResultsModel extends Backbone.Model {
                 acsi, this));
         }
         this.set("analysisCollectionSpectrumIdentifications", analysisCollectionSpectrumIdentifications);
-    }
+    }*/
 
     processSpectrumIdentificationProtocols(json) {
         const spectrumIdentificationProtocols = new Map();
         for (let siProtocol of json) {
             const id = siProtocol.id;
-            spectrumIdentificationProtocols.set(id, new SpectrumIdentificationProtocol(siProtocol, this));
+            const uploadId = siProtocol.upload_id;
+            spectrumIdentificationProtocols.set(uploadId + "_" + id, new SpectrumIdentificationProtocol(siProtocol, this));
         }
         this.set("spectrumIdentificationProtocols", spectrumIdentificationProtocols);
     }
 
-    getSpectrumIdentificationProtocolById(uploadId, id) {
+    getSpectrumIdentificationProtocol(uploadId, id) {
         const spectrumIdentificationProtocols = this.get("spectrumIdentificationProtocols");
-
-
+        if (spectrumIdentificationProtocols) {
+            return spectrumIdentificationProtocols.get(uploadId + "_" + id);
+        } else {
+            console.error("No spectrum identification protocol found for uploadId:", uploadId, "and id:", id);
+            return null;
+        }
     }
 
     processSpectraData(json) {
         const spectrumSources = new Map();
         for (let specSource of json) {
-            spectrumSources.set(specSource.up_id + "_" + specSource.id, new SpectraData(specSource, this));
+            spectrumSources.set(specSource.upload_id + "_" + specSource.id, new SpectraData(specSource, this));
         }
         this.set("spectraData", spectrumSources);
     }

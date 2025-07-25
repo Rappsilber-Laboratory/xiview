@@ -1,4 +1,5 @@
 import {Crosslink} from "./crosslink";
+import path from 'path-browserify';
 
 export class SpectrumMatch {
 
@@ -314,16 +315,11 @@ export class SpectrumMatch {
         return this.linkPos1 !== -1 && (this.matchedPeptides.length === 1 || this.linkPos2 == -1 || this.matchedPeptides[1].pos[0] == -1);
     }
 
-    runName() {
-        if (this.spectrum) {
-            return this.spectrum.file;
-        }
-    }
-
-    peakListFileName() {
-        if (this.spectrum) {
-            return this.spectrum.file;
-        }
+    peaklistFileName() {
+        const spectraDataId = this._identification.sd;
+        const uploadId = this.searchId; // todo - might be good to rename this, its a bit confusing
+        const spectraData = this.containingModel.getSpectraDataById(uploadId, spectraDataId);
+        return path.basename(spectraData.location);
     }
 
     group() {
@@ -376,13 +372,11 @@ export class SpectrumMatch {
     }
 
     fragmentTolerance() {
-        if (this.spectrum) {
-            var fragTolArr = this.spectrum.ft.split(" ");
-            return {
-                "tolerance": fragTolArr[0],
-                "unit": fragTolArr[1]
-            };
-        }
+        const sip = this.spectrumIdentificationProtocol;
+        return {
+            "tolerance": sip.fragmentTolerance,
+            "unit": sip.fragmentToleranceUnit
+        };
     }
 
     fragmentToleranceString() {
@@ -435,11 +429,15 @@ export class SpectrumMatch {
     }
 
     get pepSeq1_mods() {
-        return this.pepSeq1_base;
+        return this.matchedPeptides[0].seq_mods;
     }
 
     get pepSeq2_mods() {
-        return this.pepSeq2_base;
+        if (this.matchedPeptides[1]) {
+            return this.matchedPeptides[1].seq_mods;
+        } else {
+            return "";
+        }
     }
 
     get psmId() {
@@ -512,8 +510,8 @@ export class SpectrumMatch {
         }
     }
 
-    get spectrum() {
-        return this.containingModel.get("spectraData").get(this.searchId + "_" + this.spectrumId);
+    get spectrumIdentificationProtocol() {
+        return this.containingModel.getSpectrumIdentificationProtocol(this.searchId, this._identification.sip);
     }
 }
 

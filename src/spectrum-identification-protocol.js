@@ -5,7 +5,6 @@ export class SpectrumIdentificationProtocol {
         this._searchResultModel = searchResultModel;
     }
 
-
 // {
 //     "id": 0,
 //     "sip_ref": "SearchProtocol_1_0",
