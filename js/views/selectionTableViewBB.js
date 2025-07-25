@@ -60,7 +60,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
         const tableDataPropOrder = [
             "id", "ambiguity", "protein1", /*"pos1",*/ "pepPos1", "pepSeq1raw", "linkPos1",
             "protein2", /*"pos2",*/ "pepPos2", "pepSeq2raw", "linkPos2", "score",
-            "autovalidated", "validated", "homom", "group", "searchId", "runName", "scanNumber",
+            "autovalidated", "validated", "homom", "group", "searchId", "peaklistName", "scanNumber",
             "precursorCharge", "expMZ", "expMass", "calcMZ", "calcMass", "massError",
             "precursorIntensity", "elutionStart", "elutionEnd", "expMissedCleavages",
             "searchMissedCleavages", "missingPeaks", "modificationCount",
@@ -85,7 +85,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
             homom: "Homom",
             group: "Group",
             searchId: "Search Id",
-            runName: "Run Name",
+            peaklistName: "Peak List",
             scanNumber: "Scan Number",
             precursorCharge: "Charge (Z)",
             expMZ: "Exp M/Z",
@@ -127,7 +127,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return false;
             },
             group: function () {
-                return window.compositeModelInst.get("serverFlavour") !== "PRIDE";
+                return false;
             },
             "precursorIntensity": function() {
                 return window.compositeModelInst.get("serverFlavour") === "XI2";
@@ -192,8 +192,8 @@ export const SelectionTableViewBB = Backbone.View.extend({
             protein2: function (d) {
                 return proteinConcat(d, 1, self.model.get("clmsModel"));
             },
-            runName: function (d) {
-                return d.runName();
+            peaklistName: function (d) {
+                return d.peaklistFileName();
             },
             group: function (d) {
                 return d.group();

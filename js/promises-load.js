@@ -115,9 +115,9 @@ export function validationPage(apiBase, annotatorURL) {
 }
 
 function getTasks(apiBase, clmsModel) {
-    const mzIdentMLUrl = `${apiBase}get_xiview_mzidentml_files${window.location.search}`;
-    const analysisCollection_spectrum_identificationsUrl
-        = `${apiBase}get_xiview_analysis_collection_spectrum_identifications${window.location.search}`;
+    // const mzIdentMLUrl = `${apiBase}get_xiview_mzidentml_files${window.location.search}`;
+    // const analysisCollection_spectrum_identificationsUrl
+    //     = `${apiBase}get_xiview_analysis_collection_spectrum_identifications${window.location.search}`;
     const spectrumIdentificationProtocolUrl
         = `${apiBase}get_xiview_spectrum_identification_protocols${window.location.search}`;
     const spectraDataUrl = `${apiBase}get_xiview_spectra_data${window.location.search}`;
@@ -128,8 +128,8 @@ function getTasks(apiBase, clmsModel) {
     const proteinUrl = `${apiBase}get_xiview_proteins${window.location.search}`;
 
     return [
-        fetchDataAndProcess(mzIdentMLUrl, (data) => clmsModel.processMzIdentMLFiles(data)),
-        fetchDataAndProcess(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.processAnalysisCollectionSpectrumIdentifications(data)),
+        // fetchDataAndProcess(mzIdentMLUrl, (data) => clmsModel.processMzIdentMLFiles(data)),
+        // fetchDataAndProcess(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.processAnalysisCollectionSpectrumIdentifications(data)),
         fetchDataAndProcess(spectrumIdentificationProtocolUrl, (data) => clmsModel.processSpectrumIdentificationProtocols(data)),
         fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.processSpectraData(data)),
         fetchDataAndProcess(enzymesUrl, (data) => clmsModel.processEnzymes(data)),

@@ -128,10 +128,10 @@ export const FilterViewBB = Backbone.View.extend({
                     tooltip: "Filter to crosslinks where the proteins at both ends are in the current PDB file (if one chosen)"
                 },
                 {
-                    label: "Run",
-                    id: "runName",
+                    label: "Peaklist",
+                    id: "peaklistName",
                     chars: 5,
-                    tooltip: "Filter to matches whose run name includes this text e.g. 07_Lumos"
+                    tooltip: "Filter to matches whose peaklist file name includes this text e.g. 07_Lumos"
                 },
                 {
                     label: "Scan",
@@ -409,7 +409,7 @@ export const FilterViewBB = Backbone.View.extend({
 
         addFilterGroup.call(this, {id: "navNumberFilters", groupName: "PPI"}, ["urpPpi"]);
         addFilterGroup.call(this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
-        addFilterGroup.call(this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["runName", "scanNumber"]);
+        addFilterGroup.call(this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["peaklistName", "scanNumber"]);
         addScrollRightButton.call(this);
 
 

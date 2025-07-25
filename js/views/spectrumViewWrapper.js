@@ -256,7 +256,7 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
             field: "searchId"
         }, {
             label: "run",
-            value: match.runName()
+            value: match.peaklistFileName()
         }, {
             field: "scanNumber"
         }, {

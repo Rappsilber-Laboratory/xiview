@@ -62,7 +62,7 @@ export class FilterModel extends Backbone.Model {
             protNames: "text",
             protDesc: "text",
             protPDB: "boolean",
-            runName: "text",
+            peaklistName: "text",
             scanNumber: "number",
             urpPpi: "number",
         };
@@ -101,7 +101,7 @@ export class FilterModel extends Backbone.Model {
             protNames: "",
             protDesc: "",
             protPDB: false,
-            runName: "",
+            peaklistName: "",
             scanNumber: "",
             urpPpi: 1,
         };
@@ -179,7 +179,7 @@ export class FilterModel extends Backbone.Model {
         });
         this.preprocessedInputValues.set("pepSeq", splitPepSeq);
 
-        this.preprocessedInputValues.set("runName", this.get("runName").toLowerCase());
+        this.preprocessedInputValues.set("peaklistName", this.get("peaklistName").toLowerCase());
         this.preprocessedInputValues.set("scanNumber", parseInt(this.get("scanNumber")));
 
         // Search group pre calculations
@@ -375,9 +375,9 @@ export class FilterModel extends Backbone.Model {
         // Arranged so cheaper checks are done first
 
         //run name check
-        const runNameFilter = this.preprocessedInputValues.get("runName");
-        if (runNameFilter &&
-            match.runName().toLowerCase().indexOf(runNameFilter) == -1) {
+        const peaklistFilter = this.preprocessedInputValues.get("peaklistName");
+        if (peaklistFilter &&
+            match.peaklistFileName().toLowerCase().indexOf(peaklistFilter) == -1) {
             return false;
         }
 
