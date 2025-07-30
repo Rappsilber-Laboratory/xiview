@@ -63,16 +63,19 @@ export class Peptide {
         let lastIndex = 0;
         for (let i = 0; i < this._pep.m_ps.length; i++){
             const pos = this._pep.m_ps[i];
-            seq_mods = seq_mods + this._pep.seq.slice(lastIndex, pos);
-            let mod_name = this._pep.m_as[i];
-            //     if (!mod_name){
-            //         mod_name = this._pep.mod_mass[i];
-            //     } else if (this.modificationNames.has(mod_name)) {
-            //         mod_name = this.modificationNames.get(mod_name).toLowerCase().substring(0,4);
-            //     }
-            mod_name = (Object.values(mod_name)[0]).toLowerCase();
-            seq_mods = seq_mods + mod_name;
-            lastIndex = pos;
+            const allModCvs = this._pep.m_as[i];
+            const allModCvsKeys = Object.keys(allModCvs);
+            if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
+                seq_mods = seq_mods + this._pep.seq.slice(lastIndex, pos);
+                //     if (!mod_name){
+                //         mod_name = this._pep.mod_mass[i];
+                //     } else if (this.modificationNames.has(mod_name)) {
+                //         mod_name = this.modificationNames.get(mod_name).toLowerCase().substring(0,4);
+                //     }
+                const mod_name = (Object.values(allModCvs)[0]).toLowerCase();
+                seq_mods = seq_mods + mod_name;
+                lastIndex = pos;
+            }
         }
         seq_mods = seq_mods + this._pep.seq.slice(lastIndex);
         return seq_mods;
@@ -92,6 +95,16 @@ export class Peptide {
 
     get cl_modmass(){
         return this._pep.cl_m;
+    }
+
+    //todo - needs fixed for loop links
+    get stubs() {
+        for (let i = 0; i < this._pep.m_as.length; i++) {
+            if (Object.prototype.hasOwnProperty.call(this._pep.m_as[i], "MS:1002509") || Object.prototype.hasOwnProperty.call(this._pep.m_as[i], "MS:1002510")) {
+                return this._pep.m_as[i]["MS:1003390"];
+            }
+        }
+        return undefined;
     }
 
 }

@@ -49,6 +49,8 @@ export const prideLoadSpectrum = function (match, randId) {
     }).join(";");
     formatted_data.precursorMZ = match.expMZ();
     formatted_data.requestID = match.id;
+    formatted_data.stubs1 = match.matchedPeptides[0].stubs;
+    formatted_data.stubs2 = match.matchedPeptides[1].stubs;
 
     console.log("prideLoadSpectrum match:" + match.id);
 
