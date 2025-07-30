@@ -251,6 +251,9 @@ export const XispecWrapper = Backbone.View.extend({
         annotationRequest.annotation.modifications = data.modifications;
         annotationRequest.annotation.precursorMZ = +data.precursorMZ;
         annotationRequest.annotation.returnModSyntax = "Xmod";
+        annotationRequest.annotation.stubs1 = data.stubs1 || []; //['A:82.041864:S']; // crosslink acceptor stubs
+        annotationRequest.annotation.stubs2 = data.stubs2 || []; //['S:0.0:A']; // crosslink donor stubs
+
 
         // check if it's xi1 or xi2 style annotation
         if(data.config !== undefined){
