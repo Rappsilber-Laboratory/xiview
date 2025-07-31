@@ -5,28 +5,37 @@ export const prideLoadSpectrum = function (match, randId) {
     const formatted_data = {};
 
     const modMap = new Map();
-    function createModSequence(peptide) {
-        let seqMods = "";
+    function collectMods(peptide) { // yeah, this is awful, tidy up once knwo what annotator really needs
+        // let seqMods = "";
         const pepLen = peptide.sequence.length;
         for (let i = 0; i < pepLen; i++) {
-            seqMods += peptide.sequence[i];
+            // seqMods += peptide.sequence[i];
             if (peptide.mod_pos.indexOf(i + 1) !== -1){
-                const modIndex = peptide.mod_pos.indexOf(i + 1);
-                const modName = "(" + peptide.mod_masses[modIndex] + ")";
-                seqMods += modName;
-                if (!modMap.has(modName)) {
-                    modMap.set(modName, peptide.mod_masses[modIndex]);
+                const modIndex = peptide.mod_pos.indexOf(i + 1); //?
+
+                const allModCvs = peptide.mod_acc[modIndex]; // take out the crosslinker mods
+                const allModCvsKeys = Object.keys(allModCvs);
+                if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
+                    const modName = "(" + peptide.mod_masses[modIndex] + ")";
+                    // seqMods += modName;
+                    if (!modMap.has(modName)) {
+                        modMap.set(modName, peptide.mod_masses[modIndex]);
+                    }
                 }
             }
         }
 
-        return seqMods;
+        // return seqMods;
     }
 
-    formatted_data.sequence1 = createModSequence(match.matchedPeptides[0]);
+    collectMods(match.matchedPeptides[0]);
+    formatted_data.sequence1 = match.matchedPeptides[0].seq_mods;
+    console.log(formatted_data.sequence1);
     formatted_data.linkPos1 = match.linkPos1 - 1;
     if (match.matchedPeptides[1]) {
-        formatted_data.sequence2 = createModSequence(match.matchedPeptides[1]);
+        collectMods(match.matchedPeptides[1]);
+        formatted_data.sequence2 = match.matchedPeptides[1].seq_mods;
+        console.log(formatted_data.sequence2);
         formatted_data.linkPos2 = match.linkPos2 - 1;
     }
     formatted_data.crossLinkerModMass = match.crosslinkerModMass();

@@ -72,7 +72,12 @@ export class Peptide {
                 //     } else if (this.modificationNames.has(mod_name)) {
                 //         mod_name = this.modificationNames.get(mod_name).toLowerCase().substring(0,4);
                 //     }
-                const mod_name = (Object.values(allModCvs)[0]).toLowerCase();
+
+                // const mod_name = (Object.values(allModCvs)[0]).toLowerCase();
+
+                // const mod_name = this.getModName(allModCvs);
+
+                const mod_name = "(" + this.mod_masses[i] + ")"; // annotator has some requirements for how mod names are formatted?
                 seq_mods = seq_mods + mod_name;
                 lastIndex = pos;
             }
@@ -106,5 +111,9 @@ export class Peptide {
         }
         return undefined;
     }
+
+    // getModName(allModCvs){
+    //     return "("+(Object.values(allModCvs)[0]).toLowerCase().replace(/ /g, "") + ")";
+    // }
 
 }
