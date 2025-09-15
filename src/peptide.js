@@ -75,9 +75,9 @@ export class Peptide {
 
                 // const mod_name = (Object.values(allModCvs)[0]).toLowerCase();
 
-                // const mod_name = this.getModName(allModCvs);
+                const mod_name = this.getModName(allModCvs);
 
-                const mod_name = "(" + this.mod_masses[i] + ")"; // annotator has some requirements for how mod names are formatted?
+                // const mod_name = "(" + this.mod_masses[i] + ")"; // annotator has some requirements for how mod names are formatted?
                 seq_mods = seq_mods + mod_name;
                 lastIndex = pos;
             }
@@ -112,8 +112,8 @@ export class Peptide {
         return undefined;
     }
 
-    // getModName(allModCvs){
-    //     return "("+(Object.values(allModCvs)[0]).toLowerCase().replace(/ /g, "") + ")";
-    // }
+    getModName(allModCvs){
+        return "("+(Object.values(allModCvs)[0]).toLowerCase().replace(/ /g, "") + ")";
+    }
 
 }

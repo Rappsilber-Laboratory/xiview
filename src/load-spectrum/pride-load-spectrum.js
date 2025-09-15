@@ -16,7 +16,8 @@ export const prideLoadSpectrum = function (match, randId) {
                 const allModCvs = peptide.mod_acc[modIndex]; // take out the crosslinker mods
                 const allModCvsKeys = Object.keys(allModCvs);
                 if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
-                    const modName = "(" + peptide.mod_masses[modIndex] + ")";
+                    // const modName = "(" + peptide.mod_masses[modIndex] + ")";
+                    const modName = "(" + Object.values(peptide.mod_acc[modIndex])[0].toLowerCase().replace(/\s+/g, "") + ")";
                     // seqMods += modName;
                     if (!modMap.has(modName)) {
                         modMap.set(modName, peptide.mod_masses[modIndex]);
