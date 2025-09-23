@@ -6,40 +6,41 @@ export class SpectrumMatch {
     constructor(containingModel, participants, crosslinks, peptides, identification) {
         this.containingModel = containingModel; //containing BB model
         this._identification = identification;
-        // this.precursor_intensity = null;
-        // this.spectrumId = identification.sp;
-        // this.searchId = identification.si.toString();
-        // this.id = this.searchId + "_" + identification.id;
-        // this.precursorMZ = +identification.pc_mz; // experimental MZ, accessor for this att is called expMZ()
-        // this.calc_mz = +identification.c_mz;
-        // this._scores = identification.sc;
+
+        // Initialize frequently accessed properties directly
+        this.precursor_intensity = null;
+        this.spectrumId = identification.sp;
+        this.searchId = identification.si.toString();
+        this.psmId = identification.id;
+        this.precursorMZ = +identification.pc_mz; // experimental MZ, accessor for this att is called expMZ()
+        this.calc_mz = +identification.c_mz;
+        this._scores = identification.sc;
+        this.precursorCharge = +identification.pc_c === -1 ? undefined : +identification.pc_c; //we're taking -1 to mean undefined
+        this.passThreshold = !!identification.p;
+
+        // Initialize ion types
+        if (identification.ions) {
+            var ionTypes = identification.ions.split(";");
+            var ionTypeCount = ionTypes.length;
+            var ions = [];
+            for (var it = 0; it < ionTypeCount; it++) {
+                var ionType = ionTypes[it];
+                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+            }
+            this.ions = ions;
+        } else {
+            this.ions = [{type:"bIon"}, {type:"yIon"}];
+        }
+
+        // Initialize spectrum reference
+        // this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
+
         var scoreSets = Object.keys(this._scores);
         var scoreSetCount = scoreSets.length;
         for (var s = 0; s < scoreSetCount; s++) {
             var scoreSet = scoreSets[s];
             this.containingModel.get("scoreSets").add(scoreSet);
         }
-        //
-        // this.passThreshold = !!identification.pass;
-        // if (identification.ions) {
-        //     var ionTypes = identification.ions.split(";");
-        //     var ionTypeCount = ionTypes.length;
-        //     var ions = [];
-        //     for (var it = 0; it < ionTypeCount; it++) {
-        //         var ionType = ionTypes[it];
-        //         ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-        //     }
-        //     this.ions = ions;
-        // } else {
-        //     this.ions = [{type:"bIon"}, {type:"yIon"}];
-        // }
-        //
-        // this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
-        //
-        // this.precursorCharge = +identification.pc_c;
-        // if (this.precursorCharge === -1) {
-        //     this.precursorCharge = undefined;
-        // }
 
         this.matchedPeptides = [];
         this.matchedPeptides[0] = peptides.get(this.searchId + "_" + identification.pi1);
@@ -157,17 +158,6 @@ export class SpectrumMatch {
             }
         }
     }
-
-    // get linkPos1() {
-    //     return +this.matchedPeptides[0].linkSite;
-    // }
-    //
-    // get linkPos2() {
-    //     if (this.matchedPeptides[1]) {
-    //         this.linkPos2 = this.matchedPeptides[1].linkSite;
-    //     }
-    //     return undefined;
-    // }
 
     associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
         pep1_start, pep1_length, pep2_start, pep2_length) {
@@ -440,30 +430,13 @@ export class SpectrumMatch {
         }
     }
 
-    get psmId() {
-        return this._identification.id;
-    }
 
     get datasetId() {
         return this.searchId;
     }
 
     get scanNumber() {
-        // if (this.spectrum) {
         return this.spectrumId;
-        // }
-    }
-
-    get spectrumId() {
-        return this._identification.sp;
-    }
-
-    get searchId() {
-        return this._identification.si.toString();
-    }
-
-    get precursor_intensity() {
-        return null;
     }
 
     get elution_time_start() {
@@ -472,42 +445,6 @@ export class SpectrumMatch {
 
     get elution_time_end() {
         return null;
-    }
-
-    get _scores() {
-        return this._identification.sc;
-    }
-
-    get precursorCharge() {
-        const c = +this._identification.pc_c;
-        return c === -1 ? undefined : c;
-    }
-
-    get precursorMZ() {
-        return +this._identification.pc_mz;
-    }
-
-    get calc_mz() {
-        return +this._identification.c_mz;
-    }
-
-    get passThreshold() {
-        return !!this._identification.p;
-    }
-
-    get ions() {
-        if (this._identification.ions) {
-            var ionTypes = this._identification.ions.split(";");
-            var ionTypeCount = ionTypes.length;
-            var ions = [];
-            for (var it = 0; it < ionTypeCount; it++) {
-                var ionType = ionTypes[it];
-                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-            }
-            return ions;
-        } else {
-            return [{type: "bIon"}, {type: "yIon"}];
-        }
     }
 
     get spectrumIdentificationProtocol() {
