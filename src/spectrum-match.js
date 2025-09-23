@@ -393,7 +393,6 @@ export class SpectrumMatch {
         }
     }
 
-
     modificationCount() {
         return -1; //temp
         const modCount1 = this.matchedPeptides[0].mod_pos.length;
@@ -429,7 +428,6 @@ export class SpectrumMatch {
             return "";
         }
     }
-
 
     get datasetId() {
         return this.searchId;

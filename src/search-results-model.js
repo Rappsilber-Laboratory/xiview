@@ -329,7 +329,6 @@ export class SearchResultsModel extends Backbone.Model {
 
         }
 
-
         this.initDecoyLookup();
 
         const crosslinks = this.get("crosslinks");
@@ -363,20 +362,6 @@ export class SearchResultsModel extends Backbone.Model {
 
         this.set("minScore", minScore);
         this.set("maxScore", maxScore);
-
-        const participantArray = Array.from(participants.values());
-        // only count real participants towards participant count (which is used as cut-off further on)
-        const targetParticipantArray = participantArray.filter(function (p) {
-            return !p.is_decoy;
-        });
-
-        // for (let participant of targetParticipantArray) {
-        //     participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
-        // }
-
-        // window.vent.trigger("uniprotDataParsed", self);
-
-
     }
 
     // Connect searches to proteins
@@ -419,29 +404,14 @@ export class SearchResultsModel extends Backbone.Model {
         if (!protObj.crosslinks) {
             protObj.crosslinks = [];
         }
-        // check serverFlavour
-        // if (this.get("serverFlavour") === "PRIDE") {
         protObj.is_decoy = false;
-        // }
-        // else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-        //     protObj.is_decoy = false;
-        //     var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
-        //     if (protObj.seq_mods) {
-        //         SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-        //         protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-        //     } else if (accCheck != null && json.interactors[protObj.accession]) {
-        //         protObj.sequence = json.interactors[protObj.accession].sequence;
-        //     } else {
-        //         protObj.sequence = "";
-        //     }
-        // }
         if (protObj.sequence) {
             protObj.size = protObj.sequence.length;
         }
 
         protObj.form = 0;
 
-        if ((!protObj.name || protObj.name.trim() === '{"","protein description"}') && protObj.accession) {
+        if (!protObj.name && protObj.accession) {
             protObj.name = protObj.accession;
         }
         protObj.getMeta = function (metaField) {

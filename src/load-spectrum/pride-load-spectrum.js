@@ -1,6 +1,6 @@
 import d3 from "d3";
 
-export const prideLoadSpectrum = function (match, randId) {
+export const prideLoadSpectrum = function (match) {
     // if (match.spectrum && match.spectrum.pks) {
     const formatted_data = {};
 

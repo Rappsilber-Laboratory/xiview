@@ -5,29 +5,29 @@ export class SpectrumIdentificationProtocol {
         this._searchResultModel = searchResultModel;
     }
 
-// {
-//     "id": 0,
-//     "sip_ref": "SearchProtocol_1_0",
-//     "upload_id": 33,
-//     "frag_tol": 5,
-//     "frag_tol_unit": "ppm",
-//     "additional_search_params": {
-//         "MS:1001211": "parent mass type mono",
-//         "MS:1002494": "cross-linking search",
-//         "MS:1001256": "fragment mass type mono"
-//     },
-//     "analysis_software": {
-//         "version": "2.1.5.5",
-//         "id": "xiFDR_id",
-//         "name": "XiFDR",
-//         "SoftwareName": {
-//             "xiFDR": ""
-//         }
-//     },
-//     "threshold": {
-//         "no threshold": ""
-//     }
-// }
+    // {
+    //     "id": 0,
+    //     "sip_ref": "SearchProtocol_1_0",
+    //     "upload_id": 33,
+    //     "frag_tol": 5,
+    //     "frag_tol_unit": "ppm",
+    //     "additional_search_params": {
+    //         "MS:1001211": "parent mass type mono",
+    //         "MS:1002494": "cross-linking search",
+    //         "MS:1001256": "fragment mass type mono"
+    //     },
+    //     "analysis_software": {
+    //         "version": "2.1.5.5",
+    //         "id": "xiFDR_id",
+    //         "name": "XiFDR",
+    //         "SoftwareName": {
+    //             "xiFDR": ""
+    //         }
+    //     },
+    //     "threshold": {
+    //         "no threshold": ""
+    //     }
+    // }
 
     get id()  {
         return this._json.id;
