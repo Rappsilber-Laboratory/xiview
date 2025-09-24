@@ -31,6 +31,10 @@ export class Crosslink {
         return this.matches_pp[0].match.isMonoLink();
     }
 
+    isLoopLink() {
+        return this.matches_pp[0].match.isLoopLink();
+    }
+
     getMeta(metaField) {
         if (arguments.length === 0) {
             return this.meta;

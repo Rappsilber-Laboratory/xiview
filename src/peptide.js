@@ -36,8 +36,12 @@ export class Peptide {
         return this._pep.u_id + "_" + this._pep.id;
     }
 
-    get linkSite(){
+    get linkSite1(){
         return this._pep.ls1;
+    }
+
+    get linkSite2(){
+        return this._pep.ls2;
     }
 
     //todo - link site 2 for internally linked peptides

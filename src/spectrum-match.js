@@ -53,7 +53,7 @@ export class SpectrumMatch {
             }
         }
         // following will be inadequate for trimeric and higher order cross-links
-        if (identification.pi2 !== undefined) {
+        if (identification.pi2 !== undefined && identification.pi2 !== null) { //null if loop link
             this.matchedPeptides[1] = peptides.get(this.searchId + "_" + identification.pi2);
             if (!this.matchedPeptides[1]) {
                 alert("peptide error (missing peptide evidence?) for:" + +identification.pi2);
@@ -64,9 +64,11 @@ export class SpectrumMatch {
         }
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
-        this.linkPos1 = +this.matchedPeptides[0].linkSite;
+        this.linkPos1 = +this.matchedPeptides[0].linkSite1;
         if (this.matchedPeptides[1]) {
-            this.linkPos2 = this.matchedPeptides[1].linkSite;
+            this.linkPos2 = this.matchedPeptides[1].linkSite1;
+        } else if (identification.pi2 === null) {
+            this.linkPos2 = +this.matchedPeptides[0].linkSite2;
         }
 
         // the protein IDs and residue numers we eventually want to get:-
@@ -90,6 +92,18 @@ export class SpectrumMatch {
 
         this.couldBelongToBetweenLink = false;
         this.couldBelongToSelfLink = false;
+        this.confirmedHomomultimer = false;
+        this.overlap = [];
+
+        //looplinks
+        if (!this.matchedPeptides[1]){
+            this.couldBelongToSelfLink = true;
+            for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
+                p1ID = this.matchedPeptides[0].prt[i];
+                this.associateWithLink(participants, crosslinks, p1ID, p1ID, this.matchedPeptides[0].pos[i]  + this.linkPos1 - 1, this.matchedPeptides[0].pos[i] + this.linkPos2 - 1, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length);
+            }
+            return;
+        }
 
         //loop to produce all alternative linkage site combinations
         //(position1 count * position2 count alternative)
@@ -122,8 +136,6 @@ export class SpectrumMatch {
         }
 
         //identify homodimers: if peptides overlap its a homodimer
-        this.confirmedHomomultimer = false;
-        this.overlap = [];
         if (this.isAmbig() === false && p1ID === p2ID) { //todo: potential problem re ambiguous homo-multimer link (compare current behaviour to xiNET paper product type fig)
 
             if (this.matchedPeptides[0].sequence && this.matchedPeptides[1].sequence) {
@@ -298,11 +310,15 @@ export class SpectrumMatch {
     }
 
     isNotCrosslinked() {
-        return this.linkPos1 === -1;
+        return this.linkPos1 === null;
     }
 
     isMonoLink() {
-        return this.linkPos1 !== -1 && (this.matchedPeptides.length === 1 || this.linkPos2 == -1 || this.matchedPeptides[1].pos[0] == -1);
+        return false; //this.linkPos1 !== null && this.matchedPeptides.length === 1;
+    }
+
+    isLoopLink() {
+        return this.linkPos1 !== null && this.matchedPeptides.length === 1;
     }
 
     peaklistFileName() {
