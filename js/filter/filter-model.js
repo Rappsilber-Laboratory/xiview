@@ -196,6 +196,7 @@ export class FilterModel extends Backbone.Model {
         const linear = match.isNotCrosslinked();
         const mono = match.isMonoLink();
         const ambig = match.isAmbig();
+        const looplink = match.isLoopLink();
 
         //linears? - if linear (linkPos === 0) and linears not selected return false
         //cross-links? - if xl (linkPos > 0) and xls not selected return false
@@ -242,7 +243,7 @@ export class FilterModel extends Backbone.Model {
         if (!isNaN(pepLengthFilter)) {
             const seq1length = match.matchedPeptides[0].sequence.length;
             if (seq1length > 0 && (seq1length < pepLengthFilter ||
-                (!linear && !mono && match.matchedPeptides[1].sequence.length < pepLengthFilter))) {
+                (!linear && !mono && !looplink && match.matchedPeptides[1].sequence.length < pepLengthFilter))) {
                 return false;
             }
         }
