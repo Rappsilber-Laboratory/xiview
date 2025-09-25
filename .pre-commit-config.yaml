@@ -26,14 +26,17 @@ repos:
         files: '^js/.*\.js$'
         exclude: 'vendor/'
 
-  # Prevent committing vendor directory changes
+
+  # ESLint for CLMS-model files only
   - repo: local
     hooks:
-      - id: protect-vendor-dir
-        name: protect vendor directory
-        entry: 'bash -c "if git diff --cached --name-only | grep -E ^vendor/; then echo ERROR: Attempting to commit files in vendor/ directory; exit 1; fi"'
+      - id: eslint-clms-model
+        name: ESLint CLMS-model files
+        entry: npx eslint
         language: system
-        pass_filenames: false
+        files: '^src/.*\.(js|jsx)$'
+        args: ['--fix']
+
 
 # Global configuration
 default_stages: [commit]

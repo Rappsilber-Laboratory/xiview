@@ -12,7 +12,7 @@ export function capture(svgElems) {
 
 function getAllSVGElements() {
     // search through all document objects, including those in iframes
-    const allIFrames = [].slice.apply(document.getElementsByTagName('iframe'));
+    const allIFrames = [].slice.apply(document.getElementsByTagName("iframe"));
     const docs = [document];
     allIFrames.forEach(function (iframe) {
         try {
@@ -24,7 +24,7 @@ function getAllSVGElements() {
 
     const allSvgs = [];
     docs.forEach(function (doc) {
-        const allDocSvgs = [].slice.apply(doc.getElementsByTagName('svg'));
+        const allDocSvgs = [].slice.apply(doc.getElementsByTagName("svg"));
         allSvgs.push.apply(allSvgs, allDocSvgs);
     });
     return allSvgs;

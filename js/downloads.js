@@ -151,8 +151,7 @@ function mostReadableId(protein) {
         } else {
             return protein.id;
         }
-    }
-    else { // not xi2
+    } else { // not xi2
         // just use id
         return protein.id;
     }
@@ -427,8 +426,7 @@ function getAlphaLink2CSV(){
         const chainKey = protein.id + "-" + stoich;
         if (proteins.has(chainKey)) {
             return proteins.get(chainKey).chainChar;
-        }
-        else {
+        } else {
             chainCharIndex++;
             if (chainCharIndex > chainChars.length) {
                 alert ("Too many chains for Alphalink2 export");
