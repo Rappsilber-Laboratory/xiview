@@ -1,5 +1,3 @@
-import {SearchResultsModel} from "./search-results-model";
-
 export class Peptide {
     constructor(pep){ //}, containingModel) {
         console.assert(pep.m_as.length == pep.m_ms.length &&  pep.m_ms.length == pep.m_as.length, "Inconsistent mod data on peptide", pep);

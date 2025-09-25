@@ -1,3 +1,7 @@
+# Build outputs
+dist/
+build/
+
 # Dependencies
 node_modules/
 bower_components/
@@ -35,12 +39,46 @@ pnpm-lock.yaml
 .parcel-cache/
 .webpack/
 
+# Build tool artifacts
+*.js.map
+*.min.js
+*.min.css
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# NetBeans project files
+/nbproject/
+
+# Dreamweaver sync files (legacy)
+_notes/
+*/_notes/dwsync.xml
+build/_notes/dwsync.xml
+src/_notes/dwsync.xml
+uml/_notes/dwsync.xml
+vendor/_notes/dwsync.xml
+src/graph/_notes/dwsync.xml
+
+# KDE directory preferences
+.directory
+
 # IDE and editor files
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Claude Code directories
+.claude/
+claudedocs/
 
 # OS generated files
 .DS_Store
@@ -56,3 +94,7 @@ Desktop.ini
 # Temporary files
 *.tmp
 *.temp
+
+# PHP session files
+/tmp/
+sessions/

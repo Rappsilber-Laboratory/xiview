@@ -7,30 +7,42 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-json
-#      - id: check-added-large-files
-#        args: ['--maxkb=200']
-#      - id: check-merge-conflict
-#      - id: mixed-line-ending
-#        args: ['--fix=lf']
-#
-#  # Basic JavaScript syntax validation for source files
-#  - repo: local
-#    hooks:
-#      - id: check-js-syntax
-#        name: check JavaScript syntax
-#        entry: node -c
-#        language: system
-#        files: '^src/.*\.js$'
-#
-#  # Validate that core model files maintain proper structure
-#  - repo: local
-#    hooks:
-#      - id: validate-model-exports
-#        name: validate model file exports
-#        entry: bash -c 'for file in src/*.js; do if [ -f "$file" ] && ! grep -q "export" "$file" && ! grep -q "module.exports" "$file"; then echo "Warning: $file may be missing exports"; fi; done'
-#        language: system
-#        files: '^src/.*\.js$'
-#        pass_filenames: false
+      - id: check-added-large-files
+        args: ['--maxkb=200']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Basic JavaScript syntax validation for source files
+  - repo: local
+    hooks:
+      - id: check-js-syntax
+        name: check JavaScript syntax
+        entry: bash -c 'for file in "$@"; do node --input-type=module -c < "$file" || exit 1; done'
+        language: system
+        files: '^src/.*\.js$'
+
+  # ESLint for CLMS-model files only
+  - repo: local
+    hooks:
+      - id: eslint-clms-model
+        name: ESLint CLMS-model files
+        entry: npx eslint
+        language: system
+        files: '^src/.*\.(js|jsx)$'
+        args: ['--fix']
+
+  # Validate that core model files maintain proper structure
+  - repo: local
+    hooks:
+      - id: validate-model-exports
+        name: validate model file exports
+        entry: bash
+        args: ['-c', 'for file in src/*.js; do if [ -f "$file" ] && ! grep -q "export" "$file" && ! grep -q "module.exports" "$file"; then echo "Warning: $file may be missing exports"; fi; done']
+        language: system
+        files: '^src/.*\.js$'
+        pass_filenames: false
+
 
 # Global configuration
 default_stages: [commit]

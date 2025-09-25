@@ -1,5 +1,5 @@
 import {Crosslink} from "./crosslink";
-import path from 'path-browserify';
+import path from "path-browserify";
 
 export class SpectrumMatch {
 
@@ -329,7 +329,6 @@ export class SpectrumMatch {
     }
 
     group() {
-        return -1; // temp
         var group = this.containingModel.get("searches").get(this.searchId).group;
         return group;
     }
@@ -410,7 +409,6 @@ export class SpectrumMatch {
     }
 
     modificationCount() {
-        return -1; //temp
         const modCount1 = this.matchedPeptides[0].mod_pos.length;
         if (this.matchedPeptides[1]) {
             const modCount2 = this.matchedPeptides[1].mod_pos.length;
