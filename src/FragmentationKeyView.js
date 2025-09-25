@@ -4,7 +4,6 @@ import Backbone from "backbone";
 import * as _ from "underscore";
 import d3 from "d3";
 import * as $ from "jquery";
-import {hasOwnProperty} from "underscore/modules/_setup";
 
 
 //TODO: find a better place for this?

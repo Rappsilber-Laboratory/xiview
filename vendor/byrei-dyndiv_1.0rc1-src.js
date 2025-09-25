@@ -101,7 +101,7 @@ export const ByRei_dynDiv = {
   divList Struction
   ================================================================================
   0.  Object:[Object]        - Movable Object
-  1.  Limiter:[Object]       - Object to which the dynDIV is limited 
+  1.  Limiter:[Object]       - Object to which the dynDIV is limited
   2.  Status:[Boolean]       - Active or Inactive
   3.  zIndex:[Number]        - Init. zIndex for the dynDIV
   4.  left:[Number]          - Init. Position left
@@ -119,7 +119,7 @@ export const ByRei_dynDiv = {
 */
 
  /*
-  This include all get Methodes 
+  This include all get Methodes
  */
  get: {
   /* Warper for prefix request */
@@ -275,7 +275,7 @@ export const ByRei_dynDiv = {
              }
              else if (ByRei_dynDiv.divList[i][0] === obj) {
                       result.found = true;
-                      result.data = i; 
+                      result.data = i;
                       break;
              }
         }
@@ -321,11 +321,11 @@ export const ByRei_dynDiv = {
    }
    return result;
   }
-  
+
  },
 
- /* 
-  This include all on(action) Methodes 
+ /*
+  This include all on(action) Methodes
  */
  on: {
   /* Mouse Move Events */
@@ -456,7 +456,7 @@ export const ByRei_dynDiv = {
  },
 
  /*
-  This include all init functions 
+  This include all init functions
  */
  init: {
   /* Init Events for all div with dynDiv_ as className */
@@ -476,7 +476,7 @@ export const ByRei_dynDiv = {
   /* Init Action on MouseMove */
   action: function(evt, m_modus) {
   if (evt) {
-      if (evt.preventDefault) {evt.preventDefault();} 
+      if (evt.preventDefault) {evt.preventDefault();}
       if (ByRei_dynDiv.cache.ie) {evt.cancelBubble=true;}
       if (evt.stopPropagation) {evt.stopPropagation();}
       const evt_src = evt.target ? evt.target : evt.srcElement;
@@ -504,7 +504,7 @@ export const ByRei_dynDiv = {
           ByRei_dynDiv.cache.zIndex = ByRei_dynDiv._style(ByRei_dynDiv.cache.obj,'zIndex'); // Cache zIndex
           ByRei_dynDiv.get.pos(ByRei_dynDiv.cache.obj); // Get Position of Element
           ByRei_dynDiv.cache.modus = m_modus; // Cache Modus
-           
+
              if (ByRei_dynDiv.db(1) && ByRei_dynDiv.cache.obj) {
                  const obj = {offset: ByRei_dynDiv.get.offset.absolute(ByRei_dynDiv.cache.obj)},
                      limit = {offset: ByRei_dynDiv.get.offset.absolute(ByRei_dynDiv.db(1))};
@@ -515,12 +515,12 @@ export const ByRei_dynDiv = {
                  ByRei_dynDiv.limit.max.top = (ByRei_dynDiv.db(1).clientHeight + limit.offset.top) - (ByRei_dynDiv.cache.obj.offsetHeight + obj.offset.top);
              }
           if (ByRei_dynDiv.api.drag) {ByRei_dynDiv.api.drag();} // API drag Event
-          
+
           switch(m_modus){
            case "move" : case "moveparent" :
-            if (ByRei_dynDiv.db(9) === 'move' || ByRei_dynDiv.db(9) === 'move_resize') {ByRei_dynDiv.set.visible(false);} 
+            if (ByRei_dynDiv.db(9) === 'move' || ByRei_dynDiv.db(9) === 'move_resize') {ByRei_dynDiv.set.visible(false);}
            break;
-           case "tl" : case "tr" : case "bl" : case "br" : 
+           case "tl" : case "tr" : case "bl" : case "br" :
             if (ByRei_dynDiv.db(9) === 'resize' || ByRei_dynDiv.db(9) === 'move_resize') {ByRei_dynDiv.set.visible(false);}
            break;
           }
@@ -587,7 +587,7 @@ export const ByRei_dynDiv = {
       let result = false;
       if (navigator.cookieEnabled && id) {
        let savedata = document.cookie;
-       if (/; /.test(savedata)) {savedata = savedata.split("; ");} 
+       if (/; /.test(savedata)) {savedata = savedata.split("; ");}
        else if (/, /.test(savedata)) {savedata = savedata.split(", ");}
        if (savedata) {
            let i;
@@ -613,7 +613,7 @@ export const ByRei_dynDiv = {
   }
  },
 
- /* 
+ /*
   All set Functions
  */
  set: {
@@ -643,8 +643,8 @@ export const ByRei_dynDiv = {
   }
  },
 
- /* 
-  Resize DIV 
+ /*
+  Resize DIV
  */
  resize: function() {
   if (ByRei_dynDiv.cache.obj && ByRei_dynDiv.cache.modus) {
@@ -658,12 +658,12 @@ export const ByRei_dynDiv = {
           mouse_diff_left = (ByRei_dynDiv.cache.pos.left - ByRei_dynDiv.cache.init.pos.left || 0);
       const mouse_diff_top = (ByRei_dynDiv.cache.pos.top - ByRei_dynDiv.cache.init.pos.top || 0);
 
-      // Try to keep Aspect Ratio 
+      // Try to keep Aspect Ratio
       /* Maus so abfragen das Mouse nicht grφίers als Offset von Object sein kann ! */
       if (keepAspect) {
           switch(ByRei_dynDiv.cache.modus) {
            case "br" : case "tl" :
-            mouse_diff_left = mouse_diff_top * keepAspect; 
+            mouse_diff_left = mouse_diff_top * keepAspect;
            break;
            case "bl" : case "tr" :
             mouse_diff_left = mouse_diff_top * keepAspect * -1;
@@ -676,7 +676,7 @@ export const ByRei_dynDiv = {
           ByRei_dynDiv.cache.last.mouse.top = ByRei_dynDiv.cache.pos.top;
       }
 
-      // Scaling DIV depend on the Modus   
+      // Scaling DIV depend on the Modus
       switch(ByRei_dynDiv.cache.modus) {
        case "br": case "tr": new_size_x = ByRei_dynDiv.cache.init.width + mouse_diff_left; break;
        case "tl": case "bl": new_size_x = ByRei_dynDiv.cache.init.width - mouse_diff_left; break;
@@ -692,7 +692,7 @@ export const ByRei_dynDiv = {
        case "tr": new_top  = ByRei_dynDiv.db(5) + mouse_diff_top; break;
        case "bl": new_left = ByRei_dynDiv.db(4) + mouse_diff_left; break;
       }
-	  
+
 	  // in future, look at having element stored in db(1) that acts as bounds for boxes
 
       /* Check if Limit is reached (normal, keep aspect) */
@@ -740,7 +740,7 @@ export const ByRei_dynDiv = {
            break;
           }
       }
-	  
+
 	 	if (new_top < 39) { new_top = 39; }	// mjg. Stop dragging going under top bar hack.
 
       // Check for min. Size (20x20)
@@ -764,8 +764,8 @@ export const ByRei_dynDiv = {
   }
  },
 
- /* 
-  Move DIV 
+ /*
+  Move DIV
  */
  move: function() {
   if (ByRei_dynDiv.cache.obj) {
@@ -794,8 +794,8 @@ export const ByRei_dynDiv = {
   }
  },
 
- /* 
-  Small DB System 
+ /*
+  Small DB System
  */
  db: function(i,value) { // db(1) return value / db(1,1) set value
      let result = false;
@@ -814,8 +814,8 @@ export const ByRei_dynDiv = {
   return result;
  },
 
- /* 
-  Add Object to dynDiv and add dynDiv Events and Effects 
+ /*
+  Add Object to dynDiv and add dynDiv Events and Effects
  */
  add: function(elem,i,mode) {
   if (elem) {
@@ -851,19 +851,19 @@ export const ByRei_dynDiv = {
                 parent = parent.parentNode;
                 zIndex = func_z_index(parent,i);
                break;
-               case "resizeDiv_tl": 
+               case "resizeDiv_tl":
                 ByRei_dynDiv._style(parent,'cursor','nw-resize');
                 ByRei_dynDiv.set_eventListener(parent,'mousedown', function(e) {ByRei_dynDiv.init.action(e,'tl');});
                break;
-               case "resizeDiv_tr": 
+               case "resizeDiv_tr":
                 ByRei_dynDiv._style(parent,'cursor','ne-resize');
                 ByRei_dynDiv.set_eventListener(parent,'mousedown', function(e) {ByRei_dynDiv.init.action(e,'tr');});
                break;
-               case "resizeDiv_bl": 
+               case "resizeDiv_bl":
                 ByRei_dynDiv._style(parent,'cursor','sw-resize');
                 ByRei_dynDiv.set_eventListener(parent,'mousedown', function(e) {ByRei_dynDiv.init.action(e,'bl');});
                break;
-               case "resizeDiv_br": 
+               case "resizeDiv_br":
                 ByRei_dynDiv._style(parent,'cursor','se-resize');
                 ByRei_dynDiv.set_eventListener(parent,'mousedown', function(e) {ByRei_dynDiv.init.action(e,'br');});
                break;
@@ -871,7 +871,7 @@ export const ByRei_dynDiv = {
                  ByRei_dynDiv._style(parent,'cursor','pointer');
                  ByRei_dynDiv.set_eventListener(parent,'mousedown', function(e) {ByRei_dynDiv.on.minmax(e);});
                break;
-               case "dropArea": 
+               case "dropArea":
                  ByRei_dynDiv.dropArea.push([parent,'global']);
                break;
               }
@@ -911,7 +911,7 @@ export const ByRei_dynDiv = {
           if (ByRei_dynDiv.get.prefix.value(classNames,"dropMode-",1)) {
               dropmode = ByRei_dynDiv.get.prefix.value(classNames,"dropMode-",1);
           }
-          
+
           // Hide Action (false, move, resize)
           if (ByRei_dynDiv.get.prefix.value(classNames,"hideMove") && ByRei_dynDiv.get.prefix.value(classNames,"hideResize")) {
               hideaction = 'move_resize';
@@ -930,7 +930,7 @@ export const ByRei_dynDiv = {
               }
           }
 
-          // Show Resize (active, focus, doubleclick) 
+          // Show Resize (active, focus, doubleclick)
           if (ByRei_dynDiv.get.prefix.value(classNames,"showResize-",1)) {
               showresize = ByRei_dynDiv.get.prefix.value(classNames,"showResize-",1);
               ByRei_dynDiv.on.resize(parent,false);

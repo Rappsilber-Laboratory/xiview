@@ -60,8 +60,7 @@ export const AppearanceSettingsView = SettingsView.extend({
             })
             .text(function (d) {
                 return d.text;
-            })
-        ;
+            });
 
         // color selector
         generalTab.append("label").text("Color scheme: ")
@@ -96,8 +95,7 @@ export const AppearanceSettingsView = SettingsView.extend({
             .append("input").attr("type", "number").attr("id", "xispec_settingsDecimals")
             .attr("min", "1").attr("max", "10").attr("autocomplete", "off");
         generalTab.append("label").text("Absolute error values (QC): ")
-            .append("input").attr("type", "checkbox").attr("id", "xispec_absErrChkBx")
-        ;
+            .append("input").attr("type", "checkbox").attr("id", "xispec_absErrChkBx");
 
         // labels tab
         let labelsTab = this.mainDiv.append("div")
@@ -115,8 +113,7 @@ export const AppearanceSettingsView = SettingsView.extend({
         this.labelFontSize = labelsTab.append("label").text("label font size (px): ")
             .append("input").attr("type", "number").attr("id", "xispec_settingsLabelFontSize")
             .attr("min", "1").attr("max", "50").attr("autocomplete", "off")
-            .attr("value", this.model.get("labelFontSize"))
-        ;
+            .attr("value", this.model.get("labelFontSize"));
 
         // fragments tab
         let fragmentsTab = this.mainDiv.append("div")
@@ -126,8 +123,7 @@ export const AppearanceSettingsView = SettingsView.extend({
         fragmentsTab.append("label").text("accentuate crosslink containing fragments: ")
             .append("input").attr("type", "checkbox").attr("id", "xispec_accentuateCLcontainingChkBx");
         fragmentsTab.append("label").text("Hide not selected fragments: ")
-            .append("input").attr("type", "checkbox").attr("id", "xispec_hideNotSelectedFragments")
-        ;
+            .append("input").attr("type", "checkbox").attr("id", "xispec_hideNotSelectedFragments");
 
         // end Tabs
 

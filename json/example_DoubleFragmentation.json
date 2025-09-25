@@ -33,7 +33,7 @@
 	{"peptideId":1,"linkSite":6}
 ],
 "peaks" :[
-	
+
 	{"mz":215.13963, "intensity":247.4677, "clusterIds":[31]},
 	{"mz":220.81946, "intensity":111.6624, "clusterIds":[]},
 	{"mz":232.69991, "intensity":92.18826, "clusterIds":[]},

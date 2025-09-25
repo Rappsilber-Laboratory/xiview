@@ -5,10 +5,9 @@
     "semi": ["error", "always" ],
     "semi-style": ["error", "last"],
     "semi-spacing": ["error", {"before": false, "after": true}],
-    "quotes": [ "warn", "double" ], // JSON standard says double
+    "quotes": [ "warn", "double" ],
     "brace-style": "warn",
     "no-unused-vars": "warn"
-//    "object-curly-newline": ["error", "always"]
   },
   "env": {
     "es6": true,

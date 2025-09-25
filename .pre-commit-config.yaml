@@ -1,0 +1,39 @@
+# Pre-commit configuration for xiSPEC spectrum viewer
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Basic JavaScript syntax validation for source files
+  - repo: local
+    hooks:
+      - id: check-js-syntax
+        name: check JavaScript syntax
+        entry: bash -c 'for file in "$@"; do node --input-type=module -c < "$file" || exit 1; done'
+        language: system
+        files: '^src/.*\.js$'
+
+  # ESLint
+  - repo: local
+    hooks:
+      - id: eslint-spectrum
+        name: ESLint spectrum files
+        entry: npx eslint
+        language: system
+        files: '^src/.*\.(js|jsx)$'
+        args: ['--fix']
+
+
+# Global configuration
+default_stages: [commit]
+fail_fast: false

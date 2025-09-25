@@ -60,8 +60,7 @@ Peak.prototype.draw = function () {
             .attr("opacity", "0")
             .attr("stroke-opacity", "0.7")
             .attr("x1", 0)
-            .attr("x2", 0)
-        ;
+            .attr("x2", 0);
 
         //set the dom events for it
         const self = this;
@@ -98,6 +97,7 @@ Peak.prototype.draw = function () {
                 stickyHighlight(evt.ctrlKey);
             });
 
+        // eslint-disable-next-line no-inner-declarations
         function showTooltip(x, y, fragId) {
             let contents = [["m/z", self.x.toFixed(self.graph.model.get("showDecimals"))], ["Int", self.y.toFixed(self.graph.model.get("showDecimals"))]];
             let header = [];
@@ -155,6 +155,7 @@ Peak.prototype.draw = function () {
             }
         }
 
+        // eslint-disable-next-line no-inner-declarations
         function hideTooltip() {
             if (window.compositeModelInst !== undefined)
                 self.graph.tooltip.set("contents", null);
@@ -164,6 +165,7 @@ Peak.prototype.draw = function () {
             }
         }
 
+        // eslint-disable-next-line no-inner-declarations
         function startHighlight(fragId) {
             let fragments;
             if (fragId) {
@@ -177,11 +179,13 @@ Peak.prototype.draw = function () {
             self.graph.model.addHighlight(fragments);
         }
 
+        // eslint-disable-next-line no-inner-declarations
         function endHighlight() {
             //hideTooltip();
             self.graph.model.clearHighlight(self.fragments);
         }
 
+        // eslint-disable-next-line no-inner-declarations
         function stickyHighlight(ctrl, fragId) {
             let fragments = [];
             if (fragId) {
@@ -488,6 +492,7 @@ Peak.prototype.updateX = function (xDomain) {
     if (labelCount) {
         this.labels
             .attr("x", 0)
+            // eslint-disable-next-line no-unused-vars
             .attr("display", function (d, i) {
                 return labelVisible(d, self) ? "inline" : "none";
             });
@@ -543,7 +548,7 @@ Peak.prototype.removeLabels = function () {
     if (labelCount) {
         this.labels.attr("display", "none");
         this.labelHighlights.attr("display", "none");
-// 		this.labelLines.attr("opacity", 0);
+        // 		this.labelLines.attr("opacity", 0);
     }
 };
 
@@ -566,7 +571,7 @@ Peak.prototype.showLabels = function (lossyOverride) {
         };
         this.labels.filter(isVisible).attr("display", "inline");
         this.labelHighlights.filter(isVisible).attr("display", "inline");
-// 		this.labelLines.filter(isVisible).attr("opacity", 1);
+        // 		this.labelLines.filter(isVisible).attr("opacity", 1);
     }
 };
 

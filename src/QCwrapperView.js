@@ -75,6 +75,7 @@ export const QCwrapperView = Backbone.View.extend({
             .text(function (d) {
                 return d.text;
             });
+        // eslint-disable-next-line no-unused-vars
         let downloadButton = this.controlsDiv.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-download pointer")
             .attr("aria-hidden", "true")
@@ -119,6 +120,7 @@ export const QCwrapperView = Backbone.View.extend({
         try {
             this.plotSplit.destroy();
         } catch (err) {
+            // do nothing
         }
         this.plotSplit = Split(this.options.splitIds, {
             sizes: [75, 25],
@@ -135,6 +137,7 @@ export const QCwrapperView = Backbone.View.extend({
         try {
             this.plotSplit.destroy();
         } catch (err) {
+            // do nothing
         }
         this.plotSplit = Split(this.options.splitIds, {
             sizes: [75, 25],
@@ -191,7 +194,7 @@ export const QCwrapperView = Backbone.View.extend({
         $(this.dockRightxispec_btn[0]).hide();
         this.dockSide();
         $(this.el).addClass("xispec_QCdiv-right");
-// 		$('.gutter-horizontal').css('order', 0);
+        // 		$('.gutter-horizontal').css('order', 0);
     },
 
     dockBottom: function () {

@@ -228,9 +228,6 @@ export const ErrorPlotView = Backbone.View.extend({
             .style("text-anchor", "middle").style("pointer-events", "none");
         this.yLabel.attr("transform", "translate(" + -50 + " " + this.height / 2 + ") rotate(-90)");
 
-        let p1color = this.model.p1color;
-        let p2color = this.model.p2color;
-
         this.g = this.svgWrapper.append("g");
 
         this.highlights = this.g.selectAll("scatter-dot-highlights")

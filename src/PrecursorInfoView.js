@@ -59,13 +59,14 @@ export const PrecursorInfoView = Backbone.View.extend({
         this.content = this.wrapper.append("tspan")
             .style("cursor", "default");
 
+        let top;
         if (this.options.invert) {
             const $el = $(this.el);
-            const parentWidth = $el.width();
+            //const parentWidth = $el.width();
             const parentHeight = $el.height();
-            var top = this.model.isLinear ? parentHeight - 65 : parentHeight - 115;
+            top = this.model.isLinear ? parentHeight - 65 : parentHeight - 115;
         } else {
-            var top = 0;
+            top = 0;
         }
         this.wrapper.attr("transform", "translate(0," + top + ")");
 

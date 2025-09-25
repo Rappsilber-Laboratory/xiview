@@ -128,4 +128,3 @@ To run a web server serving the crosslink example page:
 ```sh
 npm run start:dev
 ```
-

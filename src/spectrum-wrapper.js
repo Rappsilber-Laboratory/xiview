@@ -159,6 +159,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             .attr("aria-hidden", "true");
         // .style('opacity', 0);
         if (this.id !== 0) {
+            // eslint-disable-next-line no-unused-vars
             let closeIcon = specPanelControls.append("i")
                 .attr("class", "fa fa-times xispec_closeSpecPanel")
                 .attr("id", "xispec_closeSpecPanel" + this.id)
@@ -190,6 +191,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             "   <svg id='xispec_errMzSVG" + this.id + "' class='xispec_errSVG'></svg>" +
             " </div>" +
             "</div>";
+        // eslint-disable-next-line no-unused-vars
         let qcDiv = specPanelDiv.append("div")
             .attr("class", "xispec_QCdiv")
             .attr("id", "xispec_QCdiv" + this.id)

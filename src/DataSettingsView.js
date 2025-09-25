@@ -125,9 +125,9 @@ export const DataSettingsView = SettingsView.extend({
             .attr("name", "ms2Tol")
             // .attr("min", "0")
             // .attr("step", "0.1")
-            .attr("required", "")
+            .attr("required", "");
         // .attr("class", "stepInput")
-        ;
+
         this.toleranceUnit = toleranceWrapper.append("div").append("select")
             .attr("name", "tolUnit")
             .attr("required", "")
@@ -144,11 +144,10 @@ export const DataSettingsView = SettingsView.extend({
             .attr("autocomplete", "off")
             .attr("name", "clModMass")
             .attr("required", "")
-            .attr("type", "text")
+            .attr("type", "text");
         // .attr("type", "number")
         // .attr("step", "0.001")
         // .attr("class", "stepInput")
-        ;
 
         // modTable
         let modToggle = dataForm.append("div")
@@ -159,6 +158,7 @@ export const DataSettingsView = SettingsView.extend({
 
         this.modTableWrapper = dataForm.append("div")
             .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper");
+        // eslint-disable-next-line no-unused-vars
         let modTable = this.modTableWrapper.append("table")
             .attr("id", "xispec_modificationTable")
             .attr("class", "xispec_settingsTable")
@@ -176,6 +176,7 @@ export const DataSettingsView = SettingsView.extend({
         this.lossTableWrapper = dataForm.append("div")
             .attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper")
             .style("display", "none");
+        // eslint-disable-next-line no-unused-vars
         let lossTable = this.lossTableWrapper.append("table")
             .attr("id", "xispec_lossTable")
             .attr("class", "xispec_settingsTable")
@@ -185,22 +186,24 @@ export const DataSettingsView = SettingsView.extend({
 
         let dataBottom = dataForm.append("div").attr("class", "xispec_settings-bottom");
 
+        // eslint-disable-next-line no-unused-vars
         let applyxispec_btn = dataBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
             .attr("value", "Apply")
             .attr("id", "settingsDataApply")
             .attr("type", "submit");
+        // eslint-disable-next-line no-unused-vars
         let cancelxispec_btn = dataBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
-            .attr("type", "button")
-        ;
+            .attr("type", "button");
 
         //custom config
         let customConfigTab = this.mainDiv.append("div")
             .attr("class", "xispec_settings-tab xispec_flex-column")
             .attr("id", "xispec_custom_config_tab")
             .style("display", "none");
+        // eslint-disable-next-line no-unused-vars
         let customConfigHelpToggle = customConfigTab.append("div")
             .attr("id", "xispec_toggleCustomCfgHelp")
             .attr("class", "pointer")
@@ -211,6 +214,7 @@ export const DataSettingsView = SettingsView.extend({
             .attr("class", "xispec_form-control")
             .attr("style", "display:none")
             .text("# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# also match peaks if they are one Dalton off\n# assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)");
+        // eslint-disable-next-line no-unused-vars
         let customConfigInputLabel = customConfigTab.append("label")
             .attr("for", "xispec_settingsCustomCfg-input")
             .text("Custom config input:");
@@ -227,6 +231,7 @@ export const DataSettingsView = SettingsView.extend({
         // 		.attr("name", "keepCustomCfg")
         // 		.attr("id", "xispec_keepCustomCfg")
         // ;
+        // eslint-disable-next-line no-unused-vars
         let customConfigSubmit = customConfigBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
             .attr("value", "Apply")
@@ -245,6 +250,7 @@ export const DataSettingsView = SettingsView.extend({
             customConfigDbSave.style("display", "none");
         }
 
+        // eslint-disable-next-line no-unused-vars
         let customConfigCancel = customConfigBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
@@ -268,12 +274,14 @@ export const DataSettingsView = SettingsView.extend({
         this.annotatorDropdown.append("option").attr("value", "test/FULL").text("test");
         let annotatorBottom = annotatorTab.append("div")
             .attr("class", "xispec_settings-bottom");
+        // eslint-disable-next-line no-unused-vars
         let annotatorSubmit = annotatorBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
             .attr("value", "Apply")
             .attr("id", "xispec_settingsAnnotatorApply")
             .attr("type", "submit");
 
+        // eslint-disable-next-line no-unused-vars
         let annotatorCancel = annotatorBottom.append("input")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
             .attr("value", "Cancel")
@@ -501,7 +509,7 @@ export const DataSettingsView = SettingsView.extend({
         xi2_config.crosslinker[cl_id].mass = parseFloat(form["clModMass"].value);
         // xi2 config - tolerance
         xi2_config.ms2_tol = form["ms2Tol"].value + form["tolUnit"].value;
-        
+
         // annotation block - JSON assembly
         xi2_request.Peptides = peptidesJSON;
         xi2_request.LinkSite = linkSitesJSON;
@@ -604,7 +612,7 @@ export const DataSettingsView = SettingsView.extend({
             "precursorCharge": parseInt(form["preCharge"].value),
             "losses": lossJSON
         };
-        
+
         // final JSON assembly
         return {
             "Peptides": peptidesJSON,
@@ -853,6 +861,7 @@ export const DataSettingsView = SettingsView.extend({
         let modifications = [];
         const re = /[^A-Z]+/g;
         let result;
+        // eslint-disable-next-line no-cond-assign
         while (result = re.exec(pepStrMods)) {
 
             let new_mod = {};

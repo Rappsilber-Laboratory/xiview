@@ -3,7 +3,7 @@
  */
 
 export const svgUtils = {
-    
+
     capture: function (svgElems) {
         return svgElems.map (function(svg) { return svgUtils.makeSVGDoc (svg); });
     },
@@ -110,7 +110,7 @@ export const svgUtils = {
 
         return cloneSVG;
     },
-    
+
     // Because firefox returns cssText as empty
     // https://bugzilla.mozilla.org/show_bug.cgi?id=137687
     getComputedStyleCssText: function (element, field) {
@@ -132,11 +132,11 @@ export const svgUtils = {
 
         return cssText;
     },
-    
+
     doPruneInvisible: true,
-    
+
     pruneConditionSets: [{"display": "none"}, {"visibility": "hidden"}, {"opacity": "0"}, {"fill-opacity": "0", "stroke-opacity": "0"}, {"fill-opacity": "0", "stroke": "none"}, {"fill": "none", "stroke-opacity": "0"}],
-    
+
     pruneInvisibleSubtrees: function (clonedElement, matchingOriginalElement) {
         if (svgUtils.doPruneInvisible) {
             const style = window.getComputedStyle(matchingOriginalElement);  // cloned (unattached) nodes in chrome at least don't have computed styles
@@ -150,7 +150,7 @@ export const svgUtils = {
                         const eStyle = style[condition];
                         const eAttr = matchingOriginalElement.getAttribute(condition);
                         if (!(eStyle === condVal || (!eStyle && eAttr === condVal))) {
-                            allConditionsMet = false; 
+                            allConditionsMet = false;
                         }
                     });
                     prune = allConditionsMet;
@@ -228,7 +228,7 @@ export const svgUtils = {
 			} catch (err) {
 				continue;
 			}
-			
+
             for(let i=0; i < CSSSheets[j].cssRules.length; i++){
                 rule = CSSSheets[j].cssRules[i];
                 let match = false;
@@ -252,7 +252,7 @@ export const svgUtils = {
 
         return needed;
     },
-    
+
     makeXMLStr: function (xmls, svgDoc) {
         let xmlStr = xmls.serializeToString(svgDoc);
         // serializing adds an xmlns attribute to the style element ('cos it thinks we want xhtml), which knackers it for inkscape, here we chop it out

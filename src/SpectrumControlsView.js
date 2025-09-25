@@ -36,63 +36,53 @@ export const SpectrumControlsView = Backbone.View.extend({
 
         // spectrum controls before
         this.wrapper.append("span")
-            .attr("id", "xispec_extra_spectrumControls_before")
-        ;
+            .attr("id", "xispec_extra_spectrumControls_before");
         // downloadSVG
         this.wrapper.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-download")
             .attr("aria-hidden", "true")
             .attr("id", "xispec_dl_spectrum_SVG")
             .attr("title", "download SVG")
-            .attr("style", "cursor: pointer;")
-        ;
+            .attr("style", "cursor: pointer;");
         // moveLabelsLabel
         let moveLabelsLabel = this.wrapper.append("label")
             .attr("class", "xispec_btn")
-            .text("Move Labels")
-        ;
+            .text("Move Labels");
         // moveLabelCheckbox
         this.moveLabelsChkbox = moveLabelsLabel.append("input")
             .attr("id", "xispec_moveLabels")
-            .attr("type", "checkbox")
-        ;
+            .attr("type", "checkbox");
         // toggleMeasureLabel
         let toggleMeasureLabel = this.wrapper.append("label")
             .attr("class", "xispec_btn")
             .attr("title", "measure mode on/off")
-            .text("Measure")
-        ;
+            .text("Measure");
         // toggleMeasureCheckbox
         this.measureModeChkbox = toggleMeasureLabel.append("input")
             .attr("class", "pointer")
             .attr("id", "xispec_measuringTool")
-            .attr("type", "checkbox")
-        ;
+            .attr("type", "checkbox");
         // setRangeForm
         let setRangeForm = this.wrapper.append("form")
-            .attr("id", "xispec_setrange")
-        ;
+            .attr("id", "xispec_setrange");
         // mzRangeLabel
         setRangeForm.append("label")
             .attr("class", "xispec_btn")
             .attr("title", "m/z range")
             .attr("style", "cursor: default;")
-            .text("m/z:")
-        ;
+            .text("m/z:");
         // lockZoomLabel
         setRangeForm.append("label")
             .attr("class", "xispec_btn")
             .attr("id", "xispec_lock")
             .attr("for", "xispec_lockZoom")
             .attr("title", "Lock current zoom level")
-            .text("🔓")
-        ;
+            .text("🔓");
         // lockZoomCheckbox
         setRangeForm.append("input")
             .attr("id", "xispec_lockZoom")
             .attr("type", "checkbox")
-            .attr("style", "display: none;")
-        ;
+            .attr("style", "display: none;");
         // mzRangeFrom
         setRangeForm.append("input")
             .attr("id", "xispec_xleft")
@@ -107,14 +97,12 @@ export const SpectrumControlsView = Backbone.View.extend({
             .attr("class", "xispec_form-control")
             .attr("type", "text")
             .attr("size", "5")
-            .attr("title", "m/z range to:")
-        ;
+            .attr("title", "m/z range to:");
         // mzRangeSubmit
         setRangeForm.append("input")
             .attr("id", "xispec_mzRangeSubmit")
             .attr("type", "submit")
-            .attr("style", "display:none;")
-        ;
+            .attr("style", "display:none;");
         // mzRangeError
         setRangeForm.append("span").attr("id", "xispec_range-error");
         // resetZoomButton
@@ -122,36 +110,31 @@ export const SpectrumControlsView = Backbone.View.extend({
             .attr("id", "xispec_reset")
             .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a")
             .text("Reset Zoom")
-            .attr("title", "Reset to initial zoom level")
-        ;
+            .attr("title", "Reset to initial zoom level");
         // toggleDataSettingsButton
         this.wrapper.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-cog")
             .attr("aria-hidden", "true")
             .attr("id", "xispec_toggleDataSettings")
-            .attr("title", "show/hide data settings")
-        ;
+            .attr("title", "show/hide data settings");
         // toggleAppearanceSettingsButton
         this.wrapper.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-eye")
             .attr("aria-hidden", "true")
             .attr("id", "xispec_toggleAppearanceSettings")
-            .attr("title", "show/hide appearance settings")
-        ;
+            .attr("title", "show/hide appearance settings");
         // revertAnnotationButton
         this.wrapper.append("i")
             .attr("class", "xispec_btn xispec_btn-topNav fa fa-undo xispec_disabled")
             .attr("aria-hidden", "true")
             .attr("id", "xispec_revertAnnotation")
-            .attr("title", "revert to original annotation")
-        ;
+            .attr("title", "revert to original annotation");
         // addSpectrumBtn
         this.wrapper.append("i")
             .attr("id", "xispec_addSpectrum")
             .attr("title", "Add another spectrum panel")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-plus")
-            .attr("aria-hidden", "true")
-        ;
+            .attr("aria-hidden", "true");
         // butterflyControls
         this.butterflyControls = this.wrapper.append("div")
             .attr("id", "xispec_butterflyControls")
@@ -172,10 +155,12 @@ export const SpectrumControlsView = Backbone.View.extend({
             .style("display", "none");
         this.butterflyMenuContent = butterflyMenu.append("div");
         this.butterflyMenuContentList = this.butterflyMenuContent.append("ul").style("display", "none");
+        // eslint-disable-next-line no-unused-vars
         let butterflySwap = this.butterflyMenuContentList.append("li")
             .text("Swap spectra")
             .attr("title", "swap position of original and re-annotated spectrum")
             .attr("id", "xispec_butterflySwap");
+        // eslint-disable-next-line no-unused-vars
         let butterflyHighlight = this.butterflyMenuContentList.append("li")
             .text("Highlight differences")
             .attr("title", "Highlight fragments that are in one annotation but not the other")
@@ -185,13 +170,11 @@ export const SpectrumControlsView = Backbone.View.extend({
 
         // extra_controls_after
         this.wrapper.append("span")
-            .attr("id", "xispec_extra_spectrumControls_after")
-        ;
+            .attr("id", "xispec_extra_spectrumControls_after");
         // helpLink
         let helpLink = this.wrapper.append("a")
             .attr("href", "http://spectrumviewer.org/help.php")
-            .attr("target", "_blank")
-        ;
+            .attr("target", "_blank");
         // helpButton
         helpLink.append("i")
             .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-question")
@@ -284,7 +267,10 @@ export const SpectrumControlsView = Backbone.View.extend({
 
     setRange: function (e) {
         e.preventDefault();
+        // todo - check the following
+        // eslint-disable-next-line no-undef
         let xl = xispec_xleft.value - 0;
+        // eslint-disable-next-line no-undef
         let xr = xispec_xright.value - 0;
         if (xl > xr) {
             $("#xispec_range-error")

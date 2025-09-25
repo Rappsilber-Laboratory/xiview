@@ -13,6 +13,7 @@ export const PepInputView = Backbone.View.extend({
         this.listenTo(this.model, "changed:data", this.render);
     },
 
+    // eslint-disable-next-line no-unused-vars
     contentChanged: function (e) {
         let pepStrs = this.el.value.split(";");
 
@@ -49,7 +50,7 @@ export const PepInputView = Backbone.View.extend({
 
             // add in mods
             let pep_noCL = pepStrs[i].replace(cl_re, "");
-            let modifications = [];
+            //let modifications = [];
             let mod_re = /([^A-Z#]+)/g;
             let offset = 1;
             while ((match = mod_re.exec(pep_noCL)) != null) {

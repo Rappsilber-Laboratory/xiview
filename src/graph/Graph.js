@@ -23,8 +23,7 @@ export const Graph = function (targetSvg, model, options) {
         .attr("class", "xispec_plotBackground")
         .style("fill", "white")
         .attr("pointer-events", "visible")
-        .style("cursor", "e-resize")
-    ;
+        .style("cursor", "e-resize");
 
     // create rect for yzoom on left and right y axis
     this.yZoomRectLeft = this.g.append("svg:rect")
@@ -125,8 +124,7 @@ export const Graph = function (targetSvg, model, options) {
     this.measureTooltipText["to"] = this.measureTooltip.append("text");
     this.measureTooltipText["match"] = this.measureTooltip.append("text");
     this.measureTooltipText["masses"] = this.measureTooltip.append("g")
-        .attr("class", "xispec_measureMasses")
-    ;
+        .attr("class", "xispec_measureMasses");
 
     // add Chart Title
     if (options.title) {
@@ -254,9 +252,9 @@ Graph.prototype.resize = function (xmin, xmax, ymin, ymax) {
     }
 
     const yTicks = height / 40;
-    var xTicks = 0;
+    let xTicks = 0;
     if (!this.options.butterfly || this.options.invert)
-        var xTicks = width / 100;
+        xTicks = width / 100;
 
     this.yTicks = yTicks;
 
@@ -392,6 +390,7 @@ Graph.prototype.measure = function (on) {
 
         self.disableZoom();
 
+        // eslint-disable-next-line no-inner-declarations
         function measureStart() {
             self.measureShow();
 
@@ -429,22 +428,24 @@ Graph.prototype.measure = function (on) {
                 .attr("y2", self.yscale(self.model.ymaxPrimary));
         }
 
+        // eslint-disable-next-line no-inner-declarations
         function measureMove() {
+            let endPeak;
             const coords = d3.mouse(this);
             const mouseX = self.xscale.invert(coords[0]);
             //find start and endPeak
-            var distance = 4;
+            let distance = 4;
             const highlighttrigger = 15;	//triggerdistance to prioritize highlighted peaks as endpoint
             const peakCount = self.peaks.length;
             for (let p = 0; p < peakCount; p++) {
                 const peak = self.peaks[p];
                 if (peak != self.measureStartPeak) {
                     if (_.intersection(self.model.highlights, peak.fragments).length != 0 && Math.abs(peak.x - mouseX) < highlighttrigger) {
-                        var endPeak = peak;
+                        endPeak = peak;
                         break;
                     }
                     if (Math.abs(peak.x - mouseX) < distance) {
-                        var endPeak = peak;
+                        endPeak = peak;
                         distance = Math.abs(peak.x - mouseX);
                     }
                 }
@@ -470,46 +471,49 @@ Graph.prototype.measure = function (on) {
             const measureStartX = parseFloat(self.measuringToolVLineStart.attr("x1"));
             const measureEndX = parseFloat(self.measuringToolVLineEnd.attr("x1"));
 
+            let y;
             if (self.options.invert) {
                 if (coords[1] > self.yscale(self.model.ymaxPrimary))
-                    var y = self.yscale(self.model.ymaxPrimary);
+                    y = self.yscale(self.model.ymaxPrimary);
                 else if (coords[1] < self.yscale(0))
-                    var y = self.yscale(0);
+                    y = self.yscale(0);
                 else
-                    var y = coords[1];
+                    y = coords[1];
             } else {
                 if (coords[1] < self.yscale(self.model.ymaxPrimary))
-                    var y = self.yscale(self.model.ymaxPrimary);
+                    y = self.yscale(self.model.ymaxPrimary);
                 else if (coords[1] > self.yscale(0))
-                    var y = self.yscale(0);
+                    y = self.yscale(0);
                 else
-                    var y = coords[1];
+                    y = coords[1];
             }
 
             self.measuringToolLine
                 .attr("x2", measureEndX)
                 .attr("y1", y)
-                .attr("y2", y)
-            ;
+                .attr("y2", y);
 
             //draw peak info
-            const deltaX = Math.abs(measureStartX - measureEndX);
-            var distance = Math.abs(self.xscale.invert(measureStartX) - self.xscale.invert(measureEndX));
-            if (measureStartX < measureEndX)
-                var labelX = measureStartX + deltaX / 2;
-            else
-                var labelX = measureEndX + deltaX / 2;
+            // const deltaX = Math.abs(measureStartX - measureEndX);
+            distance = Math.abs(self.xscale.invert(measureStartX) - self.xscale.invert(measureEndX));
+            // let labelX;
+            // if (measureStartX < measureEndX)
+            //     labelX = measureStartX + deltaX / 2;
+            // else
+            //     labelX = measureEndX + deltaX / 2;
 
             self.measureDistance.text(distance.toFixed(self.model.get("showDecimals")) + " Th");
 
+            // eslint-disable-next-line no-unused-vars
             const matrix = this.getScreenCTM()
                 .translate(+this.getAttribute("cx"),
                     +this.getAttribute("cy"));
 
+            let positionX;
             if (measureStartX < measureEndX)
-                var positionX = coords[0] - Math.abs(measureStartX - measureEndX) / 2;
+                positionX = coords[0] - Math.abs(measureStartX - measureEndX) / 2;
             else
-                var positionX = coords[0] + Math.abs(measureStartX - measureEndX) / 2;
+                positionX = coords[0] + Math.abs(measureStartX - measureEndX) / 2;
 
             // Because chrome is deprecating offset on svg elements
             // function getSVGOffset (svg) {
@@ -544,23 +548,25 @@ Graph.prototype.measure = function (on) {
 
             //fromText
             let fromTextColor = self.measureStartPeak.colour;
+            let fromText;
             if (self.measureStartPeak.fragments.length > 0)
-                var fromText = "From: " + self.measureStartPeak.fragments[0].name + " (" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
+                fromText = "From: " + self.measureStartPeak.fragments[0].name + " (" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
             else if (self.measureStartPeak.isotopes.length > 0)
-                var fromText = "From: " + self.measureStartPeak.isotopes[0].name + "+" + self.measureStartPeak.isotopenumbers[0] + "(" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
+                fromText = "From: " + self.measureStartPeak.isotopes[0].name + "+" + self.measureStartPeak.isotopenumbers[0] + "(" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
             else {
-                var fromText = "From: Peak (" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
+                fromText = "From: Peak (" + self.measureStartPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
                 fromTextColor = "black";
             }
             //toText
+            let toText;
             if (endPeak) {
                 var toTextColor = endPeak.colour;
                 if (endPeak.fragments.length > 0)
-                    var toText = "To: " + endPeak.fragments[0].name + "(" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
+                    toText = "To: " + endPeak.fragments[0].name + "(" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
                 else if (endPeak.isotopes.length > 0)
-                    var toText = "To: " + endPeak.isotopes[0].name + "+" + endPeak.isotopenumbers[0] + "(" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
+                    toText = "To: " + endPeak.isotopes[0].name + "+" + endPeak.isotopenumbers[0] + "(" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
                 else {
-                    var toText = "To: Peak (" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
+                    toText = "To: Peak (" + endPeak.x.toFixed(self.model.get("showDecimals")) + " m/z)";
                     toTextColor = "black";
                 }
             } else {
@@ -596,6 +602,7 @@ Graph.prototype.measure = function (on) {
                         matchText = "(" + d.matchAA + ")";
                     return "z=" + z + ": " + d.mass.toFixed(self.model.get("showDecimals")) + " Da " + matchText;
                 })
+                // eslint-disable-next-line no-unused-vars
                 .attr("y", function (d) {
                     return yText += 15;
                 })
@@ -730,9 +737,7 @@ Graph.prototype.updatePeakColors = function () {
         // 	})
         // 	p1FragPeaks.forEach(function(p){ p.line.attr("stroke", model.get('peakColor')); });
         // }
-    }
-    // only highlighted fragments are colored
-    else {
+    } else { // only highlighted fragments are colored
         let self = this;
         let highlightClusterIds = [].concat.apply([], model.highlights.map(function (h) {
             return h.clusterIds;
@@ -767,9 +772,7 @@ Graph.prototype.updatePeakLabels = function () {
                 } else {
                     this.peaks[p].removeLabels();
                 }
-            }
-            // if it is from the highlight selection force show all Labels overriding lossyShown
-            else {
+            } else { // if it is from the highlight selection force show all Labels overriding lossyShown
                 this.peaks[p].removeLabels();
                 this.peaks[p].showLabels(true);
             }

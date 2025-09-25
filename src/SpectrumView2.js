@@ -199,9 +199,8 @@ export const SpectrumView = Backbone.View.extend({
             for (let p = 0; p < peaks.length; p++) {
                 if (peaks[p].labels.length) {
                     peaks[p].labels
-                        .on(".drag", null)
+                        .on(".drag", null);
                     //.style("cursor", "default")
-                    ;
                 }
             }
         }
