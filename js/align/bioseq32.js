@@ -54,7 +54,7 @@ function makeAlphabetMap(str, defaultVal) {
 const bst_nt5 = makeAlphabetMap("ACGT", 4);
 
 
-/* 
+/*
     Ala     A       Alanine
     Arg     R       Arginine
     Asn     N       Asparagine
@@ -277,7 +277,7 @@ function bsa_align(is_local, is_semi_local, target, query, matrix, gapsc, w, tab
     const max_len = Math.max(qlen, t.length);
     w = w == null || w < 0 ? max_len : w;
     const len_diff = Math.abs(t.length - qlen); // MJG - think t.target was a mistake, replace with t.length
-    w = Math.max(w, len_diff); // mjg - dunno why this needs to be done, would just make w massive for small target and big query  
+    w = Math.max(w, len_diff); // mjg - dunno why this needs to be done, would just make w massive for small target and big query
     //console.log ("w", w, qlen, t.length, len_diff);
 
     // set gap score
@@ -613,9 +613,9 @@ function combine() {
         var ret = combine (process.argv.slice(2));
         console.log ("str", ret.str, "\nfmt", ret.fmt);
     }
-    
-    
-    
+
+
+
     if (process.argv[1] == __filename) {
       main();
     }

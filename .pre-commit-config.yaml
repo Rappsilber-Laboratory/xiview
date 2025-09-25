@@ -1,0 +1,40 @@
+# Pre-commit configuration for xiVIEW main application
+repos:
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: 'vendor/'
+      - id: end-of-file-fixer
+        exclude: 'vendor/'
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        exclude: 'vendor/'
+
+  # Basic file validation
+  - repo: local
+    hooks:
+      - id: check-js-syntax
+        name: check JavaScript syntax
+        entry: bash -c 'for file in "$@"; do node --input-type=module -c < "$file" || exit 1; done'
+        language: system
+        files: '^js/.*\.js$'
+        exclude: 'vendor/'
+
+  # Prevent committing vendor directory changes
+  - repo: local
+    hooks:
+      - id: protect-vendor-dir
+        name: protect vendor directory
+        entry: 'bash -c "if git diff --cached --name-only | grep -E ^vendor/; then echo ERROR: Attempting to commit files in vendor/ directory; exit 1; fi"'
+        language: system
+        pass_filenames: false
+
+# Global configuration
+default_stages: [commit]
+fail_fast: false

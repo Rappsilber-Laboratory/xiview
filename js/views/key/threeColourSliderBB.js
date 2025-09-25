@@ -136,7 +136,7 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         // The LinkColourAssignment and CurrentColourModelChanged events arriving almost in tandem at the distogram
         // caused c3 to freak out with hiding / showing series (known c3 bugginess) and things went wrong.
         // Essentially though we don't need to run brushmove here, the rounding caused by running it doesn't change anything
-        //this.brushmove();	
+        //this.brushmove();
 
 
         topGroup.append("text")

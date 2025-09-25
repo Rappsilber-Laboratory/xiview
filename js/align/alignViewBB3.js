@@ -93,7 +93,7 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
     },
 
     hollowElement: function (view) {
-        view.stopListening(); // remove backbone events bound with listenTo etc 
+        view.stopListening(); // remove backbone events bound with listenTo etc
         $(view.el).off(); // remove dom events
         const a = d3.select(view.el);
         a.selectAll("*").remove(); // remove all elements underneath el
@@ -449,7 +449,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         else if (affectedAction === "remove") {
             tbodybind.remove();
             return this;
-        }   // but do remove matched tbodies if action is to remove 
+        }   // but do remove matched tbodies if action is to remove
 
         tbodybind.enter().append("tbody");
         tbodybind.each(function (d) {
@@ -541,7 +541,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
                         .set("header", "Alignment to " + refID)
                         .set("contents", [
                             ["AAs are...", seqTypeLabelMap[d.klass]],
-                            [refID + " AA Range", rds >= rde ? "Would be after " + rds : (rds + 1) + " - " + rde], // + 1 for 1-based index	
+                            [refID + " AA Range", rds >= rde ? "Would be after " + rds : (rds + 1) + " - " + rde], // + 1 for 1-based index
                             ["This AA Range", cds >= cde ? "Would be after " + cds : (cds + 1) + " - " + cde], // + 1 for 1-based index
                             ["Align Sequence", parentDatum.rowLabel],
 

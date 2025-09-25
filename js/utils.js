@@ -721,4 +721,3 @@ export function getLocalStorage(objName) {
 //             return false;
 //         }
 //     }
-

@@ -168,11 +168,11 @@ tbody tr:hover td, tbody tr:hover td a, .spectrumShown{
     padding: 1em;
     position: absolute;
     line-height: normal;
-	
+
 	width: 25em;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	
+
     -webkit-box-shadow: 10px 10px 5px 0 rgba(0,0,0,0.5);
     -moz-box-shadow: 10px 10px 5px 0 rgba(0,0,0,0.5);
     box-shadow: 10px 10px 5px 0 rgba(0,0,0,0.5);
