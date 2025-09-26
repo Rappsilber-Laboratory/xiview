@@ -3,13 +3,13 @@ import d3 from "d3";
 import * as $ from "jquery";
 import * as _ from "underscore";
 import * as NGL from "ngl";
+import {sprintf} from "sprintf-js";
 import {
-    getMinimumDistance,
     intersectObjectArrays,
     joinConsecutiveNumbersIntoRanges,
     makeSubIndexedMap
 } from "../../modelUtils";
-import {toNearest, xilog} from "../../utils";
+import {xilog} from "../../utils";
 import {
     getRangedCAlphaResidueSelectionForChain,
     isViableChain,
@@ -149,6 +149,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
             return residueDict[globalNGLResIndex];
         }
 
+        // eslint-disable-next-line no-unused-vars
         function addAtomPoints(pdbIndexedResidues) {
             pdbIndexedResidues.forEach(function (fat) {
                 const atomIndex = this.getAtomIndex(fat.seqIndex, fat.chainIndex);
@@ -244,6 +245,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         console.log("CHAINS", chainMap, chainValueMap, modelIndexedChainMap, modelIndexedChainValueMap);
         const allowInterModelDistances = this.get("allowInterModelDistances");
 
+        // eslint-disable-next-line no-unused-vars
         const octAccessorObj = {
             id: function (d) {
                 return d;
@@ -258,6 +260,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
                 return d.coords[2];
             },
         };
+        // eslint-disable-next-line no-unused-vars
         const tieBreakerFunc = DistancesObj.prototype.tieBreaker;
 
         crosslinkArr.forEach(function (xlink) {
@@ -279,6 +282,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
                 const toPerModelChainMap = modelIndexedChainValueMap.get(toProtID);
                 const toChainMap = chainValueMap.get(toProtID);
 
+                // eslint-disable-next-line no-unused-vars
                 const octreeIgnoreFunc = function (point1, point2) {
                     return not3DHomomultimeric(xlink, point1.chainIndex, point2.chainIndex);
                 };
@@ -865,6 +869,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
             // new way (faster ngl interpretation for big selections!)
             const modelTree = d3.map();
+            // eslint-disable-next-line no-unused-vars
             const tmp = resnoList.map(function (r) {
                 cp.index = r.chainIndex;
 

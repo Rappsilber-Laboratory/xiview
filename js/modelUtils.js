@@ -573,7 +573,8 @@ export function clearObjectMetaData(objectArr, metaFields) {
 export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsModel) {
     const proteins = clmsModel.get("participants");
     let first = true;
-    let columns = [];
+    // eslint-disable-next-line no-unused-vars
+    let columns = []; // TODO - check this
 
     const protMap = makeMultiKeyProteinMap(clmsModel);
     const newAnnotations = [];

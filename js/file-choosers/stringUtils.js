@@ -70,6 +70,7 @@ export const STRINGUtils = {
                         echo_query: echo ? 1 : 0
                     }
                 })
+                    // eslint-disable-next-line no-unused-vars
                     .done(function (data, textStatus, xhr) {
                         const stringCache = getLocalStorage("StringIds");   // get stored data
                         const identifiersBySpecies = stringCache[taxonID] || {};  // get or make object for species
@@ -87,6 +88,7 @@ export const STRINGUtils = {
                         console.log("IDMAP FROM STRING", idMap, identifiersBySpecies, proteinIDs);
                         resolve(idMap);
                     })
+                    // eslint-disable-next-line no-unused-vars
                     .fail(function (xhr) {
                         reject("Error returned from STRING id resolution service");
                     });
@@ -134,6 +136,7 @@ export const STRINGUtils = {
                             caller_identity: "xiview"
                         },
                     })
+                        // eslint-disable-next-line no-unused-vars
                         .done(function (retrievedNetwork, textStatus, xhr) {
                             stringNetworkScoreCache[taxonID] = idBySpecies;
                             idBySpecies[networkKey] = STRINGUtils.lzw_encode(retrievedNetwork);
@@ -144,6 +147,7 @@ export const STRINGUtils = {
                             }
                             resolve({idMap: idMap, networkTsv: retrievedNetwork});
                         })
+                        // eslint-disable-next-line no-unused-vars
                         .fail(function (xhr) {
                             reject("Error returned from STRING network interaction service.");
                         });

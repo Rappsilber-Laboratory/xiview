@@ -197,6 +197,7 @@ export function drawCanvasToSVGImage(d3canvas, svgImage, callback) { // d3canvas
     svgImage.on("load", function () {
         // tidy up canvas and url
         nullCanvasObj(destinationCanvasObj);
+        // eslint-disable-next-line no-undef
         const DOMURL = URL || webkitURL || this;
         DOMURL.revokeObjectURL(url);
 

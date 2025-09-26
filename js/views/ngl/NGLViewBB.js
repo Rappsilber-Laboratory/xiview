@@ -728,6 +728,7 @@ export const NGLViewBB = BaseFrameView.extend({
                     const canvasObj = makeCanvas(stage.viewer.width * scale, (stage.viewer.height * scale) + gap);
 
                     // draw blob as image to this canvas
+                    // eslint-disable-next-line no-undef
                     const DOMURL = URL || webkitURL || window;
                     const url = DOMURL.createObjectURL(blob);
                     const img = new Image();

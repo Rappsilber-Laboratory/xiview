@@ -156,6 +156,7 @@ export const NGLExportUtils = {
         return header.concat(crosslinkLines);
     },
 
+    // eslint-disable-next-line no-unused-vars
     exportChimeraPseudobonds: function (structure, nglModelWrapper, name, selectedOnly) {
         const chainProxy = structure.getChainProxy();
         const bondArray = [];
@@ -192,6 +193,7 @@ export const NGLExportUtils = {
     },
 
 
+    // eslint-disable-next-line no-unused-vars
     exportXlinkAnalyzer: function (structure, nglModelWrapper, name, selectedOnly) {
         const csvFileName = downloadFilename("xlinkAnalyzer_CSV", "csv");
 

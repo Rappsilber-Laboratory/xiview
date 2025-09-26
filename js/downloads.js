@@ -1,10 +1,8 @@
-import {amino1toMass} from "./modelUtils";
 import {
     filterStateToString,
     fullPosConcat,
     makeLegalFileName,
     pepPosConcat,
-    proteinConcat,
     searchesToString
 } from "./utils";
 import d3 from "d3";
@@ -248,7 +246,6 @@ export function getMatchesCSV() {
 }
 
 function getSSL() {
-    const self = this;
     let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\r\n";
     // "\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");

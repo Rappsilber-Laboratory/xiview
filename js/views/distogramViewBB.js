@@ -505,7 +505,7 @@ export const DistogramBB = BaseFrameView.extend({
             const aggregates = this.aggregate(seriesData, this.precalcedDistributions, removeCatchAllCategory);
             let countArrays = aggregates.countArrays;
 
-
+            // eslint-disable-next-line no-inner-declarations
             function removeSeries(seriesID, onlyIfEmpty) {
                 const seriesIndex = _.findIndex(seriesData, function (series) {
                     return series.name === seriesID;

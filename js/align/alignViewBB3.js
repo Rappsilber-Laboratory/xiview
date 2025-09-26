@@ -445,8 +445,7 @@ export const ProtAlignViewBB = Backbone.View.extend({
         });
         if (!affectedSeqModel) {
             tbodybind.exit().remove();
-        }   // don't remove other tbodies if only 1 affectedSeqModel passed in.
-        else if (affectedAction === "remove") {
+        } else if (affectedAction === "remove") { // don't remove other tbodies if only 1 affectedSeqModel passed in.
             tbodybind.remove();
             return this;
         }   // but do remove matched tbodies if action is to remove

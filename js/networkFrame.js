@@ -802,6 +802,7 @@ export function viewsEssential(compositeModelInst, options) {
 
     // redraw brush when distancesObj is changed, extent is likely to be different
     minigramViews[1]
+        // eslint-disable-next-line no-unused-vars
         .listenTo(compositeModelInst.get("clmsModel"), "change:distancesObj", function (clmsModel, distObj) {
             this.render().redrawBrush();
         }); // if the distances change (likely?) need to re-render the view too

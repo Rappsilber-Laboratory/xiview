@@ -4,6 +4,7 @@ import d3 from "d3";
 export const MinigramViewBB = Backbone.View.extend({
     events: {},
 
+    // eslint-disable-next-line no-unused-vars
     initialize: function (viewOptions) {
         const mainDivSel = d3.select(this.el).attr("class", "minigram");
         this.chartDiv = mainDivSel.append("div")

@@ -55,6 +55,7 @@ export function getChainSequencesFromNGLStage(stage) {
 // Nice web-servicey way of doing ngl chain to clms protein matching (can be N-to-1)
 // Except it depends on having pdb codes, not a standalone file, and all the uniprot ids present too
 // Therefore, we need to return umatched sequences so we can fallback to using our own pairing algorithm if necessary
+// eslint-disable-next-line no-unused-vars
 function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback) {
 
     let count = nglSequences.length;//pdbUris.length;
@@ -103,6 +104,7 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback)
 
             mapArr.forEach(function (mapping) {
                 const dotIndex = mapping.pdb.indexOf(".");
+                // eslint-disable-next-line no-unused-vars
                 const pdbName = (dotIndex >= 0 ? mapping.pdb.slice(0, dotIndex) : mapping.pdb.slice(-1)).toLocaleLowerCase();
                 const chainName = dotIndex >= 0 ? mapping.pdb.slice(dotIndex + 1) : mapping.pdb.slice(-1); // bug fix 27/01/17
                 const matchSeqs = nglSequences.filter(function (seqObj) {
@@ -136,6 +138,7 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback)
         const url = "https://1d-coordinates.rcsb.org/graphql?query=" + encodeURI("{ alignment(from:PDB_INSTANCE, to:UNIPROT, queryId:\""
             + pdbId + "\") { target_alignment { target_id } } }");
         $.get(url, //"https://www.rcsb.org/pdb/rest/das/pdb_uniprot_mapping/alignment?query=" + pdbUri.id,
+            // eslint-disable-next-line no-unused-vars
             function (data, status, xhr) {
                 if (status === "success") {//} && (data.contentType === "text/xml" || data.contentType === "application/xml")) { // data is an xml fragment
 
@@ -160,6 +163,7 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback)
                     dealWithReturnedData(dataArr);
                 }
             }
+            // eslint-disable-next-line no-unused-vars
         ).fail(function (jqxhr, status, error) {
             // requireXiAlign.push(pdbUri);
             count--;
@@ -195,10 +199,10 @@ export function matchSequencesToExistingProteins(protAlignCollection, sequenceOb
         matchMatrix[protID] = uniqScores;
     }
 
+    // eslint-disable-next-line no-unused-vars
     const totalAlignments = filteredSeqInfo.uniqSeqs.length * proteins.length;
     window.vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
 
-    const start = performance.now();
     // webworker way, only do if enough proteins and cores to make it worthwhile
     // if ((!window || !!window.Worker) && proteins.length > 20 && workerpool.cpus > 2) {
     //     let count = proteins.length;

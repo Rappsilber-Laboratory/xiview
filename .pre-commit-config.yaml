@@ -34,7 +34,8 @@ repos:
         name: ESLint CLMS-model files
         entry: npx eslint
         language: system
-        files: '^src/.*\.(js|jsx)$'
+        files: '^js/.*\.(js|jsx)$'
+        exclude: '(bioseq32\.js|svgexp\.js)'
         args: ['--fix']
 
 

@@ -7,8 +7,7 @@ import {jqdialogs} from "../dialogs";
 import {makeURLQueryPairs, mergeContiguousFeatures} from "../modelUtils";
 import d3 from "d3";
 import {xilog} from "../utils";
-import {DefaultProteinColourModel, ManualColourModel} from "./color/protein-color-model";
-import {MetaDataHexValuesColourModel} from "./color/color-model";
+import {ManualColourModel} from "./color/protein-color-model";
 
 export class CompositeModel extends Backbone.Model {
     constructor(attributes, options) {
@@ -264,7 +263,6 @@ export class CompositeModel extends Backbone.Model {
             const uniqueResiduePairsPerPPI = filterModel.get("urpPpi");
             if (uniqueResiduePairsPerPPI > 1) {
                 let value;
-                let key;
                 const ppiMap = new Map();
                 for (let crosslink of crosslinksArr) {
                     if (crosslink.filteredMatches_pp.length) {

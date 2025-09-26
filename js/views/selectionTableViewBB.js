@@ -160,7 +160,6 @@ export const SelectionTableViewBB = Backbone.View.extend({
         );
 
         const integerNumberFormat = d3.format(".0f");
-        const twoZeroPadder = d3.format(".2f");
         const massZeroPadder = d3.format(".6f");
         const scientific = d3.format(".4e");
         const findIndexofNthUpperCaseLetter = function (str, n) { // n is 1-indexed here
@@ -231,7 +230,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return d.linkPos2;
             },
             score: function (d) {
-                return "" + d.score();//twoZeroPadder(d.score());
+                return "" + d.score();
             },
             expMZ: function (d) {
                 return massZeroPadder(d.expMZ());

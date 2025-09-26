@@ -1,4 +1,4 @@
-import {toNearest, xilog} from "../../utils";
+import {xilog} from "../../utils";
 import d3 from "d3";
 import * as $ from "jquery";
 import {filterSequenceByResidueSet} from "../../modelUtils";
@@ -34,6 +34,7 @@ export class DistancesObj {
     }
 
     getShortestLinkAlternatives(nglLinkWrappers, angstromAccuracy) {
+        // eslint-disable-next-line no-unused-vars
         angstromAccuracy = angstromAccuracy || 1;
         const self = this;
 

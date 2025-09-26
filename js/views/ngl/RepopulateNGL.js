@@ -65,6 +65,7 @@ export function repopulateNGL(pdbInfo) {
 
             if (structureComp) {
                 // match by alignment func for searches where we don't know uniprot ids, don't have pdb codes, or when matching by uniprot ids returns no matches
+                // eslint-disable-next-line no-inner-declarations
                 function matchByXiAlignment(whichNGLSequences, pdbUniProtMap) {
                     const protAlignCollection = compositeModel.get("alignColl");
                     window.vent.listenToOnce(window.vent, "sequenceMatchingDone", function (matchMatrix) {
@@ -104,6 +105,7 @@ export function repopulateNGL(pdbInfo) {
                 // }
 
                 // bit to continue onto after ngl protein chain to clms protein matching has been done
+                // eslint-disable-next-line no-inner-declarations
                 function sequenceMapsAvailable(sequenceMap) {
 
                     xilog("seqmap", sequenceMap);

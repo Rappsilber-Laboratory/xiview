@@ -261,6 +261,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
         // rerender crosslinks if selection/highlight changed, filteringDone or colourmodel changed
         this.listenTo(this.model, "change:selection filteringDone", this.renderCrossLinks);
+        // eslint-disable-next-line no-unused-vars
         this.listenTo(this.model, "currentColourModelChanged", function (colourModel, domain) {
             if (colourModel.get("id") !== this.colourScaleModel.get("id")) {    // todo - test if model is distances, if so rendering is already guaranteed
                 this.renderCrossLinks();
@@ -709,6 +710,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 const rangeColours = this.colourScaleModel.get("colScale").range();
                 const cols = rangeColours; //.slice (1,3);
                 // have slightly different saturation/luminance for each colour so shows up in black & white
+                // eslint-disable-next-line no-unused-vars
                 const colourArray = cols.map(function (col, i) {
                     col = d3.hsl(col);
                     col.s = 0.4; // - (0.1 * i);
@@ -823,7 +825,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 const seqLengths = this.getSeqLengthData();
                 const seqLengthB = seqLengths.lengthB - 1;
                 const xStep = 1; //minDim / seqLengthA;
-                const yStep = 1; //minDim / seqLengthB;
+                //const yStep = 1; //minDim / seqLengthB;
                 let linkWidth = this.options.linkWidth / 2;
                 const overallScale = this.getOverallScale();
                 if (overallScale < 1 && overallScale > 0) {
@@ -877,6 +879,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 // if redoing highlights only, find previously highlighted links not part of current set and restore them
                 // to a non-highlighted state
                 if (highlightOnly) {
+                    // eslint-disable-next-line no-unused-vars
                     const oldHighLinkSel = this.zoomGroup.select(".crosslinkPlot").selectAll(".high")
                         .filter(function (d) {
                             return !highlightedCrossLinkIDs.has(d.id);

@@ -131,6 +131,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 }
             }
 
+            // eslint-disable-next-line no-inner-declarations
             function addRow (key) {
                 let row = tBody.insertRow();
                 let cell1 = row.insertCell();
@@ -149,6 +150,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 }
             }
 
+            // eslint-disable-next-line no-inner-declarations
             function addMetaRows (key) {
                 const metaObj = protein[key];
                 let row = tBody.insertRow();
