@@ -19,27 +19,13 @@ export class SpectrumMatch {
         this.passThreshold = !!identification.p;
 
         // Initialize ion types
-        if (identification.ions) {
-            var ionTypes = identification.ions.split(";");
-            var ionTypeCount = ionTypes.length;
-            var ions = [];
-            for (var it = 0; it < ionTypeCount; it++) {
-                var ionType = ionTypes[it];
-                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-            }
-            this.ions = ions;
-        } else {
-            this.ions = [{type:"bIon"}, {type:"yIon"}];
-        }
+        // todo - get from SIP, also CV term issues to be addressed (needed CV terms were deprecated)
+        this.ions = [{type:"bIon"}, {type:"yIon"}];
 
-        // Initialize spectrum reference
-        // this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
-
-        var scoreSets = Object.keys(this._scores);
-        var scoreSetCount = scoreSets.length;
-        for (var s = 0; s < scoreSetCount; s++) {
-            var scoreSet = scoreSets[s];
-            this.containingModel.get("scoreSets").add(scoreSet);
+        const scoreSets = Object.keys(this._scores);
+        const scoreSetCount = scoreSets.length;
+        for (let s = 0; s < scoreSetCount; s++) {
+            this.containingModel.get("scoreSets").add(scoreSets[s]);
         }
 
         this.matchedPeptides = [];
@@ -329,8 +315,7 @@ export class SpectrumMatch {
     }
 
     group() {
-        var group = this.containingModel.get("searches").get(this.searchId).group;
-        return group;
+        return this.containingModel.get("searches").get(this.searchId).group;
     }
 
     expMZ() {
@@ -399,12 +384,8 @@ export class SpectrumMatch {
             // const s =
             return this._scores["Mascot:expectation value"];
         } else {
-            //if (scoreSets.size == 1) {
             var scoreSet = scoreSets.keys().next().value;
-            var s = this._scores[scoreSet];
-            //console.log("!", s);
-            return s;
-            //}
+            return this._scores[scoreSet];
         }
     }
 
