@@ -31,12 +31,10 @@ export const prideLoadSpectrum = function (match) {
 
     collectMods(match.matchedPeptides[0]);
     formatted_data.sequence1 = match.matchedPeptides[0].seq_mods;
-    console.log(formatted_data.sequence1);
     formatted_data.linkPos1 = match.linkPos1 - 1;
     if (match.matchedPeptides[1]) {
         collectMods(match.matchedPeptides[1]);
         formatted_data.sequence2 = match.matchedPeptides[1].seq_mods;
-        console.log(formatted_data.sequence2);
         formatted_data.linkPos2 = match.linkPos2 - 1;
     }
     formatted_data.crossLinkerModMass = match.crosslinkerModMass();
@@ -62,7 +60,6 @@ export const prideLoadSpectrum = function (match) {
     formatted_data.stubs1 = match.matchedPeptides[0].stubs;
     formatted_data.stubs2 = match.matchedPeptides[1].stubs;
 
-    console.log("prideLoadSpectrum match:" + match.id);
 
     d3.json(window.compositeModelInst.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
                     + "&sd_ref=" +  encodeURIComponent(match._identification.sd)
@@ -72,8 +69,6 @@ export const prideLoadSpectrum = function (match) {
         } else {
             d3.select("#range-error").text("");
 
-
-            console.log(json);
             const peakArray = [];
             const peakCount = json.mz.length;
             for (let i = 0; i < peakCount; i++) {
@@ -81,7 +76,6 @@ export const prideLoadSpectrum = function (match) {
             }
 
             formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
-            console.log(formatted_data);
             window.compositeModelInst.get("xispec_wrapper").setData(formatted_data);
         }
     });

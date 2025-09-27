@@ -497,7 +497,6 @@ export class SearchResultsModel extends Backbone.Model {
             }
         }
 
-        console.log("reactiveGroup:", reactiveGroup, "sp:", linkedResSets, "clf:", crosslinkableResiduesAsFeatures);
         return crosslinkableResiduesAsFeatures;
     }
 

@@ -1,6 +1,5 @@
 export class Enzyme {
     constructor(json) {
-        console.log("Enzyme constructor called with", json);
         this._json = json;
     }
 

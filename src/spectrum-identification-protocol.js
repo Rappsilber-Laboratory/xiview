@@ -1,6 +1,5 @@
 export class SpectrumIdentificationProtocol {
     constructor(json, searchResultModel) {
-        console.log("SpectrumIdentificationProtocol constructor called with", json);
         this._json = json;
         this._searchResultModel = searchResultModel;
     }
@@ -56,5 +55,4 @@ export class SpectrumIdentificationProtocol {
     get threshold() {
         return this._json.threshold;
     }
-
 }

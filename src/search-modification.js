@@ -1,6 +1,5 @@
 export class SearchModification {
     constructor(json) {
-        console.log("SearchModification constructor called with", json);
         this._json = json;
     }
 
