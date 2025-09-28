@@ -30,8 +30,8 @@ repos:
   # ESLint for CLMS-model files only
   - repo: local
     hooks:
-      - id: eslint-clms-model
-        name: ESLint CLMS-model files
+      - id: eslint-xiview
+        name: ESLint xiview files
         entry: npx eslint
         language: system
         files: '^js/.*\.(js|jsx)$'
