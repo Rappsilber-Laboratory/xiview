@@ -125,7 +125,7 @@ export function postDataLoaded(compositeModelInst) {
     const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
     compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
-    viewsThatNeedAsyncData(compositeModelInst);
+    //viewsThatNeedAsyncData(compositeModelInst);
 
 
     // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout

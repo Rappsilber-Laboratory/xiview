@@ -89,10 +89,10 @@ export function testSetup2() {
         clmsModel.processPeptides(options.peptides);
         clmsModel.processProteins(options.proteins);
 
-        models({}, clmsModel);
+        const compositeModelInst = models({}, clmsModel);
         // Start QUnit if using autostart: false
         // start();
-        postDataLoaded();
+        postDataLoaded(compositeModelInst);
 
     });
 }
