@@ -522,7 +522,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
     // 		this.userModifications.splice(userModIndex, 1);
     // 	}
     // 	else
-    // 		console.log("Error modification "+modId+"could not be found!");
     // 	if (saveToCookie)
     // 		this.saveUserModificationsToCookie();
     // },

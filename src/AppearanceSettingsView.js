@@ -1,5 +1,4 @@
 import "../css/settings.css";
-// import "../../xi3/css/xispecAdjust.css";
 import * as _ from "underscore";
 import * as $ from "jquery";
 import * as jscolor from "@eastdesire/jscolor";

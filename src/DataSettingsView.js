@@ -1,5 +1,4 @@
 import "../css/settings.css";
-// import "../../xi3/css/xispecAdjust.css";
 import "datatables.net-dt/css/jquery.dataTables.css";
 
 import * as _ from "underscore";

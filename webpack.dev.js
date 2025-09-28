@@ -1,18 +1,13 @@
 require("webpack");
 const path = require("path");
-const merge = require("webpack-merge");
+const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
     mode: "development",
-    devtool: "source-map",
+    devtool: "eval-source-map",
     module: {
         rules: [
-            // {
-            //     test: /\.(js)$/,
-            //     use: 'babel-loader',
-            //     exclude: /node_modules/
-            // }
         ]
     },
     devServer: {

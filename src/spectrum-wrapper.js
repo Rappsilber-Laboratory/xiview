@@ -281,7 +281,6 @@ export const SpectrumWrapper = Backbone.View.extend({
     //         window.xiSPECUI.lastRequestedID = json_request.annotation.requestID;
     //
     //     this.spectrumModel.trigger("requestAnnotation:pending");
-    //     console.log("annotation request:", json_request);
     //     let self = this;
     //     $.ajax({
     //         type: "POST",
@@ -295,7 +294,6 @@ export const SpectrumWrapper = Backbone.View.extend({
     //             if (data && data.annotation && data.annotation.requestID &&
     //                 data.annotation.requestID === window.xiSPECUI.lastRequestedID) {
     //                 //ToDo: Error handling -> https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/330
-    //                 console.log("annotation response:", data);
     //
     //                 self.spectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
     //                 self.settingsSpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
