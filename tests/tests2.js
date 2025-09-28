@@ -89,7 +89,7 @@ export function testSetup2() {
         clmsModel.processPeptides(options.peptides);
         clmsModel.processProteins(options.proteins);
 
-        models("PRIDE", {}, clmsModel);
+        models({}, clmsModel);
         // Start QUnit if using autostart: false
         // start();
         postDataLoaded();
