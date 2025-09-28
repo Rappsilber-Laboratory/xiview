@@ -4,20 +4,29 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>QUnit xiVIEW Tests</title>
-    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.20.0.css">
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.21.1.css">
 </head>
 <body>
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 
-<!--<script src="https://code.jquery.com/qunit/qunit-2.20.0.js"></script>-->
+<script src="https://code.jquery.com/qunit/qunit-2.21.1.js"></script>
 
 <script type="text/javascript" src="../../dist/xiview.js"></script>
 
 <script>
     QUnit.config.autostart = false;
     QUnit.config.notrycatch = true;
-    xiview.test();
+
+    // Wait for the xiview module to load
+    window.addEventListener('load', function() {
+        if (typeof xiview !== 'undefined' && xiview.test) {
+            xiview.test();
+        } else {
+            console.error('xiview.test is not available');
+            console.log('Available xiview exports:', Object.keys(xiview || {}));
+        }
+    });
 </script>
 
 </body>

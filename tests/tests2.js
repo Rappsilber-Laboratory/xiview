@@ -84,7 +84,7 @@ export function testSetup2() {
         // Initialization calls remain the same
         blosumLoading({ url: "../R/blosums.json" });
         const clmsModel = new SearchResultsModel();
-        clmsModel.processMetadata(options.metadata);
+       // clmsModel.processMetadata(options.metadata);
         clmsModel.processMatches(options.matches);
         clmsModel.processPeptides(options.peptides);
         clmsModel.processProteins(options.proteins);
