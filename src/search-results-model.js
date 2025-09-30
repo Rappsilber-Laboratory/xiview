@@ -30,6 +30,7 @@ export class SearchResultsModel extends Backbone.Model {
         };
     }
 
+    //TODO - reinstate this, needed to know whats aggregated, everywhere you see "searches" in codebase it's some kind of error
     /*processMzIdentMLFiles(json) {
         const mzidentmlFiles = new Map();
         for (let mzid of json){
@@ -259,36 +260,38 @@ export class SearchResultsModel extends Backbone.Model {
 
         const participants = this.get("participants");
         const peptides = new Map();
-        // if (this.get("serverFlavour") === "PRIDE") {
-        if (!this.isAggregatedData()) {
-            if (this.proteins) {
-                for (let participant of this.proteins) {
-                    this.initProtein(participant, json);
-                    participants.set(participant.id, participant);
-                }
-            }
-            //peptides
-            if (this.peptides) {
-                for (let peptide of this.peptides) {
-                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                    peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                    peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-                    for (let p = 0; p < peptide.prt.length; p++) {
-                        if (peptide.dec[p]) {
-                            const protein = participants.get(peptide.prt[p]);
-                            if (!protein) {
-                                console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
-                            }
-                            protein.is_decoy = true;
-                            this.set("decoysPresent", true);
-                        }
-                    }
-                }
-            }
-        } else {
+        //todo - sort this out
+        // if (!this.isAggregatedData()) {
+        //     alert("NOT AGG!");
+        //     if (this.proteins) {
+        //         for (let participant of this.proteins) {
+        //             this.initProtein(participant, json);
+        //             participants.set(participant.id, participant);
+        //         }
+        //     }
+        //     //peptides
+        //     if (this.peptides) {
+        //         for (let peptide of this.peptides) {
+        //             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+        //             peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+        //             peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
+        //             for (let p = 0; p < peptide.prt.length; p++) {
+        //                 if (peptide.dec[p]) {
+        //                     const protein = participants.get(peptide.prt[p]);
+        //                     if (!protein) {
+        //                         console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+        //                     }
+        //                     protein.is_decoy = true;
+        //                     this.set("decoysPresent", true);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // } else {
+        //     alert("AGG!");
             const tempParticipants = new Map();
             if (this.proteins) {
-                for (let participant of json.proteins) {
+                for (let participant of this.proteins) {
                     this.initProtein(participant, json);
                     tempParticipants.set(participant.id, participant);
                 }
@@ -297,7 +300,6 @@ export class SearchResultsModel extends Backbone.Model {
             if (this.peptides) {
                 for (let peptide of this.peptides) {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                     peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
 
                     for (let pe = 0; pe < peptide.prt.length; pe++) {
@@ -327,7 +329,7 @@ export class SearchResultsModel extends Backbone.Model {
                 participants.set(participant.id, participant);
             }
 
-        }
+        // }
 
         this.initDecoyLookup();
 
@@ -339,9 +341,17 @@ export class SearchResultsModel extends Backbone.Model {
         // moved from modelUtils 05/08/19
         // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
         const searchMap = this.getProteinSearchMap(this.peptides, this.matches);
-        this.get("searches").forEach(function (value, key) {
-            value.participantIDSet = searchMap[key];
-        });
+        // this.get("searches").forEach(function (value, key) {
+        //     value.participantIDSet = searchMap[key];
+        // });
+        //todo - probs here
+        const searches = new Map();
+        for (const [key, value] of Object.entries(searchMap)) {
+            searches.set(key, {participantIDSet: value, id: key});
+        }
+        this.set("searches", searches);
+
+
 
         if (this.matches) {
             const matches = this.get("matches");
@@ -369,7 +379,7 @@ export class SearchResultsModel extends Backbone.Model {
         const pepMap = d3.map(peptideArray, function (peptide) {
             return peptide.id;
         });
-        const searchMap = {};
+        const searchMap = {}; // todo- use map
         rawMatchArray = rawMatchArray || [];
         const self = this;
         rawMatchArray.forEach(function (rawMatch) {
@@ -377,16 +387,10 @@ export class SearchResultsModel extends Backbone.Model {
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchId;
-                    // check server flavour -- problems ere to do with xi2
-                    if (self.get("serverFlavour") === "XI2") {
-                        searchId = rawMatch.datasetId;
-                    } else {
-                        searchId = rawMatch.si;
-                    }
+                    let searchId= rawMatch.si;
                     let searchToProts = searchMap[searchId];
                     if (!searchToProts) {
-                        const newSet = d3.set();
+                        const newSet = new Set();
                         searchMap[searchId] = newSet;
                         searchToProts = newSet;
                     }
