@@ -38,6 +38,17 @@ repos:
         exclude: '(bioseq32\.js|svgexp\.js)'
         args: ['--fix']
 
+  # Run tests from parent directory
+  - repo: local
+    hooks:
+      - id: run-xiview-tests
+        name: run xiVIEW tests
+        entry: bash -c 'cd .. && npm run test-headless'
+        language: system
+        pass_filenames: false
+        files: '\.(js|json)$'
+        exclude: 'vendor/'
+
 
 # Global configuration
 default_stages: [commit]
