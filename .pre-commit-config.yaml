@@ -43,6 +43,16 @@ repos:
         files: '^src/.*\.js$'
         pass_filenames: false
 
+  # Run tests from parent directory
+  - repo: local
+    hooks:
+      - id: run-xiview-tests
+        name: run xiVIEW tests
+        entry: bash -c 'cd .. && npm run test-headless'
+        language: system
+        pass_filenames: false
+        files: '^src/.*\.(js|json)$'
+
 
 # Global configuration
 default_stages: [commit]
