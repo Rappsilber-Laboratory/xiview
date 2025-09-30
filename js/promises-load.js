@@ -9,7 +9,7 @@ import * as d3 from "d3";
 import {
     models,
     views,
-    blosumLoading,
+    // blosumLoading,
     modelsEssential,
     viewsEssential,
     postDataLoaded
@@ -19,6 +19,7 @@ import Split from "split.js";
 import {testCallback, testSetupNew} from "../tests/tests";
 import {testSetup2} from "../tests/tests2";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
+import {BlosumCollection} from "./model/models";
 
 export const networkPageSpinner = new Spinner({
     length: 38, // The length of each line
@@ -55,14 +56,42 @@ export function main(apiBase, annotatorURL) {
 
     const clmsModel = new SearchResultsModel();
     const tasks = getTasks(apiBase, clmsModel);
-    const blosumUrl = "R/blosums.json";
-    // const blosumLoading = (data) => {
-    //     window.compositeModelInst.set("blosum", data);
-    // };
-    tasks.push(fetchDataAndProcess(blosumUrl, blosumLoading));
+    // Create a promise that resolves when blosum data is loaded
+    const blosumPromise = new Promise((resolve, reject) => {
+        // Collection of blosum matrices that will be fetched from a json file
+        window.blosumCollInst = new BlosumCollection(); // options if we want to override defaults
 
-    // Process all requests in parallel
-    Promise.all(tasks)
+        // when the blosum Collection is fetched (an async process), we select one of its models as being selected
+        window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
+            console.log("ASYNC. blosum models loaded");
+            resolve(); // Resolve the promise when blosum data is ready
+        });
+
+        // Start the asynchronous blosum fetching after the above events have been set up
+        window.blosumCollInst.fetch();
+
+
+
+        //
+        // // Initialize blosum loading
+        // blosumLoading({});
+        //
+        // // Listen for the sync event that indicates blosum data is loaded
+        // window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
+        //     console.log("ASYNC. blosum models loaded");
+        // });
+        //
+        // // Handle potential errors
+        // window.blosumCollInst.listenToOnce(window.blosumCollInst, "error", function (model, response) {
+        //     reject(new Error(`Failed to load blosum data: ${response.status} ${response.statusText}`));
+        // });
+    });
+
+    // Add the blosum promise to the tasks array
+    const allTasks = [...tasks, blosumPromise];
+
+    // Process all requests in parallel (including blosum loading)
+    Promise.all(allTasks)
         // eslint-disable-next-line no-unused-vars
         .then((results) => {
             console.log("API data and blosum model are ready.");

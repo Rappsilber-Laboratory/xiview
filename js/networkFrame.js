@@ -126,6 +126,7 @@ export function postDataLoaded(compositeModelInst) {
     compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
     //viewsThatNeedAsyncData(compositeModelInst);
+    window.vent.trigger("buildAsyncViews");
 
 
     // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
@@ -723,6 +724,13 @@ export function views(compositeModelInst) {
         } else if (iId !== "cancel") {
             compositeModelInst.setInteractorColor(iId, checkedColor.value);
         }
+    });
+
+    // Set up a one-time event listener that is then called from allDataLoaded
+    // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
+    // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
+    compositeModelInst.listenToOnce(window.vent, "buildAsyncViews", function () {
+        viewsThatNeedAsyncData(compositeModelInst);
     });
 }
 
