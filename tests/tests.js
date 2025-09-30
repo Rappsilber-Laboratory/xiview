@@ -1631,122 +1631,185 @@ export function testCallback(model) {
 */
 }
 
-
-export function testSetupNew(cbfunc) {
-    d3.json("10003.json", function (options) {
-        window.vent.listenToOnce(window.vent, "initialSetupDone", function () {
-
-            setupColourModels();
-
-            window.compositeModelInst.get("clmsModel").listenToOnce(window.compositeModelInst.get("clmsModel"), "change:distancesObj", function () {
-                console.log("distances obj changed");
-                cbfunc(window.compositeModelInst);
-            });
-
-            const stage = new NGL.Stage("ngl", {tooltip: false});
-
-            //CLMSUI.NGLUtils.repopulateNGL ({pdbCode: "1AO6", stage: stage, compositeModel: CLMSUI.compositeModelInst});
-
-            const pdbCode = "1AO6";
-
-            const pdbSettings = pdbCode.match(commonRegexes.multiPdbSplitter).map(function (code) {
-                return {
-                    id: code,
-                    pdbCode: code,
-                    uri: "rcsb://" + code,
-                    local: false,
-                    params: {calphaOnly: this.cAlphaOnly}
-                };
-            }, this);
-
-            repopulateNGL({
-                pdbSettings: pdbSettings,
-                stage: stage,
-                compositeModel: window.compositeModelInst
-            });
-
-            console.log("here");
+// Helper function to load JSON data using fetch (Promise-based replacement for d3.json)
+function loadJsonData(url) {
+    return fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
         });
+}
 
-        // Create a promise that resolves when blosum data is loaded
-        const blosumPromise = new Promise((resolve, reject) => {
-            // Initialize blosum loading
-            blosumLoading({ url: "../R/blosums.json" });
+// Helper function to wrap event listeners in Promises
+function waitForEvent(target, eventName) {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            reject(new Error(`Timeout waiting for event: ${eventName}`));
+        }, 30000); // 30 second timeout
 
-            // Listen for the sync event that indicates blosum data is loaded
-            window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
-                console.log("ASYNC. blosum models loaded in test");
-                resolve();
-            });
-
-            // Handle potential errors
-            window.blosumCollInst.listenToOnce(window.blosumCollInst, "error", function (model, response) {
-                reject(new Error(`Failed to load blosum data in test: ${response.status} ${response.statusText}`));
-            });
+        target.listenToOnce(target, eventName, function(...args) {
+            clearTimeout(timeoutId);
+            resolve(args);
         });
-
-        // Wait for blosum loading before continuing
-        blosumPromise.then(() => {
-            const clmsModel = new SearchResultsModel();
-            // clmsModel.processMetadata(options.metadata);
-            clmsModel.processSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols)
-            clmsModel.processSpectraData(options.spectraData);
-            clmsModel.processMatches(options.matches);
-            clmsModel.processPeptides(options.peptides);
-            clmsModel.processProteins(options.proteins);
-
-            const compositeModelInst = models({}, clmsModel);
-            // Start QUnit if using autostart: false
-            // start();
-            postDataLoaded(compositeModelInst);
-
-            window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
-                {
-                    "wrong mass SDA ": {
-                        "searches": new Set(["24070"]),
-                        "linkables": [
-                            new Set([
-                                "R",
-                                "H",
-                                "K",
-                                "D",
-                                "E",
-                                "S",
-                                "T",
-                                "N",
-                                "Q",
-                                "C",
-                                "U",
-                                "G",
-                                "P",
-                                "A",
-                                "V",
-                                "I",
-                                "L",
-                                "M",
-                                "F",
-                                "Y",
-                                "W"
-                            ]),
-                            new Set([
-                                "K",
-                                "S",
-                                "Y",
-                                "T",
-                                "NTERM"
-                            ])
-                        ],
-                        "name": "wrong mass SDA ",
-                        "id": 13,
-                        "heterobi": true
-                    }
-                });
-        }).catch((error) => {
-            console.error("Blosum loading failed in test:", error);
-        });
-
-        //pretendLoad();	// add 2 to allDataLoaded bar (we aren't loading views or GO terms here)
     });
+}
+
+// Helper function to load blosum data as a Promise
+function loadBlosumData(url) {
+    return new Promise((resolve, reject) => {
+        // Initialize blosum loading
+        blosumLoading({ url: url });
+
+        // Listen for the sync event that indicates blosum data is loaded
+        window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
+            console.log("ASYNC. blosum models loaded in test");
+            resolve();
+        });
+
+        // Handle potential errors
+        window.blosumCollInst.listenToOnce(window.blosumCollInst, "error", function (model, response) {
+            reject(new Error(`Failed to load blosum data in test: ${response.status} ${response.statusText}`));
+        });
+    });
+}
+
+// Helper function to setup NGL stage
+function setupNGLStage() {
+    const stage = new NGL.Stage("ngl", {tooltip: false});
+    const pdbCode = "1AO6";
+
+    const pdbSettings = pdbCode.match(commonRegexes.multiPdbSplitter).map(function (code) {
+        return {
+            id: code,
+            pdbCode: code,
+            uri: "rcsb://" + code,
+            local: false,
+            params: {calphaOnly: false}  // Set to false for testing
+        };
+    });
+
+    repopulateNGL({
+        pdbSettings: pdbSettings,
+        stage: stage,
+        compositeModel: window.compositeModelInst
+    });
+
+    return stage;
+}
+
+// Helper function to initialize models with loaded data
+function initializeModels(options) {
+    console.log("Creating SearchResultsModel...");
+    const clmsModel = new SearchResultsModel();
+
+    console.log("Processing model data...");
+    // clmsModel.processMetadata(options.metadata);
+    clmsModel.processSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols)
+    clmsModel.processSpectraData(options.spectraData);
+    clmsModel.processMatches(options.matches);
+    clmsModel.processPeptides(options.peptides);
+    clmsModel.processProteins(options.proteins);
+
+    console.log("Creating composite model...");
+    const compositeModelInst = models({}, clmsModel);
+
+    console.log("Calling postDataLoaded...");
+    postDataLoaded(compositeModelInst);
+
+    window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
+        {
+            "wrong mass SDA ": {
+                "searches": new Set(["24070"]),
+                "linkables": [
+                    new Set([
+                        "R",
+                        "H",
+                        "K",
+                        "D",
+                        "E",
+                        "S",
+                        "T",
+                        "N",
+                        "Q",
+                        "C",
+                        "U",
+                        "G",
+                        "P",
+                        "A",
+                        "V",
+                        "I",
+                        "L",
+                        "M",
+                        "F",
+                        "Y",
+                        "W"
+                    ]),
+                    new Set([
+                        "K",
+                        "S",
+                        "Y",
+                        "T",
+                        "NTERM"
+                    ])
+                ],
+                "name": "wrong mass SDA ",
+                "id": 13,
+                "heterobi": true
+            }
+        });
+
+    return compositeModelInst;
+}
+
+export async function testSetupNew(cbfunc) {
+    try {
+        console.log("Starting testSetupNew...");
+
+        // Phase 1: Load all data concurrently using Promises
+        console.log("Loading JSON and blosum data...");
+        const [jsonData] = await Promise.all([
+            loadJsonData("10003.json"),
+            loadBlosumData("../R/blosums.json")
+        ]);
+
+        console.log("Data loaded successfully, JSON data:", jsonData);
+        console.log("window.vent:", window.vent);
+
+        // Set up event listener BEFORE initializing models (since initializeModels triggers the event)
+        console.log("Setting up initialSetupDone event listener...");
+        const initialSetupPromise = waitForEvent(window.vent, "initialSetupDone");
+
+        // Initialize models (this will trigger the initialSetupDone event)
+        console.log("Initializing models...");
+        initializeModels(jsonData);
+
+        // Wait for initial setup completion
+        console.log("Waiting for initialSetupDone event...");
+        await initialSetupPromise;
+
+        // Now setup components that depend on the models being fully ready
+        console.log("Setting up color models and NGL stage...");
+        setupColourModels();
+        setupNGLStage();
+
+        // Wait for distances object to be ready
+        console.log("Waiting for distances object to be ready...");
+        await waitForEvent(window.compositeModelInst.get("clmsModel"), "change:distancesObj");
+
+        console.log("distances obj changed");
+        console.log("About to call test callback with:", window.compositeModelInst);
+
+        // Execute test callback
+        cbfunc(window.compositeModelInst);
+
+        console.log("Test callback completed");
+
+    } catch (error) {
+        console.error("Test setup failed:", error);
+        throw error;
+    }
 }
 
 /*
