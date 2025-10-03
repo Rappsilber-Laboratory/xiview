@@ -12,21 +12,17 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 
-<!--<script src="https://code.jquery.com/qunit/qunit-2.20.0.js"></script>-->
-
-
-
 <script>
-    // QUnit.config.autostart = false;
-    // QUnit.config.notrycatch = true;
 
     // Wait for the xiview module to load
     window.addEventListener('load', function() {
-        if (typeof xiview !== 'undefined' && xiview.test2) {
-            xiview.test2();
+        if (window.XIVIEW_TEST && window.XIVIEW_TEST.test2) {
+            QUnit.config.autostart = false;
+            QUnit.config.notrycatch = true;
+            window.XIVIEW_TEST.test2();
         } else {
-            console.error('xiview.test2 is not available');
-            console.log('Available xiview exports:', Object.keys(xiview || {}));
+            console.error('XIVIEW_TEST.test2 is not available');
+            console.log('window.XIVIEW_TEST:', window.XIVIEW_TEST);
         }
     });
 </script>

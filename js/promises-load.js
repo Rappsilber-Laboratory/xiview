@@ -16,8 +16,6 @@ import {
 } from "./networkFrame";
 import {displayError} from "./utils";
 import Split from "split.js";
-import {testCallback, testSetupNew} from "../tests/tests";
-import {testSetup2} from "../tests/tests2";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 import {BlosumCollection} from "./model/models";
 
@@ -245,14 +243,16 @@ function fetchUniprotKB(accessions) {
         });
 }
 
-export function test() {
-    testSetupNew(testCallback);
-    // delete window.compositeModelInst;
-    // testSetup2();
-}
-
-export function test2() {
-    // testSetupNew(testCallback2);
-    // delete window.compositeModelInst;
-    testSetup2();
+// Conditionally expose test functions only in development builds
+if (process.env.NODE_ENV !== "production") {
+    window.XIVIEW_TEST = {
+        test: async () => {
+            const { testSetupNew } = await import("../tests/tests");
+            return testSetupNew();
+        },
+        test2: async () => {
+            const { testSetup2 } = await import("../tests/tests2");
+            return testSetup2();
+        }
+    };
 }

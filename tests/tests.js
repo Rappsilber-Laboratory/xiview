@@ -42,7 +42,7 @@ import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 
-export function testCallback(model) {
+function testCallback(model) {
     console.log("model", model);
     const clmsModel = model.get("clmsModel");
     // utils.debug = true;
@@ -1763,7 +1763,7 @@ function initializeModels(options) {
     return compositeModelInst;
 }
 
-export async function testSetupNew(cbfunc) {
+export async function testSetupNew() {
     try {
         console.log("Starting testSetupNew...");
 
@@ -1802,7 +1802,7 @@ export async function testSetupNew(cbfunc) {
         console.log("About to call test callback with:", window.compositeModelInst);
 
         // Execute test callback
-        cbfunc(window.compositeModelInst);
+        testCallback(window.compositeModelInst);
 
         console.log("Test callback completed");
 
@@ -1811,14 +1811,3 @@ export async function testSetupNew(cbfunc) {
         throw error;
     }
 }
-
-/*
-
-function testSetup (cbfunc) {
-    d3.json ("10003.json", function (options) {
-        CLMSUI.init.modelsEssential (options);
-
-        cbfunc (CLMSUI.compositeModelInst);
-    });
-}
-*/
