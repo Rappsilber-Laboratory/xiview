@@ -289,45 +289,45 @@ export class SearchResultsModel extends Backbone.Model {
         //     }
         // } else {
         //     alert("AGG!");
-            const tempParticipants = new Map();
-            if (this.proteins) {
-                for (let participant of this.proteins) {
-                    this.initProtein(participant, json);
-                    tempParticipants.set(participant.id, participant);
-                }
+        const tempParticipants = new Map();
+        if (this.proteins) {
+            for (let participant of this.proteins) {
+                this.initProtein(participant, json);
+                tempParticipants.set(participant.id, participant);
             }
-            //peptides
-            if (this.peptides) {
-                for (let peptide of this.peptides) {
-                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                    peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
+        }
+        //peptides
+        if (this.peptides) {
+            for (let peptide of this.peptides) {
+                SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
 
-                    for (let pe = 0; pe < peptide.prt.length; pe++) {
-                        const protein = tempParticipants.get(peptide.prt[pe]);
-                        if (!protein) {
-                            console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[pe]);
-                        }
-                        if (peptide.dec[pe]) {
-                            const decoyId = "DECOY_" + protein.accession;
-                            protein.is_decoy = true;
-                            protein.id = decoyId;
-                            // how to get prot acc after id has been changed?
-                            peptide.prt[pe] = decoyId;
-                            this.set("decoysPresent", true);
-                        } else {
-                            // fix ids for target in aggregated data
-                            protein.id = protein.accession;
-                            peptide.prt[pe] = protein.accession;
-
-                        }
+                for (let pe = 0; pe < peptide.prt.length; pe++) {
+                    const protein = tempParticipants.get(peptide.prt[pe]);
+                    if (!protein) {
+                        console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[pe]);
+                    }
+                    if (peptide.dec[pe]) {
+                        const decoyId = "DECOY_" + protein.accession;
+                        protein.is_decoy = true;
+                        protein.id = decoyId;
+                        // how to get prot acc after id has been changed?
+                        peptide.prt[pe] = decoyId;
+                        this.set("decoysPresent", true);
+                    } else {
+                        // fix ids for target in aggregated data
+                        protein.id = protein.accession;
+                        peptide.prt[pe] = protein.accession;
 
                     }
+
                 }
             }
+        }
 
-            for (let participant of tempParticipants.values()) {
-                participants.set(participant.id, participant);
-            }
+        for (let participant of tempParticipants.values()) {
+            participants.set(participant.id, participant);
+        }
 
         // }
 
@@ -350,7 +350,6 @@ export class SearchResultsModel extends Backbone.Model {
             searches.set(key, {participantIDSet: value, id: key});
         }
         this.set("searches", searches);
-
 
 
         if (this.matches) {
@@ -387,7 +386,7 @@ export class SearchResultsModel extends Backbone.Model {
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchId= rawMatch.si;
+                    let searchId = rawMatch.si;
                     let searchToProts = searchMap[searchId];
                     if (!searchToProts) {
                         const newSet = new Set();
