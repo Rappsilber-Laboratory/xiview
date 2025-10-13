@@ -1,0 +1,172 @@
+[
+  {
+    "id": 1,
+    "project_id": "crosslinking",
+    "identification_file_name": "multiple_spectra_per_id_1_3_0_draft.mzid",
+    "provider": {},
+    "audit_collection": {},
+    "analysis_sample_collection": {},
+    "bib": [],
+    "spectra_formats": [
+      {
+        "id": "peaklist_id",
+        "location": "path.mzml",
+        "FileFormat": "mzML format",
+        "SpectrumIDFormat": "mzML unique identifier"
+      }
+    ],
+    "contains_crosslinks": true,
+    "warnings": []
+  },
+  {
+    "id": 2,
+    "project_id": "crosslinking",
+    "identification_file_name": "Xlink_EDC_mzIdentML_1_3_0_draft.mzid",
+    "provider": {
+      "id": "PROVIDER",
+      "ContactRole": [
+        {
+          "contact_ref": "PERSON_DOC_OWNER",
+          "Role": "researcher"
+        }
+      ]
+    },
+    "audit_collection": {
+      "Person": {
+        "id": "PERSON_DOC_OWNER",
+        "name": "",
+        "Affiliation": [
+          {
+            "organization_ref": "ORG_DOC_OWNER"
+          }
+        ]
+      },
+      "Organization": {
+        "id": "ORG_DOC_OWNER"
+      }
+    },
+    "analysis_sample_collection": {},
+    "bib": [
+      {
+        "id": "10.1002/(SICI)1522-2683(19991201)20:18<3551::AID-ELPS3551>3.0.CO;2-2",
+        "authors": "David N. Perkins, Darryl J. C. Pappin, David M. Creasy, John S. Cottrell",
+        "editor": "",
+        "title": "Probability-based protein identification by searching sequence databases using mass spectrometry data",
+        "name": "Probability-based protein identification by searching sequence databases using mass spectrometry data",
+        "publication": "Electrophoresis",
+        "volume": "20",
+        "issue": "18",
+        "pages": "3551-3567",
+        "publisher": "Wiley VCH",
+        "year": 1999
+      }
+    ],
+    "spectra_formats": [
+      {
+        "location": "file:///F001386.mgf",
+        "id": "SD_1",
+        "name": "EDCMES12_mh+.mgf",
+        "FileFormat": "Mascot MGF format",
+        "SpectrumIDFormat": "single peak list nativeID format"
+      }
+    ],
+    "contains_crosslinks": true,
+    "warnings": []
+  },
+  {
+    "id": 3,
+    "project_id": "crosslinking",
+    "identification_file_name": "scores_and_thresholds_1_3_0_draft.mzid",
+    "provider": {
+      "id": "PROVIDER",
+      "ContactRole": [
+        {
+          "contact_ref": "PERSON_DOC_OWNER",
+          "Role": "researcher"
+        }
+      ]
+    },
+    "audit_collection": {
+      "Person": {
+        "lastName": "Fischer",
+        "firstName": "Lutz",
+        "id": "PERSON_DOC_OWNER",
+        "Affiliation": [
+          {
+            "organization_ref": "ORG_DOC_OWNER"
+          }
+        ],
+        "contact address": "TIB Gebäude 17, Etage 4, Raum 474 Gustav-Meyer-Allee 25 13355 Berlin",
+        "contact email": "lutz.fischer@tu-berlin.de"
+      },
+      "Organization": {
+        "id": "ORG_DOC_OWNER",
+        "name": "TU Berlin",
+        "contact name": "TU Berlin"
+      }
+    },
+    "analysis_sample_collection": {},
+    "bib": [],
+    "spectra_formats": [
+      {
+        "location": "recal_B210619_02_Lumos_ZC_CO_190_D2I_SDA-WT1.mgf",
+        "id": "SD_17022_recal_B210619_02_Lumos_ZC_CO_190_D2I_SDA-WT1.mgf",
+        "FileFormat": "Mascot MGF format",
+        "SpectrumIDFormat": "multiple peak list nativeID format"
+      },
+      {
+        "location": "recal_B210619_04_Lumos_ZC_CO_190_D2I_SDA-WT3.mgf",
+        "id": "SD_17022_recal_B210619_04_Lumos_ZC_CO_190_D2I_SDA-WT3.mgf",
+        "FileFormat": "Mascot MGF format",
+        "SpectrumIDFormat": "multiple peak list nativeID format"
+      }
+    ],
+    "contains_crosslinks": true,
+    "warnings": []
+  },
+  {
+    "id": 4,
+    "project_id": "crosslinking",
+    "identification_file_name": "noncovalently_assoc_1_3_0_draft.mzid",
+    "provider": {
+      "id": "PROVIDER",
+      "ContactRole": [
+        {
+          "contact_ref": "PERSON_DOC_OWNER",
+          "Role": "researcher"
+        }
+      ]
+    },
+    "audit_collection": {
+      "Person": {
+        "lastName": "Fischer",
+        "firstName": "Lutz",
+        "id": "PERSON_DOC_OWNER",
+        "Affiliation": [
+          {
+            "organization_ref": "ORG_DOC_OWNER"
+          }
+        ],
+        "contact address": "TIB Gebäude 17, Etage 4, Raum 474 Gustav-Meyer-Allee 25 13355 Berlin",
+        "contact email": "lutz.fischer@tu-berlin.de"
+      },
+      "Organization": {
+        "id": "ORG_DOC_OWNER",
+        "name": "TU Berlin",
+        "contact name": "TU Berlin"
+      }
+    },
+    "analysis_sample_collection": {},
+    "bib": [],
+    "spectra_formats": [
+      {
+        "location": "recal_E151023_06_Lumos_CS_AB_IN_190_HCD_HSA_SDA_2.mgf",
+        "id": "SD_16441_recal_E151023_06_Lumos_CS_AB_IN_190_HCD_HSA_SDA_2.mgf",
+        "FileFormat": "Mascot MGF format",
+        "SpectrumIDFormat": "multiple peak list nativeID format"
+      }
+    ],
+    "contains_crosslinks": false,
+    "warnings": []
+  }
+]

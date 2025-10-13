@@ -30,4 +30,7 @@ export class SpectraData {
     get uploadId() {
         return this._json.upload_id;
     }
+    get externalFormatDocumentation() {
+        return this._json.external_format_documentation;
+    }
 }

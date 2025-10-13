@@ -1,0 +1,58 @@
+{
+  "name": "clms-model",
+  "version": "2.0.0",
+  "description": "Core data model library for cross-linking mass spectrometry (CLMS) data",
+  "keywords": [
+    "crosslinking",
+    "mass spectrometry",
+    "data model",
+    "CLMS",
+    "proteomics"
+  ],
+  "bugs": {
+    "url": "https://github.com/Rappsilber-Laboratory/CLMS-model/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Rappsilber-Laboratory/CLMS-model.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": {
+    "name": "Colin Combe",
+    "email": "colin.combe@ed.ac.uk"
+  },
+  "contributors": [
+    {
+      "name": "Martin Graham",
+      "email": "M.Graham@napier.ac.uk"
+    },
+    {
+      "name": "Colin Combe",
+      "email": "colin.combe@ed.ac.uk"
+    },
+    {
+      "name": "Lars Kolbowski",
+      "email": "lars.kolbowski@tu-berlin.de"
+    },
+    {
+      "name": "Lutz Fischer",
+      "email": "lutz.fischer@tu-berlin.de"
+    }
+  ],
+  "type": "module",
+  "main": "./src/search-results-model.js",
+  "scripts": {
+    "test": "node scripts/run-tests.js",
+    "test-headless": "node scripts/run-tests.js",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "eslint": "^8.39.0",
+    "http-server": "^14.1.1",
+    "puppeteer": "^24.0.0",
+    "qunit": "2.21.1"
+  },
+  "engines": {
+    "node": ">=20.12.1"
+  }
+}

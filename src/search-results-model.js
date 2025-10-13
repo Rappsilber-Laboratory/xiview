@@ -5,6 +5,8 @@ import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
 import {SpectrumIdentificationProtocol} from "./spectrum-identification-protocol";
 import {SpectraData} from "./spectra-data";
+import {MzidentmlFile} from "./mzidentml-file";
+import {AnalysisCollectionSpectrumIdentification} from "./analysis-collection-spectrum-identification";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -31,23 +33,24 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     //TODO - reinstate this, needed to know whats aggregated, everywhere you see "searches" in codebase it's some kind of error
-    /*processMzIdentMLFiles(json) {
+    processMzIdentMLFiles(json) {
         const mzidentmlFiles = new Map();
         for (let mzid of json){
             mzidentmlFiles.set(mzid.id, new MzidentmlFile(mzid, this));
         }
         this.set("mzidentmlFiles", mzidentmlFiles);
-    }*/
+    }
 
-    /* processAnalysisCollectionSpectrumIdentifications(json) {
+    processAnalysisCollectionSpectrumIdentifications(json) {
         const analysisCollectionSpectrumIdentifications = new Map();
         for (let acsi of json) {
-            const id = acsi.id;
-            analysisCollectionSpectrumIdentifications.set(id, new AnalysisCollectionSpectrumIdentifcation(
-                acsi, this));
+            const uploadId = acsi.upload_id;
+            const listRef = acsi.spectrum_identification_list_ref;
+            const key = uploadId + "_" + listRef;
+            analysisCollectionSpectrumIdentifications.set(key, new AnalysisCollectionSpectrumIdentification(acsi, this));
         }
         this.set("analysisCollectionSpectrumIdentifications", analysisCollectionSpectrumIdentifications);
-    }*/
+    }
 
     processSpectrumIdentificationProtocols(json) {
         const spectrumIdentificationProtocols = new Map();

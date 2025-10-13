@@ -34,9 +34,6 @@ export class SpectrumIdentificationProtocol {
     get spectrumIdentificationProtocolRef() {
         return this._json.sip_ref;
     }
-    get spectrumIdentificationProtocol() {
-        return this._searchResultModel.getSpectrumIdentificationProtocol(this.uploadId, this.spectrumIdentificationProtocolRef);
-    }
     get uploadId() {
         return this._json.upload_id;
     }
