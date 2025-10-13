@@ -3,9 +3,9 @@ import * as $ from "jquery";
 window.jQuery = $;
 import d3 from "d3";
 // eslint-disable-next-line no-unused-vars
-import webpack_jquery_ui from "webpack-jquery-ui";
+import "jquery-ui/ui/widgets/dialog";
 // eslint-disable-next-line no-unused-vars
-import webpack_jquery_ui0 from "webpack-jquery-ui/css";  //ommit, if you don't want to load basic css theme
+import "jquery-ui/themes/base/all.css";
 
 //todo - this wrapping object is unnecessary
 export const jqdialogs = {
