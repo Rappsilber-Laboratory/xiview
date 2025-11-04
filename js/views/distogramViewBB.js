@@ -477,15 +477,21 @@ export const DistogramBB = BaseFrameView.extend({
 
             // Add sub-series data
             // split TT list into sublists for length
-            const subSeries = colModel.get("labels").range()    // get colour scale category names
-                .concat([colModel.get("undefinedLabel")])       // add an 'undefined' label (returning as new array)
-                .map(function (name) {                           // make into object with name and linkValues properties
-                    return {
-                        name: name,
-                        linkValues: [],
-                        isSubSeries: true,
-                    };
+            // Build directly without intermediate concat array
+            const labels = colModel.get("labels").range();
+            const subSeries = [];
+            for (let i = 0; i < labels.length; i++) {
+                subSeries.push({
+                    name: labels[i],
+                    linkValues: [],
+                    isSubSeries: true,
                 });
+            }
+            subSeries.push({
+                name: colModel.get("undefinedLabel"),
+                linkValues: [],
+                isSubSeries: true,
+            });
 
             //console.log ("measurements", measurements);
             seriesData[TT].linkValues.forEach(function (linkDatum) {
@@ -786,12 +792,15 @@ export const DistogramBB = BaseFrameView.extend({
             seriesNames.push("Random");
         }
 
-        return d3.zip(joinedCounts, seriesNames).map(function (pair) {
-            return {
-                linkValues: pair[0],
-                name: pair[1]
-            };
-        });
+        // Directly create result objects without intermediate zip array
+        const result = [];
+        for (let i = 0; i < joinedCounts.length; i++) {
+            result.push({
+                linkValues: joinedCounts[i],
+                name: seriesNames[i]
+            });
+        }
+        return result;
     },
 
     getSelectedOption: function (axisLetter) {
@@ -829,10 +838,18 @@ export const DistogramBB = BaseFrameView.extend({
         accessor = accessor || function (d) {
             return d;
         }; // return object/variable/number as is as standard accessor
-        // get extents of all arrays, concatenate them, then get extent of that array
-        const extent = d3.extent([].concat.apply([], seriesData.map(function (singleSeries) {
-            return singleSeries.linkValues ? d3.extent(singleSeries.linkValues, accessor) : [0, 1];
-        })));
+        // get extents of all arrays, then get extent of combined extents without creating intermediate arrays
+        const allExtents = [];
+        for (let i = 0; i < seriesData.length; i++) {
+            const singleSeries = seriesData[i];
+            if (singleSeries.linkValues) {
+                const ext = d3.extent(singleSeries.linkValues, accessor);
+                allExtents.push(ext[0], ext[1]);
+            } else {
+                allExtents.push(0, 1);
+            }
+        }
+        const extent = d3.extent(allExtents);
         const min = d3.min([0, Math.floor(extent[0])]);
         const max = d3.max([1, this.options.maxX || Math.ceil(extent[1])]);
         const step = Math.max(1, niceRound((max - min) / 100));

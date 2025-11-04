@@ -27,6 +27,29 @@ export const networkPageSpinner = new Spinner({
     radius: 45, // The radius of the inner circle
 });
 
+// Memory monitoring - logs JavaScript VM memory usage every 2 seconds
+function startMemoryMonitoring() {
+    let logCount = 0;
+    if (performance.memory) {
+        setInterval(() => {
+            logCount++;
+            const memory = performance.memory;
+            const usedMB = (memory.usedJSHeapSize / 1048576).toFixed(2);
+            const totalMB = (memory.totalJSHeapSize / 1048576).toFixed(2);
+            const limitMB = (memory.jsHeapSizeLimit / 1048576).toFixed(2);
+            const domNodes = document.getElementsByTagName("*").length;
+            console.log(`[Memory #${logCount}] Used: ${usedMB} MB | Total: ${totalMB} MB | Limit: ${limitMB} MB | DOM Nodes: ${domNodes}`);
+        }, 2000);
+    } else {
+        console.warn("performance.memory is not available in this browser. Memory monitoring is only supported in Chrome/Chromium-based browsers.");
+    }
+}
+
+// Start memory monitoring only in development builds
+if (process.env.NODE_ENV !== "production") {
+    startMemoryMonitoring();
+}
+
 const fetchDataFromUrl = (url) => {
     return fetch(url)
         .then(response => {

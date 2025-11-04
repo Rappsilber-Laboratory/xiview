@@ -44,16 +44,44 @@ export const MinigramViewBB = Backbone.View.extend({
         this.brushg.selectAll("rect")
             .attr("height", height);
 
+        // Initialize render state
+        this.pendingRender = false;
+        this.renderQueued = false;
+
         this.listenTo(this.model, "change", this.redrawBrush);
         this.render();
         return this;
     },
 
     render: function () {
+        // Use requestAnimationFrame to batch render calls
+        if (this.renderQueued) {
+            return this;
+        }
+
+        this.renderQueued = true;
+        requestAnimationFrame(() => {
+            this.renderQueued = false;
+            this._doRender();
+        });
+
+        return this;
+    },
+
+    _doRender: function () {
         const seriesData = this.model.data();
 
-        const min = Math.min(...seriesData.flat());
-        const max = Math.max(...seriesData.flat());
+        // Find min/max without creating array copies
+        let min = Infinity;
+        let max = -Infinity;
+        for (let i = 0; i < seriesData.length; i++) {
+            const series = seriesData[i];
+            for (let j = 0; j < series.length; j++) {
+                const value = series[j];
+                if (value < min) min = value;
+                if (value > max) max = value;
+            }
+        }
 
         this.x.domain([min, max]);
 
@@ -117,8 +145,6 @@ export const MinigramViewBB = Backbone.View.extend({
         this.svg.select(".x.axis").call(this.xAxis);
 
         this.brushg.call(this.brush);
-
-        return this;
     },
 
     brushed: function () {

@@ -390,24 +390,25 @@ export const SelectionTableViewBB = Backbone.View.extend({
     updateTable: function (options) {
         options = options || {};
 
-        this.matchCountIndices = this.model.getMarkedCrossLinks("selection")
-            // map to reduce filtered matches to selected matches only
-            .map(function (xlink) {
-                const selectedMatches = this.getMatches(xlink);
-                return {
+        // Combine map, filter, and sort prep into single pass to avoid intermediate arrays
+        const selectedLinks = this.model.getMarkedCrossLinks("selection");
+        this.matchCountIndices = [];
+        for (let i = 0; i < selectedLinks.length; i++) {
+            const xlink = selectedLinks[i];
+            const selectedMatches = this.getMatches(xlink);
+            if (selectedMatches.length) {
+                this.matchCountIndices.push({
                     id: xlink.id,
                     link: xlink,
-                    matches: selectedMatches
-                };
-            }, this)
-            // Then get rid of links with no selected and filtered matches
-            .filter(function (selLinkMatchData) {
-                return selLinkMatchData.matches.length;
-            })
-            // Then sort links by top remaining match score for each link
-            .sort(function (a, b) {
-                return b.matches[0].score() - a.matches[0].score();
-            });
+                    matches: selectedMatches,
+                    topScore: selectedMatches[0].score()
+                });
+            }
+        }
+        // Single sort pass with cached scores
+        this.matchCountIndices.sort(function (a, b) {
+            return b.topScore - a.topScore;
+        });
 
         // filter to top match per link if requested
         if (options.topMatchesOnly) {

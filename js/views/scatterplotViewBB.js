@@ -799,25 +799,38 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             const makeCoords = function (datax, datay) {
                 return datax.data.map(function (xd, i) {
                     const yd = datay.data[i];
-                    let pairs;
-                    if (xd.length === 1) {
-                        pairs = yd.map(function (d) {
-                            return [xd[0], d];
-                        });
-                    } else if (yd.length === 1) {
-                        pairs = xd.map(function (d) {
-                            return [d, yd[0]];
-                        });
-                    } else {
-                        pairs = xd.map(function (d, i) {
-                            return [d, yd[i]];
-                        });
-                    }
+                    const pairs = [];
 
-                    // get rid of pairings where one of the values is undefined
-                    pairs = pairs.filter(function (pair) {
-                        return pair[0] !== undefined && pair[1] !== undefined;
-                    });
+                    // Combine map and filter into single pass to avoid intermediate arrays
+                    if (xd.length === 1) {
+                        const x = xd[0];
+                        if (x !== undefined) {
+                            for (let j = 0; j < yd.length; j++) {
+                                const y = yd[j];
+                                if (y !== undefined) {
+                                    pairs.push([x, y]);
+                                }
+                            }
+                        }
+                    } else if (yd.length === 1) {
+                        const y = yd[0];
+                        if (y !== undefined) {
+                            for (let j = 0; j < xd.length; j++) {
+                                const x = xd[j];
+                                if (x !== undefined) {
+                                    pairs.push([x, y]);
+                                }
+                            }
+                        }
+                    } else {
+                        for (let j = 0; j < xd.length; j++) {
+                            const x = xd[j];
+                            const y = yd[j];
+                            if (x !== undefined && y !== undefined) {
+                                pairs.push([x, y]);
+                            }
+                        }
+                    }
 
                     return pairs;
                 });
@@ -854,9 +867,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             //console.log ("ddd", datax, datay, filteredCrossLinks, coords, colourScheme);
 
             const countable = colourScheme.isCategorical();
-            const counts = countable ? d3.range(0, colourScheme.getDomainCount() + 1).map(function () {
-                return 0;
-            }) : [];
+            const counts = countable ? Array(colourScheme.getDomainCount() + 1).fill(0) : [];
 
             sortedFilteredCrossLinks.forEach(function (link, i) {
                 const decoy = link.isDecoyLink();

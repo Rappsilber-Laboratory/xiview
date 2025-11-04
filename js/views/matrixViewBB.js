@@ -733,12 +733,15 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                     const atoms1 = stageModel.getAllResidueCoordsForChain(matrixValue.chain1);
                     const atoms2 = (matrixValue.chain1 !== matrixValue.chain2) ? stageModel.getAllResidueCoordsForChain(matrixValue.chain2) : atoms1;
                     // precalc some stuff that would get recalculatd a lot in the inner loop
-                    const preCalcSearchIndices = d3.range(atoms2.length).map(function (seqIndex) {
-                        return alignColl.getAlignedIndex(seqIndex + 1, alignInfo2.proteinID, true, alignInfo2.alignID, true) - 1;
-                    });
-                    const preCalcRowIndices = preCalcSearchIndices.map(function (i) {
-                        return i >= 0 ? (seqLengthB - i) * pw : -1;
-                    });
+                    // Combine into single pass to avoid creating intermediate arrays
+                    const atoms2Length = atoms2.length;
+                    const preCalcSearchIndices = new Int32Array(atoms2Length);
+                    const preCalcRowIndices = new Int32Array(atoms2Length);
+                    for (let seqIndex = 0; seqIndex < atoms2Length; seqIndex++) {
+                        const alignedIdx = alignColl.getAlignedIndex(seqIndex + 1, alignInfo2.proteinID, true, alignInfo2.alignID, true) - 1;
+                        preCalcSearchIndices[seqIndex] = alignedIdx;
+                        preCalcRowIndices[seqIndex] = alignedIdx >= 0 ? (seqLengthB - alignedIdx) * pw : -1;
+                    }
                     //console.log ("pcsi", preCalcSearchIndices);
                     //console.log ("atoms", atoms1, atoms2);
 
@@ -842,9 +845,14 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 const selectedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
                 const highlightedCrossLinkIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("highlights"), "id"));
 
-                const finalCrossLinks = Array.from(filteredCrossLinks).filter(function (crosslink) {
-                    return (crosslink.toProtein.id === proteinIDs[0].proteinID && crosslink.fromProtein.id === proteinIDs[1].proteinID) || (crosslink.toProtein.id === proteinIDs[1].proteinID && crosslink.fromProtein.id === proteinIDs[0].proteinID);
-                }, this);
+                // Filter without creating intermediate array copy
+                const finalCrossLinks = [];
+                for (const crosslink of filteredCrossLinks) {
+                    if ((crosslink.toProtein.id === proteinIDs[0].proteinID && crosslink.fromProtein.id === proteinIDs[1].proteinID) ||
+                        (crosslink.toProtein.id === proteinIDs[1].proteinID && crosslink.fromProtein.id === proteinIDs[0].proteinID)) {
+                        finalCrossLinks.push(crosslink);
+                    }
+                }
 
                 // sort so that selected links appear on top
                 let sortedFinalCrossLinks;
