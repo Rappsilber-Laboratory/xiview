@@ -39,7 +39,6 @@
       "email": "lutz.fischer@tu-berlin.de"
     }
   ],
-  "type": "module",
   "main": "./src/search-results-model.js",
   "scripts": {
     "test": "node scripts/run-tests.js",

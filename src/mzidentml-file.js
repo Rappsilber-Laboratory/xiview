@@ -5,7 +5,7 @@ export class MzidentmlFile {
     }
 
     get analysisCollectionSpectrumIdentifcation (){
-        return this._searchResultModel.analysisCollectionSpectrumIdentifcation.get(this.id)
+        return this._searchResultModel.analysisCollectionSpectrumIdentifcation.get(this.id);
     }
 
     // Note: id is what is referred to as upload_id elsewhere

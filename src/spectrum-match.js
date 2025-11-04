@@ -7,17 +7,6 @@ export class SpectrumMatch {
         this.containingModel = containingModel; //containing BB model
         this._identification = identification;
 
-        // Initialize frequently accessed properties directly
-        this.precursor_intensity = null;
-        this.spectrumId = identification.sp;
-        this.searchId = identification.si.toString();
-        this.psmId = identification.id;
-        this.precursorMZ = +identification.pc_mz; // experimental MZ, accessor for this att is called expMZ()
-        this.calc_mz = +identification.c_mz;
-        this._scores = identification.sc;
-        this.precursorCharge = +identification.pc_c === -1 ? undefined : +identification.pc_c; //we're taking -1 to mean undefined
-        this.passThreshold = !!identification.p;
-
         // Initialize ion types
         // todo - get from SIP, also CV term issues to be addressed (needed CV terms were deprecated)
         this.ions = [{type:"bIon"}, {type:"yIon"}];
@@ -422,6 +411,43 @@ export class SpectrumMatch {
         } else {
             return "";
         }
+    }
+
+    get psmId() {
+        return this._identification.id;
+    }
+
+    get spectrumId() {
+        return this._identification.sp;
+    }
+
+    get searchId() {
+        return this._identification.si.toString();
+    }
+
+    get precursor_intensity() {
+        return null;
+    }
+
+    get _scores() {
+        return this._identification.sc;
+    }
+
+    get precursorCharge() {
+        const c = +this._identification.pc_c;
+        return c === -1 ? undefined : c;
+    }
+
+    get precursorMZ() {
+        return +this._identification.pc_mz;
+    }
+
+    get calc_mz() {
+        return +this._identification.c_mz;
+    }
+
+    get passThreshold() {
+        return !!this._identification.p;
     }
 
     get datasetId() {
