@@ -166,7 +166,7 @@ export class CrosslinkViewer extends Backbone.View {
 
         // calculate default bar scale
         let maxSeqLength = 0;
-        for (let participant of this.model.get("clmsModel").get("participants").values()) {
+        for (let participant of this.model.get("clmsModel").get("proteins").values()) {
             if (participant.is_decoy === false && this.renderedProteins.has(participant.id) === false) {
                 const newProtien = new RenderedProtein(participant, this);
                 this.renderedProteins.set(participant.id, newProtien);
