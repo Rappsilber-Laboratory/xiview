@@ -329,7 +329,7 @@ export class CompositeModel extends Backbone.Model {
 
         let visibleProteinCount = 0;
         //hiding linkless participants
-        for (let participant of clmsModel.get("participants").values()) {
+        for (let participant of clmsModel.get("proteins").values()) {
             participant.hidden = true;
             for (let pCrossLink of participant.crosslinks) {
                 if (pCrossLink.filteredMatches_pp.length &&
@@ -571,7 +571,7 @@ export class CompositeModel extends Backbone.Model {
 
     hideUnselectedProteins() {
         const selected = this.get("selectedProteins");
-        for (let participant of this.get("clmsModel").get("participants").values()) {
+        for (let participant of this.get("clmsModel").get("proteins").values()) {
             if (selected.indexOf(participant) == -1) {
                 participant.manuallyHidden = true;
             }
@@ -580,7 +580,7 @@ export class CompositeModel extends Backbone.Model {
     }
 
     showHiddenProteins() {
-        for (let participant of this.get("clmsModel").get("participants").values()) {
+        for (let participant of this.get("clmsModel").get("proteins").values()) {
             participant.manuallyHidden = false;
         }
         this.get("filterModel").trigger("change");
@@ -616,7 +616,7 @@ export class CompositeModel extends Backbone.Model {
 
     proteinSelectionTextFilter() {
         const filterText = d3.select("#proteinSelectionFilter").property("value").trim().toLowerCase();
-        const participantsArr = Array.from(this.get("clmsModel").get("participants").values());
+        const participantsArr = Array.from(this.get("clmsModel").get("proteins").values());
 
         const toSelect = participantsArr.filter(function (p) {
             if (p.description) {
@@ -780,7 +780,7 @@ export class CompositeModel extends Backbone.Model {
             }
         }
 
-        const proteins = this.get("clmsModel").get("participants").values();
+        const proteins = this.get("clmsModel").get("proteins").values();
         for (let protein of proteins) {
 
             if (protein.uniprot) {

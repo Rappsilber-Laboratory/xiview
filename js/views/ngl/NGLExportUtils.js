@@ -213,7 +213,7 @@ export const NGLExportUtils = {
             xlinkanalyzerVersion: "1.1.1"
         };
 
-        const xiViewProteins = nglModelWrapper.get("compositeModel").get("clmsModel").get("participants"); // ECMA map
+        const xiViewProteins = nglModelWrapper.get("compositeModel").get("clmsModel").get("proteins"); // ECMA map
         const mapping = json.data[0].mapping;
 
         for (let prot of xiViewProteins.values()) {

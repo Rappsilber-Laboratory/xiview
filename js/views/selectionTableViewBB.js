@@ -201,7 +201,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
                 return d.confirmedHomomultimer === undefined ? "?" : d.confirmedHomomultimer;
             },
             searchId: function (d) {
-                return d.searchId;
+                return d.uploadId;
             },
             pos1: function (d) {
                 return fullPosConcat(d, 0);
@@ -558,7 +558,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
 
         filteredProps = filteredProps || this.filteredProps;
         const self = this;
-        //var proteinMap = this.model.get("clmsModel").get("participants");
+        //var proteinMap = this.model.get("clmsModel").get("proteins");
         const identityFunc = function (d) {
             return d.id;
         };

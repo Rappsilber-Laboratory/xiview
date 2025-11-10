@@ -444,7 +444,7 @@ export const CircularViewBB = BaseFrameView.extend({
             const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             self.nodeDrag.startDeg = (((dragStartTheta / degToRad) + 90) + 360) % 360;
             // draw drag representation if >1 protein displayed
-            if (self.filterInteractors(self.model.get("clmsModel").get("participants")).length > 1) {
+            if (self.filterInteractors(self.model.get("clmsModel").get("proteins")).length > 1) {
                 d3.select(this).classed("draggedNode", true);
             }
             self.nodeDrag.visited = true;
@@ -510,7 +510,7 @@ export const CircularViewBB = BaseFrameView.extend({
         };
 
         this.nodeTip = function (d) {
-            const interactor = self.model.get("clmsModel").get("participants").get(d.id);
+            const interactor = self.model.get("clmsModel").get("proteins").get(d.id);
             self.model.get("tooltipModel")
                 .set("header", makeTooltipTitle.interactor(interactor))
                 .set("contents", makeTooltipContents.interactor(interactor))
@@ -542,7 +542,7 @@ export const CircularViewBB = BaseFrameView.extend({
         };
 
         // return order as is
-        this.interactorOrder = _.pluck(Array.from(this.model.get("clmsModel").get("participants").values()), "id");
+        this.interactorOrder = _.pluck(Array.from(this.model.get("clmsModel").get("proteins").values()), "id");
 
         let alignCall = 0;
 
@@ -595,7 +595,7 @@ export const CircularViewBB = BaseFrameView.extend({
         if (orderOptions.reverseConsecutive) {
             this.options.sortDir = -this.options.sortDir; // reverse direction of consecutive resorts
         }
-        const prots = this.filterInteractors(this.model.get("clmsModel").get("participants"));
+        const prots = this.filterInteractors(this.model.get("clmsModel").get("proteins"));
         const proteinSort = function (field) {
             const numberSort = prots.length ? !isNaN(prots[0][field]) : false; // stop undefined 'prots[0].field' bug when no prots
             const sortDir = this.options.sortDir;
@@ -608,7 +608,7 @@ export const CircularViewBB = BaseFrameView.extend({
         const self = this;
         const sortFuncs = {
             best: function () {
-                return circleArrange(self.filterInteractors(this.model.get("clmsModel").get("participants")));
+                return circleArrange(self.filterInteractors(this.model.get("clmsModel").get("proteins")));
             },
             size: function () {
                 return proteinSort.call(this, "size");
@@ -871,7 +871,7 @@ export const CircularViewBB = BaseFrameView.extend({
             const svg = d3.select(this.el).select("svg");
             this.radius = this.getMaxRadius(svg);
 
-            const interactors = this.model.get("clmsModel").get("participants");
+            const interactors = this.model.get("clmsModel").get("proteins");
             //xilog ("interactorOrder", this.interactorOrder);
             //xilog ("model", this.model);
 
@@ -1060,7 +1060,7 @@ export const CircularViewBB = BaseFrameView.extend({
     selectNode: function (d) {
         const add = d3.event.ctrlKey || d3.event.shiftKey;
         this.actionNodeLinks(d.id, "selection", add);
-        const interactor = this.model.get("clmsModel").get("participants").get(d.id);
+        const interactor = this.model.get("clmsModel").get("proteins").get(d.id);
         this.model.setSelectedProteins([interactor], add);
         return this;
     },
@@ -1068,12 +1068,12 @@ export const CircularViewBB = BaseFrameView.extend({
     drawNodes: function (g, nodes) {
         const self = this;
 
-        const multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").get("participants")).length > 1;
+        const multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").get("proteins")).length > 1;
         let colourScheme = this.model.get("proteinColourAssignment");
         if (colourScheme.id === "Default Protein") {
             colourScheme = this.replacementDefaultNodeColourModel;
         }
-        const interactors = this.model.get("clmsModel").get("participants");
+        const interactors = this.model.get("clmsModel").get("proteins");
 
         const nodeLayer = this.addOrGetGroupLayer(g, "nodeLayer");
         const nodeJoin = nodeLayer.selectAll(".circleNode").data(nodes, self.idFunc);
@@ -1086,7 +1086,7 @@ export const CircularViewBB = BaseFrameView.extend({
             .on("mouseenter", function (d) {
                 self.nodeTip(d);
                 self.actionNodeLinks(d.id, "highlights", false);
-                const interactor = self.model.get("clmsModel").get("participants").get(d.id);
+                const interactor = self.model.get("clmsModel").get("proteins").get(d.id);
                 self.model.setHighlightedProteins([interactor]);
             })
             .on("mouseleave", function () {

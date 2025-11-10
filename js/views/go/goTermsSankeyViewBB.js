@@ -155,7 +155,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         // this.update();  // needed here to init interactors in goterms, temp hack, todo
         const go = this.model.get("go");
 
-        const proteins = this.model.get("clmsModel").get("participants").values();
+        const proteins = this.model.get("clmsModel").get("proteins").values();
         for (let protein of proteins) {
             if (protein.uniprot) {
                 for (let goId of protein.uniprot.go) {
@@ -224,7 +224,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
             g.filtInteractorCount = 0;
         }
 
-        // const proteins = this.model.get("clmsModel").get("participants").values();
+        // const proteins = this.model.get("clmsModel").get("proteins").values();
         // for (let protein of proteins) {
         //     if (protein.uniprot) {
         //         for (let goId of protein.uniprot.go) {

@@ -11,7 +11,7 @@ export const STRINGUtils = {
 
     // Filter the CLMS model's participants down to just those that have non-decoy inter-protein links
     filterProteinsToPPISet: function (clmsModel) {
-        const proteinMap = clmsModel.get("participants");
+        const proteinMap = clmsModel.get("proteins");
         const realProteins = filterOutDecoyInteractors(Array.from(proteinMap.values()));
         const ppiProteins = realProteins.filter(function (prot) {
             return prot.crosslinks.some(function (clink) {
@@ -226,7 +226,7 @@ export const STRINGUtils = {
         console.log("vids", viableProteinIDs.length);
 
         if (viableProteinIDs.length >= STRINGUtils.stringAPIMaxProteins) {
-            const proteins = clmsModel.get("participants");
+            const proteins = clmsModel.get("proteins");
             viableProteinIDs = viableProteinIDs.filter(function (pid) {
                 return !proteins.get(pid).hidden;
             });

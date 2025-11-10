@@ -65,11 +65,11 @@ function testCallback(model) {
             {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
         ];
         decoys.forEach(function (decoy) {
-            clmsModel.get("participants").set(decoy.id, decoy);
+            clmsModel.get("proteins").set(decoy.id, decoy);
         });
 
         clmsModel.initDecoyLookup();
-        const actual = Array.from(clmsModel.get("participants").values()).map(function (p) {
+        const actual = Array.from(clmsModel.get("proteins").values()).map(function (p) {
             return {id: p.id, targetProteinID: p.targetProteinID};
         });
         const expected = [{id: "P02768-A", targetProteinID: "P02768-A"}];
@@ -78,7 +78,7 @@ function testCallback(model) {
         });
 
         decoys.forEach(function (decoy) {
-            clmsModel.get("participants").delete(decoy.id);
+            clmsModel.get("proteins").delete(decoy.id);
         });
 
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " decoy to real protein match, Passed!");
@@ -114,13 +114,13 @@ function testCallback(model) {
             {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
         ];
         decoys.forEach(function (decoy) {
-            clmsModel.get("participants").set(decoy.accession, decoy);
+            clmsModel.get("proteins").set(decoy.accession, decoy);
         });
 
         const fakeMatch = {matchedPeptides: [{prt: ["P02768-A", "REV_P02768-A"]}, {prt: ["P02768-A"]}]};
         const actual = mostReadableMultipleId(fakeMatch, 0, clmsModel);
         decoys.forEach(function (decoy) {
-            clmsModel.get("participants").delete(decoy.accession);
+            clmsModel.get("proteins").delete(decoy.accession);
         });
 
         // updated to reflect that mostReadableMultipleId now always return ID
@@ -1435,13 +1435,13 @@ function testCallback(model) {
     test("Update Protein Metadata", function (assert) {
         const expectedValue = {
             columns: ["proteinid", "cat", "dog"],
-            items: clmsModel.get("participants"),
+            items: clmsModel.get("proteins"),
             matchedItemCount: 1
         };
         window.vent.listenToOnce(window.vent, "proteinMetadataUpdated", function (actualValue) {
             assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as proteinmetadata event data, Passed!");
 
-            const actualValue2 = clmsModel.get("participants").get("P02768-A").getMeta();
+            const actualValue2 = clmsModel.get("proteins").get("P02768-A").getMeta();
             const expectedValue2 = {proteinid: "P02768-A", cat: 2, dog: 4};
             assert.deepEqual(actualValue2, expectedValue2, "Expected " + JSON.stringify(expectedValue2) + " as protein meta value, Passed!");
         });

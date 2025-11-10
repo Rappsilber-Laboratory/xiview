@@ -51,7 +51,7 @@ export const setupColourModels = function (userConfig) {
         id: "InterProtein",
         type: "ordinal"
     }, {
-        proteins: window.compositeModelInst.get("clmsModel").get("participants")
+        proteins: window.compositeModelInst.get("clmsModel").get("proteins")
     });
 
     window.linkColor.distanceColoursBB = new DistanceColourModel({

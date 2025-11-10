@@ -104,7 +104,7 @@ export function postDataLoaded(compositeModelInst) {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of compositeModelInst.get("clmsModel").get("participants").values()) { //todo - remove static ref?
+    for (let participant of compositeModelInst.get("clmsModel").get("proteins").values()) { //todo - remove static ref?
         if (participant.uniprot) {
             const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
@@ -253,7 +253,7 @@ export function models(options, clmsModelInst) {
     options.alignmentCollectionInst = alignmentCollectionInst;
 
     const compositeModelInst = modelsEssential(options, clmsModelInst);
-    alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").get("participants").values()));
+    alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").get("proteins").values()));
     // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
     // this listener adds new sequences obtained from pdb files to existing alignment sequence models

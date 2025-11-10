@@ -18,8 +18,6 @@ import {displayError} from "./utils";
 import Split from "split.js";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 import {BlosumCollection} from "./model/models";
-import {testSetupNew} from "../tests/tests";
-import {testSetup2} from "../tests/tests2";
 
 export const networkPageSpinner = new Spinner({
     length: 38, // The length of each line
@@ -46,9 +44,9 @@ function startMemoryMonitoring() {
 }
 
 // Start memory monitoring only in development builds
-if (process.env.NODE_ENV !== "production") {
-    startMemoryMonitoring();
-}
+// if (process.env.NODE_ENV !== "production") {
+//     startMemoryMonitoring();
+// }
 
 const fetchDataFromUrl = (url) => {
     return fetch(url)

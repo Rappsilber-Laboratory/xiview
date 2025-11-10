@@ -986,7 +986,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
     // Return chain indices covered by currently visible proteins
     getShowableChains(showAll) {
-        const protMap = Array.from(this.getCompositeModel().get("clmsModel").get("participants").values()); //todo -tidy
+        const protMap = Array.from(this.getCompositeModel().get("clmsModel").get("proteins").values()); //todo -tidy
         const prots = Array.from(protMap).filter(function (prot) {
             return !prot.hidden;
         }).map(function (prot) {

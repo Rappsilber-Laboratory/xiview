@@ -82,7 +82,7 @@ export function repopulateNGL(pdbInfo) {
                 }
 
                 const nglSequences = getChainSequencesFromNGLStructure(structureComp);
-                const interactorMap = compositeModel.get("clmsModel").get("participants");
+                const interactorMap = compositeModel.get("clmsModel").get("proteins");
                 const interactorArr = Array.from(interactorMap.values());
 
                 // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches

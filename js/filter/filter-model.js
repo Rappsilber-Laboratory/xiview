@@ -314,7 +314,7 @@ export class FilterModel extends Backbone.Model {
         if (searchString) {
             //protein name check
             const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
-            const participants = window.compositeModelInst.get("clmsModel").get("participants");
+            const participants = window.compositeModelInst.get("clmsModel").get("proteins");
             const matchedPeptides = match.matchedPeptides;
             const matchedPepCount = matchedPeptides.length;
 

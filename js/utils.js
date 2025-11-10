@@ -26,7 +26,7 @@ export const commonRegexes = {
 export function proteinConcat(match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const pnames = mpeptides ? mpeptides.prt.map(function (pid) {
-        return clmsModel.get("participants").get(pid).name;
+        return clmsModel.get("proteins").get(pid).name;
     }) : [];
     return pnames.join(";");
 }

@@ -330,7 +330,7 @@ export function filterSequenceByResidueSet(seq, residueSet, all) {
 
 function makeMultiKeyProteinMap(clmsModel) {
     const protMap = d3.map();
-    clmsModel.get("participants").forEach(function (value, key) {
+    clmsModel.get("proteins").forEach(function (value, key) {
         if (!value.is_decoy) {
             protMap.set(value.accession, key);
             protMap.set(value.name, key);
@@ -471,7 +471,7 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
 
 //metadatafilechoosers
 export function updateProteinMetadata(metaDataFileContents, clmsModel) {
-    const proteins = clmsModel.get("participants");
+    const proteins = clmsModel.get("proteins");
     let first = true;
     let columns = [];
     // var dontStoreArray = ["proteinID", "Accession"].map(function(str) {
@@ -571,7 +571,7 @@ export function clearObjectMetaData(objectArr, metaFields) {
 
 //metadatafilechoosers
 export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsModel) {
-    const proteins = clmsModel.get("participants");
+    const proteins = clmsModel.get("proteins");
     let first = true;
     // eslint-disable-next-line no-unused-vars
     let columns = []; // TODO - check this

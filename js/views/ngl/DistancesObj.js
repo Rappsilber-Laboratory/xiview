@@ -294,7 +294,7 @@ export class DistancesObj {
 
         seqsByProt.entries().forEach(function (protEntry) {
             const protKey = protEntry.key;
-            const participant = clmsModel.get("participants").get(protKey);
+            const participant = clmsModel.get("proteins").get(protKey);
             const seqValues = protEntry.value.values;
             const termTypes = ["ntermList", "ctermList"];
 

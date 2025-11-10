@@ -413,7 +413,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 this.lastChainIndex = acindex;
 
                 const proteinID = self.model.get("stageModel").get("reverseChainMap").get(acindex);
-                const protein = self.model.get("clmsModel").get("participants").get(proteinID);
+                const protein = self.model.get("clmsModel").get("proteins").get(proteinID);
 
                 if (protein !== undefined) {
                     const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein));//.substring(0, 7));
@@ -648,7 +648,7 @@ export const NGLViewBB = BaseFrameView.extend({
             "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
             " - " + stageModel.get("structureComp").structure.title;
 
-        const interactors = filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("participants").values()));
+        const interactors = filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("proteins").values()));
         const alignColl = this.model.get("alignColl");
         const pdbLengthsPerProtein = interactors.map(function (inter) {
             const pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);

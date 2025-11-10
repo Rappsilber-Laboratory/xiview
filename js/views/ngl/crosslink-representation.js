@@ -209,7 +209,7 @@ export class CrosslinkRepresentation {
             const pid = chainIndexToProteinMap.get(chainProxy.index);
             //console.log ("chain label", chainProxy.index, chainProxy.chainname, chainProxy.residueCount, chainProxy.entity.description, pid);
             if (pid && isViableChain(chainProxy)) {
-                const protein = self.nglModelWrapper.getCompositeModel().get("clmsModel").get("participants").get(pid);
+                const protein = self.nglModelWrapper.getCompositeModel().get("clmsModel").get("proteins").get(pid);
                 const pname = protein ? protein.name : "none";
                 customText[chainProxy.atomOffset] = (verboseSetting === "None" ? "" : (pname + ":" + chainProxy.chainname + "(" + chainProxy.index + ")" + (verboseSetting === "Verbose" ? " " + description : "")));
             }
@@ -398,7 +398,7 @@ export class CrosslinkRepresentation {
                     pdtrans.xlinks = origFullLinks.concat(origHalfLinks);
 
                     const cp = this.structureComp.structure.getChainProxy(residue.chainIndex);
-                    const protein = nglModelWrapper.getCompositeModel().get("clmsModel").get("participants").get(proteinId);
+                    const protein = nglModelWrapper.getCompositeModel().get("clmsModel").get("proteins").get(proteinId);
                     //console.log ("cp", cp, pdtrans, this, this.structureComp);
                     nglModelWrapper.getCompositeModel().get("tooltipModel")
                         .set("header", "Cross-Linked with " + makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))
