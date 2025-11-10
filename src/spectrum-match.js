@@ -18,7 +18,7 @@ export class SpectrumMatch {
         }
 
         this.matchedPeptides = [];
-        this.matchedPeptides[0] = peptides.get(this.searchId + "_" + identification.pi1);
+        this.matchedPeptides[0] = peptides.get(this.uploadId + "_" + identification.pi1);
         if (!this.matchedPeptides[0]) {
             alert("peptide error (missing peptide evidence?) for:" + identification.pi1);
         } else {
@@ -29,7 +29,7 @@ export class SpectrumMatch {
         }
         // following will be inadequate for trimeric and higher order cross-links
         if (identification.pi2 !== undefined && identification.pi2 !== null) { //null if loop link
-            this.matchedPeptides[1] = peptides.get(this.searchId + "_" + identification.pi2);
+            this.matchedPeptides[1] = peptides.get(this.uploadId + "_" + identification.pi2);
             if (!this.matchedPeptides[1]) {
                 alert("peptide error (missing peptide evidence?) for:" + +identification.pi2);
             } else if (this.matchedPeptides[1].is_decoy.indexOf("1") != -1) {
@@ -297,14 +297,12 @@ export class SpectrumMatch {
     }
 
     peaklistFileName() {
-        const spectraDataId = this._identification.sd;
-        const uploadId = this.searchId; // todo - might be good to rename this, its a bit confusing
-        const spectraData = this.containingModel.getSpectraDataById(uploadId, spectraDataId);
+        const spectraData = this.containingModel.getSpectraDataById(this.uploadId, this._identification.sd);
         return path.basename(spectraData.location);
     }
 
     group() {
-        return this.containingModel.get("searches").get(this.searchId).group;
+        return this.containingModel.get("mzidentmlFiles").get(this.uploadId).group;
     }
 
     expMZ() {
@@ -421,7 +419,7 @@ export class SpectrumMatch {
         return this._identification.sp;
     }
 
-    get searchId() {
+    get uploadId() {
         return this._identification.si.toString();
     }
 
@@ -451,7 +449,7 @@ export class SpectrumMatch {
     }
 
     get datasetId() {
-        return this.searchId;
+        return this.uploadId;
     }
 
     get scanNumber() {
@@ -467,7 +465,7 @@ export class SpectrumMatch {
     }
 
     get spectrumIdentificationProtocol() {
-        return this.containingModel.getSpectrumIdentificationProtocol(this.searchId, this._identification.sip);
+        return this.containingModel.getSpectrumIdentificationProtocol(this.uploadId, this._identification.sip);
     }
 }
 

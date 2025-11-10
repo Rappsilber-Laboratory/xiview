@@ -4,7 +4,7 @@ export class SearchModification {
     }
 
     get id() {
-        return this._json.id;
+        return this._json.upload_id + "_" + this._json.protocol_id + "_" +  this._json.id;
     }
 
     get massDelta() {

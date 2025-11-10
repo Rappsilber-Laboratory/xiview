@@ -7,6 +7,7 @@ import {SpectrumIdentificationProtocol} from "./spectrum-identification-protocol
 import {SpectraData} from "./spectra-data";
 import {MzidentmlFile} from "./mzidentml-file";
 import {AnalysisCollectionSpectrumIdentification} from "./analysis-collection-spectrum-identification";
+import {SearchModification} from "./search-modification";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -17,7 +18,7 @@ export class SearchResultsModel extends Backbone.Model {
     //http://stackoverflow.com/questions/19835163/backbone-model-collection-property-not-empty-on-new-model-creation
     defaults() {
         return {
-            participants: new Map(), //map
+            proteins: new Map(), //map
             matches: [],
             crosslinks: new Map(), //map
             scoreExtent: null,
@@ -91,155 +92,16 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     processEnzymes(data) {
-        this.enzymes = data;
-        // const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
-        //     if (regexMatch && regexMatch.length > 1) {
-        //         const resArray = regexMatch[1].split(",");
-        //         const resCount = resArray.length;
-        //         for (let r = 0; r < resCount; r++) {
-        //             residueSet.add({
-        //                 aa: resArray[r],
-        //                 postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
-        //             });
-        //         }
-        //     }
-        // };
 
-        //enzyme specificity
-        // TODO _ seems like theres a duplication problem here if multiple searches are aggregated
-
-        //eliminate duplication first
-        // const enzymeDescriptions = new Set();
-        // for (let search of searches.values()) {
-        //     for (let enzyme of search.enzymes) {
-        //         enzymeDescriptions.add(enzyme.description);
-        //     }
-        // }
-        //
-        // const postAaSet = new Set();
-        // const aaConstrainedCTermSet = new Set();
-        // const aaConstrainedNTermSet = new Set();
-        //
-        // for (let enzymeDescription of enzymeDescriptions) {
-        //     const postAARegex = /PostAAConstrainedDigestion:DIGESTED:(.*?);ConstrainingAminoAcids:(.*?);/g;
-        //     const postAAMatch = postAARegex.exec(enzymeDescription);
-        //     getResiduesFromEnzymeDescription(postAAMatch, postAaSet);
-        //
-        //     const cTermRegex = /CTERMDIGEST:(.*?);/g;
-        //     const ctMatch = cTermRegex.exec(enzymeDescription);
-        //     getResiduesFromEnzymeDescription(ctMatch, aaConstrainedCTermSet);
-        //
-        //     const nTermRegex = /NTERMDIGEST:(.*?);/g;
-        //     const ntMatch = nTermRegex.exec(enzymeDescription);
-        //     getResiduesFromEnzymeDescription(ntMatch, aaConstrainedNTermSet);
-        // }
-        //
-        // const addEnzymeSpecificityResidues = function (residueSet, type) {
-        //     const resArray = Array.from(residueSet.values());
-        //     const resCount = resArray.length;
-        //     for (let r = 0; r < resCount; r++) {
-        //         enzymeSpecificity.push({
-        //             aa: resArray[r].aa,
-        //             type: type,
-        //             postConstraint: resArray[r].postConstraint
-        //         });
-        //     }
-        // };
-
-        const enzymeSpecificity = [];
-        // addEnzymeSpecificityResidues(postAaSet, "DIGESTIBLE"); //"Post AA constrained");
-        // addEnzymeSpecificityResidues(aaConstrainedCTermSet, "DIGESTIBLE"); // "AA constrained c-term");
-        // addEnzymeSpecificityResidues(aaConstrainedNTermSet, "DIGESTIBLE"); // "AA constrained n-term");
-        this.set("enzymeSpecificity", enzymeSpecificity);
     }
 
     processSearchModifications(data) {
-        this.searchModifications = data;
-        //modifications
-        // short term hack - index mod names by accession
-        const modificationNames = new Map();
-        // for (let mod of json.modifications){
-        //     modificationNames.set(mod.accession, mod.mod_name);
-        // }
-        this.set("modificationNames", modificationNames);
-
-        // //crosslink specificity
-        //         /*var linkableResSet = new Set();
-        //         for (var s = 0; s < searchCount; s++) {
-        //             var search = searchArray[s];
-        //             var crosslinkers = search.crosslinkers || [];
-        //             var crosslinkerCount = crosslinkers.length;
-        //             for (var cl = 0; cl < crosslinkerCount; cl++) {
-        //                 var crosslinkerDescription = crosslinkers[cl].description;
-        //                 var linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g;
-        //                 var result = null;
-        //                 while ((result = linkedAARegex.exec(crosslinkerDescription)) !== null) {
-        //                     var resArray = result[1].split(',');
-        //                     var resCount = resArray.length;
-        //                     for (var r = 0; r < resCount; r++) {
-        //                         var resRegex = /([A-Z])(.*)?/
-        //                         var resMatch = resRegex.exec(resArray[r]);
-        //                         if (resMatch) {
-        //                             linkableResSet.add(resMatch[1]);
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //         this.set("crosslinkerSpecificity", CLMS.arrayFromMapValues(linkableResSet));*/
-        //
-        //         const linkableResSets = {};
-        //         for (let search of searches.values()) {
-        //             const crosslinkers = search.crosslinkers || [];
-        //
-        //             crosslinkers.forEach(function (crosslinker) {
-        //                 const crosslinkerDescription = crosslinker.description;
-        //                 const crosslinkerName = crosslinker.name;
-        //                 const linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g; // capture both sets if > 1 set
-        //                 // //console.log("cld", crosslinkerDescription);
-        //                 let resSet = linkableResSets[crosslinkerName];
-        //
-        //                 if (!resSet) {
-        //                     resSet = {
-        //                         searches: new Set(),
-        //                         linkables: [],
-        //                         name: crosslinkerName,
-        //                         id: +crosslinker.id
-        //                     };
-        //                     linkableResSets[crosslinkerName] = resSet;
-        //                 }
-        //                 resSet.searches.add(search.id);
-        //
-        //                 let result = null;
-        //                 let i = 0;
-        //                 while ((result = linkedAARegex.exec(crosslinkerDescription)) !== null) {
-        //                     if (!resSet.linkables[i]) {
-        //                         resSet.linkables[i] = new Set();
-        //                     }
-        //
-        //                     const resArray = result[1].split(",");
-        //                     resArray.forEach(function (res) {
-        //                         const resRegex = /(cterm|nterm|[A-Z])(.*)?/i;
-        //                         const resMatch = resRegex.exec(res);
-        //                         if (resMatch) {
-        //                             resSet.linkables[i].add(resMatch[1].toUpperCase());
-        //                         }
-        //                     });
-        //                     i++;
-        //                 }
-        //
-        //                 if (i === 0) {
-        //                     resSet.linkables.push(new Set(["*"]));  // in case non-covalent
-        //                 }
-        //
-        //                 resSet.heterobi = resSet.heterobi || (i > 1);
-        //             });
-        //         }
-        //
-        //         // //console.log("CROSS", linkableResSets);
-        //         // if (this.get("serverFlavour") === "XI2") { // hacky, crosslinker specificity not working in other systems
-        //         //     this.set("crosslinkerSpecificity", linkableResSets);
-        //         // }
+        const searchModifications = new Map();
+        for (let mod of data){
+            const sm = new SearchModification(mod);
+            searchModifications.set(sm.id, sm);
+        }
+        this.set("searchModifications", searchModifications);
     }
 
     processMatches(data) {
@@ -261,7 +123,7 @@ export class SearchResultsModel extends Backbone.Model {
         // this.set("xiNETLayout", json.xiNETLayout);
 
 
-        const participants = this.get("participants");
+        const participants = this.get("proteins");
         const peptides = new Map();
         //todo - sort this out
         // if (!this.isAggregatedData()) {
@@ -302,7 +164,6 @@ export class SearchResultsModel extends Backbone.Model {
         //peptides
         if (this.peptides) {
             for (let peptide of this.peptides) {
-                SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
 
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
@@ -327,7 +188,7 @@ export class SearchResultsModel extends Backbone.Model {
                 }
             }
         }
-
+        this.set("peptides", peptides);
         for (let participant of tempParticipants.values()) {
             participants.set(participant.id, participant);
         }
@@ -509,7 +370,7 @@ export class SearchResultsModel extends Backbone.Model {
     initDecoyLookup(prefixes) {
         // Make map of reverse/random decoy proteins to real proteins
         prefixes = prefixes || ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
-        const prots = Array.from(this.get("participants").values());
+        const prots = Array.from(this.get("proteins").values());
         const nameMap = d3.map();
         const accessionMap = d3.map();
         prots.forEach(function (prot) {

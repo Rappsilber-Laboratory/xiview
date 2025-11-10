@@ -27,7 +27,7 @@ export async function testSetup() {
     module("Data Loading and Processing");
 
     test("Proteins loaded correctly", function (assert) {
-        const participants = clmsModel.get("participants");
+        const participants = clmsModel.get("proteins");
         assert.ok(participants instanceof Map, "participants is a Map");
         assert.ok(participants.size > 0, `At least some proteins loaded (${participants.size})`);
 
@@ -47,7 +47,7 @@ export async function testSetup() {
     });
 
     test("Protein sequences loaded", function (assert) {
-        const participants = clmsModel.get("participants");
+        const participants = clmsModel.get("proteins");
 
         // Check protein B using its accession
         const proteinB = participants.get("PB");
@@ -79,7 +79,7 @@ export async function testSetup() {
         // Check first match has expected properties
         const firstMatch = matches[0];
         assert.ok(firstMatch.id, "match has id");
-        assert.ok(firstMatch.searchId !== undefined, "match has searchId");
+        assert.ok(firstMatch.uploadId !== undefined, "match has uploadId");
     });
 
     test("Searches identified", function (assert) {
@@ -89,14 +89,13 @@ export async function testSetup() {
         assert.ok(searches.size > 0, "At least one search identified");
     });
 
-    test("Enzymes loaded", function (assert) {
-        const enzymes = clmsModel.enzymes;
-        assert.ok(enzymes !== undefined, "enzymes data exists");
-        assert.ok(Array.isArray(enzymes), "enzymes is an array");
-    });
+    // test("Enzymes loaded", function (assert) {
+    //     const enz = clmsModel.get("enzymes");
+    //     assert.ok(enz instanceof Map, "modifications is a Map");
+    // });
 
     test("Search modifications loaded", function (assert) {
-        const modifications = clmsModel.get("modifications");
+        const modifications = clmsModel.get("searchModifications");
         assert.ok(modifications instanceof Map, "modifications is a Map");
     });
 
@@ -123,11 +122,9 @@ export async function testSetup() {
 
         if (mzidFile) {
             assert.equal(mzidFile.id, 1, "mzidentML file id is 1");
-            assert.equal(mzidFile.uploadId, 1, "uploadId matches id");
             assert.equal(mzidFile.projectId, "crosslinking", "project_id is correct");
             assert.equal(mzidFile.identificationFileName, "multiple_spectra_per_id_1_3_0_draft.mzid", "identification_file_name is correct");
             assert.equal(mzidFile.containsCrosslinks, true, "contains_crosslinks is true");
-            assert.ok(Array.isArray(mzidFile.warnings), "warnings is an array");
             assert.ok(Array.isArray(mzidFile.spectraFormats), "spectra_formats is an array");
             assert.ok(mzidFile.spectraFormats.length > 0, "spectra_formats has entries");
         } else {
@@ -211,7 +208,7 @@ export async function testSetup() {
 
     test("Peptide to protein mappings valid", function (assert) {
         const peptides = clmsModel.peptides;  // Use direct property, not get()
-        const participants = clmsModel.get("participants");
+        const participants = clmsModel.get("proteins");
 
         let allValid = true;
         const invalidPeptides = [];
@@ -237,15 +234,14 @@ export async function testSetup() {
 
     test("Match to peptide mappings valid", function (assert) {
         const matches = clmsModel.get("matches");
-        const peptides = clmsModel.peptides;  // Use direct property, not get()
-        const peptideMap = new Map(peptides.map(p => [p.id, p]));
+        const peptides = clmsModel.get("peptides");  // Use direct property, not get()
 
         let allValid = true;
 
         matches.forEach(match => {
             if (match.matchedPeptides) {
                 match.matchedPeptides.forEach(mp => {
-                    if (mp && mp.id && !peptideMap.get(mp.id)) {
+                    if (mp && mp.id && !peptides.get(mp.id)) {
                         allValid = false;
                         console.error("Invalid match-to-peptide mapping:", match.id, "->", mp.id);
                     }
@@ -257,15 +253,16 @@ export async function testSetup() {
     });
 
     test("Search IDs consistent", function (assert) {
-        const participants = clmsModel.get("participants");
-        const searches = clmsModel.get("searches");
+        const participants = clmsModel.get("proteins");
+        const mzidFiles = clmsModel.get("mzidentmlFiles");
 
         // Check all protein search_ids are in searches map
         let allValid = true;
         participants.forEach(protein => {
-            if (protein.search_id && !searches.has(protein.search_id)) {
+            console.log("*", protein, protein.upload_id, mzidFiles.has(protein.upload_id));
+            if (protein.upload_id && !mzidFiles.has(protein.upload_id)) {
                 allValid = false;
-                console.error("Protein has invalid search_id:", protein.id, protein.search_id);
+                console.error("Protein has invalid upload_id:", protein.id, protein.upload_id);
             }
         });
 

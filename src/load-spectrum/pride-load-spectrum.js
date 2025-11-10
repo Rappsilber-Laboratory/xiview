@@ -63,7 +63,7 @@ export const prideLoadSpectrum = function (match) {
 
     d3.json(window.compositeModelInst.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
                     + "&sd_ref=" +  encodeURIComponent(match._identification.sd)
-                    + "&upload_id=" +  encodeURIComponent(match.searchId), function (error, json) {
+                    + "&upload_id=" +  encodeURIComponent(match.uploadId), function (error, json) {
         if (error) {
             console.log("error getting peak list", json);
         } else {

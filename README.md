@@ -28,13 +28,6 @@ CLMS-model provides the core data structures for xiVIEW
 - **`spectrum-identification-protocol.js`**: Search protocol metadata
 - **`load-spectrum/`**: Utilities for loading and parsing spectrum data
 
-## Technology Stack
-
-- **Pure JavaScript**: No external dependencies for maximum compatibility
-- **ES6+ Features**: Modern JavaScript with class definitions and modules
-- **Modular Design**: Each model in separate file for maintainability
-- **Event-Driven**: Uses event patterns for model change notifications
-
 ## Development
 
 ### Branch Information
