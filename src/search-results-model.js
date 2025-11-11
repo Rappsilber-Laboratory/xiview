@@ -8,6 +8,7 @@ import {SpectraData} from "./spectra-data";
 import {MzidentmlFile} from "./mzidentml-file";
 import {AnalysisCollectionSpectrumIdentification} from "./analysis-collection-spectrum-identification";
 import {SearchModification} from "./search-modification";
+import {Enzyme} from "./enzyme";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -91,7 +92,12 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     processEnzymes(data) {
-
+        const enzymes = new Map();
+        for (let e of data){
+            const enzyme = new Enzyme(e);
+            enzymes.set(e.id, e);
+        }
+        this.set("enzymes", enzymes);
     }
 
     processSearchModifications(data) {
@@ -193,6 +199,9 @@ export class SearchResultsModel extends Backbone.Model {
         this.rawMatches = null;
         this.rawPeptides = null;
         this.rawProteins = null;
+        delete this.rawMatches;
+        delete this.rawPeptides;
+        delete this.rawProteins;
         const searches = this.getProteinSearchMap(peptides, matches);
         this.set("searches", searches);
     }
