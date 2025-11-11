@@ -26,6 +26,7 @@ export const networkPageSpinner = new Spinner({
 });
 
 // Memory monitoring - logs JavaScript VM memory usage every 2 seconds
+// eslint-disable-next-line no-unused-vars
 function startMemoryMonitoring() {
     let logCount = 0;
     if (performance.memory) {
@@ -279,6 +280,8 @@ if (process.env.NODE_ENV !== "production") {
         },
         testClmsModel: async () => {
             const { testSetup } = await import("../../CLMS-model/tests/clms-model-tests");
+            // eslint-disable-next-line no-undef
+            QUnit.config.notrycatch = true;
             return testSetup();
         }
     };

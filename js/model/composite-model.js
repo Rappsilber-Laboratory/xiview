@@ -8,6 +8,7 @@ import {makeURLQueryPairs, mergeContiguousFeatures} from "../modelUtils";
 import d3 from "d3";
 import {xilog} from "../utils";
 import {ManualColourModel} from "./color/protein-color-model";
+import {getCrosslinkableResiduesAsFeatures, getDigestibleResiduesAsFeatures} from "./get-as-features";
 
 export class CompositeModel extends Backbone.Model {
     constructor(attributes, options) {
@@ -906,20 +907,21 @@ export class CompositeModel extends Backbone.Model {
             featureFilterSet.add(value.toUpperCase());
         });
 
+        const clmsModel = this.get("clmsModel");
         if (featureFilterSet.has("Digestible")) {
-            const digestFeatures = this.get("clmsModel").getDigestibleResiduesAsFeatures(participant);
+            const digestFeatures = getDigestibleResiduesAsFeatures(clmsModel, participant);
             const mergedFeatures = mergeContiguousFeatures(digestFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Crosslinkable-1")) {
-            const crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 1);
+            const crosslinkableFeatures = getCrosslinkableResiduesAsFeatures(clmsModel, participant, 1);
             const mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }
 
         if (featureFilterSet.has("Crosslinkable-2")) {
-            const crosslinkableFeatures = this.get("clmsModel").getCrosslinkableResiduesAsFeatures(participant, 2);
+            const crosslinkableFeatures = getCrosslinkableResiduesAsFeatures(clmsModel, participant, 2);
             const mergedFeatures = mergeContiguousFeatures(crosslinkableFeatures);
             features = d3.merge([mergedFeatures, features]);
         }

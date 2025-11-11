@@ -7,6 +7,9 @@ import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
 import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
 
+// Enable full stack traces in console for test failures
+QUnit.config.notrycatch = true;
+
 export function testSetup2() {
     const pdbFiles = [
         "renum_hard.pdb",
