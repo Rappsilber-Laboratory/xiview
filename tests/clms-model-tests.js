@@ -23,21 +23,20 @@ export async function testSetup() {
     }
 
     console.log("Running QUnit tests...");
-    start();
     module("Data Loading and Processing");
 
     test("Proteins loaded correctly", function (assert) {
-        const participants = clmsModel.get("proteins");
-        assert.ok(participants instanceof Map, "participants is a Map");
-        assert.ok(participants.size > 0, `At least some proteins loaded (${participants.size})`);
+        const proteins = clmsModel.get("proteins");
+        assert.ok(proteins instanceof Map, "participants is a Map");
+        assert.ok(proteins.size > 0, `At least some proteins loaded (${proteins.size})`);
 
         // In aggregated data, protein IDs are changed to accessions during parseJSON
         // Check using accessions instead of original IDs
-        const participantKeys = Array.from(participants.keys());
+        const participantKeys = Array.from(proteins.keys());
         assert.ok(participantKeys.length > 0, `Participant keys exist: ${participantKeys.join(", ")}`);
 
         // Check if PA (protein_A accession) exists
-        const proteinA = participants.get("PA");
+        const proteinA = proteins.get("protein_A");
         if (proteinA) {
             assert.ok(true, "protein_A (PA) exists");
             assert.equal(proteinA.sequence, "MKVLVIGNGKPEPK", "protein_A sequence correct");
@@ -50,7 +49,7 @@ export async function testSetup() {
         const participants = clmsModel.get("proteins");
 
         // Check protein B using its accession
-        const proteinB = participants.get("PB");
+        const proteinB = participants.get("protein_B");
         if (proteinB) {
             assert.equal(proteinB.sequence, "DAHKSEVAHRFKDLGEENFKTIDEK", "protein_B sequence correct");
             assert.equal(proteinB.accession, "PB", "protein_B accession correct");
@@ -60,15 +59,98 @@ export async function testSetup() {
     });
 
     test("Peptides processed correctly", function (assert) {
-        // Peptides are stored internally and accessed via matches
-        // The raw peptide data is in clmsModel.peptides
-        assert.ok(clmsModel.peptides, "peptides data exists");
-        assert.ok(Array.isArray(clmsModel.peptides), "peptides is an array");
-        assert.ok(clmsModel.peptides.length > 0, "peptides array is not empty");
+        const peptides = clmsModel.get("peptides");
+        assert.ok(peptides instanceof Map, "peptides is a Map");
+        assert.ok(peptides.size > 0, `peptides Map has entries (${peptides.size} total)`);
 
-        // Check first peptide has expected properties
-        const firstPeptide = clmsModel.peptides[0];
-        assert.ok(firstPeptide.id !== undefined, "peptide has id");
+        // Test DSSO crosslink donor peptide exists (from upload 1)
+        const dssoDonor = peptides.get("1_0");
+        assert.ok(dssoDonor, "DSSO crosslink donor peptide exists (1_0)");
+        if (dssoDonor) {
+            assert.equal(dssoDonor._pep.seq, "PEPK", "DSSO donor has expected sequence");
+            assert.equal(dssoDonor._pep.ls1, 4, "DSSO donor has link site at position 4");
+            assert.equal(dssoDonor._pep.cl_m, 158.003765, "DSSO donor has correct crosslink mass");
+            const donorMod = dssoDonor._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_donor");
+            assert.ok(donorMod, "DSSO donor has crosslink donor modification");
+        }
+
+        // Test DSSO crosslink acceptor peptide exists
+        const dssoAcceptor = peptides.get("1_1");
+        assert.ok(dssoAcceptor, "DSSO crosslink acceptor peptide exists (1_1)");
+        if (dssoAcceptor) {
+            assert.equal(dssoAcceptor._pep.seq, "TIDEK", "DSSO acceptor has expected sequence");
+            assert.equal(dssoAcceptor._pep.ls1, 1, "DSSO acceptor has link site at position 1");
+            const acceptorMod = dssoAcceptor._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_acceptor");
+            assert.ok(acceptorMod, "DSSO acceptor has crosslink acceptor modification");
+        }
+
+        // Test DSSO monolink stubs exist
+        const dssoStubA = peptides.get("1_2");
+        assert.ok(dssoStubA, "DSSO stub_a monolink exists (1_2)");
+        if (dssoStubA) {
+            const stubMod = dssoStubA._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_stub_a");
+            assert.ok(stubMod, "DSSO stub_a has correct modification type");
+            assert.equal(dssoStubA._pep.m_ms[0], 54.010565, "DSSO stub_a has correct mass");
+        }
+
+        // Test EDC self-link (same peptide, two link sites)
+        const edcSelfLink = peptides.get("2_5");
+        assert.ok(edcSelfLink, "EDC self-link peptide exists (2_5)");
+        if (edcSelfLink) {
+            assert.equal(edcSelfLink._pep.seq, "DVIQSLVDDDLVAK", "EDC self-link has expected sequence");
+            assert.equal(edcSelfLink._pep.ls1, 10, "EDC self-link has first link site");
+            assert.equal(edcSelfLink._pep.ls2, 14, "EDC self-link has second link site");
+            assert.equal(edcSelfLink._pep.cl_m, -18.010565, "EDC crosslink has correct mass");
+        }
+
+        // Test SDA crosslink pair
+        const sdaDonor = peptides.get("3_3");
+        const sdaAcceptor = peptides.get("3_2");
+        assert.ok(sdaDonor, "SDA crosslink donor exists (3_3)");
+        assert.ok(sdaAcceptor, "SDA crosslink acceptor exists (3_2)");
+        if (sdaDonor && sdaAcceptor) {
+            const donorMod = sdaDonor._pep.m_as.find(m => m["MS:1003393"] === "SDA_crosslink_donor");
+            const acceptorMod = sdaAcceptor._pep.m_as.find(m => m["MS:1003393"] === "SDA_crosslink_acceptor");
+            assert.ok(donorMod, "SDA donor has correct modification");
+            assert.ok(acceptorMod, "SDA acceptor has correct modification");
+            assert.equal(sdaDonor._pep.cl_m, 82.04186, "SDA donor has correct crosslink mass");
+        }
+
+        // Test linear peptide (no crosslink)
+        const linearPep = peptides.get("2_0");
+        assert.ok(linearPep, "Linear peptide exists (2_0)");
+        if (linearPep) {
+            assert.equal(linearPep._pep.ls1, null, "Linear peptide has no link site 1");
+            assert.equal(linearPep._pep.ls2, null, "Linear peptide has no link site 2");
+            assert.equal(linearPep._pep.cl_m, 0, "Linear peptide has no crosslink mass");
+            assert.equal(linearPep._pep.m_as.length, 0, "Linear peptide has no modifications");
+        }
+
+        // Test peptide with multiple non-crosslink modifications
+        const modifiedPep = peptides.get("4_0");
+        assert.ok(modifiedPep, "Peptide with multiple modifications exists (4_0)");
+        if (modifiedPep) {
+            assert.equal(modifiedPep._pep.m_as.length, 3, "Peptide has 3 modifications");
+            const oxidation = modifiedPep._pep.m_as.find(m => m["UNIMOD:35"] === "Oxidation");
+            const cm = modifiedPep._pep.m_as.filter(m => m["UNIMOD:4"] === "Carbamidomethyl");
+            assert.ok(oxidation, "Peptide has Oxidation modification");
+            assert.equal(cm.length, 2, "Peptide has 2 Carbamidomethyl modifications");
+        }
+
+        // Test peptide structure consistency
+        peptides.forEach((pepEntry, key) => {
+            assert.ok(/^\d+_\d+$/.test(key), `peptide keys follow uploadId_peptideId pattern: ${key}`);
+            const pep = pepEntry._pep;
+            assert.ok(pep.id !== undefined, `Peptide ${key} has id`);
+            assert.ok(pep.u_id, `Peptide ${key} has u_id`);
+            assert.ok(pep.seq, `Peptide ${key} has sequence`);
+            assert.ok(Array.isArray(pep.prt), `Peptide ${key} prt is array`);
+            assert.ok(Array.isArray(pep.pos), `Peptide ${key} pos is array`);
+            assert.ok(Array.isArray(pep.m_as), `Peptide ${key} m_as is array`);
+            assert.ok(Array.isArray(pep.m_ps), `Peptide ${key} m_ps is array`);
+            assert.ok(Array.isArray(pep.m_ms), `Peptide ${key} m_ms is array`);
+            assert.ok(typeof pep.cl_m === "number", `Peptide ${key} cl_m is number`);
+        });
     });
 
     test("Matches loaded correctly", function (assert) {
@@ -83,7 +165,7 @@ export async function testSetup() {
     });
 
     test("Searches identified", function (assert) {
-        const searches = clmsModel.get("searches");
+        const searches = clmsModel.get("mzidentmlFiles");
         assert.ok(searches instanceof Map, "searches is a Map");
         // Should have 4 unique search_ids based on protein data: "1", "2", "3", "4"
         assert.ok(searches.size > 0, "At least one search identified");
@@ -259,7 +341,6 @@ export async function testSetup() {
         // Check all protein search_ids are in searches map
         let allValid = true;
         participants.forEach(protein => {
-            console.log("*", protein, protein.upload_id, mzidFiles.has(protein.upload_id));
             if (protein.upload_id && !mzidFiles.has(protein.upload_id)) {
                 allValid = false;
                 console.error("Protein has invalid upload_id:", protein.id, protein.upload_id);
@@ -303,22 +384,36 @@ export async function testSetup() {
             {id: "4", prt: ["C"]},
         ];
         const matches = [
-            {pi: ["1", "2"], si: "S1"},
-            {pi: ["1", "3"], si: "S1"},
-            {pi: ["4"], si: "S2"},
+            {matchedPeptides: [peptides[0], peptides[1]], uploadId: "S1"},
+            {matchedPeptides: [peptides[0], peptides[2]], uploadId: "S1"},
+            {matchedPeptides: [peptides[3]], uploadId: "S2"},
         ];
 
         const searchMap = clmsModel.getProteinSearchMap(peptides, matches);
 
+        // OLD TEST CODE (function now returns Map with {participantIDSet, id} objects):
+        // assert.ok(searchMap, "getProteinSearchMap returns result");
+        // assert.ok(searchMap["S1"], "Search S1 exists in map");
+        // assert.ok(searchMap["S2"], "Search S2 exists in map");
+
+        // NEW TEST CODE (updated for new return format):
         assert.ok(searchMap, "getProteinSearchMap returns result");
-        assert.ok(searchMap["S1"], "Search S1 exists in map");
-        assert.ok(searchMap["S2"], "Search S2 exists in map");
+        assert.ok(searchMap.get("S1"), "Search S1 exists in map");
+        assert.ok(searchMap.get("S2"), "Search S2 exists in map");
+        assert.ok(searchMap.get("S1").participantIDSet instanceof Set, "S1 has participantIDSet as Set");
+        assert.ok(searchMap.get("S2").participantIDSet instanceof Set, "S2 has participantIDSet as Set");
+        assert.equal(searchMap.get("S1").id, "S1", "S1 has correct id property");
+        assert.equal(searchMap.get("S2").id, "S2", "S2 has correct id property");
+        // Check participantIDSet contents
+        assert.deepEqual([...searchMap.get("S1").participantIDSet].sort(), ["A", "B"], "S1 contains proteins A and B");
+        assert.deepEqual([...searchMap.get("S2").participantIDSet].sort(), ["C"], "S2 contains protein C");
     });
 
     test("isAggregatedData method", function (assert) {
         const isAggregated = clmsModel.isAggregatedData();
-        assert.equal(typeof isAggregated, "boolean", "isAggregatedData returns boolean");
+        assert.equal(isAggregated, true);
     });
 
+    start();
     console.log("CLMS-model tests completed");
 }

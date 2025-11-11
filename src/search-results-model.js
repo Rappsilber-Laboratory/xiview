@@ -33,7 +33,6 @@ export class SearchResultsModel extends Backbone.Model {
         };
     }
 
-    //TODO - reinstate this, needed to know whats aggregated, everywhere you see "searches" in codebase it's some kind of error
     processMzIdentMLFiles(json) {
         const mzidentmlFiles = new Map();
         for (let mzid of json){
@@ -105,67 +104,51 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     processMatches(data) {
-        this.matches = data;
+        this.rawMatches = data;
     }
 
     processPeptides(data) {
-        this.peptides = data;
+        this.rawPeptides = data;
     }
 
     processProteins(data) {
-        this.proteins = data;
+        this.rawProteins = data;
     }
 
     //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
     parseJSON(json) {
         this.set("primaryScore", {score_name: "Match Score"});
-        // //saved config should end up including filter settings not just xiNET layout
+        // todo - saved config should end up including filter settings not just xiNET layout
         // this.set("xiNETLayout", json.xiNETLayout);
-
-
         const participants = this.get("proteins");
         const peptides = new Map();
-        //todo - sort this out
-        // if (!this.isAggregatedData()) {
-        //     alert("NOT AGG!");
-        //     if (this.proteins) {
-        //         for (let participant of this.proteins) {
-        //             this.initProtein(participant, json);
-        //             participants.set(participant.id, participant);
-        //         }
-        //     }
-        //     //peptides
-        //     if (this.peptides) {
-        //         for (let peptide of this.peptides) {
-        //             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-        //             peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-        //             peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-        //             for (let p = 0; p < peptide.prt.length; p++) {
-        //                 if (peptide.dec[p]) {
-        //                     const protein = participants.get(peptide.prt[p]);
-        //                     if (!protein) {
-        //                         console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
-        //                     }
-        //                     protein.is_decoy = true;
-        //                     this.set("decoysPresent", true);
-        //                 }
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     alert("AGG!");
-        const tempParticipants = new Map();
-        if (this.proteins) {
-            for (let participant of this.proteins) {
+        if (!this.isAggregatedData()) {
+            for (let participant of this.rawProteins) {
+                this.initProtein(participant, json);
+                participants.set(participant.id, participant);
+            }
+            for (let peptide of this.rawPeptides) {
+                peptide.sequence = peptide.base_seq;
+                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
+                for (let p = 0; p < peptide.prt.length; p++) {
+                    if (peptide.dec[p]) {
+                        const protein = participants.get(peptide.prt[p]);
+                        if (!protein) {
+                            console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+                        }
+                        protein.is_decoy = true;
+                        this.set("decoysPresent", true);
+                    }
+                }
+            }
+        } else {
+            const tempParticipants = new Map();
+            for (let participant of this.rawProteins) {
                 this.initProtein(participant, json);
                 tempParticipants.set(participant.id, participant);
             }
-        }
-        //peptides
-        if (this.peptides) {
-            for (let peptide of this.peptides) {
+            for (let peptide of this.rawPeptides) {
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
                     const protein = tempParticipants.get(peptide.prt[pe]);
                     if (!protein) {
@@ -182,85 +165,52 @@ export class SearchResultsModel extends Backbone.Model {
                         // fix ids for target in aggregated data
                         protein.id = protein.accession;
                         peptide.prt[pe] = protein.accession;
-
                     }
-
                 }
+            }
+            for (let participant of tempParticipants.values()) {
+                participants.set(participant.id, participant);
             }
         }
         this.set("peptides", peptides);
-        for (let participant of tempParticipants.values()) {
-            participants.set(participant.id, participant);
-        }
-
-        // }
-
         this.initDecoyLookup();
-
         const crosslinks = this.get("crosslinks");
-
         let minScore = undefined;
         let maxScore = undefined;
-
-        // moved from modelUtils 05/08/19
-        // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-        const searchMap = this.getProteinSearchMap(this.peptides, this.matches);
-        // this.get("searches").forEach(function (value, key) {
-        //     value.participantIDSet = searchMap[key];
-        // });
-        //todo - probs here
-        const searches = new Map();
-        for (const [key, value] of Object.entries(searchMap)) {
-            searches.set(key, {participantIDSet: value, id: key});
-        }
-        this.set("searches", searches);
-
-
-        if (this.matches) {
-            const matches = this.get("matches");
-
-            const l = this.matches.length;
-            for (let i = 0; i < l; i++) {
-                let match;
-                match = new SpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
-                matches.push(match);
-
-                if (maxScore === undefined || match.score() > maxScore) {
-                    maxScore = match.score();
-                } else if (minScore === undefined || match.score() < minScore) {
-                    minScore = match.score();
-                }
+        const matches = this.get("matches");
+        const l = this.rawMatches.length;
+        for (let i = 0; i < l; i++) {
+            const match = new SpectrumMatch(this, participants, crosslinks, peptides, this.rawMatches[i]);
+            matches.push(match);
+            if (maxScore === undefined || match.score() > maxScore) {
+                maxScore = match.score();
+            } else if (minScore === undefined || match.score() < minScore) {
+                minScore = match.score();
             }
         }
-
         this.set("minScore", minScore);
         this.set("maxScore", maxScore);
+        this.rawMatches = null;
+        this.rawPeptides = null;
+        this.rawProteins = null;
+        const searches = this.getProteinSearchMap(peptides, matches);
+        this.set("searches", searches);
     }
 
     // Connect searches to proteins
-    getProteinSearchMap(peptideArray, rawMatchArray) {
-        const pepMap = d3.map(peptideArray, function (peptide) {
-            return peptide.id;
-        });
-        const searchMap = {}; // todo- use map
-        rawMatchArray = rawMatchArray || [];
-        const self = this;
-        rawMatchArray.forEach(function (rawMatch) {
-            const peptideIDs = rawMatch.pi ? rawMatch.pi : [rawMatch.pi1, rawMatch.pi2];
-            peptideIDs.forEach(function (pepID) {
-                if (pepID) {
-                    const prots = pepMap.get(pepID).prt;
-                    let searchId = rawMatch.si;
-                    let searchToProts = searchMap[searchId];
-                    if (!searchToProts) {
-                        const newSet = new Set();
-                        searchMap[searchId] = newSet;
-                        searchToProts = newSet;
-                    }
-                    prots.forEach(function (prot) {
-                        searchToProts.add(prot);
-                    });
-                }
+    // Returns: Map<searchId, {participantIDSet: Set<proteinId>, id: searchId}>
+    getProteinSearchMap(peptideMap, matchArray) {
+        const searchMap = new Map();
+        matchArray.forEach((match) => {
+            match.matchedPeptides.forEach((peptide) => {
+                const prots = peptide.prt;
+                const searchId = match.uploadId;
+                const search = searchMap.get(searchId) || (() => {
+                    const newSearch = {participantIDSet: new Set(), id: searchId};
+                    searchMap.set(searchId, newSearch);
+                    return newSearch;
+                })();
+                prots.forEach((prot) => search.participantIDSet.add(prot));
             });
         });
         return searchMap;
@@ -294,77 +244,6 @@ export class SearchResultsModel extends Backbone.Model {
                 this.meta[metaField] = value;
             }
         }.bind(protObj);
-    }
-
-    getDigestibleResiduesAsFeatures(participant) {
-        const digestibleResiduesAsFeatures = [];
-
-        const sequence = participant.sequence;
-        const seqLength = sequence.length;
-        const specificity = this.get("enzymeSpecificity");
-
-        const specifCount = specificity.length;
-        for (let i = 0; i < specifCount; i++) {
-            const spec = specificity[i];
-            for (let s = 0; s < seqLength; s++) {
-                if (sequence[s] === spec.aa) {
-                    if (!spec.postConstraint || !sequence[s + 1] || spec.postConstraint.indexOf(sequence[s + 1]) === -1) {
-                        digestibleResiduesAsFeatures.push({
-                            begin: s + 1,
-                            end: s + 1,
-                            name: "DIGESTIBLE",
-                            protID: participant.id,
-                            id: participant.id + " " + spec.type + (s + 1),
-                            category: "AA",
-                            type: "DIGESTIBLE"
-                        });
-                    }
-                }
-            }
-        }
-        //console.log("sp:", specificity, "df:", digestibleResiduesAsFeatures);
-        return digestibleResiduesAsFeatures;
-    }
-
-    getCrosslinkableResiduesAsFeatures(participant, reactiveGroup) {
-        const crosslinkableResiduesAsFeatures = [];
-
-        const sequence = participant.sequence;
-        const seqLength = sequence.length;
-        const linkedResSets = this.get("crosslinkerSpecificity");
-
-        const temp = d3.values(linkedResSets);
-        for (let cl = 0; cl < temp.length; cl++) {
-            // resSet = {searches: new Set(), linkables: [], name: crosslinkerName};
-            const crosslinkerLinkedResSet = temp[cl];
-            const linkables = crosslinkerLinkedResSet.linkables;
-
-            //for (var l = 0 ; l < linkables.length; l++) {
-            if (linkables[reactiveGroup - 1]) {
-                const linkableSet = linkables[reactiveGroup - 1];
-                const linkableArr = [];
-                linkableSet.forEach(v => linkableArr.push(v));
-                const specifCount = linkableArr.length;
-                for (let i = 0; i < specifCount; i++) {
-                    const spec = linkableArr[i];
-                    for (let s = 0; s < seqLength; s++) {
-                        if (sequence[s] === spec) {
-                            crosslinkableResiduesAsFeatures.push({
-                                begin: s + 1,
-                                end: s + 1,
-                                name: "CROSSLINKABLE-" + reactiveGroup,
-                                protID: participant.id,
-                                id: participant.id + " Crosslinkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
-                                category: "AA",
-                                type: "CROSSLINKABLE-" + reactiveGroup
-                            });
-                        }
-                    }
-                }
-            }
-        }
-
-        return crosslinkableResiduesAsFeatures;
     }
 
     initDecoyLookup(prefixes) {
