@@ -36,7 +36,7 @@ export async function testSetup() {
         assert.ok(participantKeys.length > 0, `Participant keys exist: ${participantKeys.join(", ")}`);
 
         // Check if PA (protein_A accession) exists
-        const proteinA = proteins.get("protein_A");
+        const proteinA = proteins.get("PA");
         if (proteinA) {
             assert.ok(true, "protein_A (PA) exists");
             assert.equal(proteinA.sequence, "MKVLVIGNGKPEPK", "protein_A sequence correct");
@@ -49,7 +49,7 @@ export async function testSetup() {
         const participants = clmsModel.get("proteins");
 
         // Check protein B using its accession
-        const proteinB = participants.get("protein_B");
+        const proteinB = participants.get("PB");
         if (proteinB) {
             assert.equal(proteinB.sequence, "DAHKSEVAHRFKDLGEENFKTIDEK", "protein_B sequence correct");
             assert.equal(proteinB.accession, "PB", "protein_B accession correct");
@@ -390,13 +390,6 @@ export async function testSetup() {
         ];
 
         const searchMap = clmsModel.getProteinSearchMap(peptides, matches);
-
-        // OLD TEST CODE (function now returns Map with {participantIDSet, id} objects):
-        // assert.ok(searchMap, "getProteinSearchMap returns result");
-        // assert.ok(searchMap["S1"], "Search S1 exists in map");
-        // assert.ok(searchMap["S2"], "Search S2 exists in map");
-
-        // NEW TEST CODE (updated for new return format):
         assert.ok(searchMap, "getProteinSearchMap returns result");
         assert.ok(searchMap.get("S1"), "Search S1 exists in map");
         assert.ok(searchMap.get("S2"), "Search S2 exists in map");

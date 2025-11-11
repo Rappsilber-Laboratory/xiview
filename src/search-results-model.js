@@ -3,6 +3,7 @@ import * as Backbone from "backbone";
 
 import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
+import {Protein} from "./protein";
 import {SpectrumIdentificationProtocol} from "./spectrum-identification-protocol";
 import {SpectraData} from "./spectra-data";
 import {MzidentmlFile} from "./mzidentml-file";
@@ -95,7 +96,7 @@ export class SearchResultsModel extends Backbone.Model {
         const enzymes = new Map();
         for (let e of data){
             const enzyme = new Enzyme(e);
-            enzymes.set(e.id, e);
+            enzymes.set(enzyme.id, enzyme);
         }
         this.set("enzymes", enzymes);
     }
@@ -128,10 +129,10 @@ export class SearchResultsModel extends Backbone.Model {
         // this.set("xiNETLayout", json.xiNETLayout);
         const participants = this.get("proteins");
         const peptides = new Map();
-        if (!this.isAggregatedData()) {
-            for (let participant of this.rawProteins) {
-                this.initProtein(participant, json);
-                participants.set(participant.id, participant);
+        if (!this.isAggregatedData()) { // use id as protein id
+            for (let rawProtein of this.rawProteins) {
+                const protein = new Protein(rawProtein);
+                participants.set(protein.id, protein);
             }
             for (let peptide of this.rawPeptides) {
                 peptide.sequence = peptide.base_seq;
@@ -147,16 +148,16 @@ export class SearchResultsModel extends Backbone.Model {
                     }
                 }
             }
-        } else {
-            const tempParticipants = new Map();
-            for (let participant of this.rawProteins) {
-                this.initProtein(participant, json);
-                tempParticipants.set(participant.id, participant);
+        } else { // is aggregated - use accession as protein id
+            const tempProteins = new Map();
+            for (let rawProtein of this.rawProteins) {
+                const protein = new Protein(rawProtein);
+                tempProteins.set(protein.id, protein);
             }
             for (let peptide of this.rawPeptides) {
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
-                    const protein = tempParticipants.get(peptide.prt[pe]);
+                    const protein = tempProteins.get(peptide.prt[pe]);
                     if (!protein) {
                         console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[pe]);
                     }
@@ -174,11 +175,15 @@ export class SearchResultsModel extends Backbone.Model {
                     }
                 }
             }
-            for (let participant of tempParticipants.values()) {
-                participants.set(participant.id, participant);
+            for (let protein of tempProteins.values()) {
+                participants.set(protein.id, protein);
             }
         }
         this.set("peptides", peptides);
+        this.rawPeptides = null;
+        this.rawProteins = null;
+        delete this.rawPeptides;
+        delete this.rawProteins;
         this.initDecoyLookup();
         const crosslinks = this.get("crosslinks");
         let minScore = undefined;
@@ -197,11 +202,7 @@ export class SearchResultsModel extends Backbone.Model {
         this.set("minScore", minScore);
         this.set("maxScore", maxScore);
         this.rawMatches = null;
-        this.rawPeptides = null;
-        this.rawProteins = null;
         delete this.rawMatches;
-        delete this.rawPeptides;
-        delete this.rawProteins;
         const searches = this.getProteinSearchMap(peptides, matches);
         this.set("searches", searches);
     }
@@ -225,39 +226,9 @@ export class SearchResultsModel extends Backbone.Model {
         return searchMap;
     }
 
-    //adds some attributes we want to protein object
-    initProtein(protObj) {
-        if (!protObj.crosslinks) {
-            protObj.crosslinks = [];
-        }
-        protObj.is_decoy = false;
-        if (protObj.sequence) {
-            protObj.size = protObj.sequence.length;
-        }
-
-        protObj.form = 0;
-
-        if (!protObj.name && protObj.accession) {
-            protObj.name = protObj.accession;
-        }
-        protObj.getMeta = function (metaField) {
-            if (arguments.length === 0) {
-                return this.meta;
-            }
-            return this.meta ? this.meta[metaField] : undefined;
-        }.bind(protObj);
-
-        protObj.setMeta = function (metaField, value) {
-            if (arguments.length === 2) {
-                this.meta = this.meta || {};
-                this.meta[metaField] = value;
-            }
-        }.bind(protObj);
-    }
-
-    initDecoyLookup(prefixes) {
+    initDecoyLookup() {
         // Make map of reverse/random decoy proteins to real proteins
-        prefixes = prefixes || ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
+        const prefixes = ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
         const prots = Array.from(this.get("proteins").values());
         const nameMap = d3.map();
         const accessionMap = d3.map();
@@ -288,12 +259,12 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     isAggregatedData() {
-        return this.get("searches").size > 1;
+        return this.get("mzidentmlFiles").size > 1;
     }
 }
 
 SearchResultsModel.commonRegexes = {
     uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
-    notUpperCase: /[^A-Z]/g,
-    decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
+    // notUpperCase: /[^A-Z]/g,
+    // decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
 };
