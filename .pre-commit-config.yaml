@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: run-xiview-tests
         name: run xiVIEW tests
-        entry: bash -c 'cd .. && npm run test-headless'
+        entry: bash -c 'cd .. && npm run test'
         language: system
         pass_filenames: false
         files: '\.(js|json)$'

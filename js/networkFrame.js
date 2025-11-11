@@ -840,46 +840,47 @@ export function viewsEssential(compositeModelInst, options) {
         }
     })
         .listenTo(window.vent, "individualMatchSelected", function (match) {
-            if (match && (compositeModelInst.get("serverFlavour") === "XIVIEW.ORG")) {
-                this.lastRequestedID = match.id; // async catch
-                //console.log ("MATCH ID", this, match.id);
-                this.primaryMatch = match; // the 'dynamic_rank = true' match
-                const dataPath = compositeModelInst.get("dataPath");
-                const url = dataPath + "?upload=" +
-                    this.model.get("clmsModel").get("sid") +
-                    "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
-                const self = this;
-                d3.json(url, function (error, json) {
-                    if (error) {
-                        console.log("error", error, "for", url, arguments);
-                    } else {
-                        // this works if first item in array has the same id, might in future send matchid to php to return for reliability
-                        const returnedMatchID = json.matchid;
-                        if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
-                            //console.log (":-)", json, self.lastRequestedID, thisSpecID);
-                            const altModel = new SearchResultsModel({serverFlavour: compositeModelInst.get("serverFlavour")});
-                            altModel.parseJSON(json);
-                            const allCrossLinks = Array.from(altModel.get("crosslinks").values());
-                            // empty selection first
-                            // (important or it will crash coz selection contains links to proteins not in clms model)
-                            self.alternativesModel
-                                .set("selection", [])
-                                .set("clmsModel", altModel)
-                                .applyFilter()
-                                .set("lastSelectedMatch", {
-                                    match: match,
-                                    directSelection: true
-                                });
-                            d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
-                            //self.alternativesModel.set("selection", allCrossLinks);
-                            self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
-                            window.vent.trigger("resizeSpectrumSubViews", true);
-                        }
-                    }
-                });
-            } else {
-                //~ //this.model.clear();
-            }
+            //todo - alternative explanations
+            // if (match && (compositeModelInst.get("serverFlavour") === "XIVIEW.ORG")) {
+            //     this.lastRequestedID = match.id; // async catch
+            //     //console.log ("MATCH ID", this, match.id);
+            //     this.primaryMatch = match; // the 'dynamic_rank = true' match
+            //     const dataPath = compositeModelInst.get("dataPath");
+            //     const url = dataPath + "?upload=" +
+            //         this.model.get("clmsModel").get("sid") +
+            //         "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
+            //     const self = this;
+            //     d3.json(url, function (error, json) {
+            //         if (error) {
+            //             console.log("error", error, "for", url, arguments);
+            //         } else {
+            //             // this works if first item in array has the same id, might in future send matchid to php to return for reliability
+            //             const returnedMatchID = json.matchid;
+            //             if (returnedMatchID == self.lastRequestedID) { // == not === 'cos returnedMatchID is a atring and self.lastRequestedID is a number
+            //                 //console.log (":-)", json, self.lastRequestedID, thisSpecID);
+            //                 const altModel = new SearchResultsModel({serverFlavour: compositeModelInst.get("serverFlavour")});
+            //                 altModel.parseJSON(json);
+            //                 const allCrossLinks = Array.from(altModel.get("crosslinks").values());
+            //                 // empty selection first
+            //                 // (important or it will crash coz selection contains links to proteins not in clms model)
+            //                 self.alternativesModel
+            //                     .set("selection", [])
+            //                     .set("clmsModel", altModel)
+            //                     .applyFilter()
+            //                     .set("lastSelectedMatch", {
+            //                         match: match,
+            //                         directSelection: true
+            //                     });
+            //                 d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
+            //                 //self.alternativesModel.set("selection", allCrossLinks);
+            //                 self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
+            //                 window.vent.trigger("resizeSpectrumSubViews", true);
+            //             }
+            //         }
+            //     });
+            // } else {
+            //     //~ //this.model.clear();
+            // }
         });
 
     const xiSPEC_options = {

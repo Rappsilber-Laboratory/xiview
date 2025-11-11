@@ -3,6 +3,7 @@ import * as _ from "underscore";
 import * as NGL from "ngl";
 import * as d3 from "d3";
 
+import {Protein} from "../../CLMS-model/src/protein";
 import {mostReadableMultipleId,} from "../js/downloads";
 import {GotohAligner} from "../js/align/bioseq32";
 import {
@@ -64,8 +65,8 @@ function testCallback(model) {
 
     test("Decoy Protein Matching", function (assert) {
         const decoys = [
-            {id: "10001001", name: "REV", accession: "REV_P02768-A", is_decoy: true},
-            {id: "10001002", name: "RAN", accession: "RAN_P02768-A", is_decoy: true},
+            new Protein({id: "10001001", name: "REV", accession: "REV_P02768-A", sequence: "", upload_id: 1, is_decoy: true}),
+            new Protein({id: "10001002", name: "RAN", accession: "RAN_P02768-A", sequence: "", upload_id: 1, is_decoy: true}),
         ];
         decoys.forEach(function (decoy) {
             clmsModel.get("proteins").set(decoy.id, decoy);
@@ -1719,7 +1720,7 @@ function initializeModels(options) {
     const clmsModel = new SearchResultsModel();
 
     console.log("Processing model data...");
-    // clmsModel.processMetadata(options.metadata);
+    clmsModel.processMzIdentMLFiles(options.mzidentmlFiles);
     clmsModel.processSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols)
     clmsModel.processSpectraData(options.spectraData);
     clmsModel.processMatches(options.matches);

@@ -1,25 +1,25 @@
 {
-  "project": [],
-  "meta": {
-    "mzidentml_files": [
-      {
-        "id": 65,
-        "project_id": "SRCH=15884--matches--MAN.LINEARS.MONOLINKS.XLINKS.BTWN.SELF.HOMOM.NOTHOMOMULT.PEPLEN=1.A.B.C.Q.DECOYS.TARGETS.DISTUNK.MGRP.URPPPI=1.MATCHSCORES=0-23.GROUPS=NA.csv",
-        "identification_file_name": "SRCH=15884--matches--MAN.LINEARS.MONOLINKS.XLINKS.BTWN.SELF.HOMOM.NOTHOMOMULT.PEPLEN=1.A.B.C.Q.DECOYS.TARGETS.DISTUNK.MGRP.URPPPI=1.MATCHSCORES=0-23.GROUPS=NA.csv",
-        "provider": null,
-        "audit_collection": null,
-        "analysis_sample_collection": null,
-        "bib": null,
-        "spectra_formats": null,
-        "contains_crosslinks": null,
-        "warnings": null
-      }
-    ],
-    "analysis_collections": [],
-    "spectrum_identification_protocols": [],
-    "enzymes": [],
-    "search_modifications": []
-  },
+  "mzidentmlFiles": [
+    {
+      "id": 1,
+      "project_id": "test",
+      "identification_file_name": "test.mzid",
+      "provider": {},
+      "audit_collection": {},
+      "analysis_sample_collection": {},
+      "bib": [],
+      "spectra_formats": [
+        {
+          "id": "peaklist_id",
+          "location": "path.mzml",
+          "FileFormat": "mzML format",
+          "SpectrumIDFormat": "mzML unique identifier"
+        }
+      ],
+      "contains_crosslinks": true,
+      "warnings": []
+    }
+  ],
   "matches": [
     {
       "id": "0",

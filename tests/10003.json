@@ -1,25 +1,25 @@
 {
-  "sid": "24070-89949-25417-83359-32655",
-  "loggedIn": true,
-  "searches": {
-    "24070": {
-      "id": "24070",
-      "peak_list_file_names": null,
-      "analysis_software": null,
-      "provider": null,
-      "audits": null,
-      "samples": null,
-      "analyses": null,
-      "protocol": null,
-      "bib": null,
-      "spectra_formats": null,
-      "upload_warnings": null,
-      "random_id": "89949-25417-83359-32655",
-      "identification_file_name": "SRCH=10003--matches--MAN.LINEARS.MONOLINKS.XLINKS.BTWN.SELF.HOMOM.NOTHOMOMULT.AMBIG.PEPLEN=1.A.B.C.Q.AUTO.DECOYS.TARGETS.DISTUNK.MGRP.URPPPI=1.MATCHSCORES=0-19.GROUPS=NA.csv",
-      "user_name": "colintest2",
-      "group": "'NA'"
-    }
-  },
+  "mzidentmlFiles": [
+  {
+    "id": 1,
+    "project_id": "test",
+    "identification_file_name": "test.mzid",
+    "provider": {},
+    "audit_collection": {},
+    "analysis_sample_collection": {},
+    "bib": [],
+    "spectra_formats": [
+      {
+        "id": "peaklist_id",
+        "location": "path.mzml",
+        "FileFormat": "mzML format",
+        "SpectrumIDFormat": "mzML unique identifier"
+      }
+    ],
+    "contains_crosslinks": true,
+    "warnings": []
+  }
+],
   "spectraData": [
     {
       "id": 0,

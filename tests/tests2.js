@@ -39,6 +39,7 @@ export function testSetup2() {
                 // Create fresh model instance for this test
                 blosumLoading({ url: "../R/blosums.json" });
                 const clmsModel = new SearchResultsModel();
+                clmsModel.processMzIdentMLFiles(options.mzidentmlFiles)
                 clmsModel.processMatches(options.matches);
                 clmsModel.processPeptides(options.peptides);
                 clmsModel.processProteins(options.proteins);
