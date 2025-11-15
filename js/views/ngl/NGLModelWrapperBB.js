@@ -97,14 +97,14 @@ export class NGLModelWrapperBB extends Backbone.Model {
         const distances = this.getChainDistances(chainInfo.resCount > this.defaults.fullDistanceCalcCutoff);
         const distancesObj = new DistancesObj(distances, this.get("chainMap"), this.getStructureName());
 
-        const clmsModel = this.getCompositeModel().get("clmsModel");
+        const compositeModel = this.getCompositeModel();
         // silent change and trigger, as loading in the same pdb file doesn't trigger the change automatically (as it generates an identical distance matrix)
         // Secondly, inserting a silent set to 'null' first stops backbone temporarily storing the previous distancesobj, as they could both be quite large
         // Also want to recalculate link distances with this object, before informing views the object is new (otherwise may draw with old data)
-        clmsModel.set("distancesObj", null, {silent: true});
-        clmsModel.set("distancesObj", distancesObj, {silent: true});
+        compositeModel.set("distancesObj", null, {silent: true});
+        compositeModel.set("distancesObj", distancesObj, {silent: true});
         distancesObj.maxDistance = d3.max(this.getCompositeModel().getHomomDistances(this.getCompositeModel().getAllCrossLinks()));
-        clmsModel.trigger("change:distancesObj", clmsModel, clmsModel.get("distancesObj"));
+        this.getCompositeModel().trigger("change:distancesObj", compositeModel, distancesObj);
         return this;
     }
 
@@ -118,7 +118,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
     setLinkList(crosslinkArr) {
         const linkDataObj = this.makeLinkList(crosslinkArr);
-        const distanceObj = this.getCompositeModel().get("clmsModel").get("distancesObj");
+        const distanceObj = this.getCompositeModel().get("distancesObj");
         if (this.get("showShortestLinksOnly") && distanceObj) { // filter to shortest links if showShortestLinksOnly set
             linkDataObj.fullLinkList = distanceObj.getShortestLinkAlternatives(linkDataObj.fullLinkList);
         }
@@ -216,7 +216,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         // Can save many calculations if assembly type is a smaller unit than the default pdb assembly type.
         // e.g. for assembly type BU1 or BU2 in 1AO6 only check chain combination A-A or B-B rather than all of A-A, A-B, B-A and B-B
         const chainMap = $.extend({}, this.get("chainMap"));
-        const distObj = this.getCompositeModel().get("clmsModel").get("distancesObj");
+        const distObj = this.getCompositeModel().get("distancesObj");
         if (distObj) {
             const chainSet = distObj.permittedChainIndicesSet;
             d3.entries(chainMap).forEach(function (proteinEntry) {
@@ -560,7 +560,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
     // Return original crosslinks from this model's link objects using origId property value
     getOriginalCrossLinks(linkObjs) {
-        const xlinks = this.getCompositeModel().get("clmsModel").get("crosslinks");
+        const xlinks = this.getCompositeModel().get("clmsModel").getCrosslinks();
         return linkObjs.map(function (linkObj) {
             return xlinks.get(linkObj.origId);
         });
@@ -692,7 +692,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
     getLinkDistancesBetween2Chains(chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2, links) {
 
         const notHomomultimeric = function (xlinkID, c1, c2) {
-            const xlink = this.getCompositeModel().get("clmsModel").get("crosslinks").get(xlinkID);
+            const xlink = this.getCompositeModel().get("clmsModel").getCrosslinks().get(xlinkID);
             return not3DHomomultimeric(xlink, c1, c2);
         };
 
@@ -986,8 +986,8 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
     // Return chain indices covered by currently visible proteins
     getShowableChains(showAll) {
-        const protMap = Array.from(this.getCompositeModel().get("clmsModel").get("proteins").values()); //todo -tidy
-        const prots = Array.from(protMap).filter(function (prot) {
+        const protMap = Array.from(this.getCompositeModel().get("clmsModel").getProteinsIterator());
+        const prots = protMap.filter(function (prot) {
             return !prot.hidden;
         }).map(function (prot) {
             return prot.id;

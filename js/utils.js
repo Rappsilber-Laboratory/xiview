@@ -26,7 +26,7 @@ export const commonRegexes = {
 export function proteinConcat(match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const pnames = mpeptides ? mpeptides.prt.map(function (pid) {
-        return clmsModel.get("proteins").get(pid).name;
+        return clmsModel.getProtein(pid).name;
     }) : [];
     return pnames.join(";");
 }
@@ -437,7 +437,7 @@ export function filterStateToString() {
 }
 
 export function searchesToString() {
-    const searches = Array.from(window.compositeModelInst.get("clmsModel").get("searches"));
+    const searches = Array.from(window.compositeModelInst.get("clmsModel").getSearches());
     const searchKeys = _.pluck(searches, 0); // just the keys
     const searchStr = ("SRCH=" + searchKeys.join("-"));// .substring(0, 40);
     return searchStr;

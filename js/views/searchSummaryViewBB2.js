@@ -1,10 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import "../../css/searchSummary.css";
-import "../../vendor/jquery.jsonview.css";
 
 import * as $ from "jquery";
-// window.jQuery = $;
-import "jsonview";
+import JSONFormatter from "json-formatter-js";
 import * as _ from "underscore";
 import d3 from "d3";
 
@@ -25,25 +23,9 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
     initialize: function (viewOptions) {
         SearchSummaryViewBB.__super__.initialize.apply(this, arguments);
 
-        // this.listenTo(this.model, "change:matches", this.render);
-        const self = this;
-
         const mainPanel = d3.select(this.el)
             .append("div").attr("class", "panelInner")
             .append("div").attr("class", "verticalFlexContainer");
-
-        // const descriptionButton = mainPanel.append("button")
-        //     .classed("btn btn-1 btn-1a flexStatic", true)
-        //     .text("Download Search Descriptions")
-        //     .on("click", function () {
-        //         const searchString = Array.from(self.model.get("searches").values())
-        //             .map(function (search) {
-        //                 return search.id;
-        //             })
-        //             .join("-");
-        //         download(self.exportDescriptions(), "plain/text", "search_description_" + searchString + ".txt");
-        //     });
-        //descriptionButton.style("display", _.isEmpty(self.model.get("crosslinkerSpecificity")) ? "none" : null);
 
         mainPanel.append("div").attr("class", "searchSummaryDiv");
 
@@ -54,12 +36,26 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
         const searches = this.model.getMzidentmlFiles();
         const objForJsonView = {};
         for (let search of searches.values()) {
-            const keyString = "GROUP " + search.group + " (" + search.id + ")";
+            const keyString = "GROUP " + search.id;
             objForJsonView[keyString] = search;
         }
-        // $(".searchSummaryDiv").JSONView(Array.from(searches.values()));
-        $(".searchSummaryDiv").JSONView(objForJsonView);
-        $(".searchSummaryDiv").JSONView("collapse", 2);
+
+        // Pre-process through JSON.stringify to invoke toJSON() methods
+        const processedData = JSON.parse(JSON.stringify(objForJsonView));
+
+        // Clear the existing content
+        const div = $(".searchSummaryDiv")[0];
+        div.innerHTML = "";
+
+        // Create formatter with openDepth set to 2 (same as old collapse behavior)
+        const formatter = new JSONFormatter(processedData, 2, {
+            hoverPreviewEnabled: false,
+            animateOpen: true,
+            animateClose: true
+        });
+
+        // Append the rendered JSON to the div
+        div.appendChild(formatter.render());
 
         return this;
     },

@@ -292,7 +292,7 @@ export class FilterModel extends Backbone.Model {
     // Test if there are proteins at both ends of a match that are in the current pdb file.
     pdbProteinFilter(match) {
         if (this.get("protPDB")) {
-            const dObj = window.compositeModelInst.get("clmsModel").get("distancesObj");
+            const dObj = window.compositeModelInst.get("distancesObj");
             if (dObj) {
                 const chainMap = dObj.chainMap;
                 if (chainMap) {
@@ -314,7 +314,7 @@ export class FilterModel extends Backbone.Model {
         if (searchString) {
             //protein name check
             const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
-            const participants = window.compositeModelInst.get("clmsModel").get("proteins");
+            const participants = window.compositeModelInst.get("clmsModel").getProteinsMap();
             const matchedPeptides = match.matchedPeptides;
             const matchedPepCount = matchedPeptides.length;
 

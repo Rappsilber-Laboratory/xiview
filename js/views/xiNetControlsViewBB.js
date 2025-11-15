@@ -31,72 +31,72 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         });
     },
 
-    saveLayout: function () {
-        // PRIDE - no saved layouts
-        // XI2 - anyone with url can save layout
-        // XIVIEW.ORG - only logged in users can save layout
-        if (window.compositeModelInst.get("serverFlavour") === "XIVIEW.ORG") {
-            const xmlhttp = new XMLHttpRequest();
-            const url = "./php/isLoggedIn.php";
-            xmlhttp.open("POST", url, true);
-            //Send the proper header information along with the request
-            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    if (xmlhttp.responseText === "false") {
-                        alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
-                        window.open("../userGUI/userLogin.html", "_blank");
-                    } else if (xmlhttp.responseText === "no") {
-                        alert("Didn't save - not your search.");
-                    } else {
-                        const callback = function (layoutJson) {
-                            const xmlhttp = new XMLHttpRequest();
-                            const url = "./php/saveLayout.php";
-                            xmlhttp.open("POST", url, true);
-                            //Send the proper header information along with the request
-                            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                            xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-                                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                                    console.log("Saved layout " + xmlhttp.responseText, true);
-                                    alert("Layout Saved");
-                                }
-                            };
-                            const sid = window.compositeModelInst.get("clmsModel").get("sid");
-                            const params = "sid=" + sid +
-                                "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
-                                "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
-                            xmlhttp.send(params);
-                        };
-
-                        window.vent.trigger("xinetSaveLayout", callback);
-                    }
-                }
-            };
-            xmlhttp.send();
-        } else if (window.compositeModelInst.get("serverFlavour") === "XI2") {
-            const self = this;
-            const callback = function (layoutJson) {
-                const xmlhttp = new XMLHttpRequest();
-                const url = self.model.get("saveLayoutPath");
-                xmlhttp.open("POST", url, true);
-                //Send the proper header information along with the request
-                xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-                    if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                        console.log("Saving layout result: " + xmlhttp.responseText);
-                        alert(xmlhttp.responseText);
-                    }
-                };
-                const sid = window.compositeModelInst.get("clmsModel").get("sid");
-                const params = "sid=" + sid +
-                    "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
-                    "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
-                xmlhttp.send(params);
-            };
-
-            window.vent.trigger("xinetSaveLayout", callback);
-        }
-    },
+    // saveLayout: function () {
+    //     // PRIDE - no saved layouts
+    //     // XI2 - anyone with url can save layout
+    //     // XIVIEW.ORG - only logged in users can save layout
+    //     if (window.compositeModelInst.get("serverFlavour") === "XIVIEW.ORG") {
+    //         const xmlhttp = new XMLHttpRequest();
+    //         const url = "./php/isLoggedIn.php";
+    //         xmlhttp.open("POST", url, true);
+    //         //Send the proper header information along with the request
+    //         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    //         xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+    //             if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+    //                 if (xmlhttp.responseText === "false") {
+    //                     alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
+    //                     window.open("../userGUI/userLogin.html", "_blank");
+    //                 } else if (xmlhttp.responseText === "no") {
+    //                     alert("Didn't save - not your search.");
+    //                 } else {
+    //                     const callback = function (layoutJson) {
+    //                         const xmlhttp = new XMLHttpRequest();
+    //                         const url = "./php/saveLayout.php";
+    //                         xmlhttp.open("POST", url, true);
+    //                         //Send the proper header information along with the request
+    //                         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    //                         xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+    //                             if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+    //                                 console.log("Saved layout " + xmlhttp.responseText, true);
+    //                                 alert("Layout Saved");
+    //                             }
+    //                         };
+    //                         const sid = window.compositeModelInst.get("clmsModel").get("sid");
+    //                         const params = "sid=" + sid +
+    //                             "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
+    //                             "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
+    //                         xmlhttp.send(params);
+    //                     };
+    //
+    //                     window.vent.trigger("xinetSaveLayout", callback);
+    //                 }
+    //             }
+    //         };
+    //         xmlhttp.send();
+    //     } else if (window.compositeModelInst.get("serverFlavour") === "XI2") {
+    //         const self = this;
+    //         const callback = function (layoutJson) {
+    //             const xmlhttp = new XMLHttpRequest();
+    //             const url = self.model.get("saveLayoutPath");
+    //             xmlhttp.open("POST", url, true);
+    //             //Send the proper header information along with the request
+    //             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    //             xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+    //                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+    //                     console.log("Saving layout result: " + xmlhttp.responseText);
+    //                     alert(xmlhttp.responseText);
+    //                 }
+    //             };
+    //             const sid = window.compositeModelInst.get("clmsModel").get("sid");
+    //             const params = "sid=" + sid +
+    //                 "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
+    //                 "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
+    //             xmlhttp.send(params);
+    //         };
+    //
+    //         window.vent.trigger("xinetSaveLayout", callback);
+    //     }
+    // },
 
     initialize: function (viewOptions) {
 
@@ -124,9 +124,9 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             saveButtonSel.style("display", "none");
         }
 
-        if (this.model.get("clmsModel").get("xiNETLayout")) {
-            d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
-        }
+        // if (this.model.get("clmsModel").get("xiNETLayout")) {
+        //     d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
+        // }
 
         const tooltips = {
             autoLayoutButton: "Automatically relayout network of displayed proteins",
@@ -144,13 +144,13 @@ export const xiNetControlsViewBB = Backbone.View.extend({
         }, this);
 
         // Generate load layout drop down
-        new xiNetLayoutListViewBB({
-            el: "#loadLayoutButton",
-            model: window.compositeModelInst,
-            myOptions: {
-                title: "Load ▼",
-            }
-        });
+        // new xiNetLayoutListViewBB({
+        //     el: "#loadLayoutButton",
+        //     model: window.compositeModelInst,
+        //     myOptions: {
+        //         title: "Load ▼",
+        //     }
+        // });
 
         // Various view options set up...
         const toggleButtonData = [
@@ -310,65 +310,65 @@ export const xiNetControlsViewBB = Backbone.View.extend({
 });
 
 
-const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
-    events: function () {
-        let parentEvents = DropDownMenuViewBB.prototype.events;
-        if (_.isFunction(parentEvents)) {
-            parentEvents = parentEvents();
-        }
-        return _.extend({}, parentEvents, {});
-    },
-
-    initialize: function () {
-        xiNetLayoutListViewBB.__super__.initialize.apply(this, arguments);
-    },
-
-    setVis: function (show) {
-        const self = this;
-        xiNetLayoutListViewBB.__super__.setVis.call(self, show);
-        if (show) {
-            const xmlhttp = new XMLHttpRequest();
-            let url = this.model.get("loadLayoutPath");
-            xmlhttp.open("POST", url, true);
-            //Send the proper header information along with the request
-            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-                    const layouts = JSON.parse(xmlhttp.responseText);
-                    const menu = [];
-                    for (let key in layouts) {
-                        menu.push(menuItem(layouts, key));
-                    }
-                    self.options.menu = menu;
-                    xiNetLayoutListViewBB.__super__.render.call(self);
-                }
-                // xiNetLayoutListViewBB.__super__.setVis.call(self, show);
-            };
-            const sid = window.compositeModelInst.get("clmsModel").get("sid");
-            const params = "sid=" + sid;
-            xmlhttp.send(params);
-            return this;
-        }
-        // else {
-        //     xiNetLayoutListViewBB.__super__.setVis.call(this, show);
-        // }
-
-        function menuItem(layouts, selectedKey) {
-            return {
-                name: selectedKey,
-                func: function () {
-                    d3.select(".savedLayoutName").property("value", selectedKey);
-                    // window.compositeModelInst.clearGroups();
-                    // const self = this;
-                    // jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear current groups before adding groups from saved layout?", "Clear Groups", "Combine current and saved", "Clear current, only groups from saved layout", function () {
-                    //     self.set("groups", new Map());
-                    //     self.trigger("change:groups");
-                    // });
-                    window.vent.trigger("xinetLoadLayout", layouts[selectedKey]);
-                },
-                context: window.compositeModelInst
-            };
-        }
-    },
-
-});
+// const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
+//     events: function () {
+//         let parentEvents = DropDownMenuViewBB.prototype.events;
+//         if (_.isFunction(parentEvents)) {
+//             parentEvents = parentEvents();
+//         }
+//         return _.extend({}, parentEvents, {});
+//     },
+//
+//     initialize: function () {
+//         xiNetLayoutListViewBB.__super__.initialize.apply(this, arguments);
+//     },
+//
+//     setVis: function (show) {
+//         const self = this;
+//         xiNetLayoutListViewBB.__super__.setVis.call(self, show);
+//         if (show) {
+//             const xmlhttp = new XMLHttpRequest();
+//             let url = this.model.get("loadLayoutPath");
+//             xmlhttp.open("POST", url, true);
+//             //Send the proper header information along with the request
+//             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+//             xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
+//                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+//                     const layouts = JSON.parse(xmlhttp.responseText);
+//                     const menu = [];
+//                     for (let key in layouts) {
+//                         menu.push(menuItem(layouts, key));
+//                     }
+//                     self.options.menu = menu;
+//                     xiNetLayoutListViewBB.__super__.render.call(self);
+//                 }
+//                 // xiNetLayoutListViewBB.__super__.setVis.call(self, show);
+//             };
+//             const sid = window.compositeModelInst.get("clmsModel").get("sid");
+//             const params = "sid=" + sid;
+//             xmlhttp.send(params);
+//             return this;
+//         }
+//         // else {
+//         //     xiNetLayoutListViewBB.__super__.setVis.call(this, show);
+//         // }
+//
+//         function menuItem(layouts, selectedKey) {
+//             return {
+//                 name: selectedKey,
+//                 func: function () {
+//                     d3.select(".savedLayoutName").property("value", selectedKey);
+//                     // window.compositeModelInst.clearGroups();
+//                     // const self = this;
+//                     // jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear current groups before adding groups from saved layout?", "Clear Groups", "Combine current and saved", "Clear current, only groups from saved layout", function () {
+//                     //     self.set("groups", new Map());
+//                     //     self.trigger("change:groups");
+//                     // });
+//                     window.vent.trigger("xinetLoadLayout", layouts[selectedKey]);
+//                 },
+//                 context: window.compositeModelInst
+//             };
+//         }
+//     },
+//
+// });

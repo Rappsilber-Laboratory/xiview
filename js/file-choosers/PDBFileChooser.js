@@ -191,7 +191,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
     // Return selected proteins, or all proteins if nothing selected
     getSelectedProteins: function () {
         const selectedProteins = this.model.get("selectedProteins");
-        return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").get("proteins").values()) : selectedProteins;
+        return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").getProteinsIterator()) : selectedProteins;
     },
     /*
     updateProteinDropdown: function (parentElem) {

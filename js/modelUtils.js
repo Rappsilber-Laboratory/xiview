@@ -304,7 +304,7 @@ export function makeSubIndexedMap(mmap, subIndexingProperty) {
 
 //distogramview, searchsummaryview
 export function crosslinkerSpecificityPerLinker(searchArray) {
-    return window.compositeModelInst.get("clmsModel").get("crosslinkerSpecificity") || {
+    return window.compositeModelInst.get("clmsModel").getCrosslinkerSpecificity() || {
         default: {
             name: "all",
             searches: new Set(_.pluck(searchArray, "id")),
@@ -330,7 +330,7 @@ export function filterSequenceByResidueSet(seq, residueSet, all) {
 
 function makeMultiKeyProteinMap(clmsModel) {
     const protMap = d3.map();
-    clmsModel.get("proteins").forEach(function (value, key) {
+    clmsModel.getProteinsMap().forEach(function (value, key) {
         if (!value.is_decoy) {
             protMap.set(value.accession, key);
             protMap.set(value.name, key);
@@ -351,7 +351,7 @@ function parseProteinID(protMap, pid) {
 
 //metadatafilechooser, STRINGfilechooser
 export function updateLinkMetadata(metaDataFileContents, clmsModel) {
-    const crosslinks = clmsModel.get("crosslinks");
+    const crosslinks = clmsModel.getCrosslinks();
     const crosslinksArr = Array.from(crosslinks.values());
     const protMap = makeMultiKeyProteinMap(clmsModel);
     const crosslinksByProteinPairing = crosslinkCountPerProteinPairing(crosslinksArr);
@@ -450,9 +450,9 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
                 }
             });
         });
-    const registry = clmsModel.get("crosslinkMetaRegistry") || d3.set();
+    const registry = clmsModel._crosslinkMetaRegistry || d3.set();
     columns.forEach(registry.add, registry);
-    clmsModel.set("crosslinkMetaRegistry", registry);
+    clmsModel._crosslinkMetaRegistry = registry;
 
     const result = {
         columns: columns,
@@ -471,7 +471,7 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
 
 //metadatafilechoosers
 export function updateProteinMetadata(metaDataFileContents, clmsModel) {
-    const proteins = clmsModel.get("proteins");
+    const proteins = clmsModel.getProteinsMap();
     let first = true;
     let columns = [];
     // var dontStoreArray = ["proteinID", "Accession"].map(function(str) {
@@ -571,7 +571,7 @@ export function clearObjectMetaData(objectArr, metaFields) {
 
 //metadatafilechoosers
 export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsModel) {
-    const proteins = clmsModel.get("proteins");
+    const proteins = clmsModel.getProteinsMap();
     let first = true;
     // eslint-disable-next-line no-unused-vars
     let columns = []; // TODO - check this
@@ -848,7 +848,7 @@ export function totalProteinLength(interactors) {
 
 //networkframe
 export function getSearchGroups(clmsModel) {
-    const searchArr = Array.from(clmsModel.get("searches").values());
+    const searchArr = Array.from(clmsModel.getSearches().values());
     const uniqueGroups = _.uniq(_.pluck(searchArr, "group"));
     //console.log ("SSS", searchArr, uniqueGroups);
     uniqueGroups.sort(function (a, b) {

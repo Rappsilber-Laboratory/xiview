@@ -159,7 +159,7 @@ function mostReadableId(protein) {
 export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const proteins = mpeptides ? mpeptides.prt.map(function (pid) {
-        return clmsModel.get("proteins").get(pid);
+        return clmsModel.getProtein(pid);
     }) : [];
     return proteins.map(function (prot) {
         return mostReadableId(prot);
@@ -170,7 +170,7 @@ export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
 export function getMatchesCSV() {
     let csv = "\"Id\",\"Protein1\",\"SeqPos1\",\"PepPos1\",\"PepSeq1\",\"LinkPos1\",\"Protein2\",\"SeqPos2\",\"PepPos2\",\"PepSeq2\",\"LinkPos2\",\"Score\",\"PrecursorIntensity\",\"Charge\",\"ExpMz\",\"ExpMass\",\"CalcMz\",\"CalcMass\",\"MassError\",\"Missing Peaks\",\"Validated\",\"Search\",\"RawFileName\",\"PeakListFileName\",\"ScanNumber\",\"ScanIndex\",\"CrossLinkerModMass\",\"FragmentTolerance\",\"IonTypes\",\"Decoy1\",\"Decoy2\",\"3D Distance\",\"From Chain\",\"To Chain\",\"LinkType\",\"DecoyType\",\"Retention Time\"\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");
-    const participants = clmsModel.get("proteins");
+    const participants = clmsModel.getProteinsMap();
     const distance2dp = d3.format(".2f");
 
     const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
@@ -276,8 +276,8 @@ function getSSL() {
         const peptide1 = match.matchedPeptides[0];
         const peptide2 = match.matchedPeptides[1];
 
-        const decoy1 = clmsModel.get("proteins").get(peptide1.prt[0]).is_decoy;
-        const decoy2 = peptide2 ? clmsModel.get("proteins").get(peptide2.prt[0]).is_decoy : "";
+        const decoy1 = clmsModel.getProtein(peptide1.prt[0]).is_decoy;
+        const decoy2 = peptide2 ? clmsModel.getProtein(peptide2.prt[0]).is_decoy : "";
 
         let decoyType;
         if (decoy1 && decoy2) {
@@ -317,13 +317,13 @@ export function getLinksCSV() {
     const clmsModel = window.compositeModelInst.get("clmsModel");
 
     let headerArray = ["Protein1", "SeqPos1", "LinkedRes1", "Protein2", "SeqPos2", "LinkedRes2", "Highest Score", "Match Count", "DecoyType", "Self", "AutoValidated", "Validated", "Link FDR", "3D Distance", "From Chain", "To Chain"];//, "PDB SeqPos 1", "PDB SeqPos 2"];
-    const searchIDs = Array.from(clmsModel.get("searches").keys());
+    const searchIDs = Array.from(clmsModel.getSearches().keys());
     searchIDs.forEach(function (sid) {
         headerArray.push("Search_" + sid);
     });
     console.log("searchIds", searchIDs);
 
-    const metaColumns = (clmsModel.get("crosslinkMetaRegistry") || d3.set()).values();
+    const metaColumns = (clmsModel._crosslinkMetaRegistry || d3.set()).values();
     headerArray = headerArray.concat(metaColumns);
 
     const headerRow = "\"" + headerArray.join("\",\"") + "\"";
@@ -476,7 +476,7 @@ function getAlphaLink2CSV(){
 function getPPIsCSV() {
     const clmsModel = window.compositeModelInst.get("clmsModel");
     const headerArray = ["Protein1", "Protein2", "Unique Distance Restraints", "DecoyType"];
-    const searchIDs = Array.from(clmsModel.get("searches").keys());
+    const searchIDs = Array.from(clmsModel.getSearches().keys());
     searchIDs.forEach(function (sid) {
         headerArray.push("Search_" + sid);
     });
@@ -601,7 +601,7 @@ export function getResidueCount() {
 
 function getModificationCount() {
     let csv = "\"Modification(s)\",\"TT\",\"TD\",\"DD\"\r\n";
-    const matches = window.compositeModelInst.get("clmsModel").get("matches");
+    const matches = window.compositeModelInst.get("clmsModel").getMatches();
 
     const modCountMap = new Map();
     const modByResCountMap = new Map();
@@ -620,8 +620,8 @@ function getModificationCount() {
             const peptide1 = match.matchedPeptides[0];
             const peptide2 = match.matchedPeptides[1];
 
-            const decoy1 = clmsModel.get("proteins").get(peptide1.prt[0]).is_decoy;
-            const decoy2 = peptide2 ? clmsModel.get("proteins").get(peptide2.prt[0]).is_decoy : false;
+            const decoy1 = clmsModel.getProtein(peptide1.prt[0]).is_decoy;
+            const decoy2 = peptide2 ? clmsModel.getProtein(peptide2.prt[0]).is_decoy : false;
 
             let decoyTypeIndex;
             if (decoy1 && decoy2) {
@@ -692,7 +692,7 @@ function getModificationCount() {
 
 function getProteinAccessions() {
     const accs = [];
-    const proteins = window.compositeModelInst.get("clmsModel").get("proteins").values();
+    const proteins = window.compositeModelInst.get("clmsModel").getProteinsIterator();
     for (let p of proteins) {
         if (!p.hidden) {
             accs.push(p.accession);
@@ -709,7 +709,7 @@ function getGroups() {
     const clmsModel = window.compositeModelInst.get("clmsModel");
     const groups = window.compositeModelInst.get("groups");
     console.log("**", groups);
-    const proteins = clmsModel.get("proteins").values();
+    const proteins = clmsModel.getProteinsIterator();
     for (let p of proteins) {
         if (!p.is_decoy) {
             const row = [p.id, p.name];

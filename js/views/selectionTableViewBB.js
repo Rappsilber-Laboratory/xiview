@@ -117,9 +117,6 @@ export const SelectionTableViewBB = Backbone.View.extend({
             ambiguity: function () {
                 return false;
             },
-            autovalidated: function () {
-                return window.compositeModelInst.get("clmsModel").get("autoValidatedPresent");
-            },
             "validated": function() {
                 return !window.compositeModelInst.get("serverFlavour") === "XI2";
             }, //CLMS.model.manualValidatedFound; },
@@ -558,7 +555,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
 
         filteredProps = filteredProps || this.filteredProps;
         const self = this;
-        //var proteinMap = this.model.get("clmsModel").get("proteins");
+        //var proteinMap = this.model.get("clmsModel").getProteins();
         const identityFunc = function (d) {
             return d.id;
         };

@@ -220,12 +220,12 @@ export class DistancesObj {
 
             // Now loop through the searches that use this crosslinker...
             crosslinkerSpecificity.searches.forEach(function (searchID) {
-                const search = clmsModel.get("searches").get(searchID);
+                const search = clmsModel.getSearches().get(searchID);
                 const protIDs = search.participantIDSet;
 
                 // Filter residue lists down to those that were in this search's proteins
                 const srmap = rmap.map(function (dirMap) {
-                    return (clmsModel.get("searches").size > 1) ? dirMap.filter(function (res) {
+                    return (clmsModel.getSearches().size > 1) ? dirMap.filter(function (res) {
                         return protIDs.has(res.protID);
                     }) : dirMap;
                 });
@@ -294,7 +294,7 @@ export class DistancesObj {
 
         seqsByProt.entries().forEach(function (protEntry) {
             const protKey = protEntry.key;
-            const participant = clmsModel.get("proteins").get(protKey);
+            const participant = clmsModel.getProtein(protKey);
             const seqValues = protEntry.value.values;
             const termTypes = ["ntermList", "ctermList"];
 

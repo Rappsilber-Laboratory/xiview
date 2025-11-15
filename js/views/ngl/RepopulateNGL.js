@@ -82,8 +82,7 @@ export function repopulateNGL(pdbInfo) {
                 }
 
                 const nglSequences = getChainSequencesFromNGLStructure(structureComp);
-                const interactorMap = compositeModel.get("clmsModel").get("proteins");
-                const interactorArr = Array.from(interactorMap.values());
+                const interactorArr = Array.from(compositeModel.get("clmsModel").getProteinsIterator());
 
                 // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                 // between ngl protein chains and clms proteins. This is asynchronous so we use a callback

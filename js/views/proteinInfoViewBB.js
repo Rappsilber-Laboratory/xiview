@@ -210,7 +210,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     const crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     // following breaks things if proteins have underscores in name
                     // var posData = self.splitDataAttr(d3sel, "data-pos", "_");
-                    // var interactor = self.model.get("clmsModel").get("proteins").get(posData[0]);
+                    // var interactor = self.model.get("clmsModel").getProteins().get(posData[0]);
                     //
                     // self.model.get("tooltipModel")
                     //     .set("header", "Cross-Linked with " + makeTooltipTitle.residue(interactor, +posData[1]))
@@ -300,7 +300,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
     getCrossLinksFromIDs: function (linkIDs, filter) {
         linkIDs = d3.set(linkIDs).values(); // strips out duplicates
 
-        const allLinks = this.model.get("clmsModel").get("crosslinks");
+        const allLinks = this.model.get("clmsModel").getCrosslinks();
         let crosslinks = linkIDs.map(function (linkId) {
             return allLinks.get(linkId);
         });

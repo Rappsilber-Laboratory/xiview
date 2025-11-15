@@ -102,7 +102,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         this.backgroundGroup = this.vis.append("g");
         // this.linkGroup = vis.append("g");
         this.foregroundGroup = this.vis.append("g");
-        this.listenTo(this.model.get("clmsModel"), "change:matches", this.updateThenRender); // New matches added (via csv generally)
+        // this.listenTo(this.model.get("clmsModel"), "change:matches", this.updateThenRender); // New matches added (via csv generally) - clmsModel no longer extends Backbone
         this.listenTo(this.model, "hiddenChanged", this.updateThenRender);
 
         this.sankey = d3_sankey().nodeWidth(15);
@@ -155,7 +155,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
         // this.update();  // needed here to init interactors in goterms, temp hack, todo
         const go = this.model.get("go");
 
-        const proteins = this.model.get("clmsModel").get("proteins").values();
+        const proteins = this.model.get("clmsModel").getProteinsIterator();
         for (let protein of proteins) {
             if (protein.uniprot) {
                 for (let goId of protein.uniprot.go) {
@@ -224,7 +224,7 @@ export const GoTermsViewBB = BaseFrameView.extend({
             g.filtInteractorCount = 0;
         }
 
-        // const proteins = this.model.get("clmsModel").get("proteins").values();
+        // const proteins = this.model.get("clmsModel").getProteins().values();
         // for (let protein of proteins) {
         //     if (protein.uniprot) {
         //         for (let goId of protein.uniprot.go) {

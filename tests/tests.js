@@ -59,8 +59,8 @@ function testCallback(model) {
     test("JSON to Model Parsing", function (assert) {
         const expectedLinks = 162;
         const expectedMatches = 289;//291; // presuming change was due to change in validation status in xi1 db
-        assert.deepEqual(clmsModel.get("crosslinks").size, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
-        assert.deepEqual(clmsModel.get("matches").length, expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
+        assert.deepEqual(clmsModel.getCrosslinks().size, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
+        assert.deepEqual(clmsModel.getMatches().length, expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
     });
 
     test("Decoy Protein Matching", function (assert) {
@@ -69,11 +69,11 @@ function testCallback(model) {
             new Protein({id: "10001002", name: "RAN", accession: "RAN_P02768-A", sequence: "", upload_id: 1, is_decoy: true}),
         ];
         decoys.forEach(function (decoy) {
-            clmsModel.get("proteins").set(decoy.id, decoy);
+            clmsModel.getProteinsMap().set(decoy.id, decoy);
         });
 
         clmsModel.initDecoyLookup();
-        const actual = Array.from(clmsModel.get("proteins").values()).map(function (p) {
+        const actual = Array.from(clmsModel.getProteinsIterator()).map(function (p) {
             return {id: p.id, targetProteinID: p.targetProteinID};
         });
         const expected = [{id: "sp|P02768-A|ALBU", targetProteinID: "sp|P02768-A|ALBU"}];
@@ -82,7 +82,7 @@ function testCallback(model) {
         });
 
         decoys.forEach(function (decoy) {
-            clmsModel.get("proteins").delete(decoy.id);
+            clmsModel.getProteinsMap().delete(decoy.id);
         });
 
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " decoy to real protein match, Passed!");
@@ -129,13 +129,13 @@ function testCallback(model) {
             {id: "10001002", name: "RAN", accession: "RAN_sp|P02768-A|ALBU", is_decoy: true},
         ];
         decoys.forEach(function (decoy) {
-            clmsModel.get("proteins").set(decoy.accession, decoy);
+            clmsModel.getProteinsMap().set(decoy.accession, decoy);
         });
 
         const fakeMatch = {matchedPeptides: [{prt: ["sp|P02768-A|ALBU", "REV_sp|P02768-A|ALBU"]}, {prt: ["sp|P02768-A|ALBU"]}]};
         const actual = mostReadableMultipleId(fakeMatch, 0, clmsModel);
         decoys.forEach(function (decoy) {
-            clmsModel.get("proteins").delete(decoy.accession);
+            clmsModel.getProteinsMap().delete(decoy.accession);
         });
 
         // updated to reflect that mostReadableMultipleId now always return ID
@@ -191,7 +191,7 @@ function testCallback(model) {
     test("Crosslink Selection testing", function (assert) {
         const expectedLinks = 3;
         const expectedMatches = 18;
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         const selectedLinks = [crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11"), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497"), crosslinks.get("sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425")];
         model.setMarkedCrossLinks("selection", selectedLinks, false, false, false);
 
@@ -202,7 +202,7 @@ function testCallback(model) {
     test("Match Selection testing", function (assert) {
         const expectedLinks = 2;
         const expectedMatches = 3;
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         const selectedMatches = d3.merge([crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497").matches_pp.slice(0, 1), crosslinks.get("sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425").matches_pp.slice(0, 2)]);
         model.setMarkedMatches("selection", selectedMatches, false, false, false);
 
@@ -213,7 +213,7 @@ function testCallback(model) {
     test("Adding Crosslink selection to prior Crosslink Selection testing", function (assert) {
         const expectedLinkIDs = ["sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497", "sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425"].sort();
         const expectedMatches = 17;
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
 
         let selectedLinks = [crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11"), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497")];
         model.setMarkedCrossLinks("selection", selectedLinks, false, false, false);
@@ -235,7 +235,7 @@ function testCallback(model) {
                 "70",
                 "71"
             ].sort();
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
 
         let selectedMatches = d3.merge([crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11").matches_pp.slice(0, 1), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497").matches_pp.slice(0, 2), crosslinks.get("sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425").matches_pp.slice(0, 2)]);
         model.setMarkedMatches("selection", selectedMatches, false, false, false);
@@ -255,7 +255,7 @@ function testCallback(model) {
     test("Adding Match Selection to prior Crosslink Selection testing", function (assert) {
         const expectedLinkIDs = ["sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497", "sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425"].sort();
         const expectedMatches = 4;	// Two of sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425 matches are marked rejected and don't pass filter
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
 
         const selectedLinks = [crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11"), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497")];
         model.setMarkedCrossLinks("selection", selectedLinks, false, false, false);
@@ -274,7 +274,7 @@ function testCallback(model) {
     test("Adding Crosslink Selection to prior Match Selection testing", function (assert) {
         const expectedLinkIDs = ["sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497", "sp|P02768-A|ALBU_190-sp|P02768-A|ALBU_425"].sort();
         const expectedMatches = 17;
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
 
         const selectedMatches = d3.merge([crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11").matches_pp.slice(0, 1), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497").matches_pp.slice(0, 2)]);
         model.setMarkedMatches("selection", selectedMatches, false, false, false);
@@ -287,7 +287,7 @@ function testCallback(model) {
     });
 
     test("Adding no Crosslinks to prior Crosslink Selection testing", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         const selectedLinks = [crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11"), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497")];
         model.setMarkedCrossLinks("selection", selectedLinks, false, false, false);
         const expectedLinkIDs = _.pluck(model.getMarkedCrossLinks("selection"), "id").sort();
@@ -300,7 +300,7 @@ function testCallback(model) {
     });
 
     test("Adding no Matches to prior Match Selection testing", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         const selectedMatches = d3.merge([crosslinks.get("sp|P02768-A|ALBU_1-sp|P02768-A|ALBU_11").matches_pp.slice(0, 1), crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497").matches_pp.slice(0, 1)]);
         model.setMarkedMatches("selection", selectedMatches, false, false, false);
         const expectedLinkIDs = _.pluck(model.getMarkedCrossLinks("selection"), "id").sort();
@@ -613,7 +613,7 @@ function testCallback(model) {
     });
 
     test("Single Crosslink Distance validated on NGLViewer", function (assert) {
-        // const crosslinks = clmsModel.get("crosslinks");
+        // const crosslinks = clmsModel.getCrosslinks();
         // const singleCrossLink = crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497");
         const expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
 
@@ -626,12 +626,12 @@ function testCallback(model) {
     });
 
     test("Same Crosslink Distance, different indexing methods 1", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         const singleCrossLink = crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497");
         const alignCollection = window.compositeModelInst.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
-        const actualDistance = clmsModel.get("distancesObj").getXLinkDistance(singleCrossLink, alignCollection);
+        const actualDistance = model.get("distancesObj").getXLinkDistance(singleCrossLink, alignCollection);
 
         const stageModel = window.compositeModelInst.get("stageModel");
         // -5 cos 4 difference in pdb / search alignments, and another 1 because this function is 0-indexed.
@@ -642,7 +642,7 @@ function testCallback(model) {
 
 
     test("2 different functions for returning atom indices", function (assert) {
-        // const crosslinks = clmsModel.get("crosslinks");
+        // const crosslinks = clmsModel.getCrosslinks();
         // const singleCrossLink = crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497");
         // const alignCollection = window.compositeModelInst.get("alignColl");
 
@@ -880,7 +880,7 @@ function testCallback(model) {
             }
         ];
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         const actualValue = distObj.calcDistanceableSequenceData();
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as distanceable sequence metadata, Passed!");
@@ -896,7 +896,7 @@ function testCallback(model) {
         $.extend(seqRange, {alignID: alignID, chainIndex: 0, protID: "sp|P02768-A|ALBU"});
         const seqMap = d3.map();
         seqMap.set("sp|P02768-A|ALBU", {key: "sp|P02768-A|ALBU", values: [seqRange]});
-        const alignedTerminalIndices = clmsModel.get("distancesObj").calcAlignedTerminalIndices(seqMap, clmsModel, alignCollBB);
+        const alignedTerminalIndices = model.get("distancesObj").calcAlignedTerminalIndices(seqMap, clmsModel, alignCollBB);
         assert.deepEqual(alignedTerminalIndices, expected, "Expected " + JSON.stringify(expected) + " as end terminals out of PDB range, Passed!");
     });
 
@@ -921,7 +921,7 @@ function testCallback(model) {
         const expected = [535, 536, 540, 552, 555, 559, 561, 568, 569, 574];	// last 10 KSTY
         const expected2 = d3.range(0, dseq1AO6.length);	// everything
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const residueSets = crosslinkerSpecificityPerLinker(searchArray);
         const linkableResidues = residueSets["wrong mass SDA "].linkables;
 
@@ -946,7 +946,7 @@ function testCallback(model) {
             return {chainIndex: 1, protID: "sp|P02768-A|ALBU", seqIndex: v + 1, searchIndex: v + 5};	// seqIndex 1-indexed, sdearchIndex 4 on from that, last 10 residues will be chain 1
         });
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
         const distanceableSequences = [
             {
@@ -970,7 +970,7 @@ function testCallback(model) {
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         let actualValue = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
         actualValue = actualValue[1]; // the KSTY & NTERM residues
         actualValue = actualValue.slice(-10);	// The last 10 values
@@ -982,7 +982,7 @@ function testCallback(model) {
     test("Sample Distance Generation, 1 Search, rounded to nearest integer", function (assert) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
         const distanceableSequences = [
             {
@@ -1006,7 +1006,7 @@ function testCallback(model) {
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
         const sampleDists = [];
         distObj.generateSampleDistancesBySearch(filteredResidueMap[0], filteredResidueMap[1], sampleDists, {linksPerSearch: 100});
@@ -1019,7 +1019,7 @@ function testCallback(model) {
     test("Sample Distance Generation, 1 Search, restricted to same protein id (dimer / full search equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
         const distanceableSequences = [
             {
@@ -1043,7 +1043,7 @@ function testCallback(model) {
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
         const sampleDists = [];
         // heterobidirectional crosslinker, between same protein id only - should be the same returned values as the previous test
@@ -1058,7 +1058,7 @@ function testCallback(model) {
     test("Sample Distance Generation, 1 Search, restricted to same chain (monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
         const distanceableSequences = [
             {
@@ -1082,7 +1082,7 @@ function testCallback(model) {
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
         const sampleDists = [];
         // heterobidirectional crosslinker, between same chains only
@@ -1097,7 +1097,7 @@ function testCallback(model) {
     test("Sample Distance Generation, 1 Search, restricted to same model index (artificially set to make monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
         const distanceableSequences = [
             {
@@ -1121,7 +1121,7 @@ function testCallback(model) {
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
         const sampleDists = [];
         const cimimap = d3.map({0: 0, 1: 1}); // artifically associate each chain with a different model
@@ -1143,7 +1143,7 @@ function testCallback(model) {
     test("Sample Distance Generation, 1 Search, 2 different models, but inter-model distance flag set to true, rounded to nearest integer", function (assert) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
         const distanceableSequences = [
             {
@@ -1167,7 +1167,7 @@ function testCallback(model) {
         ];
         const alignedTerminalIndices = {ntermList: [], ctermList: []};
 
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
         const filteredResidueMap = distObj.calcFilteredSequenceResidues(crosslinkerSpecificityList[0], distanceableSequences, alignedTerminalIndices);
         const sampleDists = [];
         const cimimap = d3.map({0: 0, 1: 1}); // artifically associate each chain with a different model
@@ -1190,9 +1190,9 @@ function testCallback(model) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
 
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
 
         const sampleDists = distObj.getSampleDistances(100, crosslinkerSpecificityList, {
             withinProtein: true,
@@ -1207,11 +1207,11 @@ function testCallback(model) {
     test("Run through DistancesObj right from getSampleDistances, no crosslinker specified, 1 Search, restricted to same model (artifically set, to make monomer equivalent), rounded to nearest integer", function (assert) {
         const expectedValue = [28, 44, 13, 43, 51, 60, 28, 44, 24, 44, 29, 35, 44, 44, 37, 49, 51, 55, 13, 24, 37, 30, 41, 51, 43, 44, 49, 30, 38, 48, 51, 29, 51, 41, 38, 11, 60, 35, 55, 51, 48, 11, 29, 45, 13, 43, 51, 60, 29, 44, 25, 44, 29, 35, 45, 44, 38, 49, 51, 55, 13, 25, 38, 30, 41, 50, 43, 44, 49, 30, 38, 48, 51, 29, 51, 41, 38, 11, 60, 35, 55, 50, 48, 11];
 
-        const crossSpec = clmsModel.get("crosslinkerSpecificity");
-        clmsModel.set("crosslinkerSpecificity", null);	// null crosslink specificity for this test
-        const searchArray = Array.from(clmsModel.get("searches").values());
+        const crossSpec = clmsModel.getCrosslinkerSpecificity();
+        clmsModel._crosslinkerSpecificity = null;	// null crosslink specificity for this test
+        const searchArray = Array.from(clmsModel.getSearches().values());
         const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
-        const distObj = clmsModel.get("distancesObj");
+        const distObj = model.get("distancesObj");
 
         const sampleDists = distObj.getSampleDistances(100, crosslinkerSpecificityList, {
             withinProtein: true,
@@ -1219,7 +1219,7 @@ function testCallback(model) {
         });
         const actualValue = sampleDists.map(Math.round);
 
-        clmsModel.set("crosslinkerSpecificity", crossSpec);	// restore crosslink specs
+        clmsModel._crosslinkerSpecificity = crossSpec;	// restore crosslink specs
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as sampled distances, Passed!");
     });
@@ -1450,13 +1450,13 @@ function testCallback(model) {
     test("Update Protein Metadata", function (assert) {
         const expectedValue = {
             columns: ["proteinid", "cat", "dog"],
-            items: clmsModel.get("proteins"),
+            items: clmsModel.getProteinsMap(),
             matchedItemCount: 1
         };
         window.vent.listenToOnce(window.vent, "proteinMetadataUpdated", function (actualValue) {
             assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as proteinmetadata event data, Passed!");
 
-            const actualValue2 = clmsModel.get("proteins").get("sp|P02768-A|ALBU").getMeta();
+            const actualValue2 = clmsModel.getProtein("sp|P02768-A|ALBU").getMeta();
             const expectedValue2 = {proteinid: "sp|P02768-A|ALBU", cat: 2, dog: 4};
             assert.deepEqual(actualValue2, expectedValue2, "Expected " + JSON.stringify(expectedValue2) + " as protein meta value, Passed!");
         });
@@ -1470,15 +1470,15 @@ function testCallback(model) {
         const expectedValue = {
             columns: ["cat", "dog"],
             columnTypes: {cat: "numeric", dog: "numeric"},
-            items: clmsModel.get("crosslinks"),
+            items: clmsModel.getCrosslinks(),
             matchedItemCount: 2,
             ppiCount: 2
         };
         window.vent.listenToOnce(window.vent, "linkMetadataUpdated", function (actualValue) {
-            console.log("CLLCC2", clmsModel, clmsModel.get("crosslinks"));
+            console.log("CLLCC2", clmsModel, clmsModel.getCrosslinks());
             assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as linkmetadata event data, Passed!");
 
-            const actualValue2 = $.extend({}, clmsModel.get("crosslinks").get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497").getMeta());
+            const actualValue2 = $.extend({}, clmsModel.getCrosslinks().get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497").getMeta());
             delete actualValue2.distance;
             const expectedValue2 = {cat: 2, dog: 4};
             assert.deepEqual(actualValue2, expectedValue2, "Expected " + JSON.stringify(expectedValue2) + " as link meta value, Passed!");
@@ -1733,7 +1733,7 @@ function initializeModels(options) {
     console.log("Calling postDataLoaded...");
     postDataLoaded(compositeModelInst);
 
-    window.compositeModelInst.get("clmsModel").set("crosslinkerSpecificity",
+    window.compositeModelInst.get("clmsModel")._crosslinkerSpecificity =
         {
             "wrong mass SDA ": {
                 "searches": new Set(["24070"]),
@@ -1773,7 +1773,7 @@ function initializeModels(options) {
                 "id": 13,
                 "heterobi": true
             }
-        });
+        };
 
     return compositeModelInst;
 }
@@ -1811,7 +1811,7 @@ export async function testSetupNew() {
 
         // Wait for distances object to be ready
         console.log("Waiting for distances object to be ready...");
-        await waitForEvent(window.compositeModelInst.get("clmsModel"), "change:distancesObj");
+        await waitForEvent(window.compositeModelInst, "change:distancesObj");
 
         console.log("distances obj changed");
         console.log("About to call test callback with:", window.compositeModelInst);

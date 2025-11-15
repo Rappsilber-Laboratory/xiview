@@ -5,3 +5,20 @@
 	flex-grow: 1;
 	flex-shrink: 1;
 }
+
+/* Hide the root 'Object' node in json-formatter-js */
+.searchSummaryDiv > .json-formatter-row {
+	margin-left: -1em;
+}
+
+.searchSummaryDiv > .json-formatter-row > .json-formatter-toggler-link {
+	display: none;
+}
+
+.searchSummaryDiv > .json-formatter-row > .json-formatter-key {
+	display: none;
+}
+
+.searchSummaryDiv > .json-formatter-row > .json-formatter-bracket {
+	display: none;
+}

@@ -413,7 +413,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 this.lastChainIndex = acindex;
 
                 const proteinID = self.model.get("stageModel").get("reverseChainMap").get(acindex);
-                const protein = self.model.get("clmsModel").get("proteins").get(proteinID);
+                const protein = self.model.get("clmsModel").getProtein(proteinID);
 
                 if (protein !== undefined) {
                     const rgb = d3.rgb(self.model.get("proteinColourAssignment").getColour(protein));//.substring(0, 7));
@@ -591,7 +591,7 @@ export const NGLViewBB = BaseFrameView.extend({
                 .set("showShortestLinksOnly", this.options.shortestLinksOnly);
 
             // First time distancesObj fires we should setup the display for a new data set
-            this.listenToOnce(this.model.get("clmsModel"), "change:distancesObj", function () {
+            this.listenToOnce(this.model, "change:distancesObj", function () {
                 buildAssemblySelector.call(this);
                 this
                     .setAssemblyChains()
@@ -622,7 +622,7 @@ export const NGLViewBB = BaseFrameView.extend({
     },
 
     setAssemblyChains: function () {
-        this.model.get("clmsModel").get("distancesObj").setAssemblyChains(this.model.get("stageModel").get("structureComp").structure, this.options.defaultAssembly);
+        this.model.get("distancesObj").setAssemblyChains(this.model.get("stageModel").get("structureComp").structure, this.options.defaultAssembly);
         return this;
     },
 
@@ -648,7 +648,7 @@ export const NGLViewBB = BaseFrameView.extend({
             "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
             " - " + stageModel.get("structureComp").structure.title;
 
-        const interactors = filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").get("proteins").values()));
+        const interactors = filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").getProteinsIterator()));
         const alignColl = this.model.get("alignColl");
         const pdbLengthsPerProtein = interactors.map(function (inter) {
             const pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);
@@ -901,8 +901,8 @@ export const NGLViewBB = BaseFrameView.extend({
                 "Filter: " + filterStateToString()
             ],
             {
-                crosslinkerInfo: this.model.get("clmsModel").get("crosslinkerSpecificity"),
-                crosslinks: this.model.get("clmsModel").get("crosslinks")
+                crosslinkerInfo: this.model.get("clmsModel").getCrosslinkerSpecificity(),
+                crosslinks: this.model.get("clmsModel").getCrosslinks()
             }
         );
         return this;

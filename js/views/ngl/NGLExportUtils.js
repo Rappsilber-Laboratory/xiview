@@ -95,7 +95,7 @@ export const NGLExportUtils = {
         const pdbIds = structure.chainToOriginalStructureIDMap || {};
         const chainProxy = structure.getChainProxy();
         const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").getCrosslinks();
 
         const header = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
         const crosslinkLines = [];
@@ -106,7 +106,7 @@ export const NGLExportUtils = {
                 chainProxy.index = link.residueB.chainIndex;
                 const chainB = chainProxy.chainname;
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
-                const distObj = window.compositeModelInst.get("clmsModel").get("distancesObj");
+                const distObj = window.compositeModelInst.get("distancesObj");
 
                 const xiviewLink = crosslinkMap.get(link.origId);
                 const p1 = xiviewLink.fromProtein.accession;
@@ -134,7 +134,7 @@ export const NGLExportUtils = {
         const pdbIds = structure.chainToOriginalStructureIDMap || {};
         const chainProxy = structure.getChainProxy();
         const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").getCrosslinks();
 
         const header = ["model,protein1,chain1,res1,protein2"];
         const crosslinkLines = [];
@@ -160,7 +160,7 @@ export const NGLExportUtils = {
     exportChimeraPseudobonds: function (structure, nglModelWrapper, name, selectedOnly) {
         const chainProxy = structure.getChainProxy();
         const bondArray = [];
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").getCrosslinks();
         const colorScheme = nglModelWrapper.get("compositeModel").get("linkColourAssignment");
 
         for (let link of nglModelWrapper.getFullLinks()) {
@@ -213,7 +213,7 @@ export const NGLExportUtils = {
             xlinkanalyzerVersion: "1.1.1"
         };
 
-        const xiViewProteins = nglModelWrapper.get("compositeModel").get("clmsModel").get("proteins"); // ECMA map
+        const xiViewProteins = nglModelWrapper.get("compositeModel").get("clmsModel").getProteinsMap();
         const mapping = json.data[0].mapping;
 
         for (let prot of xiViewProteins.values()) {
@@ -224,7 +224,7 @@ export const NGLExportUtils = {
 
         const chainProxy = structure.getChainProxy();
         const subunits = new Map();
-        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").get("crosslinks");
+        const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").getCrosslinks();
 
         const header = ["Protein1,Protein2,AbsPos1,AbsPos2,score"];
         const crosslinkLines = [];

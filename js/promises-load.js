@@ -38,16 +38,16 @@ function startMemoryMonitoring() {
             const limitMB = (memory.jsHeapSizeLimit / 1048576).toFixed(2);
             const domNodes = document.getElementsByTagName("*").length;
             console.log(`[Memory #${logCount}] Used: ${usedMB} MB | Total: ${totalMB} MB | Limit: ${limitMB} MB | DOM Nodes: ${domNodes}`);
-        }, 2000);
+        }, 10000);
     } else {
         console.warn("performance.memory is not available in this browser. Memory monitoring is only supported in Chrome/Chromium-based browsers.");
     }
 }
 
 // Start memory monitoring only in development builds
-// if (process.env.NODE_ENV !== "production") {
-//     startMemoryMonitoring();
-// }
+if (process.env.NODE_ENV !== "production") {
+    startMemoryMonitoring();
+}
 
 const fetchDataFromUrl = (url) => {
     return fetch(url)
@@ -79,6 +79,7 @@ export function main(apiBase, annotatorURL) {
     const clmsModel = new SearchResultsModel();
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
+    // eslint-disable-next-line no-unused-vars
     const blosumPromise = new Promise((resolve, reject) => {
         // Collection of blosum matrices that will be fetched from a json file
         window.blosumCollInst = new BlosumCollection(); // options if we want to override defaults
@@ -152,7 +153,7 @@ export function validationPage(apiBase, annotatorURL) {
             initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false});
             window.vent.trigger("spectrumShow", true);
-            const allMatches = window.compositeModelInst.get("clmsModel").get("matches");
+            const allMatches = window.compositeModelInst.get("clmsModel").getMatches();
             compositeModelInst.setMarkedMatches("selection", allMatches);
             networkPageSpinner.stop();
         })
@@ -192,7 +193,7 @@ function getTasks(apiBase, clmsModel) {
 }
 
 function setWindowTitle(clmsModel) {
-    const searches = clmsModel.get("searches");
+    const searches = clmsModel.getSearches();
     if (!clmsModel.isAggregatedData()) {
         const id_file_names = [];
         searches.forEach(function (search) {

@@ -77,8 +77,8 @@ export function testSetup2() {
                             });
 
                             // Wait for distance calculations
-                            clmsModel.listenToOnce(
-                                clmsModel,
+                            compositeModelInst.listenToOnce(
+                                compositeModelInst,
                                 "change:distancesObj",
                                 function () {
                                     console.log(`*distances obj changed for ${pdbFile}`);
@@ -86,9 +86,9 @@ export function testSetup2() {
                                     // Validate expectations (same for all PDB files)
                                     const expectedLinks = 904;
                                     const expectedMatches = 1667;
-                                    assert.deepEqual(clmsModel.get("crosslinks").size, expectedLinks,
+                                    assert.deepEqual(clmsModel.getCrosslinks().size, expectedLinks,
                                         "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
-                                    assert.deepEqual(clmsModel.get("matches").length, expectedMatches,
+                                    assert.deepEqual(clmsModel.getMatches().length, expectedMatches,
                                         "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
 
                                     // Validate distance calculations
@@ -141,8 +141,8 @@ export function testCallback2(model) {
         const done = assert.async();
         const expectedLinks = 904;
         const expectedMatches = 1667;
-        assert.deepEqual(clmsModel.get("crosslinks").size, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
-        assert.deepEqual(clmsModel.get("matches").length, expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
+        assert.deepEqual(clmsModel.getCrosslinks().size, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " crosslinks, Passed!");
+        assert.deepEqual(clmsModel.getMatches().length, expectedMatches, "Expected " + JSON.stringify(expectedMatches) + " matches, Passed!");
         done();
     });
 }

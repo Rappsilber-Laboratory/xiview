@@ -289,7 +289,7 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.listenTo(this.model, "filteringDone", function () {
             this.renderCrossLinks({isFiltering: true});
         });
-        this.listenTo(this.model.get("clmsModel"), "change:distancesObj", this.ifADistanceAxisRerender);
+        this.listenTo(this.model, "change:distancesObj", this.ifADistanceAxisRerender);
         this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
         this.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
             //console.log ("HELLO", arguments);

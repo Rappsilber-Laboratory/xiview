@@ -39,7 +39,7 @@ export const setupColourModels = function (userConfig) {
             longDescription: "Differentiate crosslinks by search group when multiple searches are viewed together.",
             id: "Group",
         }, {
-            searchMap: window.compositeModelInst.get("clmsModel").get("searches"),
+            searchMap: window.compositeModelInst.get("clmsModel").getSearches(),
         });
     };
 
@@ -51,7 +51,7 @@ export const setupColourModels = function (userConfig) {
         id: "InterProtein",
         type: "ordinal"
     }, {
-        proteins: window.compositeModelInst.get("clmsModel").get("proteins")
+        proteins: window.compositeModelInst.get("clmsModel").getProteinsMap()
     });
 
     window.linkColor.distanceColoursBB = new DistanceColourModel({
@@ -64,11 +64,11 @@ export const setupColourModels = function (userConfig) {
 
     //init highest score colour model
     const clmsModel = window.compositeModelInst.get("clmsModel"); //todo - shouldn't have this static reference to model here
-    const minScore = clmsModel.get("minScore");
-    const maxScore = clmsModel.get("maxScore");
+    const minScore = clmsModel.getMinScore();
+    const maxScore = clmsModel.getMaxScore();
 
     const hiScores = [];
-    for (let crosslink of clmsModel.get("crosslinks").values()) {
+    for (let crosslink of clmsModel.getCrosslinks().values()) {
         const scores = crosslink.filteredMatches_pp.map(function (m) {
             return m.match.score();
         });

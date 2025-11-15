@@ -95,7 +95,7 @@ export class CompositeModel extends Backbone.Model {
         const filterModel = this.get("filterModel");
         const clmsModel = this.get("clmsModel");
         const crosslinksArr = this.getAllCrossLinks();
-        const searches = Array.from(clmsModel.get("searches").values());
+        const searches = Array.from(clmsModel.getSearches().values());
         let result;
 
         if (filterModel) {
@@ -104,7 +104,7 @@ export class CompositeModel extends Backbone.Model {
         // if its FDR based filtering,
         // set all matches fdrPass att to false, then calc
         if (filterModel && filterModel.get("fdrMode")) {
-            const matches = clmsModel.get("matches");
+            const matches = clmsModel.getMatches();
             for (let match of matches) {
                 match.fdrPass = false;
             }
@@ -330,7 +330,7 @@ export class CompositeModel extends Backbone.Model {
 
         let visibleProteinCount = 0;
         //hiding linkless participants
-        for (let participant of clmsModel.get("proteins").values()) {
+        for (let participant of clmsModel.getProteinsIterator()) {
             participant.hidden = true;
             for (let pCrossLink of participant.crosslinks) {
                 if (pCrossLink.filteredMatches_pp.length &&
@@ -370,7 +370,7 @@ export class CompositeModel extends Backbone.Model {
     }
 
     getAllCrossLinks() {
-        return Array.from(this.get("clmsModel").get("crosslinks").values());
+        return Array.from(this.get("clmsModel").getCrosslinks().values());
     }
 
     getAllTTCrossLinks() {
@@ -572,7 +572,7 @@ export class CompositeModel extends Backbone.Model {
 
     hideUnselectedProteins() {
         const selected = this.get("selectedProteins");
-        for (let participant of this.get("clmsModel").get("proteins").values()) {
+        for (let participant of this.get("clmsModel").getProteinsIterator()) {
             if (selected.indexOf(participant) == -1) {
                 participant.manuallyHidden = true;
             }
@@ -581,7 +581,7 @@ export class CompositeModel extends Backbone.Model {
     }
 
     showHiddenProteins() {
-        for (let participant of this.get("clmsModel").get("proteins").values()) {
+        for (let participant of this.get("clmsModel").getProteinsIterator()) {
             participant.manuallyHidden = false;
         }
         this.get("filterModel").trigger("change");
@@ -617,7 +617,7 @@ export class CompositeModel extends Backbone.Model {
 
     proteinSelectionTextFilter() {
         const filterText = d3.select("#proteinSelectionFilter").property("value").trim().toLowerCase();
-        const participantsArr = Array.from(this.get("clmsModel").get("proteins").values());
+        const participantsArr = Array.from(this.get("clmsModel").getProteinsIterator());
 
         const toSelect = participantsArr.filter(function (p) {
             if (p.description) {
@@ -781,7 +781,7 @@ export class CompositeModel extends Backbone.Model {
             }
         }
 
-        const proteins = this.get("clmsModel").get("proteins").values();
+        const proteins = this.get("clmsModel").getProteinsIterator();
         for (let protein of proteins) {
 
             if (protein.uniprot) {
@@ -841,7 +841,7 @@ export class CompositeModel extends Backbone.Model {
     getSingleCrosslinkDistance(xlink, distancesObj, protAlignCollection, options) {
         if (xlink.toProtein) {
             // distancesObj and alignCollection can be supplied to function or, if not present, taken from model
-            distancesObj = distancesObj || this.get("clmsModel").get("distancesObj");
+            distancesObj = distancesObj || this.get("distancesObj");
             protAlignCollection = protAlignCollection || this.get("alignColl");
             options = options || {
                 average: false
@@ -864,7 +864,7 @@ export class CompositeModel extends Backbone.Model {
         options = options || {};
         const includeUndefineds = options.includeUndefineds || false;
 
-        const distModel = this.get("clmsModel").get("distancesObj");
+        const distModel = this.get("distancesObj");
         const protAlignCollection = this.get("alignColl");
         let distArr = crosslinks.map(function (cl) {
             const dist = this.getSingleCrosslinkDistance(cl, distModel, protAlignCollection, options);

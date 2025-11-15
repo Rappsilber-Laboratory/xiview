@@ -275,8 +275,8 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         this.listenTo(this.colourScaleModel, "colourModelChanged", function () {
             this.render({noResize: true});
         }); // colourScaleModel is pointer to distance colour model, so this triggers even if not current colour model (redraws background)
-        this.listenTo(this.model.get("clmsModel"), "change:distancesObj", this.distancesChanged); // Entire new set of distances
-        this.listenTo(this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally)
+        this.listenTo(this.model, "change:distancesObj", this.distancesChanged); // Entire new set of distances
+        // this.listenTo(this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally) - clmsModel no longer extends Backbone
         this.listenTo(window.vent, "proteinMetadataUpdated", function () {
             this.makeProteinPairingOptions();
             this.updateAxisLabels();
@@ -402,7 +402,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
     // chain may show if checked in dropdown and if allowed by chainset in distancesobj (i.e. not cutoff by assembly choice)
     chainMayShow: function (dropdownIndex, chainIndex) {
-        const distanceObj = this.model.get("clmsModel").get("distancesObj");
+        const distanceObj = this.model.get("distancesObj");
         const allowedChains = distanceObj ? distanceObj.permittedChainIndicesSet : null;
         return allowedChains ? allowedChains.has(chainIndex) : true;
     },
@@ -427,11 +427,11 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     },
 
     getChainsForProtein: function (proteinID) {
-        return this.model.get("clmsModel").get("distancesObj").chainMap[proteinID];
+        return this.model.get("distancesObj").chainMap[proteinID];
     },
 
     addAlignIDs: function (proteinIDsObj) {
-        const distancesObj = this.model.get("clmsModel").get("distancesObj");
+        const distancesObj = this.model.get("distancesObj");
         proteinIDsObj.forEach(function (pid) {
             pid.alignID = null;
             if (pid.proteinID) {
@@ -655,7 +655,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
 
     renderBackgroundMap: function () {
         let z = performance.now();
-        const distancesObj = this.model.get("clmsModel").get("distancesObj");
+        const distancesObj = this.model.get("distancesObj");
         const stageModel = this.model.get("stageModel");
 
         // only render background if distances available

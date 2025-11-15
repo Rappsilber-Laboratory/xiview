@@ -209,7 +209,7 @@ export class CrosslinkRepresentation {
             const pid = chainIndexToProteinMap.get(chainProxy.index);
             //console.log ("chain label", chainProxy.index, chainProxy.chainname, chainProxy.residueCount, chainProxy.entity.description, pid);
             if (pid && isViableChain(chainProxy)) {
-                const protein = self.nglModelWrapper.getCompositeModel().get("clmsModel").get("proteins").get(pid);
+                const protein = self.nglModelWrapper.getCompositeModel().get("clmsModel").getProtein(pid);
                 const pname = protein ? protein.name : "none";
                 customText[chainProxy.atomOffset] = (verboseSetting === "None" ? "" : (pname + ":" + chainProxy.chainname + "(" + chainProxy.index + ")" + (verboseSetting === "Verbose" ? " " + description : "")));
             }
@@ -255,7 +255,7 @@ export class CrosslinkRepresentation {
                 }
                 const origLinkID = linkObj.origId;
                 const model = self.nglModelWrapper.getCompositeModel();
-                const link = model.get("clmsModel").get("crosslinks").get(origLinkID);
+                const link = model.get("clmsModel").getCrosslinks().get(origLinkID);
                 const colRGBString = model.get("linkColourAssignment").getColour(link); // returns an 'rgb(r,g,b)' string
                 let col24bit = colCache[colRGBString];
                 if (col24bit === undefined) {
@@ -298,7 +298,7 @@ export class CrosslinkRepresentation {
                 }
                 const origLinkID = linkObj.origId;
                 const model = self.nglModelWrapper.getCompositeModel();
-                const link = model.get("clmsModel").get("crosslinks").get(origLinkID);
+                const link = model.get("clmsModel").getCrosslinks().get(origLinkID);
                 const colRGBString = model.get("linkColourAssignment").getColour(link); // returns an 'rgb(r,g,b)' string
                 let col24bit = colCache[colRGBString];
                 if (col24bit === undefined) {
@@ -398,7 +398,7 @@ export class CrosslinkRepresentation {
                     pdtrans.xlinks = origFullLinks.concat(origHalfLinks);
 
                     const cp = this.structureComp.structure.getChainProxy(residue.chainIndex);
-                    const protein = nglModelWrapper.getCompositeModel().get("clmsModel").get("proteins").get(proteinId);
+                    const protein = nglModelWrapper.getCompositeModel().get("clmsModel").getProtein(proteinId);
                     //console.log ("cp", cp, pdtrans, this, this.structureComp);
                     nglModelWrapper.getCompositeModel().get("tooltipModel")
                         .set("header", "Cross-Linked with " + makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))

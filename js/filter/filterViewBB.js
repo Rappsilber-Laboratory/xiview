@@ -399,7 +399,7 @@ export const FilterViewBB = Backbone.View.extend({
         initMinigramFilterGroup.call(this, {
             attr: "matchScoreCutoff",
             extentProperty: "scoreExtent",
-            label: window.compositeModelInst.get("clmsModel").get("primaryScore").score_name,
+            label: window.compositeModelInst.get("clmsModel").getPrimaryScore().score_name,
             id: "matchScore",
             groupName: "Scores",
             tooltipIntro: "Filter out matches with scores"
@@ -735,7 +735,7 @@ export const FilterSummaryViewBB = Backbone.View.extend({
     render: function () {
         const commaFormat = d3.format(",");
         const model = this.model;
-        const decoysPresent = model.get("clmsModel").get("decoysPresent");
+        const decoysPresent = model.get("clmsModel").getDecoysPresent();
         const variables = {
             targets: commaFormat(model.getFilteredCrossLinks().length),
             decoysTD: commaFormat(model.getFilteredCrossLinks("decoysTD").length),
@@ -778,7 +778,7 @@ export const FDRSummaryViewBB = Backbone.View.extend({
 
         const clmsModel = this.model.get("clmsModel");
         const singleTargetProtein = clmsModel.targetProteinCount < 2;
-        const decoysPresent = clmsModel.get("decoysPresent");
+        const decoysPresent = clmsModel.getDecoysPresent();
 
         const self = this;
 

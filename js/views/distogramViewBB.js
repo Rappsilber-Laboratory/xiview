@@ -322,7 +322,7 @@ export const DistogramBB = BaseFrameView.extend({
                     this.api.hide("Cross-Links", {
                         withLegend: true
                     }); // doesn't work properly if done in configuration above
-                    if (!self.model.get("clmsModel").get("decoysPresent")) {
+                    if (!self.model.get("clmsModel").getDecoysPresent()) {
                         this.api.hide("Decoys (TD-DD)", {
                             withLegend: true
                         }); // if no decoys, hide the decoy total series
@@ -361,7 +361,7 @@ export const DistogramBB = BaseFrameView.extend({
             });
             if (distAttr.length === 1) {
                 const userMax = +mainDivSel.select(".xAxisMax").property("value");    // user defined value from widget
-                const distObj = this.model.get("clmsModel").get("distancesObj");
+                const distObj = this.model.get("distancesObj");
                 if (!userMax) {
                     distAttr[0].maxVal = niceRound(distObj.maxDistance * 1.3) + 1;
                 }
@@ -390,7 +390,7 @@ export const DistogramBB = BaseFrameView.extend({
                 noAxesRescale: true
             });
         }); // update selection series
-        this.listenTo(this.model.get("clmsModel"), "change:distancesObj", distancesAvailable); // new distanceObj for new pdb
+        this.listenTo(this.model, "change:distancesObj", distancesAvailable); // new distanceObj for new pdb
         this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
         this.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
             const columns = metaMetaData.columns;
@@ -413,7 +413,7 @@ export const DistogramBB = BaseFrameView.extend({
             self.setMultipleSelectControls(mainDivSel.select("div.toolbar"), newOptions, true);
         });
 
-        if (this.model.get("clmsModel").get("distancesObj")) {
+        if (this.model.get("distancesObj")) {
             distancesAvailable();
         }
 
@@ -721,9 +721,9 @@ export const DistogramBB = BaseFrameView.extend({
     },
 
     recalcRandomBinning: function (linkCount) {
-        const searchArray = Array.from(this.model.get("clmsModel").get("searches").values());
+        const searchArray = Array.from(this.model.get("clmsModel").getSearches().values());
         const crosslinkerSpecificityMap = crosslinkerSpecificityPerLinker(searchArray);
-        const distObj = this.model.get("clmsModel").get("distancesObj");
+        const distObj = this.model.get("distancesObj");
         const rscope = this.options.randomScope;
         const randArr = distObj ? distObj.getSampleDistances(
             d3.median([10000, linkCount * 100, 100000]),

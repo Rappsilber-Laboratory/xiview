@@ -36,7 +36,7 @@ import {CrosslinkViewer} from "../../crosslink-viewer/js/views/xinet/crosslink-v
 import {AnnotationType} from "./model/annotation-model-collection";
 import {AnnotationTypeCollection} from "./model/annotation-model-collection";
 import {KeyViewBB} from "./views/key/keyViewBB";
-import {SearchSummaryViewBB} from "./views/searchSummaryViewBB";
+import {SearchSummaryViewBB} from "./views/searchSummaryViewBB2";
 import {CircularViewBB} from "./views/circle/circularViewBB";
 import {AnnotationDropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {ColourCollectionOptionViewBB} from "./ui-utils/color-collection-option-view";
@@ -104,7 +104,7 @@ export function postDataLoaded(compositeModelInst) {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of compositeModelInst.get("clmsModel").get("proteins").values()) { //todo - remove static ref?
+    for (let participant of compositeModelInst.get("clmsModel").getProteinsIterator()) { //todo - remove static ref?
         if (participant.uniprot) {
             const featureArray = Array.from(participant.uniprot.features);
             featureArray.forEach(function (feature) {
@@ -148,7 +148,7 @@ export function postDataLoaded(compositeModelInst) {
     window.vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
-    if (compositeModelInst.get("clmsModel").get("searches").size > 1) {
+    if (compositeModelInst.get("clmsModel").getSearches().size > 1) {
         d3.select("#linkColourSelect").property("value", "Group");
     }
 
@@ -253,7 +253,7 @@ export function models(options, clmsModelInst) {
     options.alignmentCollectionInst = alignmentCollectionInst;
 
     const compositeModelInst = modelsEssential(options, clmsModelInst);
-    alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").get("proteins").values()));
+    alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").getProteinsIterator()));
     // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
 
     // this listener adds new sequences obtained from pdb files to existing alignment sequence models
@@ -282,7 +282,8 @@ export function models(options, clmsModelInst) {
     });
 
     // Set up colour models, some (most) of which depend on data properties
-    const crosslinkerKeys = d3.keys(compositeModelInst.get("clmsModel").get("crosslinkerSpecificity"));
+    // todo - BROKEN. FIX.
+    const crosslinkerKeys = d3.keys(compositeModelInst.get("clmsModel").getCrosslinkerSpecificity());
     const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
     setupColourModels({distance: storedDistanceColourSettings});
 
@@ -312,7 +313,7 @@ export function models(options, clmsModelInst) {
     // If more than one search, set group colour scheme to be default. https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/72
     compositeModelInst
         .set("linkColourAssignment",
-            window.compositeModelInst.get("clmsModel").get("searches").size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
+            window.compositeModelInst.get("clmsModel").getSearches().size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
         )
         .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB);
 
@@ -323,25 +324,21 @@ export function models(options, clmsModelInst) {
 export function modelsEssential(options, clmsModelInst) {
     clmsModelInst.parseJSON(options);
 
-    const scoreExtentInstance = matchScoreRange(clmsModelInst.get("matches"), false);
+    const scoreExtentInstance = matchScoreRange(clmsModelInst.getMatches(), false);
     // if (scoreExtentInstance[0]) {
     //     scoreExtentInstance[0] = Math.min(0, scoreExtentInstance[0]); // make scoreExtent min zero, if existing min isn't negative
     // }
     let filterSettings = {
-        decoys: clmsModelInst.get("decoysPresent"),
+        decoys: clmsModelInst.getDecoysPresent(),
         // selfLinks: clmsModelInst.targetProteinCount < 50,
-        A: clmsModelInst.get("manualValidatedPresent"),
-        B: clmsModelInst.get("manualValidatedPresent"),
-        C: clmsModelInst.get("manualValidatedPresent"),
-        Q: clmsModelInst.get("manualValidatedPresent"),
         // AUTO: !clmsModelInst.get("manualValidatedPresent"),
-        // ambig: clmsModelInst.get("ambiguousPresent") &&  clmsModelInst.targetProteinCount < 50,
-        linears: clmsModelInst.get("linearsPresent"),
+        // ambig: clmsModelInst.getAmbiguousPresent() &&  clmsModelInst.targetProteinCount < 50,
+        linears: clmsModelInst.getLinearsPresent(),
         //matchScoreCutoff: [undefined, undefined],
         matchScoreCutoff: scoreExtentInstance.slice(),
         //distanceCutoff: [0, 250],
         searchGroups: getSearchGroups(clmsModelInst),
-        primaryScore: clmsModelInst.get("primaryScore"),
+        primaryScore: clmsModelInst.getPrimaryScore(),
     };
     // const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
     // filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
@@ -381,7 +378,7 @@ export function modelsEssential(options, clmsModelInst) {
 
     // Data generation routines for minigram models
     minigramModels[0].data = function () {
-        return flattenMatches(clmsModelInst.get("matches")); // matches is now an array of arrays - [matches, []];
+        return flattenMatches(clmsModelInst.getMatches()); // matches is now an array of arrays - [matches, []];
     };
     minigramModels[1].data = function () {
         const crosslinks = window.compositeModelInst.getAllCrossLinks();
@@ -395,17 +392,6 @@ export function modelsEssential(options, clmsModelInst) {
         return [distances];
     };
 
-    // change in distanceObj changes the distanceExtent in filter model and should trigger a re-filter for distance minigram model as dists may have changed
-    minigramModels[1]
-        .listenTo(clmsModelInst, "change:distancesObj", function (clmsModel, distObj) {
-            //console.log ("minigram arguments", arguments, this);
-            const max = Math.ceil(distObj.maxDistance);
-            this.set("extent", [0, max + 1]);
-            filterModelInst.distanceExtent = [0, max];
-            filterModelInst
-                .trigger("change:distanceCutoff", filterModelInst, [this.get("domainStart"), this.get("domainEnd")])
-                .trigger("change", filterModelInst, {showHide: true});
-        });
 
     // overarching model
     const compositeModel = new CompositeModel({
@@ -418,6 +404,17 @@ export function modelsEssential(options, clmsModelInst) {
     window.compositeModelInst = compositeModel;
     window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
 
+    // change in distanceObj changes the distanceExtent in filter model and should trigger a re-filter for distance minigram model as dists may have changed
+    minigramModels[1]
+        .listenTo(compositeModel, "change:distancesObj", function (clmsModel, distObj) {
+            //console.log ("minigram arguments", arguments, this);
+            const max = Math.ceil(distObj.maxDistance);
+            this.set("extent", [0, max + 1]);
+            filterModelInst.distanceExtent = [0, max];
+            filterModelInst
+                .trigger("change:distanceCutoff", filterModelInst, [this.get("domainStart"), this.get("domainEnd")])
+                .trigger("change", filterModelInst, {showHide: true});
+        });
 
     //moving this to end of allDataLoaded - think validation page needs this, TODO, check
     //window.compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
@@ -549,7 +546,7 @@ export function views(compositeModelInst) {
         // hide/disable view choices that depend on certain data being present until that data arrives
         .enableItemsByID(maybeViews, false)
         .enableItemsByID(mostViews, true)
-        .listenTo(compositeModelInst.get("clmsModel"), "change:distancesObj", function (model, newDistancesObj) {
+        .listenTo(compositeModelInst, "change:distancesObj", function (model, newDistancesObj) {
             this.enableItemsByID(maybeViews, !!newDistancesObj);
         });
 
@@ -744,10 +741,9 @@ export function viewsEssential(compositeModelInst, options) {
         model: filterModel,
         myOptions: {
             hide: {
-                "AUTO": !compositeModelInst.get("clmsModel").get("autoValidatedPresent"),
-                "ambig": !compositeModelInst.get("clmsModel").get("ambiguousPresent"),
-                "unval": !compositeModelInst.get("clmsModel").get("unvalidatedPresent"),
-                "linears": !compositeModelInst.get("clmsModel").get("linearsPresent"),
+                "ambig": !compositeModelInst.get("clmsModel").getAmbiguousPresent(),
+                "unval": !compositeModelInst.get("clmsModel").getUnvalidatedPresent(),
+                "linears": !compositeModelInst.get("clmsModel").getLinearsPresent(),
             }
         }
     });
@@ -762,11 +758,11 @@ export function viewsEssential(compositeModelInst, options) {
         model: compositeModelInst,
     });
 
-    const unvalidatedPresent = compositeModelInst.get("clmsModel").get("unvalidatedPresent");
+    const unvalidatedPresent = compositeModelInst.get("clmsModel").getUnvalidatedPresent();
     if (unvalidatedPresent !== true) {
         d3.select("#filterModeDiv").style("display", "none");
     }
-    const linearsPresent = compositeModelInst.get("clmsModel").get("linearsPresent");
+    const linearsPresent = compositeModelInst.get("clmsModel").getLinearsPresent();
     if (linearsPresent !== true) {
         d3.select("#product").style("display", "none");
     }
@@ -811,7 +807,7 @@ export function viewsEssential(compositeModelInst, options) {
     // redraw brush when distancesObj is changed, extent is likely to be different
     minigramViews[1]
         // eslint-disable-next-line no-unused-vars
-        .listenTo(compositeModelInst.get("clmsModel"), "change:distancesObj", function (clmsModel, distObj) {
+        .listenTo(compositeModelInst, "change:distancesObj", function (clmsModel, distObj) {
             this.render().redrawBrush();
         }); // if the distances change (likely?) need to re-render the view too
 
@@ -1035,7 +1031,7 @@ function viewsThatNeedAsyncData(compositeModelInst) {
         displayEventName: "keyViewShow",
         model: compositeModelInst,
     });
-    //if (window.compositeModelInst.get("clmsModel").get("searches").size > 1) {
+    //if (window.compositeModelInst.get("clmsModel").getSearches().size > 1) {
     //     d3.select("#linkColourSelect").property("value","Group");
     //}
 
