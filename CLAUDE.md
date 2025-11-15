@@ -4,14 +4,14 @@ This file provides guidance to Claude Code when working with the crosslink-viewe
 
 ## Component Overview
 
-The crosslink-viewer submodule contains xiNET, a web-based visualization tool for cross-linking mass spectrometry data. It provides interactive network visualization of protein cross-links with residue-level resolution.
+The crosslink-viewer submodule contains xiNET, a web-based visualization tool for crosslinking mass spectrometry data. It provides interactive network visualization of protein crosslinks with residue-level resolution.
 
 ## Role in build-xiview Project
 
 crosslink-viewer serves as the **network visualization component** within the xiVIEW ecosystem:
 
-- **Network Display**: Interactive visualization of protein cross-link networks
-- **Residue Resolution**: Detailed view of cross-link positions on protein sequences
+- **Network Display**: Interactive visualization of protein crosslink networks
+- **Residue Resolution**: Detailed view of crosslink positions on protein sequences
 - **Layout Algorithms**: Sophisticated network layout and clustering capabilities
 
 ## Architecture
@@ -55,7 +55,7 @@ crosslink-viewer serves as the **network visualization component** within the xi
 
 ### Integration Points
 
-- **Data Import**: Accepts cross-link data from CLMS-model structures
+- **Data Import**: Accepts crosslink data from CLMS-model structures
 - **Filtering**: Responds to data filtering and selection from parent application
 
 ## Integration with build-xiview
@@ -63,7 +63,7 @@ crosslink-viewer serves as the **network visualization component** within the xi
 ### Component Integration
 
 crosslink-viewer operates as a visualization component that:
-- Receives cross-link data through defined interfaces
+- Receives crosslink data through defined interfaces
 - Provides interactive network exploration capabilities
 - Communicates selection and interaction events
 
@@ -74,7 +74,7 @@ crosslink-viewer is integrated into the main xiVIEW build process while maintain
 ## Important Notes
 
 - **No Vendor Changes**: Never modify code in vendor/ directories
-- **Performance**: Consider performance with large cross-link datasets
+- **Performance**: Consider performance with large crosslink datasets
 - **Browser Compatibility**: Ensure SVG rendering works across target browsers
 
 ## Citation
@@ -86,5 +86,5 @@ If using xiNET functionality, cite:
 
 crosslink-viewer provides essential functionality for:
 - Interactive exploration of protein interaction networks
-- Visualization of cross-link connectivity patterns
+- Visualization of crosslink connectivity patterns
 - Analysis of protein complex topology
