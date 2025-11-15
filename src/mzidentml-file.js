@@ -41,8 +41,19 @@ export class MzidentmlFile {
         return this._json.spectra_formats;
     }
 
-    get containsCrosslinks() {
-        return this._json.contains_crosslinks;
+    toJSON() {
+        // Return an object with all getter values for serialization
+        // This allows customization of what gets displayed in JSON viewers
+        return {
+            id: this.id,
+            projectId: this.projectId,
+            identificationFileName: this.identificationFileName,
+            provider: this.provider,
+            auditCollection: this.auditCollection,
+            analysisSampleCollection: this.analysisSampleCollection,
+            bib: this.bib,
+            spectraFormats: this.spectraFormats
+        };
     }
 
 }

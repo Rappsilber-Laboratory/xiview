@@ -1,5 +1,4 @@
 import {Crosslink} from "./crosslink";
-import path from "path-browserify";
 
 export class SpectrumMatch {
 
@@ -14,7 +13,7 @@ export class SpectrumMatch {
         const scoreSets = Object.keys(this._scores);
         const scoreSetCount = scoreSets.length;
         for (let s = 0; s < scoreSetCount; s++) {
-            this.containingModel.get("scoreSets").add(scoreSets[s]);
+            this.containingModel._scoreSets.add(scoreSets[s]);
         }
 
         this.matchedPeptides = [];
@@ -24,7 +23,7 @@ export class SpectrumMatch {
         } else {
             if (this.matchedPeptides[0].is_decoy.indexOf("1") != -1) {
                 this.is_decoy = true;
-                this.containingModel.set("decoysPresent", true);
+                this.containingModel._decoysPresent = true;
             }
         }
         // following will be inadequate for trimeric and higher order cross-links
@@ -34,12 +33,13 @@ export class SpectrumMatch {
                 alert("peptide error (missing peptide evidence?) for:" + +identification.pi2);
             } else if (this.matchedPeptides[1].is_decoy.indexOf("1") != -1) {
                 this.is_decoy = true;
-                this.containingModel.set("decoysPresent", true);
+                this.containingModel._decoysPresent = true;
             }
         }
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
         this.linkPos1 = +this.matchedPeptides[0].linkSite1;
+        this.linkPos2 = undefined;
         if (this.matchedPeptides[1]) {
             this.linkPos2 = this.matchedPeptides[1].linkSite1;
         } else if (identification.pi2 === null) {
@@ -51,7 +51,7 @@ export class SpectrumMatch {
 
         if (this.isNotCrosslinked()) {
             //its a linear
-            this.containingModel.set("linearsPresent", true);
+            this.containingModel._linearsPresent = true;
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
                 this.associateWithLink(participants, crosslinks, p1ID);
@@ -86,7 +86,7 @@ export class SpectrumMatch {
             for (let j = 0; j < this.matchedPeptides[1].pos.length; j++) {
 
                 if (i > 0 || j > 0) {
-                    this.containingModel.set("ambiguousPresent", true);
+                    this.containingModel._ambiguousPresent = true;
                 }
 
                 //some files (must be csv) are not puting in duplicate protein ids in ambig links
@@ -157,7 +157,7 @@ export class SpectrumMatch {
         let fromProt, toProt;
 
         if (this.isNotCrosslinked()) {//!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
-            this.containingModel.set("linearsPresent", true);
+            this.containingModel._linearsPresent = true;
             fromProt = proteins.get(p1ID);
             if (!fromProt) {
                 alert("FAIL: not protein with ID " + p1ID);
@@ -298,11 +298,11 @@ export class SpectrumMatch {
 
     peaklistFileName() {
         const spectraData = this.containingModel.getSpectraDataById(this.uploadId, this._identification.sd);
-        return path.basename(spectraData.location);
+        return spectraData.location.split("/").pop().split("\\").pop();
     }
 
     group() {
-        return this.containingModel.get("mzidentmlFiles").get(this.uploadId).group;
+        return this.containingModel.getMzidentmlFiles().get(this.uploadId).group;
     }
 
     expMZ() {
@@ -365,7 +365,7 @@ export class SpectrumMatch {
 
     score() {
         //return this._scores.score;
-        var scoreSets = this.containingModel.get("scoreSets");
+        var scoreSets = this.containingModel.getScoreSets();
         // console.log("*",scoreSets);
         if (scoreSets.has("Mascot:expectation value")) {
             // const s =

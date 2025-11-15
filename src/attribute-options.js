@@ -1,5 +1,3 @@
-import * as d3 from "d3";
-
 export const attributeOptions =
     [
         {
@@ -160,7 +158,9 @@ export const attributeOptions =
             label: "Match Precursor Intensity",
             decimalPlaces: 0,
             matchLevel: true,
-            valueFormat: d3.format(".1e"),
+            valueFormat: function (n) {
+                return n.toExponential(1);
+            },
             logAxis: true,
             logStart: 1000
         },

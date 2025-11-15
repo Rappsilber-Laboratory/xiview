@@ -26,7 +26,7 @@ export async function testSetup() {
     module("Data Loading and Processing");
 
     test("Proteins loaded correctly", function (assert) {
-        const proteins = clmsModel.get("proteins");
+        const proteins = clmsModel.getProteinsMap();
         assert.ok(proteins instanceof Map, "participants is a Map");
         assert.ok(proteins.size > 0, `At least some proteins loaded (${proteins.size})`);
 
@@ -46,7 +46,7 @@ export async function testSetup() {
     });
 
     test("Protein sequences loaded", function (assert) {
-        const participants = clmsModel.get("proteins");
+        const participants = clmsModel.getProteinsMap();
 
         // Check protein B using its accession
         const proteinB = participants.get("PB");
@@ -59,7 +59,7 @@ export async function testSetup() {
     });
 
     test("Peptides processed correctly", function (assert) {
-        const peptides = clmsModel.get("peptides");
+        const peptides = clmsModel.getPeptides();
         assert.ok(peptides instanceof Map, "peptides is a Map");
         assert.ok(peptides.size > 0, `peptides Map has entries (${peptides.size} total)`);
 
@@ -154,7 +154,7 @@ export async function testSetup() {
     });
 
     test("Matches loaded correctly", function (assert) {
-        const matches = clmsModel.get("matches");
+        const matches = clmsModel.getMatches();
         assert.ok(Array.isArray(matches), "matches is an array");
         assert.equal(matches.length, 27, "Expected 27 matches");
 
@@ -165,7 +165,7 @@ export async function testSetup() {
     });
 
     test("Searches identified", function (assert) {
-        const searches = clmsModel.get("mzidentmlFiles");
+        const searches = clmsModel.getMzidentmlFiles();
         assert.ok(searches instanceof Map, "searches is a Map");
         // Should have 4 unique search_ids based on protein data: "1", "2", "3", "4"
         assert.ok(searches.size > 0, "At least one search identified");
@@ -177,28 +177,28 @@ export async function testSetup() {
     // });
 
     test("Search modifications loaded", function (assert) {
-        const modifications = clmsModel.get("searchModifications");
+        const modifications = clmsModel.getSearchModifications();
         assert.ok(modifications instanceof Map, "modifications is a Map");
     });
 
     test("Spectra data loaded", function (assert) {
-        const spectraData = clmsModel.get("spectraData");
+        const spectraData = clmsModel.getSpectraData();
         assert.ok(spectraData instanceof Map, "spectraData is a Map");
     });
 
     test("Spectrum identification protocols loaded", function (assert) {
-        const protocols = clmsModel.get("spectrumIdentificationProtocols");
+        const protocols = clmsModel.getSpectrumIdentificationProtocols();
         assert.ok(protocols instanceof Map, "spectrumIdentificationProtocols is a Map");
     });
 
     test("MzIdentML files loaded", function (assert) {
-        const mzidentmlFiles = clmsModel.get("mzidentmlFiles");
+        const mzidentmlFiles = clmsModel.getMzidentmlFiles();
         assert.ok(mzidentmlFiles instanceof Map, "mzidentmlFiles is a Map");
         assert.ok(mzidentmlFiles.size > 0, "At least one mzidentML file loaded");
     });
 
     test("MzIdentML file properties correct", function (assert) {
-        const mzidentmlFiles = clmsModel.get("mzidentmlFiles");
+        const mzidentmlFiles = clmsModel.getMzidentmlFiles();
         // Get first mzidentML file (id 1 based on test data)
         const mzidFile = mzidentmlFiles.get(1);
 
@@ -206,7 +206,6 @@ export async function testSetup() {
             assert.equal(mzidFile.id, 1, "mzidentML file id is 1");
             assert.equal(mzidFile.projectId, "crosslinking", "project_id is correct");
             assert.equal(mzidFile.identificationFileName, "multiple_spectra_per_id_1_3_0_draft.mzid", "identification_file_name is correct");
-            assert.equal(mzidFile.containsCrosslinks, true, "contains_crosslinks is true");
             assert.ok(Array.isArray(mzidFile.spectraFormats), "spectra_formats is an array");
             assert.ok(mzidFile.spectraFormats.length > 0, "spectra_formats has entries");
         } else {
@@ -215,13 +214,13 @@ export async function testSetup() {
     });
 
     test("Analysis collection spectrum identifications loaded", function (assert) {
-        const analysisCollection = clmsModel.get("analysisCollectionSpectrumIdentifications");
+        const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
         assert.ok(analysisCollection instanceof Map, "analysisCollectionSpectrumIdentifications is a Map");
         assert.ok(analysisCollection.size > 0, "At least one analysis collection spectrum identification loaded");
     });
 
     test("Analysis collection spectrum identification properties correct", function (assert) {
-        const analysisCollection = clmsModel.get("analysisCollectionSpectrumIdentifications");
+        const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
         // Get first entry - upload_id 1, spectrum_identification_list_ref "sil_HCD"
         const acsi = analysisCollection.get("1_sil_HCD");
 
@@ -239,8 +238,8 @@ export async function testSetup() {
     });
 
     test("Relationship between mzidentml files and analysis collections", function (assert) {
-        const mzidentmlFiles = clmsModel.get("mzidentmlFiles");
-        const analysisCollection = clmsModel.get("analysisCollectionSpectrumIdentifications");
+        const mzidentmlFiles = clmsModel.getMzidentmlFiles();
+        const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
 
         // Check that analysis collection entries reference valid upload_ids (mzidentml file ids)
         let allValid = true;
@@ -257,13 +256,13 @@ export async function testSetup() {
     module("Crosslinks");
 
     test("Crosslinks generated from matches", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         assert.ok(crosslinks instanceof Map, "crosslinks is a Map");
         assert.ok(crosslinks.size > 0, "crosslinks generated from matches");
     });
 
     test("Crosslinks have correct structure", function (assert) {
-        const crosslinks = clmsModel.get("crosslinks");
+        const crosslinks = clmsModel.getCrosslinks();
         const firstCrosslink = Array.from(crosslinks.values())[0];
 
         if (firstCrosslink) {
@@ -275,7 +274,7 @@ export async function testSetup() {
     });
 
     test("Linear peptides identified", function (assert) {
-        const matches = clmsModel.get("matches");
+        const matches = clmsModel.getMatches();
         const linearMatches = matches.filter(m => !m.crosslink);
 
         // Check if linear matches exist in test data
@@ -289,13 +288,13 @@ export async function testSetup() {
     module("Data Integrity");
 
     test("Peptide to protein mappings valid", function (assert) {
-        const peptides = clmsModel.peptides;  // Use direct property, not get()
-        const participants = clmsModel.get("proteins");
+        const peptides = clmsModel.getPeptides();
+        const participants = clmsModel.getProteinsMap();
 
         let allValid = true;
         const invalidPeptides = [];
 
-        if (peptides && peptides.length) {
+        if (peptides && peptides.size > 0) {
             peptides.forEach(peptide => {
                 if (peptide.prt) {
                     peptide.prt.forEach(proteinId => {
@@ -315,8 +314,8 @@ export async function testSetup() {
     });
 
     test("Match to peptide mappings valid", function (assert) {
-        const matches = clmsModel.get("matches");
-        const peptides = clmsModel.get("peptides");  // Use direct property, not get()
+        const matches = clmsModel.getMatches();
+        const peptides = clmsModel.getPeptides();
 
         let allValid = true;
 
@@ -335,8 +334,8 @@ export async function testSetup() {
     });
 
     test("Search IDs consistent", function (assert) {
-        const participants = clmsModel.get("proteins");
-        const mzidFiles = clmsModel.get("mzidentmlFiles");
+        const participants = clmsModel.getProteinsMap();
+        const mzidFiles = clmsModel.getMzidentmlFiles();
 
         // Check all protein search_ids are in searches map
         let allValid = true;
@@ -353,9 +352,9 @@ export async function testSetup() {
     module("Model State");
 
     test("Presence flags set correctly", function (assert) {
-        const crosslinksPresent = clmsModel.get("crosslinksPresent");
-        const linearsPresent = clmsModel.get("linearsPresent");
-        const decoysPresent = clmsModel.get("decoysPresent");
+        const crosslinksPresent = clmsModel.getCrosslinksPresent();
+        const linearsPresent = clmsModel.getLinearsPresent();
+        const decoysPresent = clmsModel.getDecoysPresent();
 
         assert.equal(typeof crosslinksPresent, "boolean", "crosslinksPresent is boolean");
         assert.equal(typeof linearsPresent, "boolean", "linearsPresent is boolean");
@@ -363,7 +362,7 @@ export async function testSetup() {
     });
 
     test("Score extent calculated", function (assert) {
-        const scoreExtent = clmsModel.get("scoreExtent");
+        const scoreExtent = clmsModel.getScoreExtent();
 
         if (scoreExtent) {
             assert.ok(Array.isArray(scoreExtent) || scoreExtent instanceof Map,

@@ -1,5 +1,3 @@
-import d3 from "d3";
-
 export const prideLoadSpectrum = function (match) {
     // if (match.spectrum && match.spectrum.pks) {
     const formatted_data = {};
@@ -61,13 +59,22 @@ export const prideLoadSpectrum = function (match) {
     formatted_data.stubs2 = match.matchedPeptides[1].stubs;
 
 
-    d3.json(window.compositeModelInst.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
+    const url = window.compositeModelInst.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
                     + "&sd_ref=" +  encodeURIComponent(match._identification.sd)
-                    + "&upload_id=" +  encodeURIComponent(match.uploadId), function (error, json) {
-        if (error) {
-            console.log("error getting peak list", json);
-        } else {
-            d3.select("#range-error").text("");
+                    + "&upload_id=" +  encodeURIComponent(match.uploadId);
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(json => {
+            const rangeErrorEl = document.querySelector("#range-error");
+            if (rangeErrorEl) {
+                rangeErrorEl.textContent = "";
+            }
 
             const peakArray = [];
             const peakCount = json.mz.length;
@@ -77,7 +84,9 @@ export const prideLoadSpectrum = function (match) {
 
             formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
             window.compositeModelInst.get("xispec_wrapper").setData(formatted_data);
-        }
-    });
+        })
+        .catch(error => {
+            console.log("error getting peak list", error);
+        });
     // }
 };
