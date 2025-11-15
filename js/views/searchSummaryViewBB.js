@@ -3,7 +3,6 @@ import "../../css/searchSummary.css";
 import "../../vendor/jquery.jsonview.css";
 
 import * as $ from "jquery";
-// window.jQuery = $;
 import "jsonview";
 import * as _ from "underscore";
 import d3 from "d3";
@@ -32,18 +31,18 @@ export const SearchSummaryViewBB = BaseFrameView.extend({
             .append("div").attr("class", "panelInner")
             .append("div").attr("class", "verticalFlexContainer");
 
-        // const descriptionButton = mainPanel.append("button")
-        //     .classed("btn btn-1 btn-1a flexStatic", true)
-        //     .text("Download Search Descriptions")
-        //     .on("click", function () {
-        //         const searchString = Array.from(self.model.get("searches").values())
-        //             .map(function (search) {
-        //                 return search.id;
-        //             })
-        //             .join("-");
-        //         download(self.exportDescriptions(), "plain/text", "search_description_" + searchString + ".txt");
-        //     });
-        //descriptionButton.style("display", _.isEmpty(self.model.get("crosslinkerSpecificity")) ? "none" : null);
+        const descriptionButton = mainPanel.append("button")
+            .classed("btn btn-1 btn-1a flexStatic", true)
+            .text("Download Search Descriptions")
+            .on("click", function () {
+                const searchString = Array.from(self.model.get("searches").values())
+                    .map(function (search) {
+                        return search.id;
+                    })
+                    .join("-");
+                download(self.exportDescriptions(), "plain/text", "search_description_" + searchString + ".txt");
+            });
+        descriptionButton.style("display", _.isEmpty(self.model.get("crosslinkerSpecificity")) ? "none" : null);
 
         mainPanel.append("div").attr("class", "searchSummaryDiv");
 
