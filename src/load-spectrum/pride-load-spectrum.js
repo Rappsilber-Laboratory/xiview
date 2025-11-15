@@ -1,8 +1,18 @@
+/**
+ * Load spectrum data from PRIDE for a given spectrum match
+ * @param {SpectrumMatch} match - The spectrum match to load spectrum data for
+ * @returns {void}
+ */
 export const prideLoadSpectrum = function (match) {
     // if (match.spectrum && match.spectrum.pks) {
     const formatted_data = {};
 
     const modMap = new Map();
+    /**
+     * Collect modifications from a peptide
+     * @param {Peptide} peptide - The peptide to collect modifications from
+     * @returns {void}
+     */
     function collectMods(peptide) { // yeah, this is awful, tidy up once knwo what annotator really needs
         // let seqMods = "";
         const pepLen = peptide.sequence.length;

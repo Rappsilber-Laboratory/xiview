@@ -1,4 +1,8 @@
 export class SpectraData {
+    /**
+     * Create a SpectraData instance
+     * @param {Object} json - Raw spectra data object
+     */
     constructor(json) {
         this._json = json;
     }
@@ -12,24 +16,52 @@ export class SpectraData {
     // spectrum_id_format:"MS:1000774",
     // upload_id:33}
 
+    /**
+     * Get spectra file format
+     * @returns {string} File format CV term
+     */
     get fileFormat() {
         return this._json.file_format;
     }
+    /**
+     * Get spectra data identifier
+     * @returns {number} Data identifier
+     */
     get id() {
         return this._json.id;
     }
+    /**
+     * Get spectra file location/path
+     * @returns {string} File location
+     */
     get location() {
         return this._json.location;
     }
+    /**
+     * Get spectra data name
+     * @returns {string|null} Data name or null
+     */
     get name() {
         return this._json.name;
     }
+    /**
+     * Get spectrum identifier format
+     * @returns {string} Spectrum ID format CV term
+     */
     get spectrumIdFormat() {
         return this._json.spectrum_id_format;
     }
+    /**
+     * Get upload identifier
+     * @returns {number} Upload identifier
+     */
     get uploadId() {
         return this._json.upload_id;
     }
+    /**
+     * Get external format documentation
+     * @returns {string|null} Documentation URL or null
+     */
     get externalFormatDocumentation() {
         return this._json.external_format_documentation;
     }

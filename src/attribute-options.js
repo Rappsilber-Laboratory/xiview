@@ -1,9 +1,22 @@
+/**
+ * Attribute options for crosslink visualization and filtering
+ * Each option defines how to extract and display attribute values from crosslinks
+ * @type {Array<Object>}
+ * @property {Function} linkFunc - Function to extract values from filtered matches (param: Crosslink, returns: Array<number>)
+ * @property {Function} unfilteredLinkFunc - Function to extract values from all matches (param: Crosslink, returns: Array<number>)
+ * @property {string} id - Unique identifier for the attribute
+ * @property {string} label - Display label for the attribute
+ * @property {number} decimalPlaces - Number of decimal places for formatting
+ * @property {boolean} [matchLevel] - True if attribute is at match level vs crosslink level
+ */
 export const attributeOptions =
     [
         {
+            /** @param {Crosslink} link @returns {Array<number>} */
             linkFunc: function (link) {
                 return [link.filteredMatches_pp.length];
             },
+            /** @param {Crosslink} link @returns {Array<number>} */
             unfilteredLinkFunc: function (link) {
                 return [link.matches_pp.length];
             },

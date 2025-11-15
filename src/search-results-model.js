@@ -27,109 +27,212 @@ export class SearchResultsModel {
     }
 
     // Public getter methods
-    // Get a single protein by ID
+    /**
+     * Get a single protein by ID
+     * @param {string} proteinId - The protein identifier
+     * @returns {Protein|undefined} The protein object, or undefined if not found
+     */
     getProtein(proteinId) {
         return this._proteins.get(proteinId);
     }
 
-    // Get an iterator over protein values (for iteration)
+    /**
+     * Get an iterator over protein values (for iteration)
+     * @returns {Iterator<Protein>} Iterator over all proteins
+     */
     getProteinsIterator() {
         return this._proteins.values();
     }
 
-    // Get the entire protein Map (for operations needing the Map)
+    /**
+     * Get the entire protein Map (for operations needing the Map)
+     * @returns {Map<string, Protein>} Map of protein IDs to Protein objects
+     */
     getProteinsMap() {
         return this._proteins;
     }
 
+    /**
+     * Get all spectrum matches
+     * @returns {Array<SpectrumMatch>} Array of all spectrum matches
+     */
     getMatches() {
         return this._matches;
     }
 
+    /**
+     * Get all crosslinks
+     * @returns {Map<string, Crosslink>} Map of crosslink IDs to Crosslink objects
+     */
     getCrosslinks() {
         return this._crosslinks;
     }
 
+    /**
+     * Get score extent (min/max range)
+     * @returns {Array<number>|null} Score extent [min, max] or null
+     */
     getScoreExtent() {
         return this._scoreExtent;
     }
 
+    /**
+     * Get all searches
+     * @returns {Map<string, Object>} Map of search IDs to search objects
+     */
     getSearches() {
         return this._searches;
     }
 
+    /**
+     * Check if decoy proteins are present in the data
+     * @returns {boolean} True if decoys present
+     */
     getDecoysPresent() {
         return this._decoysPresent;
     }
 
+    /**
+     * Check if ambiguous matches are present in the data
+     * @returns {boolean} True if ambiguous matches present
+     */
     getAmbiguousPresent() {
         return this._ambiguousPresent;
     }
 
+    /**
+     * Check if unvalidated matches are present in the data
+     * @returns {boolean} True if unvalidated matches present
+     */
     getUnvalidatedPresent() {
         return this._unvalidatedPresent;
     }
 
+    /**
+     * Check if crosslinks are present in the data
+     * @returns {boolean} True if crosslinks present
+     */
     getCrosslinksPresent() {
         return this._crosslinksPresent;
     }
 
+    /**
+     * Check if linear peptides are present in the data
+     * @returns {boolean} True if linear peptides present
+     */
     getLinearsPresent() {
         return this._linearsPresent;
     }
 
+    /**
+     * Get all available score sets
+     * @returns {Set<string>} Set of score set names
+     */
     getScoreSets() {
         return this._scoreSets;
     }
 
+    /**
+     * Get the currently selected score set
+     * @returns {string|null} Selected score set name or null
+     */
     getSelectedScoreSet() {
         return this._selectedScoreSet;
     }
 
+    /**
+     * Get all mzIdentML files
+     * @returns {Map<string, MzidentmlFile>} Map of file IDs to MzidentmlFile objects
+     */
     getMzidentmlFiles() {
         return this._mzidentmlFiles;
     }
 
+    /**
+     * Get all analysis collection spectrum identifications
+     * @returns {Map<string, AnalysisCollectionSpectrumIdentification>} Map of identifications
+     */
     getAnalysisCollectionSpectrumIdentifications() {
         return this._analysisCollectionSpectrumIdentifications;
     }
 
+    /**
+     * Get all spectrum identification protocols
+     * @returns {Map<string, SpectrumIdentificationProtocol>} Map of protocol IDs to protocol objects
+     */
     getSpectrumIdentificationProtocols() {
         return this._spectrumIdentificationProtocols;
     }
 
+    /**
+     * Get all spectra data
+     * @returns {Map<string, SpectraData>} Map of spectra data IDs to SpectraData objects
+     */
     getSpectraData() {
         return this._spectraData;
     }
 
+    /**
+     * Get all enzymes
+     * @returns {Map<string, Enzyme>} Map of enzyme IDs to Enzyme objects
+     */
     getEnzymes() {
         return this._enzymes;
     }
 
+    /**
+     * Get all search modifications
+     * @returns {Map<string, SearchModification>} Map of modification IDs to SearchModification objects
+     */
     getSearchModifications() {
         return this._searchModifications;
     }
 
+    /**
+     * Get the primary score definition
+     * @returns {Object} Primary score object with score_name property
+     */
     getPrimaryScore() {
         return this._primaryScore;
     }
 
+    /**
+     * Get all peptides
+     * @returns {Map<string, Peptide>} Map of peptide IDs to Peptide objects
+     */
     getPeptides() {
         return this._peptides;
     }
 
+    /**
+     * Get minimum score value
+     * @returns {number} Minimum score
+     */
     getMinScore() {
         return this._minScore;
     }
 
+    /**
+     * Get maximum score value
+     * @returns {number} Maximum score
+     */
     getMaxScore() {
         return this._maxScore;
     }
 
+    /**
+     * Get crosslinker specificity information
+     * @returns {*} Crosslinker specificity data
+     */
     getCrosslinkerSpecificity() {
         return this._crosslinkerSpecificity;
     }
 
+    /**
+     * Process and store mzIdentML file metadata
+     * @param {Array<Object>} json - Array of mzIdentML file data objects
+     * @returns {void}
+     */
     processMzIdentMLFiles(json) {
         const mzidentmlFiles = new Map();
         for (let mzid of json) {
@@ -138,6 +241,11 @@ export class SearchResultsModel {
         this._mzidentmlFiles = mzidentmlFiles;
     }
 
+    /**
+     * Process and store analysis collection spectrum identifications
+     * @param {Array<Object>} json - Array of analysis collection data objects
+     * @returns {void}
+     */
     processAnalysisCollectionSpectrumIdentifications(json) {
         const analysisCollectionSpectrumIdentifications = new Map();
         for (let acsi of json) {
@@ -149,6 +257,11 @@ export class SearchResultsModel {
         this._analysisCollectionSpectrumIdentifications = analysisCollectionSpectrumIdentifications;
     }
 
+    /**
+     * Process and store spectrum identification protocols
+     * @param {Array<Object>} json - Array of protocol data objects
+     * @returns {void}
+     */
     processSpectrumIdentificationProtocols(json) {
         const spectrumIdentificationProtocols = new Map();
         for (let siProtocol of json) {
@@ -159,6 +272,12 @@ export class SearchResultsModel {
         this._spectrumIdentificationProtocols = spectrumIdentificationProtocols;
     }
 
+    /**
+     * Get spectrum identification protocol by upload ID and protocol ID
+     * @param {string} uploadId - The upload identifier
+     * @param {string} id - The protocol identifier
+     * @returns {SpectrumIdentificationProtocol|null} The protocol object or null if not found
+     */
     getSpectrumIdentificationProtocol(uploadId, id) {
         const spectrumIdentificationProtocols = this._spectrumIdentificationProtocols;
         if (spectrumIdentificationProtocols) {
@@ -169,6 +288,11 @@ export class SearchResultsModel {
         }
     }
 
+    /**
+     * Process and store spectra data
+     * @param {Array<Object>} json - Array of spectra data objects
+     * @returns {void}
+     */
     processSpectraData(json) {
         const spectrumSources = new Map();
         for (let specSource of json) {
@@ -177,6 +301,12 @@ export class SearchResultsModel {
         this._spectraData = spectrumSources;
     }
 
+    /**
+     * Get spectra data by upload ID and data ID
+     * @param {string} uploadId - The upload identifier
+     * @param {string} id - The spectra data identifier
+     * @returns {SpectraData|null} The spectra data object or null if not found
+     */
     getSpectraDataById(uploadId, id) {
         const spectraData = this._spectraData;
         if (spectraData) {
@@ -187,6 +317,11 @@ export class SearchResultsModel {
         }
     }
 
+    /**
+     * Process and store enzyme data
+     * @param {Array<Object>} data - Array of enzyme data objects
+     * @returns {void}
+     */
     processEnzymes(data) {
         const enzymes = new Map();
         for (let e of data) {
@@ -196,6 +331,11 @@ export class SearchResultsModel {
         this._enzymes = enzymes;
     }
 
+    /**
+     * Process and store search modification data
+     * @param {Array<Object>} data - Array of modification data objects
+     * @returns {void}
+     */
     processSearchModifications(data) {
         const searchModifications = new Map();
         for (let mod of data) {
@@ -205,19 +345,38 @@ export class SearchResultsModel {
         this._searchModifications = searchModifications;
     }
 
+    /**
+     * Store raw match data for later processing
+     * @param {Array<Object>} data - Array of raw match data
+     * @returns {void}
+     */
     processMatches(data) {
         this._rawMatches = data;
     }
 
+    /**
+     * Store raw peptide data for later processing
+     * @param {Array<Object>} data - Array of raw peptide data
+     * @returns {void}
+     */
     processPeptides(data) {
         this._rawPeptides = data;
     }
 
+    /**
+     * Store raw protein data for later processing
+     * @param {Array<Object>} data - Array of raw protein data
+     * @returns {void}
+     */
     processProteins(data) {
         this._rawProteins = data;
     }
 
-    //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
+    /**
+     * Parse JSON data and construct SpectrumMatch objects from raw data
+     * @param {Object} json - JSON object containing search results data
+     * @returns {void}
+     */
     parseJSON(json) {
         this._primaryScore = {score_name: "Match Score"};
         // todo - saved config should end up including filter settings not just xiNET layout
@@ -302,8 +461,12 @@ export class SearchResultsModel {
         this._searches = searches;
     }
 
-    // Connect searches to proteins
-    // Returns: Map<searchId, {participantIDSet: Set<proteinId>, id: searchId}>
+    /**
+     * Connect searches to proteins
+     * @param {Map<string, Peptide>} peptideMap - Map of peptide IDs to Peptide objects
+     * @param {Array<SpectrumMatch>} matchArray - Array of spectrum matches
+     * @returns {Map<string, Object>} Map of search IDs to search objects with participantIDSet and id
+     */
     getProteinSearchMap(peptideMap, matchArray) {
         const searchMap = new Map();
         matchArray.forEach((match) => {
@@ -321,6 +484,10 @@ export class SearchResultsModel {
         return searchMap;
     }
 
+    /**
+     * Initialize decoy protein lookup mapping decoy proteins to their target proteins
+     * @returns {void}
+     */
     initDecoyLookup() {
         // Make map of reverse/random decoy proteins to real proteins
         const prefixes = ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
@@ -353,6 +520,10 @@ export class SearchResultsModel {
         this._targetProteinCount = prots.length - decoys.length;
     }
 
+    /**
+     * Check if the data is aggregated from multiple mzIdentML files
+     * @returns {boolean} True if data is aggregated (more than one mzIdentML file)
+     */
     isAggregatedData() {
         return this._mzidentmlFiles.size > 1;
     }

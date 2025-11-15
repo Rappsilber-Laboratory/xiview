@@ -2,6 +2,14 @@ import {Crosslink} from "./crosslink";
 
 export class SpectrumMatch {
 
+    /**
+     * Create a SpectrumMatch linking a mass spectrum to peptide identifications
+     * @param {SearchResultsModel} containingModel - The containing search results model
+     * @param {Map<string, Protein>} participants - Map of protein IDs to Protein objects
+     * @param {Map<string, Crosslink>} crosslinks - Map of crosslink IDs to Crosslink objects
+     * @param {Map<string, Peptide>} peptides - Map of peptide IDs to Peptide objects
+     * @param {Object} identification - Raw identification data object
+     */
     constructor(containingModel, participants, crosslinks, peptides, identification) {
         this.containingModel = containingModel; //containing BB model
         this._identification = identification;
@@ -26,7 +34,6 @@ export class SpectrumMatch {
                 this.containingModel._decoysPresent = true;
             }
         }
-        // following will be inadequate for trimeric and higher order cross-links
         if (identification.pi2 !== undefined && identification.pi2 !== null) { //null if loop link
             this.matchedPeptides[1] = peptides.get(this.uploadId + "_" + identification.pi2);
             if (!this.matchedPeptides[1]) {
@@ -146,6 +153,20 @@ export class SpectrumMatch {
         }
     }
 
+    /**
+     * Associate this match with a crosslink
+     * @param {Map<string, Protein>} proteins - Map of protein IDs to Protein objects
+     * @param {Map<string, Crosslink>} crosslinks - Map of crosslink IDs to Crosslink objects
+     * @param {string} p1ID - Protein 1 identifier
+     * @param {string} [p2ID] - Protein 2 identifier (optional for linear peptides)
+     * @param {number} [res1] - Residue position 1
+     * @param {number} [res2] - Residue position 2
+     * @param {number} [pep1_start] - Peptide 1 start position
+     * @param {number} [pep1_length] - Peptide 1 length
+     * @param {number} [pep2_start] - Peptide 2 start position
+     * @param {number} [pep2_length] - Peptide 2 length
+     * @returns {void}
+     */
     associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
         pep1_start, pep1_length, pep2_start, pep2_length) {
 
@@ -266,11 +287,19 @@ export class SpectrumMatch {
         this.crosslinks.push(resLink);
     }
 
+    /**
+     * Check if this match is ambiguous (multiple peptide positions)
+     * @returns {boolean} True if match is ambiguous
+     */
     isAmbig() {
         return this.matchedPeptides[0].pos.length > 1 ||
             (this.matchedPeptides[1] && this.matchedPeptides[1].pos.length > 1);
     }
 
+    /**
+     * Check if this match involves a decoy protein
+     * @returns {boolean} True if match involves decoy
+     */
     isDecoy() {
         if (this.is_decoy) { //todo - looks bad
             return this.is_decoy;
@@ -280,47 +309,91 @@ export class SpectrumMatch {
         }
     }
 
+    /**
+     * Get match identifier
+     * @returns {string} The PSM identifier
+     */
     get id () {
         return this.psmId;
     }
 
+    /**
+     * Check if peptides are not crosslinked (linear peptides)
+     * @returns {boolean} True if not crosslinked
+     */
     isNotCrosslinked() {
         return this.linkPos1 === null;
     }
 
+    /**
+     * Check if this is a monolink
+     * @returns {boolean} Always returns false
+     */
     isMonoLink() {
         return false; //this.linkPos1 !== null && this.matchedPeptides.length === 1;
     }
 
+    /**
+     * Check if this is a loop link (intra-peptide crosslink)
+     * @returns {boolean} True if loop link
+     */
     isLoopLink() {
         return this.linkPos1 !== null && this.matchedPeptides.length === 1;
     }
 
+    /**
+     * Get the peaklist file name
+     * @returns {string} The peaklist file name
+     */
     peaklistFileName() {
         const spectraData = this.containingModel.getSpectraDataById(this.uploadId, this._identification.sd);
         return spectraData.location.split("/").pop().split("\\").pop();
     }
 
+    /**
+     * Get the group this match belongs to
+     * @returns {*} The group identifier
+     */
     group() {
         return this.containingModel.getMzidentmlFiles().get(this.uploadId).group;
     }
 
+    /**
+     * Get experimental m/z value
+     * @returns {number} Experimental m/z
+     */
     expMZ() {
         return this.precursorMZ;
     }
 
+    /**
+     * Calculate experimental mass
+     * @returns {number} Experimental mass
+     */
     expMass() {
         return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
+    /**
+     * Get calculated m/z value
+     * @returns {number} Calculated m/z
+     */
     calcMZ() {
         return this.calc_mz;// (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
+    /**
+     * Calculate theoretical mass
+     * @returns {number} Calculated mass
+     */
     calcMass() {
         return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * SpectrumMatch.protonMass); //this.calc_mass;
     }
 
+    /**
+     * Calculate number of missing or misassigned peaks
+     * @returns {number} Number of missing peaks
+     */
     missingPeaks() {
         const errorMZ = this.expMZ() - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
@@ -328,18 +401,34 @@ export class SpectrumMatch {
         return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
+    /**
+     * Calculate mass error in ppm
+     * @returns {number} Mass error in parts per million
+     */
     massError() {
         return ((this.expMass() - this.calcMass()) / this.calcMass()) * 1000000;
     }
 
+    /**
+     * Get ion types for this match
+     * @returns {Array<Object>} Array of ion type objects
+     */
     ionTypes() {
         return this.ions;
     }
 
+    /**
+     * Get ion types as JSON string
+     * @returns {string} JSON string of ion types
+     */
     ionTypesString() {
         return JSON.stringify(this.ionTypes());
     }
 
+    /**
+     * Calculate total crosslinker modification mass
+     * @returns {number} Crosslinker modification mass
+     */
     crosslinkerModMass() {
         var clModMass = +this.matchedPeptides[0].cl_modmass;
         if (this.matchedPeptides[1]) {
@@ -348,6 +437,10 @@ export class SpectrumMatch {
         return clModMass;
     }
 
+    /**
+     * Get fragment tolerance settings
+     * @returns {Object} Object with tolerance and unit properties
+     */
     fragmentTolerance() {
         const sip = this.spectrumIdentificationProtocol;
         return {
@@ -356,6 +449,10 @@ export class SpectrumMatch {
         };
     }
 
+    /**
+     * Get fragment tolerance as formatted string
+     * @returns {string|undefined} Fragment tolerance string or undefined
+     */
     fragmentToleranceString() {
         var fragTol = this.fragmentTolerance();
         if (fragTol) {
@@ -363,6 +460,10 @@ export class SpectrumMatch {
         }
     }
 
+    /**
+     * Get the score for this match
+     * @returns {number} The match score
+     */
     score() {
         //return this._scores.score;
         var scoreSets = this.containingModel.getScoreSets();
@@ -376,6 +477,10 @@ export class SpectrumMatch {
         }
     }
 
+    /**
+     * Get the maximum modification count across peptides
+     * @returns {number} Modification count
+     */
     modificationCount() {
         const modCount1 = this.matchedPeptides[0].mod_pos.length;
         if (this.matchedPeptides[1]) {
@@ -387,10 +492,18 @@ export class SpectrumMatch {
         return modCount1;
     }
 
+    /**
+     * Get peptide 1 base sequence
+     * @returns {string} Peptide 1 base sequence
+     */
     get pepSeq1_base() {
         return this.matchedPeptides[0].sequence;
     }
 
+    /**
+     * Get peptide 2 base sequence
+     * @returns {string} Peptide 2 base sequence or empty string
+     */
     get pepSeq2_base() {
         if (this.matchedPeptides[1]) {
             return this.matchedPeptides[1].sequence;
@@ -399,10 +512,18 @@ export class SpectrumMatch {
         }
     }
 
+    /**
+     * Get peptide 1 sequence with modifications
+     * @returns {string} Peptide 1 sequence with modifications
+     */
     get pepSeq1_mods() {
         return this.matchedPeptides[0].seq_mods;
     }
 
+    /**
+     * Get peptide 2 sequence with modifications
+     * @returns {string} Peptide 2 sequence with modifications or empty string
+     */
     get pepSeq2_mods() {
         if (this.matchedPeptides[1]) {
             return this.matchedPeptides[1].seq_mods;
@@ -411,59 +532,115 @@ export class SpectrumMatch {
         }
     }
 
+    /**
+     * Get peptide-spectrum match identifier
+     * @returns {string} PSM identifier
+     */
     get psmId() {
         return this._identification.id;
     }
 
+    /**
+     * Get spectrum identifier
+     * @returns {string} Spectrum identifier
+     */
     get spectrumId() {
         return this._identification.sp;
     }
 
+    /**
+     * Get upload identifier
+     * @returns {string} Upload identifier
+     */
     get uploadId() {
         return this._identification.si.toString();
     }
 
+    /**
+     * Get precursor intensity
+     * @returns {null} Always returns null
+     */
     get precursor_intensity() {
         return null;
     }
 
+    /**
+     * Get scores object
+     * @returns {Object} Object containing score values
+     */
     get _scores() {
         return this._identification.sc;
     }
 
+    /**
+     * Get precursor charge state
+     * @returns {number|undefined} Precursor charge or undefined if -1
+     */
     get precursorCharge() {
         const c = +this._identification.pc_c;
         return c === -1 ? undefined : c;
     }
 
+    /**
+     * Get precursor m/z value
+     * @returns {number} Precursor m/z
+     */
     get precursorMZ() {
         return +this._identification.pc_mz;
     }
 
+    /**
+     * Get calculated m/z value
+     * @returns {number} Calculated m/z
+     */
     get calc_mz() {
         return +this._identification.c_mz;
     }
 
+    /**
+     * Check if match passes threshold
+     * @returns {boolean} True if passes threshold
+     */
     get passThreshold() {
         return !!this._identification.p;
     }
 
+    /**
+     * Get dataset identifier
+     * @returns {string} Dataset identifier
+     */
     get datasetId() {
         return this.uploadId;
     }
 
+    /**
+     * Get scan number
+     * @returns {string} Scan number
+     */
     get scanNumber() {
         return this.spectrumId;
     }
 
+    /**
+     * Get elution time start
+     * @returns {null} Always returns null
+     */
     get elution_time_start() {
         return null;
     }
 
+    /**
+     * Get elution time end
+     * @returns {null} Always returns null
+     */
     get elution_time_end() {
         return null;
     }
 
+    /**
+     * Get spectrum identification protocol
+     * @returns {SpectrumIdentificationProtocol} The spectrum identification protocol
+     */
     get spectrumIdentificationProtocol() {
         return this.containingModel.getSpectrumIdentificationProtocol(this.uploadId, this._identification.sip);
     }

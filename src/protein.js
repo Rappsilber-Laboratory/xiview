@@ -1,6 +1,6 @@
 /**
  * Protein class for CLMS-model
- * Represents a protein/participant in cross-linking mass spectrometry data
+ * Represents a protein/participant in crosslinking mass spectrometry data
  */
 export class Protein {
     /**

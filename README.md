@@ -1,6 +1,6 @@
 # CLMS-model
 
-JavaScript data model library for cross-linking mass spectrometry (CLMS) data.
+JavaScript data model library for crosslinking mass spectrometry (CLMS) data.
 
 ## Component Overview
 
@@ -10,7 +10,7 @@ CLMS-model provides the core data structures for xiVIEW
 ### Core Data Models
 
 - **SearchResultsModel**: Top-level container for all experiment data
-- **CrossLink**: Represents cross-linked peptide pairs with positions and evidence
+- **CrossLink**: Represents crosslinked peptide pairs with positions and evidence
 - **Peptide**: Individual peptide sequences with modifications and proteins
 - **SpectrumMatch**: Links mass spectra to peptide identifications
 - **SpectraData**: Container for raw spectral data and metadata
@@ -18,7 +18,7 @@ CLMS-model provides the core data structures for xiVIEW
 ### Key Source Files (`src/`)
 
 - **`search-results-model.js`**: Main container for search results and experiment data
-- **`crosslink.js`**: CrossLink model - represents cross-linked peptide pairs
+- **`crosslink.js`**: CrossLink model - represents crosslinked peptide pairs
 - **`peptide.js`**: Peptide model - individual peptide sequences and modifications
 - **`spectrum-match.js`**: SpectrumMatch model - links spectra to peptide identifications
 - **`attribute-options.js`**: Configuration and attribute management

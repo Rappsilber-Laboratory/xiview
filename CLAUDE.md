@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with the CLMS-model subm
 
 ## Component Overview
 
-CLMS-model is the core data model library for cross-linking mass spectrometry (CLMS) data. It provides the fundamental data structures, validation, and business logic that power the entire xiVIEW application ecosystem.
+CLMS-model is the core data model library for crosslinking mass spectrometry (CLMS) data. It provides the fundamental data structures, validation, and business logic that power the entire xiVIEW application ecosystem.
 
 ## Role in build-xiview Project
 
@@ -19,7 +19,7 @@ CLMS-model serves as the **foundational data layer** for the entire xiVIEW syste
 
 ### Key Source Files (`src/`)
 
-- **`crosslink.js`**: CrossLink model - represents cross-linked peptide pairs
+- **`crosslink.js`**: CrossLink model - represents crosslinked peptide pairs
 - **`peptide.js`**: Peptide model - individual peptide sequences and modifications
 - **`search-results-model.js`**: Main container for search results and experiment data
 - **`spectrum-match.js`**: SpectrumMatch model - links spectra to peptide identifications
@@ -33,7 +33,7 @@ CLMS-model serves as the **foundational data layer** for the entire xiVIEW syste
 ### Core Data Models
 
 1. **SearchResultsModel**: Top-level container for all experiment data
-2. **CrossLink**: Represents cross-linked peptide pairs with positions and evidence
+2. **CrossLink**: Represents crosslinked peptide pairs with positions and evidence
 3. **Peptide**: Individual peptide sequences with modifications and proteins
 4. **SpectrumMatch**: Links mass spectra to peptide identifications
 5. **SpectraData**: Container for raw spectral data and metadata
@@ -122,7 +122,7 @@ class ModelName {
 
 **crosslink-viewer**:
 - Uses CrossLink and Peptide models for network visualization
-- Accesses protein and cross-link data for layout algorithms
+- Accesses protein and crosslink data for layout algorithms
 
 ### Build Integration
 
@@ -157,7 +157,7 @@ SearchResultsModel
 CLMS-model provides the stable foundation that enables:
 - Consistent data representation across all visualization components
 - Reliable data validation and integrity checking
-- Shared business logic for cross-linking mass spectrometry analysis
+- Shared business logic for crosslinking mass spectrometry analysis
 - Seamless data exchange between xiview, spectrum, and crosslink-viewer components
 
 The models defined here directly impact the functionality and reliability of the entire xiVIEW application ecosystem.

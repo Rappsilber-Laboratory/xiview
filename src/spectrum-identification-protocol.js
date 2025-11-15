@@ -1,4 +1,9 @@
 export class SpectrumIdentificationProtocol {
+    /**
+     * Create a SpectrumIdentificationProtocol instance
+     * @param {Object} json - Raw protocol data object
+     * @param {SearchResultsModel} searchResultModel - The containing search results model
+     */
     constructor(json, searchResultModel) {
         this._json = json;
         this._searchResultModel = searchResultModel;
@@ -12,7 +17,7 @@ export class SpectrumIdentificationProtocol {
     //     "frag_tol_unit": "ppm",
     //     "additional_search_params": {
     //         "MS:1001211": "parent mass type mono",
-    //         "MS:1002494": "cross-linking search",
+    //         "MS:1002494": "crosslinking search",
     //         "MS:1001256": "fragment mass type mono"
     //     },
     //     "analysis_software": {
@@ -28,27 +33,59 @@ export class SpectrumIdentificationProtocol {
     //     }
     // }
 
+    /**
+     * Get protocol identifier
+     * @returns {number} Protocol identifier
+     */
     get id()  {
         return this._json.id;
     }
+    /**
+     * Get spectrum identification protocol reference
+     * @returns {string} Protocol reference
+     */
     get spectrumIdentificationProtocolRef() {
         return this._json.sip_ref;
     }
+    /**
+     * Get upload identifier
+     * @returns {number} Upload identifier
+     */
     get uploadId() {
         return this._json.upload_id;
     }
+    /**
+     * Get fragment ion tolerance value
+     * @returns {number} Fragment tolerance
+     */
     get fragmentTolerance() {
         return this._json.frag_tol;
     }
+    /**
+     * Get fragment ion tolerance unit
+     * @returns {string} Tolerance unit (e.g., "ppm", "Da")
+     */
     get fragmentToleranceUnit() {
         return this._json.frag_tol_unit;
     }
+    /**
+     * Get additional search parameters
+     * @returns {Object} Object containing CV term key-value pairs
+     */
     get additionalSearchParams() {
         return this._json.additional_search_params;
     }
+    /**
+     * Get analysis software information
+     * @returns {Object} Software information object
+     */
     get analysisSoftware() {
         return this._json.analysis_software;
     }
+    /**
+     * Get search threshold information
+     * @returns {Object} Threshold object
+     */
     get threshold() {
         return this._json.threshold;
     }
