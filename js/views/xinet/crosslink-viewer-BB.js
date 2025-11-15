@@ -166,7 +166,7 @@ export class CrosslinkViewer extends Backbone.View {
 
         // calculate default bar scale
         let maxSeqLength = 0;
-        for (let participant of this.model.get("clmsModel").get("proteins").values()) {
+        for (let participant of this.model.get("clmsModel").getProteinsIterator()) {
             if (participant.is_decoy === false && this.renderedProteins.has(participant.id) === false) {
                 const newProtien = new RenderedProtein(participant, this);
                 this.renderedProteins.set(participant.id, newProtien);
@@ -212,7 +212,7 @@ export class CrosslinkViewer extends Backbone.View {
             }
         }
 
-        for (let crosslink of this.model.get("clmsModel").get("crosslinks").values()) {
+        for (let crosslink of this.model.get("clmsModel").getCrosslinks().values()) {
             if (!crosslink.isDecoyLink() && !crosslink.isLinearLink()) {
                 if (!this.renderedCrosslinks.has(crosslink.id)) {
                     const renderedCrossLink = new RenderedCrosslink(crosslink, this);
@@ -550,11 +550,11 @@ export class CrosslinkViewer extends Backbone.View {
         this.d3cola.stop();
         if (this.firstRender) { // first render
             this.firstRender = false;
-            if (this.model.get("clmsModel").get("xiNETLayout")) {
-                this.loadLayout(this.model.get("clmsModel").get("xiNETLayout").layout);
-            } else {
-                this.autoLayout([]); //layout all
-            }
+            // if (this.model.get("clmsModel").get("xiNETLayout")) {
+            //     this.loadLayout(this.model.get("clmsModel").get("xiNETLayout").layout);
+            // } else {
+            this.autoLayout([]); //layout all
+            // }
         }
 
         for (let ppLink of this.renderedP_PLinks.values()) {
