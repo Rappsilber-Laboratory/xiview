@@ -931,7 +931,7 @@ export function viewsEssential(compositeModelInst, options) {
                 {
                     name: "Filtered Crosslinks",
                     func: downloadLinks,
-                    tooltip: "Produces a CSV File of Filtered Cross-Link data"
+                    tooltip: "Produces a CSV File of Filtered Crosslink data"
                 },
                 {
                     name: "Filtered PPI",

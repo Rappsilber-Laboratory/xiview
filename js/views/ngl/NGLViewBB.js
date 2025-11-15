@@ -268,7 +268,7 @@ export const NGLViewBB = BaseFrameView.extend({
         {
             initialState: this.options.showResidues,
             class: "showResiduesCB",
-            label: "Cross-Linked Residues",
+            label: "Crosslinked Residues",
             id: "showResidues",
             d3tooltip: "Show crosslinked residues on protein representations"
         },

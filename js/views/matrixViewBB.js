@@ -33,7 +33,7 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
     defaultOptions: {
         xlabel: "Residue Index 1",
         ylabel: "Residue Index 2",
-        chartTitle: "Cross-Link Matrix",
+        chartTitle: "Crosslink Matrix",
         chainBackground: "white",
         matrixObj: null,
         selectedColour: "#ff0",

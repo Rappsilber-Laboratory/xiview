@@ -193,16 +193,16 @@ function getTasks(apiBase, clmsModel) {
 }
 
 function setWindowTitle(clmsModel) {
-    const searches = clmsModel.getSearches();
+    const mzidentmlFiles = clmsModel.getMzidentmlFiles();
     if (!clmsModel.isAggregatedData()) {
         const id_file_names = [];
-        searches.forEach(function (search) {
+        mzidentmlFiles.forEach(function (search) {
             id_file_names.push(search.id + ": "
                 + (search.identification_file_name ? search.identification_file_name : search.name));
         });
         document.title = id_file_names.join(", ");
     } else {
-        document.title = Array.from(searches.keys()).join(", ");
+        document.title = Array.from(mzidentmlFiles.keys()).join(", ");
     }
 }
 

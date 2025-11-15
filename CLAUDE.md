@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with the xiview submodul
 
 ## Component Overview
 
-xiview is the main application component of the xiVIEW cross-linking mass spectrometry visualization tool. It provides the primary user interface, application logic, and coordinates with other submodules to deliver the complete xiVIEW experience.
+xiview is the main application component of the xiVIEW crosslinking mass spectrometry visualization tool. It provides the primary user interface, application logic, and coordinates with other submodules to deliver the complete xiVIEW experience.
 
 ## Role in build-xiview Project
 

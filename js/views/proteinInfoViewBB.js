@@ -213,7 +213,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                     // var interactor = self.model.get("clmsModel").getProteins().get(posData[0]);
                     //
                     // self.model.get("tooltipModel")
-                    //     .set("header", "Cross-Linked with " + makeTooltipTitle.residue(interactor, +posData[1]))
+                    //     .set("header", "Crosslinked with " + makeTooltipTitle.residue(interactor, +posData[1]))
                     //     .set("contents", makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
                     //     .set("location", {
                     //         pageX: d3.event.pageX,

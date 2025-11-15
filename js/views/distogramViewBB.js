@@ -34,10 +34,10 @@ export const DistogramBB = BaseFrameView.extend({
         xlabel: "X Value",
         ylabel: "Count",
         y2label: "Random (absolute)",
-        seriesNames: ["Cross-Links", "Decoys (TD-DD)", "Random", "Selected"],
+        seriesNames: ["Crosslinks", "Decoys (TD-DD)", "Random", "Selected"],
         subSeriesNames: [],
         scaleOthersTo: {
-            Random: "Cross-Links"
+            Random: "Crosslinks"
         },
         chartTitle: "DISTO",// this.identifier,
         maxX: 90,
@@ -190,7 +190,7 @@ export const DistogramBB = BaseFrameView.extend({
                 columns: columnsAsNamesOnly,
                 type: "bar",
                 colors: {
-                    "Cross-Links": "#44d",
+                    "Crosslinks": "#44d",
                     Random: "#444",
                     Selected: "url(#selectedStripe)",
                     "Decoys (TD-DD)": "#d44",
@@ -276,7 +276,7 @@ export const DistogramBB = BaseFrameView.extend({
                     title: function (x) {
                         const tickFunc = self.chart.internal.config.axis_x_tick_format;
                         const realX = tickFunc(x, true);
-                        const clSeries = self.chart.x()["Cross-Links"];
+                        const clSeries = self.chart.x()["Crosslinks"];
                         const gap = clSeries.length > 1 ? clSeries[1] - clSeries[0] : 1;
                         const nextX = tickFunc(x + gap, true);
                         const realXVal = realX.val;
@@ -319,7 +319,7 @@ export const DistogramBB = BaseFrameView.extend({
             onrendered: function () {
                 if (firstRun) {
                     firstRun = false;
-                    this.api.hide("Cross-Links", {
+                    this.api.hide("Crosslinks", {
                         withLegend: true
                     }); // doesn't work properly if done in configuration above
                     if (!self.model.get("clmsModel").getDecoysPresent()) {
@@ -713,7 +713,7 @@ export const DistogramBB = BaseFrameView.extend({
                 this.model.getFilteredCrossLinks("decoysDD"),
                 this.model.getMarkedCrossLinks("selection"),
             ],
-            seriesNames: ["Cross-Links", "Decoys (TD-DD)", "Decoys (DD)", "Selected"],
+            seriesNames: ["Crosslinks", "Decoys (TD-DD)", "Decoys (DD)", "Selected"],
             matchFilters: [undefined, undefined, undefined, function (m) {
                 return this.model.get("match_selection").has(m.match.id);
             }]

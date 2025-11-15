@@ -401,7 +401,7 @@ export class CrosslinkRepresentation {
                     const protein = nglModelWrapper.getCompositeModel().get("clmsModel").getProtein(proteinId);
                     //console.log ("cp", cp, pdtrans, this, this.structureComp);
                     nglModelWrapper.getCompositeModel().get("tooltipModel")
-                        .set("header", "Cross-Linked with " + makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))
+                        .set("header", "Crosslinked with " + makeTooltipTitle.residue(protein, srindex, ":" + cp.chainname + "/" + cp.modelIndex))
                         .set("contents", makeTooltipContents.multilinks(pdtrans.xlinks, protein.id, srindex, {"Distance": distances}))
                         .set("location", this.makeTooltipCoords(pickingData.canvasPosition));
                 }

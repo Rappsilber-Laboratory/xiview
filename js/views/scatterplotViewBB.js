@@ -687,14 +687,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             return axmd.matchLevel;
         });
         const size = this.selectSize;
-        const levelText = isMatchLevel ? (size === 1 ? "Match" : "Matches") : (size === 1 ? "Cross-Link" : "Cross-Links");
+        const levelText = isMatchLevel ? (size === 1 ? "Match" : "Matches") : (size === 1 ? "Crosslink" : "Crosslinks");
 
         if (this.nearest && this.nearest.link) {
             const tipExtra = isMatchLevel ? makeTooltipContents.match(this.nearest.match) :
                 makeTooltipContents.link(this.nearest.link);
             tooltipData = tooltipData.concat([
                 ["&nbsp;"],
-                ["Nearest " + (isMatchLevel ? "Match" : "Cross-Link")]
+                ["Nearest " + (isMatchLevel ? "Match" : "Crosslink")]
             ]).concat(tipExtra);
         }
 

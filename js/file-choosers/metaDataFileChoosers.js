@@ -126,9 +126,9 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
 
     initialize: function (viewOptions) {
         const myDefaults = {
-            buttonText: "Select Cross-Link or PPI MetaData CSV File",
+            buttonText: "Select Crosslink or PPI MetaData CSV File",
             loadedEventName: "linkMetadataUpdated",
-            parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Cross-Links",
+            parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Crosslinks",
             docUrl: "./docs/html/import/crossmeta.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
@@ -140,7 +140,7 @@ export const LinkMetaDataFileChooserBB = AbstractMetaDataFileChooserBB.extend({
         updateLinkMetadata(fileContents, this.model.get("clmsModel"));
     },
 
-    identifier: "Cross-Link MetaData File Chooser",
+    identifier: "Crosslink MetaData File Chooser",
 });
 
 

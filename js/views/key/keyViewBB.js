@@ -155,7 +155,7 @@ export const KeyViewBB = BaseFrameView.extend({
             ambigp: "Ambiguous Crosslink(s).",
             multip: "Multiple Linkage Sites.",
             selflinkp: "Self Crosslink(s)",
-            // selflinkpc: "Self Crosslink(s); definitely includes Cross-Links not between the same molecule of same protein.",
+            // selflinkpc: "Self Crosslink(s); definitely includes Crosslinks not between the same molecule of same protein.",
             annotp: "Annotation range in contracted protein",
             clinkr: "Cross Link between different proteins.",
             ambigr: "Ambiguous Crosslink.",

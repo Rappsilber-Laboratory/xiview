@@ -1,16 +1,16 @@
 # xiVIEW
 
-Interactive visualization of protein cross-linking mass spectrometry data sets.
+Interactive visualization of protein crosslinking mass spectrometry data sets.
 
 ## Component Overview
 
-xiVIEW is the main application component within the build-xiview project. It provides the primary user interface, application logic, and coordinates with other submodules (CLMS-model, spectrum, crosslink-viewer) to deliver comprehensive cross-linking mass spectrometry data analysis and visualization.
+xiVIEW is the main application component within the build-xiview project. It provides the primary user interface, application logic, and coordinates with other submodules (CLMS-model, spectrum, crosslink-viewer) to deliver comprehensive crosslinking mass spectrometry data analysis and visualization.
 
 ## Architecture
 
 ### Key Features
 
-- **Interactive Data Exploration**: Browse and filter cross-linking datasets
+- **Interactive Data Exploration**: Browse and filter crosslinking datasets
 - **Multiple Visualization Modes**: Integrated spectrum and network views
 - **Protein Structure Integration**: 3D visualization with NGL viewer
 - **Data Management**: Import, export, and session management
