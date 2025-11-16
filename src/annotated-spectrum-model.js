@@ -5,8 +5,31 @@ import {Fragment} from "./graph/Fragment";
 
 import * as colorbrewer from "colorbrewer";
 
+/**
+ * Backbone model for storing and managing annotated mass spectrum data.
+ * Handles spectrum peaks, fragment annotations, modifications, and visualization settings.
+ *
+ * @class AnnotatedSpectrumModel
+ * @extends Backbone.Model
+ * @property {Object} JSONdata - Raw spectrum data including peaks and annotations
+ * @property {Fragment[]} fragments - Array of fragment ion objects
+ * @property {Array} peakList - List of peaks with m/z and intensity values
+ * @property {Object} precursor - Precursor ion information (charge, m/z, mass, error)
+ * @property {Array} peptides - Peptide sequences with modifications
+ * @property {string[]} pepStrs - Plain peptide sequence strings
+ * @property {string[]} pepStrsMods - Peptide sequences with modification IDs
+ * @property {Array} knownModifications - List of known post-translational modifications
+ * @property {Array} sticky - Array of persistently highlighted fragments
+ * @property {Array} highlights - Array of currently highlighted fragments
+ * @property {boolean} isLinear - Whether this is a linear (true) or crosslinked (false) peptide
+ */
 export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
+    /**
+     * Default model attributes and visualization settings.
+     *
+     * @returns {Object} Default attribute values
+     */
     defaults: function () {
         return {
             baseDir: "./",
@@ -59,6 +82,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
     },
 
+    /**
+     * Processes and sets spectrum data from JSONdata attribute.
+     * Parses peaks, fragments, peptides, and annotation information.
+     * Triggers 'changed:data' event when complete.
+     *
+     * @method setData
+     */
     setData: function () {
 
         if (this.get("JSONdata") == null) {
@@ -147,6 +177,12 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
     },
 
+    /**
+     * Converts peak list to MGF (Mascot Generic Format) text format.
+     *
+     * @method peaksToMGF
+     * @returns {string} Peak list in MGF format (m/z and intensity pairs)
+     */
     peaksToMGF: function () {
         let output = "";
         for (let i = 0; i < this.peakList.length; i++) {
@@ -156,6 +192,11 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         return output.trim();
     },
 
+    /**
+     * Clears all spectrum data and resets the model to empty state.
+     *
+     * @method clear
+     */
     clear: function () {
         this.sticky = Array();
         this.precursor = {};
@@ -176,6 +217,12 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         // Backbone.Model.prototype.clear.call(this);
     },
 
+    /**
+     * Calculates and sets the m/z and intensity ranges for the graph from peak data.
+     *
+     * @method setGraphData
+     * @private
+     */
     setGraphData: function () {
 
         let peaks = this.get("JSONdata").peaks;
@@ -200,15 +247,34 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         }
     },
 
+    /**
+     * Sets the current zoom range for the m/z axis.
+     *
+     * @method setZoom
+     * @param {number[]} arr - Array with [min, max] m/z values
+     */
     setZoom: function (arr) {
         this.set("mzRange", [arr[0], arr[1]]);
     },
 
+    /**
+     * Resets the zoom to show the full m/z range.
+     * Triggers 'resetZoom' event.
+     *
+     * @method resetZoom
+     */
     resetZoom: function () {
         this.set("mzRange", [this.xminPrimary, this.xmaxPrimary]);
         this.trigger("resetZoom");
     },
 
+    /**
+     * Adds fragments to the highlight list.
+     * Triggers 'changed:Highlights' event.
+     *
+     * @method addHighlight
+     * @param {Fragment[]} fragments - Array of fragments to highlight
+     */
     addHighlight: function (fragments) {
         for (let f = 0; f < fragments.length; f++) {
             if (this.highlights.indexOf(fragments[f]) === -1)
@@ -217,6 +283,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.trigger("changed:Highlights");
     },
 
+    /**
+     * Removes fragments from the highlight list (unless they are sticky).
+     * Triggers 'changed:Highlights' event.
+     *
+     * @method clearHighlight
+     * @param {Fragment[]} fragments - Array of fragments to un-highlight
+     */
     clearHighlight: function (fragments) {
         for (let f = 0; f < fragments.length; f++) {
             let index = this.highlights.indexOf(fragments[f]);
@@ -227,6 +300,11 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.trigger("changed:Highlights");
     },
 
+    /**
+     * Clears all sticky (persistent) highlights.
+     *
+     * @method clearStickyHighlights
+     */
     clearStickyHighlights: function () {
         if (this.sticky.length !== 0) {
             let oldsticky = this.sticky;
@@ -235,6 +313,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         }
     },
 
+    /**
+     * Updates the sticky highlight list (persistent highlights that remain on click).
+     *
+     * @method updateStickyHighlight
+     * @param {Fragment[]} fragments - Fragments to add or set as sticky
+     * @param {boolean} add - If true, adds to existing sticky highlights; if false, replaces them
+     */
     updateStickyHighlight: function (fragments, add) {
         if (add === true) {
             for (let f = 0; f < fragments.length; f++) {
@@ -257,6 +342,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         }
     },
 
+    /**
+     * Changes the color scheme for fragment visualization.
+     * Uses ColorBrewer diverging color palettes.
+     *
+     * @method changeColorScheme
+     * @param {string} schemeStr - Color scheme name ("RdBu", "BrBG", "PiYG", "PRGn", "PuOr")
+     */
     changeColorScheme: function (schemeStr) {
         this.set("colorScheme", schemeStr);
         this.colorPalette = colorbrewer.RdBu[8]; // default
@@ -282,6 +374,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         // this.trigger("changed:ColorScheme");
     },
 
+    /**
+     * Updates fragment colors based on current visibility and color scheme settings.
+     * Triggers 'change:colors' event.
+     *
+     * @method updateColors
+     * @private
+     */
     updateColors: function () {
         switch (this.get("visFragments")) {
         case "both":
@@ -312,6 +411,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.trigger("change:colors");
     },
 
+    /**
+     * Changes the crosslink positions and requests re-annotation.
+     * Used for exploring alternative crosslink site assignments.
+     *
+     * @method changeLinkPos
+     * @param {Array} newLinkSites - New crosslink site positions
+     */
     changeLinkPos: function (newLinkSites) {
 
         // make sure this model is in the activated SpectrumWrapper
@@ -329,6 +435,16 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.set("changedAnnotation", true);
     },
 
+    /**
+     * Moves a modification from one position to another and requests re-annotation.
+     * Used for exploring alternative modification placements.
+     *
+     * @method changeMod
+     * @param {number} oldPos - Original amino acid position
+     * @param {number} newPos - New amino acid position
+     * @param {number} oldPepIndex - Original peptide index (0 or 1)
+     * @param {number} newPepIndex - New peptide index (0 or 1)
+     */
     changeMod: function (oldPos, newPos, oldPepIndex, newPepIndex) {
 
         // make sure this model is in the activated SpectrumWrapper
@@ -361,6 +477,14 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.set("changedAnnotation", true);
     },
 
+    /**
+     * Checks if a modification is valid for a specific amino acid.
+     *
+     * @method checkForValidModification
+     * @param {string} mod - Modification ID
+     * @param {string} aminoAcid - Single letter amino acid code
+     * @returns {boolean} True if modification is valid for this amino acid
+     */
     checkForValidModification: function (mod, aminoAcid) {
         for (let i = 0; i < this.knownModifications.length; i++) {
             if (this.knownModifications[i].id === mod) {
@@ -370,6 +494,13 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         }
     },
 
+    /**
+     * Calculates the precursor mass and m/z from peptide sequences and modifications.
+     * Updates precursor.calcMass and precursor.calcMz properties.
+     * Triggers 'changed:mass' event.
+     *
+     * @method calcPrecursorMass
+     */
     calcPrecursorMass: function () {
 
         let JSONdata = this.get("JSONdata");
@@ -443,6 +574,12 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.trigger("changed:mass");
     },
 
+    /**
+     * Updates the list of known modifications by merging annotation modifications
+     * with previously known modifications.
+     *
+     * @method updateKnownModifications
+     */
     updateKnownModifications: function () {
         this.annotationModifications = this.get("JSONdata").annotation.modifications.map(function(m){
             m["userMod"] = false;
@@ -460,6 +597,14 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         this.knownModifications = this.annotationModifications.concat(filtered_knownMods);
     },
 
+    /**
+     * Updates or adds a modification definition.
+     * Preserves original values if modification is changed.
+     *
+     * @method updateModification
+     * @param {Object} update_mod - Modification object with id, mass, and aminoAcids
+     * @returns {Object} The updated or added modification object
+     */
     updateModification: function (update_mod) {
         let found = false;
         for (let i = 0; i < this.knownModifications.length; i++) {
@@ -486,6 +631,12 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         }
     },
 
+    /**
+     * Resets a modification to its original values (if it was changed).
+     *
+     * @method resetModification
+     * @param {string} updateModId - ID of the modification to reset
+     */
     resetModification: function (updateModId) {
         for (let i = 0; i < this.knownModifications.length; i++) {
             if (this.knownModifications[i].id === updateModId) {
@@ -501,6 +652,11 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
 
     },
 
+    /**
+     * Resets all modifications to their original values.
+     *
+     * @method reset_all_modifications
+     */
     reset_all_modifications: function () {
         for (let i = 0; i < this.knownModifications.length; i++) {
             this.resetModification(this.knownModifications[i].id);

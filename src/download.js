@@ -1,3 +1,14 @@
+/**
+ * Downloads content as a file to the user's browser.
+ * Handles different content types and ensures proper encoding for cross-browser compatibility.
+ *
+ * @function download
+ * @param {string} content - The file content to download
+ * @param {string} contentType - MIME type of the content (e.g., "application/svg", "plain/text")
+ * @param {string} fileName - Name for the downloaded file
+ * @example
+ * download("<svg>...</svg>", "application/svg", "spectrum.svg");
+ */
 export function download(content, contentType, fileName) {
     const oldToNewTypes = {
         "application/svg": "image/svg+xml;charset=utf-8",
@@ -5,6 +16,14 @@ export function download(content, contentType, fileName) {
     };
     const newContentType = oldToNewTypes[contentType] || contentType;
 
+    /**
+     * Converts a string to a Blob with proper UTF-8 encoding.
+     * Handles Unicode characters correctly across different browsers.
+     *
+     * @param {string} binary - The string content to convert to Blob
+     * @returns {Blob} Blob object containing the encoded content
+     * @private
+     */
     function dataURItoBlob(binary) {
         let array = [];
         let te;

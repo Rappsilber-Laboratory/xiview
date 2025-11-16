@@ -3,6 +3,32 @@ import * as d3 from "d3";
 import {Peak} from "./Peak";
 import {matchMassToAA} from "../matchMassToAA";
 
+/**
+ * Creates an interactive mass spectrum graph visualization using D3.js.
+ * Handles rendering of peaks, annotations, zooming, panning, and interactive features.
+ *
+ * @class Graph
+ * @param {d3.selection} targetSvg - D3 selection of the SVG element to render into
+ * @param {AnnotatedSpectrumModel} model - The data model containing spectrum information
+ * @param {Object} options - Configuration options for the graph
+ * @param {string} [options.id] - Identifier for this graph instance
+ * @param {string} [options.title] - Title to display above the graph
+ * @param {string} [options.xlabel] - Label for x-axis
+ * @param {string} [options.ylabelLeft] - Label for left y-axis
+ * @param {string} [options.ylabelRight] - Label for right y-axis
+ * @param {boolean} [options.butterfly=false] - Whether to render in butterfly mode
+ * @param {boolean} [options.invert=false] - Whether to invert the graph orientation
+ * @param {boolean} [options.hidden=false] - Whether the graph is initially hidden
+ * @param {string} [options.measureTooltipSvgG] - Selector for measure tooltip container
+ * @property {d3.scale.linear} xscale - D3 scale for x-axis (m/z values)
+ * @property {d3.scale.linear} yscale - D3 scale for left y-axis (intensity)
+ * @property {d3.scale.linear} yscale_right - D3 scale for right y-axis (% of base peak)
+ * @property {AnnotatedSpectrumModel} model - Reference to the data model
+ * @property {Object} options - Graph configuration options
+ * @property {boolean} yZoomed - Whether y-axis has been zoomed by user
+ * @property {Object} margin - Margins around the plot area
+ * @property {Peak[]} peaks - Array of Peak objects representing spectrum peaks
+ */
 export const Graph = function (targetSvg, model, options) {
     this.xscale = d3.scale.linear();
     this.yscale = d3.scale.linear();
@@ -162,6 +188,12 @@ export const Graph = function (targetSvg, model, options) {
 
 };
 
+/**
+ * Initializes the graph with spectrum data from the model.
+ * Creates Peak objects for each peak in the data and renders them.
+ *
+ * @method setData
+ */
 Graph.prototype.setData = function () {
     //create peaks array with Peaks
     this.peaks = [];
@@ -208,6 +240,16 @@ Graph.prototype.setData = function () {
     }
 };
 
+/**
+ * Resizes and redraws the graph to fit the specified data range.
+ * Updates scales, axes, and all visual elements.
+ *
+ * @method resize
+ * @param {number} xmin - Minimum m/z value to display
+ * @param {number} xmax - Maximum m/z value to display
+ * @param {number} ymin - Minimum intensity value
+ * @param {number} ymax - Maximum intensity value
+ */
 Graph.prototype.resize = function (xmin, xmax, ymin, ymax) {
 
     if (this.options.hidden) {
@@ -334,6 +376,11 @@ Graph.prototype.resize = function (xmin, xmax, ymin, ymax) {
     this.redraw()();
 };
 
+/**
+ * Disables zoom and pan interactions on the graph.
+ *
+ * @method disableZoom
+ */
 Graph.prototype.disableZoom = function () {
 
     this.plot.attr("pointer-events", "none");
@@ -345,6 +392,12 @@ Graph.prototype.disableZoom = function () {
         .on("zoom", null);
 };
 
+/**
+ * Enables zoom and pan interactions on the graph.
+ * Sets up brush handlers for drag-to-zoom functionality.
+ *
+ * @method enableZoom
+ */
 Graph.prototype.enableZoom = function () {
     this.plot.attr("pointer-events", "visible");
     this.plot.call(this.zoom);
@@ -379,6 +432,12 @@ Graph.prototype.enableZoom = function () {
     }
 };
 
+/**
+ * Activates or deactivates the measuring tool for calculating mass differences between peaks.
+ *
+ * @method measure
+ * @param {boolean} on - Whether to turn the measuring tool on (true) or off (false)
+ */
 Graph.prototype.measure = function (on) {
     if (on === true) {
         const self = this;
@@ -643,18 +702,37 @@ Graph.prototype.measure = function (on) {
     }
 };
 
+/**
+ * Hides the measuring tool display elements.
+ *
+ * @method measureClear
+ * @private
+ */
 Graph.prototype.measureClear = function () {
     this.measuringTool.attr("display", "none");
     this.measureDistance.attr("display", "none");
     this.measureTooltip.attr("display", "none");
 };
 
+/**
+ * Shows the measuring tool display elements.
+ *
+ * @method measureShow
+ * @private
+ */
 Graph.prototype.measureShow = function () {
     this.measuringTool.attr("display", "inline");
     this.measureDistance.attr("display", "inline");
     this.measureTooltip.attr("display", "inline");
 };
 
+/**
+ * Returns a redraw function that updates the graph display.
+ * Called during zoom/pan operations to refresh peak positions and scales.
+ *
+ * @method redraw
+ * @returns {Function} Redraw callback function
+ */
 Graph.prototype.redraw = function () {
     let self = this;
     return function () {
@@ -696,6 +774,11 @@ Graph.prototype.redraw = function () {
     };
 };
 
+/**
+ * Clears all peaks and annotations from the graph.
+ *
+ * @method clear
+ */
 Graph.prototype.clear = function () {
     this.model.set("measureMode", false);
     this.peaks = [];
@@ -705,6 +788,11 @@ Graph.prototype.clear = function () {
     this.annotations.selectAll("*").remove();
 };
 
+/**
+ * Clears highlights from all peaks except sticky highlights.
+ *
+ * @method clearHighlights
+ */
 Graph.prototype.clearHighlights = function () {
     for (let p = 0; p < this.peaks.length; p++) {
         if (this.peaks[p].fragments.length > 0 && !_.contains(this.model.sticky, this.peaks[p].fragments[0])) {
@@ -713,6 +801,11 @@ Graph.prototype.clearHighlights = function () {
     }
 };
 
+/**
+ * Updates the colors of all peaks based on current color scheme and highlight state.
+ *
+ * @method updatePeakColors
+ */
 Graph.prototype.updatePeakColors = function () {
     let model = this.model;
 
@@ -751,6 +844,11 @@ Graph.prototype.updatePeakColors = function () {
     }
 };
 
+/**
+ * Updates the visibility and display of peak annotation labels.
+ *
+ * @method updatePeakLabels
+ */
 Graph.prototype.updatePeakLabels = function () {
     let peakCount = this.peaks.length;
 
@@ -780,12 +878,22 @@ Graph.prototype.updatePeakLabels = function () {
     }
 };
 
+/**
+ * Applies the current color scheme to all peaks.
+ *
+ * @method setColors
+ */
 Graph.prototype.setColors = function () {
     for (let p = 0; p < this.peaks.length; p++) {
         this.peaks[p].setColor();
     }
 };
 
+/**
+ * Updates the color of highlight elements on all peaks.
+ *
+ * @method updateHighlightColors
+ */
 Graph.prototype.updateHighlightColors = function () {
     for (let p = 0; p < this.peaks.length; p++) {
         if (this.peaks[p].highlightLine !== undefined) {
@@ -795,11 +903,21 @@ Graph.prototype.updateHighlightColors = function () {
     }
 };
 
+/**
+ * Shows the graph by making it visible.
+ *
+ * @method show
+ */
 Graph.prototype.show = function () {
     this.g.attr("visibility", "visible");
     this.enableZoom();
 };
 
+/**
+ * Hides the graph by making it invisible.
+ *
+ * @method hide
+ */
 Graph.prototype.hide = function () {
     this.g.attr("visibility", "hidden");
     this.disableZoom();

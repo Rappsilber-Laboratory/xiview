@@ -1,3 +1,18 @@
+/**
+ * Matches a mass value to amino acids that have similar monoisotopic masses.
+ * Useful for identifying potential amino acid compositions from mass differences.
+ *
+ * @function matchMassToAA
+ * @param {number} mass - The mass value to match against amino acid masses (in Daltons)
+ * @param {number} [tolerance=0.01] - Mass tolerance for matching (in Daltons)
+ * @returns {string} Comma-separated string of matching amino acid single-letter codes
+ * @example
+ * // Returns "A" (mass of Alanine is 71.03711)
+ * matchMassToAA(71.04, 0.1);
+ * @example
+ * // Returns "I,L" (Isoleucine and Leucine have identical masses)
+ * matchMassToAA(113.08, 0.01);
+ */
 export const matchMassToAA = function (mass, tolerance) {
 
     if (tolerance === undefined) tolerance = 0.01;

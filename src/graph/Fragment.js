@@ -1,3 +1,24 @@
+/**
+ * Represents a fragment ion from peptide fragmentation in mass spectrometry.
+ * Fragments are generated during MS/MS analysis and used for peptide identification.
+ *
+ * @class Fragment
+ * @param {Object} fragment - Fragment data object containing fragment properties
+ * @param {string} fragment.class - Fragment class (e.g., "lossy", "non-lossy")
+ * @param {number[]} fragment.clusterIds - Array of cluster IDs this fragment belongs to
+ * @param {Object[]} fragment.clusterInfo - Information about each cluster
+ * @param {number} fragment.id - Unique fragment identifier
+ * @param {boolean} fragment.isMonoisotopic - Whether this is a monoisotopic peak
+ * @param {number} fragment.mass - Mass of the fragment in Daltons
+ * @param {string} [fragment.stub] - Stub sequence if applicable
+ * @param {string} fragment.name - Fragment name (e.g., "b3", "y5")
+ * @param {number} fragment.peptideId - ID of the parent peptide (0 or 1)
+ * @param {Array} fragment.range - Residue range(s) this fragment spans
+ * @param {string} fragment.sequence - Amino acid sequence of the fragment
+ * @param {string} fragment.type - Fragment ion type
+ * @param {number} [fragment.ionNumber] - Ion number (position from terminus)
+ * @param {Object[]} all_clusters - Array of all cluster objects for lookup
+ */
 export function Fragment(fragment, all_clusters) {
     this.class = fragment.class;
     this.clusterIds = fragment.clusterIds;
@@ -36,6 +57,13 @@ export function Fragment(fragment, all_clusters) {
 
 }
 
+/**
+ * Gets the charge state of this fragment for a specific peak.
+ *
+ * @method get_charge
+ * @param {number} peak_id - The peak ID to get charge information for
+ * @returns {number} The charge state of the fragment at this peak
+ */
 Fragment.prototype.get_charge = function (peak_id) {
 
     // let clusterId = _.intersection(, this.clusterIds)[0];

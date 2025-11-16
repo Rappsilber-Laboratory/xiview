@@ -1,6 +1,24 @@
 import * as _ from "underscore";
 import d3 from "d3";
 
+/**
+ * Represents a single peak in a mass spectrum.
+ * Peaks may be annotated with fragment ion assignments and isotope cluster information.
+ *
+ * @class Peak
+ * @param {number} id - Index of this peak in the peak list
+ * @param {Graph} graph - The Graph instance this peak belongs to
+ * @property {number} id - Peak identifier
+ * @property {number} x - m/z value of the peak
+ * @property {number} y - Intensity value of the peak
+ * @property {Array} IsotopeClusters - Isotope clusters this peak belongs to
+ * @property {Array} labels - D3 selection of label elements for this peak
+ * @property {number[]} clusterIds - IDs of clusters this peak belongs to
+ * @property {Graph} graph - Reference to parent graph
+ * @property {Fragment[]} fragments - Fragment ions matching this peak (monoisotopic)
+ * @property {Fragment[]} isotopes - Fragment ions matching this peak (isotopic)
+ * @property {number[]} isotopenumbers - Isotope numbers for isotopic matches
+ */
 export function Peak(id, graph) {
     let peak = graph.model.get("JSONdata").peaks[id];
     this.id = id;
@@ -48,6 +66,13 @@ export function Peak(id, graph) {
     }
 }
 
+/**
+ * Draws the peak and its associated annotations in the SVG.
+ * Creates SVG line elements for the peak and labels for fragment annotations.
+ * Sets up interaction handlers for tooltips and highlighting.
+ *
+ * @method draw
+ */
 Peak.prototype.draw = function () {
     //svg elements
     this.lineLabelGroup = this.graph.peaksSVG.append("g");
@@ -418,6 +443,13 @@ Peak.prototype.draw = function () {
     this.setColor();
 };
 
+/**
+ * Shows or hides the highlight effect on this peak.
+ *
+ * @method highlight
+ * @param {boolean} show - Whether to show (true) or hide (false) the highlight
+ * @param {Fragment[]} [fragments] - Specific fragments to highlight (if provided)
+ */
 Peak.prototype.highlight = function (show, fragments) {
     if (show === true) {
         this.highlightLine.attr("opacity", "1");
@@ -443,6 +475,12 @@ Peak.prototype.highlight = function (show, fragments) {
     }
 };
 
+/**
+ * Updates the peak's position and visibility based on current zoom/pan state.
+ * Called during redraw operations when the view changes.
+ *
+ * @method update
+ */
 Peak.prototype.update = function () {
 
     this.lineLabelGroup.attr("transform", "translate(" + this.graph.xscale(this.x) + ",0)");
@@ -468,6 +506,12 @@ Peak.prototype.update = function () {
     }
 };
 
+/**
+ * Updates the X-axis position of peak labels based on current zoom range.
+ *
+ * @method updateX
+ * @param {number[]} xDomain - Current x-axis domain [min, max]
+ */
 Peak.prototype.updateX = function (xDomain) {
     const labelCount = this.labels.length;
     const model = this.graph.model;
@@ -504,6 +548,12 @@ Peak.prototype.updateX = function (xDomain) {
     }
 };
 
+/**
+ * Updates the Y-axis position of peak and labels based on current intensity scale.
+ *
+ * @method updateY
+ * @param {number[]} yDomain - Current y-axis domain [min, max]
+ */
 Peak.prototype.updateY = function (yDomain) {
     const yScale = this.graph.yscale;
     const ymax = yDomain[1];
@@ -543,6 +593,11 @@ Peak.prototype.updateY = function (yDomain) {
     }
 };
 
+/**
+ * Hides all fragment annotation labels for this peak.
+ *
+ * @method removeLabels
+ */
 Peak.prototype.removeLabels = function () {
     const labelCount = this.labels.length;
     if (labelCount) {
@@ -552,6 +607,12 @@ Peak.prototype.removeLabels = function () {
     }
 };
 
+/**
+ * Shows fragment annotation labels for this peak based on visibility settings.
+ *
+ * @method showLabels
+ * @param {boolean} [lossyOverride] - If true, show lossy fragments even if normally hidden
+ */
 Peak.prototype.showLabels = function (lossyOverride) {
     const xDomain = this.graph.xscale.domain();
     const labelCount = this.labels.length;
@@ -575,6 +636,12 @@ Peak.prototype.showLabels = function (lossyOverride) {
     }
 };
 
+/**
+ * Sets the color of this peak based on fragment assignments and current color scheme.
+ * Peaks are colored according to their fragment annotations (peptide 1 vs 2, lossy vs non-lossy).
+ *
+ * @method setColor
+ */
 Peak.prototype.setColor = function () {
     let model = this.graph.model;
     this.colour = model.get("peakColor");	// standard color
