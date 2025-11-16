@@ -57,6 +57,18 @@ import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {prideLoadSpectrum} from "../../CLMS-model/src/load-spectrum/pride-load-spectrum";
 
+// Configuration imports
+import {createDefaultAnnotationTypes} from "./config/annotation-types";
+import {VIEW_CHECKBOX_CONFIGS} from "./config/view-checkboxes";
+import {DYNAMIC_CONTAINER_IDS} from "./config/window-ids";
+import {
+    getProteinSelectionMenuConfig,
+    getGroupsMenuConfig,
+    getLoadMenuConfig,
+    getExportMenuConfig,
+    getHelpMenuConfig
+} from "./config/menu-definitions";
+
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
 window.vent = {};
 _.extend(window.vent, Backbone.Events);
@@ -70,36 +82,7 @@ export function postDataLoaded(compositeModelInst) {
     });
 
     //init annotation types
-    let annotationTypes = [
-        new AnnotationType({
-            category: "AA",
-            type: "Digestible",
-            tooltip: "Mark Digestible Residues",
-            source: "Search",
-            colour: "#1f78b4",
-        }),
-        new AnnotationType({
-            category: "AA",
-            type: "Crosslinkable-1",
-            tooltip: "Mark CrossLinkable residues (first or only reactive group)",
-            source: "Search",
-            colour: "#a6cee3",
-        }),
-        new AnnotationType({
-            category: "AA",
-            type: "Cross-linkable-2",
-            tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
-            source: "Search",
-            colour: "#a6cee3",
-        }),
-        new AnnotationType({
-            category: "Alignment",
-            type: "PDB aligned region",
-            tooltip: "Show regions that align to currently loaded PDB Data",
-            source: "PDB",
-            colour: "#b2df8a",
-        })
-    ];
+    let annotationTypes = createDefaultAnnotationTypes();
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
@@ -430,7 +413,7 @@ export function modelsEssential(options, clmsModelInst) {
 }
 
 export function views(compositeModelInst) {
-    const windowIds = ["spectrumPanelWrapper", "spectrumSettingsWrapper", "keyPanel", "nglPanel", "distoPanel", "matrixPanel", "alignPanel", "circularPanel", "proteinInfoPanel", "pdbPanel", "stringPanel", "csvPanel", "searchSummaryPanel", "linkMetaLoadPanel", "proteinMetaLoadPanel", "userAnnotationsMetaLoadPanel", "gafAnnotationsMetaLoadPanel", "scatterplotPanel", "urlSearchBox", "listPanel", "goTermsPanel"];
+    const windowIds = DYNAMIC_CONTAINER_IDS;
     // something funny happens if I do a data join and enter with d3 instead
     // ('distoPanel' datum trickles down into chart axes due to unintended d3 select.select inheritance)
     // http://stackoverflow.com/questions/18831949/d3js-make-new-parent-data-descend-into-child-nodes
@@ -445,77 +428,7 @@ export function views(compositeModelInst) {
     });
 
     // Generate checkboxes for view dropdown
-    const checkBoxData = [
-        {
-            id: "keyChkBxPlaceholder",
-            label: "Legend & Colours",
-            eventName: "keyViewShow",
-            tooltip: "Explains and allows changing of current colour scheme",
-            sectionEnd: true
-        },
-        {
-            id: "circularChkBxPlaceholder",
-            label: "Circular",
-            eventName: "circularViewShow",
-            tooltip: "Proteins are arranged in a circle, with crosslinks drawn in-between",
-        },
-        {
-            id: "nglChkBxPlaceholder",
-            label: "3D (NGL)",
-            eventName: "nglViewShow",
-            tooltip: "Spatial view of protein complexes and crosslinks. Requires a relevant PDB File to be loaded [Load > PDB Data]"
-        },
-        {
-            id: "matrixChkBxPlaceholder",
-            label: "Matrix",
-            eventName: "matrixViewShow",
-            tooltip: "AKA Contact Map. Relevant PDB File required for distance background"
-        },
-        {
-            id: "proteinInfoChkBxPlaceholder",
-            label: "Protein Info",
-            eventName: "proteinInfoViewShow",
-            tooltip: "Shows metadata and crosslink annotated sequences for currently selected proteins"
-        },
-        {
-            id: "spectrumChkBxPlaceholder",
-            label: "Spectrum",
-            eventName: "spectrumShow",
-            tooltip: "View the spectrum for a selected match (selection made through Selected Match Table after selecting Crosslinks)",
-            sectionEnd: true
-        },
-        {
-            id: "distoChkBxPlaceholder",
-            label: "Histogram",
-            eventName: "distoViewShow",
-            tooltip: "Configurable view for showing distribution of one crosslink/match property"
-        },
-        {
-            id: "scatterplotChkBxPlaceholder",
-            label: "Scatterplot",
-            eventName: "scatterplotViewShow",
-            tooltip: "Configurable view for comparing two crosslink/match properties",
-        },
-        {
-            id: "alignChkBxPlaceholder",
-            label: "Alignment",
-            eventName: "alignViewShow",
-            tooltip: "Shows alignments between Search/PDB/Uniprot sequences per protein"
-        },
-        {
-            id: "searchSummaryChkBxPlaceholder",
-            label: "Search Summaries",
-            eventName: "searchesViewShow",
-            tooltip: "Shows metadata for current searches",
-            sectionEnd: false
-        },
-        {
-            id: "goTermsChkBxPlaceholder",
-            label: "GO Terms",
-            eventName: "goTermsViewShow",
-            tooltip: "Browse Gene Ontology terms"
-        },
-    ];
+    const checkBoxData = VIEW_CHECKBOX_CONFIGS;
     checkBoxData.forEach(function (cbdata) {
         const options = $.extend({
             labelFirst: false
@@ -557,45 +470,7 @@ export function views(compositeModelInst) {
     new DropDownMenuViewBB({
         el: "#proteinSelectionDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
-        myOptions: {
-            title: "Protein-Selection",
-            menu: [{
-                name: "Hide Selected",
-                func: compositeModelInst.hideSelectedProteins,
-                context: compositeModelInst,
-                tooltip: "Hide selected proteins",
-            },
-            {
-                name: "Hide Unselected",
-                func: compositeModelInst.hideUnselectedProteins,
-                context: compositeModelInst,
-                tooltip: "Hide unselected proteins",
-                sectionEnd: true
-            },
-            {
-                name: "+Neighbours",
-                func: compositeModelInst.stepOutSelectedProteins,
-                context: compositeModelInst,
-                tooltip: "Select proteins which are crosslinked to already selected proteins",
-                categoryTitle: "Change Selection",
-                sectionBegin: true
-            },
-            {
-                sectionBegin: true,
-                id: "proteinSelectionFilter",
-                func: compositeModelInst.proteinSelectionTextFilter,
-                closeOnClick: false,
-                context: compositeModelInst,
-                tooltip: "Select proteins whose descriptions include input text",
-                categoryTitle: "Select by text filter:",
-                sectionEnd: true
-            }
-            ],
-            //tooltipModel: compModel.get("tooltipModel")
-            sectionHeader: function (d) {
-                return (d.categoryTitle ? d.categoryTitle.replace(/_/g, " ") : "");
-            },
-        }
+        myOptions: getProteinSelectionMenuConfig(compositeModelInst)
     })
         .wholeMenuEnabled(true);
 
@@ -606,98 +481,15 @@ export function views(compositeModelInst) {
     new DropDownMenuViewBB({
         el: "#groupsDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
-        myOptions: {
-            title: "Groups",
-            menu: [
-                {
-                    sectionBegin: true,
-                    categoryTitle: "Group Selected - enter name:",
-                    id: "groupSelected",
-                    func: compositeModelInst.groupSelectedProteins,
-                    closeOnClick: false,
-                    context: compositeModelInst,
-                    tooltip: "Enter group name",
-                },
-                {
-                    name: "Clear Groups",
-                    func: compositeModelInst.clearGroups,
-                    context: compositeModelInst,
-                    tooltip: "Clears all groups"
-                },
-                {
-                    name: "Auto Group",
-                    func: compositeModelInst.autoGroup,
-                    context: compositeModelInst,
-                    tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
-                },
-                // {
-                //     name: "Auto Group Compartments",
-                //     func: compModel.autoGroupCompartments,
-                //     context: compModel,
-                //     tooltip: "Group protein into compartmenst based on GO terms.",
-                //     sectionEnd: true
-                // },
-                {
-                    name: "Collapse All",
-                    func: compositeModelInst.collapseGroups,
-                    context: compositeModelInst,
-                    tooltip: "Collapse all groups",
-                },
-                {
-                    name: "Expand All",
-                    func: compositeModelInst.expandGroups,
-                    context: compositeModelInst,
-                    tooltip: "Expand all groups",
-                }
-            ],
-            //tooltipModel: compModel.get("tooltipModel")
-            sectionHeader: function (d) {
-                return (d.categoryTitle ? d.categoryTitle.replace(/_/g, " ") : "");
-            },
-        }
+        myOptions: getGroupsMenuConfig(compositeModelInst)
     })
         .wholeMenuEnabled(true);
 
     // Generate buttons for load dropdown
-    const loadButtonData = [{
-        name: "PDB",
-        eventName: "pdbFileChooserShow",
-        tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
-    },
-    {
-        name: "STRING",
-        eventName: "stringDataChooserShow",
-        tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
-    },
-    {
-        name: "Edge Metadata",
-        eventName: "linkMetaDataFileChooserShow",
-        tooltip: "Load edge (crosslink or PPI) meta-data from a local CSV file"
-    },
-    {
-        name: "Node Metadata",
-        eventName: "proteinMetaDataFileChooserShow",
-        tooltip: "Load node (protein) meta-data from a local CSV file"
-    },
-    {
-        name: "Sequence Annotations",
-        eventName: "userAnnotationsMetaDataFileChooserShow",
-        tooltip: "Load custom domain annotations (or other sequence annotations) from a local CSV file"
-    },
-    ];
-    loadButtonData.forEach(function (bdata) {
-        bdata.func = function () {
-            window.vent.trigger(bdata.eventName, true);
-        };
-    });
     new DropDownMenuViewBB({
         el: "#loadDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
-        myOptions: {
-            title: "Import",
-            menu: loadButtonData,
-            //tooltipModel: compModel.get("tooltipModel"),
-        }
+        myOptions: getLoadMenuConfig()
     });
 
     new xiNetControlsViewBB({
@@ -917,66 +709,7 @@ export function viewsEssential(compositeModelInst, options) {
     new DropDownMenuViewBB({
         el: "#expDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
-        myOptions: {
-            title: "Export",
-            menu: [
-                {
-                    name: "Filtered Matches",
-                    func: downloadMatches,
-                    tooltip: "Produces a CSV File of Filtered Matches data",
-                    categoryTitle: "As a CSV File",
-                    sectionBegin: true
-                },
-                {
-                    name: "Filtered Crosslinks",
-                    func: downloadLinks,
-                    tooltip: "Produces a CSV File of Filtered Crosslink data"
-                },
-                {
-                    name: "Filtered PPI",
-                    func: downloadPPIs,
-                    tooltip: "Produces a CSV File of Filtered Protein-Protein Interaction data"
-                },
-                {
-                    name: "Filtered Residues",
-                    func: downloadResidueCount,
-                    tooltip: "Produces a CSV File of Count of Filtered Residues ",
-                },
-                {
-                    name: "Filtered Modification Count",
-                    func: downloadModificationCount,
-                    tooltip: "Produces a CSV File of Count of Modifications (after filtering)",
-                },
-                {
-                    name: "Protein Accession list",
-                    func: downloadProteinAccessions,
-                    tooltip: "Produces a single row CSV File of visible Proteins' Accession numbers",
-                },
-                {
-                    name: "Groups",
-                    func: downloadGroups,
-                    tooltip: "Produces a CSV File of Proteins' Accession numbers with group membership given in the 'complex' column",
-                    sectionEnd: true
-                },
-                {
-                    name: "Filtered Matches ",  // extra space to differentiate from first entry in menu
-                    func: downloadSSL,
-                    tooltip: "Produces an SSL file for quantitation in SkyLine",
-                    categoryTitle: "As an SSL File",
-                    sectionBegin: true,
-                },
-                {
-                    name: "AlphaLink2 for selected proteins [DEV]",  // extra space to differentiate from first entry in menu
-                    func: downloadAlphaLink2,
-                    tooltip: "Exports AlphaLink2 csv file and corresponding FASTA. Prototype! Exported FDR values are wrong (all set to 0.05).",
-                    categoryTitle: "AlphaLink2",
-                    sectionBegin: true,
-                },
-            ],
-            sectionHeader: function (d) {
-                return (d.categoryTitle ? d.categoryTitle.replace(/_/g, " ") : "");
-            },
-        }
+        myOptions: getExportMenuConfig(downloadMatches, downloadLinks, downloadPPIs, downloadResidueCount, downloadModificationCount, downloadProteinAccessions, downloadGroups, downloadSSL, downloadAlphaLink2)
     })
         .wholeMenuEnabled(true);
 
@@ -984,25 +717,7 @@ export function viewsEssential(compositeModelInst, options) {
     new DropDownMenuViewBB({
         el: "#helpDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
-        myOptions: {
-            title: "Help",
-            menu: [{
-                name: "version " + packageInfo.version,
-            },{
-                name: "Xi Docs",
-                func: function () {
-                    window.open("./docs/html/xiview.html", "_blank");
-                },
-                tooltip: "Documentation for xiVIEW"
-            }, {
-                name: "Online Videos",
-                func: function () {
-                    //                    window.open("https://vimeo.com/user64900020", "_blank");
-                    window.open("https://rappsilberlab.org/software/xiview/", "_blank");
-                },
-                tooltip: "A number of how-to videos are available via this link to the lab homepage",
-            }],
-        }
+        myOptions: getHelpMenuConfig()
     });
     d3.select("#helpDropdownPlaceholder > div").append("img")
         .attr("class", "rappsilberImage")

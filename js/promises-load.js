@@ -173,9 +173,7 @@ function getTasks(apiBase, clmsModel) {
     ];
 }
 
-function setWindowTitle(clmsModel) {
-    // const mzidentmlFiles = clmsModel.getMzidentmlFiles();
-    // const fileNames = Array.from(mzidentmlFiles.values(), f => f.identificationFileName);
+function setWindowTitle() {
     document.title = window.location.search;//fileNames.join(", ");
 }
 
