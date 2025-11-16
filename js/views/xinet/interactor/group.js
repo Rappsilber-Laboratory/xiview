@@ -4,7 +4,19 @@ import {CrosslinkViewer} from "../crosslink-viewer-BB";
 import {makeTooltipContents, makeTooltipTitle} from "../../../../../xiview/js/make-tooltip";
 import {RenderedProtein} from "./rendered-protein";
 
+/**
+ * Represents a group of proteins in the xiNET visualization.
+ * Groups can be expanded to show member proteins or collapsed to a single symbol.
+ * Supports nested groups (subgroups) and complex hierarchies.
+ */
 export class Group extends Interactor {
+    /**
+     * Creates a new Group instance.
+     *
+     * @param {string} id - Unique identifier for this group
+     * @param {string[]} participantIds - Array of protein IDs to include in this group
+     * @param {CrosslinkViewer} controller - The parent crosslink viewer controller
+     */
     constructor(id, participantIds, controller) {
         super(controller);
 
@@ -216,6 +228,12 @@ export class Group extends Interactor {
         return false;
     }
 
+    /**
+     * Checks if this group overlaps with other groups.
+     * An overlapping group shares members with another group but neither is a subset of the other.
+     *
+     * @returns {boolean} True if this group overlaps with other groups
+     */
     isOverlappingGroup() {
         for (let renderedParticipant of this.renderedParticipants) {
             if (!renderedParticipant.participant.hidden && renderedParticipant.parentGroups.size > 1) {
@@ -379,6 +397,11 @@ export class Group extends Interactor {
         }
     }
 
+    /**
+     * Updates the bounding box and visual representation of an expanded group.
+     * Calculates the minimum rectangle containing all member proteins and subgroups.
+     * Updates the group outline, highlight, and label positions.
+     */
     updateExpandedGroup() {
         let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
         const z = this.controller.z, pad = 5 * z;
@@ -533,6 +556,13 @@ export class Group extends Interactor {
         }
     }
 
+    /**
+     * Collapses this group to a single symbol.
+     * Animates member proteins moving to the collapse point and hides them.
+     *
+     * @param {Object} svgP - Optional SVG point to collapse towards {x, y}
+     * @param {boolean} [transition=true] - Whether to animate the transition
+     */
     collapse(svgP, transition = true) {
         // transition = false;
         if (this.isOverlappingGroup()) {
@@ -641,6 +671,13 @@ export class Group extends Interactor {
         }
     }
 
+    /**
+     * Expands this group to show all member proteins.
+     * Animates member proteins spreading out from the group symbol.
+     * Attempts to keep proteins on screen by scaling and translating as needed.
+     *
+     * @param {boolean} [transition=true] - Whether to animate the transition
+     */
     expand(transition = true) {
         // transition = false;
         this.busy = true;

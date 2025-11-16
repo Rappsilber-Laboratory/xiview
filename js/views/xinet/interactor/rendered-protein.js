@@ -7,8 +7,19 @@ import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../../../../../xiview/js/make-tooltip";
 import {rotatePointAboutPoint, trig} from "../trig";
 
+/**
+ * Represents a rendered protein in the xiNET visualization.
+ * Handles protein visualization in both collapsed (circle) and expanded (stick) forms.
+ * Supports rotation, scaling, annotations, and interaction with crosslinks.
+ */
 export class RenderedProtein extends Interactor {
 
+    /**
+     * Creates a new RenderedProtein instance.
+     *
+     * @param {Object} participant - The protein data model object
+     * @param {CrosslinkViewer} controller - The parent crosslink viewer controller
+     */
     constructor(participant, controller) {
         super(controller);
         this.participant = participant;
@@ -237,6 +248,12 @@ export class RenderedProtein extends Interactor {
         };
     }
 
+    /**
+     * Sets the rotation angle of the protein.
+     * Updates SVG transforms and adjusts label orientation to keep it readable.
+     *
+     * @param {number} angle - The rotation angle in degrees
+     */
     setRotation(angle) {
         this.rotation = angle % 360;
         if (this.rotation < 0) {
@@ -534,6 +551,12 @@ export class RenderedProtein extends Interactor {
         }
     }
 
+    /**
+     * Transitions the protein from stick (expanded) to circle (collapsed) form.
+     *
+     * @param {Object} svgP - Optional SVG point to collapse towards {x, y}
+     * @param {boolean} [transition=true] - Whether to animate the transition
+     */
     toCircle(svgP, transition = true) {
         const transitionTime = transition ? RenderedProtein.transitionTime : 0; //this maybe isn't so good
 
@@ -742,6 +765,11 @@ export class RenderedProtein extends Interactor {
         }
     }
 
+    /**
+     * Transitions the protein from circle (collapsed) to stick (expanded) form.
+     *
+     * @param {boolean} [transition=true] - Whether to animate the transition
+     */
     toStick(transition = true) {
         const transitionTime = transition ? RenderedProtein.transitionTime : 0;
 
@@ -887,6 +915,13 @@ export class RenderedProtein extends Interactor {
         this.toStick(false);
     }
 
+    /**
+     * Generates the SVG path for a crosslink in stick form.
+     * Creates different path types for mono-links, loop-links, and regular crosslinks.
+     *
+     * @param {RenderedCrosslink} renderedCrossLink - The crosslink to generate path for
+     * @returns {string} SVG path data string
+     */
     getCrossLinkPath(renderedCrossLink) {
         const x1 = this.getResXwithStickZoom(renderedCrossLink.crosslink.fromResidue);
         let baseLine = 0;
@@ -958,10 +993,21 @@ export class RenderedProtein extends Interactor {
         }
     }
 
+    /**
+     * Calculates the x-coordinate of a residue in the stick representation.
+     * Coordinates are relative to the center of the protein.
+     *
+     * @param {number} r - The residue number
+     * @returns {number} The x-coordinate scaled by stickZoom
+     */
     getResXwithStickZoom(r) {
         return (r - (this.participant.size / 2)) * this.stickZoom;
     }
 
+    /**
+     * Updates all links connected to this protein.
+     * Calls update/check on all protein-protein links and rendered crosslinks.
+     */
     checkLinks() {
         for (let p_pLink of this.renderedP_PLinks) {
             //p_pLink.check();
@@ -978,6 +1024,11 @@ export class RenderedProtein extends Interactor {
         if (this.rectDomains) d3.select(this.rectDomains).selectAll("*").remove();
     }
 
+    /**
+     * Creates and displays positional features (domains, annotations) for this protein.
+     * Clears existing features first, then creates new SVG elements for each annotation.
+     * Handles alignment between different coordinate systems (e.g., PDB to sequence).
+     */
     setPositionalFeatures() {
         this.clearPositionalFeatures();
         const annotationTypes = this.controller.model.get("annotationTypes");

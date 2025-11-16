@@ -16,6 +16,20 @@ import {P_PLink} from "./link/p_p-link";
 import {G_GLink} from "./link/g_g-link";
 import {ManualColourModel} from "../../../../xiview/js/model/color/protein-color-model";
 
+/**
+ * Main controller class for the xiNET crosslink network visualization.
+ * Extends Backbone.View to provide an interactive SVG-based visualization of protein
+ * crosslink networks. Handles layout, rendering, user interaction, and state management.
+ *
+ * Key Features:
+ * - Interactive protein network visualization with force-directed layout (cola.js)
+ * - Residue-level crosslink display
+ * - Protein grouping and hierarchical organization
+ * - Zoom, pan, and selection capabilities
+ * - Export to SVG and layout saving/loading
+ *
+ * @extends Backbone.View
+ */
 export class CrosslinkViewer extends Backbone.View {
 
     // constructor(attributes, options) {
@@ -25,6 +39,11 @@ export class CrosslinkViewer extends Backbone.View {
     //     }), options);
     // }
 
+    /**
+     * Initializes the CrosslinkViewer.
+     * Sets up SVG elements, event listeners, layout groups, and the cola force-directed layout.
+     * Creates context menus and initializes the model listeners.
+     */
     initialize() {
         // this.debug = true;
         this.fixedSize = this.model.get("xinetFixedSize");
@@ -545,6 +564,14 @@ export class CrosslinkViewer extends Backbone.View {
         return this;
     }
 
+    /**
+     * Renders the crosslink network visualization.
+     * Updates all links and proteins based on current filter state.
+     * On first render, initializes the automatic layout.
+     * Updates link colors, widths, and visibility based on filtered crosslinks.
+     *
+     * @returns {CrosslinkViewer} Returns this for method chaining
+     */
     render() {
         console.log("xiNET RENDER");
         this.d3cola.stop();
@@ -818,6 +845,12 @@ export class CrosslinkViewer extends Backbone.View {
         }
     }
 
+    /**
+     * Performs automatic force-directed layout of the network.
+     * Uses the cola.js library to position proteins based on their connections.
+     *
+     * @param {Array} fixedParticipants - Array of proteins to keep in fixed positions
+     */
     autoLayout(fixedParticipants) {
         console.log("xiNET AUTO LAYOUT");
         this.d3cola.stop();
@@ -1532,6 +1565,12 @@ export class CrosslinkViewer extends Backbone.View {
         element.setAttribute("transform", s);
     }
 
+    /**
+     * Handles mouse down events on the SVG canvas.
+     * Initiates selection/pan mode and hides context menu.
+     *
+     * @param {MouseEvent} evt - The mouse event
+     */
     mouseDown(evt) {
         evt.preventDefault();
         this.d3cola.stop();
@@ -1542,7 +1581,12 @@ export class CrosslinkViewer extends Backbone.View {
         d3.select(".xinet-context-menu").style("display", "none");
     }
 
-    // dragging/rotating/panning/selecting
+    /**
+     * Handles mouse move events for dragging, rotating, panning, and selecting.
+     * Implements different behaviors based on current state (DRAGGING, ROTATING, SELECT_PAN).
+     *
+     * @param {MouseEvent} evt - The mouse event
+     */
     mouseMove(evt) {
         if (this.dragStart) {
             const p = this.getEventPoint(evt); // seems to be correct, see below
@@ -1692,7 +1736,14 @@ export class CrosslinkViewer extends Backbone.View {
         }
     }
 
-    // this ends all dragging and rotating
+    /**
+     * Handles mouse up events.
+     * Finalizes drag, rotation, pan, or selection operations.
+     * Handles context menu display for right-clicks.
+     *
+     * @param {MouseEvent} evt - The mouse event
+     * @returns {boolean} False to prevent default behavior
+     */
     mouseUp(evt) {
         this.preventDefaultsAndStopPropagation(evt);
         //remove selection rect, may not be shown but just do this now

@@ -5,8 +5,19 @@ import {CrosslinkViewer} from "../crosslink-viewer-BB";
 import {G_GLink} from "./g_g-link";
 import d3 from "d3";
 
+/**
+ * Represents an aggregate protein-to-protein link.
+ * Aggregates multiple crosslinks between two proteins into a single visual element.
+ */
 export class P_PLink extends Link {
 
+    /**
+     * Creates a new P_PLink instance.
+     *
+     * @param {string} p_pId - Unique identifier for this protein-protein link
+     * @param {Object} crosslink - Initial crosslink to include in this aggregate
+     * @param {CrosslinkViewer} crosslinkViewer - The parent crosslink viewer controller
+     */
     constructor(p_pId, crosslink, crosslinkViewer) {
         super(crosslinkViewer);
         this.isAggregateLink = true;
@@ -20,10 +31,19 @@ export class P_PLink extends Link {
         }
     }
 
+    /**
+     * Gets all crosslinks aggregated in this protein-protein link.
+     *
+     * @returns {Array} Array of crosslink objects
+     */
     getCrosslinks() {
         return this.crosslinks;
     }
 
+    /**
+     * Initializes the SVG elements for this protein-protein link.
+     * Creates line or path elements depending on whether it's a self-link.
+     */
     initSVG() {
         if (this.crosslinks[0].isSelfLink() === false) {
             this.line = document.createElementNS(CrosslinkViewer.svgns, "line");
@@ -307,6 +327,10 @@ export class P_PLink extends Link {
     //     return false;
     // }
 
+    /**
+     * Updates the width of the thick line based on the number of filtered crosslinks.
+     * Uses stepped widths defined in xinetPpiSteps model property.
+     */
     updateThickLineWidth() {
         const steps = this.controller.model.get("xinetPpiSteps");
 

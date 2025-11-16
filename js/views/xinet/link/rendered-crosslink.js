@@ -5,7 +5,17 @@ import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../../../../../xiview/js/make-tooltip";
 import {rotatePointAboutPoint} from "../trig";
 
+/**
+ * Represents a rendered crosslink between protein residues.
+ * Extends Link to provide visualization for individual crosslinks at residue resolution.
+ */
 export class RenderedCrosslink extends Link {
+    /**
+     * Creates a new RenderedCrosslink instance.
+     *
+     * @param {Object} crosslink - The crosslink data model object
+     * @param {CrosslinkViewer} crosslinkViewer - The parent crosslink viewer controller
+     */
     constructor(crosslink, crosslinkViewer) {
         super(crosslinkViewer);
         this.isAggregateLink = false;
@@ -21,6 +31,10 @@ export class RenderedCrosslink extends Link {
         this.pepSvgArr = [];
     }
 
+    /**
+     * Initializes the SVG elements for this crosslink.
+     * Creates line or path elements depending on link type (self-link, mono-link, or inter-protein).
+     */
     initSVG() {
         if (this.crosslink.isSelfLink() || this.crosslink.isMonoLink()) {
             this.line = document.createElementNS(CrosslinkViewer.svgns, "path");
@@ -230,7 +244,12 @@ export class RenderedCrosslink extends Link {
     }
 
 
-    //used when filter changed
+    /**
+     * Checks if this crosslink should be displayed based on current filter and visibility settings.
+     * Hides the link if proteins are hidden, collapsed, or if no matches pass the filter.
+     *
+     * @returns {boolean} True if link should be shown, false otherwise
+     */
     check() {
         // neither end is a bar which isn't in a collapsed group? then hide
         if ((!this.renderedFromProtein.expanded || (this.renderedFromProtein.inCollapsedGroup())) &&
@@ -362,7 +381,15 @@ export class RenderedCrosslink extends Link {
         }
     }
 
-    //calculate the  coordinates of a residue (relative to this.controller.container)
+    /**
+     * Calculates the screen coordinates of a residue.
+     * Accounts for protein rotation and zoom level.
+     * Coordinates are relative to the controller.container coordinate system.
+     *
+     * @param {number} r - The residue number
+     * @param {RenderedProtein} renderedInteractor - The protein containing the residue
+     * @returns {number[]} Array containing [x, y] coordinates
+     */
     getResidueCoordinates(r, renderedInteractor) {
         let x = renderedInteractor.getResXwithStickZoom(r) * this.controller.z;
         let y = 0;

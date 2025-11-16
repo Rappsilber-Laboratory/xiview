@@ -3,8 +3,20 @@ import {Link} from "./link";
 import {CrosslinkViewer} from "../crosslink-viewer-BB";
 import d3 from "d3";
 
+/**
+ * Represents an aggregate group-to-group link.
+ * Aggregates multiple protein-protein links when proteins are in collapsed groups.
+ */
 export class G_GLink extends Link {
 
+    /**
+     * Creates a new G_GLink instance.
+     *
+     * @param {string} id - Unique identifier for this group-group link
+     * @param {Group} group1 - The first group
+     * @param {Group} group2 - The second group
+     * @param {CrosslinkViewer} crosslinkViewer - The parent crosslink viewer controller
+     */
     constructor(id, group1, group2, crosslinkViewer) {
         super(crosslinkViewer);
 
@@ -16,6 +28,12 @@ export class G_GLink extends Link {
         this.group2 = group2;
     }
 
+    /**
+     * Gets all crosslinks aggregated in this group-group link.
+     * Collects crosslinks from all constituent protein-protein links.
+     *
+     * @returns {Array} Array of all crosslink objects
+     */
     getCrosslinks() {
         let allCrosslinks = [];
         for (let pp of this.p_pLinks.values()) {
@@ -212,6 +230,12 @@ export class G_GLink extends Link {
         this.isSelected = select;
     }
 
+    /**
+     * Checks if this group-group link has any filtered crosslinks.
+     * Returns true if any constituent protein-protein link has filtered crosslinks.
+     *
+     * @returns {boolean} True if link should be shown
+     */
     check() {
         for (let pp of this.p_pLinks.values()) {
             if (pp.filteredCrossLinkCount > 0) {
