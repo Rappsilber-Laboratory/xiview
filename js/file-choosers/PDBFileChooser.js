@@ -8,9 +8,12 @@ import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 import {loadUserFile} from "./load-user-file";
 
-export const PDBFileChooserBB = BaseFrameView.extend({
+export class PDBFileChooserBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -24,10 +27,10 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             "click button.PDBSubmit": "loadPDBCode",
             // "click .cAlphaOnly": "toggleCAlphaSetting",
         });
-    },
+    }
 
-    initialize: function (viewOptions) {
-        PDBFileChooserBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
         this.cAlphaOnly = false;
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
@@ -186,13 +189,13 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
-    },
+    }
 
     // Return selected proteins, or all proteins if nothing selected
-    getSelectedProteins: function () {
+    getSelectedProteins() {
         const selectedProteins = this.model.get("selectedProteins");
         return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").getProteinsIterator()) : selectedProteins;
-    },
+    }
     /*
     updateProteinDropdown: function (parentElem) {
         const proteins = this.getSelectedProteins();
@@ -219,9 +222,9 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             },
         });
 
-    },
+    }
 */
-    launchExternalPDBWindow: function () {
+    launchExternalPDBWindow() {
         // http://stackoverflow.com/questions/15818892/chrome-javascript-window-open-in-new-tab
         // annoying workaround whereby we need to open a blank window here and set the location later
         // otherwise chrome/pop-up blockers think it is some spammy popup rather than something the user wants.
@@ -295,9 +298,9 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         } else {
             newtab.document.body.innerHTML = "No legal Accession IDs are in the current dataset. These are required to query the PDB service.";
         }
-    },
+    }
 
-    launchExternalSwissmodelWindow: function () {
+    launchExternalSwissmodelWindow() {
         const newtab = window.open("", "_blank");
         const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
         if (accessionIDs.length === 1) {
@@ -305,9 +308,9 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         } else {
             newtab.document.body.innerHTML = "Select exactly one protein with legal Accession ID in the current dataset. SWISS-MODEL service can only query single protein.";
         }
-    },
+    }
 
-    getSelectedOption: function (higherElem, selectName) {
+    getSelectedOption(higherElem, selectName) {
         let funcMeta;
 
         //this.controlDiv
@@ -324,7 +327,7 @@ export const PDBFileChooserBB = BaseFrameView.extend({
                 funcMeta = d;
             });
         return funcMeta;
-    },
+    }
 
     /*
     launchExternalEBIPDBWindow: function () {
@@ -332,9 +335,9 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             sequence: ""
         }).sequence;
         window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
-    },*/
+    }*/
 
-    selectPDBFile: function (evt) {
+    selectPDBFile(evt) {
         this.setWaitingEffect();
         this.loadRoute = "file";
         const self = this;
@@ -378,17 +381,17 @@ export const PDBFileChooserBB = BaseFrameView.extend({
         }
 
         evt.target.value = null;    // reset value so same file can be chosen twice in succession
-    },
+    }
 
-    enteringPDBCode: function (evt) {
+    enteringPDBCode(evt) {
         const valid = this.isPDBCodeValid();
         d3.select(this.el).select(".PDBSubmit").property("disabled", !valid);
         if (valid && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
             this.loadPDBCode();
         }
-    },
+    }
 
-    loadPDBCode: function () {
+    loadPDBCode() {
         const pdbCode = d3.select(this.el).select(".inputPDBCode").property("value");
         this.loadRoute = "pdb";
         this.setWaitingEffect();
@@ -408,18 +411,18 @@ export const PDBFileChooserBB = BaseFrameView.extend({
             stage: this.stage,
             compositeModel: this.model
         });
-    },
+    }
 
-    isPDBCodeValid: function () {
+    isPDBCodeValid() {
         const elem = d3.select(this.el).select(".inputPDBCode");
         return elem.node().checkValidity();
-    },
+    }
 
-    // toggleCAlphaSetting: function (evt) {
+    // toggleCAlphaSetting(evt) {
     //     var val = evt.target.checked;
     //     this.cAlphaOnly = val;
     //     return this;
-    // },
+    // }
+}
 
-    identifier: "PDB File Chooser",
-});
+PDBFileChooserBB.prototype.identifier = "PDB File Chooser";

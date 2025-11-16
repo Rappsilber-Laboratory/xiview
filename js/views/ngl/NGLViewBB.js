@@ -19,9 +19,12 @@ import {NGLExportUtils} from "./NGLExportUtils";
 import {CrosslinkRepresentation} from "./crosslink-representation";
 import d3 from "d3";
 
-export const NGLViewBB = BaseFrameView.extend({
+export class NGLViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -50,30 +53,32 @@ export const NGLViewBB = BaseFrameView.extend({
             "mouseleave canvas": "clearHighlighted",
             "click .greyer": "colorChange"
         });
-    },
+    }
 
-    defaultOptions: {
-        labelVisible: false,
-        selectedOnly: false,
-        showResidues: true,
-        shortestLinksOnly: true,
-        chainRep: "cartoon",
-        initialColourScheme: "uniform",
-        greyOut: false,
-        showAllProteins: false,
-        chainLabelSetting: "Short",
-        fixedLabelSize: false,
-        defaultAssembly: "default",
-        allowInterModelDistances: false,
-        exportKey: true,
-        exportTitle: true,
-        canHideToolbarArea: true,
-        canTakeImage: true,
-    },
+    get defaultOptions() {
+        return {
+            labelVisible: false,
+            selectedOnly: false,
+            showResidues: true,
+            shortestLinksOnly: true,
+            chainRep: "cartoon",
+            initialColourScheme: "uniform",
+            greyOut: false,
+            showAllProteins: false,
+            chainLabelSetting: "Short",
+            fixedLabelSize: false,
+            defaultAssembly: "default",
+            allowInterModelDistances: false,
+            exportKey: true,
+            exportTitle: true,
+            canHideToolbarArea: true,
+            canTakeImage: true,
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
-        NGLViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
         const self = this;
         this.colourScheme = this.options.initialColourScheme;
         // this.el is the dom element this should be getting added to, replaces targetDiv
@@ -619,14 +624,14 @@ export const NGLViewBB = BaseFrameView.extend({
             }
         });
 
-    },
+    }
 
-    setAssemblyChains: function () {
+    setAssemblyChains() {
         this.model.get("distancesObj").setAssemblyChains(this.model.get("stageModel").get("structureComp").structure, this.options.defaultAssembly);
         return this;
-    },
+    }
 
-    reportLinks: function () {
+    reportLinks() {
         const fullLinkCount = this.xlRepr.nglModelWrapper.getFullLinkCount();
         const halfLinkCount = this.xlRepr.nglModelWrapper.getHalfLinkCount();
         const currentFilteredLinkCount = this.model.getFilteredCrossLinks().length;
@@ -638,9 +643,9 @@ export const NGLViewBB = BaseFrameView.extend({
             (missingLinkCount ? " (" + commaFormat(missingLinkCount) + " others outside of structure scope)" : "");
         this.chartDiv.select("div.linkInfo").html(linkText);
         return this;
-    },
+    }
 
-    repopulate: function () {
+    repopulate() {
         const stageModel = this.model.get("stageModel");
         xilog("REPOPULATE", this.model, stageModel);
         const sname = stageModel.getStructureName();
@@ -682,17 +687,17 @@ export const NGLViewBB = BaseFrameView.extend({
 
         this.showFiltered();
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         if (this.isVisible()) {
             this.showFiltered();
             xilog("re rendering NGL view");
         }
         return this;
-    },
+    }
 
-    relayout: function () {
+    relayout() {
         const stageModel = this.model.get("stageModel");
         if (stageModel) {
             const stage = stageModel.get("structureComp").stage;
@@ -701,13 +706,13 @@ export const NGLViewBB = BaseFrameView.extend({
             }
         }
         return this;
-    },
+    }
 
-    takeImage: function (){
+    takeImage(){
         return this.downloadImage();
-    },
+    }
 
-    downloadImage: function () {
+    downloadImage() {
         // https://github.com/arose/ngl/issues/33
         const stageModel = this.model.get("stageModel");
         if (stageModel) {
@@ -771,9 +776,9 @@ export const NGLViewBB = BaseFrameView.extend({
             });
         }
         return this;
-    },
+    }
 
-    colorChange: function () {
+    colorChange() {
         // const val = d3.select(".greyer").property("checked");
         // console.log("GREYNESS", val)
         // NGL.ColormakerRegistry.removeScheme(this.xlRepr.colorOptions.residueColourScheme);
@@ -805,17 +810,17 @@ export const NGLViewBB = BaseFrameView.extend({
                 {nglRep: self.xlRepr.sstrucRepr, colourScheme: self.xlRepr.colorOptions.residueColourScheme},
             ]);
         }
-    },
+    }
 
-    centerView: function () {
+    centerView() {
         const stageModel = this.model.get("stageModel");
         if (stageModel) {
             stageModel.get("structureComp").stage.autoView(1000);
         }
         return this;
-    },
+    }
 
-    savePDB: function () {
+    savePDB() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportPDB(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
@@ -827,9 +832,9 @@ export const NGLViewBB = BaseFrameView.extend({
             ]
         );
         return this;
-    },
+    }
 
-    exportPymol: function () {
+    exportPymol() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportPymolCrossLinkSyntax(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
@@ -840,58 +845,58 @@ export const NGLViewBB = BaseFrameView.extend({
             ]
         );
         return this;
-    },
+    }
 
-    export3dLinksCSV: function () {
+    export3dLinksCSV() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
-    },
+    }
 
     //todo - unnecessary duplication
-    export3dLinksCSVSelected: function () {
+    export3dLinksCSVSelected() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.export3dLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), true
         );
         return this;
-    },
+    }
 
-    exportHalfInLinksCSV: function () {
+    exportHalfInLinksCSV() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportHalfInLinksCSV(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
-    },
+    }
 
-    exportChimeraPB: function () {
+    exportChimeraPB() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportChimeraPseudobonds(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
-    },
+    }
 
-    exportJWalk: function () {
+    exportJWalk() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportJWalk(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
-    },
+    }
 
-    exportXlinkAnalyzer: function () {
+    exportXlinkAnalyzer() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportXlinkAnalyzer(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(), false
         );
         return this;
-    },
+    }
 
-    exportHaddock: function () {
+    exportHaddock() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportHaddockCrossLinkSyntax(
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
@@ -906,9 +911,9 @@ export const NGLViewBB = BaseFrameView.extend({
             }
         );
         return this;
-    },
+    }
 
-    toggleLabels: function (event) {
+    toggleLabels(event) {
         const bool = event.target.checked;
         this.options.labelVisible = bool;
         if (this.xlRepr) {
@@ -918,9 +923,9 @@ export const NGLViewBB = BaseFrameView.extend({
             });
         }
         return this;
-    },
+    }
 
-    toggleResidues: function (event) {
+    toggleResidues(event) {
         const bool = event.target.checked;
         this.options.showResidues = bool;
         if (this.xlRepr) {
@@ -928,30 +933,30 @@ export const NGLViewBB = BaseFrameView.extend({
             // this.xlRepr.halfLinkResRepr.setVisibility(bool);
         }
         return this;
-    },
+    }
 
-    toggleNonSelectedLinks: function (event) {
+    toggleNonSelectedLinks(event) {
         const bool = event.target.checked;
         this.options.selectedOnly = bool;
         if (this.xlRepr) {
             this.xlRepr.linkRepr.setVisibility(!bool);
         }
         return this;
-    },
+    }
 
-    toggleShortestLinksOnly: function (event) {
+    toggleShortestLinksOnly(event) {
         const bool = event.target.checked;
         this.model.get("stageModel").set("showShortestLinksOnly", bool);
         return this;
-    },
+    }
 
-    toggleAllowInterModelDistances: function (event) {
+    toggleAllowInterModelDistances(event) {
         const bool = event.target.checked;
         this.model.get("stageModel").set("allowInterModelDistances", bool);
         return this;
-    },
+    }
 
-    toggleShowAllProteins: function () {
+    toggleShowAllProteins() {
         const showAllCB = d3.select(".showAllProteinsCB");
         const bool = !showAllCB.node().checked;
         this.options.showAllProteins = bool;
@@ -960,9 +965,9 @@ export const NGLViewBB = BaseFrameView.extend({
             this.xlRepr.redisplayProteins();
         }
         return this;
-    },
+    }
 
-    setChainLabelLength: function () {
+    setChainLabelLength() {
         const checkedElem = d3.select(this.el).select("input.chainLabelLengthRB:checked");
         if (!checkedElem.empty()) {
             const value = checkedElem.property("value");
@@ -973,9 +978,9 @@ export const NGLViewBB = BaseFrameView.extend({
             }
         }
         return this;
-    },
+    }
 
-    setChainLabelFixedSize: function (event) {
+    setChainLabelFixedSize(event) {
         const bool = event.target.checked;
         this.options.fixedLabelSize = bool;
         if (this.xlRepr) {
@@ -983,51 +988,49 @@ export const NGLViewBB = BaseFrameView.extend({
             this.xlRepr.labelRepr.setParameters({fixedSize: bool, radiusScale: bool ? 1 : 3});
         }
         return this;
-    },
+    }
 
-    rerenderColourSchemes: function (repSchemePairs) {
+    rerenderColourSchemes(repSchemePairs) {
         if (this.xlRepr && this.isVisible()) {
             xilog("rerendering ngl");
             this.xlRepr.rerenderColourSchemes(repSchemePairs);
         }
         return this;
-    },
+    }
 
-    showHighlightedLinks: function () {
+    showHighlightedLinks() {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setHighlightedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
             // this.xlRepr.setHighlightedRes (this.xlRepr.nglModelWrapper.getFullLinks());
         }
         return this;
-    },
+    }
 
-    showSelectedLinks: function () {
+    showSelectedLinks() {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setSelectedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
             // this.xlRepr.setSelectedRes(this.xlRepr.nglModelWrapper.getHalfLinks());
         }
         return this;
-    },
+    }
 
-    showFiltered: function () {
+    showFiltered() {
         if (this.xlRepr && this.isVisible()) {
             this.model.get("stageModel").setFilteredLinkList();
         }
         return this;
-    },
+    }
 
-    clearHighlighted: function () {
+    clearHighlighted() {
         if (this.xlRepr && this.isVisible()) {
             // next line eventually fires through an empty selection to showHighlighted above
             this.model.setMarkedCrossLinks("highlights", [], false, false);
             this.model.get("tooltipModel").set("contents", null);
         }
         return this;
-    },
+    }
 
-    identifier: "NGL Viewer - PDB Structure",
-
-    optionsToString: function () {
+    optionsToString() {
         const abbvMap = {
             labelVisible: "LBLSVIS",
             selectedOnly: "SELONLY",
@@ -1040,16 +1043,18 @@ export const NGLViewBB = BaseFrameView.extend({
         optionsPlus.rep = this.xlRepr.options.chainRep;
 
         return objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
-    },
+    }
 
-    pdbFilenameStateString: function () {
+    pdbFilenameStateString() {
         const stageModel = this.model.get("stageModel");
         return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString() + "-" + filterStateToString());
-    },
+    }
 
     // Returns a useful filename given the view and filters current states
-    filenameStateString: function () {
+    filenameStateString() {
         const stageModel = this.model.get("stageModel");
         return makeLegalFileName(searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + filterStateToString());
-    },
-});
+    }
+}
+
+NGLViewBB.prototype.identifier = "NGL Viewer - PDB Structure";

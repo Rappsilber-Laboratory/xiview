@@ -7,9 +7,12 @@ import {d3_sankey} from "./sankey";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 
-export const GoTermsViewBB = BaseFrameView.extend({
+export class GoTermsViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -17,24 +20,26 @@ export const GoTermsViewBB = BaseFrameView.extend({
         return _.extend({}, parentEvents, {
             "keyup .goTextMatch": "goTextMatch",
         });
-    },
+    }
 
-    defaultOptions: {
-        margin: {
-            top: 5,
-            right: 5,
-            bottom: 5,
-            left: 5
-        },
-        subclassColour: "gray",
-        partofColour: "brown",
-        canHideToolbarArea: true,
-        canTakeImage: true,
-    },
+    get defaultOptions() {
+        return {
+            margin: {
+                top: 5,
+                right: 5,
+                bottom: 5,
+                left: 5
+            },
+            subclassColour: "gray",
+            partofColour: "brown",
+            canHideToolbarArea: true,
+            canTakeImage: true,
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
-        GoTermsViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         const self = this;
 
@@ -167,10 +172,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 }
             }
         }
-    },
+    }
 
-
-    goTextMatch: function (evt) {
+    goTextMatch(evt) {
         const val = evt.target.value;
         const regex = new RegExp(val, "i");
 
@@ -204,9 +208,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
         const msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
         d3.select(this.el).select(".goTextResult").text(msg);
         this.model[evt.key === "Enter" || evt.keyCode === 13 || evt.which === 13 ? "setSelectedProteins" : "setHighlightedProteins"](interactors, false);
-    },
+    }
 
-    update: function () {
+    update() {
         const termType = d3.select("#goTermsPanelgoTermSelect")
             .selectAll("option")
             .filter(function () {
@@ -328,9 +332,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
         };
 
         return this;
-    },
+    }
 
-    render: function (renderOptions) {
+    render(renderOptions) {
         if (this.isVisible()) {
             //this.update();
             if (this.data) {
@@ -467,9 +471,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
         }
 
         return this;
-    },
+    }
 
-    hideAllExceptMe: function (term) {
+    hideAllExceptMe(term) {
         const nodeSel = this.foregroundGroup.selectAll(".node")
             .data(this.data.nodes, function (d) {
                 return d.id;
@@ -483,9 +487,9 @@ export const GoTermsViewBB = BaseFrameView.extend({
                 return term.isDirectRelation(d2.term) ? 1 : 0;
             });
         }
-    },
+    }
 
-    hideAllLinksExceptTo: function (term) {
+    hideAllLinksExceptTo(term) {
         const linkSel = this.backgroundGroup.selectAll(".goLink")
             .data(this.data.links,
                 function (d) {
@@ -496,31 +500,31 @@ export const GoTermsViewBB = BaseFrameView.extend({
             if (!term) return "none";
             return /*!term ||*/ (term.id === dlink.source.id || term.id === dlink.target.id) ? null : "none";
         });
-    },
+    }
 
-    updateThenRender: function () {
+    updateThenRender() {
         if (this.isVisible()) {
             return this.update().render();
         }
         return this;
-    },
+    }
 
-    relayout: function (descriptor) {
+    relayout(descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render({iterations: 6});
         }
         return this;
-    },
+    }
 
-    reshow: function () {
+    reshow() {
         return this.update();
-    },
+    }
 
     // called when things need repositioned, but not re-rendered from data
     // gets called before render
-    resize: function () {
+    resize() {
         return this.render();
-    },
+    }
+}
 
-    identifier: "Go Terms View",
-});
+GoTermsViewBB.prototype.identifier = "Go Terms View";

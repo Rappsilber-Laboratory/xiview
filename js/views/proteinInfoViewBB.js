@@ -5,8 +5,12 @@ import d3 from "d3";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {makeLegalDomID} from "../utils";
 
-export const ProteinInfoViewBB = BaseFrameView.extend({
-    events: function () {
+export class ProteinInfoViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -15,17 +19,19 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
             "mouseenter .proteinTabs span": "highlightProteins",
             "mouseleave .proteinTabs span": "unhighlightProteins",
         }, parentEvents, {});
-    },
+    }
 
-    defaultOptions: {
-        removeTheseKeys: new Set(["canonicalSeq", "seq_mods", "filteredNotDecoyNotLinearCrossLinks", "hidden", "targetProteinID", "form", "is_decoy", "manuallyHidden"]),
-        expandTheseKeys: new Set(["uniprot", "meta"]),
-        orderedKeys: ["name", "id", "accession", "description", "size", "sequence"],
-    },
+    get defaultOptions() {
+        return {
+            removeTheseKeys: new Set(["canonicalSeq", "seq_mods", "filteredNotDecoyNotLinearCrossLinks", "hidden", "targetProteinID", "form", "is_decoy", "manuallyHidden"]),
+            expandTheseKeys: new Set(["uniprot", "meta"]),
+            orderedKeys: ["name", "id", "accession", "description", "size", "sequence"],
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
-        ProteinInfoViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         const flexContainer = d3.select(this.el)
             .append("div")
@@ -47,9 +53,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
         this.listenTo(this.model, "change:highlightedProteins", this.showProteinHighlightsState);
 
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         if (this.isVisible()) {
             const prots = this.model.get("selectedProteins");
             prots.sort(function (a, b) {
@@ -91,9 +97,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
             this.updateTable(this.displayedProt);
         }
         return this;
-    },
+    }
 
-    updateTabs: function () {
+    updateTabs() {
         const self = this;
         d3.select(this.el).select("div.proteinTabs").selectAll(".protTab").classed("selectedTab",
             function (d) {
@@ -101,9 +107,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 return d === self.displayedProt;
             });
 
-    },
+    }
 
-    updateTable: function (protein) {
+    updateTable(protein) {
         const divSel = d3.select(this.el).select("div.proteinInfoPanel");
         //deliberately doesn't use d3 from here on
         const div = divSel[0][0];
@@ -229,9 +235,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
             this.showCrossLinksState();
 
         }
-    },
+    }
 
-    showCrossLinksState: function () {
+    showCrossLinksState() {
         const self = this;
         //console.log ("in prot info filter");
         if (this.isVisible()) {
@@ -270,9 +276,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 });
         }
         return this;
-    },
+    }
 
-    showProteinHighlightsState: function () {
+    showProteinHighlightsState() {
         const highlightSet = d3.set(_.pluck(this.model.get("highlightedProteins"), "id"));
         //d3.select(this.el).selectAll(".sectionTable h2")
         d3.select(this.el).selectAll(".protTab")
@@ -280,24 +286,24 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
                 return highlightSet.has(d.id);
             });
         return this;
-    },
+    }
 
-    highlightProteins: function (evt) {
+    highlightProteins(evt) {
         this.model.setHighlightedProteins([d3.select(evt.target).datum()]);
         return this;
-    },
+    }
 
-    unhighlightProteins: function () {
+    unhighlightProteins() {
         this.model.setHighlightedProteins([]);
         return this;
-    },
+    }
 
-    splitDataAttr: function (d3sel, dataAttrName, splitChar) {
+    splitDataAttr(d3sel, dataAttrName, splitChar) {
         const ids = d3sel.attr(dataAttrName);
         return ids ? ids.split(splitChar || ",") : [];
-    },
+    }
 
-    getCrossLinksFromIDs: function (linkIDs, filter) {
+    getCrossLinksFromIDs(linkIDs, filter) {
         linkIDs = d3.set(linkIDs).values(); // strips out duplicates
 
         const allLinks = this.model.get("clmsModel").getCrosslinks();
@@ -311,9 +317,9 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
             });
         }
         return crosslinks;
-    },
+    }
 
-    makeInteractiveSeqString: function (protein, seq, xlinks, filterDecoys) {
+    makeInteractiveSeqString(protein, seq, xlinks, filterDecoys) {
         const proteinId = protein.id;
         if (filterDecoys) {
             xlinks = xlinks.filter(function (xlink) {
@@ -360,7 +366,7 @@ export const ProteinInfoViewBB = BaseFrameView.extend({
         //console.log("iStr", iStr);
 
         return iStr;
-    },
+    }
+}
 
-    identifier: "Selected Protein Info",
-});
+ProteinInfoViewBB.prototype.identifier = "Selected Protein Info";

@@ -5,14 +5,20 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 
-export const ThreeColourSliderBB = Backbone.View.extend({
-    events: {
-        "change input.filterTypeNumber": "directInput",
-        "keyup input.filterTypeNumber": "directInputIfReturn",
-        //"mouseup input.filterTypeNumber": "directInput",
-    },
+export class ThreeColourSliderBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function (viewOptions) {
+    get events() {
+        return {
+            "change input.filterTypeNumber": "directInput",
+            "keyup input.filterTypeNumber": "directInputIfReturn",
+            //"mouseup input.filterTypeNumber": "directInput",
+        };
+    }
+
+    initialize(viewOptions) {
 
         const defaultOptions = {
             unitText: "",
@@ -152,23 +158,23 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         this.listenTo(this.model, "colourModelChanged", this.render); // if range  (or domain) changes in current colour model
 
         return this;
-    },
+    }
 
-    setMajorDimRange: function (isVert) {
+    setMajorDimRange(isVert) {
         const m = this.options.margin;
         this.majorDim.range(isVert ? [this.height - m.top, m.bottom] : [m.left, this.width - m.right]);
-    },
+    }
 
-    resetStretchDimension: function () {
+    resetStretchDimension() {
         const d3el = d3.select(this.el);
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(d3el.select("svg").node());
         const stretchDim = this.isVerticallyOriented() ? "height" : "width";
         this[stretchDim] = jqElem[stretchDim](); //this.svg.node().clientHeight;
         return this;
-    },
+    }
 
-    resize: function () {
+    resize() {
         this.resetStretchDimension();
 
         // changing y range automatically adjusts the extent, but we want to keep the same extent
@@ -178,9 +184,9 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         this.brush(d3.select(this.el).select(".brush"));
 
         return this;
-    },
+    }
 
-    render: function (args) {
+    render(args) {
         // use brush extent or domain value (when render is called from backbone)
         // domain value here is not the domain of the slider, but the domain of the colour scale (should fit within the slider's domain)
         const s = (args && args.domain ? args.domain.slice() : undefined) || this.brush.extent();
@@ -219,21 +225,21 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         d3el.select("div.vmin > input").property("value", rounded[0]);
         d3el.select("div.vmax > input").property("value", rounded[1]);
         return this;
-    },
+    }
 
-    show: function (show) {
+    show(show) {
         d3.select(this.el).style("display", show ? null : "none");
         if (show) {
             this.resize().render();
         }
         return this;
-    },
+    }
 
-    brushstart: function () {
+    brushstart() {
         return this;
-    },
+    }
 
-    brushmove: function () {
+    brushmove() {
         const s = this.brush.extent();
         // round so values in domain are the same that are shown in text labels and input controls
         const rounded = s.map(function (val) {
@@ -241,14 +247,14 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         }, this);
         this.model.setDomain(rounded); // this'll trigger a re-render due to the colourModelChanged listener above ^^^
         return this;
-    },
+    }
 
-    brushend: function () {
+    brushend() {
         return this;
-    },
+    }
 
 
-    directInput: function (evt) {
+    directInput(evt) {
         const target = evt.target;
         const value = +target.value;
         const isMin = d3.select(target).classed("vmin");
@@ -264,15 +270,15 @@ export const ThreeColourSliderBB = Backbone.View.extend({
         this.brush.extent(correct);
         this.brush(d3.select(this.el).select(".brush"));
         this.brushmove();
-    },
+    }
 
-    directInputIfReturn: function (evt) {
+    directInputIfReturn(evt) {
         if (evt.keyCode === 13) {
             this.directInput(evt);
         }
-    },
+    }
 
-    isVerticallyOriented: function () {
+    isVerticallyOriented() {
         return this.options.orientation.toLowerCase() === "vertical";
-    },
-});
+    }
+}

@@ -1,11 +1,17 @@
 import Backbone from "backbone";
 import d3 from "d3";
 
-export const MinigramViewBB = Backbone.View.extend({
-    events: {},
+export class MinigramViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
+        return {};
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
+    initialize(viewOptions) {
         const mainDivSel = d3.select(this.el).attr("class", "minigram");
         this.chartDiv = mainDivSel.append("div")
             .attr("id", this.el.id + "c3Chart")
@@ -51,9 +57,9 @@ export const MinigramViewBB = Backbone.View.extend({
         this.listenTo(this.model, "change", this.redrawBrush);
         this.render();
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         // Use requestAnimationFrame to batch render calls
         if (this.renderQueued) {
             return this;
@@ -66,9 +72,9 @@ export const MinigramViewBB = Backbone.View.extend({
         });
 
         return this;
-    },
+    }
 
-    _doRender: function () {
+    _doRender() {
         const seriesData = this.model.data();
 
         // Find min/max without creating array copies
@@ -145,9 +151,9 @@ export const MinigramViewBB = Backbone.View.extend({
         this.svg.select(".x.axis").call(this.xAxis);
 
         this.brushg.call(this.brush);
-    },
+    }
 
-    brushed: function () {
+    brushed() {
         const extent = this.brush.extent();
         if (extent[0] === extent[1]) {
             this.clearBrush();
@@ -157,35 +163,34 @@ export const MinigramViewBB = Backbone.View.extend({
                 domainEnd: extent[1]
             });
         }
-    },
+    }
 
-    // brushClicked: function () {
+    // brushClicked() {
     //     if (d3.event.defaultPrevented) return; // Ignore click events that are part of a brush event
     //     this.clearBrush();
-    // },
+    // }
 
-    clearBrush: function () {
+    clearBrush() {
         this.brush.clear();
         this.brushg.call(this.brush);
         this.model.set({
             domainStart: null,
             domainEnd: null
         });
-    },
+    }
 
-    brushRecalc: function () {
+    brushRecalc() {
         if (this.model.get("domainStart") !== undefined) {
             this.brush.extent([this.model.get("domainStart"), this.model.get("domainEnd")]);
             this.brushg.call(this.brush);
         }
         return this;
-    },
+    }
 
-    redrawBrush: function () {
+    redrawBrush() {
         if (!this.stopRebounds) {
             this.brushRecalc();
         }
         return this;
-    },
-
-});
+    }
+}

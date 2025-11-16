@@ -15,9 +15,12 @@ import {radixSort} from "../modelUtils";
 import d3 from "d3";
 import {makeTooltipContents} from "../make-tooltip";
 
-export const ScatterplotViewBB = BaseFrameView.extend({
+export class ScatterplotViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -31,30 +34,32 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             "click .logX": "toggleLogX",
             "click .logY": "toggleLogY",
         });
-    },
+    }
 
-    defaultOptions: {
-        xlabel: "Axis 1",
-        ylabel: "Axis 2",
-        chartTitle: "Scatterplot",
-        selectedColour: "#ff0",
-        highlightedColour: "#f80",
-        jitter: true,
-        chartMargin: 10,
-        pointSize: 4,
-        attributeOptions: null,
-        standardTickFormat: d3.format(",d"),
-        logX: false,
-        logY: false,
-        exportKey: true,
-        exportTitle: true,
-        canHideToolbarArea: true,
-        canTakeImage: true,
-    },
+    get defaultOptions() {
+        return {
+            xlabel: "Axis 1",
+            ylabel: "Axis 2",
+            chartTitle: "Scatterplot",
+            selectedColour: "#ff0",
+            highlightedColour: "#f80",
+            jitter: true,
+            chartMargin: 10,
+            pointSize: 4,
+            attributeOptions: null,
+            standardTickFormat: d3.format(",d"),
+            logX: false,
+            logY: false,
+            exportKey: true,
+            exportTitle: true,
+            canHideToolbarArea: true,
+            canTakeImage: true,
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
-        ScatterplotViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         this.options.attributeOptions = attributeOptions;
 
@@ -315,14 +320,14 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         });
 
         this.axisChosen().render(); // initial render with defaults
-    },
+    }
 
     // eslint-disable-next-line no-unused-vars
-    takeImage: function (event, thisSVG) {
+    takeImage(event, thisSVG) {
         return this.downloadSVGWithCanvas();
-    },
+    }
 
-    ifADistanceAxisRerender: function () {
+    ifADistanceAxisRerender() {
         const distanceAxes = this.getBothAxesMetaData().filter(function (axis) {
             return axis.id === "Distance";
         });
@@ -330,9 +335,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             console.log("RERENDER SCATTERPLOT ON DISTANCE CHANGE");
             this.axisChosen().render();
         }
-    },
+    }
 
-    setMultipleSelectControls: function (elem, options, keepOld) {
+    setMultipleSelectControls(elem, options, keepOld) {
         const self = this;
         addMultipleSelectControls({
             addToElem: elem,
@@ -355,12 +360,12 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 return d.id;
             },
         });
-    },
+    }
 
     // options.extent = area of selection in data coordinates if we're not picking it up from the brush
     // options.add = add to existing selections
     // options.select = true for selections, false for highlight
-    selectPoints: function (options) {
+    selectPoints(options) {
         options = options || {};
         const xAxisData = this.getAxisData("X", true);
         const yAxisData = this.getAxisData("Y", true);
@@ -441,38 +446,38 @@ export const ScatterplotViewBB = BaseFrameView.extend({
 
         //console.log ("nearest", nearest);
         this.nearest = nearest;
-    },
+    }
 
-    relayout: function (descriptor) {
+    relayout(descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render();
         }
         return this;
-    },
+    }
 
-    toggleJitter: function () {
+    toggleJitter() {
         this.options.jitter = !this.options.jitter;
         this.render();
         return this;
-    },
+    }
 
-    toggleLogX: function (evt) {
+    toggleLogX(evt) {
         const checked = d3.select(evt.target).property("checked");
         this.options.logX = checked;
         return this
             .axisChosen() // redo all axis information
             .render();
-    },
+    }
 
-    toggleLogY: function (evt) {
+    toggleLogY(evt) {
         const checked = d3.select(evt.target).property("checked");
         this.options.logY = checked;
         return this
             .axisChosen() // redo all axis information
             .render();
-    },
+    }
 
-    getData: function (funcMeta, filteredFlag, optionalLinks) {
+    getData(funcMeta, filteredFlag, optionalLinks) {
         const linkFunc = funcMeta ? (filteredFlag ? funcMeta.linkFunc : funcMeta.unfilteredLinkFunc) : undefined;
         const crosslinks = optionalLinks ||
             (filteredFlag ? this.getFilteredCrossLinks() : this.model.getAllCrossLinks());
@@ -480,9 +485,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             return linkFunc ? linkFunc.call(this, c) : [undefined];
         }, this);
         return data;
-    },
+    }
 
-    getSelectedOption: function (axisLetter) {
+    getSelectedOption(axisLetter) {
         let funcMeta;
 
         this.controlDiv
@@ -498,13 +503,13 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 funcMeta = d;
             });
         return funcMeta;
-    },
+    }
 
-    getFilteredCrossLinks: function () {
+    getFilteredCrossLinks() {
         return this.model.getFilteredCrossLinks("all"); // include decoys and linears for this view
-    },
+    }
 
-    getAxisData: function (axisLetter, filteredFlag, optionalLinks) {
+    getAxisData(axisLetter, filteredFlag, optionalLinks) {
         const funcMeta = this.getSelectedOption(axisLetter);
         const data = this.getData(funcMeta, filteredFlag, optionalLinks);
         return {
@@ -516,46 +521,46 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             canLogAxis: funcMeta.logAxis || false,
             logStart: funcMeta.logStart
         };
-    },
+    }
 
-    getBothAxesMetaData: function () {
+    getBothAxesMetaData() {
         return ["X", "Y"].map(this.getSelectedOption, this);
-    },
+    }
 
-    isLinearScale: function (scale) {
+    isLinearScale(scale) {
         const domain = scale.domain();
         const bottomVal = scale(domain[0]);
         const fullRange = Math.abs(scale(domain[1]) - bottomVal);
         const halfRange = Math.abs(scale(d3.mean(domain)) - bottomVal);
         return (fullRange / halfRange) >= (2 - 0.001); // -0.0001 for rounding
-    },
+    }
 
-    setValidEmptyBrushExtent: function () {
+    setValidEmptyBrushExtent() {
         this.brush.extent([
             [this.x.domain()[0], this.y.domain()[0]],
             [this.x.domain()[0], this.y.domain()[0]]
         ]);
-    },
+    }
 
-    makeXAxisType: function (setAsLogScale) {
+    makeXAxisType(setAsLogScale) {
         if (setAsLogScale === this.isLinearScale(this.x)) { // only if different scale type is required
             this.x = setAsLogScale ? d3.scale.log() : d3.scale.linear();
             this.xAxis.scale(this.x);
             this.brush.x(this.x);
         }
         return this;
-    },
+    }
 
-    makeYAxisType: function (setAsLogScale) {
+    makeYAxisType(setAsLogScale) {
         if (setAsLogScale === this.isLinearScale(this.y)) { // only if different scale type is required
             this.y = setAsLogScale ? d3.scale.log() : d3.scale.linear();
             this.yAxis.scale(this.y);
             this.brush.y(this.y);
         }
         return this;
-    },
+    }
 
-    axisChosen: function () {
+    axisChosen() {
         const dataX = this.getAxisData("X", false);
         const dataY = this.getAxisData("Y", false);
 
@@ -588,9 +593,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.brush.clear();
 
         return this;
-    },
+    }
 
-    scaleAxes: function (datax, datay) {
+    scaleAxes(datax, datay) {
         const directions = [{
             dataDetails: datax,
             scale: this.x
@@ -627,13 +632,13 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         this.calcJitterRanges();
 
         return this;
-    },
+    }
 
-    doHighlightAndTooltip: function (evt) {
+    doHighlightAndTooltip(evt) {
         return this.doHighlight(evt).doTooltip(evt);
-    },
+    }
 
-    getHighlightRange: function (evt, squarius) {
+    getHighlightRange(evt, squarius) {
         const background = d3.select(this.el).select(".background").node();
         const margin = this.options.chartMargin;
         const x = crossBrowserElementX(evt, background) + margin;
@@ -651,9 +656,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 py: y
             }
         };
-    },
+    }
 
-    doTooltip: function (evt) {
+    doTooltip(evt) {
         const axesMetaData = this.getBothAxesMetaData();
         const highlightRange = this.getHighlightRange(evt, 20);
         const vals = [highlightRange.xrange, highlightRange.yrange];
@@ -708,9 +713,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .set("location", evt);
         this.trigger("change:location", this.model, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
         return this;
-    },
+    }
 
-    doHighlight: function (evt) {
+    doHighlight(evt) {
         const highlightRange = this.getHighlightRange(evt, 20);
         const extent = [
             [highlightRange.xrange[0], highlightRange.yrange[0]],
@@ -723,23 +728,23 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             mousePosition: highlightRange.mousePosition
         });
         return this;
-    },
+    }
 
-    clearHighlightAndTooltip: function () {
+    clearHighlightAndTooltip() {
         return this.clearHighlight().clearTooltip();
-    },
+    }
 
-    clearTooltip: function () {
+    clearTooltip() {
         this.model.get("tooltipModel").set("contents", null);
         return this;
-    },
+    }
 
-    clearHighlight: function () {
+    clearHighlight() {
         this.model.setMarkedCrossLinks("highlights", [], false, false);
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         if (this.isVisible()) {
             console.log("SCATTERPLOT RENDER");
             this
@@ -749,20 +754,20 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 });
         }
         return this;
-    },
+    }
 
 
-    recolourCrossLinks: function () {
+    recolourCrossLinks() {
         this.renderCrossLinks({recolourOnly: true});
         return this;
-    },
+    }
 
-    rehighlightCrossLinks: function () {
+    rehighlightCrossLinks() {
         this.renderCrossLinks({rehighlightOnly: true});
         return this;
-    },
+    }
 
-    renderCrossLinks: function (renderOptions) {
+    renderCrossLinks(renderOptions) {
         renderOptions = renderOptions || {};
 
         if (renderOptions.isVisible || this.isVisible()) {
@@ -962,25 +967,25 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             }
         }
         return this;
-    },
+    }
 
-    getXJitter: function (link) {
+    getXJitter(link) {
         return (((link.fromResidue % 10) / 10) - 0.45) * this.jitterRanges.x;
-    },
+    }
 
-    getYJitter: function (link) {
+    getYJitter(link) {
         return (((link.fromResidue % 10) / 10) - 0.45) * this.jitterRanges.y;
-    },
+    }
 
-    getXPosition: function (xCoord, xJitter) {
+    getXPosition(xCoord, xJitter) {
         return this.x(xCoord) + xJitter;
-    },
+    }
 
-    getYPosition: function (yCoord, yJitter) {
+    getYPosition(yCoord, yJitter) {
         return this.y(yCoord) + yJitter;
-    },
+    }
 
-    getSizeData: function () {
+    getSizeData() {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(this.svg.node());
         const cx = jqElem.width(); //this.svg.node().clientWidth;
@@ -997,19 +1002,19 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             height: height,
             minDim: minDim,
         };
-    },
+    }
 
-    calcJitterRanges: function () {
+    calcJitterRanges() {
         this.jitterRanges = this.jitterRanges || {};
         const xunit = Math.abs(this.x(this.x.domain()[0]) - this.x(this.x.domain()[0] + 1));
         this.jitterRanges.x = Math.max(2, xunit / 3);
         const yunit = Math.abs(this.y(this.y.domain()[0]) - this.y(this.y.domain()[0] + 1));
         this.jitterRanges.y = Math.max(2, yunit / 3);
         return this;
-    },
+    }
 
     // called when things need repositioned, but not re-rendered from data
-    resize: function () {
+    resize() {
 
         const sizeData = this.getSizeData();
 
@@ -1049,9 +1054,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             .calcJitterRanges();
 
         return this;
-    },
+    }
 
-    redrawAxes: function (sizeData) {
+    redrawAxes(sizeData) {
         this.vis.select(".x")
             .attr("transform", "translate(0," + (sizeData.height) + ")")
             .call(this.xAxis);
@@ -1062,10 +1067,10 @@ export const ScatterplotViewBB = BaseFrameView.extend({
         declutterAxis(this.vis.select(".y"));
 
         return this;
-    },
+    }
 
     // Used to do this just on resize, but rectangular areas mean labels often need re-centred on panning
-    repositionLabels: function (sizeData) {
+    repositionLabels(sizeData) {
         // reposition labels
         const labelCoords = [{
             x: sizeData.width / 2,
@@ -1089,13 +1094,9 @@ export const ScatterplotViewBB = BaseFrameView.extend({
                 return "translate(" + d.x + " " + d.y + ") rotate(" + d.rot + ")";
             });
         return this;
-    },
+    }
 
-    canvasImageParent: "svg > g > g", // where to put image made from canvas for downloading svg file
-
-    identifier: "Scatterplot",
-
-    optionsToString: function () {
+    optionsToString() {
         const meta = this.getBothAxesMetaData();
         let axisLabels = _.pluck(meta, "label");
 
@@ -1110,5 +1111,8 @@ export const ScatterplotViewBB = BaseFrameView.extend({
             });
         }
         return (this.options.jitter ? "Jitter_" : "") + axisLabels.join("_by_");
-    },
-});
+    }
+}
+
+ScatterplotViewBB.prototype.identifier = "Scatterplot";
+ScatterplotViewBB.prototype.canvasImageParent = "svg > g > g";

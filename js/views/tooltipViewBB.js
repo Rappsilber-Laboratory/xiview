@@ -4,9 +4,16 @@ import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
 
-export const TooltipViewBB = Backbone.View.extend({
-    className: "CLMStooltip",
-    initialize: function () {
+export class TooltipViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
+
+    get className() {
+        return "CLMStooltip";
+    }
+
+    initialize() {
         const tooltip = d3.select(this.el);
         tooltip.style("visibility", "hidden");
         tooltip.append("h2");
@@ -20,8 +27,9 @@ export const TooltipViewBB = Backbone.View.extend({
 
         this.listenTo(this.model, "change:location", this.setPosition);
         this.listenTo(this.model, "change:contents change:header", this.render);
-    },
-    render: function () {
+    }
+
+    render() {
         const contents = this.model.get("contents");
         if (contents === null) {
             this.setToFade();
@@ -73,8 +81,9 @@ export const TooltipViewBB = Backbone.View.extend({
         // });
 
         return this;
-    },
-    setPosition: function () {
+    }
+
+    setPosition() {
         const e = this.model.get("location");
 
         //console.log ("event", e);
@@ -110,8 +119,9 @@ export const TooltipViewBB = Backbone.View.extend({
 
         tooltip.style("left", newtx + "px").style("top", newty + "px");
         return this;
-    },
-    setToFade: function () {
+    }
+
+    setToFade() {
         const self = this;
         const tooltip = d3.select(this.el);
         tooltip
@@ -123,4 +133,4 @@ export const TooltipViewBB = Backbone.View.extend({
             });
         return this;
     }
-});
+}

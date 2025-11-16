@@ -2,8 +2,12 @@
 import Backbone from "backbone";
 import d3 from "d3";
 
-export const ColourCollectionOptionViewBB = Backbone.View.extend({
-    initialize: function (options) {
+export class ColourCollectionOptionViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
+
+    initialize(options) {
         const self = this;
         d3.select(this.el).attr("class", "btn selectHolder")
             .append("span")
@@ -53,9 +57,9 @@ export const ColourCollectionOptionViewBB = Backbone.View.extend({
         });
 
         return this;
-    },
+    }
 
-    setSelected: function (model) {
+    setSelected(model) {
         d3.select(this.el)
             .selectAll("option")
             .property("selected", function (d) {
@@ -64,4 +68,4 @@ export const ColourCollectionOptionViewBB = Backbone.View.extend({
 
         return this;
     }
-});
+}

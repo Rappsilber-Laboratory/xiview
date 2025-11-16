@@ -113,8 +113,12 @@ const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
     };
 };
 
-export const CircularViewBB = BaseFrameView.extend({
-    events: function () {
+export class CircularViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -128,37 +132,39 @@ export const CircularViewBB = BaseFrameView.extend({
             "click .showSelectedOnly": "toggleSelectedOnly",
             "click .backdrop": "clearSelection",
         });
-    },
+    }
 
-    defaultOptions: {
-        nodeWidth: 10, // this is a percentage measure
-        tickWidth: 23,
-        tickLabelCycle: 5, // show label every nth tick
-        gap: 5,
-        linkParse: function (link) {
-            // turn toPos and fromPos to zero-based index
-            return {
-                fromPos: link.fromResidue - 1,
-                fromNodeID: link.fromProtein.id,
-                toPos: link.toResidue - 1,
-                toNodeID: link.toProtein.id
-            };
-        },
-        intraOutside: true,
-        showResLabels: true,
-        homomOpposite: true,
-        showSelectedOnly: false,
-        sort: "alpha",
-        sortDir: 1,
-        showLinkless: true,
-        exportKey: true,
-        exportTitle: true,
-        canHideToolbarArea: true,
-        canTakeImage: true,
-    },
+    get defaultOptions() {
+        return {
+            nodeWidth: 10, // this is a percentage measure
+            tickWidth: 23,
+            tickLabelCycle: 5, // show label every nth tick
+            gap: 5,
+            linkParse: function (link) {
+                // turn toPos and fromPos to zero-based index
+                return {
+                    fromPos: link.fromResidue - 1,
+                    fromNodeID: link.fromProtein.id,
+                    toPos: link.toResidue - 1,
+                    toNodeID: link.toProtein.id
+                };
+            },
+            intraOutside: true,
+            showResLabels: true,
+            homomOpposite: true,
+            showSelectedOnly: false,
+            sort: "alpha",
+            sortDir: 1,
+            showLinkless: true,
+            exportKey: true,
+            exportTitle: true,
+            canHideToolbarArea: true,
+            canTakeImage: true,
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
+    initialize(viewOptions) {
         const self = this;
 
         this.defaultOptions.featureParse = function (feature, nodeid) {
@@ -213,7 +219,7 @@ export const CircularViewBB = BaseFrameView.extend({
             }
         };
 
-        CircularViewBB.__super__.initialize.apply(this, arguments);
+        super.initialize(...arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el);
@@ -242,39 +248,40 @@ export const CircularViewBB = BaseFrameView.extend({
 
         // DROPDOWN STARTS
         // Various view options set up, then put in a dropdown menu
-        const orderOptionsButtonData = [{
-            class: "circRadio",
-            label: "Alphabetically",
-            id: "alpha",
-            raw_id: "alpha",
-            type: "radio",
-            group: "sort"
-        },
-        {
-            class: "circRadio",
-            label: "By Length",
-            id: "size",
-            raw_id: "size",
-            type: "radio",
-            group: "sort"
-        },
-        {
-            class: "circRadio",
-            label: "To Reduce Crossings",
-            id: "best",
-            raw_id: "best",
-            type: "radio",
-            group: "sort",
-            sectionEnd: true,
-            d3tooltip: "Order proteins to reduce visual crosslink intersections in the circle - making it easier to comprehend"
-        },
-        {
-            class: "niceButton",
-            label: "Redo Current Ordering",
-            id: "nice",
-            raw_id: "nice",
-            type: "button"
-        },
+        const orderOptionsButtonData = [
+            {
+                class: "circRadio",
+                label: "Alphabetically",
+                id: "alpha",
+                raw_id: "alpha",
+                type: "radio",
+                group: "sort"
+            },
+            {
+                class: "circRadio",
+                label: "By Length",
+                id: "size",
+                raw_id: "size",
+                type: "radio",
+                group: "sort"
+            },
+            {
+                class: "circRadio",
+                label: "To Reduce Crossings",
+                id: "best",
+                raw_id: "best",
+                type: "radio",
+                group: "sort",
+                sectionEnd: true,
+                d3tooltip: "Order proteins to reduce visual crosslink intersections in the circle - making it easier to comprehend"
+            },
+            {
+                class: "niceButton",
+                label: "Redo Current Ordering",
+                id: "nice",
+                raw_id: "nice",
+                type: "button"
+            },
         ];
         orderOptionsButtonData
             .filter(function (d) {
@@ -310,41 +317,42 @@ export const CircularViewBB = BaseFrameView.extend({
         });
 
 
-        const showOptionsButtonData = [{
-            class: "showLinkless",
-            label: "All Proteins",
-            id: "showLinkless",
-            initialState: this.options.showLinkless,
-            d3tooltip: "Keep showing proteins with no current crosslinks for a steadier layout"
-        },
-        {
-            class: "showResLabelsButton",
-            label: "Residue Labels (If Few Links)",
-            id: "resLabels",
-            initialState: this.options.showResLabels,
-            d3tooltip: "If only a few crosslinks, show the residue letters at the ends of the cross-links"
-        },
-        {
-            class: "flipIntraButton",
-            label: "Self Links on Outside",
-            id: "flip",
-            initialState: this.options.intraOutside,
-            d3tooltip: "Flips the display of Self crosslinks between inside and outside"
-        },
-        {
-            class: "toggleHomomOpposition",
-            label: "Links with Overlapping Peptides Opposite to Self Links",
-            id: "homomOpposite",
-            initialState: this.options.homomOpposite,
-            d3tooltip: "Show crosslinks with overlapping peptides on the opposite side (in/out) to Self crosslinks. Often these may be homomultimeric - links between different copies of the same protein."
-        },
-        {
-            class: "showSelectedOnly",
-            label: "Selected Crosslinks Only",
-            id: "showSelectedOnly",
-            initialState: this.options.showSelectedOnly,
-            d3tooltip: "Show selected crosslinks only (yellow highlighting is removed also.)"
-        },
+        const showOptionsButtonData = [
+            {
+                class: "showLinkless",
+                label: "All Proteins",
+                id: "showLinkless",
+                initialState: this.options.showLinkless,
+                d3tooltip: "Keep showing proteins with no current crosslinks for a steadier layout"
+            },
+            {
+                class: "showResLabelsButton",
+                label: "Residue Labels (If Few Links)",
+                id: "resLabels",
+                initialState: this.options.showResLabels,
+                d3tooltip: "If only a few crosslinks, show the residue letters at the ends of the cross-links"
+            },
+            {
+                class: "flipIntraButton",
+                label: "Self Links on Outside",
+                id: "flip",
+                initialState: this.options.intraOutside,
+                d3tooltip: "Flips the display of Self crosslinks between inside and outside"
+            },
+            {
+                class: "toggleHomomOpposition",
+                label: "Links with Overlapping Peptides Opposite to Self Links",
+                id: "homomOpposite",
+                initialState: this.options.homomOpposite,
+                d3tooltip: "Show crosslinks with overlapping peptides on the opposite side (in/out) to Self crosslinks. Often these may be homomultimeric - links between different copies of the same protein."
+            },
+            {
+                class: "showSelectedOnly",
+                label: "Selected Crosslinks Only",
+                id: "showSelectedOnly",
+                initialState: this.options.showSelectedOnly,
+                d3tooltip: "Show selected crosslinks only (yellow highlighting is removed also.)"
+            },
         ];
         showOptionsButtonData
             .forEach(function (d) {
@@ -587,9 +595,9 @@ export const CircularViewBB = BaseFrameView.extend({
         this.reOrderAndRender();
 
         return this;
-    },
+    }
 
-    reOrder: function (orderOptions) {
+    reOrder(orderOptions) {
         orderOptions = orderOptions || {};
         //xilog ("this", this, this.options);
         if (orderOptions.reverseConsecutive) {
@@ -626,54 +634,54 @@ export const CircularViewBB = BaseFrameView.extend({
         };
         this.interactorOrder = sortFuncs[this.options.sort] ? sortFuncs[this.options.sort].call(this) : _.pluck(prots, "id");
         return this;
-    },
+    }
 
-    reOrderAndRender: function (localOptions) {
+    reOrderAndRender(localOptions) {
         return this.reOrder(localOptions).render(localOptions);
-    },
+    }
 
-    flipIntra: function () {
+    flipIntra() {
         this.options.intraOutside = !this.options.intraOutside;
         this.render(); // nodes move position too (radially)
         return this;
-    },
+    }
 
-    showResLabelsIfRoom: function () {
+    showResLabelsIfRoom() {
         this.options.showResLabels = !this.options.showResLabels;
         this.renderPartial(["linkLabels"]);
         return this;
-    },
+    }
 
-    toggleLinklessVisibility: function () {
+    toggleLinklessVisibility() {
         this.options.showLinkless = !this.options.showLinkless;
         this.render();
         return this;
-    },
+    }
 
-    toggleHomomOppositeIntra: function () {
+    toggleHomomOppositeIntra() {
         this.options.homomOpposite = !this.options.homomOpposite;
         this.renderPartial(["links"]);
         return this;
-    },
+    }
 
-    toggleSelectedOnly: function () {
+    toggleSelectedOnly() {
         this.options.showSelectedOnly = !this.options.showSelectedOnly;
         this.renderPartial(["links"]);
         return this;
-    },
+    }
 
-    idFunc: function (d) {
+    idFunc(d) {
         return d.id;
-    },
+    }
 
-    showAccentedLinks: function (accentType) {
+    showAccentedLinks(accentType) {
         if (this.isVisible()) {
             this.showAccentOnTheseLinks(d3.select(this.el).selectAll(".circleGhostLink"), accentType);
         }
         return this;
-    },
+    }
 
-    showAccentOnTheseLinks: function (d3Selection, accentType) {
+    showAccentOnTheseLinks(d3Selection, accentType) {
         let accentedLinkList = this.model.getMarkedCrossLinks(accentType);
         if (accentType === "selection" && this.options.showSelectedOnly) {
             accentedLinkList = [];
@@ -697,16 +705,16 @@ export const CircularViewBB = BaseFrameView.extend({
                 .classed(linkType, true);
         }
         return this;
-    },
+    }
 
-    showAccentedNodes: function (accentType) {
+    showAccentedNodes(accentType) {
         if (this.isVisible()) {
             this.showAccentOnTheseNodes(d3.select(this.el).selectAll(".circleNode"), accentType);
         }
         return this;
-    },
+    }
 
-    showAccentOnTheseNodes: function (d3Selection, accentType) {
+    showAccentOnTheseNodes(d3Selection, accentType) {
         const accentedNodeList = this.model.get(accentType === "selection" ? "selectedProteins" : "highlightedProteins");
         if (accentedNodeList) {
             const linkType = {
@@ -720,10 +728,9 @@ export const CircularViewBB = BaseFrameView.extend({
             });
         }
         return this;
-    },
+    }
 
-
-    actionNodeLinks: function (nodeId, actionType, add, startPos, endPos) {
+    actionNodeLinks(nodeId, actionType, add, startPos, endPos) {
         const filteredCrossLinks = this.model.getFilteredCrossLinks();
         const anyPos = startPos == undefined && endPos == undefined;
         startPos = startPos || 0;
@@ -735,9 +742,9 @@ export const CircularViewBB = BaseFrameView.extend({
         this.model.setMarkedCrossLinks(actionType, matchLinks, actionType === "highlights", add);
         //this.model.set (actionType, matchLinks);
         return this;
-    },
+    }
 
-    clearSelection: function (evt) {
+    clearSelection(evt) {
         evt = evt || {};
         //console.log ("evt", evt);
         if (!this.nodeDrag.visited) {
@@ -750,9 +757,9 @@ export const CircularViewBB = BaseFrameView.extend({
         }
         this.nodeDrag.visited = false;
         return this;
-    },
+    }
 
-    convertLinks: function (links, rad1, rad2) {
+    convertLinks(links, rad1, rad2) {
         const xlinks = this.model.get("clmsModel").getCrosslinks();
         const intraOutside = this.options.intraOutside;
         const homomOpposite = this.options.homomOpposite;
@@ -835,14 +842,14 @@ export const CircularViewBB = BaseFrameView.extend({
             };
         }, this);
         return newLinks;
-    },
+    }
 
-    getMaxRadius: function (d3sel) {
+    getMaxRadius(d3sel) {
         const zelem = $(d3sel.node());
         return Math.min(zelem.width(), zelem.height()) / 2;
-    },
+    }
 
-    filterInteractors: function (interactors) {  // interactors is a native map
+    filterInteractors(interactors) {  // interactors is a native map
         const filteredInteractors = [];
         const showLinkless = this.options.showLinkless;
         interactors.forEach(function (value) {
@@ -851,16 +858,16 @@ export const CircularViewBB = BaseFrameView.extend({
             }
         });
         return filteredInteractors;
-    },
+    }
 
-    renderPartial: function (renderPartArr) {
+    renderPartial(renderPartArr) {
         this.render({
             changed: d3.set(renderPartArr)
         });
         return this;
-    },
+    }
 
-    render: function (renderOptions) {
+    render(renderOptions) {
 
         renderOptions = renderOptions || {};
         //xilog ("render options", renderOptions);
@@ -929,26 +936,27 @@ export const CircularViewBB = BaseFrameView.extend({
             const innerFeatureRadius = tickRadius * ((100 - (this.options.nodeWidth * 0.7)) / 100);
             const textRadius = (tickRadius + innerNodeRadius) / 2;
 
-            const arcRadii = [{
-                arc: "arc",
-                inner: innerNodeRadius,
-                outer: tickRadius
-            },
-            {
-                arc: "featureArc",
-                inner: innerFeatureRadius,
-                outer: tickRadius
-            }, // both radii same for textArc
-            {
-                arc: "textArc",
-                inner: textRadius,
-                outer: textRadius
-            }, // both radii same for textArc
-            {
-                arc: "resLabelArc",
-                inner: innerNodeRadius,
-                outer: textRadius
-            },
+            const arcRadii = [
+                {
+                    arc: "arc",
+                    inner: innerNodeRadius,
+                    outer: tickRadius
+                },
+                {
+                    arc: "featureArc",
+                    inner: innerFeatureRadius,
+                    outer: tickRadius
+                }, // both radii same for textArc
+                {
+                    arc: "textArc",
+                    inner: textRadius,
+                    outer: textRadius
+                }, // both radii same for textArc
+                {
+                    arc: "resLabelArc",
+                    inner: innerNodeRadius,
+                    outer: textRadius
+                },
             ];
             arcRadii.forEach(function (arcData) {
                 this[arcData.arc].innerRadius(arcData.inner).outerRadius(arcData.outer);
@@ -986,17 +994,17 @@ export const CircularViewBB = BaseFrameView.extend({
         }
 
         return this;
-    },
+    }
 
-    addOrGetGroupLayer: function (g, layerClass) {
+    addOrGetGroupLayer(g, layerClass) {
         let groupLayer = g.select("g." + layerClass);
         if (groupLayer.empty()) {
             groupLayer = g.append("g").attr("class", layerClass);
         }
         return groupLayer;
-    },
+    }
 
-    drawLinks: function (g, links) {
+    drawLinks(g, links) {
         const self = this;
         const crosslinks = this.model.get("clmsModel").getCrosslinks();
         //xilog ("clinks", crosslinks);
@@ -1055,17 +1063,17 @@ export const CircularViewBB = BaseFrameView.extend({
                 self.showAccentOnTheseLinks.call(self, this, "selection");
             });
         return this;
-    },
+    }
 
-    selectNode: function (d) {
+    selectNode(d) {
         const add = d3.event.ctrlKey || d3.event.shiftKey;
         this.actionNodeLinks(d.id, "selection", add);
         const interactor = this.model.get("clmsModel").getProtein(d.id);
         this.model.setSelectedProteins([interactor], add);
         return this;
-    },
+    }
 
-    drawNodes: function (g, nodes) {
+    drawNodes(g, nodes) {
         const self = this;
 
         const multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").getProteins()).length > 1;
@@ -1107,9 +1115,9 @@ export const CircularViewBB = BaseFrameView.extend({
         this.showAccentOnTheseNodes(nodeJoin, "selection");
 
         return this;
-    },
+    }
 
-    drawNodeTicks: function (g, nodes, radius) {
+    drawNodeTicks(g, nodes, radius) {
         const self = this;
         const tot = nodes.reduce(function (total, node) {
             return total + (node.size || 1);
@@ -1190,9 +1198,9 @@ export const CircularViewBB = BaseFrameView.extend({
             });
 
         return this;
-    },
+    }
 
-    drawNodeText: function (g, nodes) {
+    drawNodeText(g, nodes) {
         const self = this;
 
         const defs = d3.select(this.el).select("svg defs");
@@ -1248,9 +1256,9 @@ export const CircularViewBB = BaseFrameView.extend({
         });
 
         return this;
-    },
+    }
 
-    drawFeatures: function (g, features) {
+    drawFeatures(g, features) {
         const self = this;
 
         // Sort so features are drawn biggest first, smallest last (trying to avoid small features being occluded)
@@ -1293,10 +1301,9 @@ export const CircularViewBB = BaseFrameView.extend({
             });
 
         return this;
-    },
+    }
 
-
-    drawResidueLetters: function (g, links) {
+    drawResidueLetters(g, links) {
 
         const circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
         //xilog ("ff", this.resLabelArc, this.resLabelArc.innerRadius(), this.resLabelArc.innerRadius()(), circumference);
@@ -1348,18 +1355,16 @@ export const CircularViewBB = BaseFrameView.extend({
             });
 
         return this;
-    },
+    }
 
-    relayout: function (descriptor) {
+    relayout(descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render();
         }
         return this;
-    },
+    }
 
-    identifier: "Circular View",
-
-    optionsToString: function () {
+    optionsToString() {
         const abbvMap = {
             showResLabels: "RESLBLS",
             intraOutside: "SELFOUTER",
@@ -1373,11 +1378,13 @@ export const CircularViewBB = BaseFrameView.extend({
 
         const str = objectStateToAbbvString(this.options, fields, d3.set(), abbvMap);
         return str;
-    },
+    }
 
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy c3 view just to be sure)
-    remove: function () {
-        CircularViewBB.__super__.remove.apply(this, arguments);
+    remove() {
+        super.remove(...arguments);
     }
-});
+}
+
+CircularViewBB.prototype.identifier = "Circular View";

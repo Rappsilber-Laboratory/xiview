@@ -17,22 +17,27 @@ import {download} from "../downloads";
 import d3 from "d3";
 
 // https://stackoverflow.com/questions/32065257/having-a-static-variable-in-backbone-js-views#32820288
-export const BaseFrameView = Backbone.View.extend({
+export class BaseFrameView extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    events: {
-        // following line commented out, mouseup sometimes not called on element if pointer drifts outside element
-        // and dragend not supported by zepto, fallback to d3 instead (see later)
-        // "mouseup .draggableCorner": "relayout",    // do resize without dyn_div alter function
-        "click .downloadButton": "downloadSVG",
-        "click .downloadButton2": "downloadSVGWithCanvas",
-        "click .closeButton": "hideView",
-        "click .hideToolbarButton": "hideToolbarArea",
-        "click .takeImageButton": "takeImage",
-        "click .maximiseButton": "minMaxPanel",
-        "click": "bringToTop",
-    },
+    get events () {
+        return {
+            // following line commented out, mouseup sometimes not called on element if pointer drifts outside element
+            // and dragend not supported by zepto, fallback to d3 instead (see later)
+            // "mouseup .draggableCorner": "relayout",    // do resize without dyn_div alter function
+            "click .downloadButton": "downloadSVG",
+            "click .downloadButton2": "downloadSVGWithCanvas",
+            "click .closeButton": "hideView",
+            "click .hideToolbarButton": "hideToolbarArea",
+            "click .takeImageButton": "takeImage",
+            "click .maximiseButton": "minMaxPanel",
+            "click": "bringToTop",
+        };
+    }
 
-    initialize: function (viewOptions) {
+    initialize(viewOptions) {
 
         // window level options that don't depend on type of view
         const globalOptions = {
@@ -124,22 +129,22 @@ export const BaseFrameView = Backbone.View.extend({
         }
 
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         return this;
-    },
+    }
 
-    relayout: function () {
+    relayout() {
         return this;
-    },
+    }
 
     // called when reshown (visible set to true) - use for updating calcs before rendering
-    reshow: function () {
+    reshow() {
         return this;
-    },
+    }
 
-    _makeDetachedSVG: function (thisSVG) {
+    _makeDetachedSVG(thisSVG) {
         let keyHeight = 0;
         if (this.options.exportKey) {
             const svgKey = this.addKey({addOrigin: this.options.exportTitle});
@@ -164,14 +169,14 @@ export const BaseFrameView = Backbone.View.extend({
         }
 
         return {detachedSVGD3: detachedSVGD3, allSVGs: svgStrings};
-    },
+    }
 
-    takeImage: function (event, thisSVG) {
+    takeImage(event, thisSVG) {
         return this.downloadSVG(event, thisSVG);
-    },
+    }
 
     // use thisSVG d3 selection to set a specific svg element to download, otherwise take first in the view
-    downloadSVG: function (event, thisSVG) {
+    downloadSVG(event, thisSVG) {
         const detachedSVG = this._makeDetachedSVG(thisSVG);
         // const detachedSVGD3 = detachedSVG.detachedSVGD3;
         const svgStrings = detachedSVG.allSVGs;
@@ -184,16 +189,14 @@ export const BaseFrameView = Backbone.View.extend({
         this.removeKey();
 
         return this;
-    },
-
-    canvasImageParent: "svg",
+    }
 
     /**
      Called when we need to change a canvas element to an image to add to a cloned svg element we download.
      Needs canvasImageParent set to decide where to place it in an svg (e.g. for matrix we put it in a g with a clipPath)
      And add an extra css rule after the style element's already been generated to try and stop the image anti-aliasing
      */
-    downloadSVGWithCanvas: function () {
+    downloadSVGWithCanvas() {
         const detachedSVG = this._makeDetachedSVG();
         const detachedSVGD3 = detachedSVG.detachedSVGD3;
         const svgStrings = detachedSVG.allSVGs;
@@ -226,9 +229,9 @@ export const BaseFrameView = Backbone.View.extend({
         });
 
         return this;
-    },
+    }
 
-    addKey: function (options) {
+    addKey(options) {
         options = options || {};
         const tempSVG = (options.addToSelection || d3.select(this.el).select("svg")).append("svg").attr("class", "tempKey");
         updateColourKey(window.compositeModelInst.get("linkColourAssignment"), tempSVG);
@@ -243,18 +246,18 @@ export const BaseFrameView = Backbone.View.extend({
             link.append("text").text(this.imageOriginString().substring(0, 240)).attr("dy", "1em").attr("class", "imageOrigin");
         }
         return tempSVG;
-    },
+    }
 
-    removeKey: function (d3Sel) {
+    removeKey(d3Sel) {
         (d3Sel || d3.select(this.el)).selectAll(".tempKey").remove();
-    },
+    }
 
-    hideView: function () {
+    hideView() {
         window.vent.trigger(this.displayEventName, false);
         return this;
-    },
+    }
 
-    hideToolbarArea: function () {
+    hideToolbarArea() {
         const toolbarArea = d3.select(this.el).select(".toolbarArea");
         if (!toolbarArea.empty()) {
             const currentState = toolbarArea.style("display");
@@ -262,9 +265,9 @@ export const BaseFrameView = Backbone.View.extend({
             this.relayout({dragEnd: true});
         }
         return this;
-    },
+    }
 
-    minMaxPanel: function () {
+    minMaxPanel() {
         const panel = d3.select(this.el);
         const maxed = panel.classed("maxSize");
         panel.classed("maxSize", !maxed);
@@ -286,11 +289,11 @@ export const BaseFrameView = Backbone.View.extend({
         this.relayout({dragEnd: true});
 
         return this;
-    },
+    }
 
     // find z-indexes of all visible, movable divs, and make the current one a higher z-index
     // then a bit of maths to reset the lowest z-index so they don't run off to infinity
-    bringToTop: function () {
+    bringToTop() {
         if (this.options.canBringToTop !== false && this.el.id !== BaseFrameView.staticLastTopID) {
             const sortArr = [];
             const activeDivs = d3.selectAll(".dynDiv").filter(function () {
@@ -326,9 +329,9 @@ export const BaseFrameView = Backbone.View.extend({
             //console.log ("sortArr", sortArr);
         }
         return this;
-    },
+    }
 
-    setVisible: function (show) {
+    setVisible(show) {
         this.visible = show;
         d3.select(this.el)
             .style("display", show ? "block" : "none")
@@ -342,31 +345,29 @@ export const BaseFrameView = Backbone.View.extend({
             this.bringToTop();
         }
         return this;
-    },
+    }
 
     // Ask if view is currently visible in the DOM (use boolean for performance, querying dom for visibility often took ages)
-    isVisible: function () {
+    isVisible() {
         const start = window.performance.now();
         xilog(this.$el.toString(), "isVis start:", start);
         //var answer = isZeptoDOMElemVisible (this.$el);
         const answer = this.visible;
         xilog(this.$el, "isVis time:" + answer, (window.performance.now() - start));
         return answer;
-    },
+    }
 
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy a c3 view just to be sure)
-    remove: function () {
+    remove() {
         // remove drag listener
         d3.select(this.el).selectAll(".draggableCorner").on(".drag", null);
 
         // this line destroys the containing backbone view and it's events
         Backbone.View.prototype.remove.call(this);
-    },
+    }
 
-    identifier: "Base",
-
-    makeChartTitle: function (counts, colourScheme, titleElem, matchLevel) {
+    makeChartTitle(counts, colourScheme, titleElem, matchLevel) {
         const labels = colourScheme.isCategorical() ? colourScheme.get("labels").range() : [];
         const commaed = d3.format(",");
         const totalStr = commaed(d3.sum(counts));
@@ -393,26 +394,26 @@ export const BaseFrameView = Backbone.View.extend({
                 self.model.get("tooltipModel").set("contents", null);
             });
         return this;
-    },
+    }
 
     // return any relevant view states that can be used to label a screenshot etc
-    optionsToString: function () {
+    optionsToString() {
         return "";
-    },
+    }
 
     // Returns a useful filename given the view and filters current states
-    filenameStateString: function () {
+    filenameStateString() {
         return makeLegalFileName(searchesToString() + "--" + this.identifier
             + "-" + this.optionsToString() + "--" + filterStateToString());
-    },
+    }
 
     // Returns a useful image title string - omit type of view as user will see it
-    imageOriginString: function () {
+    imageOriginString() {
         return makeLegalFileName(searchesToString() + "--" + filterStateToString());
-    },
+    }
 
     /* Following used in PDBFileChooser and StringFileChooser, though any of the views could take advantage of them */
-    setSpinner: function (state) {
+    setSpinner(state) {
         const target = d3.select(this.el).node();
         if (state) {
             this.spinner = new Spinner().spin(target);
@@ -420,23 +421,23 @@ export const BaseFrameView = Backbone.View.extend({
             this.spinner.stop();
         }
         return this;
-    },
+    }
 
-    setWaitingEffect: function () {
+    setWaitingEffect() {
         this.setStatusText("Please Wait...").setSpinner(true);
         d3.select(this.el).selectAll(".columnbar, .fakeButton").property("disabled", true).attr("disabled", true);
         d3.select(this.el).selectAll(".btn").property("disabled", true);
         return this;
-    },
+    }
 
-    setCompletedEffect: function () {
+    setCompletedEffect() {
         d3.select(this.el).selectAll(".columnbar, .fakeButton").property("disabled", false).attr("disabled", null);
         d3.select(this.el).selectAll(".btn").property("disabled", false);
         this.setSpinner(false);
         return this;
-    },
+    }
 
-    setStatusText: function (msg, success) {
+    setStatusText(msg, success) {
         const mbar = d3.select(this.el).select(".messagebar"); //.style("display", null);
         let t = mbar.html(msg);
         if (success !== undefined) {
@@ -446,8 +447,11 @@ export const BaseFrameView = Backbone.View.extend({
             t.style("color", "var(--main-color)");
         }
         return this;
-    },
-});
+    }
+}
+
+BaseFrameView.prototype.canvasImageParent = "svg";
+BaseFrameView.prototype.identifier = "Base";
 
 // stores id of last view which was 'brought to top' as class property. So I don't need to do expensive DOM operations sometimes.
 BaseFrameView.staticLastTopID = 1;

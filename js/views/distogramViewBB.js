@@ -19,8 +19,12 @@ import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {crosslinkerSpecificityPerLinker} from "../modelUtils";
 import d3 from "d3";
 
-export const DistogramBB = BaseFrameView.extend({
-    events: function () {
+export class DistogramBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -28,36 +32,38 @@ export const DistogramBB = BaseFrameView.extend({
         return _.extend({}, parentEvents, {
             "click .randomScope": "reRandom",
         });
-    },
+    }
 
-    defaultOptions: {
-        xlabel: "X Value",
-        ylabel: "Count",
-        y2label: "Random (absolute)",
-        seriesNames: ["Crosslinks", "Decoys (TD-DD)", "Random", "Selected"],
-        subSeriesNames: [],
-        scaleOthersTo: {
-            Random: "Crosslinks"
-        },
-        chartTitle: "DISTO",// this.identifier,
-        maxX: 90,
-        attributeOptions: null,
-        xStandardTickFormat: d3.format(","),
-        randomScope: "All",
-        selectedColour: "#ff0",
-        exportKey: true,
-        exportTitle: true,
-        canHideToolbarArea: true,
-        canTakeImage: true,
-    },
+    get defaultOptions() {
+        return {
+            xlabel: "X Value",
+            ylabel: "Count",
+            y2label: "Random (absolute)",
+            seriesNames: ["Crosslinks", "Decoys (TD-DD)", "Random", "Selected"],
+            subSeriesNames: [],
+            scaleOthersTo: {
+                Random: "Crosslinks"
+            },
+            chartTitle: "DISTO",// this.identifier,
+            maxX: 90,
+            attributeOptions: null,
+            xStandardTickFormat: d3.format(","),
+            randomScope: "All",
+            selectedColour: "#ff0",
+            exportKey: true,
+            exportTitle: true,
+            canHideToolbarArea: true,
+            canTakeImage: true,
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
+    initialize(viewOptions) {
 
         this.identifier = "Histogram View";
 
         //this.defaultOptions.chartTitle = this.identifier;
-        DistogramBB.__super__.initialize.apply(this, arguments);
+        super.initialize(...arguments);
 
         this.attrExtraOptions = {
             "Distance": {
@@ -418,9 +424,9 @@ export const DistogramBB = BaseFrameView.extend({
         }
 
         return this;
-    },
+    }
 
-    setMultipleSelectControls: function (elem, options, keepOld) {
+    setMultipleSelectControls(elem, options, keepOld) {
         const self = this;
         addMultipleSelectControls({
             addToElem: elem,
@@ -444,9 +450,9 @@ export const DistogramBB = BaseFrameView.extend({
             },
         });
         return this;
-    },
+    }
 
-    render: function (options) {
+    render(options) {
 
         options = options || {};
 
@@ -647,11 +653,11 @@ export const DistogramBB = BaseFrameView.extend({
         }
 
         return this;
-    },
+    }
 
     // only reset maxY (i.e. the chart scale) if necessary as it causes redundant repaint (given we load and repaint straight after)
     // so only reset scale if maxY is bigger than current chart value or maxY is less than half of current chart value
-    resetMaxY: function (maxY) {
+    resetMaxY(maxY) {
         //maxY = maxY || 1;
         const curMaxY = this.chart.axis.max().y;
         //console.log("curMaxY", curMaxY, "my", maxY);
@@ -664,33 +670,33 @@ export const DistogramBB = BaseFrameView.extend({
             this.chart.internal.y2.domain([0, maxY / this.y2Rescale]);
         }
         return this;
-    },
+    }
 
-    getAxisRange: function () {
+    getAxisRange() {
         return this.chart.internal.orgXDomain[1] - this.chart.internal.orgXDomain[0];
-    },
+    }
 
     // make x tick text values the rounder numbers, and remove any that overlap afterwards
-    tidyXAxis: function () {
+    tidyXAxis() {
         const xaxis = d3.select(this.el).select(".c3-axis-x");
         if (this.chart) {
             niceValueAxis(xaxis, this.getAxisRange());
             declutterAxis(xaxis, true);
         }
         return this;
-    },
+    }
 
     // Hack to move bars right by half a bar width so they sit between correct values rather than over the start of an interval
-    makeBarsSitBetweenTicks: function (chartObj, whichXAxis) {  // can be xAxis or subXAxis
+    makeBarsSitBetweenTicks(chartObj, whichXAxis) {  // can be xAxis or subXAxis
         const internal = chartObj || this.chart.internal;
         const halfBarW = internal.getBarW(internal[whichXAxis], 1) / 2 || 0;
         d3.select(this.el).selectAll(".c3-event-rects,.c3-chart-bars").attr("transform", "translate(" + halfBarW + ",0)");
         return this;
-    },
+    }
 
     // See if new and old data are of the same series and of the same lengths
     // (we can then shortcut the c3 drawing code somewhat)
-    compareNewOldData: function (newData) {
+    compareNewOldData(newData) {
         const oldData = this.chart.data();
         //console.log ("oldData", this.chart, oldData, newData);
         if (oldData.length !== newData.length - 1) {    // 'x' isn't in old data
@@ -703,9 +709,9 @@ export const DistogramBB = BaseFrameView.extend({
 
         //console.log ("match", oldNewMatch);
         return oldNewMatch;
-    },
+    }
 
-    getFilteredLinksByDecoyStatus: function () {
+    getFilteredLinksByDecoyStatus() {
         return {
             links: [
                 this.model.getFilteredCrossLinks(),
@@ -718,9 +724,9 @@ export const DistogramBB = BaseFrameView.extend({
                 return this.model.get("match_selection").has(m.match.id);
             }]
         };
-    },
+    }
 
-    recalcRandomBinning: function (linkCount) {
+    recalcRandomBinning(linkCount) {
         const searchArray = Array.from(this.model.get("clmsModel").getSearches().values());
         const crosslinkerSpecificityMap = crosslinkerSpecificityPerLinker(searchArray);
         const distObj = this.model.get("distancesObj");
@@ -732,8 +738,7 @@ export const DistogramBB = BaseFrameView.extend({
                 withinChain: rscope === "Chain",
                 withinModel: !this.model.get("stageModel").get("allowInterModelDistances"),
             }
-        ) :
-            [];
+        ) : [];
         const thresholds = this.getBinThresholds([
             []
         ]);
@@ -745,9 +750,9 @@ export const DistogramBB = BaseFrameView.extend({
             data: binnedData,
             origSize: randArr.length
         };
-    },
+    }
 
-    getRelevantAttributeData: function (attrMetaData) {
+    getRelevantAttributeData(attrMetaData) {
         const linkFunc = attrMetaData.linkFunc;
         const linkData = this.getFilteredLinksByDecoyStatus();
         const links = linkData.links;
@@ -801,9 +806,9 @@ export const DistogramBB = BaseFrameView.extend({
             });
         }
         return result;
-    },
+    }
 
-    getSelectedOption: function (axisLetter) {
+    getSelectedOption(axisLetter) {
         let funcMeta;
 
         d3.select(this.el)
@@ -820,21 +825,21 @@ export const DistogramBB = BaseFrameView.extend({
             });
 
         return funcMeta;
-    },
+    }
 
-    getDataCount: function () {
+    getDataCount() {
         const funcMeta = this.getSelectedOption("X");
         this.options.maxX = funcMeta.maxVal || this.options.absX;
         return this.getRelevantAttributeData.call(this, funcMeta);
-    },
+    }
 
-    isEmpty: function (series) {
+    isEmpty(series) {
         return series.every(function (aSeries) {
             return !aSeries.linkValues.length;
         });
-    },
+    }
 
-    getBinThresholds: function (seriesData, accessor) {
+    getBinThresholds(seriesData, accessor) {
         accessor = accessor || function (d) {
             return d;
         }; // return object/variable/number as is as standard accessor
@@ -860,13 +865,13 @@ export const DistogramBB = BaseFrameView.extend({
             thresholds = [0, 1]; // need at least 1 so empty data gets represented as 1 empty bin
         }
         return thresholds;
-    },
+    }
 
-    getPrecalcedDistribution: function (seriesName) {
+    getPrecalcedDistribution(seriesName) {
         return this.precalcedDistributions[seriesName];
-    },
+    }
 
-    aggregate: function (seriesData, precalcedDistributions, removeLastEntry) {
+    aggregate(seriesData, precalcedDistributions, removeLastEntry) {
 
         const thresholds = this.getBinThresholds(seriesData, function (d) {
             return d[1];
@@ -921,17 +926,17 @@ export const DistogramBB = BaseFrameView.extend({
             countArrays: countArrays,
             thresholds: thresholds
         };
-    },
+    }
 
-    reRandom: function (evt) {
+    reRandom(evt) {
         this.options.randomScope = evt.target.value;
         this.options.reRandom = true;
         this.render();
         return this;
-    },
+    }
 
     // handle extra options that can be attached to attribute being shown (usually distance)
-    handleExtraOptions: function () {
+    handleExtraOptions() {
         const funcMeta = this.getSelectedOption("X");
         const extras = this.attrExtraOptions[funcMeta.id] || {};
         const d3el = d3.select(this.el);
@@ -941,9 +946,9 @@ export const DistogramBB = BaseFrameView.extend({
             .style("display", extras.showDistMaxInput ? null : "none");
         d3el.selectAll(".c3-axis-y2,c3-axis-y2-label").style("display", extras.showY2Axis ? null : "none");
         return this;
-    },
+    }
 
-    relayout: function () {
+    relayout() {
         // fix c3 setting max-height to current height so it never gets bigger y-wise
         // See https://github.com/masayuki0812/c3/issues/1450
         d3.select(this.el).select(".c3")
@@ -953,17 +958,17 @@ export const DistogramBB = BaseFrameView.extend({
         this.options.dodgeTidyXAxis = false;  // retidy x axis on resize
         this.chart.resize();
         return this;
-    },
+    }
 
-    getSeriesColours: function (seriesNames) {
+    getSeriesColours(seriesNames) {
         const colModel = this.colourScaleModel;
         const colRange = colModel.get("colScale").range();
         const colMap = _.object(_.zip(seriesNames, colRange));
         colMap[colModel.get("undefinedLabel")] = colModel.get("undefinedColour");
         return colMap;
-    },
+    }
 
-    highlightOrSelect: function (type, c3Data, c3MouseData) {
+    highlightOrSelect(type, c3Data, c3MouseData) {
         const seriesIndex = _.indexOf(_.pluck(c3Data, "id"), c3MouseData.id); // get the series id associated with the c3 mouse data
         const matchBasedSelection = this.getSelectedOption("X").matchLevel;
         const hidden = this.chart.internal.hiddenTargetIds;
@@ -995,20 +1000,20 @@ export const DistogramBB = BaseFrameView.extend({
             }
         }
         return this;
-    },
+    }
 
     // removes view
     // not really needed unless we want to do something extra on top of the prototype remove function (like destroy c3 view just to be sure)
-    remove: function () {
-        DistogramBB.__super__.remove.apply(this, arguments);
+    remove() {
+        super.remove(...arguments);
         // this line destroys the c3 chart and it's events and points the this.chart reference to a dead end
         this.chart = this.chart.destroy();
         return this;
-    },
+    }
 
-    optionsToString: function () {
+    optionsToString() {
         const seriesIDs = _.pluck(this.chart.data.shown(), "id");
         const funcMeta = this.getSelectedOption("X");
         return funcMeta.label + "-" + seriesIDs.join("-").toUpperCase();
-    },
-});
+    }
+}

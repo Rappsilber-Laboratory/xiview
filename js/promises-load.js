@@ -83,31 +83,12 @@ export function main(apiBase, annotatorURL) {
     const blosumPromise = new Promise((resolve, reject) => {
         // Collection of blosum matrices that will be fetched from a json file
         window.blosumCollInst = new BlosumCollection(); // options if we want to override defaults
-
         // when the blosum Collection is fetched (an async process), we select one of its models as being selected
         window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
-            console.log("ASYNC. blosum models loaded");
             resolve(); // Resolve the promise when blosum data is ready
         });
-
         // Start the asynchronous blosum fetching after the above events have been set up
         window.blosumCollInst.fetch();
-
-
-
-        //
-        // // Initialize blosum loading
-        // blosumLoading({});
-        //
-        // // Listen for the sync event that indicates blosum data is loaded
-        // window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
-        //     console.log("ASYNC. blosum models loaded");
-        // });
-        //
-        // // Handle potential errors
-        // window.blosumCollInst.listenToOnce(window.blosumCollInst, "error", function (model, response) {
-        //     reject(new Error(`Failed to load blosum data: ${response.status} ${response.statusText}`));
-        // });
     });
 
     // Add the blosum promise to the tasks array
@@ -193,9 +174,9 @@ function getTasks(apiBase, clmsModel) {
 }
 
 function setWindowTitle(clmsModel) {
-    const mzidentmlFiles = clmsModel.getMzidentmlFiles();
-    const fileNames = Array.from(mzidentmlFiles.values(), f => f.identification_file_name);
-    document.title = fileNames.join(", ");
+    // const mzidentmlFiles = clmsModel.getMzidentmlFiles();
+    // const fileNames = Array.from(mzidentmlFiles.values(), f => f.identificationFileName);
+    document.title = window.location.search;//fileNames.join(", ");
 }
 
 function initPageSplitter() {

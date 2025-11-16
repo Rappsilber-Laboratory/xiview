@@ -9,8 +9,12 @@ import {sectionTable} from "../../ui-utils/section-table";
 import {updateColourKey} from "../../utils";
 import {ManualColourModel} from "../../model/color/protein-color-model";
 
-export const KeyViewBB = BaseFrameView.extend({
-    events: function () {
+export class KeyViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -19,27 +23,29 @@ export const KeyViewBB = BaseFrameView.extend({
             "change input.color-chooser": "changeColour",
             "click .downloadButton3": "downloadKey",
         });
-    },
+    }
 
-    defaultOptions: {
-        colourConfigs: [
-            {
-                id: "cross-link",
-                modelID: "linkColourAssignment",
-                collectionID: "Collection",
-                placeholderID: "linkColourDropdownPlaceholder",
-            }, {
-                id: "protein",
-                modelID: "proteinColourAssignment",
-                collectionID: "ProteinCollection",
-                placeholderID: "proteinColourDropdownPlaceholder",
-            }
-        ],
-    },
+    get defaultOptions() {
+        return {
+            colourConfigs: [
+                {
+                    id: "cross-link",
+                    modelID: "linkColourAssignment",
+                    collectionID: "Collection",
+                    placeholderID: "linkColourDropdownPlaceholder",
+                }, {
+                    id: "protein",
+                    modelID: "proteinColourAssignment",
+                    collectionID: "ProteinCollection",
+                    placeholderID: "proteinColourDropdownPlaceholder",
+                }
+            ],
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
-        KeyViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         const topDiv = d3.select(this.el).append("div")
             .attr("class", "verticalFlexContainer keyPanel");
@@ -64,9 +70,9 @@ export const KeyViewBB = BaseFrameView.extend({
         }, this);
 
         return this;
-    },
+    }
 
-    setupColourSection: function (chartDiv) {
+    setupColourSection(chartDiv) {
         const sectionDiv = chartDiv.append("div");
         //sectionDiv.append("h3").text("Chosen Colour Scheme Legend").attr("class", "groupHeader");
 
@@ -116,9 +122,9 @@ export const KeyViewBB = BaseFrameView.extend({
             .append("button")
             .attr("class", "downloadButton3 btn btn-1 btn-1a")
             .text("Download This Colour Scheme as SVG");
-    },
+    }
 
-    setupLegendSection: function (chartDiv) {
+    setupLegendSection(chartDiv) {
         const sectionDiv = chartDiv.append("div");
         sectionDiv.append("h3").text("View Legends").attr("class", "groupHeader");
 
@@ -295,9 +301,9 @@ export const KeyViewBB = BaseFrameView.extend({
                     d3Sel.style("fill", colour);
                 }
             });
-    },
+    }
 
-    changeColour: function (evt) {
+    changeColour(evt) {
         const parentDatum = d3.select(evt.target.parentNode.parentNode.parentNode).datum();
         const colourModelKey = parentDatum.colourModelKey;
         const colourAssign = this.model.get(colourModelKey);
@@ -317,9 +323,9 @@ export const KeyViewBB = BaseFrameView.extend({
             // this will fire a change event for this colour model
             colourAssign.setRange(colScale.range());
         }
-    },
+    }
 
-    relayout: function () {
+    relayout() {
         //console.log ("dragend fired");
         const colourAssigns = _.pluck(this.options.colourConfigs, "modelID").map(this.model.get, this.model);
         colourAssigns.forEach(function (colourAssign, i) {
@@ -328,9 +334,9 @@ export const KeyViewBB = BaseFrameView.extend({
             }
         }, this);
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         const self = this;
         const colourSections = this.options.colourConfigs.map(function (config) {
             return {
@@ -435,15 +441,15 @@ export const KeyViewBB = BaseFrameView.extend({
         }, this);
         jscolor.install();
         return this;
-    },
+    }
 
-    downloadKey: function (evt) {
+    downloadKey(evt) {
         const d = d3.select(evt.target).datum();  // d3 datum for this button
         const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey");
         updateColourKey(this.model.get(d.colourModelKey), tempSVG);
         this.downloadSVG(null, tempSVG);
         tempSVG.remove();
-    },
+    }
+}
 
-    identifier: "Legend",
-});
+KeyViewBB.prototype.identifier = "Legend";

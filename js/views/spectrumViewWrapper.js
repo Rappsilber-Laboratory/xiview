@@ -8,27 +8,34 @@ import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, proteinConcat} from "../utils";
 import d3 from "d3";
 
-export const SpectrumViewWrapper = BaseFrameView.extend({
+export class SpectrumViewWrapper extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
-        let parentEvents = BaseFrameView.prototype.events;
+    get events() {
+        let parentEvents = super.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
         return _.extend({
             "click #clearHighlights": "clearSpectrumHighlights",
         }, parentEvents, {});
-    },
+    }
 
-    defaultOptions: {
-        canBringToTop: true,
-        canHideToolbarArea: false,
-        canTakeImage: true,
-    },
+
+
+    get defaultOptions() {
+        return {
+            canBringToTop: true,
+            canHideToolbarArea: false,
+            canTakeImage: true,
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (options) {
-        SpectrumViewWrapper.__super__.initialize.apply(this, arguments);
+    initialize(options) {
+        super.initialize(...arguments);
 
 
         //this.options = _.extend({}, this.options, this.defaultOptions, options.myOptions);
@@ -137,18 +144,18 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
 
         this.newestSelectionShown = true;
         this.enableControls(false);
-    },
+    }
 
-    enableControls: function (state) {
+    enableControls(state) {
         d3.select(this.el)
             .selectAll(".validationControls,#spectrumControls")
             //.style ("background", state ? null : "#888888")
             .selectAll("*")
             .property("disabled", !state)
             .classed("spectrumDisabled", !state);
-    },
+    }
 
-    triggerSpectrumViewer: function (match, forceShow) {
+    triggerSpectrumViewer(match, forceShow) {
         //console.log ("MATCH selected", match, forceShow);
         if (this.isVisible() || forceShow) {
             this.newestSelectionShown = true;
@@ -172,9 +179,9 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         } else {
             this.newestSelectionShown = false;
         }
-    },
+    }
 
-    relayout: function () {
+    relayout() {
         // if a new selected match has been made while the spectrum viewer was hidden,
         // load it in when the spectrum viewer is made visible
         if (!this.newestSelectionShown) {
@@ -198,11 +205,13 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         // anyways at the moment replacing the entire style attribute wipes out display: none when single alt explanation so I've added the above bit of code.
         //alts.style("width", w+"px");
         return this;
-    },
+    }
 
-    identifier: "Spectrum View",
+    get identifier() {
+        return "Spectrum View";
+    }
 
-    optionsToString: function () {
+    optionsToString() {
         //console.log ("this", this);
         const match = this.primaryMatch;
         console.log("MATCH", match);
@@ -273,14 +282,14 @@ export const SpectrumViewWrapper = BaseFrameView.extend({
         });
         const joinedDescription = description1.join("-");
         return joinedDescription;
-    },
+    }
 
     // Returns a useful filename given the view and filters current states
-    filenameStateString: function () {
+    filenameStateString() {
         return makeLegalFileName(this.identifier + "-" + this.optionsToString());
-    },
+    }
 
-    clearSpectrumHighlights: function () {
+    clearSpectrumHighlights() {
         window.xiSPECUI.vent.trigger("clearSpectrumHighlights"); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
     }
-});
+}

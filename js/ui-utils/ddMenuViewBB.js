@@ -9,17 +9,23 @@ import {capture, makeXMLStr} from "../svgexp";
 import d3 from "d3";
 import {download} from "../downloads";
 
-export const DropDownMenuViewBB = Backbone.View.extend({
-    events: {
-        "mouseenter .menuTitle": "switchVis",
-        "click .menuTitle": "toggleVis",
-        "click li": "menuSelection",
-        // martin - i had to add another event here to listen to key presses in the text input,
-        // or we do without refreshes on key presses, or maybe theres a better way you know of...
-        "keyup li > input": "menuSelection",
-    },
+export class DropDownMenuViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function (viewOptions) {
+    get events() {
+        return {
+            "mouseenter .menuTitle": "switchVis",
+            "click .menuTitle": "toggleVis",
+            "click li": "menuSelection",
+            // martin - i had to add another event here to listen to key presses in the text input,
+            // or we do without refreshes on key presses, or maybe theres a better way you know of...
+            "keyup li > input": "menuSelection",
+        };
+    }
+
+    initialize(viewOptions) {
         // const emptyFunc = function () {
         // };
         const defaultOptions = {
@@ -63,15 +69,15 @@ export const DropDownMenuViewBB = Backbone.View.extend({
             .update()
             .render();
         return this;
-    },
+    }
 
-    updateTitle: function (newTitle) {
+    updateTitle(newTitle) {
         this.options.title = newTitle;
         d3.select(this.el).select("span.menuTitle").text(this.options.title);
         return this;
-    },
+    }
 
-    updateTooltip: function (tooltipObj) {
+    updateTooltip(tooltipObj) {
         if (tooltipObj && this.options.tooltipModel) {
             const self = this;
             d3.select(this.el).select("span.menuTitle")
@@ -87,9 +93,9 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                 });
         }
         return this;
-    },
+    }
 
-    update: function () {
+    update() {
         const self = this;
         if (this.collection) {
             let lastCat = null;
@@ -136,9 +142,9 @@ export const DropDownMenuViewBB = Backbone.View.extend({
             this.options.menu = adata;
         }
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         const listHolder = d3.select(this.el).select("div ul");
         const choices = listHolder.selectAll("li")
             .data(this.options.menu, function (d) {
@@ -219,14 +225,14 @@ export const DropDownMenuViewBB = Backbone.View.extend({
         */
 
         return this;
-    },
+    }
 
     // hide/show or disable menu items by id array ["#myid", "#id2", etc]
-    filter: function (idArr, show) {
+    filter(idArr, show) {
         return this.enableItemsByID(idArr, show);
-    },
+    }
 
-    enableItemsByID: function (idArr, enable) {
+    enableItemsByID(idArr, enable) {
         const selection = d3.select(this.el).selectAll("li").selectAll(idArr.join(","));
         selection.forEach(function (nestedSel) {
             if (nestedSel.length) {
@@ -237,9 +243,9 @@ export const DropDownMenuViewBB = Backbone.View.extend({
             }
         });
         return this;
-    },
+    }
 
-    enableItemsByIndex: function (indices, enable) {
+    enableItemsByIndex(indices, enable) {
         const indexSet = d3.set(indices);
 
         d3.select(this.el).selectAll("li")
@@ -252,22 +258,22 @@ export const DropDownMenuViewBB = Backbone.View.extend({
                 }
             });
         return this;
-    },
+    }
 
-    wholeMenuEnabled: function (enabled) {
+    wholeMenuEnabled(enabled) {
         d3.select(this.el).classed("disabledMenu", !enabled);
 
         if (this.isShown() && !enabled) {
             this.hideVis();
         }
         return this;
-    },
+    }
 
-    isShown: function () {
+    isShown() {
         return d3.select(this.el).select("div").style("display") !== "none";
-    },
+    }
 
-    toggleVis: function () {
+    toggleVis() {
         const show = this.isShown();
         // if showing then hide all other menus, really should do it via an event but...
         if (!show) {
@@ -275,29 +281,29 @@ export const DropDownMenuViewBB = Backbone.View.extend({
         }
         this.setVis(!show);
         return this;
-    },
+    }
 
-    hideVis: function () {
+    hideVis() {
         return this.setVis(false);
-    },
+    }
 
-    setVis: function (show) {
+    setVis(show) {
         if (!show || !d3.select(this.el).classed("disabledMenu")) {
             DropDownMenuViewBB.anyOpen = show; // static var. Set to true if any menu clicked open.
             d3.select(this.el).select("div")
                 .style("display", show ? "block" : "none");
         }
         return this;
-    },
+    }
 
-    switchVis: function () {
+    switchVis() {
         if (DropDownMenuViewBB.anyOpen && !this.isShown()) {
             this.toggleVis();
         }
         return this;
-    },
+    }
 
-    menuSelection: function (evt) {
+    menuSelection(evt) {
         const d3target = d3.select(evt.target);
         if (d3target && !d3target.classed("disabledItem")) {    // if enabled item
             const datum = d3target.datum();
@@ -314,22 +320,26 @@ export const DropDownMenuViewBB = Backbone.View.extend({
             }
         }
     }
-});
+}
 
 
-export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
-    events: function () {
-        let parentEvents = DropDownMenuViewBB.prototype.events;
+export class AnnotationDropDownMenuViewBB extends DropDownMenuViewBB {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
+        let parentEvents = super.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
         return _.extend({}, parentEvents, {
             "click button.downloadAnnotationKey": "downloadKey",
         });
-    },
+    }
 
-    initialize: function () {
-        AnnotationDropDownMenuViewBB.__super__.initialize.apply(this, arguments);
+    initialize() {
+        super.initialize(...arguments);
 
         d3.select(this.el).select("div")
             .append("button")
@@ -347,10 +357,10 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
         this.listenTo(this.collection, "update", function () {
             this.update().render();
         });
-    },
+    }
 
-    render: function () {
-        AnnotationDropDownMenuViewBB.__super__.render.apply(this, arguments);
+    render() {
+        super.render(...arguments);
 
         const self = this;
         const items = d3.select(this.el).selectAll("li");
@@ -393,17 +403,17 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
         items.select(".buttonPlaceholder").classed("aaButtonPlaceholder", true).select("label"); // .select pushes data to label
 
         return this;
-    },
+    }
 
-    decideSVGButtonEnabled: function () {
+    decideSVGButtonEnabled() {
         const shownCount = this.collection.where({
             shown: true
         }).length;
         d3.select(this.el).select("Button.downloadAnnotationKey").property("disabled", shownCount === 0);
         return this;
-    },
+    }
 
-    setColour: function (featureTypeModel, shown) {
+    setColour(featureTypeModel, shown) {
         const self = this;
         d3.select(this.el).selectAll("li")
             .filter(function (d) {
@@ -420,9 +430,9 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
 
         this.decideSVGButtonEnabled();
         return this;
-    },
+    }
 
-    downloadKey: function () {
+    downloadKey() {
         const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey").style("text-transform", "capitalize");
         const self = this;
         updateAnnotationColourKey(
@@ -445,10 +455,10 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
         this.downloadSVG(null, tempSVG);
         tempSVG.remove();
         return this;
-    },
+    }
 
     // use thisSVG d3 selection to set a specific svg element to download, otherwise take first in the view
-    downloadSVG: function (event, thisSVG) {
+    downloadSVG(event, thisSVG) {
         const svgSel = thisSVG || d3.select(this.el).selectAll("svg");
         const svgArr = [svgSel.node()];
         const svgStrings = capture(svgArr);
@@ -457,16 +467,16 @@ export const AnnotationDropDownMenuViewBB = DropDownMenuViewBB.extend({
         const fileName = this.filenameStateString().substring(0, 240);
         download(svgXML, "application/svg", fileName + ".svg");
         return this;
-    },
+    }
 
     // return any relevant view states that can be used to label a screenshot etc
-    optionsToString: function () {
+    optionsToString() {
         return "";
-    },
+    }
 
-    identifier: "Sequence Annotations",
-
-    filenameStateString: function () {
+    filenameStateString() {
         return makeLegalFileName(searchesToString() + "--" + this.identifier);
-    },
-});
+    }
+}
+
+AnnotationDropDownMenuViewBB.prototype.identifier = "Sequence Annotations";

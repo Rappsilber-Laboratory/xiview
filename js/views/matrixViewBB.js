@@ -14,9 +14,12 @@ import {commonLabels, declutterAxis, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
 
-export const DistanceMatrixViewBB = BaseFrameView.extend({
+export class DistanceMatrixViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -28,33 +31,35 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             "mouseleave .clipg": "cancelHighlights",
             "input .dragPanRB": "setMatrixDragMode",
         });
-    },
+    }
 
-    defaultOptions: {
-        xlabel: "Residue Index 1",
-        ylabel: "Residue Index 2",
-        chartTitle: "Crosslink Matrix",
-        chainBackground: "white",
-        matrixObj: null,
-        selectedColour: "#ff0",
-        highlightedColour: "#f80",
-        linkWidth: 5,
-        tooltipRange: 7,
-        matrixDragMode: "Pan",
-        margin: {
-            top: 30,
-            right: 20,
-            bottom: 40,
-            left: 60
-        },
-        exportKey: true,
-        exportTitle: true,
-        canHideToolbarArea: true,
-        canTakeImage: true,
-    },
+    get defaultOptions() {
+        return {
+            xlabel: "Residue Index 1",
+            ylabel: "Residue Index 2",
+            chartTitle: "Crosslink Matrix",
+            chainBackground: "white",
+            matrixObj: null,
+            selectedColour: "#ff0",
+            highlightedColour: "#f80",
+            linkWidth: 5,
+            tooltipRange: 7,
+            matrixDragMode: "Pan",
+            margin: {
+                top: 30,
+                right: 20,
+                bottom: 40,
+                left: 60
+            },
+            exportKey: true,
+            exportTitle: true,
+            canHideToolbarArea: true,
+            canTakeImage: true,
+        };
+    }
 
-    initialize: function (viewOptions) {
-        DistanceMatrixViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         const self = this;
 
@@ -292,21 +297,21 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 value: this.options.matrixDragMode
             }
         });
-    },
+    }
 
-    relayout: function () {
+    relayout() {
         this.resize();
         return this;
-    },
+    }
 
-    setAndShowPairing: function (pairing) {
+    setAndShowPairing(pairing) {
         this
             .matrixChosen(pairing)
             .resetZoomHandler(this)
             .render();
-    },
+    }
 
-    makeProteinPairingOptions: function () {
+    makeProteinPairingOptions() {
         const crosslinks = this.model.getAllTTCrossLinks();
         const totals = crosslinkCountPerProteinPairing(crosslinks);
         const entries = d3.entries(totals);
@@ -348,9 +353,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 return "[" + d.value.crosslinks.length + "] " + d.value.label;
             });
         return nonEmptyEntries.length ? nonEmptyEntries : entries;
-    },
+    }
 
-    getCurrentPairing: function (pairing, onlyIfNoneSelected) {
+    getCurrentPairing(pairing, onlyIfNoneSelected) {
         const mainDivSel = d3.select(this.el);
         const selected = mainDivSel.select("#" + mainDivSel.attr("id") + "chainSelect")
             .selectAll("option")
@@ -358,31 +363,31 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 return d3.select(this).property("selected");
             });
         return (selected.size() === 0 && onlyIfNoneSelected) ? pairing : selected.datum().value;
-    },
+    }
 
-    matchesChanged: function () {
+    matchesChanged() {
         const entries = this.makeProteinPairingOptions();
         const pairing = this.getCurrentPairing(entries[0], true);
         this.matrixChosen(pairing);
         this.render();
         return this;
-    },
+    }
 
     // Either new PDB File in town, or change to existing distances
-    distancesChanged: function () {
+    distancesChanged() {
         this.render();
         return this;
-    },
+    }
 
-    updateAxisLabels: function () {
+    updateAxisLabels() {
         const protIDs = this.getCurrentProteinIDs();
         this.vis.selectAll("g.label text").data(protIDs)
             .text(function (d) {
                 return d.labelText;
             });
-    },
+    }
 
-    matrixChosen: function (proteinPairValue) {
+    matrixChosen(proteinPairValue) {
         if (proteinPairValue) {
             this.options.matrixObj = proteinPairValue;
 
@@ -398,20 +403,20 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         }
 
         return this;
-    },
+    }
 
     // chain may show if checked in dropdown and if allowed by chainset in distancesobj (i.e. not cutoff by assembly choice)
-    chainMayShow: function (dropdownIndex, chainIndex) {
+    chainMayShow(dropdownIndex, chainIndex) {
         const distanceObj = this.model.get("distancesObj");
         const allowedChains = distanceObj ? distanceObj.permittedChainIndicesSet : null;
         return allowedChains ? allowedChains.has(chainIndex) : true;
-    },
+    }
 
-    alignedIndexAxisFormat: function (searchIndex) {
+    alignedIndexAxisFormat(searchIndex) {
         return d3.format(",.0f")(searchIndex);
-    },
+    }
 
-    getCurrentProteinIDs: function () {
+    getCurrentProteinIDs() {
         const mObj = this.options.matrixObj;
         return mObj ? [{
             chainIDs: null,
@@ -424,13 +429,13 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             labelText: mObj.toProtein.name.replace("_", " ")
         }
         ] : [null, null];
-    },
+    }
 
-    getChainsForProtein: function (proteinID) {
+    getChainsForProtein(proteinID) {
         return this.model.get("distancesObj").chainMap[proteinID];
-    },
+    }
 
-    addAlignIDs: function (proteinIDsObj) {
+    addAlignIDs(proteinIDsObj) {
         const distancesObj = this.model.get("distancesObj");
         proteinIDsObj.forEach(function (pid) {
             pid.alignID = null;
@@ -440,17 +445,17 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             }
         }, this);
         return proteinIDsObj;
-    },
+    }
 
 
-    getOverallScale: function (sizeData) {
+    getOverallScale(sizeData) {
         const sd = sizeData || this.getSizeData();
         const baseScale = Math.min(sd.width / sd.lengthA, sd.height / sd.lengthB);
         return baseScale * this.zoomStatus.scale();
-    },
+    }
 
     // Tooltip functions
-    convertEvtToXY: function (evt) {
+    convertEvtToXY(evt) {
         const sd = this.getSizeData();
 
         // *****!$$$ finally, cross-browser
@@ -476,9 +481,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         //console.log ("p4", px, py);
 
         return [Math.round(px), Math.round(py)];
-    },
+    }
 
-    grabNeighbourhoodLinks: function (extent) {
+    grabNeighbourhoodLinks(extent) {
         const filteredCrossLinks = this.model.getFilteredCrossLinks();
         const filteredCrossLinkMap = d3.map(filteredCrossLinks, function (d) {
             return d.id;
@@ -494,18 +499,18 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         };
         const neighbourhoodLinks = findResiduesInSquare(convFunc, filteredCrossLinkMap, extent[0][0], extent[0][1], extent[1][0], extent[1][1], true);
         return neighbourhoodLinks;
-    },
+    }
 
-    selectNeighbourhood: function (extent) {
+    selectNeighbourhood(extent) {
         const add = d3.event.ctrlKey || d3.event.shiftKey; // should this be added to current selection?
         const linkWrappers = this.grabNeighbourhoodLinks(extent);
         const crosslinks = _.pluck(linkWrappers, "crosslink");
         this.model.setMarkedCrossLinks("selection", crosslinks, false, add);
-    },
+    }
 
 
     // Brush neighbourhood and invoke tooltip
-    brushNeighbourhood: function (evt) {
+    brushNeighbourhood(evt) {
         const xy = this.convertEvtToXY(evt);
         const halfRange = this.options.tooltipRange / 2;
         const highlightExtent = d3.transpose(xy.map(function (xory) {
@@ -517,13 +522,13 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         // invoke tooltip before setting highlights model change for quicker tooltip response
         this.invokeTooltip(evt, linkWrappers);
         this.model.setMarkedCrossLinks("highlights", crosslinks, true, false);
-    },
+    }
 
-    cancelHighlights: function () {
+    cancelHighlights() {
         this.model.setMarkedCrossLinks("highlights", [], true, false);
-    },
+    }
 
-    setMatrixDragMode: function (evt) {
+    setMatrixDragMode(evt) {
         this.options.matrixDragMode = evt.target.value;
         const top = d3.select(this.el);
         if (this.options.matrixDragMode === "Pan") {
@@ -534,9 +539,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             top.selectAll(".clipg .brush rect").style("pointer-events", null);
         }
         return this;
-    },
+    }
 
-    invokeTooltip: function (evt, linkWrappers) {
+    invokeTooltip(evt, linkWrappers) {
         if (this.options.matrixObj) {
             const crosslinks = _.pluck(linkWrappers, "crosslink");
             crosslinks.sort(function (a, b) {
@@ -552,10 +557,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 .set("location", evt);
             //this.trigger("change:location", this.model, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
         }
-    },
+    }
     // end of tooltip functions
 
-    zoomHandler: function (self) {
+    zoomHandler(self) {
         const sizeData = this.getSizeData();
         const width = sizeData.width;
         const height = sizeData.height;
@@ -574,25 +579,25 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         //console.log ("tx", tx, ty, fx, fy, width, height);
         self.zoomStatus.translate([tx, ty]);
         self.panZoom();
-    },
+    }
 
-    resetZoomHandler: function (self) {
+    resetZoomHandler(self) {
         self.zoomStatus.scale(1.0).translate([0, 0]);
         return this;
-    },
+    }
 
     // That's how you define the value of a pixel //
     // http://stackoverflow.com/questions/7812514/drawing-a-dot-on-html5-canvas
     // moved from out of render() as firefox in strict mode objected
-    drawPixel: function (cd, pixi, r, g, b, a) {
+    drawPixel(cd, pixi, r, g, b, a) {
         const index = pixi * 4;
         cd[index] = r;
         cd[index + 1] = g;
         cd[index + 2] = b;
         cd[index + 3] = a;
-    },
+    }
 
-    render: function (renderOptions) {
+    render(renderOptions) {
         renderOptions = renderOptions || {};
         if (this.options.matrixObj && this.isVisible()) {
             if (!renderOptions.noResize) {
@@ -605,10 +610,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 });
         }
         return this;
-    },
+    }
 
     // draw white blocks in background to demarcate areas covered by active pdb chains
-    renderChainBlocks: function (alignInfo) {
+    renderChainBlocks(alignInfo) {
 
         const seqLengths = this.getSeqLengthData();
         const seqLengthB = seqLengths.lengthB - 1;
@@ -651,9 +656,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             }, this);
 
         }, this);
-    },
+    }
 
-    renderBackgroundMap: function () {
+    renderBackgroundMap() {
         let z = performance.now();
         const distancesObj = this.model.get("distancesObj");
         const stageModel = this.model.get("stageModel");
@@ -811,9 +816,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         console.log("render background map", z, "ms");
 
         return this;
-    },
+    }
 
-    renderCrossLinks: function (renderOptions) {
+    renderCrossLinks(renderOptions) {
 
         renderOptions = renderOptions || {};
         //console.log ("renderCrossLinks", renderOptions);
@@ -926,9 +931,9 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         }
 
         return this;
-    },
+    }
 
-    getSizeData: function () {
+    getSizeData() {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(this.svg.node());
         const cx = jqElem.width(); //this.svg.node().clientWidth;
@@ -947,19 +952,19 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
             minDim: minDim,
         });
         return sizeData;
-    },
+    }
 
-    getSeqLengthData: function () {
+    getSeqLengthData() {
         const mObj = this.options.matrixObj;
         const size = mObj ? [mObj.fromProtein.size, mObj.toProtein.size] : [0, 0];
         return {
             lengthA: size[0],
             lengthB: size[1]
         };
-    },
+    }
 
     // called when things need repositioned, but not re-rendered from data
-    resize: function () {
+    resize() {
         console.log("matrix resize");
         const sizeData = this.getSizeData();
         const minDim = sizeData.minDim;
@@ -1039,10 +1044,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         this.panZoom();
 
         return this;
-    },
+    }
 
     // Used to do this just on resize, but rectangular areas mean labels often need re-centred on panning
-    repositionLabels: function (sizeData) {
+    repositionLabels(sizeData) {
         // reposition labels
         //console.log ("SD", sizeData, this.options.margin);
         const labelCoords = [{
@@ -1067,10 +1072,10 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
                 return "translate(" + d.x + " " + d.y + ") rotate(" + d.rot + ")";
             });
         return this;
-    },
+    }
 
     // called when panning and zooming performed
-    panZoom: function () {
+    panZoom() {
 
         const self = this;
         const sizeData = this.getSizeData();
@@ -1135,16 +1140,16 @@ export const DistanceMatrixViewBB = BaseFrameView.extend({
         //console.log ("sizeData", sizeData);
 
         return this;
-    },
+    }
 
-    identifier: "Matrix View",
-
-    optionsToString: function () {
+    optionsToString() {
         const matrixObj = this.options.matrixObj;
         return [matrixObj.fromProtein, matrixObj.toProtein]
             .map(function (protein) {
                 return protein.name.replace("_", " ");
             })
             .join("-");
-    },
-});
+    }
+}
+
+DistanceMatrixViewBB.prototype.identifier = "Matrix View";

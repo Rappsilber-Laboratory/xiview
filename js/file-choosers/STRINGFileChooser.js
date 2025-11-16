@@ -6,9 +6,12 @@ import {STRINGUtils} from "./stringUtils";
 import {commonRegexes} from "../utils";
 import {updateLinkMetadata} from "../modelUtils";
 
-export const STRINGFileChooserBB = BaseFrameView.extend({
+export class STRINGFileChooserBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -16,10 +19,10 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
         return _.extend({}, parentEvents, {
             "keyup .inputTaxonID": "enteringTaxonID",
         });
-    },
+    }
 
-    initialize: function (viewOptions) {
-        STRINGFileChooserBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el).classed("metaLoadPanel", true);
@@ -98,15 +101,15 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
-    },
+    }
 
-    enteringTaxonID: function (evt) {
+    enteringTaxonID(evt) {
         if (this.isTaxaIDValid() && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
             this.loadSTRINGData();
         }
-    },
+    }
 
-    loadSTRINGData: function () {
+    loadSTRINGData() {
         const taxonID = d3.select(this.el).select(".inputTaxonID").property("value");
 
         this.setWaitingEffect();
@@ -128,12 +131,12 @@ export const STRINGFileChooserBB = BaseFrameView.extend({
             self.setStatusText(errorReason || statusText, !errorReason);
         };
         STRINGUtils.loadStringDataFromModel(this.model.get("clmsModel"), taxonID, callback);
-    },
+    }
 
-    isTaxaIDValid: function () {
+    isTaxaIDValid() {
         const elem = d3.select(this.el).select(".inputTaxonID");
         return elem.node().checkValidity();
-    },
+    }
+}
 
-    identifier: "STRING Data Loader",
-});
+STRINGFileChooserBB.prototype.identifier = "STRING Data Loader";

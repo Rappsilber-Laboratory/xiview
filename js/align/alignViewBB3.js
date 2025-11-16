@@ -9,10 +9,13 @@ import {addMultipleSelectControls} from "../utils";
 import {AlignSettingsViewBB, CollectionAsSelectViewBB} from "./alignSettingsViewBB";
 import d3 from "d3";
 
-export const AlignCollectionViewBB = BaseFrameView.extend({
+export class AlignCollectionViewBB extends BaseFrameView {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
-        let parentEvents = BaseFrameView.prototype.events;
+    get events() {
+        let parentEvents = super.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
         }
@@ -20,10 +23,10 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
             "change input.alignRadio": "radioClicked",
             "mouseleave label": "clearTooltip",
         }, parentEvents, {});
-    },
+    }
 
-    initialize: function (viewOptions) {
-        AlignCollectionViewBB.__super__.initialize.apply(this, arguments);
+    initialize(viewOptions) {
+        super.initialize(...arguments);
 
         const topElem = d3.select(this.el);
         const modelViewID = topElem.attr("id") + "IndView";
@@ -90,37 +93,37 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
             this.renderTab(indAlignModel);
         });
         return this;
-    },
+    }
 
-    hollowElement: function (view) {
+    hollowElement(view) {
         view.stopListening(); // remove backbone events bound with listenTo etc
         $(view.el).off(); // remove dom events
         const a = d3.select(view.el);
         a.selectAll("*").remove(); // remove all elements underneath el
-    },
+    }
 
-    clearTooltip: function () {
+    clearTooltip() {
         if (this.tooltipModel) {
             this.tooltipModel.set("contents", null);
         }
         return this;
-    },
+    }
 
-    setTabContents: function (d) {
+    setTabContents(d) {
         const seqCount = d.get("seqCollection") ? d.get("seqCollection").length : 0;
         return d.get("displayLabel") + (seqCount ? "<span class='alignSeqCount'>" + seqCount + "</span>" : "");
-    },
+    }
 
-    renderTab: function (indAlignModel) {
+    renderTab(indAlignModel) {
         const list = d3.select(this.el).select("DIV.checkHolder");
         const indTab = list.selectAll("span.alignTab").filter(function (d) {
             return (d.id = indAlignModel.get("id"));
         });
         const self = this;
         indTab.select("label").html(self.setTabContents);
-    },
+    }
 
-    render: function () {
+    render() {
         const models = this.collection.models;
 
         const topElem = d3.select(this.el);
@@ -174,14 +177,14 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
         topElem.select(".alignSortWidget").style("display", models.length > 1 ? null : "none");
 
         return this;
-    },
+    }
 
-    radioClicked: function (evt) {
+    radioClicked(evt) {
         const model = this.collection.get(evt.target.value);
         this.setFocusModel(model);
-    },
+    }
 
-    setFocusModel: function (model) {
+    setFocusModel(model) {
         const prevModel = this.modelView ? this.modelView.model : undefined;
         if (prevModel) {
             console.log("old modelView", this.modelView);
@@ -221,23 +224,31 @@ export const AlignCollectionViewBB = BaseFrameView.extend({
             this.modelView.render();
         }
         return this;
-    },
+    }
+}
 
-    identifier: "Alignment View",
-});
+AlignCollectionViewBB.prototype.identifier = "Alignment View";
 
-export const ProtAlignViewBB = Backbone.View.extend({
-    defaults: {
-        defaultSeqShowSetting: 3,
-    },
+export class ProtAlignViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    events: {
-        "mouseleave td.seq>span": "clearTooltip",
-        "change input.diff": "render",
-        "mouseleave th": "clearTooltip",
-    },
+    get defaults () {
+        return {
+            defaultSeqShowSetting: 3
+        };
+    }
 
-    initialize: function (viewOptions) {
+    get events() {
+        return {
+            "mouseleave td.seq>span": "clearTooltip",
+            "change input.diff": "render",
+            "mouseleave th": "clearTooltip",
+        };
+    }
+
+    initialize(viewOptions) {
         this.tooltipModel = viewOptions.tooltipModel;
 
         const topElem = d3.select(this.el);
@@ -294,14 +305,14 @@ export const ProtAlignViewBB = Backbone.View.extend({
         //this.ellipStr = new Array(10).join("\u2026");
 
         return this;
-    },
+    }
 
-    ellipFill: function (length) {
+    ellipFill(length) {
         const sigfigs = length ? Math.floor(Math.log(length) / Math.LN10) + 1 : 0; // cos Math.log10 non-existent in IE11
         return this.ellipStr.substring(0, sigfigs);
-    },
+    }
 
-    makeIndexString: function (length, unit) {
+    makeIndexString(length, unit) {
         unit = unit || 10;
 
         let iFillStr = new Array(unit).join(" ");
@@ -315,10 +326,10 @@ export const ProtAlignViewBB = Backbone.View.extend({
             segs.push(gStr);
         }
         return segs.join("");
-    },
+    }
 
     // generate other sequence strings from comp object
-    stringGeneration: function (seq, showSimilar, showDiff) {
+    stringGeneration(seq, showSimilar, showDiff) {
 
         const ellipsisInsert = this.ellipFill.bind(this);
 
@@ -406,9 +417,9 @@ export const ProtAlignViewBB = Backbone.View.extend({
         seq.segments = segments;
         const max = Math.max(seq.str.length, seq.refStr.length);
         seq.indexStr = this.makeIndexString(max, 20).substring(0, max);
-    },
+    }
 
-    render: function (obj) {
+    render(obj) {
         //console.log ("ALIGNVIEWMODEL RENDER", obj);
         const affectedSeqModel = obj ? obj.affectedSeqModel : undefined;
         const affectedAction = obj ? obj.affectedAction : undefined;  // set to 'remove' if you want to remove this particular sequence from the view
@@ -560,12 +571,12 @@ export const ProtAlignViewBB = Backbone.View.extend({
             });
 
         return this;
-    },
+    }
 
-    clearTooltip: function () {
+    clearTooltip() {
         if (this.tooltipModel) {
             this.tooltipModel.set("contents", null);
         }
         return this;
-    },
-});
+    }
+}

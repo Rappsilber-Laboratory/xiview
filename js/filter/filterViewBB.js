@@ -4,19 +4,31 @@ import * as _ from "underscore";
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import d3 from "d3";
 
-export const FilterViewBB = Backbone.View.extend({
-    tagName: "span",
-    className: "filterGroup",
-    events: {
-        "change input.modeToggle": "processModeChanged",
-        "input input.filterTypeText": "processTextFilter",
-        "keyup input.filterTypeNumber": "processNumberFilter",
-        "mouseup input.filterTypeNumber": "processNumberFilter",
-        "click input.filterTypeToggle": "processBooleanFilter",
-        "click input.groupToggleFilter": "processGroupToggleFilter",
-    },
+export class FilterViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function (viewOptions) {
+    get tagName() {
+        return "span";
+    }
+
+    get className() {
+        return "filterGroup";
+    }
+
+    get events() {
+        return {
+            "change input.modeToggle": "processModeChanged",
+            "input input.filterTypeText": "processTextFilter",
+            "keyup input.filterTypeNumber": "processNumberFilter",
+            "mouseup input.filterTypeNumber": "processNumberFilter",
+            "click input.filterTypeToggle": "processBooleanFilter",
+            "click input.groupToggleFilter": "processGroupToggleFilter",
+        };
+    }
+
+    initialize(viewOptions) {
         const defaultOptions = {
             config: [
                 {
@@ -437,10 +449,10 @@ export const FilterViewBB = Backbone.View.extend({
             showHide: true
         }); // Forces first call of setInputValuesFromModel
         this.processModeChanged();
-    },
+    }
 
     // Add a text-based filter widget to a d3 selection, using the attached data
-    addTextFilter: function (d3sel) {
+    addTextFilter(d3sel) {
         const textFilter = d3sel
             .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
@@ -467,9 +479,9 @@ export const FilterViewBB = Backbone.View.extend({
             .attr("pattern", function (d) {
                 return patterns[d.id];
             });
-    },
+    }
 
-    addNumberFilter: function (d3sel) {
+    addNumberFilter(d3sel) {
         const numberFilter = d3sel
             .attr("title", function (d) {
                 return d.tooltip ? d.tooltip : undefined;
@@ -501,11 +513,11 @@ export const FilterViewBB = Backbone.View.extend({
             .style("width", function (d) {
                 return d.chars + "em";
             });
-    },
+    }
 
 
     // toggle filter
-    addBooleanFilter: function (d3sel) {
+    addBooleanFilter(d3sel) {
         const toggle = d3sel
             .attr("id", function (d) {
                 return "toggles_" + d.id;
@@ -531,13 +543,13 @@ export const FilterViewBB = Backbone.View.extend({
             .attr("name", function (d) {
                 return d.name;
             });
-    },
+    }
 
-    datumFromTarget: function (target) {
+    datumFromTarget(target) {
         return d3.select(target).datum() || {};
-    },
+    }
 
-    processBooleanFilter: function (evt) {
+    processBooleanFilter(evt) {
         // alert("hello?");
         const target = evt.target;
         const data = this.datumFromTarget(target);
@@ -551,17 +563,17 @@ export const FilterViewBB = Backbone.View.extend({
             d3.select("#self").style("display", target.checked ? "flex" : "none");
         }
         this.model.set(id, target.checked);
-    },
+    }
 
-    processTextFilter: function (evt) {
+    processTextFilter(evt) {
         const target = evt.target;
         if (evt.target.checkValidity()) {
             const data = this.datumFromTarget(target);
             this.model.set(data.id, target.value);
         }
-    },
+    }
 
-    processGroupToggleFilter: function (evt) {
+    processGroupToggleFilter(evt) {
         const target = evt.target;
         const data = this.datumFromTarget(target);
 
@@ -570,9 +582,9 @@ export const FilterViewBB = Backbone.View.extend({
             current[target.checked ? "add" : "remove"](data.id);
             this.model.set("searchGroups", current.values());
         }
-    },
+    }
 
-    processNumberFilter: function (evt) {
+    processNumberFilter(evt) {
         const target = evt.target;
         const data = this.datumFromTarget(target);
         const id = data.id;
@@ -580,9 +592,9 @@ export const FilterViewBB = Backbone.View.extend({
         if (this.model.get(id) != value) {
             this.model.set(id, value);
         }
-    },
+    }
 
-    processModeChanged: function () {
+    processModeChanged() {
         const checked = d3.select(this.el).selectAll("input[name='modeSelect']").filter(":checked");
         if (checked.size() === 1) {
             const fdrMode = checked.datum().id === "fdrMode";
@@ -591,9 +603,9 @@ export const FilterViewBB = Backbone.View.extend({
                 manualMode: !fdrMode
             });
         }
-    },
+    }
 
-    setInputValuesFromModel: function (model, options) {
+    setInputValuesFromModel(model, options) {
         options = options || {};
         model = model || this.model;
 
@@ -628,16 +640,20 @@ export const FilterViewBB = Backbone.View.extend({
             d3el.select("#groupFilters").style("display", this.model.possibleSearchGroups && this.model.possibleSearchGroups.length < 2 ? "none" : null);
             d3el.select("#distanceFilter").style("display", this.model.distanceExtent[0] == undefined ? "none" : null);    // == matches null as well
         }
-    },
+    }
 
-    render: function () {
+    render() {
         return this;
     }
-});
+}
 
 //todo - move to separate file?
-export const FDRViewBB = Backbone.View.extend({
-    initialize: function () {
+export class FDRViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
+
+    initialize() {
 
         const chartDiv = d3.select(this.el);
         chartDiv.html("<div class='fdrCalculation'><p>Basic link-level FDR calculation</p><span></span></div>");
@@ -682,9 +698,9 @@ export const FDRViewBB = Backbone.View.extend({
         this.model.trigger("change:fdrThreshold", this.model);
 
         return this;
-    },
+    }
 
-    setInputValuesFromModel: function (model) {
+    setInputValuesFromModel(model) {
         model = model || this.model;
         const fdrThreshold = model.get("fdrThreshold");
         const d3el = d3.select(this.el);
@@ -696,18 +712,24 @@ export const FDRViewBB = Backbone.View.extend({
             return fdrThreshold * 100;
         });
     }
-});
+}
 
 
-export const ProteinSummaryViewBB = Backbone.View.extend({
-    events: {},
+export class ProteinSummaryViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function () {
+    get events() {
+        return {};
+    }
+
+    initialize() {
         this.listenTo(this.model, "filteringDone", this.render)
             .render();
-    },
+    }
 
-    render: function () {
+    render() {
         const model = this.model;
         let summaryHtmlString = "Proteins: " + model.get("proteinCount") + "<br/>";
         summaryHtmlString += "PPIs: " + model.get("ppiCount") + "<br/>";
@@ -716,23 +738,29 @@ export const ProteinSummaryViewBB = Backbone.View.extend({
         const pSel = d3.select(this.el);
         pSel.html(summaryHtmlString);
         return this;
-    },
-});
+    }
+}
 
 
-export const FilterSummaryViewBB = Backbone.View.extend({
-    events: {},
+export class FilterSummaryViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function () {
+    get events() {
+        return {};
+    }
+
+    initialize() {
         const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Crosslinks";
         this.targetTemplate = _.template(targetTemplateString);
         this.allTemplate = _.template(targetTemplateString + " ( + <%= decoysTD %> TD; <%= decoysDD %> DD Decoys)");
 
         this.listenTo(this.model, "filteringDone", this.render)
             .render();
-    },
+    }
 
-    render: function () {
+    render() {
         const commaFormat = d3.format(",");
         const model = this.model;
         const decoysPresent = model.get("clmsModel").getDecoysPresent();
@@ -745,13 +773,19 @@ export const FilterSummaryViewBB = Backbone.View.extend({
 
         d3.select(this.el).html((decoysPresent ? this.allTemplate : this.targetTemplate)(variables));
         return this;
-    },
-});
+    }
+}
 
-export const FDRSummaryViewBB = Backbone.View.extend({
-    events: {},
+export class FDRSummaryViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function () {
+    get events() {
+        return {};
+    }
+
+    initialize() {
         const fdrTypes = ["interFdrCut", "intraFdrCut"];
         d3.select(this.el).selectAll("p").data(fdrTypes)
             .enter()
@@ -764,9 +798,9 @@ export const FDRSummaryViewBB = Backbone.View.extend({
 
         this.listenTo(this.model, "filteringDone", this.render)
             .render();
-    },
+    }
 
-    render: function () {
+    render() {
         const fdrTypes = {
             "interFdrCut": "Between",
             "intraFdrCut": "Within"
@@ -801,5 +835,5 @@ export const FDRSummaryViewBB = Backbone.View.extend({
             });
 
         return this;
-    },
-});
+    }
+}

@@ -3,16 +3,22 @@ import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
 
-export const AlignSettingsViewBB = Backbone.View.extend({
-    events: {
-        "change input": "inputChanged",
-        "keyup input": "inputKeyed",
-        "change select": "selectChanged",
-        "input input": "inputChanged",
-    },
+export class AlignSettingsViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
+
+    get events() {
+        return {
+            "change input": "inputChanged",
+            "keyup input": "inputKeyed",
+            "change select": "selectChanged",
+            "input input": "inputChanged",
+        };
+    }
 
     // eslint-disable-next-line no-unused-vars
-    initialize: function (viewOptions) {
+    initialize(viewOptions) {
         const controls = d3.select(this.el);
         const inputArray = [{
             label: "Set Gap Open Penalty",
@@ -68,9 +74,9 @@ export const AlignSettingsViewBB = Backbone.View.extend({
             .render();
 
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         const self = this;
         d3.select(this.el)
             .selectAll("div.controlBlock input")
@@ -78,9 +84,9 @@ export const AlignSettingsViewBB = Backbone.View.extend({
                 return self.model.get(d.prop);
             });
         return this;
-    },
+    }
 
-    inputChanged: function (evt) {
+    inputChanged(evt) {
         if (evt.target.checkValidity()) {
             const control = d3.select(evt.target);
             const controlDatum = control.datum();
@@ -89,16 +95,16 @@ export const AlignSettingsViewBB = Backbone.View.extend({
             // this line inform views that wish to know of such events at a bulk level, rather than individually
             this.model.collection.bulkAlignChangeFinished();
         }
-    },
+    }
 
-    inputKeyed: function (evt) {
+    inputKeyed(evt) {
         const key = evt.which || evt.keyCode || 0;
         if (key === 13) {
             this.inputChanged(evt);
         }
-    },
+    }
 
-    selectChanged: function (evt) {
+    selectChanged(evt) {
         const control = d3.select(evt.target);
         const controlDatum = control.datum();
         const selectedOption = control.selectAll("option")
@@ -110,14 +116,20 @@ export const AlignSettingsViewBB = Backbone.View.extend({
         // this line inform views that wish to know of such events at a bulk level, rather than individually
         this.model.collection.bulkAlignChangeFinished();
     }
-});
+}
 
-export const CollectionAsSelectViewBB = Backbone.View.extend({
-    events: {
-        "change select": "selectChanged",
-    },
+export class CollectionAsSelectViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function (viewOptions) {
+    get events() {
+        return {
+            "change select": "selectChanged",
+        };
+    }
+
+    initialize(viewOptions) {
         this.options = $.extend({optionLabelField: "name", label: "label", name: "name"}, viewOptions);
         const topElem = d3.select(this.el).append("DIV").attr("class", "controlBlock");
         const tpl = _.template("<LABEL><%= label %></LABEL><SELECT name='<%= name %>'></SELECT>");
@@ -132,9 +144,9 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
             // above, thus we add an immediate this.render() afterwards as a safety net
             .render();
         return this;
-    },
+    }
 
-    render: function () {
+    render() {
         const self = this;
 
         const options = d3.select(this.el).select("select").selectAll("option")
@@ -159,22 +171,22 @@ export const CollectionAsSelectViewBB = Backbone.View.extend({
         options.exit().remove();
 
         return this;
-    },
+    }
 
     // In case the selected score matrix is set from another view or model, we should reflect that choice here
-    setSelected: function (aModel) {
+    setSelected(aModel) {
         if (aModel && aModel.cid !== this.lastSelected) {
             this.lastSelected = aModel.cid;
             this.render();
         }
         return this;
-    },
+    }
 
-    selectChanged: function (evt) {
+    selectChanged(evt) {
         const control = d3.select(evt.target);
         const selectedOption = control.selectAll("option").filter(function () {
             return this.selected;
         });
         this.collection.trigger("blosumModelSelected", selectedOption.datum());
     }
-});
+}

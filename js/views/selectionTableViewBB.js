@@ -6,15 +6,21 @@ import d3 from "d3";
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import {fullPosConcat, pepPosConcat, proteinConcat} from "../utils";
 
-export const SelectionTableViewBB = Backbone.View.extend({
-    events: {
-        "mouseenter tr.matchRow": "highlight",
-        "mouseleave table": "highlight",
-        "mouseenter table": "focusTable",
-        "keydown table": "selectByKey",
-    },
+export class SelectionTableViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function (options) {
+    get events() {
+        return {
+            "mouseenter tr.matchRow": "highlight",
+            "mouseleave table": "highlight",
+            "mouseenter table": "focusTable",
+            "keydown table": "selectByKey",
+        };
+    }
+
+    initialize(options) {
         this.options = options || {};
 
         const d3el = d3.select(this.el);
@@ -367,24 +373,24 @@ export const SelectionTableViewBB = Backbone.View.extend({
             }
         });
 
-    },
+    }
 
-    render: function () {
+    render() {
         this.updateTable({
             topMatchesOnly: this.viewStateModel.get("topOnly"),
             topCount: this.viewStateModel.get("topCount")
         });
-    },
+    }
 
-    getMatches: function (xlink) {
+    getMatches(xlink) {
         const selectedMatches = this.model.getMarkedMatches("selection");
         return _.pluck(xlink.filteredMatches_pp, "match")
             .filter(function (m) {
                 return selectedMatches.has(m.id);
             }); // selection now done on a per-match basis
-    },
+    }
 
-    updateTable: function (options) {
+    updateTable(options) {
         options = options || {};
 
         // Combine map, filter, and sort prep into single pass to avoid intermediate arrays
@@ -452,17 +458,17 @@ export const SelectionTableViewBB = Backbone.View.extend({
         }
 
         d3.select(this.el).select("table").style("display", this.matchCountIndices.length && !this.viewStateModel.get("hidden") ? null : "none");
-    },
+    }
 
-    pageIncrement: function (incr) {
+    pageIncrement(incr) {
         const newPage = this.page + incr;
         if (newPage >= 1 && newPage <= this.getPageCount()) {
             this.setPage(newPage);
         }
         return this;
-    },
+    }
 
-    setPage: function (pg) {
+    setPage(pg) {
         // limit page number and set text elements
         const mci = this.matchCountIndices;
         const totalSelectedFilteredMatches = mci.length ? _.last(mci).runningTotalEnd : 0;
@@ -514,9 +520,9 @@ export const SelectionTableViewBB = Backbone.View.extend({
 
         const tablePage = this.matchCountIndices.slice(lowerLink, upperLink + 1);
         this.addRows(tablePage, this.filteredProps, matchBounds);
-    },
+    }
 
-    countRepeatedAmbiguousMatches: function (arrayOfMatchLists) {
+    countRepeatedAmbiguousMatches(arrayOfMatchLists) {
         const ambigSet = d3.set();
         let repeatedAmbigCount = 0;
 
@@ -535,23 +541,23 @@ export const SelectionTableViewBB = Backbone.View.extend({
         });
 
         return repeatedAmbigCount;
-    },
+    }
 
-    getPageCount: function () {
+    getPageCount() {
         const mci = this.matchCountIndices;
         const totalSelectedFilteredMatches = mci.length ? _.last(mci).runningTotalEnd : 0;
         return Math.floor(totalSelectedFilteredMatches / this.pageSize) + 1;
-    },
+    }
 
-    makeColourSwatch: function (elem, colourScheme) {
+    makeColourSwatch(elem, colourScheme) {
         elem.attr("class", "colourSwatchSquare")
             .style("background", function (d) {
                 return colourScheme ? colourScheme.getColour(d.link) : "transparent";
             });
-    },
+    }
 
     // code that maintains the rows in the table
-    addRows: function (selectedLinkArray, filteredProps, firstLastLinkMatchBounds) {
+    addRows(selectedLinkArray, filteredProps, firstLastLinkMatchBounds) {
 
         filteredProps = filteredProps || this.filteredProps;
         const self = this;
@@ -704,56 +710,56 @@ export const SelectionTableViewBB = Backbone.View.extend({
                     setCell.call(this, d);
                 }
             });
-    },
+    }
 
-    updateSwatchesOnly: function () {
+    updateSwatchesOnly() {
         const colourScheme = this.model.get("linkColourAssignment");
         const self = this;
         d3.select(this.el).selectAll(".colourSwatchSquare")
             .each(function () {
                 self.makeColourSwatch(d3.select(this), colourScheme);
             });
-    },
+    }
 
-    setVisible: function (show) {
+    setVisible(show) {
         d3.select(this.el).style("display", show ? "block" : "none");
         if (show) {
             this.render();
         }
-    },
+    }
 
-    clearCurrentRowHighlight: function () {
+    clearCurrentRowHighlight() {
         d3.select(this.el).selectAll("tr").classed("spectrumShown2", false);
         return this;
-    },
+    }
 
-    setTableHighlights: function (highlightedMatches) {
+    setTableHighlights(highlightedMatches) {
         const highlightedMatchIDs = d3.set(_.pluck(highlightedMatches, "id"));
         d3.select(this.el).selectAll("tr.matchRow").classed("highlighted", function (d) {
             return highlightedMatchIDs.has(d.id);
         });
         return this;
-    },
+    }
 
     // this is called when mouse moved over a row
     // and should via the backbone models and events eventually call setTableHighlights above too
-    highlight: function (evt) {
+    highlight(evt) {
         const datum = d3.select(evt.currentTarget).datum();
         return this.highlightFromDatum(datum, evt);
-    },
+    }
 
-    highlightFromDatum: function (datum, evt) {
+    highlightFromDatum(datum, evt) {
         this.model.setMarkedMatches("highlights", datum ? [{
             match: datum
         }] : [], true, evt.ctrlKey || evt.shiftKey);
         return this;
-    },
+    }
 
-    focusTable: function () {
+    focusTable() {
         this.el.focus();
-    },
+    }
 
-    selectByKey: function (evt) {
+    selectByKey(evt) {
         const kcode = evt.keyCode;
 
         if (kcode === 38 || kcode === 40 || kcode === 13) {
@@ -810,9 +816,9 @@ export const SelectionTableViewBB = Backbone.View.extend({
 
             //console.log ("CI", currentWithinPageIndex);
         }
-    },
+    }
 
-    select: function (d) {
+    select(d) {
         const mainModel = this.options.mainModel;
         if (mainModel) {
             //TODO: fix?
@@ -839,7 +845,7 @@ export const SelectionTableViewBB = Backbone.View.extend({
             })
             .trigger("change:lastSelectedMatch", this.model, this.model.get("selectedMatch"));
         //}
-    },
+    }
+}
 
-    identifier: "Selected Match Table",
-});
+SelectionTableViewBB.prototype.identifier = "Selected Match Table";

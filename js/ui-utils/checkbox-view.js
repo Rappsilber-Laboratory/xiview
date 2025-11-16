@@ -3,14 +3,26 @@ import * as _ from "underscore";
 import {makeLegalDomID} from "../utils";
 import d3 from "d3";
 
-export const checkBoxView = Backbone.View.extend({
-    tagName: "span",
-    className: "buttonPlaceholder",
-    events: {
-        "click input": "checkboxClicked"
-    },
+export class checkBoxView extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    initialize: function (viewOptions) {
+    get tagName() {
+        return "span";
+    }
+
+    get className() {
+        return "buttonPlaceholder";
+    }
+
+    get events() {
+        return {
+            "click input": "checkboxClicked"
+        };
+    }
+
+    initialize(viewOptions) {
 
         //console.log ("this", this.model);
         const defaultOptions = {
@@ -41,15 +53,15 @@ export const checkBoxView = Backbone.View.extend({
         } else if (this.options.eventName) {
             this.listenTo(window.vent, this.options.eventName, this.showState);
         }
-    },
+    }
 
     // eslint-disable-next-line no-unused-vars
-    showState: function (args) {
+    showState(args) {
         const boolVal = arguments.length > 1 ? arguments[1] : arguments[0];
         d3.select(this.el).select("input").property("checked", boolVal);
-    },
+    }
 
-    checkboxClicked: function () {
+    checkboxClicked() {
         const checked = d3.select(this.el).select("input").property("checked");
         if (this.model && this.options.toggleAttribute) {
             this.model.set(this.options.toggleAttribute, checked);
@@ -57,4 +69,4 @@ export const checkBoxView = Backbone.View.extend({
             window.vent.trigger(this.options.eventName, checked);
         }
     }
-});
+}

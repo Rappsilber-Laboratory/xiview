@@ -79,9 +79,12 @@ export class ColourModel extends Backbone.Model {
     }
 }
 
-export const ColourModelCollection = Backbone.Collection.extend({
-    model: ColourModel,
-});
+export class ColourModelCollection extends Backbone.Collection {
+    constructor(models, options) {
+        super(models, options);
+        this.model = ColourModel;
+    }
+}
 
 
 export class MetaDataHexValuesColourModel extends ColourModel {

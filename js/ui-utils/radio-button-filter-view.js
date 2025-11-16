@@ -4,12 +4,22 @@ import d3 from "d3";
 
 // import {BaseFrameView} from "./base-frame-view";
 
-export const RadioButtonFilterViewBB = Backbone.View.extend({
-    tagName: "div",
-    events: {
-        "click .singleRadioButton": "changeFilter"
-    },
-    initialize: function (initData) {
+export class RadioButtonFilterViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
+
+    get tagName() {
+        return "div";
+    }
+
+    get events() {
+        return {
+            "click .singleRadioButton": "changeFilter"
+        };
+    }
+
+    initialize(initData) {
         const defaultOptions = {
             states: [0, 1],
             labels: ["Option 1", "Option 2"],
@@ -22,9 +32,9 @@ export const RadioButtonFilterViewBB = Backbone.View.extend({
             this.listenTo(window.vent, this.options.eventName, this.showState);
         }
         this.render();
-    },
+    }
 
-    render: function () {
+    render() {
         const self = this;
         const con = d3.select(this.el);
         con.append("p").attr("class", "headerLabel").text(this.options.header);
@@ -47,20 +57,20 @@ export const RadioButtonFilterViewBB = Backbone.View.extend({
         labs.append("span").text(function (d, i) {
             return labels[i];
         });
-    },
+    }
 
-    showState: function (filterVal) {
+    showState(filterVal) {
         //console.log ("in show state rb", filterVal);
         const self = this;
         d3.select(this.el).selectAll("input.singleRadioButton")
             .property("checked", function (d, i) {
                 return self.options.states[i] === filterVal;
             });
-    },
+    }
 
-    changeFilter: function (evt) {
+    changeFilter(evt) {
         if (this.options.eventName) {
             window.vent.trigger(this.options.eventName, +evt.currentTarget.value);
         }
     }
-});
+}

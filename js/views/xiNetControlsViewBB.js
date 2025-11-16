@@ -6,9 +6,12 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {commonLabels, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 
-export const xiNetControlsViewBB = Backbone.View.extend({
+export class xiNetControlsViewBB extends Backbone.View {
+    constructor(options) {
+        super(options);
+    }
 
-    events: function () {
+    get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
             parentEvents = parentEvents();
@@ -29,7 +32,7 @@ export const xiNetControlsViewBB = Backbone.View.extend({
             "change .thickLinks": "setThickLinksShown",
             "change .xinetPpiStep": "updatePpiSteps",
         });
-    },
+    }
 
     // saveLayout: function () {
     //     // PRIDE - no saved layouts
@@ -96,12 +99,12 @@ export const xiNetControlsViewBB = Backbone.View.extend({
     //
     //         window.vent.trigger("xinetSaveLayout", callback);
     //     }
-    // },
+    // }
 
-    initialize: function (viewOptions) {
+    initialize(viewOptions) {
 
         this.options = _.extend(this.defaultOptions, viewOptions.myOptions);
-        xiNetControlsViewBB.__super__.initialize.apply(this, arguments);
+        super.initialize(...arguments);
 
         const mainDivSel = d3.select(this.el);
 
@@ -276,38 +279,38 @@ export const xiNetControlsViewBB = Backbone.View.extend({
                 // tooltipModel: self.model.get("tooltipModel"),
             }
         });
-    },
+    }
 
-    setShowLabels: function () {
+    setShowLabels() {
         this.model.set("xinetShowLabels", d3.select("input.showLabels").property("checked"));
-    },
+    }
 
-    setFixedSize: function () {
+    setFixedSize() {
         this.model.set("xinetFixedSize", d3.select("input.fixedSize").property("checked"));
-    },
+    }
 
-    setCropLabels: function () {
+    setCropLabels() {
         this.model.set("xinetCropLabels", d3.select("input.cropLabels").property("checked"));
-    },
+    }
 
-    setThickLinksShown: function () {
+    setThickLinksShown() {
         const checkbox = d3.select("input.thickLinks");
         const checked = checkbox.property("checked");
         // console.log("!" + checked);
         d3.select("input#xiNetButtonBarppiStep1").property("disabled", !checked);
         d3.select("input#xiNetButtonBarppiStep2").property("disabled", !checked);
         this.model.set("xinetThickLinks", checked);
-    },
+    }
 
-    updatePpiSteps: function () {
+    updatePpiSteps() {
         const steps = [];
         steps[0] = d3.select("input#xiNetButtonBarppiStep1").property("value");
         steps[1] = d3.select("input#xiNetButtonBarppiStep2").property("value");
         this.model.set("xinetPpiSteps", steps);
-    },
+    }
+}
 
-    identifier: "xiNET Controls",
-});
+xiNetControlsViewBB.prototype.identifier = "xiNET Controls";
 
 
 // const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
