@@ -1,10 +1,35 @@
+/**
+ * @fileoverview Model for crosslink match filtering with FDR and manual modes.
+ * Manages all filtering criteria including subset filters (linears/crosslinks/monolinks),
+ * score filters, distance filters, validation status, navigation filters (protein names, peptide sequences),
+ * and FDR-based filtering. Supports URL parameter encoding/decoding for filter state persistence.
+ */
+
 import * as _ from "underscore";
 import {objectStateToAbbvString} from "../utils";
 import {makeURLQueryPairs} from "../modelUtils";
 import d3 from "d3";
 import Backbone from "backbone";
 
+/**
+ * Model managing all filtering logic for crosslinking mass spectrometry matches.
+ * Supports two filtering modes: manual (score-based) and FDR (false discovery rate).
+ * Handles subset filtering, validation status, distance constraints, protein/peptide navigation,
+ * search group filtering, and URL state encoding.
+ * @class
+ * @extends Backbone.Model
+ * @property {Object} extents - Min/max value constraints for numeric filters
+ * @property {Object} patterns - Regular expression patterns for text input validation
+ * @property {Object} types - Data types for each filter property (boolean, number, text)
+ * @property {Object} preprocessedInputValues - Cached pre-processed user input values
+ */
 export class FilterModel extends Backbone.Model {
+    /**
+     * Creates a new FilterModel instance and initializes filter constraints.
+     * Sets up value extents, validation patterns, and type definitions for all filter properties.
+     * @param {Object} attributes - Initial model attributes
+     * @param {Object} options - Configuration options
+     */
     constructor(attributes, options) {
         super(attributes, options);
 
@@ -68,6 +93,12 @@ export class FilterModel extends Backbone.Model {
         };
     }
 
+    /**
+     * Returns default filter values.
+     * Manual mode enabled, FDR mode disabled, all link types shown, pass validation only,
+     * targets shown, decoys shown, 5% FDR threshold, no protein/peptide navigation filters.
+     * @returns {Object} Default filter attribute values
+     */
     defaults() {
         return {
             manualMode: true,
@@ -107,7 +138,15 @@ export class FilterModel extends Backbone.Model {
         };
     }
 
-
+    /**
+     * Initializes the filter model with score/distance extents and preprocessing structures.
+     * Sets up matchScoreCutoff and distanceCutoff arrays (avoiding shared array references in defaults),
+     * initializes scoreExtent and distanceExtent from secondarySettings or current values,
+     * and creates preprocessing data structures (valMap, preprocessedInputValues).
+     * @param {Object} options - Initialization options
+     * @param {Object} [secondarySettings] - Optional settings containing scoreExtent, distanceExtent, possibleSearchGroups
+     * @returns {void}
+     */
     initialize(options, secondarySettings) {
         if (!this.get("matchScoreCutoff")) {
             this.set("matchScoreCutoff", [undefined, undefined]);
@@ -132,7 +171,11 @@ export class FilterModel extends Backbone.Model {
         this.resetValues = this.toJSON(); // Store copy of original values if needed to restore later
     }
 
-    // only used by tests
+    /**
+     * Resets all filter values to their initial state.
+     * Only used by tests. Restores values stored during initialization.
+     * @returns {FilterModel} This model instance for chaining
+     */
     resetFilter() {
         this
             .clear({
@@ -143,16 +186,34 @@ export class FilterModel extends Backbone.Model {
         return this;
     }
 
+    /**
+     * Gets the minimum allowed value for a numeric filter attribute.
+     * @param {string} attrID - Attribute identifier (aaApart, pepLength, urpPpi, fdrThreshold)
+     * @returns {number|null} Minimum value or null if no extent defined
+     */
     getMinExtent(attrID) {
         const extents = this.extents[attrID];
         return extents ? extents.min : null;
     }
 
+    /**
+     * Gets the maximum allowed value for a numeric filter attribute.
+     * @param {string} attrID - Attribute identifier (aaApart, pepLength, urpPpi, fdrThreshold)
+     * @returns {number|null} Maximum value or null if no extent defined
+     */
     getMaxExtent(attrID) {
         const extents = this.extents[attrID];
         return extents ? extents.max : null;
     }
 
+    /**
+     * Preprocesses user input filter values for efficient matching.
+     * Parses and caches protein names/descriptions (split by commas and hyphens),
+     * peptide sequences (with upper/lowercase versions), peaklist names, scan numbers,
+     * and search group mappings. Called once before filtering to avoid repeated parsing.
+     * @param {Array} searchArray - Array of search objects with id and group properties
+     * @returns {void}
+     */
     preprocessFilterInputValues(searchArray) {
         let protSplit1 = this.get("protNames").toLowerCase().split(","); // split by commas
         this.preprocessedInputValues.set("protNames", protSplit1.map(function (prot) {
@@ -192,6 +253,13 @@ export class FilterModel extends Backbone.Model {
         this.precalcedSearchToGroupMap = searchGroupMap;
     }
 
+    /**
+     * Filters matches by link type subset criteria.
+     * Checks linears/monolinks/crosslinks flags, between-links/self-links flags,
+     * ambiguity, homomultimer status, amino acid separation (aaApart), and peptide length.
+     * @param {Object} match - Match object to filter
+     * @returns {boolean} True if match passes subset filter, false otherwise
+     */
     subsetFilter(match) {
         const linear = match.isNotCrosslinked();
         const mono = match.isMonoLink();
@@ -251,6 +319,13 @@ export class FilterModel extends Backbone.Model {
         return true;
     }
 
+    /**
+     * Filters matches by score cutoff range.
+     * Checks if match score falls within [matchScoreCutoff[0], matchScoreCutoff[1]].
+     * Returns true if match has no score (e.g., from CSV without score column).
+     * @param {Object} match - Match object with score() method
+     * @returns {boolean} True if match passes score filter, false otherwise
+     */
     scoreFilter(match) {
         const score = match.score();
         //defend against not having a score (from a CSV file without such a column)
@@ -261,6 +336,12 @@ export class FilterModel extends Backbone.Model {
         return (msc[0] == undefined || score >= msc[0]) && (msc[1] == undefined || score <= msc[1]); // == undefined cos shared links get undefined json'ified to null
     }
 
+    /**
+     * Filters matches by decoy/target status.
+     * Returns decoys flag if match is decoy, targets flag if match is target.
+     * @param {Object} match - Match object with isDecoy() method
+     * @returns {boolean} True if match passes decoy filter, false otherwise
+     */
     decoyFilter(match) {
         if (match.isDecoy()) {
             return this.get("decoys");
@@ -269,6 +350,13 @@ export class FilterModel extends Backbone.Model {
         }
     }
 
+    /**
+     * Filters crosslinks by 3D distance cutoff range.
+     * Undefined distances pass if no distances exist or distanceUndef flag is true.
+     * Checks if distance falls within [distanceCutoff[0], distanceCutoff[1]].
+     * @param {Object} crosslink - Crosslink object with getMeta("distance") method
+     * @returns {boolean} True if crosslink passes distance filter, false otherwise
+     */
     distanceFilter(crosslink) {
         const dist = crosslink.getMeta("distance");
         if (dist === undefined) {   // show undefined distances if either no distances or specifically allowed (distanceUndef flag)
@@ -279,6 +367,13 @@ export class FilterModel extends Backbone.Model {
         return (dsc[0] == undefined || dist >= dsc[0]) && (dsc[1] == undefined || dist <= dsc[1]); // == undefined cos shared links get undefined json'ified to null
     }
 
+    /**
+     * Filters matches by manual validation status.
+     * Returns true if match passes threshold and "pass" flag is true,
+     * or if match fails threshold and "fail" flag is true.
+     * @param {Object} match - Match object with passThreshold property
+     * @returns {boolean} True if match passes validation status filter, false otherwise
+     */
     validationStatusFilter(match) {
         if (this.get("pass") && match.passThreshold == true) {
             return true;
@@ -289,7 +384,13 @@ export class FilterModel extends Backbone.Model {
         return false;
     }
 
-    // Test if there are proteins at both ends of a match that are in the current pdb file.
+    /**
+     * Tests if proteins at both ends of match are present in the current PDB file.
+     * Only applied when protPDB flag is true. Checks if both matched peptides have
+     * associated proteins with chains in the current PDB chain map.
+     * @param {Object} match - Match object with matchedPeptides array
+     * @returns {boolean} True if match passes PDB protein filter (or filter inactive), false otherwise
+     */
     pdbProteinFilter(match) {
         if (this.get("protPDB")) {
             const dObj = window.compositeModelInst.get("distancesObj");
@@ -310,6 +411,17 @@ export class FilterModel extends Backbone.Model {
         return true;
     }
 
+    /**
+     * Filters matches by protein name or description search strings.
+     * Supports complex queries: comma-separated for OR, hyphen-separated for AND.
+     * Example: "A-B,C-D" means (A AND B) OR (C AND D).
+     * Searches protein names, accessions (for name field), or descriptions/keywords (for description field).
+     * @param {Object} match - Match object with matchedPeptides array
+     * @param {string} searchString - User input search string (raw)
+     * @param {string} dataField - Field to search in protein object ("name" or "description")
+     * @param {string} preProcessedField - Key for preprocessedInputValues ("protNames" or "protDesc")
+     * @returns {boolean} True if match passes protein filter (or filter inactive), false otherwise
+     */
     proteinFilter(match, searchString, dataField, preProcessedField) {
         if (searchString) {
             //protein name check
@@ -372,6 +484,13 @@ export class FilterModel extends Backbone.Model {
         return true;
     }
 
+    /**
+     * Filters matches by navigation criteria (peaklist name, scan number, protein names/descriptions, peptide sequences, PDB presence).
+     * Arranged with cheaper checks first for performance. Calls proteinFilter() for name/description searches,
+     * pdbProteinFilter() for PDB checks, and internal seqCheck() for peptide sequence matching.
+     * @param {Object} match - Match object to filter
+     * @returns {boolean} True if match passes navigation filter, false otherwise
+     */
     navigationFilter(match) {
         // Arranged so cheaper checks are done first
 
@@ -465,8 +584,13 @@ export class FilterModel extends Backbone.Model {
         }
     }
 
-
-    // If activated, this only passes matches whose search ids belong to particular groups
+    /**
+     * Filters matches by search group membership.
+     * If multiple search groups exist, only passes matches whose datasetId belongs to
+     * one of the selected search groups. Inactive if only one search group exists.
+     * @param {Object} match - Match object with datasetId property
+     * @returns {boolean} True if match passes group filter (or filter inactive), false otherwise
+     */
     groupFilter(match) {
         if (this.possibleSearchGroups.length > 1) {
             const matchGroup = this.precalcedSearchToGroupMap.get(match.datasetId);
@@ -475,7 +599,13 @@ export class FilterModel extends Backbone.Model {
         return true;
     }
 
-    // If activated, this only passes an array of matches if they are of the same group
+    /**
+     * Filters match arrays by search group homogeneity.
+     * When multipleGroup flag is false and multiple search groups exist, only passes
+     * match arrays where all matches belong to the same search group.
+     * @param {Array} matchArr - Array of match objects with match.match.datasetId
+     * @returns {boolean} True if match array passes group filter (or filter inactive), false otherwise
+     */
     groupFilter2(matchArr) {
         if (matchArr.length > 1 && this.possibleSearchGroups.length > 1 && !this.get("multipleGroup")) {
             const smap = this.precalcedSearchToGroupMap;
@@ -487,6 +617,12 @@ export class FilterModel extends Backbone.Model {
         return true;
     }
 
+    /**
+     * Generates abbreviated state string for filename/logging purposes.
+     * Creates human-readable summary of active filter settings using abbreviated field names.
+     * Different field sets for FDR mode vs manual mode. Follows Stanford data management file naming guidelines.
+     * @returns {string} Abbreviated state string (e.g., "FDR_THR0.05_SELFCUT0.02_BTWNCUT0.03")
+     */
     stateString() {
         // https://library.stanford.edu/research/data-management-services/case-studies/case-study-file-naming-done-well
         let fields = [];
@@ -537,11 +673,24 @@ export class FilterModel extends Backbone.Model {
         return str;
     }
 
+    /**
+     * Generates URL query parameter pairs from current filter settings.
+     * Encodes all filter attributes as URL parameters with "F" prefix.
+     * Used for shareable URLs and state persistence.
+     * @returns {Array<string>} Array of "key=value" query parameter strings
+     */
     getURLQueryPairs() {
         // make url parts from current filter attributes
         return makeURLQueryPairs(this.attributes, "F");
     }
 
+    /**
+     * Extracts filter settings from URL query parameter map.
+     * Parses URL parameters with "F" prefix, validates against allowable filter keys,
+     * and returns filter-specific settings.
+     * @param {Object} urlChunkMap - Map of URL parameter key-value pairs
+     * @returns {Object} Validated filter settings extracted from URL
+     */
     getFilterUrlSettings(urlChunkMap) {
         const urlChunkKeys = d3.keys(urlChunkMap).filter(function (key) {
             return key[0] === "F";

@@ -55,7 +55,7 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
-import {prideLoadSpectrum} from "../../CLMS-model/src/load-spectrum/pride-load-spectrum";
+import {prideLoadSpectrum} from "../../CLMS-model/js/models/load-spectrum/pride-load-spectrum";
 
 // Configuration imports
 import {createDefaultAnnotationTypes} from "./config/annotation-types";

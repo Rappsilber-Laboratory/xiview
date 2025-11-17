@@ -3,7 +3,7 @@ import * as _ from "underscore";
 import * as NGL from "ngl";
 import * as d3 from "d3";
 
-import {Protein} from "../../CLMS-model/src/protein";
+import {Protein} from "../../CLMS-model/js/models/protein";
 import {mostReadableMultipleId,} from "../js/downloads";
 import {GotohAligner} from "../js/align/bioseq32";
 import {
@@ -41,7 +41,7 @@ import {start, module, test} from "qunit";
 import {blosumLoading, models, postDataLoaded} from "../js/networkFrame";
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
-import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
+import {SearchResultsModel} from "../../CLMS-model/js/models/search-results-model";
 
 // Enable full stack traces in console for test failures
 QUnit.config.notrycatch = true;
@@ -1720,12 +1720,12 @@ function initializeModels(options) {
     const clmsModel = new SearchResultsModel();
 
     console.log("Processing model data...");
-    clmsModel.processMzIdentMLFiles(options.mzidentmlFiles);
-    clmsModel.processSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols)
-    clmsModel.processSpectraData(options.spectraData);
-    clmsModel.processMatches(options.matches);
-    clmsModel.processPeptides(options.peptides);
-    clmsModel.processProteins(options.proteins);
+    clmsModel.storeMzIdentMLFiles(options.mzidentmlFiles);
+    clmsModel.storeSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols)
+    clmsModel.storeSpectraData(options.spectraData);
+    clmsModel.storeMatches(options.matches);
+    clmsModel.storePeptides(options.peptides);
+    clmsModel.storeProteins(options.proteins);
 
     console.log("Creating composite model...");
     const compositeModelInst = models({}, clmsModel);

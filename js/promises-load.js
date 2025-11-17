@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Main application entry point for xiVIEW.
+ * Handles CSS imports, initialization, data loading, and application bootstrapping.
+ * This is the entry point specified in webpack configuration.
+ */
+
 import "../css/reset.css";
 import "../css/common.css";
 import "../vendor/byrei-dyndiv_0.5.css";
@@ -16,16 +22,25 @@ import {
 } from "./networkFrame";
 import {displayError} from "./utils";
 import Split from "split.js";
-import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
+import {SearchResultsModel} from "../../CLMS-model/js/models/search-results-model";
 import {BlosumCollection} from "./model/models";
 
+/**
+ * Global spinner instance for displaying loading state on the main network page.
+ * @type {Spinner}
+ */
 export const networkPageSpinner = new Spinner({
     length: 38, // The length of each line
     width: 17, // The line thickness
     radius: 45, // The radius of the inner circle
 });
 
-// Memory monitoring - logs JavaScript VM memory usage every 2 seconds
+/**
+ * Starts periodic memory monitoring for development builds.
+ * Logs JavaScript VM memory usage and DOM node count every 10 seconds.
+ * Only works in Chrome/Chromium-based browsers that support performance.memory API.
+ * @private
+ */
 // eslint-disable-next-line no-unused-vars
 function startMemoryMonitoring() {
     let logCount = 0;
@@ -49,6 +64,13 @@ if (process.env.NODE_ENV !== "production") {
     startMemoryMonitoring();
 }
 
+/**
+ * Fetches JSON data from a specified URL.
+ * @param {string} url - The URL to fetch data from
+ * @returns {Promise<Object>} Promise that resolves to the JSON data
+ * @throws {Error} If the HTTP request fails or response is not OK
+ * @private
+ */
 const fetchDataFromUrl = (url) => {
     return fetch(url)
         .then(response => {
@@ -62,6 +84,14 @@ const fetchDataFromUrl = (url) => {
         });
 };
 
+/**
+ * Fetches data from a URL and processes it with the provided function.
+ * @param {string} url - The URL to fetch data from
+ * @param {Function} processFunction - Function to process the fetched data
+ * @returns {Promise<void>} Promise that resolves when data is fetched and processed
+ * @throws {Error} If fetching or processing fails
+ * @private
+ */
 const fetchDataAndProcess = (url, processFunction) => {
     return fetchDataFromUrl(url)
         .then((data) => {
@@ -72,6 +102,14 @@ const fetchDataAndProcess = (url, processFunction) => {
         });
 };
 
+/**
+ * Main application initialization function for the full xiVIEW interface.
+ * Loads all necessary data (API endpoints, BLOSUM matrices), initializes models and views,
+ * and sets up the complete application UI.
+ * @param {string} apiBase - Base URL for API endpoints
+ * @param {string} annotatorURL - URL for the annotation service
+ * @returns {void}
+ */
 export function main(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -117,6 +155,14 @@ export function main(apiBase, annotatorURL) {
         });
 }
 
+/**
+ * Validation page initialization function for spectrum validation interface.
+ * Loads essential data and initializes a minimal view set focused on spectrum validation.
+ * Unlike main(), this does not load BLOSUM matrices or full visualization components.
+ * @param {string} apiBase - Base URL for API endpoints
+ * @param {string} annotatorURL - URL for the annotation service
+ * @returns {void}
+ */
 export function validationPage(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -147,6 +193,14 @@ export function validationPage(apiBase, annotatorURL) {
         });
 }
 
+/**
+ * Creates an array of data fetching tasks for all required API endpoints.
+ * Each task fetches data from an API endpoint and processes it into the CLMS model.
+ * @param {string} apiBase - Base URL for API endpoints
+ * @param {SearchResultsModel} clmsModel - The search results model to populate with data
+ * @returns {Promise[]} Array of promises for parallel data fetching
+ * @private
+ */
 function getTasks(apiBase, clmsModel) {
     const mzIdentMLUrl = `${apiBase}get_xiview_mzidentml_files${window.location.search}`;
     const analysisCollection_spectrum_identificationsUrl
@@ -161,22 +215,33 @@ function getTasks(apiBase, clmsModel) {
     const proteinUrl = `${apiBase}get_xiview_proteins${window.location.search}`;
 
     return [
-        fetchDataAndProcess(mzIdentMLUrl, (data) => clmsModel.processMzIdentMLFiles(data)),
-        fetchDataAndProcess(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.processAnalysisCollectionSpectrumIdentifications(data)),
-        fetchDataAndProcess(spectrumIdentificationProtocolUrl, (data) => clmsModel.processSpectrumIdentificationProtocols(data)),
-        fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.processSpectraData(data)),
-        fetchDataAndProcess(enzymesUrl, (data) => clmsModel.processEnzymes(data)),
+        fetchDataAndProcess(mzIdentMLUrl, (data) => clmsModel.storeMzIdentMLFiles(data)),
+        fetchDataAndProcess(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.storeAnalysisCollectionSpectrumIdentifications(data)),
+        fetchDataAndProcess(spectrumIdentificationProtocolUrl, (data) => clmsModel.storeSpectrumIdentificationProtocols(data)),
+        fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.storeSpectraData(data)),
+        fetchDataAndProcess(enzymesUrl, (data) => clmsModel.storeEnzymes(data)),
         fetchDataAndProcess(searchModificationsUrl, (data) => clmsModel.processSearchModifications(data)),
-        fetchDataAndProcess(proteinUrl, (data) => clmsModel.processProteins(data)), // .then(() => {fetchUniprotKB(accessions);}),
-        fetchDataAndProcess(peptidesUrl, (data) => clmsModel.processPeptides(data)),
-        fetchDataAndProcess(matchesUrl, (data) => clmsModel.processMatches(data)),
+        fetchDataAndProcess(proteinUrl, (data) => clmsModel.storeProteins(data)), // .then(() => {fetchUniprotKB(accessions);}),
+        fetchDataAndProcess(peptidesUrl, (data) => clmsModel.storePeptides(data)),
+        fetchDataAndProcess(matchesUrl, (data) => clmsModel.storeMatches(data)),
     ];
 }
 
+/**
+ * Sets the browser window title based on current URL search parameters.
+ * @returns {void}
+ * @private
+ */
 function setWindowTitle() {
     document.title = window.location.search;//fileNames.join(", ");
 }
 
+/**
+ * Initializes the page splitter that divides the main view from the selection table.
+ * Creates a vertical split with 80% for main content and 20% for selection table.
+ * @returns {void}
+ * @private
+ */
 function initPageSplitter() {
     window.split = Split(["#topDiv", "#bottomDiv"], //yuk, todo - get rid
         {
@@ -192,6 +257,14 @@ function initPageSplitter() {
     d3.select(".gutter").attr("title", "Drag to change space available to selection table");
 }
 
+/**
+ * Fetches protein data from UniProt in batches to avoid rate limiting.
+ * Queries the UniProt REST API for multiple accession IDs in batches.
+ * @param {string[]} accessions - Array of UniProt accession IDs to fetch
+ * @param {number} [batchSize=5] - Number of accessions to fetch per batch
+ * @returns {Promise<Object[]>} Promise that resolves to array of UniProt entry objects
+ * @private
+ */
 async function fetchAccessionsInBatches(accessions, batchSize = 5) {
     const baseURL = "https://rest.uniprot.org/uniprotkb/search";
     let allResults = []; // To store results from all batches
@@ -227,6 +300,13 @@ const accessions = [
     "D24680", "E11223", "F33445", "G55667", "H77889", "I99001"
 ];
 
+/**
+ * Fetches UniProt KB data for a list of protein accessions.
+ * Uses batch fetching to retrieve data in groups of 50.
+ * @param {string[]} accessions - Array of UniProt accession IDs
+ * @returns {void}
+ * @private
+ */
 // eslint-disable-next-line no-unused-vars
 function fetchUniprotKB(accessions) {
     fetchAccessionsInBatches(accessions, 50)

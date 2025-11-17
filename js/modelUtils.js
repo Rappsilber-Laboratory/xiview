@@ -1,10 +1,21 @@
+/**
+ * @fileoverview Model utility functions for xiVIEW application.
+ * Contains helper functions for working with matches, crosslinks, proteins, sequences,
+ * metadata, and various data transformations.
+ */
+
 import * as _ from "underscore";
 import * as $ from "jquery";
 import * as d3 from "d3";
 import {octree as d3octree} from "../vendor/d3-octree";
 import {commonRegexes, xilog} from "./utils";
 
-//used by networkframe for setting up minigram
+/**
+ * Separates match scores into arrays based on whether they are decoys or not.
+ * Used by network frame for setting up minigram.
+ * @param {Object[]} matchesArr - Array of match objects
+ * @returns {Array[]} Array containing two arrays: [non-decoy scores, decoy scores]
+ */
 export function flattenMatches(matchesArr) {
     const arrs = [
         [],
@@ -18,7 +29,14 @@ export function flattenMatches(matchesArr) {
     return arrs;
 }
 
-//used by networkframe
+/**
+ * Gets the min/max score range from an array of matches.
+ * Optionally floors the minimum and ceils the maximum to integers.
+ * Used by network frame.
+ * @param {Object[]} matches - Array of match objects with score() method
+ * @param {boolean} integerise - Whether to floor/ceil the extent to integers
+ * @returns {number[]} [min, max] extent array
+ */
 export function matchScoreRange(matches, integerise) {
     let extent = d3.extent(matches, function (m) {
         return m.score();
@@ -32,7 +50,15 @@ export function matchScoreRange(matches, integerise) {
     return extent;
 }
 
-// used here and in circleview
+/**
+ * Gets the amino acid residue type at a given sequence index in a protein.
+ * Optionally applies a sequence alignment function to transform the index.
+ * Used here and in circle view.
+ * @param {Object} protein - Protein object with sequence property
+ * @param {number} seqIndex - 1-indexed position in the sequence
+ * @param {Function} [seqAlignFunc] - Optional function to transform seqIndex
+ * @returns {string} Single-letter amino acid code
+ */
 export function getResidueType(protein, seqIndex, seqAlignFunc) {
     // Some sequence alignment stuff can be done if you pass in a func
     seqIndex = seqAlignFunc ? seqAlignFunc(seqIndex) : seqIndex;
@@ -40,26 +66,53 @@ export function getResidueType(protein, seqIndex, seqAlignFunc) {
     return protein.sequence[seqIndex - 1];
 }
 
-//used here
+/**
+ * Gets the residue type from either the 'from' or 'to' end of a crosslink.
+ * @param {Object} xlink - Crosslink object with fromProtein, toProtein, fromResidue, toResidue
+ * @param {boolean} getTo - If true, get 'to' residue; if false, get 'from' residue
+ * @param {Function} [seqAlignFunc] - Optional sequence alignment function
+ * @returns {string} Single-letter amino acid code
+ */
 export function getDirectionalResidueType(xlink, getTo, seqAlignFunc) {
     return getResidueType(getTo ? xlink.toProtein : xlink.fromProtein, getTo ? xlink.toResidue : xlink.fromResidue, seqAlignFunc);
 }
 
-//used widely
+/**
+ * Filters out decoy proteins/interactors from an array.
+ * Used widely throughout the application.
+ * @param {Object[]} interactorArr - Array of interactor objects with is_decoy property
+ * @returns {Object[]} Filtered array containing only non-decoy interactors
+ */
 export function filterOutDecoyInteractors(interactorArr) {
     return interactorArr.filter(function (i) {
         return !i.is_decoy;
     });
 }
 
-//used by make-tooltip
+/**
+ * Returns the highest score among a crosslink's filtered matches.
+ * Used by make-tooltip.
+ * @param {Object} crosslink - Crosslink object with filteredMatches_pp array
+ * @returns {number} Highest match score
+ */
 export function highestScore(crosslink) {
     return d3.max(crosslink.filteredMatches_pp.map(function (m) {
         return +m.match.score();
     }));
 }
 
-//used by matrixview
+/**
+ * Finds all crosslinks with residues falling within a rectangular region.
+ * Used by matrix view for selecting crosslinks in a drawn rectangle.
+ * @param {Function} convFunc - Conversion function that maps coordinates to protein/residue pairs
+ * @param {Map} crosslinkMap - Map of crosslinks keyed by protein_residue pairs
+ * @param {number} x1 - First x coordinate of rectangle
+ * @param {number} y1 - First y coordinate of rectangle
+ * @param {number} x2 - Second x coordinate of rectangle
+ * @param {number} y2 - Second y coordinate of rectangle
+ * @param {boolean} asymmetric - Whether to exclude symmetric pairs (e.g., same protein homodimers)
+ * @returns {Object[]} Array of objects with {crosslink, x, y} properties
+ */
 export function findResiduesInSquare(convFunc, crosslinkMap, x1, y1, x2, y2, asymmetric) {
     const a = [];
     const xmin = Math.max(0, Math.round(Math.min(x1, x2)));
@@ -97,6 +150,10 @@ export function findResiduesInSquare(convFunc, crosslinkMap, x1, y1, x2, y2, asy
     return a;
 }
 
+/**
+ * Mapping from 3-letter amino acid codes to 1-letter codes.
+ * @type {Object.<string, string>}
+ */
 export const amino3to1Map = {
     "Ala": "A",
     "Asx": "B",
@@ -151,7 +208,11 @@ const aminoNameto1Map = {
     N_Terminal: "NTERM"
 };
 
-//used by download.js/getSSL()
+/**
+ * Mapping from 1-letter amino acid codes to their monoisotopic masses in Daltons.
+ * Used by download.js/getSSL().
+ * @type {Object.<string, number>}
+ */
 export const amino1toMass = {
     "A": 71.03711,
     "R": 156.10111,
@@ -175,8 +236,13 @@ export const amino1toMass = {
     "V": 99.06841,
 };
 
-// return array of indices of first occurrence of a sequence when encountering a repetition
-// e.g. ["CAT", "DOG", "CAT", "DOG"] -> [undefined, undefined, 0, 1];
+/**
+ * Returns array of indices pointing to first occurrence of each sequence when duplicates exist.
+ * @param {string[]} sequences - Array of sequence strings
+ * @returns {(number|undefined)[]} Array where duplicates point to first occurrence index, uniques are undefined
+ * @example
+ * indexSameSequencesToFirstOccurrence(["CAT", "DOG", "CAT", "DOG"]) // returns [undefined, undefined, 0, 1]
+ */
 export function indexSameSequencesToFirstOccurrence(sequences) {
     return sequences.map(function (seq, i) {
         let val = undefined;
@@ -190,7 +256,13 @@ export function indexSameSequencesToFirstOccurrence(sequences) {
     });
 }
 
-//used by nglutils
+/**
+ * Filters out repeated sequences to avoid costly realignment calculations.
+ * Returns unique sequences plus mapping information to restore full sequence list later.
+ * Used by NGL utils.
+ * @param {string[]} sequences - Array of potentially duplicate sequences
+ * @returns {Object} Object with sameSeqIndices, uniqSeqs, uniqSeqIndices, uniqSeqReverseIndex
+ */
 export function filterRepeatedSequences(sequences) {
     // Filter out repeated sequences to avoid costly realignment calculation of the same sequences
     const sameSeqIndices = indexSameSequencesToFirstOccurrence(sequences);
@@ -209,7 +281,14 @@ export function filterRepeatedSequences(sequences) {
     };
 }
 
-//used by nglutils
+/**
+ * Reinflates a collapsed sequence match matrix back to full size using filtered sequence info.
+ * Used by NGL utils to restore matrices after filtering repeated sequences.
+ * @param {Object} matchMatrix - Matrix keyed by protein ID
+ * @param {string[]} sequences - Full sequence array including duplicates
+ * @param {Object} filteredSeqInfo - Info object from filterRepeatedSequences
+ * @returns {Object} Reinflated match matrix
+ */
 export function reinflateSequenceMap(matchMatrix, sequences, filteredSeqInfo) {
     d3.keys(matchMatrix).forEach(function (protID) {
         const matchMatrixProt = matchMatrix[protID];
@@ -224,7 +303,13 @@ export function reinflateSequenceMap(matchMatrix, sequences, filteredSeqInfo) {
     return matchMatrix;
 }
 
-//used by nglutils
+/**
+ * Pairs sequence objects with protein IDs based on best alignment scores.
+ * Used by NGL utils.
+ * @param {Object} matrix - Match matrix with protein IDs as keys
+ * @param {Object[]} sequenceObjs - Array of sequence objects to pair
+ * @returns {Object[]} Array of {id, seqObj} pairing objects
+ */
 export function matrixPairings(matrix, sequenceObjs) {
     xilog("MATRIX PAIRINGS", matrix, sequenceObjs);
     const entries = d3.entries(matrix);
@@ -262,6 +347,13 @@ export function matrixPairings(matrix, sequenceObjs) {
     return pairings;
 }
 
+/**
+ * Finds intersection of two object arrays using a comparison function.
+ * @param {Object[]} a - First array of objects
+ * @param {Object[]} b - Second array of objects
+ * @param {Function} compFunc - Comparison function that extracts comparable value from objects
+ * @returns {Object[]} Array of elements from b that match elements in a
+ */
 export function intersectObjectArrays(a, b, compFunc) {
     if (!_.isEmpty(a) && !_.isEmpty(b) && compFunc) {
         const map = d3.map(a, compFunc);
@@ -273,8 +365,13 @@ export function intersectObjectArrays(a, b, compFunc) {
     return [];
 }
 
-//used by pdbfilechooser, nglutils
-// interactorCollection can be map or array
+/**
+ * Extracts valid UniProt accession IDs from an interactor collection.
+ * Filters out decoys and validates accessions against UniProt regex pattern.
+ * Used by PDB file chooser and NGL utils.
+ * @param {Map|Array} interactorCollection - Map or array of interactor objects
+ * @returns {string[]} Array of valid UniProt accession IDs
+ */
 export function getLegalAccessionIDs(interactorCollection) {
     let ids = [];
     if (interactorCollection) {
@@ -289,7 +386,13 @@ export function getLegalAccessionIDs(interactorCollection) {
     return ids;
 }
 
-//nglutils, ngl-wrapper-model
+/**
+ * Creates a nested map structure by sub-indexing values by a specified property.
+ * Used by NGL utils and NGL wrapper model.
+ * @param {Object} mmap - Map to be sub-indexed
+ * @param {string} subIndexingProperty - Property name to use for sub-indexing
+ * @returns {Object} Nested map with sub-indexed values
+ */
 export function makeSubIndexedMap(mmap, subIndexingProperty) {
     const subIndexedMap = {};
     d3.entries(mmap).forEach(function (entry) {
@@ -302,7 +405,13 @@ export function makeSubIndexedMap(mmap, subIndexingProperty) {
     return subIndexedMap;
 }
 
-//distogramview, searchsummaryview
+/**
+ * Gets crosslinker specificity information per linker from the CLMS model.
+ * Returns default specificity if none defined.
+ * Used by distogram view and search summary view.
+ * @param {Object[]} searchArray - Array of search objects
+ * @returns {Object} Crosslinker specificity object with name, searches, and linkables
+ */
 export function crosslinkerSpecificityPerLinker(searchArray) {
     return window.compositeModelInst.get("clmsModel").getCrosslinkerSpecificity() || {
         default: {
@@ -313,8 +422,14 @@ export function crosslinkerSpecificityPerLinker(searchArray) {
     };
 }
 
-//nglutils, distances
-// return indices of sequence where letters match ones in the residue set. Index is to the array, not to any external factor
+/**
+ * Returns array indices of sequence positions where amino acids match those in the residue set.
+ * Used by NGL utils and distances calculation.
+ * @param {string} seq - Protein sequence string
+ * @param {Set} residueSet - Set of amino acid letters to match
+ * @param {boolean} all - If true, return all indices; if false, only matching ones
+ * @returns {number[]} Array of indices (0-indexed to the sequence array)
+ */
 export function filterSequenceByResidueSet(seq, residueSet, all) {
     const resIndices = all ? d3.range(0, seq.length) : [];
     if (!all) {
@@ -350,6 +465,13 @@ function parseProteinID(protMap, pid) {
 }
 
 //metadatafilechooser, STRINGfilechooser
+/**
+ * Updates crosslink metadata from a CSV/TSV file.
+ * Parses metadata file and assigns metadata to matching crosslinks in the CLMS model.
+ * @param {string} metaDataFileContents - CSV/TSV file contents with crosslink metadata
+ * @param {Object} clmsModel - The CLMS model to update
+ * @returns {void}
+ */
 export function updateLinkMetadata(metaDataFileContents, clmsModel) {
     const crosslinks = clmsModel.getCrosslinks();
     const crosslinksArr = Array.from(crosslinks.values());
@@ -470,6 +592,13 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
 }
 
 //metadatafilechoosers
+/**
+ * Updates protein metadata from a CSV/TSV file.
+ * Parses metadata file and assigns metadata to matching proteins in the CLMS model.
+ * @param {string} metaDataFileContents - CSV/TSV file contents with protein metadata
+ * @param {Object} clmsModel - The CLMS model to update
+ * @returns {void}
+ */
 export function updateProteinMetadata(metaDataFileContents, clmsModel) {
     const proteins = clmsModel.getProteinsMap();
     let first = true;
@@ -557,6 +686,12 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel) {
 
 //used by fdr.js
 // objectArr can be crosslinks or protein interactors (or a mix of)
+/**
+ * Clears specified metadata fields from an array of objects.
+ * @param {Object[]} objectArr - Array of objects to clear metadata from
+ * @param {string[]} metaFields - Array of metadata field names to clear
+ * @returns {void}
+ */
 export function clearObjectMetaData(objectArr, metaFields) {
     objectArr.forEach(function (obj) {
         if (obj.getMeta()) {
@@ -570,6 +705,13 @@ export function clearObjectMetaData(objectArr, metaFields) {
 }
 
 //metadatafilechoosers
+/**
+ * Updates user annotations metadata from a CSV/TSV file.
+ * Creates annotation objects and adds them to proteins in the CLMS model.
+ * @param {string} userAnnotationsFileContents - CSV/TSV file contents with user annotations
+ * @param {Object} clmsModel - The CLMS model to update
+ * @returns {void}
+ */
 export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsModel) {
     const proteins = clmsModel.getProteinsMap();
     let first = true;
@@ -635,6 +777,13 @@ export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsM
 }
 
 //used here, matrixview
+/**
+ * Counts crosslinks per protein pairing.
+ * Creates a map of protein pairs to crosslink counts, optionally including linear (self) links.
+ * @param {Object[]} crosslinkArr - Array of crosslink objects
+ * @param {boolean} includeLinears - Whether to include linear/self links
+ * @returns {Map} Map with protein pair keys and count values
+ */
 export function crosslinkCountPerProteinPairing(crosslinkArr, includeLinears) {
     const obj = {};
     const linearShim = {id: "*linear", name: "linear"};
@@ -665,6 +814,12 @@ export function crosslinkCountPerProteinPairing(crosslinkArr, includeLinears) {
 // merges array of ranges
 // features should be pre-filtered to an individual protein and to an individual type
 // this can be reused for any array containing elements with properties 'begin' and 'end'
+/**
+ * Merges contiguous features (annotations) that share the same properties.
+ * Adjacent features with identical category, type, and description are combined.
+ * @param {Object[]} features - Array of feature objects with begin, end, category, type, description
+ * @returns {Object[]} Array of merged features
+ */
 export function mergeContiguousFeatures(features) {
     features.sort(function (f1, f2) {
         return +f1.begin - +f2.begin;
@@ -708,6 +863,12 @@ export function mergeContiguousFeatures(features) {
 //nglutils / ngl-model-wrapper
 // merges array of single numbers
 // assumes vals are already sorted numerically (though each val is a string)
+/**
+ * Converts an array of consecutive numbers into range strings.
+ * @param {number[]} vals - Array of numbers
+ * @param {string} joinString - String to join ranges with (e.g., "-" or "–")
+ * @returns {string[]} Array of range strings (e.g., ["1-5", "7", "9-12"])
+ */
 export function joinConsecutiveNumbersIntoRanges(vals, joinString) {
     joinString = joinString || "-";
 
@@ -739,6 +900,13 @@ export function joinConsecutiveNumbersIntoRanges(vals, joinString) {
 }
 
 //nglutils, matrixview
+/**
+ * Calculates squared Euclidean distance between two 3D coordinates.
+ * Returns squared distance to avoid expensive sqrt operation.
+ * @param {number[]} coords1 - First coordinate [x, y, z]
+ * @param {number[]} coords2 - Second coordinate [x, y, z]
+ * @returns {number} Squared distance between coordinates
+ */
 export function getDistanceSquared(coords1, coords2) {
     let d2 = 0;
     for (let n = 0; n < coords1.length; n++) {
@@ -749,6 +917,16 @@ export function getDistanceSquared(coords1, coords2) {
 }
 
 // nglutils / nglmodelwrapper
+/**
+ * Finds minimum distance between two sets of 3D points using octree spatial indexing.
+ * Efficiently searches for closest point pairs, optionally filtering with ignore function.
+ * @param {Object[]} points1 - First set of points
+ * @param {Object[]} points2 - Second set of points
+ * @param {Object} accessorObj - Object with x, y, z accessor functions
+ * @param {number} maxDistance - Maximum distance to search (optimization parameter)
+ * @param {Function} [ignoreFunc] - Optional function to filter out point pairs
+ * @returns {Object} Object with minDist (distance) and closest point pair info
+ */
 export function getMinimumDistance(points1, points2, accessorObj, maxDistance, ignoreFunc) {
 
     accessorObj = accessorObj || {};
@@ -775,6 +953,14 @@ export function getMinimumDistance(points1, points2, accessorObj, maxDistance, i
 }
 
 // matrixview, scatterplotview
+/**
+ * Performs radix sort on data array using a bucket function.
+ * Efficient O(n) sorting for data with limited number of categories.
+ * @param {number} categoryCount - Number of distinct categories/buckets
+ * @param {Array} data - Array of data to sort
+ * @param {Function} bucketFunction - Function that returns bucket index for each element
+ * @returns {Array} Sorted array
+ */
 export function radixSort(categoryCount, data, bucketFunction) {
     const radixSortBuckets = Array.apply(null, Array(categoryCount)).map(function () {
         return [];
@@ -807,6 +993,12 @@ function tryParseJSON(jsonString) {
 }
 
 //networkframe
+/**
+ * Parses URL query string into an object.
+ * Converts "?key1=val1&key2=val2" into {key1: "val1", key2: "val2"}.
+ * @param {string} str - Query string to parse (with or without leading "?")
+ * @returns {Object} Object with key-value pairs from query string
+ */
 export function parseURLQueryString(str) {
     const urlChunkMap = {};
     str.split("&").forEach(function (part) {
@@ -821,6 +1013,13 @@ export function parseURLQueryString(str) {
 }
 
 //filtermodel, compositemodel
+/**
+ * Converts an object into URL query string key-value pairs.
+ * Optionally adds a common prefix to all keys.
+ * @param {Object} obj - Object to convert to query pairs
+ * @param {string} [commonKeyPrefix] - Optional prefix for all keys
+ * @returns {string[]} Array of "key=value" strings
+ */
 export function makeURLQueryPairs(obj, commonKeyPrefix) {
     const attrEntries = d3.entries(obj);
     const parts = attrEntries.map(function (attrEntry) {
@@ -840,6 +1039,11 @@ export function makeURLQueryPairs(obj, commonKeyPrefix) {
 }
 
 //nglview
+/**
+ * Calculates total length of all protein sequences.
+ * @param {Object[]} interactors - Array of protein/interactor objects with size property
+ * @returns {number} Sum of all protein sequence lengths
+ */
 export function totalProteinLength(interactors) {
     return d3.sum(interactors, function (d) {
         return d.size;
@@ -847,6 +1051,12 @@ export function totalProteinLength(interactors) {
 }
 
 //networkframe
+/**
+ * Gets search groups from the CLMS model.
+ * Returns array of search group objects with their associated searches.
+ * @param {Object} clmsModel - The CLMS model
+ * @returns {Object[]} Array of search group objects
+ */
 export function getSearchGroups(clmsModel) {
     const searchArr = Array.from(clmsModel.getSearches().values());
     const uniqueGroups = _.uniq(_.pluck(searchArr, "group"));
@@ -859,7 +1069,16 @@ export function getSearchGroups(clmsModel) {
     return uniqueGroups;
 }
 
+/**
+ * Mapping from 1-letter amino acid codes to 3-letter codes (inverse of amino3to1Map).
+ * @type {Object.<string, string>}
+ */
 export const amino1to3Map = _.invert(amino3to1Map);
+
+/**
+ * Mapping from 1-letter amino acid codes to full amino acid names (inverse of aminoNameto1Map).
+ * @type {Object.<string, string>}
+ */
 export const amino1toNameMap = _.invert(aminoNameto1Map);
 
 d3.entries(amino3to1Map).forEach(function (entry) {

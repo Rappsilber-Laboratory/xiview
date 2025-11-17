@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Main application model that coordinates filtering, selection, and data management.
+ * CompositeModel integrates the core CLMS data model with filtering, UI state, and view coordination.
+ * Handles crosslink filtering (including FDR), protein selection/hiding, grouping, distance calculations,
+ * and synchronization of selection state across matches and crosslinks.
+ */
+
 import * as _ from "underscore";
 
 import Backbone from "backbone";
@@ -10,11 +17,39 @@ import {xilog} from "../utils";
 import {ManualColourModel} from "./color/protein-color-model";
 import {getCrosslinkableResiduesAsFeatures, getDigestibleResiduesAsFeatures} from "./get-as-features";
 
+/**
+ * Main application model coordinating CLMS data, filtering, and UI state.
+ * Acts as the central hub connecting clmsModel (core data), filterModel (filtering logic),
+ * and various views. Manages selection/highlights, protein grouping, distance calculations,
+ * and crosslink filtering with FDR support.
+ * @class
+ * @extends Backbone.Model
+ * @property {Array} highlights - Array of highlighted crosslinks
+ * @property {Array} selection - Array of selected crosslinks
+ * @property {d3.Map} match_highlights - Map of highlighted matches (fine-grained)
+ * @property {d3.Map} match_selection - Map of selected matches (fine-grained)
+ * @property {Array} selectedProteins - Currently selected protein interactors
+ * @property {Array} highlightedProteins - Currently highlighted protein interactors
+ * @property {Map} groups - Protein groups (group name => Set of protein IDs)
+ * @property {number} TTCrossLinkCount - Count of target-target crosslinks (non-decoy, non-linear)
+ * @property {Object} filteredXLinks - Categorized filtered crosslinks (all, targets, linears, decoys, etc.)
+ */
 export class CompositeModel extends Backbone.Model {
+    /**
+     * Creates a new CompositeModel instance.
+     * @param {Object} attributes - Initial model attributes
+     * @param {Object} options - Configuration options
+     */
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Initializes the composite model with default properties and event listeners.
+     * Sets up selection/highlight arrays, UI state flags, protein groups, and listeners for
+     * FDR mode changes and distance recalculation events.
+     * @returns {void}
+     */
     initialize() {
         this.set({
             highlights: [], // listen to these two for differences in highlighted selected links
@@ -57,9 +92,12 @@ export class CompositeModel extends Backbone.Model {
         this.calcAndStoreTTCrossLinkCount();
     }
 
-    // Set cross-link homomultimer states to true if any constituent matches are homomultimer
-    // This means when we grab distances we get the worst-case distance (useful for setting ranges)
-    // Another call to applyFilter will set them back to normal
+    /**
+     * Sets crosslink homomultimer states to true if any constituent matches are homomultimeric.
+     * This enables calculation of worst-case distances (useful for setting distance ranges).
+     * Another call to applyFilter() will reset states to normal values.
+     * @returns {CompositeModel} This model instance for chaining
+     */
     calcWorstCaseHomomultimerStates() {
         const crosslinksArr = this.getAllCrossLinks();
         crosslinksArr.forEach(function (clink) {
@@ -73,7 +111,13 @@ export class CompositeModel extends Backbone.Model {
         return this;
     }
 
-    // Get distances if links are made homomultimer if possible, needed to generate initial distance range
+    /**
+     * Calculates crosslink distances with worst-case homomultimer states.
+     * Temporarily sets homomultimer states to worst-case, calculates distances, then restores original states.
+     * Used to generate initial distance ranges that encompass all possible homomultimer configurations.
+     * @param {Array} crosslinkArr - Array of crosslink objects
+     * @returns {Array} Array of calculated distances
+     */
     getHomomDistances(crosslinkArr) {
         // Store current homo states
         const oldHom = _.pluck(crosslinkArr, "confirmedHomomultimer");
@@ -91,6 +135,13 @@ export class CompositeModel extends Backbone.Model {
         return dists;
     }
 
+    /**
+     * Applies all active filters to crosslinks and updates filtered results.
+     * Main filtering pipeline that handles FDR-based and standard filtering, protein hiding,
+     * unique residue pair constraints, and decoy categorization. Updates filteredXLinks cache
+     * with categorized results (targets, linears, decoys) and triggers filtering events.
+     * @returns {CompositeModel} This model instance for chaining
+     */
     applyFilter() {
         const filterModel = this.get("filterModel");
         const clmsModel = this.get("clmsModel");
@@ -365,14 +416,28 @@ export class CompositeModel extends Backbone.Model {
         return this;
     }
 
+    /**
+     * Retrieves filtered crosslinks of a specific type.
+     * @param {string} [type="targets"] - Type of crosslinks to retrieve: "all", "targets" (default),
+     *   "linears", "linearTargets", "decoysTD", or "decoysDD"
+     * @returns {Array} Array of filtered crosslinks of the specified type
+     */
     getFilteredCrossLinks(type) { // if type of crosslinks not declared, make it 'targets' by default
         return this.filteredXLinks[type || "targets"];
     }
 
+    /**
+     * Retrieves all crosslinks from the CLMS model.
+     * @returns {Array} Array of all crosslink objects
+     */
     getAllCrossLinks() {
         return Array.from(this.get("clmsModel").getCrosslinks().values());
     }
 
+    /**
+     * Retrieves all target-target (non-decoy, non-linear, non-monolink) crosslinks.
+     * @returns {Array|null} Array of TT crosslinks, or null if no CLMS model is available
+     */
     getAllTTCrossLinks() {
         const clmsModel = this.get("clmsModel");
         if (clmsModel) {
@@ -384,6 +449,11 @@ export class CompositeModel extends Backbone.Model {
         return null;
     }
 
+    /**
+     * Calculates and stores the count of target-target crosslinks.
+     * Updates the TTCrossLinkCount model property with the count.
+     * @returns {void}
+     */
     calcAndStoreTTCrossLinkCount() {
         const ttCrossLinks = this.getAllTTCrossLinks();
         if (ttCrossLinks !== null) {
@@ -391,14 +461,34 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
+    /**
+     * Retrieves the map of marked (selected/highlighted) matches.
+     * @param {string} modelProperty - Property name ("selection" or "highlights")
+     * @returns {d3.Map} Map of marked matches
+     */
     getMarkedMatches(modelProperty) {
         return this.get("match_" + modelProperty);
     }
 
+    /**
+     * Retrieves the array of marked (selected/highlighted) crosslinks.
+     * @param {string} modelProperty - Property name ("selection" or "highlights")
+     * @returns {Array} Array of marked crosslinks
+     */
     getMarkedCrossLinks(modelProperty) {
         return this.get(modelProperty);
     }
 
+    /**
+     * Sets marked matches and propagates changes to associated crosslinks.
+     * Handles toggling for selection, deduplication, and bidirectional sync with crosslinks.
+     * @param {string} modelProperty - Property name ("selection" or "highlights")
+     * @param {Array} matches - Array of match objects to mark
+     * @param {boolean} andAlternatives - Whether to include alternative/ambiguous matches
+     * @param {boolean} add - Whether to add to existing marks (true) or replace (false)
+     * @param {boolean} dontForward - If true, don't propagate changes to crosslinks
+     * @returns {void}
+     */
     setMarkedMatches(modelProperty, matches, andAlternatives, add, dontForward) {
         if (matches) { // if undefined nothing happens, to clear selection pass an empty array - []
             const type = "match_" + modelProperty;
@@ -442,8 +532,17 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
-    // modelProperty can be "highlights" or "selection" (or a new one) depending on what array you want
-    // to fill in the model
+    /**
+     * Sets marked crosslinks and propagates changes to associated matches.
+     * Handles toggling for selection, deduplication, alternative/ambiguous link inclusion,
+     * and bidirectional sync with matches. modelProperty can be "highlights" or "selection".
+     * @param {string} modelProperty - Property name ("selection" or "highlights")
+     * @param {Array} crosslinks - Array of crosslink objects to mark
+     * @param {boolean} andAlternatives - Whether to include alternative/ambiguous crosslinks
+     * @param {boolean} add - Whether to add to existing marks (true) or replace (false)
+     * @param {boolean} dontForward - If true, don't propagate changes to matches
+     * @returns {void}
+     */
     setMarkedCrossLinks(modelProperty, crosslinks, andAlternatives, add, dontForward) {
         if (crosslinks) { // if undefined nothing happens, to clear selection pass an empty array - []
             const removedLinks = d3.map();
@@ -519,6 +618,13 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
+    /**
+     * Triggers final event after both matches and crosslinks have been updated.
+     * Views waiting for synchronized updates to both matches and crosslinks can listen to this event.
+     * @param {string} modelProperty - Property name ("selection" or "highlights")
+     * @param {Object|false} penultimateSetOfChanges - Changed attributes from previous set operation
+     * @returns {void}
+     */
     triggerFinalMatchLinksChange(modelProperty, penultimateSetOfChanges) {
         // if either of the last two backbone set operations did cause a change then trigger an event
         // so views waiting for both links and matches to finish updating can act
@@ -528,6 +634,13 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
+    /**
+     * Sets highlighted proteins, optionally adding to existing highlights.
+     * Removes duplicates before setting.
+     * @param {Array} pArr - Array of protein interactor objects to highlight
+     * @param {boolean} add - If true, add to existing highlights; if false, replace
+     * @returns {void}
+     */
     setHighlightedProteins(pArr, add) {
         let toHighlight = add ? pArr.concat(this.get("highlightedProteins")) : pArr;
         toHighlight = d3.map(toHighlight, function (d) {
@@ -536,6 +649,13 @@ export class CompositeModel extends Backbone.Model {
         this.set("highlightedProteins", toHighlight);
     }
 
+    /**
+     * Sets selected proteins, optionally toggling with existing selection.
+     * Removes duplicates before setting. For toggle mode (add=true), proteins already selected are removed.
+     * @param {Array} pArr - Array of protein interactor objects to select
+     * @param {boolean} add - If true, toggle proteins in selection; if false, replace
+     * @returns {void}
+     */
     setSelectedProteins(pArr, add) {
         let toSelect;
         if (!add){
@@ -558,6 +678,11 @@ export class CompositeModel extends Backbone.Model {
         this.set("selectedProteins", toSelect); //the array.slice() clones the array so this triggers a change
     }
 
+    /**
+     * Hides currently selected proteins and clears the selection.
+     * Triggers filter model change to reapply filtering.
+     * @returns {void}
+     */
     hideSelectedProteins() {
         const selectedArr = this.get("selectedProteins");
         const selectedCount = selectedArr.length;
@@ -570,6 +695,11 @@ export class CompositeModel extends Backbone.Model {
 
     }
 
+    /**
+     * Hides all proteins except currently selected ones.
+     * Triggers filter model change to reapply filtering.
+     * @returns {void}
+     */
     hideUnselectedProteins() {
         const selected = this.get("selectedProteins");
         for (let participant of this.get("clmsModel").getProteinsIterator()) {
@@ -580,6 +710,11 @@ export class CompositeModel extends Backbone.Model {
         this.get("filterModel").trigger("change", this.get("filterModel"));
     }
 
+    /**
+     * Shows all manually hidden proteins.
+     * Triggers filter model change to reapply filtering.
+     * @returns {void}
+     */
     showHiddenProteins() {
         for (let participant of this.get("clmsModel").getProteinsIterator()) {
             participant.manuallyHidden = false;
@@ -587,6 +722,11 @@ export class CompositeModel extends Backbone.Model {
         this.get("filterModel").trigger("change");
     }
 
+    /**
+     * Expands selection to include all proteins connected to currently selected proteins.
+     * Follows crosslinks from selected proteins and adds their interaction partners (non-decoy only).
+     * @returns {void}
+     */
     stepOutSelectedProteins() {
         const selectedArr = this.get("selectedProteins");
         const selectedCount = selectedArr.length;
@@ -615,6 +755,11 @@ export class CompositeModel extends Backbone.Model {
 
     }
 
+    /**
+     * Filters protein selection based on text input from #proteinSelectionFilter element.
+     * Searches protein names and descriptions (case-insensitive) for matches.
+     * @returns {void}
+     */
     proteinSelectionTextFilter() {
         const filterText = d3.select("#proteinSelectionFilter").property("value").trim().toLowerCase();
         const participantsArr = Array.from(this.get("clmsModel").getProteinsIterator());
@@ -628,6 +773,12 @@ export class CompositeModel extends Backbone.Model {
         this.setSelectedProteins(toSelect);
     }
 
+    /**
+     * Opens color picker dialog for choosing a protein interactor color.
+     * Updates dialog UI with interactor ID and displays modal.
+     * @param {string} interactorId - Protein interactor ID to color
+     * @returns {void}
+     */
     chooseInteractorColor(interactorId) {
         const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
         dialog.interactorId = interactorId;
@@ -638,6 +789,13 @@ export class CompositeModel extends Backbone.Model {
         cancelChooseColorButton.focus();
     }
 
+    /**
+     * Sets a custom color for a specific protein interactor.
+     * Switches to manual protein color model if not already active.
+     * @param {string} interactorId - Protein interactor ID to color
+     * @param {string} color - Color value (hex, rgb, or named color)
+     * @returns {void}
+     */
     setInteractorColor(interactorId, color) {
         const proteinColourModel = window.compositeModelInst.get("proteinColourAssignment");
         if (!(proteinColourModel instanceof ManualColourModel)) {
@@ -647,6 +805,13 @@ export class CompositeModel extends Backbone.Model {
         this.trigger("currentProteinColourModelChanged", window.linkColor.manualProteinColoursBB);
     }
 
+    /**
+     * Creates a new protein group from currently selected proteins.
+     * Triggered by Enter key press. Alerts if group name already exists.
+     * @param {Object} d3target - D3 selection of target element
+     * @param {Object} evt - jQuery event object
+     * @returns {void}
+     */
     groupSelectedProteins(d3target, evt) {
         const self = this;
         evt = evt.originalEvent;
@@ -669,6 +834,12 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
+    /**
+     * Removes a protein from a specified group. Deletes group if it becomes empty.
+     * @param {string} groupName - Name of the group
+     * @param {string} participantId - Protein participant ID to remove
+     * @returns {void}
+     */
     removeProteinFromGroup (groupName, participantId) { // todo: sort out inconsistent use of "participant"/"protein"/"interactor", its an historical artefact
         const groups = this.get("groups");
         const group = groups.get(groupName);
@@ -679,6 +850,12 @@ export class CompositeModel extends Backbone.Model {
         this.trigger("change:groups");
     }
 
+    /**
+     * Adds a protein to a specified group.
+     * @param {string} groupName - Name of the group
+     * @param {string} participantId - Protein participant ID to add
+     * @returns {void}
+     */
     addProteinToGroup (groupName, participantId) {
         const groups = this.get("groups");
         const group = groups.get(groupName);
@@ -686,6 +863,11 @@ export class CompositeModel extends Backbone.Model {
         this.trigger("change:groups");
     }
 
+    /**
+     * Clears all protein groups after user confirmation.
+     * Shows confirmation dialog before clearing.
+     * @returns {void}
+     */
     clearGroups() {
         const self = this;
         jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear all groups?", "Clear Groups", "Yes", "No", function () {
@@ -694,6 +876,12 @@ export class CompositeModel extends Backbone.Model {
         });
     }
 
+    /**
+     * Automatically creates protein groups based on GO term annotations.
+     * Groups proteins by GO terms that are descendants of "protein complex" (GO0032991).
+     * Clears existing groups after user confirmation.
+     * @returns {void}
+     */
     autoGroup() {
         const self = this;
         jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
@@ -726,6 +914,12 @@ export class CompositeModel extends Backbone.Model {
         });
     }
 
+    /**
+     * Automatically creates protein groups based on cellular compartment GO annotations.
+     * Groups proteins by specified compartment GO terms (currently configured for nucleus GO0005634).
+     * Contains commented-out code for other compartments (mitochondria, ER, cytosol, etc.).
+     * @returns {void}
+     */
     autoGroupCompartments() {
         // const self = this;
         // jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
@@ -824,20 +1018,33 @@ export class CompositeModel extends Backbone.Model {
         this.trigger("change:groups");
     }
 
+    /**
+     * Triggers group collapse in visualization views.
+     * @returns {void}
+     */
     collapseGroups() {
         window.vent.trigger("collapseGroups", true);
     }
 
+    /**
+     * Triggers group expansion in visualization views.
+     * @returns {void}
+     */
     expandGroups() {
         window.vent.trigger("expandGroups", true);
     }
 
-    // Things that can cause a cross-link's minimum distance to change:
-    // 1. New PDB File loaded
-    // 2. Change in alignment
-    // 3. Change in PDB assembly
-    // 4. Change in interModelDistances allowed flag
-    // 5. Change in link's homomultimer status - due to match filtering
+    /**
+     * Calculates the minimum distance for a single crosslink from 3D structural data.
+     * Things that can cause a crosslink's minimum distance to change:
+     * 1. New PDB file loaded, 2. Change in alignment, 3. Change in PDB assembly,
+     * 4. Change in interModelDistances allowed flag, 5. Change in link's homomultimer status.
+     * @param {Object} xlink - Crosslink object
+     * @param {Object} distancesObj - Distances object for calculating 3D distances
+     * @param {Object} protAlignCollection - Protein alignment collection
+     * @param {Object} [options] - Calculation options (average, allowInterModel, calcDecoyProteinDistances)
+     * @returns {number|Object|undefined} Calculated distance or distance object with metadata
+     */
     getSingleCrosslinkDistance(xlink, distancesObj, protAlignCollection, options) {
         if (xlink.toProtein) {
             // distancesObj and alignCollection can be supplied to function or, if not present, taken from model
@@ -859,7 +1066,13 @@ export class CompositeModel extends Backbone.Model {
         }
     }
 
-    // set includeUndefineds to true to preserve indexing of returned distances to input crosslinks
+    /**
+     * Calculates distances for multiple crosslinks from 3D structural data.
+     * By default filters out undefined distances; set includeUndefineds option to preserve indexing.
+     * @param {Array} crosslinks - Array of crosslink objects
+     * @param {Object} [options] - Calculation options (includeUndefineds, average, allowInterModel, returnChainInfo)
+     * @returns {Array} Array of distances (or distance objects if returnChainInfo is true)
+     */
     getCrossLinkDistances(crosslinks, options) {
         options = options || {};
         const includeUndefineds = options.includeUndefineds || false;
@@ -880,6 +1093,12 @@ export class CompositeModel extends Backbone.Model {
         return distArr;
     }
 
+    /**
+     * Retrieves all features for a protein participant.
+     * Merges UniProt features, alignment features, and user annotations.
+     * @param {Object} participant - Protein participant object
+     * @returns {Array} Array of feature objects
+     */
     getParticipantFeatures(participant) {
         const alignColl = this.get("alignColl");
         const featuresArray = [
@@ -892,6 +1111,13 @@ export class CompositeModel extends Backbone.Model {
         }));
     }
 
+    /**
+     * Retrieves features for a protein participant filtered by active annotation types.
+     * Only returns features whose type matches currently shown annotation types.
+     * Optionally includes dynamically generated features (Digestible, Crosslinkable-1, Crosslinkable-2).
+     * @param {Object} participant - Protein participant object
+     * @returns {Array} Array of filtered feature objects
+     */
     getFilteredFeatures(participant) {
 
         let features = this.getParticipantFeatures(participant);
@@ -932,6 +1158,12 @@ export class CompositeModel extends Backbone.Model {
         }, this) : [];
     }
 
+    /**
+     * Calculates the value range (extent) for a crosslink attribute across all crosslinks.
+     * Uses the attribute metadata's unfilteredLinkFunc to extract values from each link.
+     * @param {Object} attrMetaData - Attribute metadata object containing unfilteredLinkFunc
+     * @returns {Array} Two-element array [min, max] representing the attribute's range
+     */
     getAttributeRange(attrMetaData) {
         const allCrossLinks = this.getAllCrossLinks();
         const func = attrMetaData.unfilteredLinkFunc;
@@ -947,6 +1179,12 @@ export class CompositeModel extends Backbone.Model {
         return extent;
     }
 
+    /**
+     * Generates a URL query string representing current application state.
+     * Combines filter model parameters with PDB code and preserves non-filter URL parameters
+     * (sid, upload, decoys, unval, lowestScore, anon).
+     * @returns {string} Complete URL with query parameters reflecting current state
+     */
     generateUrlString() {
         // make url parts from current filter attributes
         let parts = this.get("filterModel").getURLQueryPairs();

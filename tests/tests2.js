@@ -5,7 +5,7 @@ import {blosumLoading, models, postDataLoaded, pretendLoad} from "../js/networkF
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
-import {SearchResultsModel} from "../../CLMS-model/src/search-results-model";
+import {SearchResultsModel} from "../../CLMS-model/js/models/search-results-model";
 
 // Enable full stack traces in console for test failures
 QUnit.config.notrycatch = true;
@@ -39,10 +39,10 @@ export function testSetup2() {
                 // Create fresh model instance for this test
                 blosumLoading({ url: "../R/blosums.json" });
                 const clmsModel = new SearchResultsModel();
-                clmsModel.processMzIdentMLFiles(options.mzidentmlFiles)
-                clmsModel.processMatches(options.matches);
-                clmsModel.processPeptides(options.peptides);
-                clmsModel.processProteins(options.proteins);
+                clmsModel.storeMzIdentMLFiles(options.mzidentmlFiles)
+                clmsModel.storeMatches(options.matches);
+                clmsModel.storePeptides(options.peptides);
+                clmsModel.storeProteins(options.proteins);
 
                 const compositeModelInst = models({}, clmsModel);
 

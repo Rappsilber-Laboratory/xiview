@@ -1,3 +1,10 @@
+/**
+ * @fileoverview 3D molecular visualization view using NGL Viewer.
+ * Displays protein structures from PDB files with crosslink distance overlays.
+ * Supports multiple representations (cartoon, surface, ball+stick), color schemes,
+ * label display, assembly selection, and exports to PDB, PyMOL, Chimera, HADDOCK, and other formats.
+ */
+
 import "../../../css/nglViewBB.css";
 
 import * as _ from "underscore";
@@ -19,11 +26,30 @@ import {NGLExportUtils} from "./NGLExportUtils";
 import {CrosslinkRepresentation} from "./crosslink-representation";
 import d3 from "d3";
 
+/**
+ * Backbone view for 3D molecular structure visualization using NGL Viewer.
+ * Renders protein structures from PDB files with crosslink distance representations,
+ * supports multiple visual styles, color schemes, assembly/model selection,
+ * and exports to various structural biology formats.
+ * @class
+ * @extends BaseFrameView
+ */
 export class NGLViewBB extends BaseFrameView {
+    /**
+     * Creates a new NGLViewBB instance.
+     * @param {Object} options - View configuration options
+     */
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Returns event handler mappings for UI interactions.
+     * Extends parent BaseFrameView events with NGL-specific handlers for:
+     * view controls (center, download, color), export functions (PDB, PyMOL, Chimera, HADDOCK, etc.),
+     * display toggles (labels, residues, selection, distances), and chain label settings.
+     * @returns {Object} Event handler mappings (selector -> method name)
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -55,6 +81,13 @@ export class NGLViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Returns default configuration options for the NGL view.
+     * Includes display settings (labels off, all links shown, cartoon representation),
+     * initial color scheme (uniform), assembly selection, interaction flags,
+     * and export options (with key and title).
+     * @returns {Object} Default option values
+     */
     get defaultOptions() {
         return {
             labelVisible: false,
@@ -76,6 +109,14 @@ export class NGLViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Initializes the NGL 3D viewer with UI controls, NGL stage, and event listeners.
+     * Creates toolbar with display toggle buttons, dropdown menus for exports/representation/coloring,
+     * initializes NGL stage with viewer canvas, sets up model change listeners,
+     * configures crosslink representation handlers, and populates initial structure.
+     * @param {Object} viewOptions - View initialization options
+     * @returns {void}
+     */
     // eslint-disable-next-line no-unused-vars
     initialize(viewOptions) {
         super.initialize(...arguments);
@@ -626,11 +667,22 @@ export class NGLViewBB extends BaseFrameView {
 
     }
 
+    /**
+     * Sets assembly chain configuration for distance calculations.
+     * Configures which chains in the PDB assembly are used for crosslink distance measurements.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     setAssemblyChains() {
         this.model.get("distancesObj").setAssemblyChains(this.model.get("stageModel").get("structureComp").structure, this.options.defaultAssembly);
         return this;
     }
 
+    /**
+     * Updates and displays crosslink statistics in the info panel.
+     * Reports count of links shown in full, shown in part, total filtered links,
+     * and links missing from structure scope. Uses comma formatting for readability.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     reportLinks() {
         const fullLinkCount = this.xlRepr.nglModelWrapper.getFullLinkCount();
         const halfLinkCount = this.xlRepr.nglModelWrapper.getHalfLinkCount();
@@ -645,6 +697,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Repopulates the view with PDB structure information and coverage statistics.
+     * Updates header with PDB ID and title, displays protein coverage percentages,
+     * creates crosslink representation, and triggers initial display with filtered links.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     repopulate() {
         const stageModel = this.model.get("stageModel");
         xilog("REPOPULATE", this.model, stageModel);
@@ -689,6 +747,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Renders the NGL view by showing filtered crosslinks.
+     * Only renders if view is visible. Called on model changes or view visibility changes.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     render() {
         if (this.isVisible()) {
             this.showFiltered();
@@ -697,6 +760,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Triggers NGL stage to recalculate layout and handle window resize.
+     * Called when container dimensions change.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     relayout() {
         const stageModel = this.model.get("stageModel");
         if (stageModel) {
@@ -708,10 +776,22 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Captures current NGL view as an image.
+     * Delegates to downloadImage(). Part of BaseFrameView interface.
+     * @returns {Promise} Promise that resolves when image is downloaded
+     */
     takeImage(){
         return this.downloadImage();
     }
 
+    /**
+     * Generates and downloads a PNG image of the current NGL view.
+     * Creates high-resolution (4x scale) image with antialiasing and transparency,
+     * optionally adds color key and title, then triggers browser download.
+     * Composite process: NGL canvas → blob → canvas with key → PNG file.
+     * @returns {void}
+     */
     downloadImage() {
         // https://github.com/arose/ngl/issues/33
         const stageModel = this.model.get("stageModel");
@@ -778,6 +858,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Updates protein structure color scheme and re-renders representations.
+     * Changes residue and secondary structure coloring based on current colourScheme setting.
+     * Rebuilds NGL color schemes and triggers immediate visual update.
+     * @returns {void}
+     */
     colorChange() {
         // const val = d3.select(".greyer").property("checked");
         // console.log("GREYNESS", val)
@@ -812,6 +898,11 @@ export class NGLViewBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Centers and fits all visible structure in the view.
+     * Triggers NGL autoView with 1000ms animation duration.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     centerView() {
         const stageModel = this.model.get("stageModel");
         if (stageModel) {
@@ -820,6 +911,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports current structure with crosslinks to PDB format.
+     * Includes crosslink information in CONECT and LINK records,
+     * adds metadata comments with PDB ID, search ID, and filter state.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     savePDB() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportPDB(
@@ -834,6 +931,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports crosslinks in PyMOL command syntax format.
+     * Generates PyMOL script with distance commands for visualizing crosslinks.
+     * Includes PDB ID, search ID, and filter metadata in comments.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     exportPymol() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportPymolCrossLinkSyntax(
@@ -847,6 +950,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports 3D crosslink distances to CSV format.
+     * Includes all crosslinks with complete 3D coordinate information.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     export3dLinksCSV() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.export3dLinksCSV(
@@ -855,6 +963,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports selected 3D crosslink distances to CSV format.
+     * Only includes currently selected crosslinks.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     //todo - unnecessary duplication
     export3dLinksCSVSelected() {
         const stageModel = this.model.get("stageModel");
@@ -864,6 +977,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports half-link (partially in structure) crosslinks to CSV format.
+     * Includes crosslinks where only one end is within the structure scope.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     exportHalfInLinksCSV() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportHalfInLinksCSV(
@@ -872,6 +990,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports crosslinks in Chimera pseudobond format.
+     * Generates Chimera-compatible file for visualizing crosslinks as pseudobonds.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     exportChimeraPB() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportChimeraPseudobonds(
@@ -880,6 +1003,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports crosslinks in JWalk format.
+     * JWalk is a tool for analyzing crosslink data in protein structures.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     exportJWalk() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportJWalk(
@@ -888,6 +1016,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports crosslinks in Xlink Analyzer format.
+     * Xlink Analyzer is a PyMOL plugin for crosslink visualization.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     exportXlinkAnalyzer() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportXlinkAnalyzer(
@@ -896,6 +1029,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Exports crosslinks in HADDOCK distance restraints format.
+     * Generates distance restraint file for protein docking with HADDOCK.
+     * Includes crosslinker specificity information and metadata comments.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     exportHaddock() {
         const stageModel = this.model.get("stageModel");
         NGLExportUtils.exportHaddockCrossLinkSyntax(
@@ -913,6 +1052,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Toggles visibility of distance labels on crosslinks.
+     * @param {Event} event - Checkbox change event
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     toggleLabels(event) {
         const bool = event.target.checked;
         this.options.labelVisible = bool;
@@ -925,6 +1069,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Toggles visibility of crosslinked residues (spheres at link endpoints).
+     * @param {Event} event - Checkbox change event
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     toggleResidues(event) {
         const bool = event.target.checked;
         this.options.showResidues = bool;
@@ -935,6 +1084,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Toggles between showing all links or only selected links.
+     * When enabled (selectedOnly=true), hides non-selected crosslinks.
+     * @param {Event} event - Checkbox change event
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     toggleNonSelectedLinks(event) {
         const bool = event.target.checked;
         this.options.selectedOnly = bool;
@@ -944,18 +1099,35 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Toggles display of shortest links only for ambiguous crosslinks.
+     * When enabled, only shows the shortest distance representation for each crosslink.
+     * @param {Event} event - Checkbox change event
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     toggleShortestLinksOnly(event) {
         const bool = event.target.checked;
         this.model.get("stageModel").set("showShortestLinksOnly", bool);
         return this;
     }
 
+    /**
+     * Toggles whether inter-model distances are allowed in calculations.
+     * When enabled, distances can be calculated between chains in different NMR models.
+     * @param {Event} event - Checkbox change event
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     toggleAllowInterModelDistances(event) {
         const bool = event.target.checked;
         this.model.get("stageModel").set("allowInterModelDistances", bool);
         return this;
     }
 
+    /**
+     * Toggles between showing all proteins or only crosslinked proteins.
+     * When showAllProteins is false, hides proteins with no current crosslinks.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     toggleShowAllProteins() {
         const showAllCB = d3.select(".showAllProteinsCB");
         const bool = !showAllCB.node().checked;
@@ -967,6 +1139,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Sets chain label length (Short/Medium/Long) based on radio button selection.
+     * Updates label display with protein names at different levels of detail.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     setChainLabelLength() {
         const checkedElem = d3.select(this.el).select("input.chainLabelLengthRB:checked");
         if (!checkedElem.empty()) {
@@ -980,6 +1157,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Sets whether chain labels have fixed size or scale with zoom.
+     * When enabled, labels maintain constant size regardless of camera distance.
+     * @param {Event} event - Checkbox change event
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     setChainLabelFixedSize(event) {
         const bool = event.target.checked;
         this.options.fixedLabelSize = bool;
@@ -990,6 +1173,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Re-renders NGL representations with updated color schemes.
+     * Applies new color schemes to specified representation/scheme pairs and updates display.
+     * @param {Array<{nglRep: Object, colourScheme: Object, immediateUpdate: boolean}>} repSchemePairs - Array of representation/scheme pairs to update
+     * @returns {void}
+     */
     rerenderColourSchemes(repSchemePairs) {
         if (this.xlRepr && this.isVisible()) {
             xilog("rerendering ngl");
@@ -998,6 +1187,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Updates display to show currently highlighted crosslinks.
+     * Visually emphasizes highlighted links retrieved from the model wrapper.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     showHighlightedLinks() {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setHighlightedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
@@ -1006,6 +1200,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Updates display to show currently selected crosslinks.
+     * Visually emphasizes selected links retrieved from the model wrapper.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     showSelectedLinks() {
         if (this.xlRepr && this.isVisible()) {
             this.xlRepr.setSelectedLinks(this.xlRepr.nglModelWrapper.getFullLinks());
@@ -1014,6 +1213,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Updates display with currently filtered crosslinks.
+     * Triggers stage model to recalculate and display filtered link list,
+     * then reports link statistics.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     showFiltered() {
         if (this.xlRepr && this.isVisible()) {
             this.model.get("stageModel").setFilteredLinkList();
@@ -1021,6 +1226,11 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Clears all highlighted crosslinks and hides tooltip.
+     * Resets highlights to empty array and clears tooltip contents.
+     * @returns {NGLViewBB} This view instance for chaining
+     */
     clearHighlighted() {
         if (this.xlRepr && this.isVisible()) {
             // next line eventually fires through an empty selection to showHighlighted above
@@ -1030,6 +1240,12 @@ export class NGLViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Generates abbreviated string representation of current view options.
+     * Includes representation type, label visibility, selection mode, residue display,
+     * shortest-links-only, and inter-model distance settings.
+     * @returns {string} Abbreviated options string for filenames
+     */
     optionsToString() {
         const abbvMap = {
             labelVisible: "LBLSVIS",
@@ -1045,12 +1261,22 @@ export class NGLViewBB extends BaseFrameView {
         return objectStateToAbbvString(optionsPlus, fields, d3.set(), abbvMap);
     }
 
+    /**
+     * Generates filename string for PDB exports with state information.
+     * Format: "{PDB_ID}-CrossLinks-{SEARCHES}-{FILTERS}"
+     * @returns {string} Legal filename string with PDB and state info
+     */
     pdbFilenameStateString() {
         const stageModel = this.model.get("stageModel");
         return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString() + "-" + filterStateToString());
     }
 
-    // Returns a useful filename given the view and filters current states
+    /**
+     * Generates comprehensive filename string with full view and filter state.
+     * Includes search IDs, view identifier, view options, PDB ID, and filter state.
+     * Format: "{SEARCHES}--{VIEW_ID}-{OPTIONS}-PDB={PDB_ID}--{FILTERS}"
+     * @returns {string} Legal filename string with complete state information
+     */
     filenameStateString() {
         const stageModel = this.model.get("stageModel");
         return makeLegalFileName(searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + filterStateToString());

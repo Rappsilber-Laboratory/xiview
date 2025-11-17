@@ -1,15 +1,37 @@
+/**
+ * @fileoverview Utility functions for xiVIEW application.
+ * Contains helper functions for DOM manipulation, file naming, data formatting,
+ * visualization utilities, and cross-browser compatibility.
+ */
+
 import * as _ from "underscore";
 import d3 from "d3";
 import * as $ from "jquery";
 
 const debug = false;
 
+/**
+ * Debug logging function that only logs when debug flag is true.
+ * @param {...*} args - Arguments to pass to console.log
+ * @returns {void}
+ */
 export function xilog() {
     if (debug && (typeof (console) !== "undefined")) {
         console.log.apply(console, arguments);
     }
 }
 
+/**
+ * Collection of commonly used regular expressions for validation and parsing.
+ * @type {Object}
+ * @property {RegExp} uniprotAccession - Pattern for UniProt accession IDs
+ * @property {string} pdbPattern - Pattern for 4-character PDB IDs
+ * @property {string} multiPdbPattern - Pattern for multiple PDB IDs with separators
+ * @property {RegExp} multiPdbSplitter - Global pattern for extracting PDB IDs from text
+ * @property {RegExp} hexColour - Pattern for 3 or 6 character hex colour codes
+ * @property {RegExp} invalidFilenameChars - Characters not allowed in filenames
+ * @property {string} digitsOnly - Pattern for 3 or more consecutive digits
+ */
 export const commonRegexes = {
     uniprotAccession: new RegExp("[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}", "i"),
     pdbPattern: "[A-Za-z0-9]{4}",
@@ -21,8 +43,14 @@ export const commonRegexes = {
     digitsOnly: "\\d{3,}",
 };
 
-//used by downloads and selectiontableview, and spectrumWrapperView
-// return comma-separated list of protein names from array of protein ids
+/**
+ * Returns a semicolon-separated list of protein names for a match's matched peptide.
+ * Used by downloads, selection table view, and spectrum wrapper view.
+ * @param {Object} match - The match object containing matchedPeptides
+ * @param {number} matchedPeptideIndex - Index (0 or 1) of the matched peptide
+ * @param {Object} clmsModel - The CLMS model containing protein information
+ * @returns {string} Semicolon-separated protein names
+ */
 export function proteinConcat(match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const pnames = mpeptides ? mpeptides.prt.map(function (pid) {
@@ -31,14 +59,26 @@ export function proteinConcat(match, matchedPeptideIndex, clmsModel) {
     return pnames.join(";");
 }
 
-//used by downloads and selectiontableview
+/**
+ * Returns a semicolon-separated list of peptide positions for a match's matched peptide.
+ * Used by downloads and selection table view.
+ * @param {Object} match - The match object containing matchedPeptides
+ * @param {number} matchedPeptideIndex - Index (0 or 1) of the matched peptide
+ * @returns {string} Semicolon-separated peptide positions, or empty string if no matched peptides
+ */
 export function pepPosConcat(match, matchedPeptideIndex) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     return mpeptides ? mpeptides.pos.join("; ") : "";
 }
 
 
-//used by downloads and selectiontableview
+/**
+ * Returns full crosslink positions (peptide position + link position - 1) for a match.
+ * Used by downloads and selection table view.
+ * @param {Object} match - The match object containing matchedPeptides and linkPos1/linkPos2
+ * @param {number} matchedPeptideIndex - Index (0 or 1) of the matched peptide
+ * @returns {string} Semicolon-separated full positions, or empty string if no matched peptides
+ */
 export function fullPosConcat(match, matchedPeptideIndex) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const linkPos = matchedPeptideIndex === 0 ? match.linkPos1 : match.linkPos2;
@@ -48,6 +88,12 @@ export function fullPosConcat(match, matchedPeptideIndex) {
 }
 
 
+/**
+ * Common UI label strings used across the application.
+ * @type {Object}
+ * @property {string} downloadImg - Label for image download button
+ * @property {string} shareLink - Label for share link button
+ */
 export const commonLabels = {
     downloadImg: "Download Image As ", // http://ux.stackexchange.com/a/61757/76906
     shareLink: "Share Search Link with Current Filter State",
@@ -59,23 +105,41 @@ export const commonLabels = {
 // },
 
 
-//used by baseframeview
-// http://stackoverflow.com/questions/10066630/how-to-check-if-element-is-visible-in-zepto
+/**
+ * Checks if a jQuery/Zepto DOM element is visible.
+ * Element is considered visible if display is not 'none', visibility is not 'hidden',
+ * and it has a height greater than 0.
+ * Used by base frame view.
+ * @param {Object} zeptoElem - jQuery or Zepto wrapped DOM element
+ * @returns {boolean} True if element is visible
+ */
 export function isZeptoDOMElemVisible(zeptoElem) { // could be a jquery-ref'ed elem as well
     //console.log ("zepto", zeptoElem);
     const display = zeptoElem.css("display") !== "none";
     return display && (zeptoElem.css("visibility") !== "hidden") && (zeptoElem.height() > 0);
 }
 
-// used by scatterplot
-// try .layerX / .layerY first as .offsetX / .offsetY is wrong in firefox
-// in fact don't use layerX / offsetX, they're unreliable cross-browser
+/**
+ * Gets the X coordinate of an event relative to an element in a cross-browser compatible way.
+ * Uses clientX and offset calculations instead of unreliable layerX/offsetX.
+ * Used by scatterplot view.
+ * @param {Event} evt - The browser event object
+ * @param {Element} [optElem] - Optional element to calculate offset from (defaults to event target)
+ * @returns {number} X coordinate relative to the element
+ */
 export function crossBrowserElementX(evt, optElem) {
     return evt.clientX - $(optElem || evt.target).offset().left; // use evt.target if no optional element passed
     //return (evt.layerX || evt.offsetX) - evt.target.offsetLeft;
 }
 
-// used by scatterplot
+/**
+ * Gets the Y coordinate of an event relative to an element in a cross-browser compatible way.
+ * Uses clientY and offset calculations.
+ * Used by scatterplot view.
+ * @param {Event} evt - The browser event object
+ * @param {Element} [optElem] - Optional element to calculate offset from (defaults to event target)
+ * @returns {number} Y coordinate relative to the element
+ */
 export function crossBrowserElementY(evt, optElem) {
     return evt.clientY - $(optElem || evt.target).offset().top;
 }
@@ -94,7 +158,15 @@ const niceRoundMap = {
     10: 10
 };
 
-//used by minigram, circular, distogram
+/**
+ * Rounds a value to a "nice" number suitable for chart axes (1, 2, 5, 10, 20, 50, etc.).
+ * Used by minigram, circular, and distogram views.
+ * @param {number} val - The value to round
+ * @returns {number} The rounded "nice" value
+ * @example
+ * niceRound(37); // returns 50
+ * niceRound(123); // returns 200
+ */
 export function niceRound(val) {
     const log = Math.floor(Math.log(val) / Math.log(10)); //no log10 func in IE
     const pow = Math.pow(10, log);
@@ -104,8 +176,14 @@ export function niceRound(val) {
     return roundVal;
 }
 
-//used in scatterplot for axes tooltips
-// correlates to d3's .round with decimal places function
+/**
+ * Rounds a value up to a specified number of decimal places.
+ * Correlates to d3's .round with decimal places function.
+ * Used in scatterplot for axes tooltips.
+ * @param {number} val - The value to ceil
+ * @param {number} decimalPlaces - Number of decimal places to preserve
+ * @returns {number} The ceiled value
+ */
 export function ceil(val, decimalPlaces) {
     const pow = Math.pow(10, decimalPlaces);
     val *= pow;
@@ -114,6 +192,12 @@ export function ceil(val, decimalPlaces) {
 }
 
 
+/**
+ * Rounds a value down to a specified number of decimal places.
+ * @param {number} val - The value to floor
+ * @param {number} decimalPlaces - Number of decimal places to preserve
+ * @returns {number} The floored value
+ */
 export function floor(val, decimalPlaces) {
     const pow = Math.pow(10, decimalPlaces);
     val *= pow;
@@ -122,7 +206,14 @@ export function floor(val, decimalPlaces) {
 }
 
 
-//used by nglutils, ngl-model-wrapper, distances
+/**
+ * Rounds a value to the nearest interval.
+ * Handles both large (>1) and small (<1) intervals correctly to avoid floating point issues.
+ * Used by NGL utils, NGL model wrapper, and distances.
+ * @param {number} val - The value to round
+ * @param {number} interval - The interval to round to
+ * @returns {number} The rounded value, or original value if interval is falsy
+ */
 export function toNearest(val, interval) {
     // adapted from https://stackoverflow.com/a/27861660/368214 - inverting small intervals avoids .00000001 stuff
     return interval ?
@@ -131,7 +222,16 @@ export function toNearest(val, interval) {
 }
 
 
-//used by main, network frame
+/**
+ * Displays an error message in a modal dialog box.
+ * Creates the error box on first use, then shows it with the provided message.
+ * Used by main and network frame.
+ * @param {Function} condition - Function that returns true if error should be displayed
+ * @param {string} message - HTML message to display in the error box
+ * @param {string} [borderColour] - Optional CSS color for the border
+ * @param {string} [scale] - Optional CSS transform scale value
+ * @returns {void}
+ */
 export function displayError(condition, message, borderColour, scale) {
     if (condition()) {
         let box = d3.select("#clmsErrorBox");
@@ -162,7 +262,14 @@ export function displayError(condition, message, borderColour, scale) {
 }
 
 
-//used here and by nglview
+/**
+ * Creates or reuses a canvas element with the specified dimensions.
+ * Used here and by NGL view.
+ * @param {number} width - Canvas width in pixels
+ * @param {number} height - Canvas height in pixels
+ * @param {Object} [existingD3CanvasSel] - Optional existing d3 selection of canvas to reuse
+ * @returns {Object} Object containing canvas, context, dataStructure (ImageData), and d3canvas
+ */
 export function makeCanvas(width, height, existingD3CanvasSel) {
     const canvas = (existingD3CanvasSel ? existingD3CanvasSel.node() : null) || document.createElement("canvas");
     const d3canvas = d3.select(canvas);
@@ -178,7 +285,12 @@ export function makeCanvas(width, height, existingD3CanvasSel) {
 }
 
 
-//used here and by nglview
+/**
+ * Nullifies canvas object properties for cleanup/garbage collection.
+ * Used here and by NGL view.
+ * @param {Object} canvasObj - Canvas object with canvas, context, and dataStructure properties
+ * @returns {void}
+ */
 export function nullCanvasObj(canvasObj) {
     canvasObj.canvas = null;
     canvasObj.context = null;
@@ -186,7 +298,15 @@ export function nullCanvasObj(canvasObj) {
 }
 
 
-//only used by baseframeview, can be moved
+/**
+ * Converts a d3 canvas to an SVG image element with proper background color.
+ * The resulting PNG will have a non-transparent background matching the canvas background.
+ * Only used by base frame view.
+ * @param {Object} d3canvas - Canvas element wrapped in a d3 selection
+ * @param {Object} svgImage - SVG image element (d3 selection) to populate
+ * @param {Function} callback - Callback function called with svgImage when load completes
+ * @returns {void}
+ */
 export function drawCanvasToSVGImage(d3canvas, svgImage, callback) { // d3canvas is a canvas wrapped in a d3 selection
     let destinationCanvasObj;
     let url;
@@ -236,7 +356,13 @@ export function drawCanvasToSVGImage(d3canvas, svgImage, callback) { // d3canvas
         });
 }
 
-// Hide overlapping d3 axis labels - used by minigram, distogram, martix, scatterplot
+/**
+ * Hides overlapping d3 axis labels to prevent clutter.
+ * Iterates through axis tick labels and hides any that overlap with the previous visible label.
+ * Used by minigram, distogram, matrix, and scatterplot views.
+ * @param {Object} d3AxisElem - d3 selection of the axis element
+ * @returns {void}
+ */
 export function declutterAxis(d3AxisElem) {
     let lastBounds = {
         left: -100,
@@ -263,7 +389,14 @@ export function declutterAxis(d3AxisElem) {
         });
 }
 
-// Remove non-round d3 axis labels and associated ticks - used by mimigram and distogram
+/**
+ * Removes non-round axis labels and adjusts tick stroke widths based on value roundness.
+ * Labels that are multiples of a power of 10 are emphasized with thicker ticks.
+ * Used by minigram and distogram views.
+ * @param {Object} d3AxisElem - d3 selection of the axis element
+ * @param {number} maxVal - Maximum value on the axis
+ * @returns {void}
+ */
 export function niceValueAxis(d3AxisElem, maxVal) {
     const u = Math.round(Math.log10(maxVal + 3)) - 1;
     const m = Math.pow(10, u);
@@ -283,17 +416,37 @@ export function niceValueAxis(d3AxisElem, maxVal) {
 }
 
 
+/**
+ * Converts a string to a legal DOM ID by removing invalid characters.
+ * Removes leading non-lowercase characters and any characters not in [\w:.-]
+ * @param {string} id - The string to convert to a legal DOM ID
+ * @returns {string} Legal DOM ID string
+ */
 export function makeLegalDomID(id) {
     const validDomID = /^[^a-z]+|[^\w:.-]+/gi;
     return id.replace(validDomID, "");
 }
 
 
-// Routine assumes on click methods are added via backbone definitions, though they could be added later with d3
-// targetDiv is a d3 select element
-// buttonData array of objects of type:
-// {class: "circRadio", label: "Alphabetical", id: "alpha", type: "radio"|"checkbox"|"button",
-// initialState: true|false, group: "sort", tooltip: "tooltipText", noBreak: true|false},
+/**
+ * Creates Backbone-compatible button/checkbox/radio controls in a target div.
+ * Assumes click methods are added via Backbone definitions, though they could be added later with d3.
+ * @param {Object} targetDiv - d3 selection of the container element
+ * @param {string} baseID - Base ID string to prefix all button IDs
+ * @param {Object[]} buttonData - Array of button configuration objects
+ * @param {string} buttonData[].class - CSS class for the control
+ * @param {string} buttonData[].label - Label text for the control
+ * @param {string} buttonData[].id - Unique identifier for the control
+ * @param {string} buttonData[].type - Type: "radio", "checkbox", or "button"
+ * @param {boolean} [buttonData[].initialState] - Initial checked state for radio/checkbox
+ * @param {string} [buttonData[].group] - Group name for radio buttons
+ * @param {string} [buttonData[].tooltip] - Tooltip text
+ * @param {boolean} [buttonData[].noBreak] - Whether to prevent line breaks in label
+ * @param {string} [buttonData[].header] - Optional header text
+ * @param {boolean} [buttonData[].inputFirst] - Whether to place input before label text
+ * @param {*} [buttonData[].value] - Value property for the input
+ * @returns {void}
+ */
 export function makeBackboneButtons(targetDiv, baseID, buttonData) {
     const makeID = function (d) {
         return makeLegalDomID(baseID + d.id);
@@ -397,8 +550,15 @@ export function makeBackboneButtons(targetDiv, baseID, buttonData) {
 
 }
 
-// Functions for making useful file names
-
+/**
+ * Converts object state to an abbreviated string representation for use in filenames.
+ * Filters out empty/false/undefined values and formats them with abbreviations.
+ * @param {Object} object - Object to convert (can be Backbone model or plain object)
+ * @param {string[]} fields - Array of field names to include
+ * @param {Set} zeroFormatFields - Set of field names that should be formatted with 4 decimal places
+ * @param {Object} abbvMap - Map of field names to their abbreviations
+ * @returns {string} Dot-separated string of field=value pairs
+ */
 export function objectStateToAbbvString(object, fields, zeroFormatFields, abbvMap) {
     fields = fields.filter(function (field) {
         const val = object.get ? object.get(field) || object[field] : object[field];
@@ -431,11 +591,20 @@ export function objectStateToAbbvString(object, fields, zeroFormatFields, abbvMa
     return strParts.join(".");
 }
 
+/**
+ * Converts the current filter state to a string representation.
+ * Truncates to 160 characters maximum.
+ * @returns {string} Filter state string
+ */
 export function filterStateToString() {
     const filterStr = window.compositeModelInst.get("filterModel").stateString();
     return filterStr.substring(0, 160);
 }
 
+/**
+ * Converts the current searches to a string representation.
+ * @returns {string} Search IDs joined with hyphens, prefixed with "SRCH="
+ */
 export function searchesToString() {
     const searches = Array.from(window.compositeModelInst.get("clmsModel").getSearches());
     const searchKeys = _.pluck(searches, 0); // just the keys
@@ -444,6 +613,12 @@ export function searchesToString() {
 }
 
 
+/**
+ * Removes invalid characters from a filename string and truncates to 240 characters.
+ * Uses commonRegexes.invalidFilenameChars to determine invalid characters.
+ * @param {string} fileNameStr - The filename string to sanitize
+ * @returns {string} Legal filename string
+ */
 export function makeLegalFileName(fileNameStr) {
     let newStr = fileNameStr.replace(commonRegexes.invalidFilenameChars, "");
     newStr = newStr.substring(0, 240);
@@ -451,7 +626,13 @@ export function makeLegalFileName(fileNameStr) {
 }
 
 
-// Function for making a cross-link colour key as an svg group element
+/**
+ * Creates or updates a crosslink colour key as an SVG group element.
+ * Generates a visual legend showing the color scheme with labels and optionally a gradient.
+ * @param {Object} colourAssign - Color assignment model containing scale and scheme information
+ * @param {Object} svgElem - d3 selection of the SVG element to add the key to
+ * @returns {void}
+ */
 export function updateColourKey(colourAssign, svgElem) {
     svgElem.attr("height", "200");
 
@@ -556,6 +737,17 @@ export function updateColourKey(colourAssign, svgElem) {
     }
 }
 
+/**
+ * Creates or updates an annotation colour key from Backbone model array.
+ * Each model in the array is rendered as a colored swatch with label.
+ * @param {Object[]} bbModelArray - Array of Backbone models to display in the key
+ * @param {Object} svgElem - d3 selection of the SVG element to add the key to
+ * @param {Object} [myOptions] - Options to customize the key display
+ * @param {Function} [myOptions.colour] - Function to extract color from model JSON (default: d => d.colour)
+ * @param {Function} [myOptions.label] - Function to extract label from model JSON (default: d => d.label || d.name)
+ * @param {string} [myOptions.title] - Title for the key (default: "Key")
+ * @returns {void}
+ */
 export function updateAnnotationColourKey(bbModelArray, svgElem, myOptions) {
     const defaults = {
         colour: function (d) {
@@ -609,14 +801,24 @@ export function updateAnnotationColourKey(bbModelArray, svgElem, myOptions) {
 }
 
 
-// settings can be
-// addToElem - element to add select elements to
-// selectList - names of select elements to add
-// optionList - options to add to each select element (same)
-// selectLabelFunc - function to set human readable name for select element label
-// optionLabelFunc - function to set human readable name for option
-// changeFunc - function that runs when change event occurs on a select element
-// initialSelectionFunc - function that decides initially set option
+/**
+ * Adds multiple select dropdown controls to a container element.
+ * Creates labeled select elements with options and change handlers.
+ * @param {Object} settings - Configuration object for the select controls
+ * @param {Object} settings.addToElem - d3 selection of element to add select controls to
+ * @param {Array} [settings.selectList=[]] - Array of select element identifiers
+ * @param {Array} [settings.optionList=[]] - Array of options to add to each select
+ * @param {Function} [settings.selectLabelFunc] - Function to generate label text for select (default: d => d)
+ * @param {Function} [settings.optionLabelFunc] - Function to generate label text for option (default: d => d)
+ * @param {Function} [settings.optionValueFunc] - Function to generate value for option (default: d => d)
+ * @param {Function} [settings.optionSortFunc] - Optional function to sort options
+ * @param {Function} [settings.selectLabelTooltip] - Function to generate tooltip for select label
+ * @param {Function} [settings.initialSelectionFunc] - Function to determine initial selected option (default: first option)
+ * @param {Function} [settings.idFunc] - Function to generate IDs for data binding (default: index)
+ * @param {Function} [settings.changeFunc] - Function to call when select value changes
+ * @param {boolean} [settings.keepOldOptions] - Whether to keep existing options when updating
+ * @returns {Object} d3 selection of the created select elements
+ */
 export function addMultipleSelectControls(settings) {
     const defaults = {
         selectList: [],
@@ -696,8 +898,15 @@ export function addMultipleSelectControls(settings) {
 }
 
 
-// add to local storage, partObj is object such as {distanceColours: {"BS3": {domain:[15,25], range:["red", "blue", "green"]} }} that gets merged
-// into existing stored object
+/**
+ * Merges an object into existing localStorage data using deep extend.
+ * Creates the storage entry if it doesn't exist.
+ * @param {Object} partObj - Partial object to merge into storage (e.g., {distanceColours: {"BS3": {domain:[15,25], range:["red", "blue", "green"]}}})
+ * @param {string} [objName="xiView"] - Name of the localStorage item
+ * @returns {void}
+ * @example
+ * setLocalStorage({userPrefs: {theme: "dark"}}, "xiView");
+ */
 export function setLocalStorage(partObj, objName) {
     objName = objName || "xiView";
     const storageStr = localStorage.getItem(objName) || "{}";
@@ -706,6 +915,12 @@ export function setLocalStorage(partObj, objName) {
     localStorage.setItem(objName, JSON.stringify(storage));
 }
 
+/**
+ * Retrieves and parses a JSON object from localStorage.
+ * Returns empty object if item doesn't exist.
+ * @param {string} [objName="xiView"] - Name of the localStorage item
+ * @returns {Object} Parsed object from localStorage, or empty object if not found
+ */
 export function getLocalStorage(objName) {
     objName = objName || "xiView";
     const storageStr = localStorage.getItem(objName) || "{}";
