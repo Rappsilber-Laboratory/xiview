@@ -65,4 +65,20 @@ export class SpectraData {
     get externalFormatDocumentation() {
         return this._json.external_format_documentation;
     }
+
+    /**
+     * Convert to JSON object for serialization
+     * @returns {Object} Object with all getter values
+     */
+    toJSON() {
+        return {
+            // id: this.id,
+            fileFormat: this.fileFormat,
+            location: this.location,
+            name: this.name,
+            spectrumIdFormat: this.spectrumIdFormat,
+            // uploadId: this.uploadId,
+            externalFormatDocumentation: this.externalFormatDocumentation
+        };
+    }
 }

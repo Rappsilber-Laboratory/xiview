@@ -1,4 +1,4 @@
-import {SearchResultsModel} from "../src/search-results-model";
+import {SearchResultsModel} from "../js/models/search-results-model";
 
 /**
  * Loads test data from JSON files and populates a SearchResultsModel
@@ -33,15 +33,15 @@ export async function loadTestData(baseUrl = "./test-data") {
         ]);
 
         // Process data
-        clmsModel.processMatches(matchesData);
-        clmsModel.processPeptides(peptidesData);
-        clmsModel.processProteins(proteinsData);
+        clmsModel.storeMatches(matchesData);
+        clmsModel.storePeptides(peptidesData);
+        clmsModel.storeProteins(proteinsData);
         clmsModel.processSearchModifications(modificationsData);
-        clmsModel.processEnzymes(enzymesData);
-        clmsModel.processSpectraData(spectraData);
-        clmsModel.processSpectrumIdentificationProtocols(protocolsData);
-        clmsModel.processAnalysisCollectionSpectrumIdentifications(analysisCollectionData);
-        clmsModel.processMzIdentMLFiles(mzidentmlFilesData);
+        clmsModel.storeEnzymes(enzymesData);
+        clmsModel.storeSpectraData(spectraData);
+        clmsModel.storeSpectrumIdentificationProtocols(protocolsData);
+        clmsModel.storeAnalysisCollectionSpectrumIdentifications(analysisCollectionData);
+        clmsModel.storeMzIdentMLFiles(mzidentmlFilesData);
 
         // After loading all data, call parseJSON to construct internal structures
         // This populates participants, crosslinks, matches arrays, etc.

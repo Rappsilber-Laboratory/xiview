@@ -102,4 +102,25 @@ export class SearchModification {
     get crosslinkerId() {
         return this._json.crosslinker_id;
     }
+
+    /**
+     * Convert to JSON object for serialization
+     * @returns {Object} Object with all getter values
+     */
+    toJSON() {
+        return {
+            // id: this.id,
+            massDelta: this.massDelta,
+            location: this.location,
+            residue: this.residue,
+            searchModificationType: this.searchModificationType,
+            // uploadId: this.uploadId,
+            // protocolId: this.protocolId,
+            mass: this.mass,
+            residues: this.residues,
+            fixedMod: this.fixedMod,
+            accessions: this.accessions,
+            crosslinkerId: this.crosslinkerId
+        };
+    }
 }

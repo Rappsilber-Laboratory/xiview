@@ -89,4 +89,21 @@ export class SpectrumIdentificationProtocol {
     get threshold() {
         return this._json.threshold;
     }
+
+    /**
+     * Convert to JSON object for serialization
+     * @returns {Object} Object with all getter values
+     */
+    toJSON() {
+        return {
+            // id: this.id,
+            spectrumIdentificationProtocolRef: this.spectrumIdentificationProtocolRef,
+            // uploadId: this.uploadId,
+            fragmentTolerance: this.fragmentTolerance,
+            fragmentToleranceUnit: this.fragmentToleranceUnit,
+            additionalSearchParams: this.additionalSearchParams,
+            analysisSoftware: this.analysisSoftware,
+            threshold: this.threshold
+        };
+    }
 }

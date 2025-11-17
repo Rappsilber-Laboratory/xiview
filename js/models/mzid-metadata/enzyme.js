@@ -126,4 +126,28 @@ export class Enzyme {
     get cTermGainCorrected() {
         return this._json.c_term_gain;
     }
+
+    /**
+     * Convert to JSON object for serialization
+     * @returns {Object} Object with all getter values
+     */
+    toJSON() {
+        return {
+            // id: this.id,
+            name: this.name,
+            cleavage: this.cleavage,
+            specificity: this.specificity,
+            nTermGain: this.nTermGain,
+            cTermGain: this.cTermGain,
+            // uploadId: this.uploadId,
+            // protocolId: this.protocolId,
+            siteRegexp: this.siteRegexp,
+            minDistance: this.minDistance,
+            missedCleavages: this.missedCleavages,
+            semiSpecific: this.semiSpecific,
+            accession: this.accession,
+            nTermGainCorrected: this.nTermGainCorrected,
+            cTermGainCorrected: this.cTermGainCorrected
+        };
+    }
 }

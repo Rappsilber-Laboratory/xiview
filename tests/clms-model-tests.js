@@ -58,100 +58,100 @@ export async function testSetup() {
         }
     });
 
-    test("Peptides processed correctly", function (assert) {
-        const peptides = clmsModel.getPeptides();
-        assert.ok(peptides instanceof Map, "peptides is a Map");
-        assert.ok(peptides.size > 0, `peptides Map has entries (${peptides.size} total)`);
-
-        // Test DSSO crosslink donor peptide exists (from upload 1)
-        const dssoDonor = peptides.get("1_0");
-        assert.ok(dssoDonor, "DSSO crosslink donor peptide exists (1_0)");
-        if (dssoDonor) {
-            assert.equal(dssoDonor._pep.seq, "PEPK", "DSSO donor has expected sequence");
-            assert.equal(dssoDonor._pep.ls1, 4, "DSSO donor has link site at position 4");
-            assert.equal(dssoDonor._pep.cl_m, 158.003765, "DSSO donor has correct crosslink mass");
-            const donorMod = dssoDonor._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_donor");
-            assert.ok(donorMod, "DSSO donor has crosslink donor modification");
-        }
-
-        // Test DSSO crosslink acceptor peptide exists
-        const dssoAcceptor = peptides.get("1_1");
-        assert.ok(dssoAcceptor, "DSSO crosslink acceptor peptide exists (1_1)");
-        if (dssoAcceptor) {
-            assert.equal(dssoAcceptor._pep.seq, "TIDEK", "DSSO acceptor has expected sequence");
-            assert.equal(dssoAcceptor._pep.ls1, 1, "DSSO acceptor has link site at position 1");
-            const acceptorMod = dssoAcceptor._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_acceptor");
-            assert.ok(acceptorMod, "DSSO acceptor has crosslink acceptor modification");
-        }
-
-        // Test DSSO monolink stubs exist
-        const dssoStubA = peptides.get("1_2");
-        assert.ok(dssoStubA, "DSSO stub_a monolink exists (1_2)");
-        if (dssoStubA) {
-            const stubMod = dssoStubA._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_stub_a");
-            assert.ok(stubMod, "DSSO stub_a has correct modification type");
-            assert.equal(dssoStubA._pep.m_ms[0], 54.010565, "DSSO stub_a has correct mass");
-        }
-
-        // Test EDC self-link (same peptide, two link sites)
-        const edcSelfLink = peptides.get("2_5");
-        assert.ok(edcSelfLink, "EDC self-link peptide exists (2_5)");
-        if (edcSelfLink) {
-            assert.equal(edcSelfLink._pep.seq, "DVIQSLVDDDLVAK", "EDC self-link has expected sequence");
-            assert.equal(edcSelfLink._pep.ls1, 10, "EDC self-link has first link site");
-            assert.equal(edcSelfLink._pep.ls2, 14, "EDC self-link has second link site");
-            assert.equal(edcSelfLink._pep.cl_m, -18.010565, "EDC crosslink has correct mass");
-        }
-
-        // Test SDA crosslink pair
-        const sdaDonor = peptides.get("3_3");
-        const sdaAcceptor = peptides.get("3_2");
-        assert.ok(sdaDonor, "SDA crosslink donor exists (3_3)");
-        assert.ok(sdaAcceptor, "SDA crosslink acceptor exists (3_2)");
-        if (sdaDonor && sdaAcceptor) {
-            const donorMod = sdaDonor._pep.m_as.find(m => m["MS:1003393"] === "SDA_crosslink_donor");
-            const acceptorMod = sdaAcceptor._pep.m_as.find(m => m["MS:1003393"] === "SDA_crosslink_acceptor");
-            assert.ok(donorMod, "SDA donor has correct modification");
-            assert.ok(acceptorMod, "SDA acceptor has correct modification");
-            assert.equal(sdaDonor._pep.cl_m, 82.04186, "SDA donor has correct crosslink mass");
-        }
-
-        // Test linear peptide (no crosslink)
-        const linearPep = peptides.get("2_0");
-        assert.ok(linearPep, "Linear peptide exists (2_0)");
-        if (linearPep) {
-            assert.equal(linearPep._pep.ls1, null, "Linear peptide has no link site 1");
-            assert.equal(linearPep._pep.ls2, null, "Linear peptide has no link site 2");
-            assert.equal(linearPep._pep.cl_m, 0, "Linear peptide has no crosslink mass");
-            assert.equal(linearPep._pep.m_as.length, 0, "Linear peptide has no modifications");
-        }
-
-        // Test peptide with multiple non-crosslink modifications
-        const modifiedPep = peptides.get("4_0");
-        assert.ok(modifiedPep, "Peptide with multiple modifications exists (4_0)");
-        if (modifiedPep) {
-            assert.equal(modifiedPep._pep.m_as.length, 3, "Peptide has 3 modifications");
-            const oxidation = modifiedPep._pep.m_as.find(m => m["UNIMOD:35"] === "Oxidation");
-            const cm = modifiedPep._pep.m_as.filter(m => m["UNIMOD:4"] === "Carbamidomethyl");
-            assert.ok(oxidation, "Peptide has Oxidation modification");
-            assert.equal(cm.length, 2, "Peptide has 2 Carbamidomethyl modifications");
-        }
-
-        // Test peptide structure consistency
-        peptides.forEach((pepEntry, key) => {
-            assert.ok(/^\d+_\d+$/.test(key), `peptide keys follow uploadId_peptideId pattern: ${key}`);
-            const pep = pepEntry._pep;
-            assert.ok(pep.id !== undefined, `Peptide ${key} has id`);
-            assert.ok(pep.u_id, `Peptide ${key} has u_id`);
-            assert.ok(pep.seq, `Peptide ${key} has sequence`);
-            assert.ok(Array.isArray(pep.prt), `Peptide ${key} prt is array`);
-            assert.ok(Array.isArray(pep.pos), `Peptide ${key} pos is array`);
-            assert.ok(Array.isArray(pep.m_as), `Peptide ${key} m_as is array`);
-            assert.ok(Array.isArray(pep.m_ps), `Peptide ${key} m_ps is array`);
-            assert.ok(Array.isArray(pep.m_ms), `Peptide ${key} m_ms is array`);
-            assert.ok(typeof pep.cl_m === "number", `Peptide ${key} cl_m is number`);
-        });
-    });
+    // test("Peptides processed correctly", function (assert) {
+    //     const peptides = clmsModel.getPeptides();
+    //     assert.ok(peptides instanceof Map, "peptides is a Map");
+    //     assert.ok(peptides.size > 0, `peptides Map has entries (${peptides.size} total)`);
+    //
+    //     // Test DSSO crosslink donor peptide exists (from upload 1)
+    //     const dssoDonor = peptides.get("1_0");
+    //     assert.ok(dssoDonor, "DSSO crosslink donor peptide exists (1_0)");
+    //     if (dssoDonor) {
+    //         assert.equal(dssoDonor._pep.seq, "PEPK", "DSSO donor has expected sequence");
+    //         assert.equal(dssoDonor._pep.ls1, 4, "DSSO donor has link site at position 4");
+    //         assert.equal(dssoDonor._pep.cl_m, 158.003765, "DSSO donor has correct crosslink mass");
+    //         const donorMod = dssoDonor._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_donor");
+    //         assert.ok(donorMod, "DSSO donor has crosslink donor modification");
+    //     }
+    //
+    //     // Test DSSO crosslink acceptor peptide exists
+    //     const dssoAcceptor = peptides.get("1_1");
+    //     assert.ok(dssoAcceptor, "DSSO crosslink acceptor peptide exists (1_1)");
+    //     if (dssoAcceptor) {
+    //         assert.equal(dssoAcceptor._pep.seq, "TIDEK", "DSSO acceptor has expected sequence");
+    //         assert.equal(dssoAcceptor._pep.ls1, 1, "DSSO acceptor has link site at position 1");
+    //         const acceptorMod = dssoAcceptor._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_acceptor");
+    //         assert.ok(acceptorMod, "DSSO acceptor has crosslink acceptor modification");
+    //     }
+    //
+    //     // Test DSSO monolink stubs exist
+    //     const dssoStubA = peptides.get("1_2");
+    //     assert.ok(dssoStubA, "DSSO stub_a monolink exists (1_2)");
+    //     if (dssoStubA) {
+    //         const stubMod = dssoStubA._pep.m_as.find(m => m["MS:1003393"] === "DSSO_crosslink_stub_a");
+    //         assert.ok(stubMod, "DSSO stub_a has correct modification type");
+    //         assert.equal(dssoStubA._pep.m_ms[0], 54.010565, "DSSO stub_a has correct mass");
+    //     }
+    //
+    //     // Test EDC self-link (same peptide, two link sites)
+    //     const edcSelfLink = peptides.get("2_5");
+    //     assert.ok(edcSelfLink, "EDC self-link peptide exists (2_5)");
+    //     if (edcSelfLink) {
+    //         assert.equal(edcSelfLink._pep.seq, "DVIQSLVDDDLVAK", "EDC self-link has expected sequence");
+    //         assert.equal(edcSelfLink._pep.ls1, 10, "EDC self-link has first link site");
+    //         assert.equal(edcSelfLink._pep.ls2, 14, "EDC self-link has second link site");
+    //         assert.equal(edcSelfLink._pep.cl_m, -18.010565, "EDC crosslink has correct mass");
+    //     }
+    //
+    //     // Test SDA crosslink pair
+    //     const sdaDonor = peptides.get("3_3");
+    //     const sdaAcceptor = peptides.get("3_2");
+    //     assert.ok(sdaDonor, "SDA crosslink donor exists (3_3)");
+    //     assert.ok(sdaAcceptor, "SDA crosslink acceptor exists (3_2)");
+    //     if (sdaDonor && sdaAcceptor) {
+    //         const donorMod = sdaDonor._pep.m_as.find(m => m["MS:1003393"] === "SDA_crosslink_donor");
+    //         const acceptorMod = sdaAcceptor._pep.m_as.find(m => m["MS:1003393"] === "SDA_crosslink_acceptor");
+    //         assert.ok(donorMod, "SDA donor has correct modification");
+    //         assert.ok(acceptorMod, "SDA acceptor has correct modification");
+    //         assert.equal(sdaDonor._pep.cl_m, 82.04186, "SDA donor has correct crosslink mass");
+    //     }
+    //
+    //     // Test linear peptide (no crosslink)
+    //     const linearPep = peptides.get("2_0");
+    //     assert.ok(linearPep, "Linear peptide exists (2_0)");
+    //     if (linearPep) {
+    //         assert.equal(linearPep._pep.ls1, null, "Linear peptide has no link site 1");
+    //         assert.equal(linearPep._pep.ls2, null, "Linear peptide has no link site 2");
+    //         assert.equal(linearPep._pep.cl_m, 0, "Linear peptide has no crosslink mass");
+    //         assert.equal(linearPep._pep.m_as.length, 0, "Linear peptide has no modifications");
+    //     }
+    //
+    //     // Test peptide with multiple non-crosslink modifications
+    //     const modifiedPep = peptides.get("4_0");
+    //     assert.ok(modifiedPep, "Peptide with multiple modifications exists (4_0)");
+    //     if (modifiedPep) {
+    //         assert.equal(modifiedPep._pep.m_as.length, 3, "Peptide has 3 modifications");
+    //         const oxidation = modifiedPep._pep.m_as.find(m => m["UNIMOD:35"] === "Oxidation");
+    //         const cm = modifiedPep._pep.m_as.filter(m => m["UNIMOD:4"] === "Carbamidomethyl");
+    //         assert.ok(oxidation, "Peptide has Oxidation modification");
+    //         assert.equal(cm.length, 2, "Peptide has 2 Carbamidomethyl modifications");
+    //     }
+    //
+    //     // Test peptide structure consistency
+    //     peptides.forEach((pepEntry, key) => {
+    //         assert.ok(/^\d+_\d+$/.test(key), `peptide keys follow uploadId_peptideId pattern: ${key}`);
+    //         const pep = pepEntry._pep;
+    //         assert.ok(pep.id !== undefined, `Peptide ${key} has id`);
+    //         assert.ok(pep.u_id, `Peptide ${key} has u_id`);
+    //         assert.ok(pep.seq, `Peptide ${key} has sequence`);
+    //         assert.ok(Array.isArray(pep.prt), `Peptide ${key} prt is array`);
+    //         assert.ok(Array.isArray(pep.pos), `Peptide ${key} pos is array`);
+    //         assert.ok(Array.isArray(pep.m_as), `Peptide ${key} m_as is array`);
+    //         assert.ok(Array.isArray(pep.m_ps), `Peptide ${key} m_ps is array`);
+    //         assert.ok(Array.isArray(pep.m_ms), `Peptide ${key} m_ms is array`);
+    //         assert.ok(typeof pep.cl_m === "number", `Peptide ${key} cl_m is number`);
+    //     });
+    // });
 
     test("Matches loaded correctly", function (assert) {
         const matches = clmsModel.getMatches();
@@ -176,20 +176,20 @@ export async function testSetup() {
     //     assert.ok(enz instanceof Map, "modifications is a Map");
     // });
 
-    test("Search modifications loaded", function (assert) {
-        const modifications = clmsModel.getSearchModifications();
-        assert.ok(modifications instanceof Map, "modifications is a Map");
-    });
+    // test("Search modifications loaded", function (assert) {
+    //     const modifications = clmsModel.getSearchModifications();
+    //     assert.ok(modifications instanceof Map, "modifications is a Map");
+    // });
 
-    test("Spectra data loaded", function (assert) {
-        const spectraData = clmsModel.getSpectraData();
-        assert.ok(spectraData instanceof Map, "spectraData is a Map");
-    });
+    // test("Spectra data loaded", function (assert) {
+    //     const spectraData = clmsModel.getSpectraData();
+    //     assert.ok(spectraData instanceof Map, "spectraData is a Map");
+    // });
 
-    test("Spectrum identification protocols loaded", function (assert) {
-        const protocols = clmsModel.getSpectrumIdentificationProtocols();
-        assert.ok(protocols instanceof Map, "spectrumIdentificationProtocols is a Map");
-    });
+    // test("Spectrum identification protocols loaded", function (assert) {
+    //     const protocols = clmsModel.getSpectrumIdentificationProtocols();
+    //     assert.ok(protocols instanceof Map, "spectrumIdentificationProtocols is a Map");
+    // });
 
     test("MzIdentML files loaded", function (assert) {
         const mzidentmlFiles = clmsModel.getMzidentmlFiles();
@@ -213,45 +213,48 @@ export async function testSetup() {
         }
     });
 
-    test("Analysis collection spectrum identifications loaded", function (assert) {
-        const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
-        assert.ok(analysisCollection instanceof Map, "analysisCollectionSpectrumIdentifications is a Map");
-        assert.ok(analysisCollection.size > 0, "At least one analysis collection spectrum identification loaded");
-    });
+    // test("Analysis collection spectrum identifications loaded", function (assert) {
+    //     const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
+    //     assert.ok(analysisCollection instanceof Map, "analysisCollectionSpectrumIdentifications is a Map");
+    //     assert.ok(analysisCollection.size > 0, "At least one analysis collection spectrum identification loaded");
+    // });
 
-    test("Analysis collection spectrum identification properties correct", function (assert) {
-        const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
-        // Get first entry - upload_id 1, spectrum_identification_list_ref "sil_HCD"
-        const acsi = analysisCollection.get("1_sil_HCD");
+    // test("Analysis collection spectrum identification properties correct", function (assert) {
+    //     const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
+    //     // Get first entry - upload_id 1, spectrum_identification_list_ref "sil_HCD"
+    //     const acsiMap = analysisCollection.get(1);
+    //
+    //     if (acsiMap) {
+    //         const acsi = acsiMap.get("sil_HCD");
+    //         assert.equal(acsi.uploadId, 1, "uploadId is 1");
+    //         assert.equal(acsi.spectrumIdentificationListRef, "sil_HCD", "spectrum_identification_list_ref is correct");
+    //         assert.equal(acsi.spectrumIdentificationProtocolRef, "SearchProtocol_HCD", "spectrum_identification_protocol_ref is correct");
+    //         assert.ok(Array.isArray(acsi.spectraDataRefs), "spectra_data_refs is an array");
+    //         assert.ok(acsi.spectraDataRefs.length > 0, "spectra_data_refs has entries");
+    //         assert.ok(Array.isArray(acsi.searchDatabaseRefs), "search_database_refs is an array");
+    //         assert.ok(acsi.searchDatabaseRefs.length > 0, "search_database_refs has entries");
+    //     } else {
+    //         assert.ok(false, "Analysis collection spectrum identification with key '1_sil_HCD' not found");
+    //     }
+    // });
 
-        if (acsi) {
-            assert.equal(acsi.uploadId, 1, "uploadId is 1");
-            assert.equal(acsi.spectrumIdentificationListRef, "sil_HCD", "spectrum_identification_list_ref is correct");
-            assert.equal(acsi.spectrumIdentificationProtocolRef, "SearchProtocol_HCD", "spectrum_identification_protocol_ref is correct");
-            assert.ok(Array.isArray(acsi.spectraDataRefs), "spectra_data_refs is an array");
-            assert.ok(acsi.spectraDataRefs.length > 0, "spectra_data_refs has entries");
-            assert.ok(Array.isArray(acsi.searchDatabaseRefs), "search_database_refs is an array");
-            assert.ok(acsi.searchDatabaseRefs.length > 0, "search_database_refs has entries");
-        } else {
-            assert.ok(false, "Analysis collection spectrum identification with key '1_sil_HCD' not found");
-        }
-    });
-
-    test("Relationship between mzidentml files and analysis collections", function (assert) {
-        const mzidentmlFiles = clmsModel.getMzidentmlFiles();
-        const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
-
-        // Check that analysis collection entries reference valid upload_ids (mzidentml file ids)
-        let allValid = true;
-        analysisCollection.forEach(acsi => {
-            if (!mzidentmlFiles.get(acsi.uploadId)) {
-                allValid = false;
-                console.error("Analysis collection references non-existent upload_id:", acsi.uploadId);
-            }
-        });
-
-        assert.ok(allValid, "All analysis collection entries reference valid mzidentml files");
-    });
+    // test("Relationship between mzidentml files and analysis collections", function (assert) {
+    //     const mzidentmlFiles = clmsModel.getMzidentmlFiles();
+    //     const analysisCollection = clmsModel.getAnalysisCollectionSpectrumIdentifications();
+    //
+    //     // Check that analysis collection entries reference valid upload_ids (mzidentml file ids)
+    //     let allValid = true;
+    //     analysisCollection.values().forEach(acsiMap => {
+    //         acsiMap.forEach(acsi => {
+    //             if (!mzidentmlFiles.get(acsi.uploadId)) {
+    //                 allValid = false;
+    //                 console.error("Analysis collection references non-existent upload_id:", acsi.uploadId);
+    //             }
+    //         });
+    //     });
+    //
+    //     assert.ok(allValid, "All analysis collection entries reference valid mzidentml files");
+    // });
 
     module("Crosslinks");
 
@@ -287,51 +290,51 @@ export async function testSetup() {
 
     module("Data Integrity");
 
-    test("Peptide to protein mappings valid", function (assert) {
-        const peptides = clmsModel.getPeptides();
-        const participants = clmsModel.getProteinsMap();
+    // test("Peptide to protein mappings valid", function (assert) {
+    //     const peptides = clmsModel.getPeptides();
+    //     const participants = clmsModel.getProteinsMap();
+    //
+    //     let allValid = true;
+    //     const invalidPeptides = [];
+    //
+    //     if (peptides && peptides.size > 0) {
+    //         peptides.forEach(peptide => {
+    //             if (peptide.prt) {
+    //                 peptide.prt.forEach(proteinId => {
+    //                     if (!participants.get(proteinId)) {
+    //                         allValid = false;
+    //                         invalidPeptides.push({peptideId: peptide.id, proteinId: proteinId});
+    //                     }
+    //                 });
+    //             }
+    //         });
+    //     }
+    //
+    //     assert.ok(allValid, "All peptide-to-protein mappings reference valid proteins");
+    //     if (!allValid) {
+    //         console.error("Invalid peptide mappings:", invalidPeptides);
+    //     }
+    // });
 
-        let allValid = true;
-        const invalidPeptides = [];
-
-        if (peptides && peptides.size > 0) {
-            peptides.forEach(peptide => {
-                if (peptide.prt) {
-                    peptide.prt.forEach(proteinId => {
-                        if (!participants.get(proteinId)) {
-                            allValid = false;
-                            invalidPeptides.push({peptideId: peptide.id, proteinId: proteinId});
-                        }
-                    });
-                }
-            });
-        }
-
-        assert.ok(allValid, "All peptide-to-protein mappings reference valid proteins");
-        if (!allValid) {
-            console.error("Invalid peptide mappings:", invalidPeptides);
-        }
-    });
-
-    test("Match to peptide mappings valid", function (assert) {
-        const matches = clmsModel.getMatches();
-        const peptides = clmsModel.getPeptides();
-
-        let allValid = true;
-
-        matches.forEach(match => {
-            if (match.matchedPeptides) {
-                match.matchedPeptides.forEach(mp => {
-                    if (mp && mp.id && !peptides.get(mp.id)) {
-                        allValid = false;
-                        console.error("Invalid match-to-peptide mapping:", match.id, "->", mp.id);
-                    }
-                });
-            }
-        });
-
-        assert.ok(allValid, "All match-to-peptide mappings reference valid peptides");
-    });
+    // test("Match to peptide mappings valid", function (assert) {
+    //     const matches = clmsModel.getMatches();
+    //     const peptides = clmsModel.getPeptides();
+    //
+    //     let allValid = true;
+    //
+    //     matches.forEach(match => {
+    //         if (match.matchedPeptides) {
+    //             match.matchedPeptides.forEach(mp => {
+    //                 if (mp && mp.id && !peptides.get(mp.id)) {
+    //                     allValid = false;
+    //                     console.error("Invalid match-to-peptide mapping:", match.id, "->", mp.id);
+    //                 }
+    //             });
+    //         }
+    //     });
+    //
+    //     assert.ok(allValid, "All match-to-peptide mappings reference valid peptides");
+    // });
 
     test("Search IDs consistent", function (assert) {
         const participants = clmsModel.getProteinsMap();

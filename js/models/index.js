@@ -10,16 +10,16 @@ export { Crosslink } from "./crosslink";
 export { SpectrumMatch } from "./spectrum-match";
 
 // File parsers and data structures
-export { MzidentmlFile } from "./mzidentml-file";
-export { SpectraData } from "./spectra-data";
+export { MzidentmlFile } from "./mzid-metadata/mzidentml-file";
+export { SpectraData } from "./mzid-metadata/spectra-data";
 
 // Analysis and identification
-export { AnalysisCollectionSpectrumIdentification } from "./analysis-collection-spectrum-identification";
-export { SpectrumIdentificationProtocol } from "./spectrum-identification-protocol";
+export { AnalysisCollectionSpectrumIdentification } from "./mzid-metadata/analysis-collection-spectrum-identification";
+export { SpectrumIdentificationProtocol } from "./mzid-metadata/spectrum-identification-protocol";
 
 // Search configuration
-export { SearchModification } from "./search-modification";
-export { Enzyme } from "./enzyme";
+export { SearchModification } from "./mzid-metadata/search-modification";
+export { Enzyme } from "./mzid-metadata/enzyme";
 
 // Utilities and options
 export { attributeOptions } from "./attribute-options";
