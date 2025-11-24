@@ -1,12 +1,12 @@
 import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
 import {Protein} from "./protein";
-import {SpectrumIdentificationProtocol} from "./mzid-metadata/spectrum-identification-protocol";
-import {SpectraData} from "./mzid-metadata/spectra-data";
-import {MzidentmlFile} from "./mzid-metadata/mzidentml-file";
-import {AnalysisCollectionSpectrumIdentification} from "./mzid-metadata/analysis-collection-spectrum-identification";
-import {SearchModification} from "./mzid-metadata/search-modification";
-import {Enzyme} from "./mzid-metadata/enzyme";
+import {SpectrumIdentificationProtocol} from "./mzidentml-metadata/spectrum-identification-protocol";
+import {SpectraData} from "./mzidentml-metadata/spectra-data";
+import {MzidentmlFile} from "./mzidentml-metadata/mzidentml-file";
+import {AnalysisCollectionSpectrumIdentification} from "./mzidentml-metadata/analysis-collection-spectrum-identification";
+import {SearchModification} from "./mzidentml-metadata/search-modification";
+import {Enzyme} from "./mzidentml-metadata/enzyme";
 
 export class SearchResultsModel {
 
