@@ -1,5 +1,21 @@
-// View checkbox configurations for the view dropdown menu
+/**
+ * @fileoverview View checkbox configurations for xiVIEW dropdown menu.
+ * Defines all view toggles available in the View menu with their labels, tooltips, and event triggers.
+ * Views are organized into sections: Legend & primary views (circular, 3D, matrix, protein info, spectrum),
+ * analysis views (histogram, scatterplot, alignment), and metadata views (search summaries, GO terms).
+ */
 
+/**
+ * Configuration objects for all view checkboxes in the View menu.
+ * Each entry defines a checkbox that toggles visibility of a specific visualization panel.
+ * Sections are separated by sectionEnd flag for visual grouping in the dropdown.
+ * @constant {Array<Object>}
+ * @property {string} id - DOM element ID placeholder for checkbox
+ * @property {string} label - Display label in View menu
+ * @property {string} eventName - Event name triggered when checkbox toggled (e.g., "nglViewShow")
+ * @property {string} tooltip - User-facing description of view's purpose and requirements
+ * @property {boolean} [sectionEnd] - If true, adds visual separator after this checkbox
+ */
 export const VIEW_CHECKBOX_CONFIGS = [
     {
         id: "keyChkBxPlaceholder",

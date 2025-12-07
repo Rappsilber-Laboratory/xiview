@@ -1,4 +1,10 @@
-// Menu configuration definitions for dropdown menus
+/**
+ * @fileoverview Menu configuration definitions for xiVIEW dropdown menus.
+ * Exports factory functions that return menu configuration objects for:
+ * Protein Selection (hide, select neighbors, text filter), Groups (group/collapse/expand),
+ * Load (PDB, STRING, metadata files), Export (matches, links, various data formats), and Help (about dialog).
+ * Each menu config includes: title, menu items array with name/func/tooltip/context, and section formatting.
+ */
 
 import packageInfo from "../../../package.json";
 
