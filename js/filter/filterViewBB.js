@@ -1,9 +1,27 @@
+/**
+ * @fileoverview Filter control panel view for xiVIEW data filtering.
+ * Creates comprehensive UI with 20+ filter controls including validation mode (manual/FDR),
+ * target/decoy, protein names, peptide sequences, distance/score ranges, and search group toggles.
+ * Dynamically builds collapsible filter sections with text inputs, number inputs, checkboxes, and sliders.
+ * All controls sync bidirectionally with FilterModel - UI updates trigger model changes, model changes update UI.
+ */
 import "../../css/filter.css";
 import Backbone from "backbone";
 import * as _ from "underscore";
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import d3 from "d3";
 
+/**
+ * Filter control panel view - comprehensive UI for data filtering.
+ * Dynamically constructs filter controls from config array, supporting multiple filter types:
+ * mode selection (manual/FDR), boolean toggles, text search, numeric thresholds, min/max ranges.
+ * Organized into collapsible sections (Mode, Protein, Peptide, Crosslink, Distances, Scores, Groups, etc.).
+ * Bidirectional sync: UI changes update FilterModel via event handlers, model changes update UI via setInputValuesFromModel.
+ * @class
+ * @extends Backbone.View
+ * @property {d3.map} configMap - Map of filter configs indexed by id
+ * @property {string} displayEventName - Event name for display updates
+ */
 export class FilterViewBB extends Backbone.View {
     constructor(options) {
         super(options);
@@ -28,6 +46,19 @@ export class FilterViewBB extends Backbone.View {
         };
     }
 
+    /**
+     * Initializes filter panel view by building complete UI from config array.
+     * Creates extensive filter config (20+ controls), dynamically adds search group toggles,
+     * defines helper functions for UI construction, builds all filter sections using helpers,
+     * sets up model change listener for bidirectional sync, triggers initial UI update.
+     * Helper functions: makeFilterControlDiv (collapsible sections), addFilterGroup (filter controls),
+     * initMinigramFilterGroup (min/max sliders), initFDRPlaceholder, addScrollRightButton.
+     * @param {Object} viewOptions - View initialization options
+     * @param {Object} [viewOptions.myOptions] - Optional custom options
+     * @param {string} [viewOptions.displayEventName] - Event name for display updates
+     * @param {Object} [viewOptions.myOptions.hide] - Map of filter IDs to hide
+     * @returns {undefined}
+     */
     initialize(viewOptions) {
         const defaultOptions = {
             config: [
@@ -195,7 +226,17 @@ export class FilterViewBB extends Backbone.View {
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el);
 
-
+        /**
+         * Helper function: Creates collapsible filter control section with expand/collapse toggle.
+         * Builds div with vertical text label and nested content span. Clicking label toggles visibility.
+         * @param {Object} options - Section configuration
+         * @param {string} [options.id] - Optional div ID
+         * @param {string} options.groupName - Display name for section (shown in vertical label)
+         * @param {boolean} [options.hide] - If true, section initially hidden
+         * @param {boolean} [options.expandable=true] - If false, no expand/collapse control
+         * @param {string} [options.class] - Optional CSS class for nested content span
+         * @returns {d3.selection} D3 selection of nested content span (where controls should be added)
+         */
         function makeFilterControlDiv(options) {
             options = options || {};
             const div = mainDivSel.append("div").attr("class", "filterControlGroup").style("display", options.hide ? "none" : null);
@@ -233,6 +274,14 @@ export class FilterViewBB extends Backbone.View {
             return nestedDiv;
         }
 
+        /**
+         * Helper function: Adds group of filter controls to a section.
+         * Creates collapsible div using makeFilterControlDiv, looks up filter configs from configMap,
+         * iterates through configs and calls appropriate addXFilter method based on filter type.
+         * @param {Object} config - Section configuration (passed to makeFilterControlDiv)
+         * @param {Array<string>} filterIDs - Array of filter IDs to add to this section
+         * @returns {undefined}
+         */
         function addFilterGroup(config, filterIDs) {
             const divSel = makeFilterControlDiv(config);
             const filters = filterIDs.map(function (id) {
@@ -258,6 +307,21 @@ export class FilterViewBB extends Backbone.View {
                 });
         }
 
+        /**
+         * Helper function: Creates min/max range filter with text inputs and optional "undefined" checkbox.
+         * Builds collapsible section with two numeric inputs (min/max cutoffs) that update model attribute.
+         * Values constrained between extent limits. Listens to model changes to update displayed values.
+         * Used for Distance and Score filters.
+         * @param {Object} config - Range filter configuration
+         * @param {string} config.attr - Model attribute name for cutoff values (array: [min, max])
+         * @param {string} config.extentProperty - Model property name for valid extent range
+         * @param {string} [config.undefAttr] - Optional model attribute for "show undefined" checkbox
+         * @param {string} config.label - Display label for filter
+         * @param {string} config.id - Filter ID
+         * @param {string} config.groupName - Section name
+         * @param {string} config.tooltipIntro - Tooltip prefix text
+         * @returns {undefined}
+         */
         function initMinigramFilterGroup(config) {
             if (config && config.attr) {
                 const cutoffDivSel = makeFilterControlDiv(config);
@@ -336,14 +400,25 @@ export class FilterViewBB extends Backbone.View {
             }
         }
 
-
+        /**
+         * Helper function: Creates placeholder div for FDR controls.
+         * The actual FDR UI components are inserted here dynamically when FDR mode is activated.
+         * Creates collapsible section with id="fdrPanel" for FDR controls to target.
+         * @returns {undefined}
+         */
         function initFDRPlaceholder() {
             //following may not be best practice, its here to get the placeholder divs in the right place in the filter div (the grey bar at bottom)
             const fdrPanel = makeFilterControlDiv({id: "fdrPanelHolder", groupName: "FDR"});
             fdrPanel.attr("id", "fdrPanel");
         }
 
-
+        /**
+         * Helper function: Adds toggle button to show/hide off-screen filter controls.
+         * Creates fixed-position button in bottom-right that toggles filter panel positioning.
+         * When clicked, moves panel between auto (off-screen) and 20px (on-screen) right position.
+         * Button icon changes direction to indicate action (show vs hide).
+         * @returns {undefined}
+         */
         function addScrollRightButton() {
             const fixedBox = mainDivSel
                 .append("div")
@@ -411,7 +486,7 @@ export class FilterViewBB extends Backbone.View {
         initMinigramFilterGroup.call(this, {
             attr: "matchScoreCutoff",
             extentProperty: "scoreExtent",
-            label: window.compositeModelInst.get("clmsModel").getPrimaryScore().score_name,
+            label: window.compositeModelInst.get("clmsModel").selectedScoreType, // todo - should be in compositeModel?
             id: "matchScore",
             groupName: "Scores",
             tooltipIntro: "Filter out matches with scores"
@@ -481,6 +556,13 @@ export class FilterViewBB extends Backbone.View {
             });
     }
 
+    /**
+     * Adds numeric input filter control to d3 selection.
+     * Creates label with span (filter name), inequality symbol, and number input with min/max bounds.
+     * Used for threshold filters like "AA apart" and "peptide length".
+     * @param {d3.selection} d3sel - D3 selection with filter config data bound
+     * @returns {undefined}
+     */
     addNumberFilter(d3sel) {
         const numberFilter = d3sel
             .attr("title", function (d) {
@@ -545,10 +627,23 @@ export class FilterViewBB extends Backbone.View {
             });
     }
 
+    /**
+     * Extracts bound data from event target element.
+     * Returns filter config object bound to element via d3 data binding, or empty object if none.
+     * @param {HTMLElement} target - DOM element (typically event.target)
+     * @returns {Object} Filter config object with id, label, tooltip, etc.
+     */
     datumFromTarget(target) {
         return d3.select(target).datum() || {};
     }
 
+    /**
+     * Handles checkbox/radio button change events.
+     * Updates model with new boolean value. Special handling for "crosslinks" and "selfLinks"
+     * filters which control visibility of dependent filter sections (Crosslink group, Self Links).
+     * @param {Event} evt - Change event from checkbox/radio input
+     * @returns {undefined}
+     */
     processBooleanFilter(evt) {
         // alert("hello?");
         const target = evt.target;
@@ -565,6 +660,13 @@ export class FilterViewBB extends Backbone.View {
         this.model.set(id, target.checked);
     }
 
+    /**
+     * Handles text input change events.
+     * Validates input using HTML5 validation (pattern attribute if present), then updates model.
+     * Only updates model if input passes validation.
+     * @param {Event} evt - Input event from text field
+     * @returns {undefined}
+     */
     processTextFilter(evt) {
         const target = evt.target;
         if (evt.target.checkValidity()) {
@@ -573,6 +675,13 @@ export class FilterViewBB extends Backbone.View {
         }
     }
 
+    /**
+     * Handles search group toggle checkbox events.
+     * Manages set of active search groups - adds or removes group from set based on checkbox state,
+     * then updates model with new group array.
+     * @param {Event} evt - Click event from group toggle checkbox
+     * @returns {undefined}
+     */
     processGroupToggleFilter(evt) {
         const target = evt.target;
         const data = this.datumFromTarget(target);
@@ -584,6 +693,12 @@ export class FilterViewBB extends Backbone.View {
         }
     }
 
+    /**
+     * Handles number input change events (keyup and mouseup).
+     * Updates model with new numeric value if value has changed.
+     * @param {Event} evt - Keyup or mouseup event from number input
+     * @returns {undefined}
+     */
     processNumberFilter(evt) {
         const target = evt.target;
         const data = this.datumFromTarget(target);
@@ -594,6 +709,12 @@ export class FilterViewBB extends Backbone.View {
         }
     }
 
+    /**
+     * Handles validation mode radio button changes (Manual vs FDR).
+     * Reads checked radio button value and updates model with mutually exclusive mode flags.
+     * One of manualMode or fdrMode will be true, the other false.
+     * @returns {undefined}
+     */
     processModeChanged() {
         const checked = d3.select(this.el).selectAll("input[name='modeSelect']").filter(":checked");
         if (checked.size() === 1) {
@@ -605,6 +726,18 @@ export class FilterViewBB extends Backbone.View {
         }
     }
 
+    /**
+     * Syncs UI input values with model state (model → UI direction).
+     * Updates all text/number input values and checkbox states from model attributes.
+     * Also handles show/hide logic for mode-dependent sections (FDR vs Manual validation).
+     * Called automatically on model "change" events and manually during initialization.
+     * Special handling: hides FDR panel in manual mode, hides validation/score filters in FDR mode,
+     * disables "ambig" filter in FDR mode, hides groups/distances filters if not applicable.
+     * @param {Backbone.Model} [model=this.model] - Filter model instance
+     * @param {Object} [options={}] - Options object
+     * @param {boolean} [options.showHide] - If true, force show/hide logic to run
+     * @returns {undefined}
+     */
     setInputValuesFromModel(model, options) {
         options = options || {};
         model = model || this.model;
@@ -642,6 +775,12 @@ export class FilterViewBB extends Backbone.View {
         }
     }
 
+    /**
+     * Renders the view (Backbone.View standard method).
+     * No-op implementation since all rendering happens in initialize method.
+     * UI is constructed once during initialization and subsequently updated via event handlers.
+     * @returns {FilterViewBB} this for chaining
+     */
     render() {
         return this;
     }
@@ -653,6 +792,12 @@ export class FDRViewBB extends Backbone.View {
         super(options);
     }
 
+    /**
+     * Initializes FDR threshold selection UI.
+     * Creates radio buttons for preset FDR values (1%, 5%, 10%, 20%, 50%) and custom number input.
+     * Sets up click handlers to update model's fdrThreshold. Listens for model changes to sync UI.
+     * @returns {FDRViewBB} this for chaining
+     */
     initialize() {
 
         const chartDiv = d3.select(this.el);
@@ -700,6 +845,13 @@ export class FDRViewBB extends Backbone.View {
         return this;
     }
 
+    /**
+     * Syncs UI with model's fdrThreshold value.
+     * Checks appropriate radio button if value matches preset, updates custom input field.
+     * Called automatically on model fdrThreshold changes.
+     * @param {Backbone.Model} [model=this.model] - Filter model instance
+     * @returns {undefined}
+     */
     setInputValuesFromModel(model) {
         model = model || this.model;
         const fdrThreshold = model.get("fdrThreshold");
@@ -714,7 +866,13 @@ export class FDRViewBB extends Backbone.View {
     }
 }
 
-
+/**
+ * Protein summary view - displays count statistics for proteins and links.
+ * Shows: protein count, protein-protein interaction count, heteromeric link count, self link count.
+ * Automatically updates when filtering completes.
+ * @class
+ * @extends Backbone.View
+ */
 export class ProteinSummaryViewBB extends Backbone.View {
     constructor(options) {
         super(options);
@@ -724,11 +882,21 @@ export class ProteinSummaryViewBB extends Backbone.View {
         return {};
     }
 
+    /**
+     * Initializes view and sets up filteringDone listener.
+     * Automatically re-renders when model fires filteringDone event.
+     * @returns {undefined}
+     */
     initialize() {
         this.listenTo(this.model, "filteringDone", this.render)
             .render();
     }
 
+    /**
+     * Renders protein/link count summary as HTML.
+     * Displays 4 statistics: protein count, PPI count, heteromeric link count, self link count.
+     * @returns {ProteinSummaryViewBB} this for chaining
+     */
     render() {
         const model = this.model;
         let summaryHtmlString = "Proteins: " + model.get("proteinCount") + "<br/>";
@@ -741,7 +909,15 @@ export class ProteinSummaryViewBB extends Backbone.View {
     }
 }
 
-
+/**
+ * Filter summary view - displays filtered crosslink counts with decoy breakdown.
+ * Shows count of target-target crosslinks passing filters vs total, plus target-decoy and decoy-decoy counts if decoys present.
+ * Format: "Post-Filter: X of Y TT Crosslinks ( + Z TD; W DD Decoys)"
+ * @class
+ * @extends Backbone.View
+ * @property {Function} targetTemplate - Underscore template for non-decoy display
+ * @property {Function} allTemplate - Underscore template for display with decoys
+ */
 export class FilterSummaryViewBB extends Backbone.View {
     constructor(options) {
         super(options);
@@ -751,6 +927,11 @@ export class FilterSummaryViewBB extends Backbone.View {
         return {};
     }
 
+    /**
+     * Initializes view, creates templates, and sets up filteringDone listener.
+     * Creates two Underscore templates: one for datasets without decoys, one with decoy counts.
+     * @returns {undefined}
+     */
     initialize() {
         const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Crosslinks";
         this.targetTemplate = _.template(targetTemplateString);
@@ -760,6 +941,12 @@ export class FilterSummaryViewBB extends Backbone.View {
             .render();
     }
 
+    /**
+     * Renders filtered crosslink count summary using templates.
+     * Displays target-target count vs total. If decoys present, also shows TD and DD counts.
+     * Uses comma formatting for large numbers.
+     * @returns {FilterSummaryViewBB} this for chaining
+     */
     render() {
         const commaFormat = d3.format(",");
         const model = this.model;
@@ -776,6 +963,15 @@ export class FilterSummaryViewBB extends Backbone.View {
     }
 }
 
+/**
+ * FDR summary view - displays FDR score cutoffs or apparent FDR.
+ * In FDR mode: shows Inter/Intra protein score cutoffs that achieve selected FDR threshold.
+ * In manual mode: calculates and displays apparent link-level FDR using (TD - DD) / TT formula.
+ * Hides Inter protein cutoff if only 1 target protein (always undefined).
+ * @class
+ * @extends Backbone.View
+ * @property {Function} pctFormat - D3 percentage formatter
+ */
 export class FDRSummaryViewBB extends Backbone.View {
     constructor(options) {
         super(options);
@@ -785,6 +981,11 @@ export class FDRSummaryViewBB extends Backbone.View {
         return {};
     }
 
+    /**
+     * Initializes view, creates paragraph elements for Inter/Intra FDR display.
+     * Creates two <p> elements (one for Inter, one for Intra protein FDR), sets up percentage formatter.
+     * @returns {undefined}
+     */
     initialize() {
         const fdrTypes = ["interFdrCut", "intraFdrCut"];
         d3.select(this.el).selectAll("p").data(fdrTypes)
@@ -800,6 +1001,13 @@ export class FDRSummaryViewBB extends Backbone.View {
             .render();
     }
 
+    /**
+     * Renders FDR information based on current mode.
+     * FDR mode: displays "Between/Within score cutoff for X% is Y.YY" for each protein group.
+     * Manual mode: calculates apparent FDR = (TD - DD) / TT and displays as percentage.
+     * Hides Inter protein line if only 1 target protein or no decoys present.
+     * @returns {FDRSummaryViewBB} this for chaining
+     */
     render() {
         const fdrTypes = {
             "interFdrCut": "Between",

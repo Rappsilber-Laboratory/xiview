@@ -1,14 +1,46 @@
+/**
+ * @fileoverview False Discovery Rate (FDR) calculation for crosslinking mass spectrometry data.
+ * Implements target-decoy approach to estimate proportion of false positives in crosslink identifications.
+ * Separates inter/intra-protein links, calculates link scores from match scores, applies FDR threshold.
+ * Formula: FDR = (TD - DD) / TT where TD=target-decoy, DD=decoy-decoy, TT=target-target links.
+ */
 import * as _ from "underscore";
 import d3 from "d3";
 import {clearObjectMetaData} from "../modelUtils";
 
+/**
+ * Clears FDR-related metadata from crosslinks.
+ * Removes "fdr" and "linkScore" metadata fields (used when switching out of FDR mode).
+ * @param {Array<Object>} crosslinksArr - Array of crosslink objects
+ * @returns {undefined}
+ */
 export const clearFdr = function (crosslinksArr) {
     // clear fdr information from crosslinks (usually because we've gone into none-fdr mode and don't want it showing in tooltips)
     clearObjectMetaData(crosslinksArr, ["fdr", "linkScore"]);
 };
 
+/**
+ * Calculates False Discovery Rate (FDR) for crosslinks using target-decoy approach.
+ * Algorithm: 1) Calculate link scores (default: RMS of match scores), 2) Separate inter/intra-protein,
+ * 3) Sort by score, 4) Calculate running FDR = (TD - DD) / TT with monotonicity constraint,
+ * 5) Find cutoff where FDR ≤ threshold. Sets "fdr" and "linkScore" metadata on each crosslink.
+ * @param {Array<Object>} crosslinksArr - Array of crosslink objects to calculate FDR for
+ * @param {Object} options - Configuration options
+ * @param {Function} [options.scoreCalcFunc] - Custom scoring function (default: quadratic mean of match scores)
+ * @param {number} [options.threshold] - FDR threshold (e.g., 0.05 for 5% FDR), undefined for no FDR filtering
+ * @param {boolean} [options.filterLinears=false] - If true, exclude linear links from FDR calculation
+ * @param {Object} options.filterModel - Filter model instance for subset filtering
+ * @param {Object} options.CLMSModel - CLMS model instance
+ * @returns {Array<Object>|null} Array with 2 objects (Inter, Intra) containing cutoff info, or null if required models missing
+ */
 export const fdr = function (crosslinksArr, options) {
 
+    /**
+     * Default link score calculation: quadratic mean (RMS) of filtered match scores.
+     * Filters matches by subset filter, then calculates sqrt(sum of squared scores).
+     * @param {Object} crosslink - Crosslink object with matches_pp array
+     * @returns {number} Quadratic mean of match scores
+     */
     const defaultScoreCalcFunc = function (crosslink) { // default function is based on quadratic mean (rms)
         const filtered = crosslink.matches_pp
             .filter(function (match_pp) {
@@ -68,7 +100,7 @@ export const fdr = function (crosslinksArr, options) {
     const fdrResult = linkArrs.map(function (linkArr, index) {
 
         let fdr = 1;
-        const t = [0, 0, 0, 0];
+        const t = [0, 0, 0, 0]; // Counters: [TT, TD, DD, zero-score links]
         let cutoffIndex = 0;
         const runningFdr = [];
         let fdrScoreCutoff;
@@ -102,6 +134,7 @@ export const fdr = function (crosslinksArr, options) {
                     t[decoyClass(link)]--;
                 }
                 i++;
+                // Record first index where FDR meets threshold
                 if (fdr <= options.threshold && cutoffIndex === 0) {
                     cutoffIndex = i;
                     //console.log ("cutoff totals tt td dd", t, link, cutoffIndex);
@@ -112,6 +145,7 @@ export const fdr = function (crosslinksArr, options) {
                 cutoffIndex = linkArr.length; // then set cutoffindex to last index in array
             }
 
+            // Adjust cutoff index and determine score cutoff
             cutoffIndex = Math.max(cutoffIndex - 1, 0);
             const lastLink = linkArr[cutoffIndex];
             fdrScoreCutoff = nonzero ? lastLink.getMeta("linkScore") : 0.001;

@@ -1,6 +1,28 @@
+/**
+ * @fileoverview Minigram histogram view with interactive brush selection.
+ * Displays small histogram visualization of score/distance distributions with brushable range selection.
+ * Supports target and decoy data overlays. Uses requestAnimationFrame for efficient batch rendering.
+ * Brush interaction updates model's domainStart/domainEnd attributes for range filtering.
+ */
 import Backbone from "backbone";
 import d3 from "d3";
 
+/**
+ * Minigram histogram view with interactive brush selection for range filtering.
+ * Creates compact histogram (300x65px) showing data distribution with optional decoy overlay (red bars).
+ * D3 brush tool enables range selection - dragging updates model's domainStart/domainEnd.
+ * Efficient rendering with requestAnimationFrame batching. Automatically redraws on model changes.
+ * @class
+ * @extends Backbone.View
+ * @property {d3.selection} chartDiv - D3 selection of chart container div
+ * @property {d3.selection} svg - D3 selection of SVG g element
+ * @property {d3.scale.linear} x - X-axis linear scale
+ * @property {d3.scale.linear} y - Y-axis linear scale
+ * @property {d3.svg.axis} xAxis - X-axis generator
+ * @property {d3.svg.brush} brush - D3 brush behavior for range selection
+ * @property {d3.selection} brushg - D3 selection of brush g element
+ * @property {boolean} renderQueued - Flag to prevent duplicate render requests
+ */
 export class MinigramViewBB extends Backbone.View {
     constructor(options) {
         super(options);
@@ -10,7 +32,13 @@ export class MinigramViewBB extends Backbone.View {
         return {};
     }
 
-    // eslint-disable-next-line no-unused-vars
+    /**
+     * Initializes minigram view by creating SVG structure, scales, axis, and brush.
+     * Sets up 300x65px SVG with margins, linear scales for x/y axes, bottom-oriented x-axis with 5 ticks,
+     * D3 brush for range selection. Listens to model changes to redraw brush. Triggers initial render.
+     * @param {Object} viewOptions - View initialization options (unused)
+     * @returns {MinigramViewBB} this for chaining
+     */
     initialize(viewOptions) {
         const mainDivSel = d3.select(this.el).attr("class", "minigram");
         this.chartDiv = mainDivSel.append("div")
@@ -59,8 +87,12 @@ export class MinigramViewBB extends Backbone.View {
         return this;
     }
 
+    /**
+     * Queues render operation using requestAnimationFrame for efficient batching.
+     * Prevents duplicate render requests via renderQueued flag. Delegates to _doRender.
+     * @returns {MinigramViewBB} this for chaining
+     */
     render() {
-        // Use requestAnimationFrame to batch render calls
         if (this.renderQueued) {
             return this;
         }
@@ -74,6 +106,13 @@ export class MinigramViewBB extends Backbone.View {
         return this;
     }
 
+    /**
+     * Performs actual histogram rendering with D3 data join pattern.
+     * Algorithm: 1) Gets data from model, 2) Calculates min/max for x-domain, 3) Creates histogram with 30 bins,
+     * 4) Updates y-domain from histogram max, 5) Updates/adds/removes target bars (blue), 6) If present, updates decoy bars (red, half-width),
+     * 7) Updates x-axis, 8) Redraws brush. Uses efficient enter/update/exit pattern.
+     * @returns {undefined}
+     */
     _doRender() {
         const seriesData = this.model.data();
 
@@ -153,6 +192,12 @@ export class MinigramViewBB extends Backbone.View {
         this.brushg.call(this.brush);
     }
 
+    /**
+     * Handles brush interaction events (user dragging brush extent).
+     * If brush extent is empty (no selection), clears brush. Otherwise, updates model
+     * with selected range (domainStart/domainEnd) to trigger filtering.
+     * @returns {undefined}
+     */
     brushed() {
         const extent = this.brush.extent();
         if (extent[0] === extent[1]) {
@@ -170,6 +215,11 @@ export class MinigramViewBB extends Backbone.View {
     //     this.clearBrush();
     // }
 
+    /**
+     * Clears brush selection and resets model's domain range to null.
+     * Removes visual brush extent and sets domainStart/domainEnd to null (no filtering).
+     * @returns {undefined}
+     */
     clearBrush() {
         this.brush.clear();
         this.brushg.call(this.brush);
@@ -179,6 +229,12 @@ export class MinigramViewBB extends Backbone.View {
         });
     }
 
+    /**
+     * Recalculates and redraws brush extent from model's domain range.
+     * If domainStart is defined, sets brush extent to [domainStart, domainEnd] and redraws.
+     * Used to sync brush visualization with model state.
+     * @returns {MinigramViewBB} this for chaining
+     */
     brushRecalc() {
         if (this.model.get("domainStart") !== undefined) {
             this.brush.extent([this.model.get("domainStart"), this.model.get("domainEnd")]);
@@ -187,6 +243,12 @@ export class MinigramViewBB extends Backbone.View {
         return this;
     }
 
+    /**
+     * Model change listener that triggers brush recalculation.
+     * Calls brushRecalc unless stopRebounds flag is set (prevents infinite update loops).
+     * Automatically invoked when model changes to keep brush in sync.
+     * @returns {MinigramViewBB} this for chaining
+     */
     redrawBrush() {
         if (!this.stopRebounds) {
             this.brushRecalc();
