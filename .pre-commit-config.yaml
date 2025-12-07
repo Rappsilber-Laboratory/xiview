@@ -38,6 +38,17 @@ repos:
         exclude: '(bioseq32\.js|svgexp\.js)'
         args: ['--fix']
 
+  # Rebuild dist files before testing
+  - repo: local
+    hooks:
+      - id: rebuild-dist
+        name: rebuild dist files
+        entry: bash -c 'cd .. && npm run build-dev'
+        language: system
+        pass_filenames: false
+        files: '\.(js|css)$'
+        exclude: 'vendor/'
+
   # Run tests from parent directory
   - repo: local
     hooks:

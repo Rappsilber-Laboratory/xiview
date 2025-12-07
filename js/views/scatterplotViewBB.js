@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Scatterplot view for visualizing crosslink metrics in 2D.
+ * Renders crosslinks or matches as points on canvas with user-selectable X/Y axes from available metrics.
+ * Supports brush selection, logarithmic scales, jittering, tooltips, and color-coded categories.
+ * Uses dual canvas layers (filtered + highlighted) for efficient rendering of large datasets.
+ */
+
 import "../../css/scatterplot.css";
 import * as _ from "underscore";
 import * as $ from "jquery";
@@ -15,11 +22,32 @@ import {radixSort} from "../modelUtils";
 import d3 from "d3";
 import {makeTooltipContents} from "../make-tooltip";
 
+/**
+ * Backbone view for 2D scatterplot visualization of crosslink metrics.
+ * Displays crosslinks or matches as canvas-rendered points with user-selectable axes from attributes
+ * like score, distance, FDR, ambiguity, etc. Supports brush selection, log scales, jitter for
+ * overlapping points, tooltips showing nearest point, and categorical color coding.
+ * @class
+ * @extends BaseFrameView
+ * @property {Object} x - D3 scale for x-axis (linear or log)
+ * @property {Object} y - D3 scale for y-axis (linear or log)
+ * @property {Object} brush - D3 brush behavior for rectangular selection
+ * @property {Object} filteredCanvas - Canvas for rendering filtered/selected crosslinks
+ * @property {Object} highlightedCanvas - Canvas for rendering highlighted crosslinks
+ * @property {Object} jitterRanges - Jitter ranges for x/y to avoid overlapping points
+ * @property {number} selectSize - Count of selected/highlighted items
+ * @property {Object} nearest - Nearest link/match to mouse position
+ */
 export class ScatterplotViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Returns event handlers for this view.
+     * Extends parent events with scatterplot-specific handlers for mouse interaction and toggle buttons.
+     * @returns {Object} Event handlers map
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -36,6 +64,10 @@ export class ScatterplotViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Returns default options for scatterplot view.
+     * @returns {Object} Default options including labels, colors, point size, jitter, log axes, and interaction settings
+     */
     get defaultOptions() {
         return {
             xlabel: "Axis 1",
@@ -57,7 +89,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         };
     }
 
-    // eslint-disable-next-line no-unused-vars
+    /**
+     * Initializes the scatterplot view.
+     * Sets up SVG/canvas elements, scales, brush selection, axes, dropdowns for axis selection,
+     * toggle buttons for jitter/log scales, control buttons, event listeners, and initial render.
+     * @param {Object} viewOptions - View initialization options
+     */
     initialize(viewOptions) {
         super.initialize(...arguments);
 
@@ -322,11 +359,21 @@ export class ScatterplotViewBB extends BaseFrameView {
         this.axisChosen().render(); // initial render with defaults
     }
 
-    // eslint-disable-next-line no-unused-vars
+    /**
+     * Captures image export with canvas content.
+     * Overrides base method to include canvas layers in exported SVG.
+     * @param {Event} event - Click event from download button
+     * @param {SVGElement} thisSVG - SVG element to export
+     * @returns {*} Result from downloadSVGWithCanvas()
+     */
     takeImage(event, thisSVG) {
         return this.downloadSVGWithCanvas();
     }
 
+    /**
+     * Re-renders scatterplot if Distance is a selected axis and distances changed.
+     * Called when distancesObj changes or PDB assembly changes.
+     */
     ifADistanceAxisRerender() {
         const distanceAxes = this.getBothAxesMetaData().filter(function (axis) {
             return axis.id === "Distance";
@@ -337,6 +384,13 @@ export class ScatterplotViewBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Creates X/Y axis dropdown controls.
+     * Adds two select widgets allowing users to choose which data attributes to plot on each axis.
+     * @param {Object} elem - D3 selection of element to add controls to
+     * @param {Array} options - Array of attribute option objects with id, label, and functions
+     * @param {boolean} keepOld - Whether to keep old options or replace them
+     */
     setMultipleSelectControls(elem, options, keepOld) {
         const self = this;
         addMultipleSelectControls({
@@ -448,6 +502,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         this.nearest = nearest;
     }
 
+    /**
+     * Relayouts the view on resize or visibility change.
+     * Only renders if dragEnd is true to avoid double renders when view becomes visible.
+     * @param {Object} [descriptor] - Descriptor object with dragEnd flag
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     relayout(descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render();
@@ -455,12 +515,22 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Toggles jitter on/off for overlapping points.
+     * Jitter adds small random offset to prevent exact point overlaps.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     toggleJitter() {
         this.options.jitter = !this.options.jitter;
         this.render();
         return this;
     }
 
+    /**
+     * Toggles logarithmic scale for X axis.
+     * @param {Event} evt - Click event with checkbox state
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     toggleLogX(evt) {
         const checked = d3.select(evt.target).property("checked");
         this.options.logX = checked;
@@ -469,6 +539,11 @@ export class ScatterplotViewBB extends BaseFrameView {
             .render();
     }
 
+    /**
+     * Toggles logarithmic scale for Y axis.
+     * @param {Event} evt - Click event with checkbox state
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     toggleLogY(evt) {
         const checked = d3.select(evt.target).property("checked");
         this.options.logY = checked;
@@ -477,6 +552,13 @@ export class ScatterplotViewBB extends BaseFrameView {
             .render();
     }
 
+    /**
+     * Gets data values for all crosslinks using specified attribute function.
+     * @param {Object} funcMeta - Attribute metadata with linkFunc or unfilteredLinkFunc
+     * @param {boolean} filteredFlag - Whether to use filtered (true) or all (false) crosslinks
+     * @param {Array} [optionalLinks] - Optional crosslink array to use instead of model's links
+     * @returns {Array} Array of data value arrays, one per crosslink
+     */
     getData(funcMeta, filteredFlag, optionalLinks) {
         const linkFunc = funcMeta ? (filteredFlag ? funcMeta.linkFunc : funcMeta.unfilteredLinkFunc) : undefined;
         const crosslinks = optionalLinks ||
@@ -487,6 +569,11 @@ export class ScatterplotViewBB extends BaseFrameView {
         return data;
     }
 
+    /**
+     * Gets currently selected attribute option for specified axis.
+     * @param {string} axisLetter - "X" or "Y" to specify which axis
+     * @returns {Object} Selected attribute metadata object with label, functions, etc.
+     */
     getSelectedOption(axisLetter) {
         let funcMeta;
 
@@ -505,10 +592,22 @@ export class ScatterplotViewBB extends BaseFrameView {
         return funcMeta;
     }
 
+    /**
+     * Gets filtered crosslinks including decoys and linears.
+     * Unlike other views, scatterplot displays all link types.
+     * @returns {Array} Array of filtered crosslink objects
+     */
     getFilteredCrossLinks() {
         return this.model.getFilteredCrossLinks("all"); // include decoys and linears for this view
     }
 
+    /**
+     * Gets axis data including label, data values, and formatting info.
+     * @param {string} axisLetter - "X" or "Y" to specify which axis
+     * @param {boolean} filteredFlag - Whether to use filtered (true) or all (false) crosslinks
+     * @param {Array} [optionalLinks] - Optional crosslink array to use instead of model's links
+     * @returns {Object} Axis data object with label, data array, formatting options, and flags
+     */
     getAxisData(axisLetter, filteredFlag, optionalLinks) {
         const funcMeta = this.getSelectedOption(axisLetter);
         const data = this.getData(funcMeta, filteredFlag, optionalLinks);
@@ -523,10 +622,20 @@ export class ScatterplotViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Gets metadata for both X and Y axes.
+     * @returns {Array} Array of two attribute metadata objects [X axis, Y axis]
+     */
     getBothAxesMetaData() {
         return ["X", "Y"].map(this.getSelectedOption, this);
     }
 
+    /**
+     * Tests if a scale is linear (vs logarithmic).
+     * Checks if midpoint scaling matches linear expectations.
+     * @param {Object} scale - D3 scale object to test
+     * @returns {boolean} True if scale is linear, false if logarithmic
+     */
     isLinearScale(scale) {
         const domain = scale.domain();
         const bottomVal = scale(domain[0]);
@@ -535,6 +644,10 @@ export class ScatterplotViewBB extends BaseFrameView {
         return (fullRange / halfRange) >= (2 - 0.001); // -0.0001 for rounding
     }
 
+    /**
+     * Sets brush extent to valid empty value (both corners at domain minimum).
+     * Needed when switching axes to avoid invalid brush extent (e.g., containing zeros in log scale).
+     */
     setValidEmptyBrushExtent() {
         this.brush.extent([
             [this.x.domain()[0], this.y.domain()[0]],
@@ -542,6 +655,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         ]);
     }
 
+    /**
+     * Switches X axis between linear and logarithmic scale type.
+     * Only recreates scale if type change is needed.
+     * @param {boolean} setAsLogScale - True for log scale, false for linear
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     makeXAxisType(setAsLogScale) {
         if (setAsLogScale === this.isLinearScale(this.x)) { // only if different scale type is required
             this.x = setAsLogScale ? d3.scale.log() : d3.scale.linear();
@@ -551,6 +670,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Switches Y axis between linear and logarithmic scale type.
+     * Only recreates scale if type change is needed.
+     * @param {boolean} setAsLogScale - True for log scale, false for linear
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     makeYAxisType(setAsLogScale) {
         if (setAsLogScale === this.isLinearScale(this.y)) { // only if different scale type is required
             this.y = setAsLogScale ? d3.scale.log() : d3.scale.linear();
@@ -560,6 +685,11 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Called when user selects new axis attributes from dropdowns.
+     * Updates axis scales, tick formats, scale types (linear/log), axis labels, clears brush, and rescales.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     axisChosen() {
         const dataX = this.getAxisData("X", false);
         const dataY = this.getAxisData("Y", false);
@@ -595,6 +725,14 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Sets axis scale domains based on data extents.
+     * Calculates appropriate domains from data, applies zero-basing if needed,
+     * floors/ceils to integer bounds, and sets log scale start values.
+     * @param {Object} datax - X axis data object with data array and options
+     * @param {Object} datay - Y axis data object with data array and options
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     scaleAxes(datax, datay) {
         const directions = [{
             dataDetails: datax,
@@ -634,10 +772,23 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Highlights points and shows tooltip on mouse move.
+     * Convenience method chaining both highlight and tooltip actions.
+     * @param {Event} evt - Mouse move event
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     doHighlightAndTooltip(evt) {
         return this.doHighlight(evt).doTooltip(evt);
     }
 
+    /**
+     * Calculates highlight extent range around mouse position.
+     * Creates square extent of specified size centered on mouse coords.
+     * @param {Event} evt - Mouse event with position
+     * @param {number} squarius - Half-width of highlight square in pixels
+     * @returns {Object} Object with xrange, yrange arrays and mousePosition {px, py}
+     */
     getHighlightRange(evt, squarius) {
         const background = d3.select(this.el).select(".background").node();
         const margin = this.options.chartMargin;
@@ -658,6 +809,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Displays tooltip showing highlighted crosslinks/matches and nearest point.
+     * Formats tooltip with axis ranges and nearest link/match details.
+     * @param {Event} evt - Mouse event for positioning
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     doTooltip(evt) {
         const axesMetaData = this.getBothAxesMetaData();
         const highlightRange = this.getHighlightRange(evt, 20);
@@ -715,6 +872,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Highlights crosslinks near mouse cursor.
+     * Creates small extent around mouse position and selects points within it.
+     * @param {Event} evt - Mouse move event
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     doHighlight(evt) {
         const highlightRange = this.getHighlightRange(evt, 20);
         const extent = [
@@ -730,20 +893,38 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Clears highlights and tooltips.
+     * Convenience method chaining both clear actions.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     clearHighlightAndTooltip() {
         return this.clearHighlight().clearTooltip();
     }
 
+    /**
+     * Clears tooltip display.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     clearTooltip() {
         this.model.get("tooltipModel").set("contents", null);
         return this;
     }
 
+    /**
+     * Clears all highlighted crosslinks.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     clearHighlight() {
         this.model.setMarkedCrossLinks("highlights", [], false, false);
         return this;
     }
 
+    /**
+     * Main render method for the scatterplot view.
+     * Resizes and renders crosslinks if view is visible.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     render() {
         if (this.isVisible()) {
             console.log("SCATTERPLOT RENDER");
@@ -756,17 +937,34 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
-
+    /**
+     * Re-renders crosslinks with updated colors only (no position changes).
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     recolourCrossLinks() {
         this.renderCrossLinks({recolourOnly: true});
         return this;
     }
 
+    /**
+     * Re-renders highlighted crosslinks only (incremental update).
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     rehighlightCrossLinks() {
         this.renderCrossLinks({rehighlightOnly: true});
         return this;
     }
 
+    /**
+     * Renders crosslinks as points on dual canvas layers (filtered + highlighted).
+     * Main rendering logic: converts data to coordinates, applies jitter, draws to canvas with colors,
+     * handles decoys (squares), ambiguous (dashed), selected (yellow), and highlighted (orange) styles.
+     * @param {Object} [renderOptions] - Render options
+     * @param {boolean} [renderOptions.isVisible] - Force rendering even if visibility check would fail
+     * @param {boolean} [renderOptions.rehighlightOnly] - Only update highlights without full re-render
+     * @param {boolean} [renderOptions.recolourOnly] - Only update colors without repositioning
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     renderCrossLinks(renderOptions) {
         renderOptions = renderOptions || {};
 
@@ -969,22 +1167,52 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Calculates X jitter offset for a crosslink.
+     * Deterministic jitter based on fromResidue to avoid points jumping on recolors/filtering.
+     * @param {Object} link - Crosslink object
+     * @returns {number} X jitter offset in pixels
+     */
     getXJitter(link) {
         return (((link.fromResidue % 10) / 10) - 0.45) * this.jitterRanges.x;
     }
 
+    /**
+     * Calculates Y jitter offset for a crosslink.
+     * Deterministic jitter based on fromResidue to avoid points jumping on recolors/filtering.
+     * @param {Object} link - Crosslink object
+     * @returns {number} Y jitter offset in pixels
+     */
     getYJitter(link) {
         return (((link.fromResidue % 10) / 10) - 0.45) * this.jitterRanges.y;
     }
 
+    /**
+     * Converts X data coordinate to canvas pixel position with jitter.
+     * @param {number} xCoord - X data value
+     * @param {number} xJitter - X jitter offset in pixels
+     * @returns {number} X pixel position on canvas
+     */
     getXPosition(xCoord, xJitter) {
         return this.x(xCoord) + xJitter;
     }
 
+    /**
+     * Converts Y data coordinate to canvas pixel position with jitter.
+     * @param {number} yCoord - Y data value
+     * @param {number} yJitter - Y jitter offset in pixels
+     * @returns {number} Y pixel position on canvas
+     */
     getYPosition(yCoord, yJitter) {
         return this.y(yCoord) + yJitter;
     }
 
+    /**
+     * Gets size data for the scatterplot viewport.
+     * Calculates available width/height accounting for margins.
+     * Uses jQuery width() instead of clientWidth/Height for Firefox compatibility.
+     * @returns {Object} Size data with cx, cy (total SVG size), width, height (minus margins), and minDim (minimum dimension)
+     */
     getSizeData() {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(this.svg.node());
@@ -1004,6 +1232,11 @@ export class ScatterplotViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Calculates jitter ranges based on current axis scales.
+     * Jitter is ~1/3 of the pixel width of one data unit, with minimum of 2 pixels.
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     calcJitterRanges() {
         this.jitterRanges = this.jitterRanges || {};
         const xunit = Math.abs(this.x(this.x.domain()[0]) - this.x(this.x.domain()[0] + 1));
@@ -1056,6 +1289,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Redraws axes at correct positions and declutters labels.
+     * Positions X axis at bottom, Y axis at left, and removes overlapping tick labels.
+     * @param {Object} sizeData - Size data with width and height
+     * @returns {ScatterplotViewBB} This view instance for chaining
+     */
     redrawAxes(sizeData) {
         this.vis.select(".x")
             .attr("transform", "translate(0," + (sizeData.height) + ")")
@@ -1096,6 +1335,12 @@ export class ScatterplotViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Generates string representation of current scatterplot view options.
+     * Returns axis labels formatted as "Jitter_XAxis_by_YAxis" or "XAxis_(extent)_by_YAxis_(extent)" if brush active.
+     * Used for display and export filenames.
+     * @returns {string} String representation of scatterplot configuration
+     */
     optionsToString() {
         const meta = this.getBothAxesMetaData();
         let axisLabels = _.pluck(meta, "label");
