@@ -36,7 +36,7 @@ export async function loadTestData(baseUrl = "./test-data") {
         clmsModel.storeMatches(matchesData);
         clmsModel.storePeptides(peptidesData);
         clmsModel.storeProteins(proteinsData);
-        clmsModel.processSearchModifications(modificationsData);
+        clmsModel.storeSearchModifications(modificationsData);
         clmsModel.storeEnzymes(enzymesData);
         clmsModel.storeSpectraData(spectraData);
         clmsModel.storeSpectrumIdentificationProtocols(protocolsData);
@@ -46,7 +46,7 @@ export async function loadTestData(baseUrl = "./test-data") {
         // After loading all data, call parseJSON to construct internal structures
         // This populates participants, crosslinks, matches arrays, etc.
         clmsModel.parseJSON({});
-
+        console.log(clmsModel.toJSON());
         return clmsModel;
     } catch (error) {
         console.error("Error loading test data:", error);

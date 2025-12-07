@@ -224,38 +224,38 @@ export const attributeOptions =
             decimalPlaces: 2,
             maxVal: 90,
         },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.experimentalMissedCleavageCount();
-                });
+        /*     {
+                linkFunc: function (link) {
+                    return link.filteredMatches_pp.map(function (m) {
+                        return m.match.experimentalMissedCleavageCount();
+                    });
+                },
+                unfilteredLinkFunc: function (link) {
+                    return link.matches_pp.map(function (m) {
+                        return m.match.experimentalMissedCleavageCount();
+                    });
+                },
+                id: "ExpMissedCleavages",
+                label: "Experimental Max. Missed Cleavages",
+                decimalPlaces: 0,
+                matchLevel: true
             },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.experimentalMissedCleavageCount();
-                });
-            },
-            id: "ExpMissedCleavages",
-            label: "Experimental Max. Missed Cleavages",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
-        {
-            linkFunc: function (link) {
-                return link.filteredMatches_pp.map(function (m) {
-                    return m.match.searchMissedCleavageCount();
-                });
-            },
-            unfilteredLinkFunc: function (link) {
-                return link.matches_pp.map(function (m) {
-                    return m.match.searchMissedCleavageCount();
-                });
-            },
-            id: "SearchMissedCleavages",
-            label: "Search Max. Missed Cleavages",
-            decimalPlaces: 0,
-            matchLevel: true
-        },
+            {
+                linkFunc: function (link) {
+                    return link.filteredMatches_pp.map(function (m) {
+                        return m.match.searchMissedCleavageCount();
+                    });
+                },
+                unfilteredLinkFunc: function (link) {
+                    return link.matches_pp.map(function (m) {
+                        return m.match.searchMissedCleavageCount();
+                    });
+                },
+                id: "SearchMissedCleavages",
+                label: "Search Max. Missed Cleavages",
+                decimalPlaces: 0,
+                matchLevel: true
+            },*/
         {
             linkFunc: function (link) {
                 return link.filteredMatches_pp.map(function (m) {

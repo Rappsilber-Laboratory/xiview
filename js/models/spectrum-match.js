@@ -1,6 +1,84 @@
 import {Crosslink} from "./crosslink";
+import {ScoreExtent} from "./score-extent";
 
 export class SpectrumMatch {
+    /**
+     * Private identification data JSON from crosslinking-API
+     * @type {Object}
+     * @private
+     */
+    #json;
+
+    /**
+     * Get upload identifier
+     * @returns {string} Upload identifier
+     */
+    get uploadId() {
+        return this.#json.ui;
+    }
+
+    /**
+     * Reference to the parent SearchResultsModel containing this match
+     * @type {SearchResultsModel}
+     * @private
+     */
+    #containingModel;
+
+    /**
+     * Array of crosslink objects this match is associated with
+     * @type {Array<Crosslink>}
+     */
+    crosslinks;
+
+    /**
+     * Array of matched peptide objects (1 or 2 peptides depending on crosslink type)
+     * @type {Array<Peptide>}
+     */
+    matchedPeptides = [];
+
+
+    /**
+     * Crosslink position in first peptide (1-indexed)
+     * @type {number}
+     */
+    linkPos1;
+
+    /**
+     * Crosslink position in second peptide (1-indexed, undefined for linears)
+     * @type {number|undefined}
+     */
+    linkPos2;
+
+    /**
+     * Whether this match involves a decoy peptide
+     * @type {boolean}
+     * @private
+     */
+    #is_decoy;
+
+    /**
+     * Whether this match could belong to a protein heteromeric crosslink ('between link')
+     * @type {boolean}
+     */
+    couldBelongToBetweenLink;
+
+    /**
+     * Whether this match could belong to a self-link - todo -defintion
+     * @type {boolean}
+     */
+    couldBelongToSelfLink;
+
+    /**
+     * Whether this match has been confirmed as a homomultimeric link (peptides overlap)
+     * @type {boolean}
+     */
+    confirmedHomomultimer;
+
+    /**
+     * Array indicating overlapping peptide regions for homomultimers [start, end]
+     * @type {Array<number>}
+     */
+    overlap;
 
     /**
      * Create a SpectrumMatch linking a mass spectrum to peptide identifications
@@ -8,39 +86,52 @@ export class SpectrumMatch {
      * @param {Map<string, Protein>} participants - Map of protein IDs to Protein objects
      * @param {Map<string, Crosslink>} crosslinks - Map of crosslink IDs to Crosslink objects
      * @param {Map<string, Peptide>} peptides - Map of peptide IDs to Peptide objects
-     * @param {Object} identification - Raw identification data object
+     * @param {Object} json - Raw identification data object
+     * @param {string} json.ui - Spectrum identification/upload identifier
+     * @param {string} json.pi1 - Peptide identifier 1
+     * @param {string} [json.pi2] - Peptide identifier 2 (null for loop links, undefined for linear peptides)
+     * @param {string} json.id - PSM (peptide-spectrum match) identifier
+     * @param {string} json.sp - Spectrum identifier
+     * @param {Object} json.sc - Scores object containing score name-value pairs
+     * @param {number} json.pc_c - Precursor charge state
+     * @param {number} json.pc_mz - Precursor m/z value
+     * @param {number} json.c_mz - Calculated m/z value
+     * @param {boolean} json.p - Pass threshold flag
+     * @param {string} json.sd - Spectra data identifier
+     * @param {string} json.sip - Spectrum identification protocol identifier
      */
-    constructor(containingModel, participants, crosslinks, peptides, identification) {
-        this.containingModel = containingModel; //containing BB model
-        this._identification = identification;
+    constructor(containingModel, participants, crosslinks, peptides, json) {
+        this.#containingModel = containingModel;
+        this.#json = json;
 
-        // Initialize ion types
-        // todo - get from SIP, also CV term issues to be addressed (needed CV terms were deprecated)
-        this.ions = [{type:"bIon"}, {type:"yIon"}];
+        this.ions = [{type:"bIon"}, {type:"yIon"}]; //todo -remove
 
-        const scoreSets = Object.keys(this._scores);
-        const scoreSetCount = scoreSets.length;
-        for (let s = 0; s < scoreSetCount; s++) {
-            this.containingModel._scoreSets.add(scoreSets[s]);
+        //scores
+        for (const [scoreType, scoreValue] of Object.entries(this.#json.sc)) {
+            let scoreExtent = this.#containingModel.scoreExtents.get(scoreType);
+            if (!scoreExtent) {
+                scoreExtent = new ScoreExtent(scoreType);
+                this.#containingModel.scoreExtents.set(scoreType, scoreExtent);
+            }
+            scoreExtent.processScore(scoreValue);
         }
 
-        this.matchedPeptides = [];
-        this.matchedPeptides[0] = peptides.get(this.uploadId + "_" + identification.pi1);
+        this.matchedPeptides[0] = peptides.get(this.uploadId + "_" + json.pi1);
         if (!this.matchedPeptides[0]) {
-            alert("peptide error (missing peptide evidence?) for:" + identification.pi1);
+            alert("peptide error (missing peptide evidence?) for:" + json.pi1);
         } else {
             if (this.matchedPeptides[0].is_decoy.indexOf("1") != -1) {
                 this.is_decoy = true;
-                this.containingModel._decoysPresent = true;
+                this.#containingModel._decoysPresent = true;
             }
         }
-        if (identification.pi2 !== undefined && identification.pi2 !== null) { //null if loop link
-            this.matchedPeptides[1] = peptides.get(this.uploadId + "_" + identification.pi2);
+        if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
+            this.matchedPeptides[1] = peptides.get(this.uploadId + "_" + json.pi2);
             if (!this.matchedPeptides[1]) {
-                alert("peptide error (missing peptide evidence?) for:" + +identification.pi2);
+                alert("peptide error (missing peptide evidence?) for:" + +json.pi2);
             } else if (this.matchedPeptides[1].is_decoy.indexOf("1") != -1) {
                 this.is_decoy = true;
-                this.containingModel._decoysPresent = true;
+                this.#containingModel._decoysPresent = true;
             }
         }
         //if the match is ambiguous it will relate to many crosslinks
@@ -49,7 +140,7 @@ export class SpectrumMatch {
         this.linkPos2 = undefined;
         if (this.matchedPeptides[1]) {
             this.linkPos2 = this.matchedPeptides[1].linkSite1;
-        } else if (identification.pi2 === null) {
+        } else if (json.pi2 === null) {
             this.linkPos2 = +this.matchedPeptides[0].linkSite2;
         }
 
@@ -61,12 +152,12 @@ export class SpectrumMatch {
             this.containingModel._linearsPresent = true;
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
-                this.associateWithLink(participants, crosslinks, p1ID);
+                this.#associateWithLink(participants, crosslinks, p1ID);
             }
             if (this.matchedPeptides[1]) {
                 for (let i = 0; i < this.matchedPeptides[1].prt.length; i++) {
                     p1ID = this.matchedPeptides[1].prt[i];
-                    this.associateWithLink(participants, crosslinks, p1ID);
+                    this.#associateWithLink(participants, crosslinks, p1ID);
                 }
             }
             return;
@@ -78,11 +169,11 @@ export class SpectrumMatch {
         this.overlap = [];
 
         //looplinks
-        if (!this.matchedPeptides[1]){
+        if (!this.matchedPeptides[1]) {
             this.couldBelongToSelfLink = true;
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
-                this.associateWithLink(participants, crosslinks, p1ID, p1ID, this.matchedPeptides[0].pos[i]  + this.linkPos1 - 1, this.matchedPeptides[0].pos[i] + this.linkPos2 - 1, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length);
+                this.#associateWithLink(participants, crosslinks, p1ID, p1ID, this.matchedPeptides[0].pos[i] + this.linkPos1 - 1, this.matchedPeptides[0].pos[i] + this.linkPos2 - 1, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length);
             }
             return;
         }
@@ -93,7 +184,7 @@ export class SpectrumMatch {
             for (let j = 0; j < this.matchedPeptides[1].pos.length; j++) {
 
                 if (i > 0 || j > 0) {
-                    this.containingModel._ambiguousPresent = true;
+                    this.#containingModel._ambiguousPresent = true;
                 }
 
                 //some files (must be csv) are not puting in duplicate protein ids in ambig links
@@ -113,7 +204,7 @@ export class SpectrumMatch {
                 res1 = +this.matchedPeptides[0].pos[i] - 1 + this.linkPos1;
                 res2 = +this.matchedPeptides[1].pos[j] - 1 + this.linkPos2;
 
-                this.associateWithLink(participants, crosslinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
+                this.#associateWithLink(participants, crosslinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
             }
         }
 
@@ -166,8 +257,9 @@ export class SpectrumMatch {
      * @param {number} [pep2_start] - Peptide 2 start position
      * @param {number} [pep2_length] - Peptide 2 length
      * @returns {void}
+     * @private
      */
-    associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
+    #associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
         pep1_start, pep1_length, pep2_start, pep2_length) {
 
         // we don't want two different ID's, e.g. one that's "33-66" and one that's "66-33"
@@ -242,15 +334,15 @@ export class SpectrumMatch {
                     res1, null, null, this.containingModel);
             } else if (p1ID === p2ID) {
                 if ((res1 - 0) < (res2 - 0)) {
-                    resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2, this.containingModel);
+                    resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2);
                 } else {
-                    resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1, this.containingModel);
+                    resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1);
                 }
             } else if (p1ID === fromProt.id) {
-                resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2, this.containingModel);
+                resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2);
             } else {
                 //WATCH OUT - residues need to be in correct oprder
-                resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1, this.containingModel);
+                resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1);
             }
             crosslinks.set(crosslinkID, resLink);
 
@@ -301,24 +393,19 @@ export class SpectrumMatch {
      * @returns {boolean} True if match involves decoy
      */
     isDecoy() {
-        if (this.is_decoy) { //todo - looks bad
-            return this.is_decoy;
-        } else {
-            //its from csv not database, for simplicity lets just look at first crosslink //todo - look at again
-            return this.crosslinks[0].isDecoyLink();
-        }
+        return this.#is_decoy;
     }
 
     /**
      * Get match identifier
      * @returns {string} The PSM identifier
      */
-    get id () {
+    get id() {
         return this.psmId;
     }
 
     /**
-     * Check if peptides are not crosslinked (linear peptides)
+     * Check if peptides are not crosslinked (linear peptides) - todo - check warning
      * @returns {boolean} True if not crosslinked
      */
     isNotCrosslinked() {
@@ -326,7 +413,7 @@ export class SpectrumMatch {
     }
 
     /**
-     * Check if this is a monolink
+     * Check if this is a monolink - todo - whats going on here
      * @returns {boolean} Always returns false
      */
     isMonoLink() {
@@ -334,7 +421,7 @@ export class SpectrumMatch {
     }
 
     /**
-     * Check if this is a loop link (intra-peptide crosslink)
+     * Check if this is a loop link (intra-peptide crosslink) - todo - check warning
      * @returns {boolean} True if loop link
      */
     isLoopLink() {
@@ -342,28 +429,20 @@ export class SpectrumMatch {
     }
 
     /**
-     * Get the peaklist file name
+     * Get the peaklist file name - todo - tidy up SpectraData stuff
      * @returns {string} The peaklist file name
      */
     peaklistFileName() {
-        const spectraData = this.containingModel.getSpectraDataById(this.uploadId, this._identification.sd);
+        const spectraData = this.#containingModel.getMzidentmlFiles().get(this.uploadId).getSpectraDataById(this.#json.sd);
         return spectraData.location.split("/").pop().split("\\").pop();
     }
 
     /**
-     * Get the group this match belongs to
+     * Get the group this match belongs to - todo
      * @returns {*} The group identifier
      */
     group() {
-        return this.containingModel.getMzidentmlFiles().get(this.uploadId).group;
-    }
-
-    /**
-     * Get experimental m/z value
-     * @returns {number} Experimental m/z
-     */
-    expMZ() {
-        return this.precursorMZ;
+        return this.#containingModel.getMzidentmlFiles().get(this.uploadId).group;
     }
 
     /**
@@ -410,7 +489,7 @@ export class SpectrumMatch {
     }
 
     /**
-     * Get ion types for this match
+     * Get ion types for this match - todo -remove
      * @returns {Array<Object>} Array of ion type objects
      */
     ionTypes() {
@@ -430,7 +509,7 @@ export class SpectrumMatch {
      * @returns {number} Crosslinker modification mass
      */
     crosslinkerModMass() {
-        var clModMass = +this.matchedPeptides[0].cl_modmass;
+        let clModMass = +this.matchedPeptides[0].cl_modmass;
         if (this.matchedPeptides[1]) {
             clModMass = clModMass + (+this.matchedPeptides[1].cl_modmass);
         }
@@ -438,7 +517,7 @@ export class SpectrumMatch {
     }
 
     /**
-     * Get fragment tolerance settings
+     * Get fragment tolerance settings - todo - remove?
      * @returns {Object} Object with tolerance and unit properties
      */
     fragmentTolerance() {
@@ -465,16 +544,7 @@ export class SpectrumMatch {
      * @returns {number} The match score
      */
     score() {
-        //return this._scores.score;
-        var scoreSets = this.containingModel.getScoreSets();
-        // console.log("*",scoreSets);
-        if (scoreSets.has("Mascot:expectation value")) {
-            // const s =
-            return this._scores["Mascot:expectation value"];
-        } else {
-            var scoreSet = scoreSets.keys().next().value;
-            return this._scores[scoreSet];
-        }
+        return this.#json.sc[this.#containingModel.selectedScoreType];
     }
 
     /**
@@ -490,26 +560,6 @@ export class SpectrumMatch {
             }
         }
         return modCount1;
-    }
-
-    /**
-     * Get peptide 1 base sequence
-     * @returns {string} Peptide 1 base sequence
-     */
-    get pepSeq1_base() {
-        return this.matchedPeptides[0].sequence;
-    }
-
-    /**
-     * Get peptide 2 base sequence
-     * @returns {string} Peptide 2 base sequence or empty string
-     */
-    get pepSeq2_base() {
-        if (this.matchedPeptides[1]) {
-            return this.matchedPeptides[1].sequence;
-        } else {
-            return "";
-        }
     }
 
     /**
@@ -537,7 +587,7 @@ export class SpectrumMatch {
      * @returns {string} PSM identifier
      */
     get psmId() {
-        return this._identification.id;
+        return this.#json.id;
     }
 
     /**
@@ -545,31 +595,7 @@ export class SpectrumMatch {
      * @returns {string} Spectrum identifier
      */
     get spectrumId() {
-        return this._identification.sp;
-    }
-
-    /**
-     * Get upload identifier
-     * @returns {string} Upload identifier
-     */
-    get uploadId() {
-        return this._identification.si.toString();
-    }
-
-    /**
-     * Get precursor intensity
-     * @returns {null} Always returns null
-     */
-    get precursor_intensity() {
-        return null;
-    }
-
-    /**
-     * Get scores object
-     * @returns {Object} Object containing score values
-     */
-    get _scores() {
-        return this._identification.sc;
+        return this.#json.sp;
     }
 
     /**
@@ -577,8 +603,7 @@ export class SpectrumMatch {
      * @returns {number|undefined} Precursor charge or undefined if -1
      */
     get precursorCharge() {
-        const c = +this._identification.pc_c;
-        return c === -1 ? undefined : c;
+        return this.#json.pc_c === -1 ? undefined : this.#json.pc_c;
     }
 
     /**
@@ -586,7 +611,7 @@ export class SpectrumMatch {
      * @returns {number} Precursor m/z
      */
     get precursorMZ() {
-        return +this._identification.pc_mz;
+        return this.#json.pc_mz;
     }
 
     /**
@@ -594,7 +619,7 @@ export class SpectrumMatch {
      * @returns {number} Calculated m/z
      */
     get calc_mz() {
-        return +this._identification.c_mz;
+        return this.#json.c_mz;
     }
 
     /**
@@ -602,39 +627,7 @@ export class SpectrumMatch {
      * @returns {boolean} True if passes threshold
      */
     get passThreshold() {
-        return !!this._identification.p;
-    }
-
-    /**
-     * Get dataset identifier
-     * @returns {string} Dataset identifier
-     */
-    get datasetId() {
-        return this.uploadId;
-    }
-
-    /**
-     * Get scan number
-     * @returns {string} Scan number
-     */
-    get scanNumber() {
-        return this.spectrumId;
-    }
-
-    /**
-     * Get elution time start
-     * @returns {null} Always returns null
-     */
-    get elution_time_start() {
-        return null;
-    }
-
-    /**
-     * Get elution time end
-     * @returns {null} Always returns null
-     */
-    get elution_time_end() {
-        return null;
+        return this.#json.p;
     }
 
     /**
@@ -642,10 +635,75 @@ export class SpectrumMatch {
      * @returns {SpectrumIdentificationProtocol} The spectrum identification protocol
      */
     get spectrumIdentificationProtocol() {
-        return this.containingModel.getSpectrumIdentificationProtocol(this.uploadId, this._identification.sip);
+        return this.#containingModel.getMzidentmlFiles().get(this.uploadId).getSpectrumIdentificationProtocolById(this.#json.sip);
     }
+
+    get spectraDataId() {
+        return this.#json.sd;
+    }
+
+
+    // /**
+    //  * Get experimental m/z value, just a synonym for precursorMZ
+    //  * @returns {number} Experimental m/z
+    //  */
+    // expMZ() {
+    //     return this.precursorMZ;
+    // }
+
+    // /**
+    //  * Get precursor intensity
+    //  * @returns {null} Always returns null
+    //  */
+    // get precursor_intensity() {
+    //     return null;
+    // }
+
+    // /**
+    //  * Get dataset identifier
+    //  * @returns {string} Dataset identifier
+    //  */
+    // get datasetId() {
+    //     return this.uploadId;
+    // }
+
+    // /**
+    //  * Get scan number
+    //  * @returns {string} Scan number
+    //  */
+    // get scanNumber() {
+    //     return this.spectrumId;
+    // }
+
+    // /**
+    //  * Get elution time start
+    //  * @returns {null} Always returns null
+    //  */
+    // get elution_time_start() {
+    //     return null;
+    // }
+    //
+    // /**
+    //  * Get elution time end
+    //  * @returns {null} Always returns null
+    //  */
+    // get elution_time_end() {
+    //     return null;
+    // }
 }
 
 
+
+/**
+ * Mass of a proton in Daltons (used for m/z calculations)
+ * @type {number}
+ * @constant
+ */
 SpectrumMatch.protonMass = 1.007276466879;
+
+/**
+ * Mass difference between C12 and C13 isotopes in Daltons
+ * @type {number}
+ * @constant
+ */
 SpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;

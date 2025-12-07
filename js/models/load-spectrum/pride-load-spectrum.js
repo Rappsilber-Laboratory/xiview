@@ -63,14 +63,14 @@ export const prideLoadSpectrum = function (match) {
     formatted_data.ionTypes = ions.map(function (ion) {
         return ion.type.replace("Ion", "");
     }).join(";");
-    formatted_data.precursorMZ = match.expMZ();
+    formatted_data.precursorMZ = match.precursorMZ;
     formatted_data.requestID = match.id;
     formatted_data.stubs1 = match.matchedPeptides[0].stubs;
     formatted_data.stubs2 = match.matchedPeptides[1].stubs;
 
 
     const url = window.compositeModelInst.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
-                    + "&sd_ref=" +  encodeURIComponent(match._identification.sd)
+                    + "&sd_ref=" +  encodeURIComponent(match.spectraDataId)
                     + "&upload_id=" +  encodeURIComponent(match.uploadId);
 
     fetch(url)

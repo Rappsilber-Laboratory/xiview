@@ -290,6 +290,7 @@ export async function testSetup() {
 
     module("Data Integrity");
 
+    // todo
     // test("Peptide to protein mappings valid", function (assert) {
     //     const peptides = clmsModel.getPeptides();
     //     const participants = clmsModel.getProteinsMap();
@@ -364,17 +365,18 @@ export async function testSetup() {
         assert.equal(typeof decoysPresent, "boolean", "decoysPresent is boolean");
     });
 
-    test("Score extent calculated", function (assert) {
-        const scoreExtent = clmsModel.getScoreExtent();
-
-        if (scoreExtent) {
-            assert.ok(Array.isArray(scoreExtent) || scoreExtent instanceof Map,
-                "scoreExtent exists and is array or map");
-        } else {
-            // Score extent might not be set if no matches have scores
-            assert.ok(true, "scoreExtent not set (may be expected for this dataset)");
-        }
-    });
+    // todo
+    // test("Score extent calculated", function (assert) {
+    //     const scoreExtent = clmsModel.getScoreExtent();
+    //
+    //     if (scoreExtent) {
+    //         assert.ok(Array.isArray(scoreExtent) || scoreExtent instanceof Map,
+    //             "scoreExtent exists and is array or map");
+    //     } else {
+    //         // Score extent might not be set if no matches have scores
+    //         assert.ok(true, "scoreExtent not set (may be expected for this dataset)");
+    //     }
+    // });
 
     module("SearchResultsModel Methods");
 

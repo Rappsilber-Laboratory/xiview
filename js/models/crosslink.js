@@ -1,5 +1,55 @@
 export class Crosslink {
     /**
+     * Private array of spectrum matches for this crosslink
+     * @type {Array}
+     * @private
+     */
+    #matches_pp = [];
+
+    /**
+     * Array of filtered spectrum matches passing current filter criteria
+     * @type {Array}
+     */
+    filteredMatches_pp = [];
+
+    /**
+     * Private metadata object for storing additional crosslink information
+     * @type {Object}
+     * @private
+     */
+    #meta = {};
+
+    /**
+     * Unique crosslink identifier
+     * @type {string}
+     */
+    id;
+
+    /**
+     * First protein in the crosslink
+     * @type {Protein}
+     */
+    fromProtein;
+
+    /**
+     * Residue position in the first protein (1-indexed)
+     * @type {number}
+     */
+    fromResidue;
+
+    /**
+     * Second protein in the crosslink (null for linear peptides)
+     * @type {Protein|null}
+     */
+    toProtein;
+
+    /**
+     * Residue position in the second protein (null for linear peptides, 1-indexed)
+     * @type {number|null}
+     */
+    toResidue;
+
+    /**
      * Create a Crosslink representing a crosslinked peptide pair
      * @param {string} id - Crosslink identifier
      * @param {Protein} fromProtein - First protein in the crosslink
@@ -9,13 +59,34 @@ export class Crosslink {
      */
     constructor(id, fromProtein, fromResidue, toProtein, toResidue) {
         this.id = id;
-        this.matches_pp = [];
-        this.filteredMatches_pp = [];
-
         this.fromProtein = fromProtein;
         this.fromResidue = fromResidue;
         this.toProtein = toProtein;
         this.toResidue = toResidue;
+    }
+
+    /**
+     * Get all spectrum matches for this crosslink
+     * @returns {Array} Array of spectrum matches
+     */
+    get matches_pp() {
+        return this.#matches_pp;
+    }
+
+    /**
+     * Get the metadata object
+     * @returns {Object} Metadata object
+     */
+    get meta() {
+        return this.#meta;
+    }
+
+    /**
+     * Set the metadata object
+     * @param {Object} value - New metadata object
+     */
+    set meta(value) {
+        this.#meta = value;
     }
 
     /**

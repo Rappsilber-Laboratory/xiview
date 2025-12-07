@@ -1,38 +1,73 @@
-import {AnalysisCollectionSpectrumIdentification} from "./analysis-collection-spectrum-identification";
+import {AnalysisCollection_SpectrumIdentification} from "./analysis-collection-spectrum-identification";
 
 export class MzidentmlFile {
-
+    /**
+     * Private JSON data sent by crosslinking-API
+     * @type {Object}
+     * @private
+     */
     #json;
-    #analysisCollectionSpectrumIdentifications = [];
-    #spectraDataById = new Map();
+
+    /**
+     * Private array of AnalysisCollection_SpectrumIdentification instances for this file
+     * @type {Array<AnalysisCollection_SpectrumIdentification>}
+     * @private
+     */
+    #analysisCollection_spectrumIdentifications = [];
+
+    /**
+     * Private map of SpectraData objects keyed by spectra data ID
+     * @type {Map<number, SpectraData>}
+     * @private
+     */
+    #spectraDataById;
+
+    /**
+     * Private map of SpectrumIdentificationProtocol objects keyed by protocol ID
+     * @type {Map<number, SpectrumIdentificationProtocol>}
+     * @private
+     */
     #sipsById = new Map();
-    
+
     /**
      * Create an MzidentmlFile instance
      * @param {Object} json - Raw mzIdentML file data
-     * @param {SearchResultsModel} searchResultModel - The containing search results model
+     * @param {int} json.id - File identifier (upload_id)
+     * @param {string} json.project_id - Project identifier
+     * @param {string} json.identification_file_name - Identification file name
+     * @param {Object} json.analysis_software_list - Analysis software list object
+     * @param {Object} json.analysis_software_list.AnalysisSoftware
+     * @param {Object} json.provider - Provider information
+     * @param {Object} json.audit_collection - Audit collection data
+     * @param {Object} json.analysis_sample_collection - Analysis sample collection data
+     * @param {Object} json.spectra_formats - Spectra file formats data
+     * @param {Object} json.bib - Bibliography information
+     * @param {Array<Object>} analysisCollectionSpectrumIdentifications - Array of AnalysisCollection_SpectrumIdentification objects
+     * @param {Array<Object>} spectraData - Array of SpectraData objects
      */
     constructor(json,
-        analysisCollectionSpectrumIdentificationsJson,
-        spectraIdentificationProtocolsJson,
-        searchModificationsJson,
-        spectraDataJson,
+        analysisCollectionSpectrumIdentifications,
+        spectraData,
+        sipsbyIds
     ) {
         this.#json = json;
+        this.#analysisCollection_spectrumIdentifications = analysisCollectionSpectrumIdentifications;
+        this.#spectraDataById = spectraData;
+        this.#sipsById = sipsbyIds;
 
         // Build analysisCollectionSpectrumIdentifications array
-        for (const acsi of analysisCollectionSpectrumIdentificationsJson) {
-            if (acsi.upload_id === this.id) {
-                this.#analysisCollectionSpectrumIdentifications.push(
-                    new AnalysisCollectionSpectrumIdentification(acsi, this)
-                );
-            }
-        }
-        // Build spectraDataById map
-        // for (const sd of spectraDataJson) {
-        //     if (sd.uploadId === this.id) {
-        //         this.#spectraDataById.set(sd.id, sd);
+        // for (const acsi of analysisCollectionSpectrumIdentificationsJson) {
+        //     if (acsi.upload_id === this.id) {
+        //         this.#analysisCollection_spectrumIdentifications.push(
+        //             new AnalysisCollection_SpectrumIdentification(acsi, this)
+        //         );
         //     }
+        // }
+        // Build spectraDataById map
+        // for (const sd of spectraData) {
+        //     // if (sd.uploadId === this.id) {
+        //     this.spectraDataById.set(sd.id, sd);
+        //     // }
         // }
 
     }
@@ -94,11 +129,11 @@ export class MzidentmlFile {
     }
 
     /**
-     * Get <AnalysisCollection><SpectrumIdentification> data
-     * @returns {Map<string, AnalysisCollectionSpectrumIdentification>} Map of spectrumIdentificationListRef to AnalysisCollectionSpectrumIdentification
+     * Get AnalysisCollection_SpectrumIdentification data
+     * @returns {Array<AnalysisCollection_SpectrumIdentification>} AnalysisCollection_SpectrumIdentification array
      */
     get analysisCollection_SpectrumIdentifcations (){
-        return this.#analysisCollectionSpectrumIdentifications;
+        return this.#analysisCollection_spectrumIdentifications;
     }
 
 
@@ -132,7 +167,7 @@ export class MzidentmlFile {
      * @param spectraDataId
      */
     getSpectraDataById(spectraDataId) {
-
+        return this.#spectraDataById.get(spectraDataId);
     }
 
     /**
@@ -141,7 +176,7 @@ export class MzidentmlFile {
      * @return {SpectrumIdentificationProtocol}
      */
     getSpectrumIdentificationProtocolById(protocolId) {
-        return this.spectrumIdentificationProtocols.find(protocol => protocol.id === protocolId);
+        return this.#sipsById.get(protocolId);
     }
 
     /**
@@ -156,11 +191,12 @@ export class MzidentmlFile {
             // id: this.id,
             // projectId: this.projectId,
             // identificationFileName: this.identificationFileName,
-            analysisSoftware: this.analysisSoftware,
+            analysisSoftware: arrayToObjectById(this.analysisSoftware),
             provider: this.provider,
             auditCollection: this.auditCollection,
             analysisSampleCollection: this.analysisSampleCollection,
-            analysisCollectionSpectrumIdentifcations: this.#analysisCollectionSpectrumIdentifications,
+            analysisCollection_spectrumIdentifcations: arrayToObjectByProperty(this.#analysisCollection_spectrumIdentifications,
+                'spectrumIdentificationListRef'),
             // analysisProtocolCollection: this.analysisCollectionProtocolCollection,
             bib: this.bib,
             spectraFormats: this.spectraFormats,
@@ -169,4 +205,31 @@ export class MzidentmlFile {
         return returnObj;
     }
 
+}
+
+//util func to copnvert array to map indexed by id
+function arrayToMapById(array) {
+    const map = new Map();
+    for (const item of array) {
+        map.set(item.id, item);
+    }
+    return map;
+}
+
+//util func to copnvert array to object indexed by id
+function arrayToObjectById(array) {
+    const obj = {};
+    for (const item of array) {
+        obj[item.id] = item;
+    }
+    return obj;
+}
+
+//util func to copnvert array to object indexed by given property
+function arrayToObjectByProperty(array, property) {
+    const obj = {};
+    for (const item of array) {
+        obj[item[property]] = item;
+    }
+    return obj;
 }

@@ -1,11 +1,31 @@
 export class Peptide {
     /**
-     * Create a Peptide instance
-     * @param {Object} pep - Raw peptide data object
+     * Private raw peptide data object containing all peptide properties
+     * @type {Object}
+     * @private
      */
-    constructor(pep){ //}, containingModel) {
-        console.assert(pep.m_as.length == pep.m_ms.length &&  pep.m_ms.length == pep.m_as.length, "Inconsistent mod data on peptide", pep);
-        this._pep = pep;
+    #json;
+
+    /**
+     * Create a Peptide instance
+     * @param {Object} json - Raw peptide data object
+     * @param {string} json.u_id - Upload identifier
+     * @param {string} json.id - Peptide identifier
+     * @param {number} json.ls1 - Link site 1 position
+     * @param {number} json.ls2 - Link site 2 position (for loop links)
+     * @param {Array<string>} json.prt - Array of protein IDs this peptide maps to
+     * @param {Array<number>} json.pos - Array of positions in proteins where this peptide maps
+     * @param {Array<boolean>} json.dec - Array of decoy flags for each protein mapping
+     * @param {string} json.seq - Peptide base sequence
+     * @param {Array<number>} json.m_ps - Modification positions in the peptide
+     * @param {Array<number>} json.m_ms - Modification masses
+     * @param {Array<Object>} json.m_as - Modification accessions (CV term objects)
+     * @param {number} json.cl_m - Crosslinker modification mass
+     */
+    constructor(json){ //}, containingModel) {
+        console.assert(json.m_as.length == json.m_ms.length &&  json.m_ms.length == json.m_as.length, "Inconsistent mod data on peptide", json);
+        this.#json = json;
+
         // this.modificationNames = containingModel.get("modificationNames");
         // SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
         // if (){
@@ -39,7 +59,7 @@ export class Peptide {
      * @returns {string} Peptide identifier (upload_id + "_" + peptide_id)
      */
     get id(){
-        return this._pep.u_id + "_" + this._pep.id;
+        return this.#json.u_id + "_" + this.#json.id;
     }
 
     /**
@@ -47,7 +67,7 @@ export class Peptide {
      * @returns {number} Link site 1 position
      */
     get linkSite1(){
-        return this._pep.ls1;
+        return this.#json.ls1;
     }
 
     /**
@@ -55,7 +75,7 @@ export class Peptide {
      * @returns {number} Link site 2 position
      */
     get linkSite2(){
-        return this._pep.ls2;
+        return this.#json.ls2;
     }
 
     //todo - link site 2 for internally linked peptides
@@ -65,7 +85,7 @@ export class Peptide {
      * @returns {Array<string>} Array of protein IDs
      */
     get prt(){
-        return this._pep.prt;
+        return this.#json.prt;
     }
 
     /**
@@ -73,15 +93,15 @@ export class Peptide {
      * @returns {Array<number>} Array of protein positions
      */
     get pos(){
-        return this._pep.pos;
+        return this.#json.pos;
     }
 
     /**
      * Get decoy status for each protein mapping
-     * @returns {Array<string>} Array of decoy flags
+     * @returns {Array<boolean>} Array of decoy flags
      */
     get is_decoy(){
-        return this._pep.dec;
+        return this.#json.dec;
     }
 
     /**
@@ -89,7 +109,7 @@ export class Peptide {
      * @returns {string} Peptide sequence
      */
     get sequence() {
-        return this._pep.seq;
+        return this.#json.seq;
     }
 
     /**
@@ -99,14 +119,14 @@ export class Peptide {
     get seq_mods() {
         let seq_mods = "";
         let lastIndex = 0;
-        for (let i = 0; i < this._pep.m_ps.length; i++){
-            const pos = this._pep.m_ps[i];
-            const allModCvs = this._pep.m_as[i];
+        for (let i = 0; i < this.#json.m_ps.length; i++){
+            const pos = this.#json.m_ps[i];
+            const allModCvs = this.#json.m_as[i];
             const allModCvsKeys = Object.keys(allModCvs);
             if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
-                seq_mods = seq_mods + this._pep.seq.slice(lastIndex, pos);
+                seq_mods = seq_mods + this.#json.seq.slice(lastIndex, pos);
                 //     if (!mod_name){
-                //         mod_name = this._pep.mod_mass[i];
+                //         mod_name = this.#json.mod_mass[i];
                 //     } else if (this.modificationNames.has(mod_name)) {
                 //         mod_name = this.modificationNames.get(mod_name).toLowerCase().substring(0,4);
                 //     }
@@ -120,16 +140,16 @@ export class Peptide {
                 lastIndex = pos;
             }
         }
-        seq_mods = seq_mods + this._pep.seq.slice(lastIndex);
+        seq_mods = seq_mods + this.#json.seq.slice(lastIndex);
         return seq_mods;
     }
 
     /**
      * Get modification positions in the peptide
-     * @returns {Array<number>} Array of modification positions
+     * @returns {Array<int>} Array of modification positions
      */
     get mod_pos() {
-        return this._pep.m_ps;
+        return this.#json.m_ps;
     }
 
     /**
@@ -137,7 +157,7 @@ export class Peptide {
      * @returns {Array<number>} Array of modification masses
      */
     get mod_masses() {
-        return this._pep.m_ms;
+        return this.#json.m_ms;
     }
 
     /**
@@ -145,7 +165,7 @@ export class Peptide {
      * @returns {Array<Object>} Array of modification CV term objects
      */
     get mod_acc() {
-        return this._pep.m_as;
+        return this.#json.m_as;
     }
 
     /**
@@ -153,7 +173,7 @@ export class Peptide {
      * @returns {number} Crosslinker modification mass
      */
     get cl_modmass(){
-        return this._pep.cl_m;
+        return this.#json.cl_m;
     }
 
     /**
@@ -162,16 +182,16 @@ export class Peptide {
      */
     //todo - needs fixed for loop links
     get stubs() {
-        for (let i = 0; i < this._pep.m_as.length; i++) {
-            if (Object.prototype.hasOwnProperty.call(this._pep.m_as[i], "MS:1002509") || Object.prototype.hasOwnProperty.call(this._pep.m_as[i], "MS:1002510")) {
-                return this._pep.m_as[i]["MS:1003390"];
+        for (let i = 0; i < this.#json.m_as.length; i++) {
+            if (Object.prototype.hasOwnProperty.call(this.#json.m_as[i], "MS:1002509") || Object.prototype.hasOwnProperty.call(this.#json.m_as[i], "MS:1002510")) {
+                return this.#json.m_as[i]["MS:1003390"];
             }
         }
         return undefined;
     }
 
     /**
-     * Get formatted modification name from CV terms
+     * Get formatted modification name from CV terms todo - make this static
      * @param {Object} allModCvs - Object containing CV term key-value pairs
      * @returns {string} Formatted modification name
      */

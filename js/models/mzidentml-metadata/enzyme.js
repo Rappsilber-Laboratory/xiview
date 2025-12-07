@@ -1,10 +1,32 @@
 export class Enzyme {
     /**
+     * Private raw JSON data containing all enzyme properties
+     * @type {Object}
+     * @private
+     */
+    #json;
+
+    /**
      * Create an Enzyme instance
      * @param {Object} json - Raw enzyme data object
+     * @param {string} json.id - Enzyme identifier
+     * @param {string} json.name - Enzyme name
+     * @param {string} json.cleavage - Cleavage pattern
+     * @param {string} json.specificity - Enzyme specificity
+     * @param {string} json.nTermGain - N-terminal gain
+     * @param {string} json.cTermGain - C-terminal gain
+     * @param {string} json.upload_id - Upload identifier
+     * @param {string} json.protocol_id - Protocol identifier
+     * @param {string} json.site_regexp - Site regular expression pattern
+     * @param {number} json.min_distance - Minimum distance for cleavage
+     * @param {number} json.missed_cleavages - Number of allowed missed cleavages
+     * @param {boolean} json.semi_specific - Whether enzyme is semi-specific
+     * @param {string} json.accession - Enzyme accession
+     * @param {string} json.n_term_gain - Corrected N-terminal gain
+     * @param {string} json.c_term_gain - Corrected C-terminal gain
      */
     constructor(json) {
-        this._json = json;
+        this.#json = json;
     }
 
     /**
@@ -12,7 +34,7 @@ export class Enzyme {
      * @returns {string} Enzyme identifier
      */
     get id() {
-        return this._json.id;
+        return this.#json.id;
     }
 
     /**
@@ -20,7 +42,7 @@ export class Enzyme {
      * @returns {string} Enzyme name
      */
     get name() {
-        return this._json.name;
+        return this.#json.name;
     }
 
     /**
@@ -28,7 +50,7 @@ export class Enzyme {
      * @returns {string} Cleavage pattern
      */
     get cleavage() {
-        return this._json.cleavage;
+        return this.#json.cleavage;
     }
 
     /**
@@ -36,7 +58,7 @@ export class Enzyme {
      * @returns {string} Enzyme specificity
      */
     get specificity() {
-        return this._json.specificity;
+        return this.#json.specificity;
     }
 
     /**
@@ -44,7 +66,7 @@ export class Enzyme {
      * @returns {string} N-terminal gain
      */
     get nTermGain() {
-        return this._json.nTermGain;
+        return this.#json.nTermGain;
     }
 
     /**
@@ -52,7 +74,7 @@ export class Enzyme {
      * @returns {string} C-terminal gain
      */
     get cTermGain() {
-        return this._json.cTermGain;
+        return this.#json.cTermGain;
     }
 
     /**
@@ -60,7 +82,7 @@ export class Enzyme {
      * @returns {string} Upload identifier
      */
     get uploadId() {
-        return this._json.upload_id;
+        return this.#json.upload_id;
     }
 
     /**
@@ -68,7 +90,7 @@ export class Enzyme {
      * @returns {string} Protocol identifier
      */
     get protocolId() {
-        return this._json.protocol_id;
+        return this.#json.protocol_id;
     }
 
     /**
@@ -76,7 +98,7 @@ export class Enzyme {
      * @returns {string} Site regexp
      */
     get siteRegexp() {
-        return this._json.site_regexp;
+        return this.#json.site_regexp;
     }
 
     /**
@@ -84,7 +106,7 @@ export class Enzyme {
      * @returns {number} Minimum distance
      */
     get minDistance() {
-        return this._json.min_distance;
+        return this.#json.min_distance;
     }
 
     /**
@@ -92,7 +114,7 @@ export class Enzyme {
      * @returns {number} Missed cleavages count
      */
     get missedCleavages() {
-        return this._json.missed_cleavages;
+        return this.#json.missed_cleavages;
     }
 
     /**
@@ -100,7 +122,7 @@ export class Enzyme {
      * @returns {boolean} True if semi-specific
      */
     get semiSpecific() {
-        return this._json.semi_specific;
+        return this.#json.semi_specific;
     }
 
     /**
@@ -108,7 +130,7 @@ export class Enzyme {
      * @returns {string} Enzyme accession
      */
     get accession() {
-        return this._json.accession;
+        return this.#json.accession;
     }
 
     /**
@@ -116,7 +138,7 @@ export class Enzyme {
      * @returns {string} Corrected N-terminal gain
      */
     get nTermGainCorrected() {
-        return this._json.n_term_gain;
+        return this.#json.n_term_gain;
     }
 
     /**
@@ -124,7 +146,7 @@ export class Enzyme {
      * @returns {string} Corrected C-terminal gain
      */
     get cTermGainCorrected() {
-        return this._json.c_term_gain;
+        return this.#json.c_term_gain;
     }
 
     /**

@@ -1,10 +1,29 @@
 export class SearchModification {
     /**
+     * Private raw JSON data containing all modification properties
+     * @type {Object}
+     * @private
+     */
+    #json;
+
+    /**
      * Create a SearchModification instance
      * @param {Object} json - Raw modification data object
+     * @param {string} json.id - Modification identifier
+     * @param {string} json.upload_id - Upload identifier
+     * @param {string} json.protocol_id - Protocol identifier
+     * @param {number} json.massDelta - Modification mass delta
+     * @param {string} json.location - Modification location
+     * @param {string} json.residue - Residue being modified
+     * @param {string} json.searchModificationType - Search modification type
+     * @param {number} json.mass - Modification mass
+     * @param {Array<string>} json.residues - Array of residues that can be modified
+     * @param {boolean} json.fixed_mod - Whether this is a fixed modification
+     * @param {Array<string>} json.accessions - Array of modification accession identifiers
+     * @param {string} json.crosslinker_id - Crosslinker identifier
      */
     constructor(json) {
-        this._json = json;
+        this.#json = json;
     }
 
     /**
@@ -12,7 +31,7 @@ export class SearchModification {
      * @returns {string} Modification identifier
      */
     get id() {
-        return this._json.upload_id + "_" + this._json.protocol_id + "_" +  this._json.id;
+        return this.#json.upload_id + "_" + this.#json.protocol_id + "_" +  this.#json.id;
     }
 
     /**
@@ -20,7 +39,7 @@ export class SearchModification {
      * @returns {number} Mass delta
      */
     get massDelta() {
-        return this._json.massDelta;
+        return this.#json.massDelta;
     }
 
     /**
@@ -28,7 +47,7 @@ export class SearchModification {
      * @returns {string} Modification location
      */
     get location() {
-        return this._json.location;
+        return this.#json.location;
     }
 
     /**
@@ -36,7 +55,7 @@ export class SearchModification {
      * @returns {string} Residue
      */
     get residue() {
-        return this._json.residue;
+        return this.#json.residue;
     }
 
     /**
@@ -44,7 +63,7 @@ export class SearchModification {
      * @returns {string} Modification type
      */
     get searchModificationType() {
-        return this._json.searchModificationType;
+        return this.#json.searchModificationType;
     }
 
     /**
@@ -52,7 +71,7 @@ export class SearchModification {
      * @returns {string} Upload identifier
      */
     get uploadId() {
-        return this._json.upload_id;
+        return this.#json.upload_id;
     }
 
     /**
@@ -60,7 +79,7 @@ export class SearchModification {
      * @returns {string} Protocol identifier
      */
     get protocolId() {
-        return this._json.protocol_id;
+        return this.#json.protocol_id;
     }
 
     /**
@@ -68,7 +87,7 @@ export class SearchModification {
      * @returns {number} Modification mass
      */
     get mass() {
-        return this._json.mass;
+        return this.#json.mass;
     }
 
     /**
@@ -76,7 +95,7 @@ export class SearchModification {
      * @returns {Array<string>} Array of residues
      */
     get residues() {
-        return this._json.residues;
+        return this.#json.residues;
     }
 
     /**
@@ -84,7 +103,7 @@ export class SearchModification {
      * @returns {boolean} True if fixed modification
      */
     get fixedMod() {
-        return this._json.fixed_mod;
+        return this.#json.fixed_mod;
     }
 
     /**
@@ -92,7 +111,7 @@ export class SearchModification {
      * @returns {Array<string>} Array of accession identifiers
      */
     get accessions() {
-        return this._json.accessions;
+        return this.#json.accessions;
     }
 
     /**
@@ -100,7 +119,7 @@ export class SearchModification {
      * @returns {string} Crosslinker identifier
      */
     get crosslinkerId() {
-        return this._json.crosslinker_id;
+        return this.#json.crosslinker_id;
     }
 
     /**

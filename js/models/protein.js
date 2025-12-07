@@ -4,6 +4,73 @@
  */
 export class Protein {
     /**
+     * Private immutable data object containing original protein properties from server
+     * @type {Object}
+     * @private
+     */
+    #data;
+
+    /**
+     * Unique protein identifier
+     * @type {string}
+     */
+    id;
+
+    /**
+     * Protein name (from data or falls back to accession)
+     * @type {string}
+     */
+    name;
+
+    /**
+     * Whether this protein is a decoy (false target)
+     * @type {boolean}
+     */
+    is_decoy;
+
+    /**
+     * Array of crosslink objects involving this protein
+     * @type {Array}
+     */
+    crosslinks;
+
+    /**
+     * Metadata object for storing additional protein information
+     * @type {Object}
+     */
+    meta;
+
+    /**
+     * Whether this protein is hidden from visualization
+     * @type {boolean}
+     */
+    hidden;
+
+    /**
+     * Whether this protein was manually hidden by user
+     * @type {boolean}
+     */
+    manuallyHidden;
+
+    /**
+     * For decoy proteins, the ID of the corresponding target protein
+     * @type {string|null}
+     */
+    targetProteinID;
+
+    /**
+     * UniProt annotation data when loaded from external source
+     * @type {Object|null}
+     */
+    uniprot;
+
+    /**
+     * User-defined annotations for this protein
+     * @type {Array}
+     */
+    userAnnotations;
+
+    /**
      * @param {Object} data - Raw protein data from server or initialization
      * @param {string} data.id - Unique protein identifier
      * @param {string} data.name - Protein name (optional, falls back to accession)
@@ -15,7 +82,7 @@ export class Protein {
      */
     constructor(data) {
         // Store original data object for immutable properties
-        this._data = data;
+        this.#data = data;
 
         // Mutable core properties (mutated by search-results-model.js and modelUtils.js)
         this.id = data.id;
@@ -39,7 +106,7 @@ export class Protein {
      * @returns {string}
      */
     get accession() {
-        return this._data.accession;
+        return this.#data.accession;
     }
 
     /**
@@ -47,7 +114,7 @@ export class Protein {
      * @returns {string}
      */
     get sequence() {
-        return this._data.sequence || "";
+        return this.#data.sequence || "";
     }
 
     /**
@@ -55,7 +122,7 @@ export class Protein {
      * @returns {string|null}
      */
     get description() {
-        return this._data.description || null;
+        return this.#data.description || null;
     }
 
     /**
@@ -63,7 +130,7 @@ export class Protein {
      * @returns {number}
      */
     get upload_id() {
-        return this._data.upload_id;
+        return this.#data.upload_id;
     }
 
     /**

@@ -1,10 +1,24 @@
 export class SpectraData {
     /**
+     * Private JSON data sent by crosslinking-API
+     * @type {Object}
+     * @private
+     */
+    #json;
+
+    /**
      * Create a SpectraData instance
-     * @param {Object} json - Raw spectra data object
+     * @param {Object} json - JSON data sent by crosslinking-API
+     * @param {number} json.id - Spectra data identifier
+     * @param {string} json.file_format - File format CV term (e.g., "MS:1001062")
+     * @param {string} json.location - File location/path
+     * @param {string|null} json.name - File name
+     * @param {string} json.spectrum_id_format - Spectrum identifier format CV term (e.g., "MS:1000774")
+     * @param {number} json.upload_id - Upload identifier
+     * @param {string|null} json.external_format_documentation - External format documentation URL or null
      */
     constructor(json) {
-        this._json = json;
+        this.#json = json;
     }
 
     //example json
@@ -21,49 +35,49 @@ export class SpectraData {
      * @returns {string} File format CV term
      */
     get fileFormat() {
-        return this._json.file_format;
+        return this.#json.file_format;
     }
     /**
      * Get spectra data identifier
      * @returns {number} Data identifier
      */
     get id() {
-        return this._json.id;
+        return this.#json.id;
     }
     /**
      * Get spectra file location/path
      * @returns {string} File location
      */
     get location() {
-        return this._json.location;
+        return this.#json.location;
     }
     /**
      * Get spectra data name
-     * @returns {string|null} Data name or null
+     * @returns {string} Data name or null
      */
     get name() {
-        return this._json.name;
+        return this.#json.name;
     }
     /**
      * Get spectrum identifier format
      * @returns {string} Spectrum ID format CV term
      */
     get spectrumIdFormat() {
-        return this._json.spectrum_id_format;
+        return this.#json.spectrum_id_format;
     }
     /**
      * Get upload identifier
      * @returns {number} Upload identifier
      */
     get uploadId() {
-        return this._json.upload_id;
+        return this.#json.upload_id;
     }
     /**
      * Get external format documentation
      * @returns {string|null} Documentation URL or null
      */
     get externalFormatDocumentation() {
-        return this._json.external_format_documentation;
+        return this.#json.external_format_documentation;
     }
 
     /**

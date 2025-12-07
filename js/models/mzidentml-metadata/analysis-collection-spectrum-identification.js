@@ -1,39 +1,49 @@
-export class AnalysisCollectionSpectrumIdentification {
-
+/*
+ * represents contents of <AnalysisCollection><SpectrumIdentification> element, hence confusing name
+ */
+export class AnalysisCollection_SpectrumIdentification {
+    /**
+     * Private JSON data sent by crosslinking-API
+     * @type {Object}
+     * @private
+     */
     #json;
-    #mzidentmlFile;
 
     /**
-     * Create an AnalysisCollectionSpectrumIdentification instance
-     * @param {Object} json - Raw analysis collection data object
-     * @param {MzIdentMLFile} mzidentmlFile - The containing mzIdentML file
+     * Create an AnalysisCollection_SpectrumIdentification instance
+     * @param {Object} json - JSON data sent by crosslinking-API
+     * @param {int} json.upload_id - Upload identifier
+     * @param {string} json.spectrum_identification_list_ref - Spectrum identification list reference
+     * @param {string} json.spectrum_identification_protocol_ref - Spectrum identification protocol reference
+     * @param {Array<string>} json.spectra_data_refs - Array of spectra data reference identifiers
+     * @param {Array<string>} json.search_database_refs - Array of search database reference identifiers
+     * @param {MzidentmlFile} mzidentmlFile - The containing mzIdentML file
      */
-    constructor(json, mzidentmlFile) {
+    constructor(json, spectrumIdentifcationProtocols, spectraData) {
         this.#json = json;
-        this.#mzidentmlFile = mzidentmlFile;
     }
 
-    /**
-     * Get upload identifier
-     * @returns {int} Upload identifier
-     */
-    get uploadId() {
-        return this.#json.upload_id;
-    }
+    // /**
+    //  * Get upload identifier
+    //  * @returns {int} Upload identifier
+    //  */
+    // get uploadId() {
+    //     return this.#json.upload_id;
+    // }
+    //
+    // /**
+    //  * Get spectrum identification list reference
+    //  * @returns {string} Spectrum identification list reference
+    //  */
+    // get spectrumIdentificationListRef() {
+    //     return this.#json.spectrum_identification_list_ref;
+    // }
 
     /**
-     * Get spectrum identification list reference
-     * @returns {string} Spectrum identification list reference
+     * Get spectrum identification protocol
+     * @returns {SpectrumIdentificationProtocol} Spectrum identification protocol object
      */
-    get spectrumIdentificationListRef() {
-        return this.#json.spectrum_identification_list_ref;
-    }
-
-    /**
-     * Get spectrum identification protocol reference
-     * @returns {string} Spectrum identification protocol reference
-     */
-    get spectrumIdentificationProtocolRef() {
+    get spectrumIdentificationProtocol() {
         return this.#json.spectrum_identification_protocol_ref;
     }
 
@@ -59,9 +69,10 @@ export class AnalysisCollectionSpectrumIdentification {
      */
     toJSON() {
         return {
-            uploadId: this.uploadId,
-            spectrumIdentificationListRef: this.spectrumIdentificationListRef,
-            spectrumIdentificationProtocolRef: this.spectrumIdentificationProtocolRef,
+            // uploadId: this.uploadId,
+            spectrumIdentificationListRef: this.#json.spectrum_identification_list_ref,
+            spectrumIdentificationProtocolRef: this.#json.spectrum_identification_protocol_ref,
+            spectrumIdentificationProtocol: this.spectrumIdentifcationProtocol,
             spectraDataRefs: this.spectraDataRefs,
             searchDatabaseRefs: this.searchDatabaseRefs
         };
