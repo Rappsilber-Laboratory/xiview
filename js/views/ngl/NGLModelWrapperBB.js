@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Model wrapper that bridges CLMS crosslink data with NGL 3D viewer representations.
+ * Handles complex mapping of proteins to PDB chains, converts crosslinks to 3D link objects,
+ * calculates C-alpha distances, manages residue/link lookups via multiple indices, and generates
+ * NGL selection strings for visualization. A single protein may map to multiple chains in a PDB structure,
+ * and homomultimeric complexes require special handling.
+ */
+
 import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
@@ -18,11 +26,32 @@ import {
 } from "./NGLUtils";
 import {DistancesObj} from "./DistancesObj";
 
+/**
+ * Backbone model that wraps NGL 3D structure data and bridges it with CLMS crosslink data.
+ * Manages complex mapping of proteins to PDB chains, converts crosslinks into 3D link representations
+ * (full links with both ends in structure, half links with one end), calculates distance matrices,
+ * maintains multiple index structures for efficient lookups, and generates NGL selection strings.
+ * @class
+ * @extends Backbone.Model
+ * @property {Object} compositeModel - Main application model
+ * @property {Object} structureComp - NGL structure component
+ * @property {Object} chainMap - Map of protein IDs to arrays of chain objects
+ * @property {Object} reverseChainMap - Map of chain indices to protein IDs
+ * @property {Array} linkList - Array of full link objects (both ends in PDB)
+ * @property {Array} halfLinkList - Array of half link objects (one end in PDB)
+ * @property {number} fullDistanceCalcCutoff - Residue count threshold for full vs partial distance calculation (default 1200)
+ * @property {boolean} allowInterModelDistances - Whether to allow distance calculation between different NMR models (default false)
+ * @property {boolean} showShortestLinksOnly - Whether to filter to shortest alternative links (default true)
+ */
 export class NGLModelWrapperBB extends Backbone.Model {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Returns default values for model attributes.
+     * @returns {Object} Default attribute values
+     */
     defaults() {
         return {
             compositeModel: null,
@@ -38,6 +67,12 @@ export class NGLModelWrapperBB extends Backbone.Model {
     // Most of the stuff in this file is dealing with the complications of a single protein possibly mapping to many different chains
     // in a PDB structure.
 
+    /**
+     * Initializes the model and sets up event listeners.
+     * Listens for alignment collection changes (triggers link recalculation),
+     * allowInterModelDistances changes (triggers distance recalculation),
+     * and chainMap changes (triggers reverse map generation).
+     */
     initialize() {
         // When compositeModel is declared, hang a listener on it that listens to change in alignment model as this
         // possibly changes links and distances in 3d model
@@ -76,10 +111,18 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return this;
     }
 
+    /**
+     * Gets the main application composite model.
+     * @returns {Object} The composite model instance
+     */
     getCompositeModel() {
         return this.get("compositeModel");
     }
 
+    /**
+     * Gets the name of the loaded PDB structure.
+     * @returns {string} Structure name (PDB ID or filename)
+     */
     getStructureName() {
         return this.get("structureComp").structure.name;
     }
@@ -116,6 +159,13 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return this;
     }
 
+    /**
+     * Sets link list from array of crosslink objects.
+     * Converts crosslinks to link data objects, optionally filters to shortest alternatives,
+     * and wraps with index structures for efficient lookups.
+     * @param {Array} crosslinkArr - Array of crosslink objects to convert
+     * @returns {NGLModelWrapperBB} This model instance for chaining
+     */
     setLinkList(crosslinkArr) {
         const linkDataObj = this.makeLinkList(crosslinkArr);
         const distanceObj = this.getCompositeModel().get("distancesObj");
@@ -126,6 +176,14 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return this;
     }
 
+    /**
+     * Converts array of crosslink objects to 3D link representations.
+     * Core method that maps CLMS crosslinks to NGL 3D space by resolving protein-to-chain mappings,
+     * handling sequence alignments, filtering homomultimeric links, and categorizing links into
+     * full links (both ends in PDB) and half links (one end in PDB).
+     * @param {Array} crosslinkArr - Array of crosslink objects from CLMS model
+     * @returns {Object} Object with fullLinkList and halfLinkList arrays containing link objects
+     */
     makeLinkList(crosslinkArr) {
         const structure = this.get("structureComp").structure;
         let nextResidueId = 0;
@@ -376,6 +434,13 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return {fullLinkList: fullLinkList, halfLinkList: halfLinkList};
     }
 
+    /**
+     * Wraps link lists with index structures for efficient lookups.
+     * Creates multiple maps: residueId to linkIds, linkId to link objects,
+     * residue objects by various indices (residueId, NGLglobalIndex).
+     * Filters half links that also exist as full links when showShortestLinksOnly is true.
+     * @param {Object} linkDataObj - Object with fullLinkList and halfLinkList arrays
+     */
     setLinkListWrapped(linkDataObj) {
         const linkList = linkDataObj.fullLinkList;
         let halfLinkList = linkDataObj.halfLinkList;
@@ -442,19 +507,38 @@ export class NGLModelWrapperBB extends Backbone.Model {
         this.set("halfLinkList", halfLinkList);
     }
 
+    /**
+     * Gets count of unique original crosslinks represented by full links.
+     * @returns {number} Count of unique original crosslink IDs
+     */
     getFullLinkCount() {
         return this._origFullLinkCount;
     }
 
+    /**
+     * Gets all full links or full links for a specific residue.
+     * @param {Object} [residue] - Optional residue object to filter links
+     * @returns {Array} Array of full link objects
+     */
     getFullLinks(residue) {
         return residue === undefined ? this.get("linkList") : this.getFullLinksByResidueID(residue.residueId);
     }
 
+    /**
+     * Gets count of full links involving a specific residue.
+     * @param {Object} residue - Residue object with residueId property
+     * @returns {number} Count of full links involving this residue
+     */
     getFullLinkCountByResidue(residue) {
         const linkIds = this._residueIdToFullLinkIds[residue.residueId];
         return linkIds ? linkIds.length : 0;
     }
 
+    /**
+     * Gets full links for a specific residue by residue ID.
+     * @param {number} residueId - Internal residue ID
+     * @returns {Array} Array of full link objects involving this residue
+     */
     getFullLinksByResidueID(residueId) {
         const linkIds = this._residueIdToFullLinkIds[residueId];
         return linkIds ? linkIds.map(function (l) {
@@ -462,19 +546,38 @@ export class NGLModelWrapperBB extends Backbone.Model {
         }, this) : [];
     }
 
+    /**
+     * Gets count of unique original crosslinks represented by half links.
+     * @returns {number} Count of unique original crosslink IDs
+     */
     getHalfLinkCount() {
         return this._origHalfLinkCount;
     }
 
+    /**
+     * Gets all half links or half links for a specific residue.
+     * @param {Object} [residue] - Optional residue object to filter links
+     * @returns {Array} Array of half link objects
+     */
     getHalfLinks(residue) {
         return residue === undefined ? this.get("halfLinkList") : this.getHalfLinksByResidueID(residue.residueId);
     }
 
+    /**
+     * Gets count of half links involving a specific residue.
+     * @param {Object} residue - Residue object with residueId property
+     * @returns {number} Count of half links involving this residue
+     */
     getHalfLinkCountByResidue(residue) {
         const linkIds = this._residueIdToHalfLinkIds[residue.residueId];
         return linkIds ? linkIds.length : 0;
     }
 
+    /**
+     * Gets half links for a specific residue by residue ID.
+     * @param {number} residueId - Internal residue ID
+     * @returns {Array} Array of half link objects involving this residue
+     */
     getHalfLinksByResidueID(residueId) {
         const linkIds = this._residueIdToHalfLinkIds[residueId];
         return linkIds ? linkIds.map(function (l) {
@@ -482,14 +585,30 @@ export class NGLModelWrapperBB extends Backbone.Model {
         }, this) : [];
     }
 
+    /**
+     * Gets full link by NGL global residue indices of both ends.
+     * @param {number} NGLGlobalResIndex1 - NGL global residue index of first end
+     * @param {number} NGLGlobalResIndex2 - NGL global residue index of second end
+     * @returns {Object|undefined} Full link object or undefined if not found
+     */
     getFullLinkByNGLResIndices(NGLGlobalResIndex1, NGLGlobalResIndex2) {
         return this._fullLinkNGLIndexMap[NGLGlobalResIndex1 + "-" + NGLGlobalResIndex2];
     }
 
+    /**
+     * Gets half link by NGL global residue index.
+     * @param {number} NGLGlobalResIndex1 - NGL global residue index
+     * @returns {Object|undefined} Half link object or undefined if not found
+     */
     getHalfLinkByNGLResIndex(NGLGlobalResIndex1) {
         return this._halfLinkNGLIndexMap[NGLGlobalResIndex1];
     }
 
+    /**
+     * Gets residues from full links.
+     * @param {Object|Array} [fullLink] - Optional full link object(s). If undefined, returns all residues
+     * @returns {Array} Array of residue objects
+     */
     getResidues(fullLink) {
         if (fullLink === undefined) {
             return this._residueList;
@@ -504,6 +623,11 @@ export class NGLModelWrapperBB extends Backbone.Model {
         }
     }
 
+    /**
+     * Gets residues from half links.
+     * @param {Object|Array} [halfLink] - Optional half link object(s). If undefined, returns all half link residues
+     * @returns {Array} Array of residue objects
+     */
     getHalfLinkResidues(halfLink) {
         if (halfLink === undefined) {
             const halfLink = this.getHalfLinks();
@@ -523,6 +647,12 @@ export class NGLModelWrapperBB extends Backbone.Model {
         }
     }
 
+    /**
+     * Gets links shared between two residues.
+     * @param {Object} residueA - First residue object
+     * @param {Object} residueB - Second residue object
+     * @returns {Array|boolean} Array of shared link objects, or false if none found
+     */
     getSharedLinks(residueA, residueB) {
         const aLinks = this.getFullLinks(residueA);
         const bLinks = this.getFullLinks(residueB);
@@ -532,14 +662,29 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return sharedLinks.length ? sharedLinks : false;
     }
 
+    /**
+     * Gets residue object by NGL global residue index.
+     * @param {number} nglGlobalResIndex - NGL global residue index
+     * @returns {Object|undefined} Residue object or undefined if not found
+     */
     getResidueByNGLGlobalIndex(nglGlobalResIndex) {
         return this._residueNGLIndexMap[nglGlobalResIndex];
     }
 
+    /**
+     * Checks if residue is present in current residue map.
+     * @param {Object} residue - Residue object with residueId property
+     * @returns {boolean} True if residue is present
+     */
     hasResidue(residue) {
         return this._residueIdMap[residue.residueId] !== undefined;
     }
 
+    /**
+     * Checks if link is present in current link map.
+     * @param {Object} link - Link object with linkId property
+     * @returns {boolean} True if link is present
+     */
     hasLink(link) {
         return this._linkIdMap[link.linkId] !== undefined;
     }
@@ -566,6 +711,11 @@ export class NGLModelWrapperBB extends Backbone.Model {
         });
     }
 
+    /**
+     * Counts unique original crosslinks from link objects.
+     * @param {Array} linkObjs - Array of link objects with origId properties
+     * @returns {number} Count of unique original crosslink IDs
+     */
     getOriginalCrossLinkCount(linkObjs) {
         return d3.set(_.pluck(linkObjs, "origId")).size();
     }
@@ -595,10 +745,20 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return atomPairs;
     }
 
+    /**
+     * Returns atom pairs for all full links involving a residue.
+     * @param {Object} residue - Residue object
+     * @returns {Array} Array of [atomIndexA, atomIndexB, origId] tuples
+     */
     getAtomPairsFromResidue(residue) {
         return this.getAtomPairsFromLinkList(this.getFullLinks(residue));
     }
 
+    /**
+     * Gets information about viable chains in the structure.
+     * Filters out tiny chains and chains not mapped to proteins.
+     * @returns {Object} Object with viableChainIndices array and total resCount number
+     */
     getChainInfo() {
         let resCount = 0;
         const viableChainIndices = [];
@@ -617,6 +777,13 @@ export class NGLModelWrapperBB extends Backbone.Model {
         };
     }
 
+    /**
+     * Calculates C-alpha atom indices for all residues in specified chains.
+     * Builds a map of chain index → array of C-alpha atom indices.
+     * Handles cases where some residues don't have C-alpha atoms (e.g., 5TAF errors).
+     * @param {Array} chainIndices - Array of chain indices to process
+     * @returns {Object} Map of chain indices to arrays of C-alpha atom indices
+     */
     calculateAllCaAtomIndices(chainIndices) {
         const structure = this.get("structureComp").structure;
         const chainProxy = structure.getChainProxy();
@@ -655,6 +822,13 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return chainCAtomIndices;
     }
 
+    /**
+     * Calculates distance matrices for all chain pairs.
+     * For large structures (linksOnly=true), only calculates distances for actual crosslinks.
+     * For smaller structures (linksOnly=false), calculates all Ca-Ca distances.
+     * @param {boolean} linksOnly - Whether to calculate only link distances (true) or all distances (false)
+     * @returns {Object} Map of "chain1-chain2" keys to distance matrix objects
+     */
     getChainDistances(linksOnly) {
         const entries = d3.entries(this.get("chainCAtomIndices"));
         const matrixMap = {};
@@ -684,11 +858,27 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return matrixMap;
     }
 
+    /**
+     * Gets the length (residue count) of a chain.
+     * @param {number} chainIndex - Chain index
+     * @returns {number|undefined} Number of residues in chain, or undefined if chain not found
+     */
     getChainLength(chainIndex) {
         const chain = this.get("chainCAtomIndices")[chainIndex];
         return chain ? chain.length : undefined;
     }
 
+    /**
+     * Calculates distances only for actual crosslinks between two chains.
+     * Filters links to those connecting the specified chains, filters homomultimeric links,
+     * and builds a sparse distance matrix containing only crosslink distances.
+     * @param {Array} chainAtomIndices1 - C-alpha atom indices for first chain
+     * @param {Array} chainAtomIndices2 - C-alpha atom indices for second chain
+     * @param {number} chainIndex1 - First chain index
+     * @param {number} chainIndex2 - Second chain index
+     * @param {Array} links - Array of link objects to process
+     * @returns {Array} Sparse 2D array of distances (only populated for actual crosslinks)
+     */
     getLinkDistancesBetween2Chains(chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2, links) {
 
         const notHomomultimeric = function (xlinkID, c1, c2) {
@@ -726,6 +916,16 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return matrix;
     }
 
+    /**
+     * Calculates all Ca-Ca distances between two chains.
+     * Builds a complete distance matrix for all residue pairs between chains.
+     * For same-chain comparisons, diagonal is set to 0.
+     * @param {Array} chainAtomIndices1 - C-alpha atom indices for first chain
+     * @param {Array} chainAtomIndices2 - C-alpha atom indices for second chain
+     * @param {number} chainIndex1 - First chain index
+     * @param {number} chainIndex2 - Second chain index
+     * @returns {Array} Complete 2D array of distances between all residue pairs
+     */
     getAllDistancesBetween2Chains(chainAtomIndices1, chainAtomIndices2, chainIndex1, chainIndex2) {
         const matrix = [];
         const struc = this.get("structureComp").structure;
@@ -751,10 +951,22 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return matrix;
     }
 
+    /**
+     * Gets 3D coordinates of an atom.
+     * @param {Object} atomProxy - NGL atom proxy object
+     * @returns {Array} Array of [x, y, z] coordinates
+     */
     getAtomCoordinates(atomProxy) {
         return [atomProxy.x, atomProxy.y, atomProxy.z];
     }
 
+    /**
+     * Calculates distance between two atoms via proxies.
+     * Returns undefined if atoms are in different models and allowInterModelDistances is false.
+     * @param {Object} ap1 - First atom proxy
+     * @param {Object} ap2 - Second atom proxy
+     * @returns {number|undefined} Distance in Angstroms, or undefined if inter-model distance not allowed
+     */
     getAtomProxyDistance(ap1, ap2) {
         return ap1.modelIndex === ap2.modelIndex || this.get("allowInterModelDistances") ? ap1.distanceTo(ap2) : undefined;
     }
@@ -797,6 +1009,12 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return atomPairs;
     }
 
+    /**
+     * Generates PDB LINK records for crosslinks.
+     * Creates properly formatted PDB LINK records with atom names, residue info, chain IDs, and distances.
+     * @param {Array} links - Array of link objects
+     * @returns {string} Newline-separated PDB LINK records
+     */
     getPDBLinkString(links) {
         const pdbLinks = [];
         const struc = this.get("structureComp").structure;
@@ -829,6 +1047,12 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return pdbLinks.join("\n");
     }
 
+    /**
+     * Generates PDB CONECT records for crosslinks.
+     * CONECT is the correct PDB format spelling. Creates records linking atom pairs by index.
+     * @param {Array} links - Array of link objects
+     * @returns {string} Newline-separated PDB CONECT records sorted by first atom index
+     */
     getPDBConectString(links) {  // Conect is spelt right
         const pdbConects = [];
         const atomPairs = this.getAtomPairsFromLinkList(links);
@@ -844,6 +1068,16 @@ export class NGLModelWrapperBB extends Backbone.Model {
         return pdbConects.join("\n");
     }
 
+    /**
+     * Generates efficient NGL selection string from residue list.
+     * Builds hierarchical model→chain→residue selection with optimized syntax for fast NGL parsing.
+     * Groups consecutive residues into ranges for efficiency.
+     * @param {Array|string} resnoList - Array of residue objects, "all" for all residues, or null/empty for "none"
+     * @param {Object} [options] - Options object
+     * @param {boolean} [options.allAtoms] - If true, includes all atoms (not just C-alpha)
+     * @param {boolean} [options.chainsOnly] - If true, selects entire chains (residue details ignored)
+     * @returns {string} NGL selection string
+     */
     getSelectionFromResidueList(resnoList, options) { // set allAtoms to true to not restrict selection to alpha carbon atoms
         // options are
         // allAtoms:true to not add on the AND .CA qualifier
@@ -946,11 +1180,22 @@ export class NGLModelWrapperBB extends Backbone.Model {
     }
 
 
+    /**
+     * Gets atom index from residue object.
+     * @param {Object} resObj - Residue object with seqIndex, chainIndex, and resno properties
+     * @returns {number|undefined} Atom index, or undefined if resno not set
+     */
     getAtomIndexFromResidueObj(resObj) {
         const resno = resObj.resno;
         return resno !== undefined ? this.getAtomIndex(resObj.seqIndex, resObj.chainIndex) : undefined;
     }
 
+    /**
+     * Creates NGL selection string for first atom of each viable chain.
+     * Used for chain labeling and visualization.
+     * @param {Set} [chainIndexSet] - Optional set of chain indices to filter (if not provided, uses all viable chains)
+     * @returns {string} NGL selection string in "@atomIndex1,atomIndex2,..." format
+     */
     makeFirstAtomPerChainSelectionString(chainIndexSet) {
         const comp = this.get("structureComp").structure;
         const sels = [];
@@ -1012,6 +1257,11 @@ export class NGLModelWrapperBB extends Backbone.Model {
         };
     }
 
+    /**
+     * Gets 3D coordinates of all C-alpha atoms in a chain.
+     * @param {number} chainIndex - Chain index
+     * @returns {Array} Array of [x, y, z] coordinate arrays for each residue's C-alpha atom
+     */
     getAllResidueCoordsForChain(chainIndex) {
         const structure = this.get("structureComp").structure;
         const atomProxy = structure.getAtomProxy();

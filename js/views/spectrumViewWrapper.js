@@ -1,4 +1,11 @@
-// eslint-disable-next-line no-unused-vars
+/**
+ * @fileoverview Spectrum viewer wrapper integrating xiSPEC spectrum visualization.
+ * Creates container for modular xiSPEC viewer with validation controls, alternative matches table,
+ * spectrum download button, highlight clearing. Integrates with SelectionTableViewBB for match selection.
+ * Listens to compositeModel for match selection, spectrum updates, validation changes.
+ * Configures xiSPEC with crosslink-specific settings (peak tolerance, fragment types, colors).
+ */
+
 import "../../css/spectrumViewWrapper.css";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
@@ -8,11 +15,24 @@ import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, proteinConcat} from "../utils";
 import d3 from "d3";
 
+/**
+ * Spectrum viewer wrapper for xiSPEC integration.
+ * Creates DOM container with spectrum plot div, validation controls, alternatives table,
+ * clear highlights button. Configures xiSPEC with appropriate settings for crosslinking data
+ * (peptide pair mode, peak tolerance, fragment types, peptide colors). Syncs with match selection.
+ * @class
+ * @extends BaseFrameView
+ * @property {SelectionTableViewBB} alternativesTableView - Table view for alternative matches
+ */
 export class SpectrumViewWrapper extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for clear highlights button.
+     * @returns {Object} Event map
+     */
     get events() {
         let parentEvents = super.events;
         if (_.isFunction(parentEvents)) {

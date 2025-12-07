@@ -11,9 +11,25 @@ import {
 } from "./NGLUtils";
 import {NGLModelWrapperBB} from "./NGLModelWrapperBB";
 
+/**
+ * Namespace for NGL utilities, stores current PDB settings.
+ * @namespace NGLUtils
+ * @property {Array<Object>} pdbSettings - Current PDB load settings
+ */
 export const NGLUtils = {};
 
-
+/**
+ * Loads PDB files into NGL stage and populates 3D viewer with aligned sequences.
+ * Clears existing stage, loads all PDB files via Promise.all, extracts chain sequences,
+ * aligns to search proteins, creates NGLModelWrapperBB with chainMap and distance matrices,
+ * triggers "3dsync" event on compositeModel with aligned sequences. Handles merging multiple PDBs,
+ * structure copying across models, chain mapping. Catches errors and triggers 3dsync with failureReason.
+ * @param {Object} pdbInfo - PDB loading information
+ * @param {Array<Object>} pdbInfo.pdbSettings - Array of PDB load settings {id, uri, params}
+ * @param {NGL.Stage} pdbInfo.stage - NGL stage instance
+ * @param {CompositeModel} pdbInfo.compositeModel - Main composite model
+ * @returns {undefined}
+ */
 export function repopulateNGL(pdbInfo) {
     //console.log ("pdbInfo", pdbInfo);
     NGLUtils.pdbSettings = pdbInfo.pdbSettings;

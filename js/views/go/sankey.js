@@ -1,5 +1,17 @@
+/**
+ * @fileoverview D3 Sankey diagram layout algorithm for GO term visualization.
+ * Implements flow-based layout with nodes (GO terms) and links (relationships/flows).
+ * Computes positions and sizes for hierarchical flow visualization with iterative relaxation.
+ * Adapted from D3 Sankey plugin with customizations for GO term hierarchy display.
+ */
 import d3 from "d3";
 
+/**
+ * Creates a Sankey diagram layout generator with configurable properties.
+ * Returns a layout object with getter/setter methods and layout computation functions.
+ * Layout algorithm: computes node positions (x, y) and sizes (dx, dy) based on flow values.
+ * @returns {Object} Sankey layout object with methods: nodeWidth(), nodePadding(), nodes(), links(), size(), layout(), relayout(), link()
+ */
 export const d3_sankey = function () {
     const sankey = {};
     let nodeWidth = 24,
@@ -8,36 +20,67 @@ export const d3_sankey = function () {
         nodes = [],
         links = [];
 
+    /**
+     * Getter/setter for node width in pixels.
+     * @param {number} [_] - New node width value
+     * @returns {number|Object} Current width (if no args) or sankey object (for chaining)
+     */
     sankey.nodeWidth = function (_) {
         if (!arguments.length) return nodeWidth;
         nodeWidth = +_;
         return sankey;
     };
 
+    /**
+     * Getter/setter for vertical padding between nodes in pixels.
+     * @param {number} [_] - New node padding value
+     * @returns {number|Object} Current padding (if no args) or sankey object (for chaining)
+     */
     sankey.nodePadding = function (_) {
         if (!arguments.length) return nodePadding;
         nodePadding = +_;
         return sankey;
     };
 
+    /**
+     * Getter/setter for nodes array.
+     * @param {Array<Object>} [_] - Array of node objects (must have 'term' property with GO term)
+     * @returns {Array<Object>|Object} Current nodes (if no args) or sankey object (for chaining)
+     */
     sankey.nodes = function (_) {
         if (!arguments.length) return nodes;
         nodes = _;
         return sankey;
     };
 
+    /**
+     * Getter/setter for links array.
+     * @param {Array<Object>} [_] - Array of link objects with source, target, value, and optional partOf flag
+     * @returns {Array<Object>|Object} Current links (if no args) or sankey object (for chaining)
+     */
     sankey.links = function (_) {
         if (!arguments.length) return links;
         links = _;
         return sankey;
     };
 
+    /**
+     * Getter/setter for diagram size [width, height].
+     * @param {Array<number>} [_] - Two-element array [width, height] in pixels
+     * @returns {Array<number>|Object} Current size (if no args) or sankey object (for chaining)
+     */
     sankey.size = function (_) {
         if (!arguments.length) return size;
         size = _;
         return sankey;
     };
 
+    /**
+     * Computes full Sankey layout: positions and sizes for all nodes and links.
+     * Steps: compute node links, values, breadths (x-positions), depths (y-positions via iterative relaxation), link depths.
+     * @param {number} iterations - Number of relaxation iterations for node depth optimization
+     * @returns {Object} Sankey object for chaining
+     */
     sankey.layout = function (iterations) {
         computeNodeLinks();
         computeNodeValues();
@@ -47,14 +90,30 @@ export const d3_sankey = function () {
         return sankey;
     };
 
+    /**
+     * Recomputes only link depths (sy, ty offsets within nodes).
+     * Use after manually adjusting node positions without full relayout.
+     * @returns {Object} Sankey object for chaining
+     */
     sankey.relayout = function () {
         computeLinkDepths();
         return sankey;
     };
 
+    /**
+     * Returns SVG path generator function for drawing curved Bezier links between nodes.
+     * Creates horizontal cubic Bezier curves with configurable curvature.
+     * Special handling for partOf links (straight vertical alignment).
+     * @returns {Function} Path generator function with curvature() getter/setter
+     */
     sankey.link = function () {
         let curvature = 0.7;//1;//.9;
 
+        /**
+         * Generates SVG path string for a link between nodes.
+         * @param {Object} d - Link object with source, target, dy, sy, ty, and optional partOf properties
+         * @returns {string} SVG path string (M...C... format)
+         */
         function link(d) {
             // if (d.target.term.getInteractors().size < 30) {
             //     return "M" + 0 + "," + 0;
@@ -107,6 +166,11 @@ export const d3_sankey = function () {
             // + " Z"
         }
 
+        /**
+         * Getter/setter for link curvature (0=straight, 1=very curved).
+         * @param {number} [_] - New curvature value (0-1)
+         * @returns {number|Function} Current curvature (if no args) or link function (for chaining)
+         */
         link.curvature = function (_) {
             if (!arguments.length) return curvature;
             curvature = +_;
@@ -201,6 +265,14 @@ export const d3_sankey = function () {
         });
     }
 
+    /**
+     * Computes depth (y-position) for nodes using iterative relaxation algorithm.
+     * Groups nodes by breadth (x-position), initializes y based on value scaling,
+     * then iteratively relaxes positions (left-to-right and right-to-left) to minimize link crossings.
+     * Resolves vertical collisions by pushing overlapping nodes apart.
+     * @param {number} iterations - Number of relaxation iterations to perform
+     * @returns {undefined}
+     */
     function computeNodeDepths(iterations) {
         const nodesByBreadth = d3.nest()
             .key(function (d) {
@@ -309,6 +381,12 @@ export const d3_sankey = function () {
         }
     }
 
+    /**
+     * Computes vertical offsets (sy, ty) for links within their source and target nodes.
+     * Sorts links by target/source depth to minimize visual crossing, then assigns cumulative offsets.
+     * Ensures links stack properly within node heights.
+     * @returns {undefined}
+     */
     function computeLinkDepths() {
         nodes.forEach(function (node) {
             node.sourceLinks.sort(ascendingTargetDepth);

@@ -1,18 +1,47 @@
+/**
+ * @fileoverview Global tooltip view for displaying contextual information on hover.
+ * Displays header and contents (text, 1D array, 2D array/table) in positioned tooltip div.
+ * Updates position to follow mouse with offset, fades out when contents set to null.
+ * Formats numbers with d3.round. Supports table headers via tableHasHeaders flag.
+ * Listens to TooltipModel change:location/contents/header events.
+ */
+
 import "../../css/tooltip.css";
 
 import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
 
+/**
+ * Global tooltip view for contextual information display.
+ * Shows header (h2) and contents (p) in positioned div. Contents can be: plain text,
+ * 1D array (p elements), 2D array (table with optional headers). Fades out on null contents.
+ * Position updates on change:location event with mouse offset. Number formatting via d3.round.
+ * @class
+ * @extends Backbone.View
+ * @property {number} fadeDuration - Fade animation duration (200ms)
+ * @property {number} mouseOffset - Pixel offset from mouse (60px)
+ * @property {Function} numberFormat - Number formatting function
+ */
 export class TooltipViewBB extends Backbone.View {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * CSS class name for tooltip div.
+     * @returns {string} "CLMStooltip"
+     */
     get className() {
         return "CLMStooltip";
     }
 
+    /**
+     * Initializes tooltip view with DOM structure and model listeners.
+     * Creates h2 (header) and p (contents) elements, sets up fade/position parameters,
+     * listens to change:location (setPosition), change:contents/header (render).
+     * @returns {undefined}
+     */
     initialize() {
         const tooltip = d3.select(this.el);
         tooltip.style("visibility", "hidden");

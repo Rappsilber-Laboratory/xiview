@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Color scheme legend panel view for xiVIEW.
+ * Displays collapsible sections showing current color schemes (crosslinks, proteins) with interactive color pickers,
+ * and static view legends (XiNet protein/residue level, circular, matrix, scatterplot, alignment).
+ * Supports categorical color schemes with color picker controls and threshold-based schemes with ThreeColourSlider.
+ * Integrates sectionTable utility for expandable sections and allows downloading individual schemes as SVG.
+ */
 import "../../../css/key.css";
 import * as _ from "underscore";
 import d3 from "d3";
@@ -9,11 +16,27 @@ import {sectionTable} from "../../ui-utils/section-table";
 import {updateColourKey} from "../../utils";
 import {ManualColourModel} from "../../model/color/protein-color-model";
 
+/**
+ * Legend panel view displaying color schemes and view-specific legends.
+ * Shows two main sections: (1) Current color schemes with interactive controls (categorical color pickers
+ * or threshold sliders), and (2) Static view legends (XiNet, circular, matrix, scatterplot, alignment).
+ * Listens to color model changes and re-renders automatically. Supports downloading color schemes as SVG.
+ * @class
+ * @extends BaseFrameView
+ * @property {string} identifier - View type name ("Legend")
+ * @property {Object[]} options.colourConfigs - Array of color scheme configurations
+ * @property {ThreeColourSliderBB[]} sliderSubViews - Array of threshold slider subviews
+ */
 export class KeyViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Backbone.js event handler map.
+     * Extends parent events with color picker changes and SVG download button clicks.
+     * @returns {Object} Event map with jQuery selectors and handler methods
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -25,6 +48,12 @@ export class KeyViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Default options for color scheme configurations.
+     * Defines two color scheme sections: crosslinks and proteins, with their associated
+     * model IDs, collection IDs, and dropdown placeholder IDs.
+     * @returns {Object} Default options object
+     */
     get defaultOptions() {
         return {
             colourConfigs: [
@@ -43,6 +72,13 @@ export class KeyViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Initializes the legend panel with color scheme and view legend sections.
+     * Calls parent initialize, creates panel structure, sets up color and legend sections,
+     * and listens to color model and collection changes for automatic re-rendering.
+     * @param {Object} viewOptions - Initialization options from BaseFrameView
+     * @returns {KeyViewBB} This view instance for chaining
+     */
     // eslint-disable-next-line no-unused-vars
     initialize(viewOptions) {
         super.initialize(...arguments);
@@ -72,6 +108,15 @@ export class KeyViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Sets up the color scheme sections (crosslinks and proteins).
+     * Creates collapsible sections using sectionTable utility, adds dropdown placeholder labels
+     * for color scheme selectors (populated externally in networkFrame.js), and adds
+     * "Download This Colour Scheme as SVG" buttons. Initially renders with empty rows
+     * (populated in render() method based on current color scheme).
+     * @param {d3.selection} chartDiv - D3 selection of container to append sections to
+     * @returns {undefined}
+     */
     setupColourSection(chartDiv) {
         const sectionDiv = chartDiv.append("div");
         //sectionDiv.append("h3").text("Chosen Colour Scheme Legend").attr("class", "groupHeader");
@@ -124,6 +169,15 @@ export class KeyViewBB extends BaseFrameView {
             .text("Download This Colour Scheme as SVG");
     }
 
+    /**
+     * Sets up the static view legend sections.
+     * Creates collapsible sections for each view type (XiNet protein/residue level, circular, matrix,
+     * scatterplot, alignment) with SVG icon examples and text descriptions. Icons use CSS classes
+     * from various views to maintain consistent styling. Applies dynamic colors to some icons
+     * based on default color scheme (intra/inter/homomultimer link colors).
+     * @param {d3.selection} chartDiv - D3 selection of container to append sections to
+     * @returns {undefined}
+     */
     setupLegendSection(chartDiv) {
         const sectionDiv = chartDiv.append("div");
         sectionDiv.append("h3").text("View Legends").attr("class", "groupHeader");
@@ -303,6 +357,14 @@ export class KeyViewBB extends BaseFrameView {
             });
     }
 
+    /**
+     * Handles color picker change events for categorical color schemes.
+     * Extracts the color model from parent section datum, updates the color scale range
+     * at the appropriate index, or updates undefinedColour if changing the undefined category color.
+     * Triggers color model change event which cascades to all views using that scheme.
+     * @param {Event} evt - Change event from color picker input
+     * @returns {undefined}
+     */
     changeColour(evt) {
         const parentDatum = d3.select(evt.target.parentNode.parentNode.parentNode).datum();
         const colourModelKey = parentDatum.colourModelKey;
@@ -325,6 +387,12 @@ export class KeyViewBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Recalculates layout after panel resize.
+     * Resizes and re-renders threshold slider subviews (ThreeColourSliderBB) if present,
+     * as they need to adjust their SVG dimensions to fit the new panel size.
+     * @returns {KeyViewBB} This view instance for chaining
+     */
     relayout() {
         //console.log ("dragend fired");
         const colourAssigns = _.pluck(this.options.colourConfigs, "modelID").map(this.model.get, this.model);
@@ -336,6 +404,14 @@ export class KeyViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Renders the color scheme sections with current color assignments.
+     * Updates section headers with color scheme titles, populates rows with label-color pairings,
+     * creates color picker inputs for categorical schemes or ThreeColourSlider widgets for
+     * threshold schemes. Disables controls for fixed (non-editable) color schemes.
+     * Removes old slider subviews before creating new ones. Initializes jscolor library for color pickers.
+     * @returns {KeyViewBB} This view instance for chaining
+     */
     render() {
         const self = this;
         const colourSections = this.options.colourConfigs.map(function (config) {
@@ -443,6 +519,14 @@ export class KeyViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Downloads a specific color scheme as SVG.
+     * Called by "Download This Colour Scheme as SVG" button in each color section.
+     * Creates temporary SVG element, populates with color key using updateColourKey utility,
+     * downloads via parent downloadSVG method, and removes temporary element.
+     * @param {Event} evt - Click event from download button (datum contains colourModelKey)
+     * @returns {undefined}
+     */
     downloadKey(evt) {
         const d = d3.select(evt.target).datum();  // d3 datum for this button
         const tempSVG = d3.select(this.el).append("svg").attr("class", "tempKey");

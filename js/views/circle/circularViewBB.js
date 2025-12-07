@@ -1,4 +1,10 @@
-// eslint-disable-next-line no-unused-vars
+/**
+ * @fileoverview Circular/chord diagram view for visualizing protein networks and crosslinks.
+ * Displays proteins as arcs around a circle with crosslinks as curves between them.
+ * Supports protein ordering (alpha, size, reduce-crossings, manual drag), self-link positioning
+ * (inside/outside), homomultimer handling, feature overlays, residue labels, and interactive selection.
+ */
+
 import "../../../css/circularViewBB.css";
 import * as $ from "jquery";
 import * as _ from "underscore";
@@ -11,6 +17,17 @@ import d3 from "d3";
 import {circleArrange} from "./circleArrange";
 import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
 
+/**
+ * Calculates circular layout positioning for proteins, crosslinks, and features.
+ * Maps linear protein sequences to circular arcs with gaps, converts link/feature positions
+ * to angular coordinates, handles alignment between different index spaces.
+ * @param {Array} nodeArr - Array of protein/interactor objects with id, name, size
+ * @param {Array} linkArr - Array of crosslink objects
+ * @param {Array} featureArrs - Array of feature arrays (one per protein)
+ * @param {Array} range - Angular range [start, end] in degrees (e.g., [0, 360])
+ * @param {Object} options - Layout options with gap, linkParse, featureParse functions
+ * @returns {Object} Layout object with nodes (arc positions), links (angular coords), features (arc positions)
+ */
 const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
 
     const defaults = {
@@ -113,11 +130,35 @@ const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
     };
 };
 
+/**
+ * Backbone view for circular/chord diagram visualization of protein networks.
+ * Displays proteins as colored arcs around a circle with crosslinks as curves (chords) between them.
+ * Supports multiple protein orderings (alphabetical, by size, to reduce crossings, manual drag-to-reorder),
+ * self-link positioning (inside/outside circle), homomultimer detection and display, protein features
+ * as colored arcs, residue labels at link ends, selection/highlighting, and interactive tooltips.
+ * @class
+ * @extends BaseFrameView
+ * @property {number} radius - Current circle radius in pixels
+ * @property {Object} line - D3 radial line generator for inside links
+ * @property {Object} outsideLine - D3 radial line generator for outside links
+ * @property {Object} arc - D3 arc generator for protein arcs
+ * @property {Object} textArc - D3 arc generator for protein name paths
+ * @property {Object} featureArc - D3 arc generator for feature arcs
+ * @property {Object} resLabelArc - D3 arc generator for residue label positioning
+ * @property {Object} nodeDrag - D3 drag behavior for manual protein reordering
+ * @property {Array} interactorOrder - Current protein ordering (array of protein IDs)
+ * @property {Object} bespokeOrder - Custom protein ordering map from manual dragging
+ */
 export class CircularViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Returns event handlers for this view.
+     * Extends parent events with circular view-specific handlers for ordering, display toggles, and selection.
+     * @returns {Object} Event handlers map
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -134,6 +175,10 @@ export class CircularViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Returns default options for circular view.
+     * @returns {Object} Default options including node/tick widths, gaps, parsing functions, display flags
+     */
     get defaultOptions() {
         return {
             nodeWidth: 10, // this is a percentage measure
@@ -163,7 +208,14 @@ export class CircularViewBB extends BaseFrameView {
         };
     }
 
-    // eslint-disable-next-line no-unused-vars
+    /**
+     * Initializes the circular view.
+     * Sets up SVG structure, D3 line/arc generators, drag behaviors for rotation and protein reordering,
+     * ordering/show option dropdowns, tooltips, event listeners for filtering/selection/colors/features,
+     * and initial render. Configures feature parsing with alignment handling.
+     * @param {Object} viewOptions - View initialization options
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     initialize(viewOptions) {
         const self = this;
 
@@ -597,6 +649,15 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Reorders proteins according to current sort setting.
+     * Supports alpha (name), size (length), best (reduce crossings via circleArrange algorithm),
+     * or bespoke (manual drag ordering). Can reverse sort direction on consecutive calls.
+     * @param {Object} [orderOptions] - Ordering options
+     * @param {boolean} [orderOptions.reverseConsecutive] - Reverse sort direction if called consecutively
+     * @param {Object} [orderOptions.bespokeOrder] - Custom ordering map for bespoke mode
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     reOrder(orderOptions) {
         orderOptions = orderOptions || {};
         //xilog ("this", this, this.options);
@@ -636,44 +697,80 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Reorders proteins and renders the view.
+     * Convenience method that chains reOrder() and render().
+     * @param {Object} [localOptions] - Options passed to both reOrder and render
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     reOrderAndRender(localOptions) {
         return this.reOrder(localOptions).render(localOptions);
     }
 
+    /**
+     * Toggles self-link position between inside and outside circle.
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     flipIntra() {
         this.options.intraOutside = !this.options.intraOutside;
         this.render(); // nodes move position too (radially)
         return this;
     }
 
+    /**
+     * Toggles residue letter labels at link ends (if few enough links).
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     showResLabelsIfRoom() {
         this.options.showResLabels = !this.options.showResLabels;
         this.renderPartial(["linkLabels"]);
         return this;
     }
 
+    /**
+     * Toggles visibility of proteins with no current crosslinks.
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     toggleLinklessVisibility() {
         this.options.showLinkless = !this.options.showLinkless;
         this.render();
         return this;
     }
 
+    /**
+     * Toggles whether homomultimer links display opposite to self links.
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     toggleHomomOppositeIntra() {
         this.options.homomOpposite = !this.options.homomOpposite;
         this.renderPartial(["links"]);
         return this;
     }
 
+    /**
+     * Toggles showing only selected crosslinks.
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     toggleSelectedOnly() {
         this.options.showSelectedOnly = !this.options.showSelectedOnly;
         this.renderPartial(["links"]);
         return this;
     }
 
+    /**
+     * ID function for D3 data joins.
+     * @param {Object} d - Data object with id property
+     * @returns {string} Object ID
+     */
     idFunc(d) {
         return d.id;
     }
 
+    /**
+     * Shows accented (selected/highlighted) links.
+     * @param {string} accentType - "selection" or "highlights"
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     showAccentedLinks(accentType) {
         if (this.isVisible()) {
             this.showAccentOnTheseLinks(d3.select(this.el).selectAll(".circleGhostLink"), accentType);
@@ -681,6 +778,12 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Applies accent styling to specified links based on marked crosslinks.
+     * @param {Object} d3Selection - D3 selection of link elements
+     * @param {string} accentType - "selection" or "highlights"
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     showAccentOnTheseLinks(d3Selection, accentType) {
         let accentedLinkList = this.model.getMarkedCrossLinks(accentType);
         if (accentType === "selection" && this.options.showSelectedOnly) {
@@ -707,6 +810,11 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Shows accented (selected/highlighted) protein nodes.
+     * @param {string} accentType - "selection" or "highlights"
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     showAccentedNodes(accentType) {
         if (this.isVisible()) {
             this.showAccentOnTheseNodes(d3.select(this.el).selectAll(".circleNode"), accentType);
@@ -714,6 +822,12 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Applies accent styling to specified protein nodes based on marked proteins.
+     * @param {Object} d3Selection - D3 selection of node elements
+     * @param {string} accentType - "selection" or "highlights"
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     showAccentOnTheseNodes(d3Selection, accentType) {
         const accentedNodeList = this.model.get(accentType === "selection" ? "selectedProteins" : "highlightedProteins");
         if (accentedNodeList) {
@@ -730,6 +844,16 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Marks crosslinks involving a protein node (or residue range within it).
+     * Filters to links involving specified protein/residues and marks them as selection/highlights.
+     * @param {string} nodeId - Protein ID
+     * @param {string} actionType - "selection" or "highlights"
+     * @param {boolean} add - Add to existing marks (true) or replace (false)
+     * @param {number} [startPos] - Optional start residue position
+     * @param {number} [endPos] - Optional end residue position
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     actionNodeLinks(nodeId, actionType, add, startPos, endPos) {
         const filteredCrossLinks = this.model.getFilteredCrossLinks();
         const anyPos = startPos == undefined && endPos == undefined;
@@ -744,6 +868,12 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Clears current crosslink and protein selections.
+     * Doesn't clear if node was just dragged or if alt/ctrl/shift held (adding to selection).
+     * @param {Event} [evt] - Optional event with altKey, ctrlKey, shiftKey properties
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     clearSelection(evt) {
         evt = evt || {};
         //console.log ("evt", evt);
@@ -759,6 +889,16 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Converts link angular positions to path coordinates.
+     * Determines if links go inside or outside circle based on self/homomultimer status,
+     * generates coordinate arrays for D3 radial line generators. Handles long outside links
+     * with multiple control points, homomultimer bow shapes, and normal curved links.
+     * @param {Array} links - Array of link objects with id, start, end angles
+     * @param {number} rad1 - Inner radius (for inside/normal links)
+     * @param {number} rad2 - Outer radius (for outside links)
+     * @returns {Array} Array of link objects with id, coords (path control points), outside flag
+     */
     convertLinks(links, rad1, rad2) {
         const xlinks = this.model.get("clmsModel").getCrosslinks();
         const intraOutside = this.options.intraOutside;
@@ -844,11 +984,21 @@ export class CircularViewBB extends BaseFrameView {
         return newLinks;
     }
 
+    /**
+     * Gets maximum circle radius that fits in SVG container.
+     * @param {Object} d3sel - D3 selection of SVG element
+     * @returns {number} Maximum radius in pixels (min of width/height divided by 2)
+     */
     getMaxRadius(d3sel) {
         const zelem = $(d3sel.node());
         return Math.min(zelem.width(), zelem.height()) / 2;
     }
 
+    /**
+     * Filters interactors to non-decoys and optionally removes hidden ones.
+     * @param {Map} interactors - Native map of interactor objects
+     * @returns {Array} Array of filtered interactor objects
+     */
     filterInteractors(interactors) {  // interactors is a native map
         const filteredInteractors = [];
         const showLinkless = this.options.showLinkless;
@@ -860,6 +1010,12 @@ export class CircularViewBB extends BaseFrameView {
         return filteredInteractors;
     }
 
+    /**
+     * Renders only specified parts of the view.
+     * Convenience method that calls render with changed set.
+     * @param {Array} renderPartArr - Array of part names: "links", "nodes", "features", "linkLabels"
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     renderPartial(renderPartArr) {
         this.render({
             changed: d3.set(renderPartArr)
@@ -867,6 +1023,14 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Main render method for the circular view.
+     * Calculates circle radius, filters proteins/links, generates circular layout, calculates radii,
+     * and draws links/nodes/features/labels. Supports partial rendering via changed set.
+     * @param {Object} [renderOptions] - Render options
+     * @param {Object} [renderOptions.changed] - D3 set of changed parts ("links", "nodes", "features", "linkLabels")
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     render(renderOptions) {
 
         renderOptions = renderOptions || {};
@@ -996,6 +1160,12 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Gets or creates a named SVG group layer.
+     * @param {Object} g - D3 selection of parent group
+     * @param {string} layerClass - Class name for the layer
+     * @returns {Object} D3 selection of the layer group
+     */
     addOrGetGroupLayer(g, layerClass) {
         let groupLayer = g.select("g." + layerClass);
         if (groupLayer.empty()) {
@@ -1004,6 +1174,15 @@ export class CircularViewBB extends BaseFrameView {
         return groupLayer;
     }
 
+    /**
+     * Draws crosslink curves as SVG paths.
+     * Creates thin visible links (colored by link color model, ambiguous dashed) and thick invisible
+     * ghost links for mouse events (hover tooltip/highlight, click select). Links are D3-joined by ID
+     * for efficient updates. Uses cached paths from convertLinks.
+     * @param {Object} g - D3 selection of parent group
+     * @param {Array} links - Array of link objects with id, coords, outside flag
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     drawLinks(g, links) {
         const self = this;
         const crosslinks = this.model.get("clmsModel").getCrosslinks();
@@ -1065,6 +1244,12 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Handles node selection on click (or drag-end with no movement).
+     * Selects links involving the protein and marks the protein itself as selected.
+     * @param {Object} d - Node data object with id
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     selectNode(d) {
         const add = d3.event.ctrlKey || d3.event.shiftKey;
         this.actionNodeLinks(d.id, "selection", add);
@@ -1073,6 +1258,14 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Draws protein arcs as colored paths around circle.
+     * Creates arc paths colored by protein color model, with mouse events for tooltips/highlights/selection.
+     * If multiple proteins, enables drag behavior for manual reordering.
+     * @param {Object} g - D3 selection of parent group
+     * @param {Array} nodes - Array of node objects with id, start, end angles
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     drawNodes(g, nodes) {
         const self = this;
 
@@ -1117,6 +1310,15 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Draws tick marks and labels on protein arcs showing residue indices.
+     * Calculates nice tick spacing, generates tick positions (1-indexed), positions radially,
+     * and labels every Nth tick. First and last ticks always labeled, second-last tick label suppressed for aesthetics.
+     * @param {Object} g - D3 selection of parent group
+     * @param {Array} nodes - Array of node objects with id, start, end, size
+     * @param {number} radius - Tick radius in pixels
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     drawNodeTicks(g, nodes, radius) {
         const self = this;
         const tot = nodes.reduce(function (total, node) {
@@ -1200,6 +1402,14 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Draws protein names as curved text along arcs.
+     * Only draws names for proteins with ≥10° display arc. Creates curved paths in defs and textPath
+     * references. Text positioned at arc midpoint, flipped for bottom half of circle for readability.
+     * @param {Object} g - D3 selection of parent group
+     * @param {Array} nodes - Array of node objects with id, name, start, end
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     drawNodeText(g, nodes) {
         const self = this;
 
@@ -1258,6 +1468,14 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Draws protein features as colored arc segments.
+     * Sorts features largest first to avoid occlusion, colors by annotation type,
+     * with mouse events for tooltips/highlights/selection of links within feature range.
+     * @param {Object} g - D3 selection of parent group
+     * @param {Array} features - Array of feature objects with id, category, type, nodeID, start, end, fstart, fend
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     drawFeatures(g, features) {
         const self = this;
 
@@ -1303,6 +1521,14 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Draws single-letter amino acid codes at link ends (if few enough links).
+     * Only draws if >30 pixels/link on average and showResLabels enabled. Gets residue types
+     * from proteins, positions as rotated text at link endpoints.
+     * @param {Object} g - D3 selection of parent group
+     * @param {Array} links - Array of link objects with id, coords
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     drawResidueLetters(g, links) {
 
         const circumference = this.resLabelArc.innerRadius()() * 2 * Math.PI;
@@ -1357,6 +1583,12 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Relayouts the circular view on resize or visibility change.
+     * Only renders if dragEnd is true to avoid double renders when view becomes visible.
+     * @param {Object} [descriptor] - Descriptor object with dragEnd flag
+     * @returns {CircularViewBB} This view instance for chaining
+     */
     relayout(descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render();
@@ -1364,6 +1596,11 @@ export class CircularViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Generates string representation of current circular view options.
+     * Returns abbreviated option names formatted for display/export filenames.
+     * @returns {string} String representation of view configuration
+     */
     optionsToString() {
         const abbvMap = {
             showResLabels: "RESLBLS",

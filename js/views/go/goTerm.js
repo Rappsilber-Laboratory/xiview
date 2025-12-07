@@ -1,3 +1,23 @@
+/**
+ * @fileoverview Gene Ontology (GO) term class for xiVIEW.
+ * Represents a single GO term with hierarchical relationships (is_a, part_of) and associated proteins.
+ * Provides methods to traverse GO term hierarchy and collect interactors from subtrees.
+ */
+
+/**
+ * Gene Ontology term with hierarchical relationships and protein associations.
+ * Relationships are lazily instantiated Sets: is_a (superclasses), subclasses, part_of, parts.
+ * The interactors Set contains protein objects associated with this term.
+ * @class
+ * @property {string} id - GO term ID (e.g., "GO:0005737")
+ * @property {string} name - Human-readable GO term name
+ * @property {Set<string>} [is_a] - Set of parent GO term IDs (superclasses)
+ * @property {Set<string>} [subclasses] - Set of child GO term IDs
+ * @property {Set<string>} [part_of] - Set of GO term IDs this term is part of
+ * @property {Set<string>} [parts] - Set of GO term IDs that are parts of this term
+ * @property {Set<Object>} [interactors] - Set of protein objects with this GO annotation
+ * @property {number} filtInteractorCount - Cached count of filtered interactors in subtree
+ */
 export class GoTerm {
     constructor() {
         // lazy instantiation instead
@@ -35,6 +55,13 @@ export class GoTerm {
     //     return interactorSet;
     // }
 
+    /**
+     * Recursively collects all interactors (proteins) from this GO term and its subtree.
+     * Traverses parts and subclasses hierarchies to collect all associated proteins.
+     * Only includes proteins where hidden === false.
+     * @param {boolean} [storeCount] - If true, stores result count in filtInteractorCount property
+     * @returns {Set<Object>|null} Set of protein objects, or null if no interactors found
+     */
     getInteractors(storeCount) {
         const go = window.compositeModelInst.get("go");
         // GoTerm.prototype.getCount++;
@@ -81,6 +108,12 @@ export class GoTerm {
         return subTreeSet;
     }
 
+    /**
+     * Checks if another GO term is directly related to this term (one step away).
+     * Direct relations include: same term, is_a, subclass, part_of, or parts relationship.
+     * @param {GoTerm} anotherGoTerm - GO term to check for direct relationship
+     * @returns {boolean} True if directly related (including self), false otherwise
+     */
     isDirectRelation(anotherGoTerm) {
         const aGoId = anotherGoTerm.id;
         return (
@@ -92,7 +125,13 @@ export class GoTerm {
         );
     }
 
-
+    /**
+     * Recursively checks if this GO term is a descendant of another term.
+     * Traverses up the hierarchy via part_of and is_a relationships.
+     * Returns true if anotherGoTermId is found anywhere in ancestry chain (including self).
+     * @param {string} anotherGoTermId - GO term ID to check for ancestry
+     * @returns {boolean} True if this term descends from the specified term (or is the same term)
+     */
     isDescendantOf(anotherGoTermId) {
         const go = window.compositeModelInst.get("go");
         if (anotherGoTermId === this.id) {

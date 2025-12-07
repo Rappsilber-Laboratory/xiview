@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Crosslink representation class for NGL 3D visualization.
+ * CrosslinkRepresentation: manages all NGL representations (structure, residues, crosslinks, labels).
+ * Creates cartoon/ribbon/surface chain representations, spacefill residues, cylinder crosslinks, text labels.
+ * Supports color schemes (uniform, secondary structure, chain index, residue type), selection/highlighting,
+ * assembly type (asymmetric/biological), chain visibility, tooltip on hover/click.
+ * Updates representations dynamically when crosslinks/selections/colors change.
+ */
+
 import * as _ from "underscore";
 import * as $ from "jquery";
 import * as NGL from "ngl";
@@ -6,8 +15,33 @@ import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
 import {isViableChain, make3DAlignID} from "./NGLUtils";
 
+/**
+ * Crosslink representation manager for NGL 3D viewer.
+ * Creates and updates all NGL representations: structure (cartoon/ribbon/surface), residues (spacefill),
+ * crosslinks (cylinders), labels (text). Handles color schemes, selection/highlighting, visibility,
+ * assembly type. Listens to stage click/hover signals for selection/tooltip. Dynamically updates
+ * representations when data changes (crosslinks, selections, colors, filters).
+ * @class
+ * @property {NGL.Stage} stage - NGL stage instance
+ * @property {Object} chainMap - Protein → chain mapping
+ * @property {NGL.StructureComponent} structureComp - NGL structure component
+ * @property {NGLModelWrapperBB} nglModelWrapper - Parent model wrapper
+ * @property {Object} options - Display options (colors, visibility, label size, chain rep type)
+ * @property {Object} colorOptions - Color scheme objects
+ * @property {NGL.Representation} sstrucRepr - Structure representation (cartoon/ribbon/surface)
+ * @property {NGL.Representation} resRepr - Residue representation (spacefill)
+ * @property {NGL.Representation} linkRepr - Crosslink representation (cylinders)
+ * @property {NGL.Representation} labelRepr - Label representation (text)
+ */
 export class CrosslinkRepresentation {
 
+    /**
+     * Creates CrosslinkRepresentation, initializes all NGL representations.
+     * Sets default options (colors, visibility, label size), calls setup to initialize representations,
+     * registers stage click/hover listeners for selection/highlighting.
+     * @param {NGLModelWrapperBB} newNGLModelWrapper - Parent model wrapper with structure, chainMap
+     * @param {Object} params - Display parameters (colors, visibility, label size, chain rep)
+     */
     constructor(newNGLModelWrapper, params) {
 
 

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Match selection table view displaying detailed information for selected crosslinks.
+ * Shows tabular data with columns: proteins, peptide sequences, positions, charge, scores, m/z, validation.
+ * Supports pagination, sorting, filtering, row selection, keyboard navigation, highlighting on hover.
+ * Integrates with DataTables library for advanced table features. Updates when selection/filter changes.
+ * Synchronizes with spectrum viewer - clicking match loads spectrum. Color swatches show link colors.
+ */
+
 import "../../css/selectionViewBB.css";
 import * as _ from "underscore";
 import Backbone from "backbone";
@@ -6,11 +14,27 @@ import d3 from "d3";
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import {fullPosConcat, pepPosConcat, proteinConcat} from "../utils";
 
+/**
+ * Match selection table view with advanced DataTables integration.
+ * Displays detailed match information for selected crosslinks in paginated/sortable table.
+ * Columns: proteins, peptides, positions, charge, scores, m/z, validation. Highlights on hover,
+ * selects on click, keyboard navigation with arrow keys. Color swatches show link colors.
+ * Listens to filteringDone/matchValidationStateUpdated/selectionMatchesLinksChanged to redraw.
+ * @class
+ * @extends Backbone.View
+ * @property {DataTable} dataTable - DataTables instance
+ * @property {Array<Object>} tableData - Current table data array
+ * @property {checkBoxView} checkBoxView - Checkbox view for show/hide options
+ */
 export class SelectionTableViewBB extends Backbone.View {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for row hover, keyboard navigation, table focus.
+     * @returns {Object} Event map
+     */
     get events() {
         return {
             "mouseenter tr.matchRow": "highlight",
@@ -236,7 +260,7 @@ export class SelectionTableViewBB extends Backbone.View {
                 return "" + d.score();
             },
             expMZ: function (d) {
-                return massZeroPadder(d.expMZ());
+                return massZeroPadder(d.precursorMZ);
             },
             expMass: function (d) {
                 return massZeroPadder(d.expMass());

@@ -1,3 +1,10 @@
+/**
+ * @fileoverview 2D matrix view displaying crosslinks between protein pairs as a grid.
+ * Renders distance heatmap background using canvas and crosslinks as SVG circles.
+ * Supports pan/zoom, selection brushing, protein pair selection, tooltips, and distance coloring.
+ * Matrix axes represent residue indices of two proteins, with crosslinks shown at intersection points.
+ */
+
 import "../../css/matrix.css";
 import * as $ from "jquery";
 import * as _ from "underscore";
@@ -14,11 +21,31 @@ import {commonLabels, declutterAxis, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
 
+/**
+ * Backbone view for 2D crosslink distance matrix visualization.
+ * Displays crosslinks between two proteins as points in a 2D grid (residue index vs residue index).
+ * Background shows distance heatmap rendered to canvas, crosslinks rendered as SVG circles.
+ * Supports protein pair selection, pan/zoom, selection brushing, distance coloring, and tooltips.
+ * @class
+ * @extends BaseFrameView
+ * @property {Object} x - D3 linear scale for x-axis (protein 1 residues)
+ * @property {Object} y - D3 linear scale for y-axis (protein 2 residues)
+ * @property {Object} zoomStatus - D3 zoom behavior for pan/zoom functionality
+ * @property {Object} brush - D3 brush behavior for rectangular selection
+ * @property {Object} canvas - Canvas element for rendering distance heatmap background
+ * @property {Object} svg - SVG element for rendering crosslinks and axes
+ * @property {Object} colourScaleModel - Color scale model for distance coloring
+ */
 export class DistanceMatrixViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Returns event handlers for this view.
+     * Extends parent events with matrix-specific handlers for mouse interaction and drag mode.
+     * @returns {Object} Event handlers map
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -33,6 +60,10 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Returns default options for matrix view.
+     * @returns {Object} Default options including labels, colors, margins, and interaction settings
+     */
     get defaultOptions() {
         return {
             xlabel: "Residue Index 1",
@@ -58,6 +89,12 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Initializes the matrix view.
+     * Sets up SVG/canvas elements, scales, zoom/pan behaviors, brush selection, axes,
+     * control buttons, event listeners, and initial protein pairing.
+     * @param {Object} viewOptions - View initialization options including colourScaleModel
+     */
     initialize(viewOptions) {
         super.initialize(...arguments);
 
@@ -299,11 +336,20 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Relayouts the view by triggering a resize.
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     relayout() {
         this.resize();
         return this;
     }
 
+    /**
+     * Sets the protein pairing and renders the matrix.
+     * Convenience method that chains matrixChosen, zoom reset, and render.
+     * @param {Object} pairing - Protein pairing object with fromProtein and toProtein
+     */
     setAndShowPairing(pairing) {
         this
             .matrixChosen(pairing)
@@ -311,6 +357,12 @@ export class DistanceMatrixViewBB extends BaseFrameView {
             .render();
     }
 
+    /**
+     * Builds dropdown options for protein pairings based on available crosslinks.
+     * Filters to selected proteins if any selected, sorts by crosslink count.
+     * Updates the protein pairing dropdown with options showing [count] proteinA-proteinB.
+     * @returns {Array} Array of protein pairing entries
+     */
     makeProteinPairingOptions() {
         const crosslinks = this.model.getAllTTCrossLinks();
         const totals = crosslinkCountPerProteinPairing(crosslinks);
@@ -355,6 +407,12 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return nonEmptyEntries.length ? nonEmptyEntries : entries;
     }
 
+    /**
+     * Gets the currently selected protein pairing from the dropdown.
+     * @param {Object} pairing - Fallback pairing if none selected and onlyIfNoneSelected is true
+     * @param {boolean} onlyIfNoneSelected - If true, returns pairing parameter when nothing selected
+     * @returns {Object} Currently selected protein pairing object
+     */
     getCurrentPairing(pairing, onlyIfNoneSelected) {
         const mainDivSel = d3.select(this.el);
         const selected = mainDivSel.select("#" + mainDivSel.attr("id") + "chainSelect")
@@ -365,6 +423,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return (selected.size() === 0 && onlyIfNoneSelected) ? pairing : selected.datum().value;
     }
 
+    /**
+     * Handler called when matches have changed (e.g., new CSV data loaded).
+     * Rebuilds protein pairing options and re-renders matrix.
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     matchesChanged() {
         const entries = this.makeProteinPairingOptions();
         const pairing = this.getCurrentPairing(entries[0], true);
@@ -379,6 +442,10 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Updates axis labels with current protein names.
+     * Fetches protein IDs and updates label text elements.
+     */
     updateAxisLabels() {
         const protIDs = this.getCurrentProteinIDs();
         this.vis.selectAll("g.label text").data(protIDs)
@@ -387,6 +454,12 @@ export class DistanceMatrixViewBB extends BaseFrameView {
             });
     }
 
+    /**
+     * Sets the current protein pair for the matrix and updates scales/axes.
+     * Updates x/y scale domains based on protein sequence lengths and sets axis tick formats.
+     * @param {Object} proteinPairValue - Protein pair value object with fromProtein and toProtein
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     matrixChosen(proteinPairValue) {
         if (proteinPairValue) {
             this.options.matrixObj = proteinPairValue;
@@ -412,10 +485,19 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return allowedChains ? allowedChains.has(chainIndex) : true;
     }
 
+    /**
+     * Formats search index values for axis tick labels.
+     * @param {number} searchIndex - 1-indexed residue position in search sequence
+     * @returns {string} Formatted tick label
+     */
     alignedIndexAxisFormat(searchIndex) {
         return d3.format(",.0f")(searchIndex);
     }
 
+    /**
+     * Gets protein IDs and label text for current matrix pairing.
+     * @returns {Array} Array of two objects with proteinID and labelText properties
+     */
     getCurrentProteinIDs() {
         const mObj = this.options.matrixObj;
         return mObj ? [{
@@ -431,10 +513,20 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         ] : [null, null];
     }
 
+    /**
+     * Gets chains for a protein from the distances object.
+     * @param {string} proteinID - Protein ID
+     * @returns {Array} Array of chain objects for the protein
+     */
     getChainsForProtein(proteinID) {
         return this.model.get("distancesObj").chainMap[proteinID];
     }
 
+    /**
+     * Adds alignment IDs to protein ID objects for 3D structure alignment.
+     * @param {Array} proteinIDsObj - Array of objects with proteinID and chainID properties
+     * @returns {Array} The same array with alignID properties added
+     */
     addAlignIDs(proteinIDsObj) {
         const distancesObj = this.model.get("distancesObj");
         proteinIDsObj.forEach(function (pid) {
@@ -447,7 +539,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return proteinIDsObj;
     }
 
-
+    /**
+     * Calculates overall scale factor including both base scale and zoom scale.
+     * @param {Object} [sizeData] - Optional size data (fetched if not provided)
+     * @returns {number} Combined scale factor for rendering
+     */
     getOverallScale(sizeData) {
         const sd = sizeData || this.getSizeData();
         const baseScale = Math.min(sd.width / sd.lengthA, sd.height / sd.lengthB);
@@ -483,6 +579,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return [Math.round(px), Math.round(py)];
     }
 
+    /**
+     * Finds crosslinks within a rectangular extent on the matrix.
+     * @param {Array} extent - 2D extent [[x0, y0], [x1, y1]] defining rectangle bounds
+     * @returns {Array} Array of link wrapper objects with crosslink references
+     */
     grabNeighbourhoodLinks(extent) {
         const filteredCrossLinks = this.model.getFilteredCrossLinks();
         const filteredCrossLinkMap = d3.map(filteredCrossLinks, function (d) {
@@ -501,6 +602,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return neighbourhoodLinks;
     }
 
+    /**
+     * Selects crosslinks within a brushed extent.
+     * Called on brush end. Adds to selection if Ctrl/Shift held.
+     * @param {Array} extent - 2D extent [[x0, y0], [x1, y1]] from brush
+     */
     selectNeighbourhood(extent) {
         const add = d3.event.ctrlKey || d3.event.shiftKey; // should this be added to current selection?
         const linkWrappers = this.grabNeighbourhoodLinks(extent);
@@ -524,10 +630,20 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         this.model.setMarkedCrossLinks("highlights", crosslinks, true, false);
     }
 
+    /**
+     * Clears all highlighted crosslinks.
+     * Called on mouse leave from viewport.
+     */
     cancelHighlights() {
         this.model.setMarkedCrossLinks("highlights", [], true, false);
     }
 
+    /**
+     * Sets matrix drag mode (Pan or Select).
+     * Pan mode enables zoom/pan, Select mode enables rectangular brush selection.
+     * @param {Event} evt - Input event with target.value of "Pan" or "Select"
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     setMatrixDragMode(evt) {
         this.options.matrixDragMode = evt.target.value;
         const top = d3.select(this.el);
@@ -541,6 +657,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Displays tooltip showing crosslinks at cursor position.
+     * @param {Event} evt - Mouse event for tooltip positioning
+     * @param {Array} linkWrappers - Array of link wrapper objects to display
+     */
     invokeTooltip(evt, linkWrappers) {
         if (this.options.matrixObj) {
             const crosslinks = _.pluck(linkWrappers, "crosslink");
@@ -560,6 +681,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
     }
     // end of tooltip functions
 
+    /**
+     * Handles zoom behavior with bounded panning.
+     * Constrains pan translation to prevent showing empty space beyond matrix bounds.
+     * @param {DistanceMatrixViewBB} self - Reference to this view instance
+     */
     zoomHandler(self) {
         const sizeData = this.getSizeData();
         const width = sizeData.width;
@@ -581,6 +707,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         self.panZoom();
     }
 
+    /**
+     * Resets zoom and pan to default (no zoom, no pan).
+     * @param {DistanceMatrixViewBB} self - Reference to this view instance
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     resetZoomHandler(self) {
         self.zoomStatus.scale(1.0).translate([0, 0]);
         return this;
@@ -597,6 +728,14 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         cd[index + 3] = a;
     }
 
+    /**
+     * Main render method for the matrix view.
+     * Renders background distance heatmap and crosslink circles.
+     * Only renders if matrix object set and view is visible.
+     * @param {Object} [renderOptions] - Render options
+     * @param {boolean} [renderOptions.noResize] - If true, skips resize step
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     render(renderOptions) {
         renderOptions = renderOptions || {};
         if (this.options.matrixObj && this.isVisible()) {
@@ -658,6 +797,13 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         }, this);
     }
 
+    /**
+     * Renders distance heatmap background to canvas.
+     * Calculates distance matrices for all chain pairings, renders to canvas as colored heatmap,
+     * then converts to PNG image for display. For very large proteins (>5M residue pairs),
+     * skips background rendering to avoid memory issues. Uses color scale from colourScaleModel.
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     renderBackgroundMap() {
         let z = performance.now();
         const distancesObj = this.model.get("distancesObj");
@@ -818,6 +964,16 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Renders crosslinks as SVG circles on the matrix.
+     * Filters crosslinks to current protein pairing, sorts by selection/highlight status,
+     * colors by current color scheme, and positions circles at residue index coordinates.
+     * Supports incremental re-highlighting for performance.
+     * @param {Object} [renderOptions] - Render options
+     * @param {boolean} [renderOptions.isVisible] - If true, forces rendering even if visibility check would fail
+     * @param {boolean} [renderOptions.rehighlightOnly] - If true, only updates highlights without full re-render
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
     renderCrossLinks(renderOptions) {
 
         renderOptions = renderOptions || {};
@@ -933,6 +1089,12 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Gets size data for the matrix viewport.
+     * Calculates available width/height accounting for margins, and includes sequence lengths.
+     * Uses jQuery width() instead of clientWidth/Height for Firefox compatibility.
+     * @returns {Object} Size data with cx, cy (total SVG size), width, height (minus margins), minDim (minimum dimension), lengthA, lengthB (sequence lengths)
+     */
     getSizeData() {
         // Firefox returns 0 for an svg element's clientWidth/Height, so use zepto/jquery width function instead
         const jqElem = $(this.svg.node());
@@ -954,6 +1116,10 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return sizeData;
     }
 
+    /**
+     * Gets sequence lengths of current protein pairing.
+     * @returns {Object} Object with lengthA (protein 1 length) and lengthB (protein 2 length)
+     */
     getSeqLengthData() {
         const mObj = this.options.matrixObj;
         const size = mObj ? [mObj.fromProtein.size, mObj.toProtein.size] : [0, 0];
@@ -1142,6 +1308,12 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Generates string representation of current matrix view options.
+     * Returns protein pairing formatted as "ProteinA-ProteinB" with underscores replaced by spaces.
+     * Used for display and export filenames.
+     * @returns {string} String representation of protein pairing
+     */
     optionsToString() {
         const matrixObj = this.options.matrixObj;
         return [matrixObj.fromProtein, matrixObj.toProtein]

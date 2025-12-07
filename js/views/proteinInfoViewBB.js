@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Protein information view displaying detailed metadata for selected proteins.
+ * Shows tabbed interface with one tab per selected protein. Displays protein attributes
+ * (name, ID, accession, description, size, sequence) in expandable sections. Expandable attributes
+ * (uniprot, meta) shown as nested key-value pairs. Supports highlighting proteins on tab hover.
+ * Updates when protein selection changes. Filters out internal keys (canonicalSeq, hidden, etc.).
+ */
+
 import "../../css/proteinInfoViewBB.css";
 import * as _ from "underscore";
 import d3 from "d3";
@@ -5,11 +13,23 @@ import d3 from "d3";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {makeLegalDomID} from "../utils";
 
+/**
+ * Protein information view with tabbed interface for selected proteins.
+ * Creates tabs for each selected protein, displays detailed attributes in expandable sections.
+ * Filters/orders/expands keys per defaultOptions, highlights proteins on tab hover.
+ * Listens to selectionMatchesLinksChanged to update protein list.
+ * @class
+ * @extends BaseFrameView
+ */
 export class ProteinInfoViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for tab hover (highlights proteins in other views).
+     * @returns {Object} Event map
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {

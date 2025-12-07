@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Distance calculation object for crosslinks in 3D structures.
+ * DistancesObj: stores distance matrices, chain map, residue coordinates. Calculates shortest distances
+ * between crosslink residue pairs across all chain/model alternatives. Supports filtering by allowed chains,
+ * self-links, homomultimeric complexes. Caches distances in crosslink metadata. Used by NGLViewBB
+ * for distance coloring and distance filtering. Handles multiple models, multiple chains per protein.
+ */
+
 import {xilog} from "../../utils";
 import d3 from "d3";
 import * as $ from "jquery";
@@ -5,7 +13,26 @@ import {filterSequenceByResidueSet} from "../../modelUtils";
 import * as _ from "underscore";
 import {make3DAlignID, not3DHomomultimeric} from "./NGLUtils";
 
+/**
+ * Distance calculation object for crosslinks in 3D structures.
+ * Stores precomputed C-alpha distance matrices, chain-to-protein map, residue coordinates.
+ * Provides methods to calculate shortest crosslink distances across all chain/model alternatives,
+ * filter by allowed chains, handle self-links and homomultimeric complexes.
+ * @class
+ * @property {Array<Array<number>>} matrices - Precomputed C-alpha distance matrices (one per model)
+ * @property {Object} chainMap - Map of proteinID → array of chain info objects
+ * @property {string} structureName - PDB structure name
+ * @property {Array} residueCoords - Residue coordinate data
+ * @property {Set} allowedChainNameSet - Set of allowed chain names for distance calculations
+ */
 export class DistancesObj {
+    /**
+     * Creates DistancesObj with precomputed distance matrices and chain map.
+     * @param {Array<Array<number>>} matrices - Distance matrices
+     * @param {Object} chainMap - Protein → chain mapping
+     * @param {string} structureName - Structure name
+     * @param {Array} residueCoords - Residue coordinates
+     */
     constructor(matrices, chainMap, structureName, residueCoords) {
         this.matrices = matrices;
         this.chainMap = chainMap;
@@ -14,6 +41,16 @@ export class DistancesObj {
         this.setAllowedChainNameSet(undefined, true);
     }
 
+    /**
+     * Tie-breaker for sorting link alternatives with equal distances.
+     * Compares by total model index, then total chain index, then min chain index.
+     * Ensures consistent ordering when multiple chain pairs have same distance.
+     * @param {Object} link1resA - Residue A of link 1 with modelIndex, chainIndex
+     * @param {Object} link1resB - Residue B of link 1
+     * @param {Object} link2resA - Residue A of link 2
+     * @param {Object} link2resB - Residue B of link 2
+     * @returns {number} Negative/zero/positive for sort comparison
+     */
     tieBreaker(link1resA, link1resB, link2resA, link2resB) {
         let d;
         const mitotalDiff = (link1resA.modelIndex + link1resB.modelIndex) - (link2resA.modelIndex + link2resB.modelIndex);
@@ -33,6 +70,14 @@ export class DistancesObj {
         return d;
     }
 
+    /**
+     * Finds shortest distance alternative for each crosslink from multiple chain/model possibilities.
+     * Calculates distances for all link alternatives, filters NaN distances, groups by origId (crosslink),
+     * sorts by distance (with tieBreaker for equal distances), returns shortest alternative per crosslink.
+     * @param {Array<Object>} nglLinkWrappers - Array of link wrapper objects with residueA/B, origId
+     * @param {number} [angstromAccuracy=1] - Angstrom accuracy (currently unused)
+     * @returns {Array<Object>} Array of shortest link alternatives (one per unique crosslink)
+     */
     getShortestLinkAlternatives(nglLinkWrappers, angstromAccuracy) {
         // eslint-disable-next-line no-unused-vars
         angstromAccuracy = angstromAccuracy || 1;

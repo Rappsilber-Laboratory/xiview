@@ -1,11 +1,34 @@
+/**
+ * @fileoverview Export utilities for NGL 3D structures to various formats.
+ * NGLExportUtils: exports PDB structures with crosslinks to PDB, PyMOL, Chimera, HADDOCK, XWalk, Jwalk.
+ * exportPDB: generates PDB file with LINK/CONECT records for crosslinks. exportPymolCrossLinkSyntax:
+ * generates PyMOL script with distance/dashed representations. Similar functions for Chimera, HADDOCK, etc.
+ * makePDBLinkString/ConectString: generates LINK/CONECT records from crosslink data.
+ * Used by NGLViewBB export dropdown.
+ */
+
 import _ from "underscore";
 import * as NGL from "ngl";
 import {download, downloadFilename} from "../../downloads";
 import {NGLUtils} from "./RepopulateNGL";
 import d3 from "d3";
 
+/**
+ * NGL export utilities namespace for structure/crosslink export to various formats.
+ * @namespace NGLExportUtils
+ */
 export const NGLExportUtils = {
 
+    /**
+     * Exports PDB structure with crosslink LINK and CONECT records.
+     * Uses NGL PdbWriter, inserts LINK records after MODEL, CONECT records before END.
+     * Includes remarks as REMARK 3 lines (max 69 chars per line). Downloads as PDB file.
+     * @param {NGL.Structure} structure - NGL structure
+     * @param {NGLModelWrapperBB} nglModelWrapper - Model wrapper with crosslinks
+     * @param {string} [name] - Filename (default: structure.name + "-Crosslinked")
+     * @param {Array<string>} remarks - Remarks to include in PDB header
+     * @returns {undefined}
+     */
     exportPDB: function (structure, nglModelWrapper, name, remarks) {
         const PDBLinks = nglModelWrapper.getPDBLinkString(nglModelWrapper.getFullLinks());
         const PDBConects = nglModelWrapper.getPDBConectString(nglModelWrapper.getFullLinks());

@@ -1,8 +1,33 @@
+/**
+ * @fileoverview Circular arrangement algorithm for protein network layout.
+ * circleArrange: calculates optimal circular positions for proteins with crosslinks.
+ * Algorithm: 1) builds node-edge graph from crosslinks, 2) groups edges by residue position,
+ * 3) sorts proteins by total edge count (descending), 4) places proteins around circle,
+ * 5) optimizes orientation (rotation) to minimize crosslink angle costs using greedy/swap strategies.
+ * Returns array of protein positions with x, y, angle, cos, sin for rendering.
+ */
+
 import * as _ from "underscore";
 import d3 from "d3";
 
+/**
+ * Circular arrangement algorithm for protein network visualization.
+ * Calculates optimal circular layout positions and orientations for proteins to minimize
+ * crosslink visual clutter. Builds edge graph, sorts by connectivity, places around circle,
+ * optimizes rotations. Returns position array with x, y, angle, cos, sin per protein.
+ * @param {Map} proteins - Map of protein ID → protein object with crosslinks, size
+ * @param {Object} [options] - Layout options (currently unused)
+ * @returns {Array<Object>} Array of {id, x, y, angle, cos, sin} for each protein
+ */
 export const circleArrange = function (proteins, options) {
 
+    /**
+     * Builds node-edge list for one protein from its crosslinks.
+     * Extracts inter-protein crosslinks, groups edges by residue position via d3.nest,
+     * records edge ID, position, other node ID, other position. Returns node object.
+     * @param {Object} protein - Protein with crosslinks array
+     * @returns {Object} Node object with {id, length, edges (nested by pos), total}
+     */
     function makeNodeEdgeList(protein) {
         const node = {
             id: protein.id,

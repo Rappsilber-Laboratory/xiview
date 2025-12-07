@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Gene Ontology terms visualization using Sankey diagram layout.
+ * Displays GO term hierarchy (is_a, part_of relationships) with node sizes representing protein counts.
+ * Provides search filtering, interactive highlighting, and protein selection.
+ * Uses D3 Sankey layout algorithm for hierarchical flow visualization.
+ */
 import "../../../css/goTermsView.css";
 
 import * as $ from "jquery";
@@ -7,11 +13,23 @@ import {d3_sankey} from "./sankey";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 
+/**
+ * GO terms Sankey diagram view - interactive hierarchical visualization.
+ * Extends BaseFrameView with Sankey layout for displaying GO term relationships and protein associations.
+ * Features: term type selection (cellular_component/biological_process/molecular_function), text search,
+ * mouseover highlighting, click selection, relationship markers (diamond=part_of, arrow=is_a).
+ * @class
+ * @extends BaseFrameView
+ */
 export class GoTermsViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * DOM event bindings.
+     * @returns {Object} Event map
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -22,6 +40,10 @@ export class GoTermsViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Default view options.
+     * @returns {Object} Options with margin, colors, toolbar/image settings
+     */
     get defaultOptions() {
         return {
             margin: {
@@ -37,6 +59,13 @@ export class GoTermsViewBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Initializes GO terms view with UI controls, SVG structure, and protein-GO associations.
+     * Sets up: term type selector, search input, Sankey layout, SVG markers (diamond/arrow),
+     * D3 selections for background/foreground groups. Associates proteins with GO terms via uniprot annotations.
+     * @param {Object} viewOptions - View initialization options (unused)
+     * @returns {undefined}
+     */
     // eslint-disable-next-line no-unused-vars
     initialize(viewOptions) {
         super.initialize(...arguments);
@@ -174,6 +203,13 @@ export class GoTermsViewBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Handles GO term name search filtering (keyup event).
+     * Highlights matching GO terms, collects associated proteins, updates result message.
+     * Enter key sets selected proteins, other keys set highlighted proteins.
+     * @param {Event} evt - Keyboard event with target.value (search text)
+     * @returns {undefined}
+     */
     goTextMatch(evt) {
         const val = evt.target.value;
         const regex = new RegExp(val, "i");
@@ -210,6 +246,14 @@ export class GoTermsViewBB extends BaseFrameView {
         this.model[evt.key === "Enter" || evt.keyCode === 13 || evt.which === 13 ? "setSelectedProteins" : "setHighlightedProteins"](interactors, false);
     }
 
+    /**
+     * Updates internal data structure (nodes and links) from GO term hierarchy.
+     * Reads selected term type (biological_process/molecular_function/cellular_component),
+     * recursively builds node/link graph starting from root GO term,
+     * filters terms by namespace and interactor count (>1).
+     * Stores result in this.data for rendering.
+     * @returns {GoTermsViewBB} this for chaining
+     */
     update() {
         const termType = d3.select("#goTermsPanelgoTermSelect")
             .selectAll("option")
@@ -256,6 +300,13 @@ export class GoTermsViewBB extends BaseFrameView {
             sankeyNode("GO0005575");
         }
 
+        /**
+         * Recursively creates nodes and links for GO term and its relationships.
+         * Traverses part_of, is_a, parts, and subclasses relationships to build graph.
+         * Only includes terms within same namespace with >1 filtered interactors.
+         * @param {string} goId - GO term ID to process
+         * @returns {Object} Node object for this GO term
+         */
         function sankeyNode(goId) {
             if (!nodes.has(goId)) {
                 const goTerm = go.get(goId);
@@ -334,6 +385,14 @@ export class GoTermsViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Renders Sankey diagram using D3 and computed layout.
+     * Computes layout with specified iterations (default 32), creates/updates nodes (rectangles with labels)
+     * and links (curved paths with markers). Sets up event handlers for mouseover/click interactions.
+     * @param {Object} [renderOptions] - Rendering options
+     * @param {number} [renderOptions.iterations=32] - Number of layout relaxation iterations
+     * @returns {GoTermsViewBB} this for chaining
+     */
     render(renderOptions) {
         if (this.isVisible()) {
             //this.update();
@@ -473,6 +532,12 @@ export class GoTermsViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Shows/hides nodes based on direct relationship to specified term.
+     * If no term specified, shows all nodes. Otherwise, only shows nodes directly related to term.
+     * @param {GoTerm} [term] - GO term to filter by, or undefined to show all
+     * @returns {undefined}
+     */
     hideAllExceptMe(term) {
         const nodeSel = this.foregroundGroup.selectAll(".node")
             .data(this.data.nodes, function (d) {
@@ -489,6 +554,12 @@ export class GoTermsViewBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Shows/hides links based on connection to specified term.
+     * If no term specified, hides all links. Otherwise, shows only links connected to term.
+     * @param {GoTerm} [term] - GO term to filter by, or undefined to hide all
+     * @returns {undefined}
+     */
     hideAllLinksExceptTo(term) {
         const linkSel = this.backgroundGroup.selectAll(".goLink")
             .data(this.data.links,
@@ -502,6 +573,11 @@ export class GoTermsViewBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Updates data and renders if view is visible.
+     * Convenience method combining update() and render().
+     * @returns {GoTermsViewBB} this for chaining
+     */
     updateThenRender() {
         if (this.isVisible()) {
             return this.update().render();
@@ -509,6 +585,12 @@ export class GoTermsViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Re-renders with fewer iterations after drag interactions.
+     * Only renders on dragEnd to avoid double-rendering when view becomes visible.
+     * @param {Object} [descriptor] - Descriptor with dragEnd flag
+     * @returns {GoTermsViewBB} this for chaining
+     */
     relayout(descriptor) {
         if (descriptor && descriptor.dragEnd) { // avoids doing two renders when view is being made visible
             this.render({iterations: 6});
@@ -516,6 +598,11 @@ export class GoTermsViewBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Updates data when view becomes visible.
+     * Called by framework when view is shown after being hidden.
+     * @returns {GoTermsViewBB} this for chaining
+     */
     reshow() {
         return this.update();
     }

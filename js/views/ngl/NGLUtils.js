@@ -1,3 +1,12 @@
+/**
+ * @fileoverview NGL utility functions for extracting sequences, matching PDB chains to proteins, calculating distances.
+ * Core functions: getChainSequencesFromNGLStructure/Stage (extract sequences from PDB), matchSequencesToProteins
+ * (align PDB sequences to search proteins via BLOSUM), make3DAlignID (create alignment identifiers),
+ * not3DHomomultimeric (check for homomultimeric complexes), getChainsForProtein (map protein → chains),
+ * isViableChain (filter out ions/water), calculateDistanceMatrix (compute C-alpha distance matrix).
+ * Used by NGLViewBB for PDB loading, sequence alignment, distance calculation.
+ */
+
 import * as _ from "underscore";
 import * as $ from "jquery";
 // const workerpool = require('workerpool');
@@ -7,6 +16,13 @@ import d3 from "d3";
 // import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
 // import {NGLModelWrapperBB} from "./ngl-wrapper-model"; // cyclic dependency, hack it into bottom of this file
 
+/**
+ * Extracts chain sequences from NGL structure component.
+ * Iterates all chains, filters viable chains (>5 residues), extracts residue sequences,
+ * records chain name, index, model index, residue offset, structure ID. Returns array of sequence objects.
+ * @param {NGL.StructureComponent} structureComponent - NGL structure component
+ * @returns {Array<Object>} Array of {chainName, chainIndex, modelIndex, residueOffset, structureID, data (sequence string)}
+ */
 export function getChainSequencesFromNGLStructure(structureComponent) {
     const sequences = [];
     const structure = structureComponent.structure;

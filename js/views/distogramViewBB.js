@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Histogram/distogram view for visualizing frequency distributions of crosslink attributes.
+ * Renders bar charts using C3 library showing distributions of metrics like distance, score, FDR, etc.
+ * Displays multiple series: crosslinks (TT), decoys (TD-DD), random distances, selected items, and
+ * categorical sub-series based on current color scheme. Special handling for distance distributions
+ * with random distance calculations and dual Y axes (count + normalized random).
+ */
+
 import "../../css/distogram.css";
 import "../../vendor/c3.css";
 
@@ -19,11 +27,31 @@ import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {crosslinkerSpecificityPerLinker} from "../modelUtils";
 import d3 from "d3";
 
+/**
+ * Backbone view for histogram/distogram visualization of crosslink attribute distributions.
+ * Displays frequency distributions as bar charts using C3 charting library. Shows crosslinks,
+ * decoys (TD-DD), random distances, and selected items as separate series. Splits crosslinks
+ * into categorical sub-series based on current color scheme. For distance attribute, calculates
+ * random distances and displays with dual Y axes (absolute count + normalized random).
+ * @class
+ * @extends BaseFrameView
+ * @property {Object} chart - C3 chart instance
+ * @property {Object} colourScaleModel - Color scale model for categorical series
+ * @property {Array} currentBins - Array of current bin data for each series
+ * @property {Object} precalcedDistributions - Cache of precalculated distributions (e.g., Random)
+ * @property {Object} attrExtraOptions - Extra options for specific attributes (e.g., Distance)
+ * @property {number} y2Rescale - Scaling factor for secondary Y axis
+ */
 export class DistogramBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Returns event handlers for this view.
+     * Extends parent events with distogram-specific handlers for random scope changes.
+     * @returns {Object} Event handlers map
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -34,6 +62,10 @@ export class DistogramBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Returns default options for distogram view.
+     * @returns {Object} Default options including labels, series names, scaling, max X, and interaction settings
+     */
     get defaultOptions() {
         return {
             xlabel: "X Value",
@@ -57,7 +89,14 @@ export class DistogramBB extends BaseFrameView {
         };
     }
 
-    // eslint-disable-next-line no-unused-vars
+    /**
+     * Initializes the distogram view.
+     * Sets up C3 chart with bar chart configuration, axis dropdown, random scope controls,
+     * max X value input, event listeners for filtering/coloring/distances, and initial render.
+     * Configures tooltips, colors, selection/highlight handlers, and onrendered hook for bar positioning.
+     * @param {Object} viewOptions - View initialization options
+     * @returns {DistogramBB} This view instance for chaining
+     */
     initialize(viewOptions) {
 
         this.identifier = "Histogram View";
@@ -426,6 +465,14 @@ export class DistogramBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Creates X axis dropdown control for attribute selection.
+     * Adds select widget allowing users to choose which data attribute to plot as histogram.
+     * @param {Object} elem - D3 selection of element to add controls to
+     * @param {Array} options - Array of attribute option objects with id, label, and functions
+     * @param {boolean} keepOld - Whether to keep old options or replace them
+     * @returns {DistogramBB} This view instance for chaining
+     */
     setMultipleSelectControls(elem, options, keepOld) {
         const self = this;
         addMultipleSelectControls({
@@ -452,6 +499,17 @@ export class DistogramBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Main render method for the distogram view.
+     * Gets attribute data, bins it into histogram, splits into categorical sub-series by color scheme,
+     * calculates TD-DD (Target-Decoy minus Decoy-Decoy), scales/loads data to C3 chart,
+     * updates axes, and handles optimization for different render scenarios (full/axes-only/colors-only).
+     * @param {Object} [options] - Render options
+     * @param {boolean} [options.noAxesRescale] - Don't rescale X/Y axes (selection/color change only)
+     * @param {boolean} [options.recolourOnly] - Only update colors without data changes
+     * @param {boolean} [options.newColourModel] - New color model swapped in
+     * @returns {DistogramBB} This view instance for chaining
+     */
     render(options) {
 
         options = options || {};
@@ -672,6 +730,10 @@ export class DistogramBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Gets X axis range.
+     * @returns {number} Range of X axis (max - min)
+     */
     getAxisRange() {
         return this.chart.internal.orgXDomain[1] - this.chart.internal.orgXDomain[0];
     }
@@ -711,6 +773,11 @@ export class DistogramBB extends BaseFrameView {
         return oldNewMatch;
     }
 
+    /**
+     * Gets filtered crosslinks organized by decoy status.
+     * Returns crosslinks (TT), target-decoy (TD), decoy-decoy (DD), and selected.
+     * @returns {Object} Object with links array, seriesNames array, and matchFilters array
+     */
     getFilteredLinksByDecoyStatus() {
         return {
             links: [
@@ -726,6 +793,12 @@ export class DistogramBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Recalculates random distance binning.
+     * Samples random distances from PDB structure based on crosslinker specificity and scope settings.
+     * @param {number} linkCount - Number of links (used to scale random sample size)
+     * @returns {Object} Object with binned data array and origSize (sample count)
+     */
     recalcRandomBinning(linkCount) {
         const searchArray = Array.from(this.model.get("clmsModel").getSearches().values());
         const crosslinkerSpecificityMap = crosslinkerSpecificityPerLinker(searchArray);
@@ -752,6 +825,13 @@ export class DistogramBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Gets relevant attribute data for all series (crosslinks, decoys, selected, random).
+     * Applies attribute function to each link, handles match-level vs link-level data,
+     * filters by match selection if needed, and adds random series if showRandoms enabled.
+     * @param {Object} attrMetaData - Attribute metadata with linkFunc, matchLevel, id, etc.
+     * @returns {Array} Array of series objects with linkValues and name
+     */
     getRelevantAttributeData(attrMetaData) {
         const linkFunc = attrMetaData.linkFunc;
         const linkData = this.getFilteredLinksByDecoyStatus();
@@ -808,6 +888,11 @@ export class DistogramBB extends BaseFrameView {
         return result;
     }
 
+    /**
+     * Gets currently selected attribute option for specified axis.
+     * @param {string} axisLetter - "X" to specify axis (only X axis used in distogram)
+     * @returns {Object} Selected attribute metadata object with label, functions, etc.
+     */
     getSelectedOption(axisLetter) {
         let funcMeta;
 
@@ -827,18 +912,35 @@ export class DistogramBB extends BaseFrameView {
         return funcMeta;
     }
 
+    /**
+     * Gets data counts for all series using selected X axis attribute.
+     * Sets maxX from attribute metadata and returns series data.
+     * @returns {Array} Array of series objects with linkValues and name
+     */
     getDataCount() {
         const funcMeta = this.getSelectedOption("X");
         this.options.maxX = funcMeta.maxVal || this.options.absX;
         return this.getRelevantAttributeData.call(this, funcMeta);
     }
 
+    /**
+     * Checks if all series are empty (no link values).
+     * @param {Array} series - Array of series objects
+     * @returns {boolean} True if all series have no link values
+     */
     isEmpty(series) {
         return series.every(function (aSeries) {
             return !aSeries.linkValues.length;
         });
     }
 
+    /**
+     * Calculates bin thresholds for histogram.
+     * Determines extent across all series, calculates nice step size, generates threshold array.
+     * @param {Array} seriesData - Array of series objects with linkValues
+     * @param {Function} [accessor] - Optional accessor function for extracting values from linkValues
+     * @returns {Array} Array of threshold values defining bin edges
+     */
     getBinThresholds(seriesData, accessor) {
         accessor = accessor || function (d) {
             return d;
@@ -867,10 +969,24 @@ export class DistogramBB extends BaseFrameView {
         return thresholds;
     }
 
+    /**
+     * Gets precalculated distribution for a series (e.g., Random).
+     * @param {string} seriesName - Name of series
+     * @returns {Object} Precalculated distribution with data and origSize
+     */
     getPrecalcedDistribution(seriesName) {
         return this.precalcedDistributions[seriesName];
     }
 
+    /**
+     * Aggregates series data into histogram bins.
+     * Bins each series using D3 histogram layout or uses precalculated bins,
+     * scales Random series to match crosslink count, stores bins for selection/highlight.
+     * @param {Array} seriesData - Array of series objects with linkValues and name
+     * @param {Object} precalcedDistributions - Map of precalculated distributions
+     * @param {boolean} removeLastEntry - Whether to remove final bin (catch-all for values > max)
+     * @returns {Object} Object with countArrays (binned counts) and thresholds (bin edges)
+     */
     aggregate(seriesData, precalcedDistributions, removeLastEntry) {
 
         const thresholds = this.getBinThresholds(seriesData, function (d) {
@@ -928,6 +1044,12 @@ export class DistogramBB extends BaseFrameView {
         };
     }
 
+    /**
+     * Re-randomizes distance distribution when random scope changes.
+     * Updates randomScope setting, marks for recalculation, and re-renders.
+     * @param {Event} evt - Change event with new random scope value
+     * @returns {DistogramBB} This view instance for chaining
+     */
     reRandom(evt) {
         this.options.randomScope = evt.target.value;
         this.options.reRandom = true;
@@ -948,6 +1070,12 @@ export class DistogramBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Relayouts the distogram on view resize.
+     * Fixes C3 max-height issue and retidies X axis after resize.
+     * @returns {DistogramBB} This view instance for chaining
+     * @see {@link https://github.com/masayuki0812/c3/issues/1450}
+     */
     relayout() {
         // fix c3 setting max-height to current height so it never gets bigger y-wise
         // See https://github.com/masayuki0812/c3/issues/1450
@@ -960,6 +1088,12 @@ export class DistogramBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Gets color mapping for categorical sub-series.
+     * Maps series names to colors from current color scale model.
+     * @param {Array} seriesNames - Array of series names
+     * @returns {Object} Map of series names to color strings
+     */
     getSeriesColours(seriesNames) {
         const colModel = this.colourScaleModel;
         const colRange = colModel.get("colScale").range();
@@ -968,6 +1102,15 @@ export class DistogramBB extends BaseFrameView {
         return colMap;
     }
 
+    /**
+     * Highlights or selects crosslinks/matches in a histogram bin on click/hover.
+     * Gets bin data from currentBins for the bar under mouse, extracts links/matches, and marks them.
+     * Only runs once per interaction (checks seriesIndex === 0) to avoid duplicate marking.
+     * @param {string} type - "highlights" or "selection"
+     * @param {Array} c3Data - C3 data array for all series
+     * @param {Object} c3MouseData - C3 mouse data with id and index
+     * @returns {DistogramBB} This view instance for chaining
+     */
     highlightOrSelect(type, c3Data, c3MouseData) {
         const seriesIndex = _.indexOf(_.pluck(c3Data, "id"), c3MouseData.id); // get the series id associated with the c3 mouse data
         const matchBasedSelection = this.getSelectedOption("X").matchLevel;
@@ -1011,6 +1154,12 @@ export class DistogramBB extends BaseFrameView {
         return this;
     }
 
+    /**
+     * Generates string representation of current distogram view options.
+     * Returns attribute label and shown series formatted as "AttributeLabel-SERIES1-SERIES2".
+     * Used for display and export filenames.
+     * @returns {string} String representation of distogram configuration
+     */
     optionsToString() {
         const seriesIDs = _.pluck(this.chart.data.shown(), "id");
         const funcMeta = this.getSelectedOption("X");
