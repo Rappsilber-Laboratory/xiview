@@ -1,13 +1,31 @@
+/**
+ * @fileoverview Alignment settings views for per-protein gap penalty controls.
+ * AlignSettingsViewBB: number inputs for gap open/extend penalties with validation.
+ * CollectionAsSelectViewBB: generic dropdown for selecting from Backbone collection (used for BLOSUM matrix selection).
+ * Both views trigger bulk realignment when settings change.
+ */
+
 import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
 
+/**
+ * Alignment settings view for gap penalty controls.
+ * Creates number inputs for gap open and gap extend penalties with min/max validation.
+ * Updates ProtAlignModel on input change, triggers bulk alignment recalculation.
+ * @class
+ * @extends Backbone.View
+ */
 export class AlignSettingsViewBB extends Backbone.View {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for input changes.
+     * @returns {Object} Event map
+     */
     get events() {
         return {
             "change input": "inputChanged",
@@ -118,11 +136,23 @@ export class AlignSettingsViewBB extends Backbone.View {
     }
 }
 
+/**
+ * Generic dropdown view for selecting from Backbone collection.
+ * Creates select element with options from collection models. Used for BLOSUM matrix selection.
+ * Triggers "blosumModelSelected" event on collection when selection changes.
+ * @class
+ * @extends Backbone.View
+ * @property {string} lastSelected - CID of last selected model
+ */
 export class CollectionAsSelectViewBB extends Backbone.View {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for select changes.
+     * @returns {Object} Event map
+     */
     get events() {
         return {
             "change select": "selectChanged",

@@ -6,6 +6,26 @@ import {GotohAligner} from "./bioseq32";
 import {SeqCollection} from "./sequence-model-collection";
 import d3 from "d3";
 
+/**
+ * Model for one protein's alignment settings and aligned sequences.
+ * Stores gap penalties (open, extend, start), BLOSUM matrix, reference sequence (from search),
+ * SeqCollection (PDB/Uniprot sequences aligned to this protein). Triggers realignment when settings change.
+ * Provides index mapping between PDB/Uniprot sequences and search sequence (1-indexed).
+ * @class
+ * @extends Backbone.Model
+ * @property {string} displayLabel - Protein name for display
+ * @property {Object} scoreMatrix - BLOSUM matrix model (e.g., BLOSUM62, BLOSUM80)
+ * @property {number} matchScore - Match score for simple scoring (superceded by scoreMatrix)
+ * @property {number} misScore - Mismatch penalty for simple scoring
+ * @property {number} gapOpenScore - Gap open penalty
+ * @property {number} gapExtendScore - Gap extension penalty
+ * @property {number} gapAtStartScore - Fixed penalty for starting with gap (semi-global alignment)
+ * @property {string} refSeq - Reference sequence from search
+ * @property {string} refID - Reference sequence ID
+ * @property {number} maxAlignWindow - Maximum alignment window size for long sequences
+ * @property {Function} sequenceAligner - Alignment algorithm (GotohAligner)
+ * @property {SeqCollection} seqCollection - Collection of aligned sequences (PDB, Uniprot)
+ */
 export class ProtAlignModel extends Backbone.Model {
 
     constructor(attributes, options) {
@@ -31,6 +51,13 @@ export class ProtAlignModel extends Backbone.Model {
         };
     }
 
+    /**
+     * Initializes protein alignment model.
+     * Sets up bidirectional link with seqCollection, listens for setting changes to trigger realignment,
+     * listens for alignStr changes in sequences to trigger nonTrivialAlignmentChange event,
+     * updates displayLabel when protein metadata changes.
+     * @returns {ProtAlignModel} This model for chaining
+     */
     initialize() {
         //alert("!");
         // https://github.com/jashkenas/backbone/issues/56 - What is the best way to model a Collection inside of a Model?
@@ -68,10 +95,26 @@ export class ProtAlignModel extends Backbone.Model {
         return this;
     }
 
+    /**
+     * Aligns sequences without storing results in SeqCollection.
+     * Delegates to alignWithoutStoringWithSettings with current settings. Used for testing alignments.
+     * @param {Array<string>} compSeqArray - Array of comparison sequences to align
+     * @param {Object} [tempSemiLocal] - Temporary alignment mode: {local: boolean, semiLocal: boolean}
+     * @returns {Array<Object>} Array of alignment results with bitScore, eScore, avgBitScore
+     */
     alignWithoutStoring(compSeqArray, tempSemiLocal) {
         return this.alignWithoutStoringWithSettings(compSeqArray, tempSemiLocal, this.getSettings());
     }
 
+    /**
+     * Aligns sequences with specified settings without storing results.
+     * Runs Gotoh algorithm for each sequence, calculates bit scores, E-scores, average bit scores.
+     * Uses alignment window if reference sequence exceeds maxAlignWindow. Supports local/semi-local modes.
+     * @param {Array<string>} compSeqArray - Array of comparison sequences
+     * @param {Object} [tempSemiLocal] - {local: boolean, semiLocal: boolean}
+     * @param {Object} settings - Alignment settings from getSettings()
+     * @returns {Array<Object>} Alignment results with res (raw score, positions, CIGAR), bitScore, eScore, avgBitScore
+     */
     alignWithoutStoringWithSettings(compSeqArray, tempSemiLocal, settings) {
         const alignWindowSize = (settings.refSeq.length > settings.maxAlignWindow ? settings.maxAlignWindow : undefined);
         const localAlign = (tempSemiLocal && tempSemiLocal.local);
@@ -89,6 +132,14 @@ export class ProtAlignModel extends Backbone.Model {
         return fullResults;
     }
 
+    /**
+     * Converts raw alignment score to bit score using Karlin-Altschul statistics.
+     * Formula: bitScore = (lambda * rawScore - ln(K)) / ln(2).
+     * Uses lambda and K from BLOSUM matrix if available, otherwise defaults (lambda=0.254, K=0.225042).
+     * @param {number} rawScore - Raw alignment score from Gotoh algorithm
+     * @param {Object} [blosumData] - BLOSUM matrix data with lambda and K parameters
+     * @returns {number} Bit score
+     */
     getBitScore(rawScore, blosumData) {
         const lambda = (blosumData ? blosumData.lambda : 0.254) || 0.254;
         const K = (blosumData ? blosumData.K : 0.225042) || 0.225042;
@@ -96,16 +147,38 @@ export class ProtAlignModel extends Backbone.Model {
         return bitScore;
     }
 
-    // E-Score
+    /**
+     * Calculates E-score (expected number of alignments with this score or better by chance).
+     * Formula: E = dbLength * seqLength * 2^(-bitScore).
+     * Lower E-scores indicate more significant alignments.
+     * @param {number} bitScore - Bit score from getBitScore
+     * @param {number} dbLength - Total length of all reference sequences (database size)
+     * @param {number} seqLength - Length of comparison sequence
+     * @returns {number} E-score (expectation value)
+     */
     alignmentSignificancy(bitScore, dbLength, seqLength) {
         const exp = Math.pow(2, -bitScore);
         return (dbLength || 100) * seqLength * exp;	// escore
     }
 
+    /**
+     * Calculates average bit score per residue.
+     * Normalizes bit score by sequence length for comparing alignments of different lengths.
+     * @param {number} bitScore - Bit score
+     * @param {number} dbLength - Database length (unused)
+     * @param {number} seqLength - Sequence length
+     * @returns {number} Average bit score per residue
+     */
     averageBitScorePerResidue(bitScore, dbLength, seqLength) {
         return bitScore / seqLength;
     }
 
+    /**
+     * Gets current alignment settings as object for passing to alignment algorithm.
+     * Extracts scoreMatrix attributes (if Backbone Model), builds scoringSystem object,
+     * includes refSeq, aligner function, maxAlignWindow, totalRefSeqLength from collection.
+     * @returns {Object} Settings object with scoringSystem, refSeq, aligner, maxAlignWindow, totalRefSeqLength
+     */
     getSettings() {
         let matrix = this.get("scoreMatrix");
         if (matrix) {
@@ -133,10 +206,20 @@ export class ProtAlignModel extends Backbone.Model {
         };
     }
 
+    /**
+     * Gets sequence model by name/ID from seqCollection.
+     * @param {string} seqName - Sequence name/ID (e.g., PDB code, "Canonical")
+     * @returns {SeqModel} Sequence model or undefined if not found
+     */
     getSequenceModel(seqName) {
         return this.get("seqCollection").get(seqName);
     }
 
+    /**
+     * Gets array of sequence models matching predicate function.
+     * @param {Function} predicateFunc - Predicate function (model) => boolean
+     * @returns {Array<SeqModel>} Array of matching sequence models
+     */
     getSequenceModelsByPredicate(predicateFunc) {
         return this.get("seqCollection").filter(function (m) {
             return predicateFunc(m);
@@ -219,8 +302,19 @@ export class ProtAlignModel extends Backbone.Model {
     }
 }
 
-
-// A collection of the above protein level models
+/**
+ * Collection of ProtAlignModel instances (one per protein in search).
+ * Provides bulk operations (add sequences to all proteins, remove sequences, get by predicate),
+ * index mapping across all proteins, alignment feature extraction for circular/annotation views,
+ * bulk alignment change notification. Calculates totalRefSeqLength for E-score normalization.
+ * @class
+ * @extends Backbone.Collection
+ * @property {Function} model - ProtAlignModel constructor
+ * @property {string|Function} comparator - Sort function for proteins
+ * @property {Array<Object>} possibleComparators - Sort options (Name, No. of Aligned Sequences, Total Alignment Score)
+ * @property {boolean} nonTrivialChange - Flag tracking if bulk alignment changes occurred
+ * @property {number} totalRefSeqLength - Sum of all reference sequence lengths (for E-score calculation)
+ */
 export class ProtAlignCollection extends Backbone.Collection {
     constructor(options) {
         super(options);

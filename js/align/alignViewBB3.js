@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Main alignment collection view for displaying all protein alignments.
+ * Creates tabbed interface with one tab per protein showing aligned sequences count.
+ * Clicking tab shows per-protein alignment settings (gap penalties, BLOSUM matrix).
+ * Supports sorting tabs by name, sequence count, or total alignment score.
+ * Tooltips show per-protein alignment statistics on tab hover.
+ */
+
 import "../../css/alignViewBB.css";
 
 import * as $ from "jquery";
@@ -9,11 +17,27 @@ import {addMultipleSelectControls} from "../utils";
 import {AlignSettingsViewBB, CollectionAsSelectViewBB} from "./alignSettingsViewBB";
 import d3 from "d3";
 
+/**
+ * Alignment collection view with tabbed interface for all proteins.
+ * Creates radio button tabs (one per protein) with sequence counts, sort dropdown,
+ * per-protein settings panel (gap penalties, BLOSUM selector). Tooltips show alignment stats.
+ * Dynamically creates/destroys child views (AlignSettingsViewBB, CollectionAsSelectViewBB) on tab change.
+ * @class
+ * @extends BaseFrameView
+ * @property {TooltipModel} tooltipModel - Tooltip model for tab hover info
+ * @property {CollectionAsSelectViewBB} alignViewBlosumSelector - BLOSUM matrix dropdown
+ * @property {AlignSettingsViewBB} alignViewSettings - Gap penalty controls
+ * @property {ProtAlignModel} modelView - Currently focused protein model
+ */
 export class AlignCollectionViewBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for tab selection and tooltip clearing.
+     * @returns {Object} Event map
+     */
     get events() {
         let parentEvents = super.events;
         if (_.isFunction(parentEvents)) {

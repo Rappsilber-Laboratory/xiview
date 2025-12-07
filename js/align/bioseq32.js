@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Gotoh pairwise sequence alignment algorithm with affine gap penalties.
+ * Implements global, local, and semi-local alignment using dynamic programming.
+ * Supports BLOSUM substitution matrices (BLOSUM62, BLOSUM80 included), simple match/mismatch scoring.
+ * Uses typed arrays (Int8Array, Int16Array, Int32Array) for memory efficiency.
+ * Exports GotohAligner object with align() method returning alignment strings, indices, CIGAR, score.
+ * Based on biojs-io-bioseq library. Supports windowed alignment for long sequences.
+ */
+
 /**************************
  *** Common data tables ***
  **************************/

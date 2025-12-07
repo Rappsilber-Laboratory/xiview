@@ -1,10 +1,32 @@
+/**
+ * @fileoverview Sequence pairing models for aligning PDB/Uniprot sequences to search sequences.
+ * SeqModel: stores one sequence alignment (PDB/Uniprot vs search) with bidirectional index mapping,
+ * alignment strings, scores, CIGAR. SeqCollection: collection of SeqModels, auto-aligns on add.
+ * Provides mapping functions (1-indexed), blockification (split by gaps), feature extraction.
+ */
+
 import * as _ from "underscore";
 
-// Model for one sequence pairing
 import Backbone from "backbone";
 
 import {mergeContiguousFeatures} from "../modelUtils";
 
+/**
+ * Model for one sequence pairing (PDB/Uniprot sequence aligned to search sequence).
+ * Stores compSeq (PDB/Uniprot), alignment results (aligned strings, index mappings, scores),
+ * supports index mapping (1-indexed), range mapping, blockify (split aligned regions by gaps).
+ * Automatically aligns on creation via collection listener.
+ * @class
+ * @extends Backbone.Model
+ * @property {string} compID - Comparison sequence ID (e.g., PDB code)
+ * @property {string} compSeq - Comparison sequence to align
+ * @property {boolean} local - Local alignment mode
+ * @property {boolean} semiLocal - Semi-local alignment mode
+ * @property {Object} refAlignment - Reference alignment result {str, label}
+ * @property {Object} compAlignment - Comparison alignment result {str, refStr, convertToRef, convertFromRef, cigar, score, bitScore, eScore, avgBitScore, label}
+ * @property {string} alignStr - Aligned comparison string (monitored for changes)
+ * @property {boolean} dirtyBlocks - Flag if blockify results need recalculation
+ */
 class SeqModel extends Backbone.Model {
     constructor(attributes, options) {
         super(attributes, options);//{
@@ -22,6 +44,12 @@ class SeqModel extends Backbone.Model {
         };
     }
 
+    /**
+     * Performs sequence alignment against parent protein's reference sequence.
+     * Calls parent ProtAlignModel's alignWithoutStoring, stores results in refAlignment and compAlignment,
+     * sets alignStr for change monitoring, marks blocks dirty. Triggered automatically on model add.
+     * @returns {SeqModel} This model for chaining
+     */
     align() {
         const fullResult = this.collection.containingModel.alignWithoutStoring(
             [this.get("compSeq")], {local: this.get("local"), semiLocal: this.get("semiLocal")}
@@ -205,7 +233,11 @@ export class SeqCollection extends Backbone.Collection {
         this.model = SeqModel;
     }
 
-
+    /**
+     * Initializes collection to auto-align sequences on add.
+     * Listens to "add" event, calls align() on new sequence models.
+     * @returns {SeqCollection} This collection for chaining
+     */
     initialize() {
         this.listenTo(this, "add", function (newSequenceModel) {
             //~ console.log ("new sequence added. align it.", arguments);
