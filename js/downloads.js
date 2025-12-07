@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Data export and download functionality for xiVIEW.
+ * Provides comprehensive CSV/text export for matches, crosslinks, PPIs, residue counts, modifications,
+ * protein accessions, search groups, and specialized formats (SSL for XlinkX, AlphaLink2).
+ * Generates downloadable files with proper UTF-8 encoding via Blob API and programmatic anchor clicks.
+ * All exports respect current filter state and include relevant metadata (scores, distances, decoy types, validation).
+ */
+
 import {
     filterStateToString,
     fullPosConcat,
@@ -7,15 +15,34 @@ import {
 } from "./utils";
 import d3 from "d3";
 
+/**
+ * Generates standardized download filename from search names and filter state.
+ * Format: "{searchNames}--{type}--{filterState}.{suffix}". Sanitizes for filesystem compatibility.
+ * @param {string} type - File type descriptor (e.g., "matches", "links", "PPIs")
+ * @param {string} [suffix="csv"] - File extension
+ * @returns {string} Legal filename with filter state encoded
+ */
 export function downloadFilename(type, suffix) {
     suffix = suffix || "csv";
     return makeLegalFileName(searchesToString() + "--" + type + "--" + filterStateToString()) + "." + suffix;
 }
 
+/**
+ * Downloads all filtered matches as CSV with comprehensive columns.
+ * Includes protein IDs, positions, sequences, scores, charges, masses, validation, distances, decoy types.
+ * Each row represents one match. Ambiguous matches (belonging to multiple crosslinks) included once.
+ * @returns {undefined}
+ */
 export function downloadMatches() {
     download(getMatchesCSV(), "text/csv", downloadFilename("matches"));
 }
 
+/**
+ * Downloads filtered crosslinks in SSL format for XlinkX software.
+ * Format: tab-separated with file, scan, charge, sequence (with modifications as mass offsets), score.
+ * Only includes TT (target-target) matches. Modifications converted to [+mass] or [-mass] notation.
+ * @returns {undefined}
+ */
 export function downloadSSL() {
 
     // $("#newGroupName").dialog({
@@ -36,35 +63,86 @@ export function downloadSSL() {
 
 }
 
+/**
+ * Downloads filtered crosslinks in AlphaLink2 format (two files: restraints + FASTA).
+ * Restraints file: space-separated "fromResidue fromChain toResidue toChain 0.05".
+ * FASTA file: sequences for all involved protein chains (handles stoichiometry via alphaLinkStoich).
+ * Only includes selected proteins, TT links, filtered crosslinks. Chains labeled A-Z, a-z, 0-9.
+ * @returns {undefined}
+ */
 export function downloadAlphaLink2(){
     download(getAlphaLink2CSV().csv, "text/csv", "alphalink.txt");
     download(getAlphaLink2CSV().fasta, "text/csv", "alphalink.fasta");
 }
 
+/**
+ * Downloads unique filtered crosslinks as CSV.
+ * One row per crosslink with protein IDs, residues, highest score, match count, decoy type,
+ * validation status, FDR, 3D distance/chains, presence in each search, custom metadata columns.
+ * @returns {undefined}
+ */
 export function downloadLinks() {
     download(getLinksCSV(), "text/csv", downloadFilename("links"));
 }
 
+/**
+ * Downloads protein-protein interactions (PPIs) as CSV.
+ * Groups crosslinks by protein pair. Includes PPI identifiers, unique restraint count,
+ * decoy type, presence in each search. One row per PPI.
+ * @returns {undefined}
+ */
 export function downloadPPIs() {
     download(getPPIsCSV(), "text/csv", downloadFilename("PPIs"));
 }
 
+/**
+ * Downloads residue and residue-pair occurrence counts from filtered crosslinks.
+ * CSV with two sections: 1) residue pairs (e.g., "K-K", "K-S"), 2) individual residues.
+ * Counts unique crosslinks, not matches.
+ * @returns {undefined}
+ */
 export function downloadResidueCount() {
     download(getResidueCount(), "text/csv", downloadFilename("residueCount"));
 }
 
+/**
+ * Downloads modification occurrence counts from filtered matches.
+ * CSV with modification ID and TT/TD/DD counts. Includes both modification-only and residue+modification.
+ * Parses peptide sequences for modifications in format like "Kox", "Sph".
+ * @returns {undefined}
+ */
 export function downloadModificationCount() {
     download(getModificationCount(), "text/csv", downloadFilename("modificationCount"));
 }
 
+/**
+ * Downloads comma-separated list of protein accessions (non-hidden proteins only).
+ * Simple format for external tool integration.
+ * @returns {undefined}
+ */
 export function downloadProteinAccessions() {
     download(getProteinAccessions(), "text/csv", downloadFilename("proteinAccessions"));
 }
 
+/**
+ * Downloads protein group assignments as CSV.
+ * Columns: ProteinID, Name, Complex (comma-separated group names).
+ * One row per non-decoy protein.
+ * @returns {undefined}
+ */
 export function downloadGroups() {
     download(getGroups(), "text/csv", downloadFilename("groups"));
 }
 
+/**
+ * Core download function - triggers browser download of content as file.
+ * Creates Blob with proper UTF-8 encoding (handles unicode correctly), generates temporary URL,
+ * programmatically clicks hidden anchor element to trigger download. Supports legacy IE via msSaveOrOpenBlob.
+ * @param {string} content - File content as string
+ * @param {string} contentType - MIME type (e.g., "text/csv", "image/svg+xml")
+ * @param {string} fileName - Desired filename for download
+ * @returns {undefined}
+ */
 export function download(content, contentType, fileName) {
     const oldToNewTypes = {
         "application/svg": "image/svg+xml;charset=utf-8",
@@ -72,6 +150,12 @@ export function download(content, contentType, fileName) {
     };
     const newContentType = oldToNewTypes[contentType] || contentType;
 
+    /**
+     * Converts string content to Blob with proper UTF-8 encoding.
+     * Uses TextEncoder API if available, otherwise manual UTF-8 encoding handling surrogate pairs.
+     * @param {string} binary - String content to encode
+     * @returns {Blob} Blob with UTF-8 encoded content and specified MIME type
+     */
     function dataURItoBlob(binary) {
         let array = [];
         let te;
@@ -136,6 +220,13 @@ export function download(content, contentType, fileName) {
     blob = null;
 }
 
+/**
+ * Returns most readable protein identifier based on server flavor and available fields.
+ * For XI2 server: combines accession and name if different, otherwise uses best available.
+ * For other servers: uses protein ID directly.
+ * @param {Object} protein - Protein object with id, accession, name properties
+ * @returns {string} Most readable protein identifier
+ */
 function mostReadableId(protein) {
 
     //if serverFlavour is XI2
@@ -155,7 +246,14 @@ function mostReadableId(protein) {
     }
 }
 
-
+/**
+ * Returns semicolon-separated list of protein IDs for a matched peptide.
+ * Handles ambiguous peptides that map to multiple proteins. Uses mostReadableId for each protein.
+ * @param {Object} match - Match object
+ * @param {number} matchedPeptideIndex - Index into match.matchedPeptides array (0 or 1)
+ * @param {Object} clmsModel - CLMS model instance for protein lookup
+ * @returns {string} Semicolon-separated protein IDs (e.g., "P12345|PROT1;P67890|PROT2")
+ */
 export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const proteins = mpeptides ? mpeptides.prt.map(function (pid) {
@@ -166,7 +264,15 @@ export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
     }, this).join(";");
 }
 
-
+/**
+ * Generates comprehensive CSV export of all filtered matches.
+ * 37 columns including protein IDs, positions (sequence and peptide), sequences, link positions, scores,
+ * charges, masses (exp/calc), mass errors, validation, searches, scan info, crosslinker mass, tolerances,
+ * ion types, decoy flags, 3D distances with chains, link types, decoy types, retention times.
+ * Builds unique match list from all filtered crosslinks to avoid duplicating ambiguous matches.
+ * Performance logging for map building and string concatenation phases.
+ * @returns {string} CSV content with header row and one row per match
+ */
 export function getMatchesCSV() {
     let csv = "\"Id\",\"Protein1\",\"SeqPos1\",\"PepPos1\",\"PepSeq1\",\"LinkPos1\",\"Protein2\",\"SeqPos2\",\"PepPos2\",\"PepSeq2\",\"LinkPos2\",\"Score\",\"PrecursorIntensity\",\"Charge\",\"ExpMz\",\"ExpMass\",\"CalcMz\",\"CalcMass\",\"MassError\",\"Missing Peaks\",\"Validated\",\"Search\",\"RawFileName\",\"PeakListFileName\",\"ScanNumber\",\"ScanIndex\",\"CrossLinkerModMass\",\"FragmentTolerance\",\"IonTypes\",\"Decoy1\",\"Decoy2\",\"3D Distance\",\"From Chain\",\"To Chain\",\"LinkType\",\"DecoyType\",\"Retention Time\"\r\n";
     const clmsModel = window.compositeModelInst.get("clmsModel");
@@ -245,6 +351,13 @@ export function getMatchesCSV() {
     return csv;
 }
 
+/**
+ * Generates SSL format export for XlinkX software (tab-separated values).
+ * Format: file, scan, charge, sequence (with mass mods as [+/-mass] at residues), score-type, score.
+ * Only includes TT (target-target) matches. Converts modification IDs to mass offsets using modification registry.
+ * Crosslinker mass included as modification at link positions.
+ * @returns {string} SSL content with header row and one row per TT match
+ */
 function getSSL() {
     let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\r\n";
     // "\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
@@ -312,7 +425,13 @@ function getSSL() {
     return csv;
 }
 
-
+/**
+ * Generates CSV export of unique crosslinks with aggregated match statistics.
+ * Columns: Protein1/2, SeqPos1/2, LinkedRes1/2, Highest Score, Match Count, DecoyType, Self, Validated,
+ * Link FDR, 3D Distance/Chains, presence in each search, custom metadata columns.
+ * One row per unique crosslink. Distance info includes chain identifiers. Dynamic columns for searches and metadata.
+ * @returns {string} CSV content with dynamic header and one row per crosslink
+ */
 export function getLinksCSV() {
     const clmsModel = window.compositeModelInst.get("clmsModel");
 
@@ -412,6 +531,14 @@ export function getLinksCSV() {
     return rows.join("\r\n") + "\r\n";
 }
 
+/**
+ * Generates AlphaLink2 format export: restraints file + FASTA file.
+ * Restraints format: "fromResidue fromChain toResidue toChain 0.05" (space-separated, one per line).
+ * FASTA format: ">proteinID-stoichIndex\nsequence\n". Handles stoichiometry by replicating chains.
+ * Only includes: selected proteins, non-decoy proteins, filtered crosslinks, heteromeric/homomeric links
+ * where both ends are selected. Eliminates duplicate crosslinks. Chains labeled A-Z, a-z, 0-9 (max 62 chains).
+ * @returns {Object} Object with {csv: restraints, fasta: sequences}
+ */
 function getAlphaLink2CSV(){
     const selectedProteins = window.compositeModelInst.get("selectedProteins");
     const proteins = new Map();
@@ -473,6 +600,13 @@ function getAlphaLink2CSV(){
     return {csv: csv, fasta: fasta};
 }
 
+/**
+ * Generates CSV export of protein-protein interactions (PPIs) with aggregated crosslink data.
+ * Groups filtered crosslinks by protein pair (fromProtein-toProtein).
+ * Columns: Protein1, Protein2, Unique Distance Restraints (crosslink count), DecoyType,
+ * presence in each search (dynamic columns). One row per PPI.
+ * @returns {string} CSV content with dynamic header and one row per PPI
+ */
 function getPPIsCSV() {
     const clmsModel = window.compositeModelInst.get("clmsModel");
     const headerArray = ["Protein1", "Protein2", "Unique Distance Restraints", "DecoyType"];
@@ -537,6 +671,13 @@ function getPPIsCSV() {
     return rows.join("\r\n") + "\r\n";
 }
 
+/**
+ * Determines decoy type from crosslink protein decoy flags.
+ * Linear links: "T" (target) or "D" (decoy).
+ * Crosslinks: "TT" (target-target), "TD" (target-decoy), "DD" (decoy-decoy).
+ * @param {Object} aCrosslink - Crosslink object with fromProtein, toProtein
+ * @returns {string} Decoy type code
+ */
 function getDecoyTypeFromCrosslink(aCrosslink) {
     let decoyType;
     if (aCrosslink.isLinearLink()) {
@@ -559,6 +700,13 @@ function getDecoyTypeFromCrosslink(aCrosslink) {
     return decoyType;
 }
 
+/**
+ * Generates CSV export of residue and residue-pair occurrence counts in filtered crosslinks.
+ * Two sections: 1) Residue pairs (e.g., "K-K": 45, "K-S": 12), 2) Individual residues (e.g., "K": 102).
+ * Pairs are alphabetically ordered (K-S, not S-K). Counts unique crosslinks, not matches.
+ * Uses helper function incrementCount to build occurrence maps.
+ * @returns {string} CSV content with residue pair counts followed by individual residue counts
+ */
 export function getResidueCount() {
     let csv = "\"Residue(s)\",\"Occurences(in_unique_links)\"\r\n";
     //~ var matches = xlv.matches;//.values();
@@ -599,6 +747,14 @@ export function getResidueCount() {
     return csv;
 }
 
+/**
+ * Generates CSV export of modification occurrence counts from filtered matches.
+ * Parses peptide sequences for modifications (regex: /[A-Z]([a-z0-9]+)/g, e.g., "Kox", "Sph").
+ * Two sections: 1) Modification ID only (e.g., "ox": TT=50, TD=5, DD=2),
+ * 2) Residue+Modification (e.g., "Kox": TT=30, TD=3, DD=1).
+ * Applies subset, validation, score, and decoy filters. Counts by decoy type (TT/TD/DD).
+ * @returns {string} CSV content with modification ID section, blank rows, then residue+modification section
+ */
 function getModificationCount() {
     let csv = "\"Modification(s)\",\"TT\",\"TD\",\"DD\"\r\n";
     const matches = window.compositeModelInst.get("clmsModel").getMatches();
@@ -639,6 +795,14 @@ function getModificationCount() {
         }
     }
 
+    /**
+     * Helper function: Parses peptide sequence for modifications and updates count maps.
+     * Extracts modifications via regex, builds sets (modification ID, residue+modification),
+     * increments appropriate decoy type counter in maps.
+     * @param {string} pep - Peptide sequence with inline modifications (e.g., "PEPTKSIDEKM(ox)")
+     * @param {number} decoyIndex - Decoy type index: 0=TT, 1=TD, 2=DD
+     * @returns {undefined}
+     */
     function countMods(pep, decoyIndex) {
         const result = pep.matchAll(regex);
         if (result) {
@@ -690,6 +854,11 @@ function getModificationCount() {
     return csv;
 }
 
+/**
+ * Generates comma-separated list of protein accessions for non-hidden proteins.
+ * Simple export format for external tool integration (e.g., paste into web forms).
+ * @returns {string} Comma-separated accessions
+ */
 function getProteinAccessions() {
     const accs = [];
     const proteins = window.compositeModelInst.get("clmsModel").getProteinsIterator();
@@ -701,6 +870,12 @@ function getProteinAccessions() {
     return accs.join(",");
 }
 
+/**
+ * Generates CSV export of protein group assignments.
+ * Columns: ProteinID, Name, Complex (comma-separated list of group names protein belongs to).
+ * One row per non-decoy protein. Iterates all groups to find memberships for each protein.
+ * @returns {string} CSV content with header and one row per non-decoy protein
+ */
 function getGroups() {
     const headerArray = ["ProteinID", "Name", "Complex"];
     const headerRow = "\"" + headerArray.join("\",\"") + "\"";
