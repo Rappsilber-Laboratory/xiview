@@ -3,9 +3,50 @@
 import {makeLegalDomID} from "../utils";
 import d3 from "d3";
 
+/**
+ * Creates or updates collapsible sections containing data tables using D3.js data binding.
+ * Each section has a header with triangle arrow indicator and a table with key-value rows.
+ * Clicking the header toggles table visibility. Handles dynamic data updates through D3 join pattern.
+ * Used by KeyViewBB to display categorical color legends and filter information.
+ *
+ * @param {d3.selection} domid - D3 selection of parent element to append sections to
+ * @param {Object[]} data - Array of section data objects, each containing rows to display
+ * @param {string} data[].id - Unique identifier for the section (used for table id and data key)
+ * @param {Object[]} [data[].columnHeaders] - Optional column headers for this specific table
+ * @param {string} idPrefix - Prefix for table element IDs (e.g., "keyTable-")
+ * @param {string[]} columnHeaders - Default column headers (typically ["Key", "Value"])
+ * @param {Function} headerFunc - Function to generate header text from section data: (d) => string
+ * @param {Function} rowFilterFunc - Function to extract/filter rows from section data: (d) => [{key, value}, ...]
+ * @param {Function} cellFunc - Function called for each cell to populate content: function(d) { d3.select(this).html(...) }
+ * @param {number[]} [openSectionIndices] - Array of section indices to show initially (default: all open)
+ * @param {Function} [clickFunc] - Optional callback when header clicked: (tableIsNowShown, d, i) => void
+ * @returns {undefined}
+ *
+ * @example
+ * // Create color legend sections
+ * sectionTable(
+ *   d3.select("#legend"),
+ *   [{id: "confident", rows: [{key: "TT", value: "Target-Target"}]}],
+ *   "color-",
+ *   ["Type", "Description"],
+ *   d => d.id.toUpperCase(),
+ *   d => d.rows,
+ *   function(d) { d3.select(this).text(d.value); },
+ *   [0], // only first section open
+ *   (shown, d) => console.log(`${d.id} ${shown ? "shown" : "hidden"}`)
+ * );
+ */
 export const sectionTable = function (domid, data, idPrefix, columnHeaders, headerFunc, rowFilterFunc, cellFunc, openSectionIndices, clickFunc) {
     const self = this;
     const legalDom = makeLegalDomID;
+
+    /**
+     * Updates arrow indicator to reflect table visibility state.
+     * Adds "tableShown" class when table is visible (rotates arrow via CSS).
+     * @param {Object} d - Section data object
+     * @returns {undefined}
+     * @inner
+     */
     const setArrow = function (d) {
         const assocTable = d3.select("#" + idPrefix + legalDom(d.id));
         d3.select(this).classed("tableShown", assocTable.style("display") !== "none");
@@ -48,6 +89,15 @@ export const sectionTable = function (domid, data, idPrefix, columnHeaders, head
         });
     const tables = dataJoin.selectAll("table");
 
+    /**
+     * Expands array of entries for table rows.
+     * Currently a pass-through function - historically supported expandTheseKeys option
+     * to expand nested arrays. Kept for potential future expansion needs.
+     * @param {Object} d - Section data object
+     * @param {Object[]} entries - Array of {key, value} objects for table rows
+     * @returns {Object[]} Same array of entries (identity function)
+     * @inner
+     */
     const arrayExpandFunc = function (d, entries) {
         // const expandKeys = self.options.expandTheseKeys;
         return entries.map(function (entry) {

@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Main application initialization and setup for xiVIEW network interface.
+ * Orchestrates model creation, view initialization, event wiring, and data loading.
+ * Exports functions for phased initialization: models (FilterModel, CompositeModel, MinigramModel),
+ * views (all UI components), postDataLoaded (annotations, filters), blosumLoading (async matrices).
+ * Creates global window.compositeModelInst, window.blosumCollInst, window.vent (Backbone event bus).
+ * Entry point for full xiVIEW application with network visualization, spectrum viewer, alignment,
+ * NGL 3D viewer, filters, exports, and all interactive UI components.
+ */
+
 import "../css/networkPage.css";
 import "../css/xispecAdjust.css";
 import packageInfo from "../../package.json";
@@ -136,6 +146,11 @@ export function postDataLoaded(compositeModelInst) {
 
 }
 
+/**
+ * Commented-out function for loading saved layout configuration.
+ * Would restore protein positions, rotations, zoom levels, groups from saved state.
+ * Currently disabled - layout loading handled elsewhere or deprecated.
+ */
 // function loadConfig(layout) {
 //
 //     let layoutIsDodgy = false;
@@ -212,7 +227,14 @@ export function postDataLoaded(compositeModelInst) {
 //     }
 // }
 
-
+/**
+ * Asynchronously loads BLOSUM substitution matrices from JSON file.
+ * Creates global window.blosumCollInst collection, sets up sync listener for completion logging,
+ * initiates fetch. BLOSUM matrices used for protein sequence alignment scoring.
+ * Must complete before alignment views can be initialized.
+ * @param {Object} [options={}] - Options to override BlosumCollection defaults (e.g., URL)
+ * @returns {undefined}
+ */
 export function blosumLoading(options) {
     options = options || {};
 
@@ -229,6 +251,17 @@ export function blosumLoading(options) {
     window.blosumCollInst.fetch(options);
 }
 
+/**
+ * Creates all models for full xiVIEW application including alignment collection.
+ * Calls modelsEssential to create core models, then adds alignment models for all proteins,
+ * sets up 3dsync listener to add/remove PDB sequences from alignments, configures color models
+ * with distance color settings from localStorage, wires color model change listeners to trigger
+ * currentColourModelChanged/currentProteinColourModelChanged events, sets initial color schemes
+ * (Group if multiple searches, default otherwise).
+ * @param {Object} options - Options object with alignmentCollectionInst property
+ * @param {SearchResultsModel} clmsModelInst - CLMS data model with crosslinks, matches, proteins
+ * @returns {CompositeModel} Composite model instance with all models configured
+ */
 export function models(options, clmsModelInst) {
     // define alignment model and listeners first, so they're ready to pick up events from other models
     const alignmentCollectionInst = new ProtAlignCollection();
@@ -320,7 +353,7 @@ export function modelsEssential(options, clmsModelInst) {
         matchScoreCutoff: scoreExtentInstance.slice(),
         //distanceCutoff: [0, 250],
         searchGroups: getSearchGroups(clmsModelInst),
-        primaryScore: clmsModelInst.getPrimaryScore(),
+        selectedScoreType: clmsModelInst.selectedScoreType, // todo - should maybe be part of compositeModel?
     };
     // const urlFilterSettings = FilterModel.prototype.getFilterUrlSettings(urlChunkMap);
     // filterSettings = _.extend(filterSettings, urlFilterSettings); // overwrite default settings with url settings
@@ -412,6 +445,16 @@ export function modelsEssential(options, clmsModelInst) {
     return compositeModel;
 }
 
+/**
+ * Creates all views for full xiVIEW application including optional async-dependent views.
+ * Creates dynamic window divs for all panels, calls viewsEssential for core views,
+ * generates view checkboxes and adds to dropdown menu with enable/disable logic based on data availability,
+ * creates protein selection and groups dropdown menus with search/filter, creates load dropdown,
+ * creates xiNET controls, initializes color chooser dialog with interactor color selection,
+ * sets up one-time buildAsyncViews listener to call viewsThatNeedAsyncData when async data loaded.
+ * @param {CompositeModel} compositeModelInst - Main composite model instance
+ * @returns {undefined}
+ */
 export function views(compositeModelInst) {
     const windowIds = DYNAMIC_CONTAINER_IDS;
     // something funny happens if I do a data join and enter with d3 instead
@@ -522,6 +565,19 @@ export function views(compositeModelInst) {
     });
 }
 
+/**
+ * Creates essential views required by validation page and full application.
+ * Creates FilterViewBB (comprehensive filter panel), ProteinSummaryViewBB (protein/PPI counts),
+ * FilterSummaryViewBB (filtered crosslink counts), hides filter mode if no unvalidated data,
+ * hides product ions if no linears, creates two MinigramViewBB instances (score and distance histograms
+ * with brush selection), wires distance minigram to re-render on distancesObj changes,
+ * creates SelectionTableViewBB (match table), creates SpectrumViewWrapper with xiSPEC integration,
+ * creates xiSPEC wrapper with configuration, wires spectrum resize and match selection events,
+ * creates export dropdown menu, creates help dropdown with Rappsilber lab logo, creates tooltip view.
+ * @param {CompositeModel} compositeModelInst - Main composite model instance
+ * @param {Object} options - Options with specWrapperDiv selector and spectrumToTop flag
+ * @returns {undefined}
+ */
 export function viewsEssential(compositeModelInst, options) {
 
     const filterModel = compositeModelInst.get("filterModel");
@@ -737,6 +793,20 @@ export function viewsEssential(compositeModelInst, options) {
     });
 }
 
+/**
+ * Creates views that depend on asynchronously loaded data (BLOSUM matrices, Uniprot features).
+ * Called via buildAsyncViews event after async data loaded. Creates KeyViewBB (legend),
+ * SearchSummaryViewBB (search metadata), CircularViewBB (circular protein view with annotations),
+ * AnnotationDropDownMenuViewBB (annotation type selection), ColourCollectionOptionViewBB instances
+ * (link and protein color schemes), AlignCollectionViewBB (sequence alignments),
+ * DistogramBB (distance histogram), DistanceMatrixViewBB (distance matrix heatmap),
+ * NGLViewBB (3D molecular viewer), PDBFileChooserBB (PDB file loader), STRINGFileChooserBB (STRING data),
+ * ScatterplotViewBB, metadata file choosers (link, protein, user annotations), GoTermsViewBB (GO terms Sankey),
+ * ProteinInfoViewBB (protein details), FDRViewBB (FDR threshold selection), FDRSummaryViewBB (FDR summary),
+ * initializes ByRei_dynDiv window system, creates CrosslinkViewer (xiNET network visualization).
+ * @param {CompositeModel} compositeModelInst - Main composite model instance
+ * @returns {undefined}
+ */
 function viewsThatNeedAsyncData(compositeModelInst) {
 
     // This generates the legend div, we don't keep a handle to it - the event object has one

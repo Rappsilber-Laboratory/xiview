@@ -220,7 +220,7 @@ function getTasks(apiBase, clmsModel) {
         fetchDataAndProcess(spectrumIdentificationProtocolUrl, (data) => clmsModel.storeSpectrumIdentificationProtocols(data)),
         fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.storeSpectraData(data)),
         fetchDataAndProcess(enzymesUrl, (data) => clmsModel.storeEnzymes(data)),
-        fetchDataAndProcess(searchModificationsUrl, (data) => clmsModel.processSearchModifications(data)),
+        fetchDataAndProcess(searchModificationsUrl, (data) => clmsModel.storeSearchModifications(data)),
         fetchDataAndProcess(proteinUrl, (data) => clmsModel.storeProteins(data)), // .then(() => {fetchUniprotKB(accessions);}),
         fetchDataAndProcess(peptidesUrl, (data) => clmsModel.storePeptides(data)),
         fetchDataAndProcess(matchesUrl, (data) => clmsModel.storeMatches(data)),

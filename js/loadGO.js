@@ -1,5 +1,19 @@
+/**
+ * @fileoverview Gene Ontology OBO file parser for xiVIEW.
+ * Parses GO OBO format text files into a hierarchical Map of GoTerm objects.
+ * Builds bidirectional relationships: is_a/subclasses (inheritance) and part_of/parts (composition).
+ * Optimized for performance with minimal string splitting and efficient line parsing.
+ */
 import {GoTerm} from "./views/go/goTerm";
 
+/**
+ * Parses GO OBO format text into Map of GoTerm objects with hierarchical relationships.
+ * Two-pass algorithm: First pass parses terms and creates is_a/part_of forward links,
+ * second pass populates subclasses/parts backward links for efficient hierarchy traversal.
+ * Removes colons from GO IDs to ensure valid HTML IDs. Trims lines to handle CRLF endings.
+ * @param {string} txt - Full text content of OBO file
+ * @returns {Map<string, GoTerm>} Map with GO IDs as keys (colons removed, e.g., "GO0008150") and GoTerm objects as values
+ */
 export function loadGOAnnotations(txt) {
     console.log("parsing go obo");
     const z = performance.now();

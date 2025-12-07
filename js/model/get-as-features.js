@@ -1,5 +1,19 @@
+/**
+ * @fileoverview Feature extraction utilities for protein sequence annotations.
+ * Converts protease cleavage sites and crosslinkable residues into feature objects for visualization.
+ * Features include position (begin/end), category, type, and identifiers for tracking.
+ */
 import * as d3 from "d3";
 
+/**
+ * Extracts protease-digestible residues as feature objects.
+ * Searches protein sequence for residues matching enzyme specificity rules.
+ * Applies post-constraint checks (e.g., "not followed by P" for trypsin).
+ * Returns array of features with position, category "AA", type "DIGESTIBLE".
+ * @param {Object} clmsModel - CLMS model with enzymeSpecificity array
+ * @param {Object} participant - Protein object with sequence and id properties
+ * @returns {Array<Object>} Array of digestible residue feature objects
+ */
 export function getDigestibleResiduesAsFeatures(clmsModel, participant) {
     const digestibleResiduesAsFeatures = [];
 
@@ -30,6 +44,16 @@ export function getDigestibleResiduesAsFeatures(clmsModel, participant) {
     return digestibleResiduesAsFeatures;
 }
 
+/**
+ * Extracts crosslinkable residues as feature objects for specific reactive group.
+ * Searches protein sequence for residues matching crosslinker specificity rules.
+ * For heterobifunctional crosslinkers, reactiveGroup selects which reactive group (1 or 2).
+ * Returns array of features with position, category "AA", type "CROSSLINKABLE-N".
+ * @param {Object} clmsModel - CLMS model with crosslinkerSpecificity map
+ * @param {Object} participant - Protein object with sequence and id properties
+ * @param {number} reactiveGroup - Reactive group number (1 for first/only, 2 for second if heterobifunctional)
+ * @returns {Array<Object>} Array of crosslinkable residue feature objects
+ */
 export function getCrosslinkableResiduesAsFeatures(clmsModel, participant, reactiveGroup) {
     const crosslinkableResiduesAsFeatures = [];
 

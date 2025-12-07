@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Base view class providing common functionality for all visualization panels.
+ * Handles SVG export with canvas conversion, window management (hide/maximize/bring-to-top),
+ * key/legend rendering, drag-to-resize, filename generation for exports, spinner/loading states,
+ * visibility management, and panel positioning. All major views extend this class.
+ */
+
 import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
@@ -22,6 +29,12 @@ export class BaseFrameView extends Backbone.View {
         super(options);
     }
 
+    /**
+     * Backbone.js event handler map.
+     * Maps DOM events to handler methods for panel controls: download buttons (SVG/canvas),
+     * close/hide/maximize buttons, and general click to bring panel to top.
+     * @returns {Object} Event map with jQuery-style selectors as keys and method names as values
+     */
     get events () {
         return {
             // following line commented out, mouseup sometimes not called on element if pointer drifts outside element
@@ -37,6 +50,22 @@ export class BaseFrameView extends Backbone.View {
         };
     }
 
+    /**
+     * Initializes the panel with HTML scaffolding and event listeners.
+     * Creates title bar with control buttons (close/maximize/hide), four draggable resize corners,
+     * sets up D3 drag behavior for resizing, and registers display event listener if provided.
+     * Merges global defaults, subclass defaults, and instance options.
+     * @param {Object} viewOptions - Initialization options
+     * @param {string} viewOptions.displayEventName - Event name for show/hide triggers
+     * @param {Object} viewOptions.myOptions - View-specific options
+     * @param {boolean} [viewOptions.myOptions.canBringToTop=true] - Enable click-to-front behavior
+     * @param {boolean} [viewOptions.myOptions.canMaximise=true] - Show maximize/restore button
+     * @param {boolean} [viewOptions.myOptions.canHideToolbarArea=false] - Show toolbar hide button
+     * @param {boolean} [viewOptions.myOptions.canTakeImage=false] - Show image download button
+     * @param {boolean} [viewOptions.myOptions.exportKey] - Include color key in exports
+     * @param {boolean} [viewOptions.myOptions.exportTitle] - Include title/URL in exports
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     initialize(viewOptions) {
 
         // window level options that don't depend on type of view
@@ -131,10 +160,23 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Renders the view content.
+     * Base implementation does nothing - subclasses override to render specific visualizations.
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     render() {
         return this;
     }
 
+    /**
+     * Recalculates layout after panel resize.
+     * Base implementation does nothing - subclasses override to adjust visualization dimensions,
+     * update scales, and redraw content to fit new panel size.
+     * @param {Object} [options] - Relayout options
+     * @param {boolean} [options.dragEnd] - True if called at end of drag operation
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     relayout() {
         return this;
     }
@@ -144,6 +186,14 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Creates a detached clone of the SVG for export with optional color key.
+     * Clones the SVG element, optionally adds color key and title/URL at the top,
+     * expands SVG height to accommodate key, and repositions original content below key.
+     * @param {d3.selection} [thisSVG] - Specific SVG element to clone, or uses first SVG in view
+     * @returns {Object} Object with detachedSVGD3 (d3 selection of cloned SVG) and allSVGs (array of SVG elements)
+     * @private
+     */
     _makeDetachedSVG(thisSVG) {
         let keyHeight = 0;
         if (this.options.exportKey) {
@@ -171,6 +221,13 @@ export class BaseFrameView extends Backbone.View {
         return {detachedSVGD3: detachedSVGD3, allSVGs: svgStrings};
     }
 
+    /**
+     * Downloads the visualization as an image file.
+     * Alias for downloadSVG() - called by "Take Image" button if canTakeImage option is true.
+     * @param {Event} [event] - Click event from button
+     * @param {d3.selection} [thisSVG] - Specific SVG element to download
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     takeImage(event, thisSVG) {
         return this.downloadSVG(event, thisSVG);
     }
@@ -231,6 +288,15 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Adds a color key legend to the SVG.
+     * Creates a temporary SVG element containing the current link color scheme legend.
+     * Optionally adds title/URL text above the key if addOrigin is true.
+     * @param {Object} [options] - Key options
+     * @param {d3.selection} [options.addToSelection] - SVG to add key to, or uses first in view
+     * @param {boolean} [options.addOrigin] - Include title and clickable URL above key
+     * @returns {d3.selection} The temporary SVG element containing the key
+     */
     addKey(options) {
         options = options || {};
         const tempSVG = (options.addToSelection || d3.select(this.el).select("svg")).append("svg").attr("class", "tempKey");
@@ -248,15 +314,31 @@ export class BaseFrameView extends Backbone.View {
         return tempSVG;
     }
 
+    /**
+     * Removes the temporary color key from the SVG.
+     * @param {d3.selection} [d3Sel] - SVG to remove key from, or uses view's main element
+     * @returns {undefined}
+     */
     removeKey(d3Sel) {
         (d3Sel || d3.select(this.el)).selectAll(".tempKey").remove();
     }
 
+    /**
+     * Hides the panel by triggering the display event.
+     * Triggers the view's displayEventName event with false, which is listened to by setVisible().
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     hideView() {
         window.vent.trigger(this.displayEventName, false);
         return this;
     }
 
+    /**
+     * Toggles visibility of the toolbar area.
+     * Shows/hides the .toolbarArea element and triggers relayout to adjust panel content size.
+     * Only available if canHideToolbarArea option is true.
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     hideToolbarArea() {
         const toolbarArea = d3.select(this.el).select(".toolbarArea");
         if (!toolbarArea.empty()) {
@@ -267,6 +349,13 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Toggles between maximized and normal panel size.
+     * If currently normal: saves current position/size to prevBounds and expands to fill screen.
+     * If currently maximized: restores saved position/size from prevBounds.
+     * Updates maximize button icon (expand/compress) and triggers relayout.
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     minMaxPanel() {
         const panel = d3.select(this.el);
         const maxed = panel.classed("maxSize");
@@ -331,6 +420,14 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Shows or hides the panel.
+     * Updates cached visibility state, sets CSS display property, and adds/removes dynDivVisible class.
+     * When showing: calls reshow() → relayout() → render() → bringToTop() lifecycle chain.
+     * Listener for displayEventName event triggered by hideView() and other components.
+     * @param {boolean} show - True to show panel, false to hide
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     setVisible(show) {
         this.visible = show;
         d3.select(this.el)
@@ -367,6 +464,17 @@ export class BaseFrameView extends Backbone.View {
         Backbone.View.prototype.remove.call(this);
     }
 
+    /**
+     * Creates formatted chart title with counts per category and tooltip.
+     * Generates title string like "ViewName: 1,234 Crosslinks - 800 Confident, 434 Ambiguous".
+     * For categorical color schemes, breaks down counts by category label. Adds hover tooltip
+     * showing category breakdown. Used by views with categorical data (scatter plot, distogram, etc.).
+     * @param {number[]} counts - Array of counts per category (parallel to color scheme labels)
+     * @param {Object} colourScheme - Color scheme model with labels and categorical status
+     * @param {d3.selection} titleElem - D3 selection of title element to update
+     * @param {boolean} [matchLevel=false] - True for "Matches", false for "Crosslinks"
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     makeChartTitle(counts, colourScheme, titleElem, matchLevel) {
         const labels = colourScheme.isCategorical() ? colourScheme.get("labels").range() : [];
         const commaed = d3.format(",");
@@ -423,6 +531,13 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Sets panel to waiting state during async operations.
+     * Shows "Please Wait..." status message, displays spinner, and disables all interactive
+     * controls (.columnbar, .fakeButton, .btn) to prevent further user actions.
+     * Used by file chooser views during PDB/STRING data fetching.
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     setWaitingEffect() {
         this.setStatusText("Please Wait...").setSpinner(true);
         d3.select(this.el).selectAll(".columnbar, .fakeButton").property("disabled", true).attr("disabled", true);
@@ -430,6 +545,12 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Restores panel to normal state after async operation completes.
+     * Re-enables all interactive controls (.columnbar, .fakeButton, .btn) and hides spinner.
+     * Typically followed by setStatusText() with success/failure message.
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     setCompletedEffect() {
         d3.select(this.el).selectAll(".columnbar, .fakeButton").property("disabled", false).attr("disabled", null);
         d3.select(this.el).selectAll(".btn").property("disabled", false);
@@ -437,6 +558,14 @@ export class BaseFrameView extends Backbone.View {
         return this;
     }
 
+    /**
+     * Updates status message text in the .messagebar element with color transitions.
+     * Used to provide user feedback during async operations and file loading.
+     * @param {string} msg - Status message HTML to display
+     * @param {boolean} [success] - Color indication: false=red (error), true=blue (success), undefined=default
+     *                              If defined, animates from color back to default after 5 seconds
+     * @returns {BaseFrameView} This view instance for chaining
+     */
     setStatusText(msg, success) {
         const mbar = d3.select(this.el).select(".messagebar"); //.style("display", null);
         let t = mbar.html(msg);

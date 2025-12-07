@@ -1721,11 +1721,14 @@ function initializeModels(options) {
 
     console.log("Processing model data...");
     clmsModel.storeMzIdentMLFiles(options.mzidentmlFiles);
-    clmsModel.storeSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols)
+    clmsModel.storeAnalysisCollectionSpectrumIdentifications([]);//hack
+    clmsModel.storeSpectrumIdentificationProtocols(options.spectrumIdentificationProtocols);
     clmsModel.storeSpectraData(options.spectraData);
     clmsModel.storeMatches(options.matches);
     clmsModel.storePeptides(options.peptides);
     clmsModel.storeProteins(options.proteins);
+    clmsModel.storeEnzymes([]);
+    clmsModel.storeSearchModifications([]);
 
     console.log("Creating composite model...");
     const compositeModelInst = models({}, clmsModel);
@@ -1736,7 +1739,7 @@ function initializeModels(options) {
     window.compositeModelInst.get("clmsModel")._crosslinkerSpecificity =
         {
             "wrong mass SDA ": {
-                "searches": new Set(["24070"]),
+                "searches": new Set([24070]),
                 "linkables": [
                     new Set([
                         "R",

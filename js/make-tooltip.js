@@ -1,20 +1,51 @@
+/**
+ * @fileoverview Tooltip content generation utilities for xiVIEW.
+ * Provides two main exports: makeTooltipContents (formats data into tooltip body arrays) and makeTooltipTitle (generates tooltip titles).
+ * Supports multiple data types: crosslinks, proteins, residues, features, GO terms, matches, and complexes.
+ * Outputs are arrays of [label, value] pairs suitable for tooltip rendering, with optional table formatting.
+ */
 import * as d3 from "d3";
 import * as _ from "underscore";
 import {amino1to3Map, getDirectionalResidueType, getResidueType, highestScore} from "./modelUtils";
 
+/**
+ * Tooltip content formatters for various xiVIEW data types.
+ * Each method returns array of [label, value] pairs or table-like 2D arrays with optional tableHasHeaders flag.
+ * Includes formatting dictionaries for units and unknown values (e.g., distance in Angstroms).
+ * @namespace
+ * @property {number} maxRows - Maximum rows to display in multi-row tooltips (25)
+ */
 export const makeTooltipContents = {
     maxRows: 25,
 
+    /**
+     * Formats single-letter amino acid code to display format with 3-letter code.
+     * @param {string} singleLetterCode - Single letter amino acid code (e.g., "K")
+     * @returns {string} Formatted string "K (Lys)"
+     */
     residueString: function (singleLetterCode) {
         return singleLetterCode + " (" + amino1to3Map[singleLetterCode] + ")";
     },
 
+    /**
+     * Format configuration for special fields.
+     * @property {Object} formats - D3 format functions by key (distance: 2 decimal places)
+     * @property {Object} units - Unit suffixes by key (distance: Angstroms symbol)
+     * @property {Object} unknownText - Text to display for undefined values by key
+     */
     formatDictionary: {
         formats: {distance: d3.format(".2f")},
         units: {distance: " Å"},
         unknownText: {distance: "Unknown"}
     },
 
+    /**
+     * Formats value with appropriate format, unit, and unknown text based on key.
+     * Uses formatDictionary to look up formatting rules. Falls back to raw value if no rules defined.
+     * @param {string} key - Field name (e.g., "distance")
+     * @param {*} value - Value to format
+     * @returns {string} Formatted string with unit, or unknown text if value undefined
+     */
     niceFormat: function (key, value) {
         const fd = makeTooltipContents.formatDictionary;
         const noFormat = function (v) {
@@ -28,6 +59,14 @@ export const makeTooltipContents = {
         return value !== undefined ? (format(value) + (unit || "")) : unknown;
     },
 
+    /**
+     * Generates tooltip content array for a single crosslink.
+     * Returns [label, value] pairs: From/To proteins and residues, match count, highest score, plus metadata fields.
+     * Handles linear links (no "to" protein) and monolinks appropriately.
+     * @param {Object} xlink - Crosslink object
+     * @param {Object} [extras] - Additional key-value pairs to include in tooltip
+     * @returns {Array<Array>} Array of [label, value] pairs
+     */
     link: function (xlink, extras) {
         const linear = xlink.isLinearLink();
         const mono = xlink.isMonoLink();
@@ -52,6 +91,12 @@ export const makeTooltipContents = {
         return info;
     },
 
+    /**
+     * Generates tooltip content array for a protein (interactor).
+     * Returns [label, value] pairs: ID, Accession, Size, Description, Keywords (if UniProt data available), plus metadata.
+     * @param {Object} interactor - Protein object
+     * @returns {Array<Array>} Array of [label, value] pairs
+     */
     interactor: function (interactor) {
         const contents = [
             ["ID", interactor.id],
@@ -75,6 +120,17 @@ export const makeTooltipContents = {
         return contents;
     },
 
+    /**
+     * Generates tooltip table for multiple crosslinks at a single residue.
+     * Returns 2D array with headers: Protein, Pos, Residue, Matches (plus extras).
+     * Sorted by match count (descending), then protein name, then position.
+     * Limited to maxRows (25) with "+ N More" footer if truncated.
+     * @param {Array<Object>} xlinks - Array of crosslink objects
+     * @param {string} interactorId - ID of protein containing the residue
+     * @param {number} residueIndex - Residue position index
+     * @param {Object} [extras] - Additional columns to include (key: column name, value: array of values)
+     * @returns {Array<Array>} 2D table array with tableHasHeaders flag set to true
+     */
     multilinks: function (xlinks, interactorId, residueIndex, extras) {
         let ttinfo = xlinks.map(function (xlink) {
             const linear = xlink.isLinearLink();
@@ -224,7 +280,19 @@ export const makeTooltipContents = {
         return contents;
     },
 };
+
+/**
+ * Tooltip title generators for various xiVIEW data types.
+ * Each method returns a string title for the tooltip based on the data being displayed.
+ * Handles singular/plural forms and formats protein/residue names appropriately.
+ * @namespace
+ */
 export const makeTooltipTitle = {
+    /**
+     * Generates title for crosslink tooltip.
+     * @param {number} linkCount - Number of links
+     * @returns {string} "Linked Residue Pair" or "Linked Residue Pairs"
+     */
     link: function (linkCount) {
         return "Linked Residue Pair" + (linkCount > 1 ? "s" : "");
     },

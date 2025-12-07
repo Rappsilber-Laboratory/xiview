@@ -2,14 +2,25 @@
  * Created by cs22 on 04/12/14.
  */
 
-
-
+/**
+ * Captures SVG elements and converts them to standalone SVG documents.
+ * Clones each SVG, extracts all used styles, preserves parent chain context, and prunes invisible subtrees.
+ * Returns array of cloned SVG elements with embedded styles suitable for export.
+ * @param {Array<SVGElement>} svgElems - Array of SVG DOM elements to capture
+ * @returns {Array<SVGElement>} Array of standalone SVG document elements
+ */
 export function capture(svgElems) {
     return svgElems.map(function (svg) {
         return makeSVGDoc(svg);
     });
 }
 
+/**
+ * Finds all SVG elements in document and accessible iframes.
+ * Searches main document plus all same-origin iframe content documents.
+ * Cross-domain iframes are skipped with console warning.
+ * @returns {Array<SVGElement>} Array of all found SVG elements
+ */
 function getAllSVGElements() {
     // search through all document objects, including those in iframes
     const allIFrames = [].slice.apply(document.getElementsByTagName("iframe"));
@@ -30,7 +41,13 @@ function getAllSVGElements() {
     return allSvgs;
 }
 
-
+/**
+ * Creates standalone SVG document from SVG element with all context preserved.
+ * Clones SVG, prunes invisible subtrees, extracts used styles, wraps in dummy parent chain
+ * to preserve parent context (classes/IDs), embeds styles as style element, sets namespaces.
+ * @param {SVGElement} svgElem - Original SVG element to convert
+ * @returns {SVGElement} Cloned SVG with embedded styles and parent context
+ */
 function makeSVGDoc(svgElem) {
     // clone node
     let cloneSVG = svgElem.cloneNode(true);
@@ -136,11 +153,25 @@ function getComputedStyleCssText(element, field) {
 
 const doPruneInvisible = true;
 
+/**
+ * Condition sets for determining element invisibility.
+ * Element is invisible if ALL conditions in any set are met.
+ * @constant {Array<Object>}
+ */
 const pruneConditionSets = [{"display": "none"}, {"visibility": "hidden"}, {"opacity": "0"}, {
     "fill-opacity": "0",
     "stroke-opacity": "0"
 }, {"fill-opacity": "0", "stroke": "none"}, {"fill": "none", "stroke-opacity": "0"}];
 
+/**
+ * Recursively removes invisible elements from cloned SVG tree.
+ * Checks computed style against pruneConditionSets - removes if conditions met.
+ * Processes children in reverse order to handle array mutation during removal.
+ * Uses original element for style computation (cloned elements lack computed styles).
+ * @param {Element} clonedElement - Cloned element to potentially prune
+ * @param {Element} matchingOriginalElement - Matching original element for style computation
+ * @returns {undefined}
+ */
 function pruneInvisibleSubtrees(clonedElement, matchingOriginalElement) {
     if (doPruneInvisible) {
         const style = window.getComputedStyle(matchingOriginalElement);  // cloned (unattached) nodes in chrome at least don't have computed styles
@@ -181,6 +212,15 @@ function pruneInvisibleSubtrees(clonedElement, matchingOriginalElement) {
     }
 }
 
+/**
+ * Extracts parent chain IDs and classes that are referenced in styles.
+ * Walks up parent chain collecting IDs and class attributes, then filters to only keep
+ * those actually referenced in provided styles array (for CSS selector matching).
+ * Returns array from innermost to outermost parent with relevant id/class properties.
+ * @param {Element} elem - SVG element whose parent chain to analyze
+ * @param {Array<string>} styles - Array of CSS style strings to check for references
+ * @returns {Array<Object>} Array of {id, class} objects for parents (undefined if not referenced)
+ */
 function parentChain(elem, styles) {
     // Capture id / classes of svg's parent chain.
     const ownerDoc = elem.ownerDocument || document;
@@ -260,6 +300,14 @@ function usedStyles(elem, subtree, both) {
     return needed;
 }
 
+/**
+ * Serializes SVG document to XML string with Inkscape compatibility fixes.
+ * Removes xmlns from style elements (breaks Inkscape), strips alpha from hex colors,
+ * removes problematic nth-of-type transform rule (GitHub issue #105).
+ * @param {XMLSerializer} xmls - XMLSerializer instance
+ * @param {SVGElement} svgDoc - SVG document element to serialize
+ * @returns {string} XML string representation of SVG
+ */
 export function makeXMLStr(xmls, svgDoc) {
     let xmlStr = xmls.serializeToString(svgDoc);
     // serializing adds an xmlns attribute to the style element ('cos it thinks we want xhtml), which knackers it for inkscape, here we chop it out
@@ -274,6 +322,13 @@ export function makeXMLStr(xmls, svgDoc) {
     return xmlStr;
 }
 
+/**
+ * Saves SVG documents as individual SVG files using FileSaver.
+ * Serializes each SVG to XML string, creates blob, triggers download with saveAs().
+ * Files named "saved0.svg", "saved1.svg", etc.
+ * @param {Array<SVGElement>} svgDocs - Array of SVG document elements to save
+ * @returns {undefined}
+ */
 function saveSVGDocs(svgDocs) {
     const xmls = new XMLSerializer();
     svgDocs.forEach(function (svgDoc, i) {
