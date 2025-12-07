@@ -1,20 +1,44 @@
+/**
+ * @fileoverview Crosslink-specific color model classes for xiVIEW.
+ * Provides five specialized color schemes for crosslinks: default (self/homo/hetero), group-based,
+ * distance-based (threshold), protein-pair-based, and score-based (threshold).
+ * Each class extends ColourModel and implements getValue() to extract appropriate values from crosslinks.
+ */
 import * as _ from "underscore";
 import d3 from "d3";
 import * as colorbrewer from "colorbrewer";
 import {ColourModel} from "./color-model";
 import {filterOutDecoyInteractors} from "../../modelUtils";
 
+/**
+ * Default crosslink color model - colors by link type (self/homomultimeric/heteromeric).
+ * Three categories: Self (intra-protein), Homomultimeric (overlapping peptides proving different molecules),
+ * and Heteromeric (inter-protein). Aggregate links always get dark gray (#202020).
+ * @class
+ * @extends ColourModel
+ */
 export class DefaultLinkColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Initializes as ordinal type with three categories.
+     * @returns {undefined}
+     */
     initialize() {
         this
             .set("labels", this.get("colScale").copy().range(["Self", "Homomultimeric (Overlapping Peptides)", "Heteromeric"]))
             .set("type", "ordinal");
     }
 
+    /**
+     * Classifies link into self (0), homomultimeric (1), or heteromeric (2).
+     * For aggregate links: uses first crosslink's properties and checks link.hd (homomultimer detected).
+     * For regular links: uses confirmedHomomultimer flag.
+     * @param {Object} link - Crosslink or aggregate link object
+     * @returns {number} 0=self, 1=homomultimeric, 2=heteromeric
+     */
     getValue(link) {
         if (link.isAggregateLink) {
             const crosslinks = link.getCrosslinks();
@@ -24,6 +48,11 @@ export class DefaultLinkColourModel extends ColourModel {
         }
     }
 
+    /**
+     * Returns color for link - aggregate links always get dark gray.
+     * @param {Object} obj - Crosslink or aggregate link object
+     * @returns {string} Hex color string
+     */
     getColour(obj) {  // obj is generally a crosslink, but is non-specific at this point
         if (obj.isAggregateLink) {
             return "#202020";
@@ -33,11 +62,30 @@ export class DefaultLinkColourModel extends ColourModel {
     }
 }
 
+/**
+ * Group-based color model - colors crosslinks by search group.
+ * Analyzes search-to-group mappings and creates ordinal scale for up to 10 groups (using ColorBrewer).
+ * For >10 groups, falls back to two-color scheme (multiple groups vs single group).
+ * Links spanning multiple groups get dark gray (#202020FF).
+ * @class
+ * @extends ColourModel
+ * @property {Map} searchMap - Map of dataset IDs to search objects (with group property)
+ * @property {boolean} [overload] - True if >10 groups (uses simplified two-color scheme)
+ */
 export class GroupColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Initializes group-based color model by analyzing search-to-group mappings.
+     * Creates ordinal scale for up to 10 groups using ColorBrewer, or falls back to
+     * two-color scheme (multiple/single) for >10 groups.
+     * @param {Object} attrs - Model attributes
+     * @param {Object} options - Options object
+     * @param {Map} options.searchMap - Map of dataset IDs to search objects (with group property)
+     * @returns {undefined}
+     */
     initialize(attrs, options) {
 
         this.searchMap = options.searchMap;
@@ -84,6 +132,13 @@ export class GroupColourModel extends ColourModel {
             .set("type", "ordinal");
     }
 
+    /**
+     * Determines which group a link belongs to.
+     * Returns group number if link belongs to exactly one group, -1 if multiple groups.
+     * Checks all filtered matches across all crosslinks (for aggregate links).
+     * @param {Object} link - Crosslink or aggregate link object
+     * @returns {number} Group number (0+) or -1 for multiple groups
+     */
     getValue(link) {
         // choose value if link definitely belongs to just one group or set as undefined (-1)
         let value = null;
@@ -92,7 +147,7 @@ export class GroupColourModel extends ColourModel {
                 const filteredMatchesAndPepPositions = crosslink.filteredMatches_pp;
                 for (let fm_pp of filteredMatchesAndPepPositions) {
                     const match = fm_pp.match;
-                    const group = this.searchMap.get(match.datasetId).group;
+                    const group = this.searchMap.get(match.uploadId).group;
                     if (!value) {
                         value = group;
                     } else if (value !== group) { //check if link uniquely belongs to one group
@@ -105,7 +160,7 @@ export class GroupColourModel extends ColourModel {
             const filteredMatchesAndPepPositions = link.filteredMatches_pp;
             for (let fm_pp = filteredMatchesAndPepPositions.length; --fm_pp >= 0;) {
                 const match = filteredMatchesAndPepPositions[fm_pp].match;
-                const group = this.searchMap.get(match.datasetId).group;
+                const group = this.searchMap.get(match.uploadId).group;
                 if (!value) {
                     value = group;
                 } else if (value !== group) { //check if link uniquely belongs to one group
@@ -117,6 +172,13 @@ export class GroupColourModel extends ColourModel {
         return value;
     }
 
+    /**
+     * Returns color for a given value, handling undefined values appropriately.
+     * For linear scale (>10 groups), converts undefined to -1 to get "multiple groups" color.
+     * For ordinal scale, undefined was already added to domain during initialize.
+     * @param {number} val - Group number or -1 for multiple groups
+     * @returns {string} Hex color string
+     */
     getColourByValue(val) {
         const scale = this.get("colScale");
         // the ordinal scales will have had a colour for undefined already added to their scales (in initialize)
@@ -128,16 +190,34 @@ export class GroupColourModel extends ColourModel {
         return scale(val);
     }
 
+    /**
+     * Returns color for a crosslink by first getting its group value, then mapping to color.
+     * @param {Object} crosslink - Crosslink or aggregate link object
+     * @returns {string} Hex color string
+     */
     getColour(crosslink) {
         return this.getColourByValue(this.getValue(crosslink));
     }
 }
 
+/**
+ * Distance-based threshold color model - colors crosslinks by Ca-Ca distance.
+ * Three categories: Within Distance (good), Borderline, Overlong (violates distance constraint).
+ * Aggregate links return undefined (cannot have single distance value).
+ * Uses metadata field "distance" from crosslink objects.
+ * @class
+ * @extends ColourModel
+ */
 export class DistanceColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Initializes as threshold type with three distance categories.
+     * Labels: Within Distance, Borderline, Overlong. Unit: Angstroms.
+     * @returns {undefined}
+     */
     initialize() {
         this
             .set("type", "threshold")
@@ -145,6 +225,12 @@ export class DistanceColourModel extends ColourModel {
             .set("unit", "Å");
     }
 
+    /**
+     * Extracts Ca-Ca distance from crosslink metadata.
+     * Returns undefined for aggregate links (no single distance value).
+     * @param {Object} link - Crosslink or aggregate link object
+     * @returns {number|undefined} Distance in Angstroms, or undefined for aggregate links
+     */
     getValue(link) {
         if (link.isAggregateLink) {
             return undefined;
@@ -154,11 +240,29 @@ export class DistanceColourModel extends ColourModel {
     }
 }
 
+/**
+ * Protein-pair-based color model - colors crosslinks by protein pair involved.
+ * For 3-5 proteins: uses ColorBrewer Set3 with distinct color per protein pair.
+ * For other counts: falls back to two-color scheme (same protein vs other).
+ * Self-links (same protein) always get "same" category.
+ * @class
+ * @extends ColourModel
+ * @property {boolean} [overload] - True if too many proteins (not 3-5) for distinct colors
+ */
 export class InterProteinColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Initializes protein-pair color model by creating ordinal scale.
+     * For 3-5 proteins: creates distinct color for each protein pair using Set3 palette.
+     * Otherwise: uses two-color scheme (same/other).
+     * @param {Object} properties - Model properties
+     * @param {Object} options - Options object
+     * @param {Map} options.proteins - Map of protein IDs to protein objects
+     * @returns {undefined}
+     */
     initialize(properties, options) {
         let colScale;
         let labels = ["Same Protein"];
@@ -186,10 +290,25 @@ export class InterProteinColourModel extends ColourModel {
             .set("labels", this.get("colScale").copy().range(labels));
     }
 
+    /**
+     * Creates canonical string key for a protein pair (order-independent).
+     * Always returns smaller ID first to ensure consistent key regardless of order.
+     * @param {string} pid1 - First protein ID
+     * @param {string} pid2 - Second protein ID
+     * @returns {string} Canonical key in format "id1---id2" (sorted)
+     */
     makeProteinPairKey(pid1, pid2) {
         return pid1 < pid2 ? pid1 + "---" + pid2 : pid2 + "---" + pid1;
     }
 
+    /**
+     * Determines protein pair key for a link.
+     * Returns "same" for self-links or linear links (single protein).
+     * Returns "other" (overload mode) or protein pair key (distinct color mode).
+     * For aggregate links, uses first crosslink's proteins.
+     * @param {Object} link - Crosslink or aggregate link object
+     * @returns {string} "same", "other", or canonical protein pair key
+     */
     getValue(link) {
         let id1, id2;
         if (link.isAggregateLink) {
@@ -204,17 +323,39 @@ export class InterProteinColourModel extends ColourModel {
     }
 }
 
+/**
+ * Score-based threshold color model - colors crosslinks by highest match score.
+ * Three categories: Low Score, Mid Score, High Score.
+ * For aggregate links, examines all matches across all crosslinks to find maximum score.
+ * Uses match.score() method to retrieve score value.
+ * @class
+ * @extends ColourModel
+ */
 export class HighestScoreColourModel extends ColourModel {
     constructor(attributes, options) {
         super(attributes, options);
     }
 
+    /**
+     * Initializes as threshold type with three score categories.
+     * Labels: Low Score, Mid Score, High Score.
+     * @param {Object} properties - Model properties (unused)
+     * @param {Object} options - Options object (unused)
+     * @returns {undefined}
+     */
     // eslint-disable-next-line no-unused-vars
     initialize(properties, options) {
         this.set("type", "threshold")
             .set("labels", this.get("colScale").copy().range(["Low Score", "Mid Score", "High Score"]));
     }
 
+    /**
+     * Extracts highest score from all matches in a link.
+     * For aggregate links: examines all matches across all constituent crosslinks.
+     * For regular links: examines all filtered matches.
+     * @param {Object} link - Crosslink or aggregate link object
+     * @returns {number} Maximum score value
+     */
     getValue(link) {
         let scores = [];
         if (link.isAggregateLink) {
@@ -232,6 +373,12 @@ export class HighestScoreColourModel extends ColourModel {
         return Math.max.apply(Math, scores);
     }
 
+    /**
+     * Returns array of [label, color] pairs for legend display.
+     * Restricts to minimum length between color range and label range (for ordinal scales).
+     * Uses d3.zip to pair labels with their corresponding colors.
+     * @returns {Array<Array>} Array of [label, color] tuples
+     */
     getLabelColourPairings() {
         const colScale = this.get("colScale");
         const labels = this.get("labels").range();//.concat(this.get("undefinedLabel"));

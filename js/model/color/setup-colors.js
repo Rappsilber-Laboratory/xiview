@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Color model initialization and factory functions for xiVIEW.
+ * Sets up all predefined color schemes (default, group, inter-protein, distance, score) for crosslinks and proteins.
+ * Includes factory function to dynamically create color models from metadata (numeric → threshold, hex → ordinal with hex values, categorical → ordinal).
+ * Manages color model collections with event listeners for metadata updates.
+ */
 import * as $ from "jquery";
 
 import {DefaultLinkColourModel} from "./link-color-model";
@@ -19,6 +25,20 @@ import d3 from "d3";
 
 window.linkColor = {};//todo - get rid
 
+/**
+ * Initializes all color models for crosslinks and proteins.
+ * Creates predefined schemes (default, group, inter-protein, distance, highest score) and collections.
+ * Sets up event listeners for metadata updates to dynamically add metadata-based color schemes.
+ * Stores collections in window.linkColor for global access.
+ * @param {Object} [userConfig] - Optional user configuration to override defaults
+ * @param {Object} [userConfig.default] - Default crosslink colors config
+ * @param {Array<number>} [userConfig.default.domain] - Ordinal domain [0, 1, 2]
+ * @param {Array<string>} [userConfig.default.range] - Color range for self/homo/hetero
+ * @param {Object} [userConfig.distance] - Distance threshold config
+ * @param {Array<number>} [userConfig.distance.domain] - Threshold values [min, max] in Angstroms
+ * @param {Array<string>} [userConfig.distance.range] - Three colors for within/borderline/overlong
+ * @returns {undefined}
+ */
 export const setupColourModels = function (userConfig) {
     const defaultConfig = {
         default: {domain: [0, 1, 2], range: ["#7570b3FF", "#d95f02FF", "#1b9e77FF"]},
@@ -33,6 +53,11 @@ export const setupColourModels = function (userConfig) {
         id: "Default"
     });
 
+    /**
+     * Factory function for creating group color model.
+     * Gets search map from global clmsModel instance.
+     * @returns {GroupColourModel} New group color model instance
+     */
     const makeGroupColourModel = function () {
         return new GroupColourModel({
             title: "Group",
@@ -64,8 +89,9 @@ export const setupColourModels = function (userConfig) {
 
     //init highest score colour model
     const clmsModel = window.compositeModelInst.get("clmsModel"); //todo - shouldn't have this static reference to model here
-    const minScore = clmsModel.getMinScore();
-    const maxScore = clmsModel.getMaxScore();
+    const scoreExtent = clmsModel.scoreExtents.get(clmsModel.selectedScoreType); // todo - compositeModel?
+    const minScore = scoreExtent ? scoreExtent[0] : undefined;
+    const maxScore = scoreExtent ? scoreExtent[1] : undefined;
 
     const hiScores = [];
     for (let crosslink of clmsModel.getCrosslinks().values()) {
@@ -175,6 +201,17 @@ export const setupColourModels = function (userConfig) {
     window.linkColor.ProteinCollection = proteinColourCollection;
 };
 
+/**
+ * Factory function that creates appropriate color model based on metadata field analysis.
+ * Analyzes all values for the field and determines best color model type:
+ * - All numeric → ThresholdColourModel with quantile-based thresholds
+ * - All hex colors → MetaDataHexValuesColourModel (uses metadata values directly as colors)
+ * - Mixed/categorical → MetaDataColourModel with ordinal scale
+ * @param {string} field - Metadata field name to extract from objects
+ * @param {string} label - Display label for the color model
+ * @param {Map} objs - Map of objects (crosslinks or proteins) with getMeta() method
+ * @returns {ColourModel} Appropriate color model subclass instance
+ */
 const makeColourModel = function (field, label, objs) {
     let allColors = true, allNumbers = true, min = Number.POSITIVE_INFINITY, max = Number.NEGATIVE_INFINITY;
     const categories = new Set();
