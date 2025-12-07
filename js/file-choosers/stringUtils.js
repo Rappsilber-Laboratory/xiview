@@ -1,9 +1,23 @@
+/**
+ * @fileoverview STRING database utility functions for protein ID resolution and network queries.
+ * Provides API integration with STRING v11 for protein-protein interaction scores.
+ * Features: protein ID resolution (UniProt → STRING IDs), network query (fetch interaction scores),
+ * CSV translation (TSV network → CSV metadata format), localStorage caching (IDs + networks),
+ * LZW compression (reduce cache size). Handles large protein sets (max 2000) with error messaging.
+ * Uses Promises with jQuery AJAX for async API calls.
+ */
+
 import * as _ from "underscore";
 import * as $ from "jquery";
 import d3 from "d3";
 import {getLocalStorage, setLocalStorage} from "../utils";
 import {filterOutDecoyInteractors} from "../modelUtils";
 
+/**
+ * STRING database utilities namespace with API integration functions.
+ * All methods handle localStorage caching, Promise-based async flow, error reporting.
+ * @namespace STRINGUtils
+ */
 export const STRINGUtils = {
 
     // Maximum number of proteins we can POST to STRING's network interaction API (found by trial and error)
@@ -43,6 +57,15 @@ export const STRINGUtils = {
         return d3.csv.format(rows);
     },
 
+    /**
+     * Resolves UniProt protein IDs to STRING taxon-specific IDs with localStorage caching.
+     * Checks cache for already-resolved IDs, queries STRING API for new IDs, updates cache,
+     * returns Promise resolving to ID map. Handles local storage full errors with alert.
+     * Uses STRING get_string_ids API endpoint with species, limit=1, format=only-ids.
+     * @param {Array<string>} proteinIDs - Array of UniProt protein IDs
+     * @param {string} taxonID - NCBI Taxon ID (e.g., "9606" for human)
+     * @returns {Promise<Object>} Promise resolving to map of UniProt ID → STRING ID
+     */
     getStringIdentifiers: function (proteinIDs, taxonID) {
         const stringIDCache = getLocalStorage("StringIds");
         const identifiersBySpecies = stringIDCache[taxonID] || {};
@@ -100,6 +123,16 @@ export const STRINGUtils = {
         }
     },
 
+    /**
+     * Queries STRING for protein-protein interaction network with localStorage caching and LZW compression.
+     * Takes STRING ID map, sorts IDs, creates network key, checks cache (exact match and subnetwork match via regex),
+     * if cached returns decompressed network, otherwise queries STRING network API, compresses and caches result,
+     * returns Promise resolving to {idMap, networkTsv}. Rejects if protein count exceeds stringAPIMaxProteins.
+     * Uses STRING network API endpoint with identifiers, species, caller_identity=xiview.
+     * @param {Object} idMap - Map of UniProt ID → STRING ID
+     * @param {string} taxonID - NCBI Taxon ID
+     * @returns {Promise<Object>} Promise resolving to {idMap: Object, networkTsv: string} or rejecting with error message
+     */
     queryStringInteractions: function (idMap, taxonID) {
         const stringIDs = d3.values(idMap);
         if (stringIDs.length > 1) {
@@ -191,6 +224,13 @@ export const STRINGUtils = {
         return out.join("");
     },
 
+    /**
+     * LZW decompression algorithm for string data.
+     * Decompresses LZW-encoded strings from localStorage. Handles unicode correctly with
+     * Array.from (splits by codepoint) and codePointAt/fromCodePoint. Skips surrogate pair range.
+     * @param {string} s - Compressed string
+     * @returns {string} Decompressed original string
+     */
     lzw_decode: function (s) {
         const dict = new Map(); // Use a Map!
         const data = Array.from(s + "");  // conveniently splits by codepoint rather than 16-bit chars
@@ -220,6 +260,15 @@ export const STRINGUtils = {
         return out.join("");
     },
 
+    /**
+     * Main entry point for loading STRING data from CLMS model.
+     * Filters proteins to PPI set (non-decoy inter-protein links), further filters to non-hidden if needed
+     * to stay under stringAPIMaxProteins limit, delegates to loadStringData with protein IDs.
+     * @param {SearchResultsModel} clmsModel - CLMS model with proteins
+     * @param {string} taxonID - NCBI Taxon ID
+     * @param {Function} callback - Callback(csv, errorReason) called with CSV string or error
+     * @returns {undefined}
+     */
     loadStringDataFromModel: function (clmsModel, taxonID, callback) {
         let viableProteinIDs = _.pluck(STRINGUtils.filterProteinsToPPISet(clmsModel), "id");
         console.log("vids", viableProteinIDs.length);
@@ -235,6 +284,16 @@ export const STRINGUtils = {
         STRINGUtils.loadStringData(viableProteinIDs, taxonID, callback);
     },
 
+    /**
+     * Loads STRING data via Promise chain: resolve IDs → query network → translate to CSV.
+     * Chains getStringIdentifiers and queryStringInteractions Promises, translates TSV to CSV,
+     * calls callback(csv) on success or callback(null, errorReason) on failure.
+     * Handles empty/null network as error ("No meaningful STRING interactions found").
+     * @param {Array<string>} pids - Array of UniProt protein IDs
+     * @param {string} taxonID - NCBI Taxon ID
+     * @param {Function} callback - Callback(csv, errorReason) called with CSV string or error
+     * @returns {undefined}
+     */
     loadStringData: function (pids, taxonID, callback) {
         function chainError(err) {
             return Promise.reject(err);
@@ -257,6 +316,11 @@ export const STRINGUtils = {
             });
     },
 
+    /**
+     * Calculates total size of STRING localStorage cache (IDs + network scores).
+     * Sums lengths of "StringIds" and "StringNetworkScores" localStorage entries.
+     * @returns {number} Total cache size in characters (0 if localStorage unavailable)
+     */
     getCacheSize: function () {
         if (localStorage) {
             return ["StringIds", "StringNetworkScores"].reduce(function (a, b) {
@@ -266,6 +330,12 @@ export const STRINGUtils = {
         return 0;
     },
 
+    /**
+     * Purges all STRING localStorage cache (IDs + network scores).
+     * Deletes "StringIds" and "StringNetworkScores" from localStorage.
+     * Called by "Purge cache" button when localStorage reports full.
+     * @returns {undefined}
+     */
     purgeCache: function () {
         if (localStorage) {
             delete localStorage.StringIds;

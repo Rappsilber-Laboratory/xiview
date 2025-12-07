@@ -1,3 +1,11 @@
+/**
+ * @fileoverview STRING database integration for loading protein-protein interaction scores.
+ * Provides UI for querying STRING database with NCBI Taxon ID to retrieve interaction scores
+ * for protein pairs. Caches STRING IDs and network scores in localStorage. Updates crosslink
+ * metadata with STRING scores and subscores (experimental, database, coexpression, etc.).
+ * Automatically switches to STRING Score color scheme when scores loaded.
+ */
+
 import * as _ from "underscore";
 import d3 from "d3";
 
@@ -6,11 +14,24 @@ import {STRINGUtils} from "./stringUtils";
 import {commonRegexes} from "../utils";
 import {updateLinkMetadata} from "../modelUtils";
 
+/**
+ * STRING database chooser view for loading protein interaction scores.
+ * Creates UI with organism dropdown (Human, E. Coli, B. Subtilis), NCBI Taxon ID input,
+ * cache purge button. Queries STRING API to resolve protein IDs and fetch interaction networks.
+ * Updates crosslink metadata with STRING scores, switches color scheme to STRING Score.
+ * Displays success/failure messages with PPI match counts.
+ * @class
+ * @extends BaseFrameView
+ */
 export class STRINGFileChooserBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for STRING chooser interactions.
+     * @returns {Object} Event map with selectors and handler method names
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -21,6 +42,14 @@ export class STRINGFileChooserBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Initializes STRING chooser view with UI elements.
+     * Creates organism dropdown (Human, E. Coli, B. Subtilis) with Taxon ID values,
+     * NCBI Taxon ID text input (digits only), cache purge button for localStorage,
+     * results message bar. Pre-loads STRING data if initPDBs option provided (reused option name).
+     * @param {Object} viewOptions - Options including initPDBs (Taxon ID to load on init)
+     * @returns {undefined}
+     */
     initialize(viewOptions) {
         super.initialize(...arguments);
 
@@ -103,12 +132,25 @@ export class STRINGFileChooserBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Handles keyup events on Taxon ID input field.
+     * If Enter key pressed and input valid, loads STRING data for entered Taxon ID.
+     * @param {Event} evt - Keyup event with evt.keyCode
+     * @returns {undefined}
+     */
     enteringTaxonID(evt) {
         if (this.isTaxaIDValid() && evt.keyCode === 13) { // if return key pressed do same as pressing 'Enter' button
             this.loadSTRINGData();
         }
     }
 
+    /**
+     * Loads STRING interaction data for current protein set and Taxon ID.
+     * Gets Taxon ID from input, calls STRINGUtils.loadStringDataFromModel to query STRING API
+     * (resolves protein IDs, fetches network, translates to CSV), updates crosslink metadata,
+     * switches color scheme to STRING Score if any scores matched, displays success/failure message.
+     * @returns {undefined}
+     */
     loadSTRINGData() {
         const taxonID = d3.select(this.el).select(".inputTaxonID").property("value");
 
@@ -133,6 +175,11 @@ export class STRINGFileChooserBB extends BaseFrameView {
         STRINGUtils.loadStringDataFromModel(this.model.get("clmsModel"), taxonID, callback);
     }
 
+    /**
+     * Checks if Taxon ID input is valid using HTML5 validation.
+     * Uses pattern attribute (digitsOnly) to validate format.
+     * @returns {boolean} True if input passes HTML5 validation
+     */
     isTaxaIDValid() {
         const elem = d3.select(this.el).select(".inputTaxonID");
         return elem.node().checkValidity();

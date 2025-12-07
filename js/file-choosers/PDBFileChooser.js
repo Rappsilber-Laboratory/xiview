@@ -1,3 +1,11 @@
+/**
+ * @fileoverview PDB file chooser view for loading 3D structural data.
+ * Provides UI for loading PDB files from local filesystem or RCSB PDB database via 4-character codes.
+ * Integrates with NGL viewer for 3D molecular visualization. Supports PDB query services (RCSB, SWISS-MODEL).
+ * Parses PDB/CIF files, aligns sequences with search data, triggers 3dsync event with aligned sequences.
+ * Displays success/failure messages with sequence match counts. Caches NGL Stage for rendering.
+ */
+
 import * as _ from "underscore";
 import d3 from "d3";
 import * as NGL from "ngl";
@@ -8,11 +16,26 @@ import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 import {loadUserFile} from "./load-user-file";
 
+/**
+ * PDB file chooser view for loading 3D structural data into xiVIEW.
+ * Creates UI with file selector (local PDB/CIF files), text input (PDB codes), query service buttons
+ * (RCSB UniProt search, SWISS-MODEL lookup). Maintains NGL Stage instance. Listens to 3dsync event
+ * to display success/failure messages with sequence alignment counts. Supports multiple PDB files/codes.
+ * @class
+ * @extends BaseFrameView
+ * @property {NGL.Stage} stage - NGL Stage instance for 3D rendering
+ * @property {boolean} cAlphaOnly - Load only C-alpha atoms (currently disabled feature)
+ * @property {string} loadRoute - Source of PDB data: "file" or "pdb" (code)
+ */
 export class PDBFileChooserBB extends BaseFrameView {
     constructor(options) {
         super(options);
     }
 
+    /**
+     * Event handlers for PDB chooser interactions.
+     * @returns {Object} Event map with selectors and handler method names
+     */
     get events() {
         let parentEvents = BaseFrameView.prototype.events;
         if (_.isFunction(parentEvents)) {
@@ -29,6 +52,14 @@ export class PDBFileChooserBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Initializes PDB chooser view with UI elements and NGL Stage.
+     * Creates file selector (multiple .txt/.cif/.pdb files), PDB code input (accepts multiple space-separated codes),
+     * query service buttons (RCSB, SWISS-MODEL), results message bar. Creates NGL Stage for 3D rendering.
+     * Sets up 3dsync listener to display load success/failure with sequence counts. Pre-loads PDBs if initPDBs option provided.
+     * @param {Object} viewOptions - Options including initPDBs (space-separated PDB codes to load on init)
+     * @returns {undefined}
+     */
     initialize(viewOptions) {
         super.initialize(...arguments);
         this.cAlphaOnly = false;
@@ -224,6 +255,12 @@ export class PDBFileChooserBB extends BaseFrameView {
 
     }
 */
+    /**
+     * Opens RCSB PDB search in new tab querying for structures matching selected proteins' UniProt accessions.
+     * Constructs complex JSON query for RCSB API v2 search. Opens blank window immediately (to avoid popup blocker),
+     * then sets location to RCSB search URL with encoded query. Displays error if no legal accession IDs available.
+     * @returns {undefined}
+     */
     launchExternalPDBWindow() {
         // http://stackoverflow.com/questions/15818892/chrome-javascript-window-open-in-new-tab
         // annoying workaround whereby we need to open a blank window here and set the location later
@@ -300,6 +337,12 @@ export class PDBFileChooserBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Opens SWISS-MODEL repository in new tab for selected protein's UniProt accession.
+     * Requires exactly one protein selected with legal accession ID. Opens SWISS-MODEL repository page
+     * showing homology models for that protein. Displays error if zero or multiple proteins selected.
+     * @returns {undefined}
+     */
     launchExternalSwissmodelWindow() {
         const newtab = window.open("", "_blank");
         const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
@@ -310,6 +353,13 @@ export class PDBFileChooserBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Helper to get selected option data from dropdown select element.
+     * Filters selects by name, finds selected option, returns its bound data.
+     * @param {d3.selection} higherElem - Parent D3 selection containing select elements
+     * @param {string} selectName - Name of select element to query
+     * @returns {*} Data bound to selected option
+     */
     getSelectedOption(higherElem, selectName) {
         let funcMeta;
 
@@ -337,6 +387,14 @@ export class PDBFileChooserBB extends BaseFrameView {
         window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
     }*/
 
+    /**
+     * Handles local PDB file selection event.
+     * Sets waiting effect, reads all selected files via loadUserFile, creates Blob for each,
+     * calls repopulateNGL with pdbSettings array after all files loaded. Supports multiple files.
+     * Resets input value to allow re-selecting same file.
+     * @param {Event} evt - File input change event with evt.target.files
+     * @returns {undefined}
+     */
     selectPDBFile(evt) {
         this.setWaitingEffect();
         this.loadRoute = "file";
@@ -383,6 +441,12 @@ export class PDBFileChooserBB extends BaseFrameView {
         evt.target.value = null;    // reset value so same file can be chosen twice in succession
     }
 
+    /**
+     * Handles keyup events on PDB code input field.
+     * Validates input, enables/disables submit button based on validity. If Enter key pressed and valid, loads PDB codes.
+     * @param {Event} evt - Keyup event with evt.keyCode
+     * @returns {undefined}
+     */
     enteringPDBCode(evt) {
         const valid = this.isPDBCodeValid();
         d3.select(this.el).select(".PDBSubmit").property("disabled", !valid);
@@ -391,6 +455,12 @@ export class PDBFileChooserBB extends BaseFrameView {
         }
     }
 
+    /**
+     * Loads PDB structure(s) from RCSB database via 4-character code(s).
+     * Parses input for multiple space-separated codes, creates pdbSettings array with rcsb:// URIs,
+     * calls repopulateNGL to fetch and load structures. Sets waiting effect during load.
+     * @returns {undefined}
+     */
     loadPDBCode() {
         const pdbCode = d3.select(this.el).select(".inputPDBCode").property("value");
         this.loadRoute = "pdb";
@@ -413,6 +483,11 @@ export class PDBFileChooserBB extends BaseFrameView {
         });
     }
 
+    /**
+     * Checks if PDB code input is valid using HTML5 validation.
+     * Uses pattern attribute (multiPdbPattern) to validate format.
+     * @returns {boolean} True if input passes HTML5 validation
+     */
     isPDBCodeValid() {
         const elem = d3.select(this.el).select(".inputPDBCode");
         return elem.node().checkValidity();
