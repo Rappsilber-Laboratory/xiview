@@ -260,6 +260,9 @@ export const XispecWrapper = Backbone.View.extend({
         // check if it's xi1 or xi2 style annotation
         if(data.config !== undefined){
             annotationRequest.annotation.config = data.config;
+            if (annotationRequest.annotation.crosslinkerID === undefined){
+                annotationRequest.annotation.config.crosslinker = [];
+            }
         } else {
 
             let ionTypes = data.ionTypes.split(";");
