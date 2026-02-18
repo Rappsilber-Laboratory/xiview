@@ -140,7 +140,7 @@ export function main(apiBase, annotatorURL) {
             const compositeModelInst = models({}, clmsModel);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
-            setWindowTitle(clmsModel);
+            setWindowTitle();
             initPageSplitter();
             views(compositeModelInst);
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
@@ -176,7 +176,7 @@ export function validationPage(apiBase, annotatorURL) {
             const compositeModelInst = modelsEssential({}, clmsModel);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
-            setWindowTitle(clmsModel);
+            setWindowTitle();
             initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false});
             window.vent.trigger("spectrumShow", true);
@@ -233,7 +233,10 @@ function getTasks(apiBase, clmsModel) {
  * @private
  */
 function setWindowTitle() {
-    document.title = window.location.search;//fileNames.join(", ");
+    const params = new URLSearchParams(window.location.search);
+    const project = params.get("project");
+    const file = params.get("file");
+    document.title = file ? `${project}; ${file}` : project;
 }
 
 /**
