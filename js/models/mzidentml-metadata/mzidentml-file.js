@@ -9,18 +9,18 @@ export class MzidentmlFile {
     #json;
 
     /**
-     * Private array of AnalysisCollection_SpectrumIdentification instances for this file
-     * @type {Array<AnalysisCollection_SpectrumIdentification>}
-     * @private
-     */
-    #analysisCollection_spectrumIdentifications = [];
-
-    /**
      * Private map of SpectraData objects keyed by spectra data ID
      * @type {Map<number, SpectraData>}
      * @private
      */
     #spectraDataById;
+
+    /**
+     * Private array of AnalysisCollection_SpectrumIdentification instances for this file
+     * @type {Array<AnalysisCollection_SpectrumIdentification>}
+     * @private
+     */
+    #analysisCollection_spectrumIdentifications = [];
 
     /**
      * Private map of SpectrumIdentificationProtocol objects keyed by protocol ID
@@ -38,22 +38,27 @@ export class MzidentmlFile {
      * @param {Object} json.analysis_software_list - Analysis software list object
      * @param {Object} json.analysis_software_list.AnalysisSoftware
      * @param {Object} json.provider - Provider information
+     * @param {Object} json.provider.ContactRole - Provider Contact Role information
      * @param {Object} json.audit_collection - Audit collection data
+     * @param {Object} json.audit_collection.Person - Audit collection Person data
+     * @param {Object} json.audit_collection.Person.Affiliation - Audit collection Person data
+     * @param {Object} json.audit_collection.Organization - Audit collection Organisation data
      * @param {Object} json.analysis_sample_collection - Analysis sample collection data
      * @param {Object} json.spectra_formats - Spectra file formats data
      * @param {Object} json.bib - Bibliography information
-     * @param {Array<Object>} analysisCollectionSpectrumIdentifications - Array of AnalysisCollection_SpectrumIdentification objects
-     * @param {Array<Object>} spectraData - Array of SpectraData objects
+     * @param {Array<AnalysisCollection_SpectrumIdentification>} analysisCollectionSpectrumIdentifications - Array of AnalysisCollection_SpectrumIdentification objects
+     * @param {Map<number, SpectraData>} spectraData - SpectraData instances keyed by spectra data ID
+     * @param {Map<number, SpectrumIdentificationProtocol>} sipsByIds - SpectrumIdentificationProtocol instances keyed by protocol ID
      */
     constructor(json,
         analysisCollectionSpectrumIdentifications,
         spectraData,
-        sipsbyIds
+        sipsByIds
     ) {
         this.#json = json;
         this.#analysisCollection_spectrumIdentifications = analysisCollectionSpectrumIdentifications;
         this.#spectraDataById = spectraData;
-        this.#sipsById = sipsbyIds;
+        this.#sipsById = sipsByIds;
 
         // Build analysisCollectionSpectrumIdentifications array
         // for (const acsi of analysisCollectionSpectrumIdentificationsJson) {
@@ -191,12 +196,12 @@ export class MzidentmlFile {
             // id: this.id,
             // projectId: this.projectId,
             // identificationFileName: this.identificationFileName,
-            analysisSoftware: arrayToObjectById(this.analysisSoftware),
-            provider: this.provider,
-            auditCollection: this.auditCollection,
+            analysisSoftware: analysisSoftwareToObject(this.analysisSoftware),
+            provider: arrayToObjectByKV(this.provider?.ContactRole, "Role", "contact_ref"),
+            auditCollection: auditCollectionToObject(this.auditCollection),
             analysisSampleCollection: this.analysisSampleCollection,
             analysisCollection_spectrumIdentifcations: arrayToObjectByProperty(this.#analysisCollection_spectrumIdentifications,
-                'spectrumIdentificationListRef'),
+                "spectrumIdentificationListRef"),
             // analysisProtocolCollection: this.analysisCollectionProtocolCollection,
             bib: this.bib,
             spectraFormats: this.spectraFormats,
@@ -207,29 +212,62 @@ export class MzidentmlFile {
 
 }
 
-//util func to copnvert array to map indexed by id
-function arrayToMapById(array) {
-    const map = new Map();
-    for (const item of array) {
-        map.set(item.id, item);
-    }
-    return map;
-}
-
-//util func to copnvert array to object indexed by id
-function arrayToObjectById(array) {
-    const obj = {};
-    for (const item of array) {
-        obj[item.id] = item;
-    }
-    return obj;
-}
-
-//util func to copnvert array to object indexed by given property
+//util func to convert array to object indexed by given property
 function arrayToObjectByProperty(array, property) {
     const obj = {};
     for (const item of array) {
         obj[item[property]] = item;
+    }
+    return obj;
+}
+
+//util func to convert auditCollection to { personName: { affiliation, address, email } } object
+function auditCollectionToObject(auditCollection) {
+    if (!auditCollection || Object.keys(auditCollection).length === 0) return {};
+
+    const persons = Array.isArray(auditCollection.Person)
+        ? auditCollection.Person
+        : auditCollection.Person ? [auditCollection.Person] : [];
+    const organizations = Array.isArray(auditCollection.Organization)
+        ? auditCollection.Organization
+        : auditCollection.Organization ? [auditCollection.Organization] : [];
+
+    const orgById = {};
+    for (const org of organizations) {
+        orgById[org.id] = org.name ?? org["contact name"] ?? org.id;
+    }
+
+    const obj = {};
+    for (const person of persons) {
+        const name = [person.firstName, person.lastName].filter(Boolean).join(" ") || person.name || person.id;
+        const affiliations = (person.Affiliation ?? [])
+            .map(a => orgById[a.organization_ref] ?? a.organization_ref)
+            .filter(Boolean);
+        const personObj = {};
+        if (affiliations.length === 1) personObj.affiliation = affiliations[0];
+        else if (affiliations.length > 1) personObj.affiliation = affiliations;
+        if (person["contact address"]) personObj.address = person["contact address"];
+        if (person["contact email"]) personObj.email = person["contact email"];
+        obj[name] = personObj;
+    }
+    return obj;
+}
+
+//util func to convert analysisSoftware array to { name: version } object
+function analysisSoftwareToObject(array) {
+    const obj = {};
+    for (const item of (array ?? [])) {
+        const name = item.name ?? Object.keys(item.SoftwareName)[0];
+        obj[name] = item.version ?? "";
+    }
+    return obj;
+}
+
+//util func to convert array to object using one property as key, another as value
+function arrayToObjectByKV(array, keyProp, valueProp) {
+    const obj = {};
+    for (const item of (array ?? [])) {
+        obj[item[keyProp]] = item[valueProp];
     }
     return obj;
 }
