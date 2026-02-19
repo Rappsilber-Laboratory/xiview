@@ -191,7 +191,7 @@
       <dia:attribute name="comment_font_height">
         <dia:real val="0.69999999999999996"/>
       </dia:attribute>
-      <dia:attribute name="attributes">
+            <dia:attribute name="attributes">
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#json#</dia:string>
@@ -285,7 +285,7 @@
           </dia:attribute>
         </dia:composite>
       </dia:attribute>
-      <dia:attribute name="operations">
+            <dia:attribute name="operations">
         <dia:composite type="umloperation">
           <dia:attribute name="name">
             <dia:string>#constructor#</dia:string>
@@ -510,7 +510,7 @@
       <dia:attribute name="comment_font_height">
         <dia:real val="0.69999999999999996"/>
       </dia:attribute>
-      <dia:attribute name="attributes">
+            <dia:attribute name="attributes">
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#json#</dia:string>
@@ -880,7 +880,7 @@
           </dia:attribute>
         </dia:composite>
       </dia:attribute>
-      <dia:attribute name="operations">
+            <dia:attribute name="operations">
         <dia:composite type="umloperation">
           <dia:attribute name="name">
             <dia:string>#constructor#</dia:string>
@@ -967,19 +967,19 @@
     </dia:object>
     <dia:object type="UML - Class" version="0" id="O2">
       <dia:attribute name="obj_pos">
-        <dia:point val="55,-32"/>
+        <dia:point val="53,-32"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="54.95,-32.05;82.52,-18.75"/>
+        <dia:rectangle val="52.95,-32.05;87.77,-20.55"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
-        <dia:point val="55,-32"/>
+        <dia:point val="53,-32"/>
       </dia:attribute>
       <dia:attribute name="elem_width">
-        <dia:real val="27.469999999999999"/>
+        <dia:real val="34.719999999999999"/>
       </dia:attribute>
       <dia:attribute name="elem_height">
-        <dia:real val="13.199999999999999"/>
+        <dia:real val="11.4"/>
       </dia:attribute>
       <dia:attribute name="name">
         <dia:string>#MzidentmlFile#</dia:string>
@@ -1071,7 +1071,7 @@
       <dia:attribute name="comment_font_height">
         <dia:real val="0.69999999999999996"/>
       </dia:attribute>
-      <dia:attribute name="attributes">
+            <dia:attribute name="attributes">
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#json#</dia:string>
@@ -1235,98 +1235,6 @@
         </dia:composite>
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
-            <dia:string>#analysisSoftware#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="type">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="value">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="comment">
-            <dia:string>#Get analysis software#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="visibility">
-            <dia:enum val="0"/>
-          </dia:attribute>
-          <dia:attribute name="abstract">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-          <dia:attribute name="class_scope">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-        </dia:composite>
-        <dia:composite type="umlattribute">
-          <dia:attribute name="name">
-            <dia:string>#provider#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="type">
-            <dia:string>#*#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="value">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="comment">
-            <dia:string>#Get provider information#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="visibility">
-            <dia:enum val="0"/>
-          </dia:attribute>
-          <dia:attribute name="abstract">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-          <dia:attribute name="class_scope">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-        </dia:composite>
-        <dia:composite type="umlattribute">
-          <dia:attribute name="name">
-            <dia:string>#auditCollection#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="type">
-            <dia:string>#*#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="value">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="comment">
-            <dia:string>#Get audit collection information#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="visibility">
-            <dia:enum val="0"/>
-          </dia:attribute>
-          <dia:attribute name="abstract">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-          <dia:attribute name="class_scope">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-        </dia:composite>
-        <dia:composite type="umlattribute">
-          <dia:attribute name="name">
-            <dia:string>#analysisSampleCollection#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="type">
-            <dia:string>#*#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="value">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="comment">
-            <dia:string>#Get analysis sample collection#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="visibility">
-            <dia:enum val="0"/>
-          </dia:attribute>
-          <dia:attribute name="abstract">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-          <dia:attribute name="class_scope">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-        </dia:composite>
-        <dia:composite type="umlattribute">
-          <dia:attribute name="name">
             <dia:string>#analysisCollection_SpectrumIdentifcations#</dia:string>
           </dia:attribute>
           <dia:attribute name="type">
@@ -1348,54 +1256,8 @@
             <dia:boolean val="false"/>
           </dia:attribute>
         </dia:composite>
-        <dia:composite type="umlattribute">
-          <dia:attribute name="name">
-            <dia:string>#spectraFormats#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="type">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="value">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="comment">
-            <dia:string>#Get spectra file formats#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="visibility">
-            <dia:enum val="0"/>
-          </dia:attribute>
-          <dia:attribute name="abstract">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-          <dia:attribute name="class_scope">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-        </dia:composite>
-        <dia:composite type="umlattribute">
-          <dia:attribute name="name">
-            <dia:string>#bib#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="type">
-            <dia:string>#*#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="value">
-            <dia:string>##</dia:string>
-          </dia:attribute>
-          <dia:attribute name="comment">
-            <dia:string>#Get bibliography information#</dia:string>
-          </dia:attribute>
-          <dia:attribute name="visibility">
-            <dia:enum val="0"/>
-          </dia:attribute>
-          <dia:attribute name="abstract">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-          <dia:attribute name="class_scope">
-            <dia:boolean val="false"/>
-          </dia:attribute>
-        </dia:composite>
       </dia:attribute>
-      <dia:attribute name="operations">
+            <dia:attribute name="operations">
         <dia:composite type="umloperation">
           <dia:attribute name="name">
             <dia:string>#constructor#</dia:string>
@@ -1444,7 +1306,7 @@
             </dia:composite>
             <dia:composite type="umlparameter">
               <dia:attribute name="name">
-                <dia:string>#analysisCollectionSpectrumIdentifications: Array&lt;Object&gt;#</dia:string>
+                <dia:string>#analysisCollectionSpectrumIdentifications: Array&lt;AnalysisCollection_SpectrumIdentification&gt;#</dia:string>
               </dia:attribute>
               <dia:attribute name="type">
                 <dia:string>##</dia:string>
@@ -1461,7 +1323,7 @@
             </dia:composite>
             <dia:composite type="umlparameter">
               <dia:attribute name="name">
-                <dia:string>#spectraData: Array&lt;Object&gt;#</dia:string>
+                <dia:string>#spectraData: Map&lt;number, SpectraData&gt;#</dia:string>
               </dia:attribute>
               <dia:attribute name="type">
                 <dia:string>##</dia:string>
@@ -1478,7 +1340,7 @@
             </dia:composite>
             <dia:composite type="umlparameter">
               <dia:attribute name="name">
-                <dia:string>#sipsbyIds#</dia:string>
+                <dia:string>#sipsByIds: Map&lt;number, SpectrumIdentificationProtocol&gt;#</dia:string>
               </dia:attribute>
               <dia:attribute name="type">
                 <dia:string>##</dia:string>
@@ -1733,7 +1595,7 @@
       <dia:attribute name="comment_font_height">
         <dia:real val="0.69999999999999996"/>
       </dia:attribute>
-      <dia:attribute name="attributes">
+            <dia:attribute name="attributes">
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#json#</dia:string>
@@ -2034,7 +1896,7 @@
           </dia:attribute>
         </dia:composite>
       </dia:attribute>
-      <dia:attribute name="operations">
+            <dia:attribute name="operations">
         <dia:composite type="umloperation">
           <dia:attribute name="name">
             <dia:string>#constructor#</dia:string>
@@ -2225,7 +2087,7 @@
       <dia:attribute name="comment_font_height">
         <dia:real val="0.69999999999999996"/>
       </dia:attribute>
-      <dia:attribute name="attributes">
+            <dia:attribute name="attributes">
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#json#</dia:string>
@@ -2411,7 +2273,7 @@
           </dia:attribute>
         </dia:composite>
       </dia:attribute>
-      <dia:attribute name="operations">
+            <dia:attribute name="operations">
         <dia:composite type="umloperation">
           <dia:attribute name="name">
             <dia:string>#constructor#</dia:string>
@@ -2602,7 +2464,7 @@
       <dia:attribute name="comment_font_height">
         <dia:real val="0.69999999999999996"/>
       </dia:attribute>
-      <dia:attribute name="attributes">
+            <dia:attribute name="attributes">
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#json#</dia:string>
@@ -2857,7 +2719,7 @@
           </dia:attribute>
         </dia:composite>
       </dia:attribute>
-      <dia:attribute name="operations">
+            <dia:attribute name="operations">
         <dia:composite type="umloperation">
           <dia:attribute name="name">
             <dia:string>#constructor#</dia:string>
@@ -3038,18 +2900,18 @@
     </dia:object>
     <dia:object type="UML - Association" version="2" id="O6">
       <dia:attribute name="obj_pos">
-        <dia:point val="82.47,-29.6"/>
+        <dia:point val="87.72,-29.6"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="81.72,-37.045;93.05,-28.745"/>
+        <dia:rectangle val="86.97,-37.045;93.05,-28.745"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
-        <dia:point val="82.47,-29.6"/>
-        <dia:point val="87,-29.6"/>
-        <dia:point val="87,-36.3"/>
+        <dia:point val="87.72,-29.6"/>
+        <dia:point val="91,-29.6"/>
+        <dia:point val="91,-36.3"/>
         <dia:point val="93,-36.3"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
@@ -3198,18 +3060,18 @@
     </dia:object>
     <dia:object type="UML - Association" version="2" id="O8">
       <dia:attribute name="obj_pos">
-        <dia:point val="82.47,-29"/>
+        <dia:point val="87.72,-29"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="81.72,-29.75;95.05,-22.445"/>
+        <dia:rectangle val="86.97,-29.75;95.05,-22.445"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
-        <dia:point val="82.47,-29"/>
-        <dia:point val="89.085,-29"/>
-        <dia:point val="89.085,-23.3"/>
+        <dia:point val="87.72,-29"/>
+        <dia:point val="91.71,-29"/>
+        <dia:point val="91.71,-23.3"/>
         <dia:point val="95,-23.3"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
@@ -3358,18 +3220,18 @@
     </dia:object>
     <dia:object type="UML - Association" version="2" id="O10">
       <dia:attribute name="obj_pos">
-        <dia:point val="82.47,-28.4"/>
+        <dia:point val="87.72,-28.4"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="81.72,-29.15;92.05,-12.445"/>
+        <dia:rectangle val="86.97,-29.15;92.05,-12.445"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
-        <dia:point val="82.47,-28.4"/>
-        <dia:point val="87.585,-28.4"/>
-        <dia:point val="87.585,-13.3"/>
+        <dia:point val="87.72,-28.4"/>
+        <dia:point val="90.21,-28.4"/>
+        <dia:point val="90.21,-13.3"/>
         <dia:point val="92,-13.3"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
@@ -3396,7 +3258,7 @@
         <dia:string>##</dia:string>
       </dia:attribute>
       <dia:attribute name="multipicity_a">
-        <dia:string>##</dia:string>
+        <dia:string>#1#</dia:string>
       </dia:attribute>
       <dia:attribute name="visibility_a">
         <dia:enum val="3"/>
@@ -3408,7 +3270,7 @@
         <dia:string>##</dia:string>
       </dia:attribute>
       <dia:attribute name="multipicity_b">
-        <dia:string>##</dia:string>
+        <dia:string>#n#</dia:string>
       </dia:attribute>
       <dia:attribute name="visibility_b">
         <dia:enum val="3"/>
@@ -3441,7 +3303,7 @@
         <dia:point val="109.9,-11.6"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="109.15,-20.75;120,-10"/>
+        <dia:rectangle val="109.15,-21.445;120,-10.745"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
@@ -3521,7 +3383,7 @@
         <dia:point val="109.9,-11"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="109.15,-11.75;119,-5"/>
+        <dia:rectangle val="109.15,-11.75;119,-5.745"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>

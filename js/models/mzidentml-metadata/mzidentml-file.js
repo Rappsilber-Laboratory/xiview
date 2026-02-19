@@ -101,37 +101,6 @@ export class MzidentmlFile {
         return this.#json.identification_file_name;
     }
 
-    /**
-     * Get analysis software
-     * @returns [{*}] Analysis software data
-     */
-    get analysisSoftware() {
-        return this.#json.analysis_software_list.AnalysisSoftware;
-    }
-
-    /**
-     * Get provider information
-     * @returns {*} Provider data
-     */
-    get provider() {
-        return this.#json.provider;
-    }
-
-    /**
-     * Get audit collection information
-     * @returns {*} Audit collection data
-     */
-    get auditCollection() {
-        return this.#json.audit_collection;
-    }
-
-    /**
-     * Get analysis sample collection
-     * @returns {*} Analysis sample collection data
-     */
-    get analysisSampleCollection() {
-        return this.#json.analysis_sample_collection;
-    }
 
     /**
      * Get AnalysisCollection_SpectrumIdentification data
@@ -149,23 +118,6 @@ export class MzidentmlFile {
     // get spectrumIdentificationProtocols() {
     //     return this.#searchResultModel.getSpectrumIdentificationProtocols().get(this.id);
     // }
-
-
-    /**
-     * Get spectra file formats
-     * @returns [SpectraData] Spectra formats data
-     */
-    get spectraFormats() {
-        return this.#json.spectra_formats;
-    }
-
-    /**
-     * Get bibliography information
-     * @returns {*} Bibliography data
-     */
-    get bib() {
-        return this.#json.bib;
-    }
 
     /**
      * Get spectra data by identifier
@@ -185,29 +137,25 @@ export class MzidentmlFile {
     }
 
     /**
-     * Convert to JSON object for serialization
-     * @returns {Object} Object with all getter values
+     * Convert to JSON object
+     * Used to customize what gets displayed in searchSummaryViewBB2.js JSON viewer
+     * @returns {Object} Object
      */
     toJSON() {
-        // Return an object with all getter values for serialization
-        // This allows customization of what gets displayed in JSON viewers
-
-        const returnObj =  {
+        return {
             // id: this.id,
             // projectId: this.projectId,
             // identificationFileName: this.identificationFileName,
-            analysisSoftware: analysisSoftwareToObject(this.analysisSoftware),
-            provider: arrayToObjectByKV(this.provider?.ContactRole, "Role", "contact_ref"),
-            auditCollection: auditCollectionToObject(this.auditCollection),
-            analysisSampleCollection: this.analysisSampleCollection,
+            analysisSoftware: analysisSoftwareToObject(this.#json.analysis_software_list.AnalysisSoftware),
+            provider: arrayToObjectByKV(this.#json.provider?.ContactRole, "Role", "contact_ref"),
+            auditCollection: auditCollectionToObject(this.#json.audit_collection),
+            analysisSampleCollection: this.#json.analysis_sample_collection,
             analysisCollection_spectrumIdentifcations: arrayToObjectByProperty(this.#analysisCollection_spectrumIdentifications,
                 "spectrumIdentificationListRef"),
             // analysisProtocolCollection: this.analysisCollectionProtocolCollection,
-            bib: this.bib,
-            spectraFormats: this.spectraFormats,
+            bib: this.#json.bib,
+            spectraFormats: this.#json.spectra_formats,
         };
-        console.log("*", returnObj);
-        return returnObj;
     }
 
 }
