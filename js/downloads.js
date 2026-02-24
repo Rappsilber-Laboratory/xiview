@@ -16,6 +16,17 @@ import {
 import d3 from "d3";
 
 /**
+ * Escapes a single value for inclusion in a quoted CSV field (RFC 4180).
+ * Converts value to string and doubles any embedded double-quote characters.
+ * @param {*} value - Value to escape
+ * @returns {string} Escaped string safe for use inside a double-quoted CSV field
+ */
+function csvField(value) {
+    const str = (value === null || value === undefined) ? "" : String(value);
+    return str.replace(/"/g, "\"\"");
+}
+
+/**
  * Generates standardized download filename from search names and filter state.
  * Format: "{searchNames}--{type}--{filterState}.{suffix}". Sanitizes for filesystem compatibility.
  * @param {string} type - File type descriptor (e.g., "matches", "links", "PPIs")
@@ -336,9 +347,9 @@ export function getMatchesCSV() {
         const retentionTime = match.retentionTime !== undefined ? match.retentionTime : (match.elution_time_end === -1 ? match.elution_time_start : "");
 
         const data = [
-            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursor_intensity, match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.validated, match.uploadId, "", match.peaklistFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, distancesJoined.join("\",\""), linkType, decoyType, retentionTime
+            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursor_intensity, match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.validated, match.uploadId, "", match.peaklistFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, ...distancesJoined, linkType, decoyType, retentionTime
         ];
-        csv += "\"" + data.join("\",\"") + "\"\r\n";
+        csv += "\"" + data.map(csvField).join("\",\"") + "\"\r\n";
         /*
         }
     }
@@ -524,7 +535,7 @@ export function getLinksCSV() {
             row.push(mval === undefined ? "" : mval);
         }
 
-        return "\"" + row.join("\",\"") + "\"";
+        return "\"" + row.map(csvField).join("\",\"") + "\"";
     }, this);
 
     rows.unshift(headerRow);
@@ -664,7 +675,7 @@ function getPPIsCSV() {
         //     row.push(mval === undefined ? "" : mval);
         // }
 
-        rows.push("\"" + row.join("\",\"") + "\"");
+        rows.push("\"" + row.map(csvField).join("\",\"") + "\"");
 
     }
 
@@ -895,7 +906,7 @@ function getGroups() {
                 }
             }
             row.push(protGroups.join(","));
-            rows.push("\"" + row.join("\",\"") + "\"");
+            rows.push("\"" + row.map(csvField).join("\",\"") + "\"");
         }
     }
     return rows.join("\r\n") + "\r\n";
