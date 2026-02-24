@@ -9,6 +9,11 @@ import {
 } from "./utils";
 import d3 from "d3";
 
+function csvField(value) {
+    const str = (value === null || value === undefined) ? "" : String(value);
+    return str.replace(/"/g, "\"\"");
+}
+
 export function downloadFilename(type, suffix) {
     suffix = suffix || "csv";
     return makeLegalFileName(searchesToString() + "--" + type + "--" + filterStateToString()) + "." + suffix;
@@ -233,9 +238,9 @@ export function getMatchesCSV() {
         const retentionTime = match.retentionTime !== undefined ? match.retentionTime : (match.elution_time_end === -1 ? match.elution_time_start : "");
 
         const data = [
-            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursor_intensity, match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.validated, match.searchId, match.runName(), match.peakListFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, distancesJoined.join("\",\""), linkType, decoyType, retentionTime
+            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursor_intensity, match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.validated, match.searchId, match.runName(), match.peakListFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, ...distancesJoined, linkType, decoyType, retentionTime
         ];
-        csv += "\"" + data.join("\",\"") + "\"\r\n";
+        csv += "\"" + data.map(csvField).join("\",\"") + "\"\r\n";
         /*
         }
     }
@@ -409,7 +414,7 @@ export function getLinksCSV() {
             row.push(mval === undefined ? "" : mval);
         }
 
-        return "\"" + row.join("\",\"") + "\"";
+        return "\"" + row.map(csvField).join("\",\"") + "\"";
     }, this);
 
     rows.unshift(headerRow);
@@ -535,7 +540,7 @@ function getPPIsCSV() {
         //     row.push(mval === undefined ? "" : mval);
         // }
 
-        rows.push("\"" + row.join("\",\"") + "\"");
+        rows.push("\"" + row.map(csvField).join("\",\"") + "\"");
 
     }
 
@@ -725,7 +730,7 @@ function getGroups() {
                 }
             }
             row.push(protGroups.join(","));
-            rows.push("\"" + row.join("\",\"") + "\"");
+            rows.push("\"" + row.map(csvField).join("\",\"") + "\"");
         }
     }
     return rows.join("\r\n") + "\r\n";
