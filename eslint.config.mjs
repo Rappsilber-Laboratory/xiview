@@ -8,10 +8,9 @@ function cleanGlobals(obj) {
 export default [
     {
         ignores: [
-            "crosslink-viewer/vendor/cola.js",
-            "xiview/vendor/**",
-            "xiview/js/align/bioseq32.js",
-            "xiview/js/svgexp.js",
+            "vendor/**",
+            "js/align/bioseq32.js",
+            "js/svgexp.js",
             "node_modules/**",
         ],
     },

@@ -6,7 +6,7 @@
  * Each menu config includes: title, menu items array with name/func/tooltip/context, and section formatting.
  */
 
-import packageInfo from "../../../package.json";
+import packageInfo from "../../package.json";
 
 /**
  * Get protein selection dropdown menu configuration

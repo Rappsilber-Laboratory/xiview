@@ -1,65 +1,124 @@
 # xiVIEW
 
-Interactive visualization of protein crosslinking mass spectrometry data sets.
+Interactive visualization of protein crosslinking mass spectrometry data sets, developed by the Rappsilber Laboratory.
 
-## Component Overview
+## Project Architecture
 
-xiVIEW is the main application component within the build-xiview project. It provides the primary user interface, application logic, and coordinates with other submodules (CLMS-model, spectrum, crosslink-viewer) to deliver comprehensive crosslinking mass spectrometry data analysis and visualization.
+This is a merged, single-repository version of what was previously organised as a git submodule project. It combines four original components into a single codebase:
 
-## Architecture
+| Original submodule | Branch | Now located at |
+|--------------------|--------|----------------|
+| xiview | v2 | `js/`, `css/`, `images/`, `tests/` (top level) |
+| CLMS-model | v2 | `js/models/` |
+| spectrum (xiSPEC) | dev | `src/` |
+| crosslink-viewer (xiNET) | master | `js/views/xinet/` |
 
-### Key Features
+The entry point is `js/promises-load.js`, which loads CSS, initialises the spinner, imports core modules, and handles data fetching.
 
-- **Interactive Data Exploration**: Browse and filter crosslinking datasets
-- **Multiple Visualization Modes**: Integrated spectrum and network views
-- **Protein Structure Integration**: 3D visualization with NGL viewer
-- **Data Management**: Import, export, and session management
-- **Advanced Filtering**: Sophisticated data filtering and search capabilities
+## Key Directories
 
-### Key Directories
+- **`js/`** - Main application code (views, models, filters, controllers)
+  - **`js/models/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.)
+  - **`js/views/xinet/`** - xiNET crosslink network visualization component
+  - **`js/model/`** - Application-specific models extending the core CLMS models
+  - **`js/views/`** - UI view components using Backbone.js
+  - **`js/filter/`** - Data filtering and search functionality
+- **`src/`** - xiSPEC spectrum viewer component
+- **`css/`** - All stylesheets
+- **`images/`** - Icons, logos, and UI graphics
+- **`tests/`** - Test files and test data
+- **`vendor/`** - Third-party libraries (do not modify)
 
-- **`js/views/`**: UI view components using Backbone.js framework
-- **`js/model/`**: Application-specific models extending CLMS-model
-- **`js/models/`**: Core CLMS data models (from CLMS-model)
-- **`js/filter/`**: Data filtering and search functionality
-- **`js/controller/`**: Application controllers and event handling
-- **`css/`**: Stylesheets for the main application
-- **`images/`**: Icons, logos, and UI graphics
+## Quick Start
 
-### Technology Stack
+Install dependencies:
+```bash
+npm install
+```
 
-- **Backbone.js**: MVC framework for application structure
-- **jQuery**: DOM manipulation and event handling
-- **d3.js v3**: Data visualization (intentionally staying on v3)
-- **NGL viewer**: 3D molecular structure visualization
-- **DataTables**: Interactive data table components
+### Development Build
 
-## Development
+```bash
+npm run build-dev
+```
 
-### Branch Information
-- **Current branch**: v2
-- **Development branch**: v2
+### Production Build
 
-### Integration with build-xiview
+```bash
+npm run build-prod
+```
 
-xiVIEW is built as part of the parent build-xiview webpack configuration:
-- Entry point: `js/promises-load.js`
-- Build commands run from parent directory
-- Dependencies managed by parent package.json
+## Available Commands
 
-### Code Conventions
+```bash
+# Development build
+npm run build-dev
 
-- **Framework**: Follow Backbone.js patterns for views and models
-- **Naming**: camelCase for JavaScript, kebab-case for CSS
-- **Dependencies**: Use libraries available in parent build system
-- **Testing**: Tests located in `tests/` directory
+# Production build
+npm run build-prod
 
-## Integration Points
+# Run ESLint
+npm run lint
 
-xiVIEW coordinates with other submodules:
-- **CLMS-model**: Core data structures and business logic
-- **spectrum**: Embedded spectrum visualization (xiSPEC)
-- **crosslink-viewer**: Network visualization (xiNET)
+# Run automated tests (builds first, then tests)
+npm test
+
+# Run tests without building (requires prior build)
+npm run test-headless
+```
+
+## Testing Infrastructure
+
+xiVIEW includes automated testing using QUnit and Puppeteer:
+
+- **Test Location**: `tests/` directory
+- **Test Files**: `qunit.html`, `qunit2.html` (browser), `tests.js`, `tests2.js` (logic), `clms-model-tests.js`
+- **Test Data**: JSON test datasets (`10003.json`, `15884.json`, `blosums.json`)
+- **Execution**: Headless browser testing via Puppeteer with local HTTP server
+- **Coverage**: 67 tests covering data parsing, filtering, selection, scoring, alignment, distance calculations, and CSV export
+
+The test runner automatically:
+1. Starts a local HTTP server to serve test files
+2. Launches headless Chrome to execute QUnit tests
+3. Reports detailed results with pass/fail counts and timing
+
+## Build System
+
+- **Webpack**: Separate development and production configurations (`webpack.dev.js`, `webpack.prod.js`)
+- **Entry Point**: `js/promises-load.js`
+- **Output**: Builds to `dist/xiview.js` as UMD library
+- **Babel**: ES2018 with preset-env for browser compatibility
+- **ESLint**: Unix line endings, semicolons required, 4-space indentation
+
+## Key Dependencies
+
+- **d3** (~3.5.17) - Data visualization (note: intentionally staying on v3)
+- **backbone** (~1.6.0) - MVC framework
+- **jquery** (~3.7.1) - DOM manipulation
+- **ngl** (~2.3.1) - 3D molecular visualization
+- **datatables.net** - Data table components
+- **split.js** - UI panel splitting
+
+## Troubleshooting
+
+### Build Failures
+
+1. Check node version compatibility
+2. Clear node_modules and reinstall:
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+## Citations
+
+If using xiSPEC functionality, cite:
+> Lars Kolbowski, Colin Combe, Juri Rappsilber; xiSPEC: web-based visualization, analysis and sharing of proteomics data, Nucleic Acids Research, gky353, https://doi.org/10.1093/nar/gky353
+
+If using xiNET functionality, cite:
+> Combe, Colin W., Lutz Fischer, and Juri Rappsilber. "xiNET: Cross-Link Network Maps With Residue Resolution." Molecular & Cellular Proteomics : MCP 14, no. 4 (April 2015): 1137–47. https://doi.org/10.1074/mcp.O114.042259.
+
+---
 
 Built by
 

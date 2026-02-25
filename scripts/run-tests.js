@@ -14,9 +14,9 @@ const path = require('path');
 
 // Test files to run (relative to project root)
 const TEST_FILES = [
-    'xiview/tests/qunit.html',
-    'xiview/tests/qunit2.html',
-    'CLMS-model/tests/qunit-clms-model.html'
+    'tests/qunit.html',
+    'tests/qunit2.html',
+    'tests/qunit-clms-model.html'
 ];
 
 const SERVER_PORT = 8080;

@@ -14,7 +14,7 @@ import * as _ from "underscore";
 import * as c3 from "../../vendor/c3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {attributeOptions} from "../../../CLMS-model/js/models/attribute-options";
+import {attributeOptions} from "../models/attribute-options";
 import {
     addMultipleSelectControls,
     commonLabels,

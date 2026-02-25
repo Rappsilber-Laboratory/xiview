@@ -22,7 +22,7 @@ import {
 } from "./networkFrame";
 import {displayError} from "./utils";
 import Split from "split.js";
-import {SearchResultsModel} from "../../CLMS-model/js/models/search-results-model";
+import {SearchResultsModel} from "./models/search-results-model";
 import {BlosumCollection} from "./model/models";
 
 /**
@@ -334,7 +334,7 @@ if (process.env.NODE_ENV !== "production") {
             return testSetup2();
         },
         testClmsModel: async () => {
-            const { testSetup } = await import("../../CLMS-model/tests/clms-model-tests");
+            const { testSetup } = await import("../tests/clms-model-tests");
             // eslint-disable-next-line no-undef
             QUnit.config.notrycatch = true;
             return testSetup();

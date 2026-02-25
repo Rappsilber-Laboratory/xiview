@@ -5,16 +5,16 @@ import * as d3 from "d3";
 import Backbone from "backbone";
 import * as cola from "../../../vendor/cola";
 
-import {capture, makeXMLStr} from "../../../../xiview/js/svgexp";
-import {filterStateToString, makeLegalFileName, searchesToString} from "../../../../xiview/js/utils";
-import {download} from "../../../../xiview/js/downloads";
+import {capture, makeXMLStr} from "../../svgexp";
+import {filterStateToString, makeLegalFileName, searchesToString} from "../../utils";
+import {download} from "../../downloads";
 
 import {RenderedProtein} from "./interactor/rendered-protein";
 import {RenderedCrosslink} from "./link/rendered-crosslink";
 import {Group} from "./interactor/group";
 import {P_PLink} from "./link/p_p-link";
 import {G_GLink} from "./link/g_g-link";
-import {ManualColourModel} from "../../../../xiview/js/model/color/protein-color-model";
+import {ManualColourModel} from "../../model/color/protein-color-model";
 
 /**
  * Main controller class for the xiNET crosslink network visualization.

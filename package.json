@@ -39,9 +39,9 @@
       "email": "lutz.fischer@tu-berlin.de"
     }
   ],
-  "main": "./xiview/js/main.js",
+  "main": "./js/main.js",
   "scripts": {
-    "lint": "eslint CLMS-model/js/models crosslink-viewer/js xiview/js spectrum/src",
+    "lint": "eslint js src",
     "test": "node scripts/run-tests.js",
     "diagram:clms": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/clms-model-config.js",
     "diagram:xiview": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/xiview-config.js",
@@ -85,6 +85,7 @@
     "babel-loader": "^9.1.2",
     "css-loader": "^7.1.4",
     "eslint": "^10.0.0",
+    "globals": "^17.3.0",
     "jsdom": "^26.1.0",
     "puppeteer": "^24.0.0",
     "qunit": "2.21.1",

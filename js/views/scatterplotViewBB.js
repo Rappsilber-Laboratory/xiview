@@ -10,7 +10,7 @@ import * as _ from "underscore";
 import * as $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {attributeOptions} from "../../../CLMS-model/js/models/attribute-options";
+import {attributeOptions} from "../models/attribute-options";
 import {
     addMultipleSelectControls, ceil, commonLabels,
     crossBrowserElementX,

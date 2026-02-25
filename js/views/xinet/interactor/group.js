@@ -1,7 +1,7 @@
 import d3 from "d3";
 import {Interactor} from "./interactor";
 import {CrosslinkViewer} from "../crosslink-viewer-BB";
-import {makeTooltipContents, makeTooltipTitle} from "../../../../../xiview/js/make-tooltip";
+import {makeTooltipContents, makeTooltipTitle} from "../../../make-tooltip";
 import {RenderedProtein} from "./rendered-protein";
 
 /**

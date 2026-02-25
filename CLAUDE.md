@@ -1,141 +1,120 @@
-# CLAUDE.md - xiview
+# CLAUDE.md - xiview_all
 
-This file provides guidance to Claude Code when working with the xiview submodule within the build-xiview project.
+This file provides guidance to Claude Code when working with this repository.
 
-## Component Overview
+## Project Overview
 
-xiview is the main application component of the xiVIEW crosslinking mass spectrometry visualization tool. It provides the primary user interface, application logic, and coordinates with other submodules to deliver the complete xiVIEW experience.
+xiVIEW is a web-based visualization tool for crosslinking mass spectrometry data developed by the Rappsilber Laboratory. This repository is a **merged, single-repository** version of what was previously organised as a git submodule project (`build-xiview`). All four original components have been combined into one codebase.
 
-## Role in build-xiview Project
+## Repository Structure
 
-xiview serves as the **main application orchestrator** within the build-xiview container:
+What were previously four separate git submodules are now merged into this single repository:
 
-- **Primary UI**: All main user interface components and views
-- **Application Logic**: Core application state management and business logic
-- **Integration Hub**: Coordinates with CLMS-model, spectrum, and crosslink-viewer components
-- **Entry Point**: Contains `js/promises-load.js` which is the main application entry point
+| Original submodule | Original branch | Now located at |
+|--------------------|-----------------|----------------|
+| xiview | v2 | `js/`, `css/`, `images/`, `tests/` (top level) |
+| CLMS-model | v2 | `js/models/` |
+| spectrum (xiSPEC) | dev | `src/` |
+| crosslink-viewer (xiNET) | master | `js/views/xinet/` |
 
 ## Architecture
 
 ### Key Directories
 
-- **`js/views/`**: UI view components using Backbone.js framework
-- **`js/model/`**: Application-specific models extending CLMS-model
-- **`js/models/`**: Core CLMS data models (from CLMS-model)
-- **`js/filter/`**: Data filtering and search functionality
-- **`js/controller/`**: Application controllers and event handling
-- **`css/`**: Stylesheets for the main application
-- **`images/`**: Icons, logos, and UI graphics
-- **`tests/`**: Test files and testing utilities
+- **`js/`** - Main application JavaScript
+  - **`js/promises-load.js`** - Application entry point and loader
+  - **`js/networkFrame.js`** - Main application initialisation, wires up all views and models
+  - **`js/models/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.) — originally CLMS-model
+  - **`js/model/`** - Application-specific models extending the core CLMS models
+  - **`js/views/`** - UI view components using Backbone.js
+  - **`js/views/xinet/`** - xiNET crosslink network visualization — originally crosslink-viewer
+  - **`js/filter/`** - Data filtering and search functionality
+  - **`js/align/`** - Sequence alignment utilities
+  - **`js/config/`** - Configuration and menu definitions
+  - **`js/file-choosers/`** - File import UI components
+  - **`js/ui-utils/`** - Shared UI utilities
+- **`src/`** - xiSPEC spectrum viewer — originally spectrum submodule
+- **`css/`** - All stylesheets
+- **`images/`** - Icons, logos, and UI graphics
+- **`tests/`** - Test files and test data
+- **`vendor/`** - Third-party libraries (do not modify)
+
+### Core Data Models (`js/models/`)
+
+- **`search-results-model.js`** - Top-level container for all experiment data
+- **`crosslink.js`** - CrossLink model
+- **`peptide.js`** - Peptide model
+- **`protein.js`** - Protein model
+- **`spectrum-match.js`** - SpectrumMatch model
+- **`attribute-options.js`** - Configuration and attribute management
+- **`load-spectrum/`** - Utilities for loading and parsing spectrum data
 
 ### Technology Stack
 
-- **Framework**: Backbone.js for MVC architecture
-- **UI Library**: jQuery for DOM manipulation
-- **Visualization**: d3.js v3 (intentionally not upgraded)
-- **Molecular Graphics**: NGL viewer for 3D protein structures
-- **Build**: Integrated with webpack via parent build-xiview project
+- **Backbone.js**: MVC framework for application structure
+- **jQuery**: DOM manipulation and event handling
+- **d3.js v3**: Data visualization (intentionally staying on v3)
+- **NGL viewer**: 3D molecular structure visualization
+- **DataTables**: Interactive data table components
+- **Webpack**: Module bundling (dev/prod configurations)
+- **Babel**: ES2018 transpilation
 
-### Integration Points
+## Development Commands
 
-xiview integrates with other submodules through:
-
-- **CLMS-model**: Uses core data models (CrossLink, Peptide, SearchResultsModel)
-- **spectrum**: Embeds xiSPEC for spectrum visualization
-- **crosslink-viewer**: Integrates xiNET for network visualization
-
-## Development Workflow
-
-### Branch Information
-- **Current branch**: `v2`
-- **Development branch**: `v2`
-
-### File Organization
-
-Follow existing patterns when adding new components:
-- **Views**: Place in `js/views/` directory, extend Backbone.View
-- **Models**: Extend CLMS-model base classes in `js/model/`
-- **Styles**: Add component-specific CSS to appropriate files in `css/`
-- **Tests**: Create corresponding test files in `tests/` directory
-
-### Code Conventions
-
-- **Naming**: Use camelCase for JavaScript, kebab-case for CSS classes
-- **Indentation**: 4 spaces (configured in parent .eslintrc.json)
-- **Quotes**: Double quotes for strings
-- **Semicolons**: Required at end of statements
-- **Line Endings**: Unix style (LF)
-
-### Key Files
-
-- **`js/promises-load.js`**: Main application entry point and loader
-- **`js/main.js`**: Core application initialization
-- **`js/views/`**: UI components organized by feature
-- **`css/style.css`**: Main stylesheet
-- **`package.json`**: Not present - dependencies managed by parent project
-
-## Development Guidelines
-
-### Adding New Features
-
-1. **Understand Integration**: Consider how new features interact with other submodules
-2. **Follow Backbone Patterns**: Use existing view and model patterns
-3. **Test Integration**: Verify compatibility with CLMS-model, spectrum, and crosslink-viewer
-4. **Maintain d3 v3**: Do not upgrade d3 version - intentionally staying on v3
-5. **Respect Dependencies**: Use libraries available in parent package.json
-
-### Common Patterns
-
-- **Views**: Extend Backbone.View, use proper event handling
-- **Models**: Extend CLMS-model classes when possible
-- **Events**: Use Backbone events for component communication
-- **DOM**: Use jQuery for DOM manipulation, d3 for data-driven visualizations
-
-### Integration with Build System
-
-xiview is built as part of the parent build-xiview webpack configuration:
-- Entry point: `xiview/js/promises-load.js`
-- Output: Combined into `dist/xiview.js`
-- No separate build process - integrated with parent
-
-## Important Notes
-
-- **d3 Version**: Intentionally staying on d3 v3 - do not upgrade
-- **Dependencies**: All dependencies managed by parent build-xiview project
-- **Testing**: Run tests from parent directory using npm commands
-- **Linting**: ESLint configuration inherited from parent .eslintrc.json
-- **No Vendor Changes**: Never modify code in vendor/ directories
-
-## Debugging and Development
-
-### Local Development
-
-Development is done through the parent build-xiview project:
+### Building
 ```bash
-# From build-xiview root
+# Development build
 npm run build-dev
+
+# Production build
+npm run build-prod
 ```
 
-### Testing
-
-Tests are located in the `tests/` directory. Run from parent project:
+### Linting
 ```bash
-# From build-xiview root
 npm run lint
 ```
 
-### Common Issues
+### Testing
+```bash
+npm test           # Full test suite (builds first)
+npm run test-headless  # Run tests without building (requires prior build)
+```
 
-1. **Module Loading**: Ensure new modules are properly imported in promises-load.js
-2. **Backbone Integration**: Follow existing view and model patterns
-3. **Cross-Module Communication**: Use proper event channels for submodule integration
-4. **Styling Conflicts**: Check for CSS conflicts with other components
+**Test Infrastructure**:
+- **Framework**: QUnit 2.21.1 with Puppeteer headless execution
+- **Test Files**: `tests/qunit.html`, `tests/qunit2.html`, `tests/tests.js`, `tests/tests2.js`, `tests/clms-model-tests.js`
+- **Coverage**: 67 tests covering data parsing, filtering, selection, scoring, alignment, distance calculations, and CSV export
 
-## Context Within xiVIEW
+## Build System
 
-xiview serves as the main application shell that:
-- Loads and initializes all other components
-- Provides the primary user interface
-- Manages application state and user interactions
-- Coordinates data flow between visualization components
-- Handles user authentication and session management
+- **Webpack**: Uses `webpack.common.js` with separate `webpack.dev.js` / `webpack.prod.js`
+- **Entry point**: `js/promises-load.js`
+- **Output**: Builds to `dist/xiview.js` as UMD library
+- **Babel**: Configured for ES2018 with preset-env
+- **ESLint**: Unix line endings, semicolons required, 4-space indentation, double quotes
+
+## Code Conventions
+
+- **Naming**: camelCase for JavaScript, kebab-case for CSS classes
+- **Indentation**: 4 spaces
+- **Quotes**: Double quotes for strings
+- **Semicolons**: Required at end of statements
+- **Line Endings**: Unix style (LF)
+- **Framework**: Follow Backbone.js patterns for views and models
+
+### Adding New Components
+
+- **Views**: Place in `js/views/`, extend Backbone.View
+- **Core models**: Place in `js/models/`
+- **App-specific models**: Place in `js/model/`, extend core CLMS models where possible
+- **Styles**: Add to appropriate file in `css/`
+- **Tests**: Add to `tests/`
+
+## Important Rules
+
+- crosslink and crosslinking are not hyphenated
+- Do not upgrade from d3 v3
+- Never modify code in `vendor/` directories
+- Do not add QUnit import to HTML files (it is included in the development bundle)
+- Do not lint, test, or build — the user will do that

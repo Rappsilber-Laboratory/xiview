@@ -10,7 +10,7 @@
 
 import "../css/networkPage.css";
 import "../css/xispecAdjust.css";
-import packageInfo from "../../package.json";
+import packageInfo from "../package.json";
 
 import * as _ from "underscore";
 import Backbone from "backbone";
@@ -32,7 +32,7 @@ import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
 
-import {XispecWrapper} from "../../spectrum/src/xispec-wrapper";
+import {XispecWrapper} from "../src/xispec-wrapper";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
     downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
@@ -41,7 +41,7 @@ import {
 import {TooltipViewBB} from "./views/tooltipViewBB";
 import {checkBoxView} from "./ui-utils/checkbox-view";
 import {xiNetControlsViewBB} from "./views/xiNetControlsViewBB";
-import {CrosslinkViewer} from "../../crosslink-viewer/js/views/xinet/crosslink-viewer-BB";
+import {CrosslinkViewer} from "./views/xinet/crosslink-viewer-BB";
 import {AnnotationType} from "./model/annotation-model-collection";
 import {AnnotationTypeCollection} from "./model/annotation-model-collection";
 import {KeyViewBB} from "./views/key/keyViewBB";
@@ -65,7 +65,7 @@ import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
-import {prideLoadSpectrum} from "../../CLMS-model/js/models/load-spectrum/pride-load-spectrum";
+import {prideLoadSpectrum} from "./models/load-spectrum/pride-load-spectrum";
 
 // Configuration imports
 import {createDefaultAnnotationTypes} from "./config/annotation-types";

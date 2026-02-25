@@ -5,7 +5,7 @@ import {blosumLoading, models, postDataLoaded, pretendLoad} from "../js/networkF
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
-import {SearchResultsModel} from "../../CLMS-model/js/models/search-results-model";
+import {SearchResultsModel} from "../js/models/search-results-model";
 
 // Enable full stack traces in console for test failures
 QUnit.config.notrycatch = true;
