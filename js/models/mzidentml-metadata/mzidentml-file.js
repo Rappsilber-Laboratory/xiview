@@ -137,6 +137,14 @@ export class MzidentmlFile {
     }
 
     /**
+     * Get spectra formats as object keyed by id
+     * @returns {Object} Spectra formats object
+     */
+    get spectraFormats() {
+        return spectraFormatsToObject(this.#json.spectra_formats);
+    }
+
+    /**
      * Convert to JSON object
      * Used to customize what gets displayed in searchSummaryViewBB2.js JSON viewer
      * @returns {Object} Object
@@ -153,8 +161,8 @@ export class MzidentmlFile {
             analysisCollection_spectrumIdentifcations: arrayToObjectByProperty(this.#analysisCollection_spectrumIdentifications,
                 "spectrumIdentificationListRef"),
             // analysisProtocolCollection: this.analysisCollectionProtocolCollection,
-            bib: this.#json.bib,
-            spectraFormats: this.#json.spectra_formats,
+            bib: bibToObject(this.#json.bib),
+            spectraFormats: this.spectraFormats,
         };
     }
 
@@ -216,6 +224,33 @@ function arrayToObjectByKV(array, keyProp, valueProp) {
     const obj = {};
     for (const item of (array ?? [])) {
         obj[item[keyProp]] = item[valueProp];
+    }
+    return obj;
+}
+
+//util func to convert spectra_formats array to { id: { location, FileFormat, SpectrumIDFormat } } object
+function spectraFormatsToObject(spectraFormats) {
+    const obj = {};
+    for (const item of (spectraFormats ?? [])) {
+        const entry = {};
+        if (item.location) entry.location = item.location;
+        if (item.FileFormat) entry.FileFormat = item.FileFormat;
+        if (item.SpectrumIDFormat) entry.SpectrumIDFormat = item.SpectrumIDFormat;
+        obj[item.id] = entry;
+    }
+    return obj;
+}
+
+//util func to convert bib array to { title: { authors, publication, doi } } object
+function bibToObject(bib) {
+    const obj = {};
+    for (const item of (bib ?? [])) {
+        const key = item.title || item.doi || item.id;
+        const entry = {};
+        if (item.authors) entry.authors = item.authors;
+        if (item.publication) entry.publication = item.publication;
+        if (item.doi) entry.doi = item.doi;
+        obj[key] = entry;
     }
     return obj;
 }

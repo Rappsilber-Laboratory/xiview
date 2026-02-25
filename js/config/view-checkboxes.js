@@ -75,7 +75,7 @@ export const VIEW_CHECKBOX_CONFIGS = [
     },
     {
         id: "searchSummaryChkBxPlaceholder",
-        label: "Search Summaries",
+        label: "mzIdentML Metadata",
         eventName: "searchesViewShow",
         tooltip: "Shows metadata for current searches",
         sectionEnd: false

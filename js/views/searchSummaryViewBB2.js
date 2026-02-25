@@ -117,6 +117,6 @@ export class SearchSummaryViewBB extends BaseFrameView {
     }
 
     get identifier() {
-        return "Search Summaries";
+        return "mzIdentML Metadata";
     }
 }

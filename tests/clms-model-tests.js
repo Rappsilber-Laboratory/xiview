@@ -206,8 +206,8 @@ export async function testSetup() {
             assert.equal(mzidFile.id, 1, "mzidentML file id is 1");
             assert.equal(mzidFile.projectId, "crosslinking", "project_id is correct");
             assert.equal(mzidFile.identificationFileName, "multiple_spectra_per_id_1_3_0_draft.mzid", "identification_file_name is correct");
-            assert.ok(Array.isArray(mzidFile.spectraFormats), "spectra_formats is an array");
-            assert.ok(mzidFile.spectraFormats.length > 0, "spectra_formats has entries");
+            assert.ok(typeof mzidFile.spectraFormats === "object" && !Array.isArray(mzidFile.spectraFormats), "spectraFormats is an object");
+            assert.ok(Object.keys(mzidFile.spectraFormats).length > 0, "spectraFormats has entries");
         } else {
             assert.ok(false, "MzIdentML file with id 1 not found");
         }
