@@ -1,13 +1,13 @@
 {
   "rules": {
-    "indent": ["error", 4],
     "linebreak-style": ["error", "unix" ],
     "semi": ["error", "always" ],
     "semi-style": ["error", "last"],
     "semi-spacing": ["error", {"before": false, "after": true}],
     "quotes": [ "warn", "double" ],
     "brace-style": "warn",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "indent": ["error", 4]
   },
   "env": {
     "es6": true,
@@ -15,7 +15,7 @@
     "node": true
   },
   "parserOptions": {
-    "ecmaVersion": 2018,
+    "ecmaVersion": 2022,
     "sourceType": "module"
   },
   "extends": "eslint:recommended",

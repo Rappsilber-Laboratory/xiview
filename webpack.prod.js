@@ -1,4 +1,4 @@
-require("webpack");
+const webpack = require("webpack");
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 module.exports = merge(common, {
@@ -11,5 +11,10 @@ module.exports = merge(common, {
                 exclude: /node_modules/
             }
         ]
-    }
+    },
+    plugins: [
+        new webpack.DefinePlugin({
+            "process.env.NODE_ENV": JSON.stringify("production")
+        })
+    ]
 });

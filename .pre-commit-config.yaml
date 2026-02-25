@@ -1,6 +1,6 @@
-# Pre-commit configuration for xiVIEW main application
+# Pre-commit configuration for xiVIEW main repository
 repos:
-  # Standard pre-commit hooks
+  # Standard pre-commit hooks for general file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -8,59 +8,51 @@ repos:
         exclude: 'vendor/'
       - id: end-of-file-fixer
         exclude: 'vendor/'
+      - id: check-yaml
       - id: check-json
+        exclude: 'vendor/'
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: [ '--maxkb=1000' ]
+      - id: check-case-conflict
       - id: check-merge-conflict
       - id: mixed-line-ending
-        args: ['--fix=lf']
+        args: [ '--fix=lf' ]
         exclude: 'vendor/'
 
-  # Basic file validation
+  # NPM linting with autofix
   - repo: local
     hooks:
-      - id: check-js-syntax
-        name: check JavaScript syntax
-        entry: bash -c 'for file in "$@"; do node --input-type=module -c < "$file" || exit 1; done'
-        language: system
-        files: '^js/.*\.js$'
-        exclude: 'vendor/'
-
-
-  # ESLint for CLMS-model files only
-  - repo: local
-    hooks:
-      - id: eslint-xiview
-        name: ESLint xiview files
-        entry: npx eslint
-        language: system
-        files: '^js/.*\.(js|jsx)$'
-        exclude: '(bioseq32\.js|svgexp\.js)'
-        args: ['--fix']
-
-  # Rebuild dist files before testing
-  - repo: local
-    hooks:
-      - id: rebuild-dist
-        name: rebuild dist files
-        entry: bash -c 'cd .. && npm run build-dev'
+      - id: npm-lint-fix
+        name: npm lint with autofix
+        entry: npm run lint
         language: system
         pass_filenames: false
-        files: '\.(js|css)$'
-        exclude: 'vendor/'
+        files: '\.(js|jsx)$'
+        exclude: '(vendor/|node_modules/)'
 
-  # Run tests from parent directory
+  # Custom webpack build validation
   - repo: local
     hooks:
-      - id: run-xiview-tests
-        name: run xiVIEW tests
-        entry: bash -c 'cd .. && npm run test'
+      - id: webpack-build-check
+        name: webpack build validation
+        entry: npm run build-dev
+        language: system
+        pass_filenames: false
+        files: '\.(js|css|json)$'
+        exclude: '(vendor/|node_modules/|dist/)'
+
+  # Run automated tests
+  - repo: local
+    hooks:
+      - id: npm-test
+        name: run npm tests
+        entry: npm run test
         language: system
         pass_filenames: false
         files: '\.(js|json)$'
-        exclude: 'vendor/'
+        exclude: '(vendor/|node_modules/|dist/)'
 
 
 # Global configuration
-default_stages: [commit]
+default_stages: [ commit ]
 fail_fast: false
