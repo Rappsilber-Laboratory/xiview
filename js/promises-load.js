@@ -24,6 +24,7 @@ import {displayError} from "./utils";
 import Split from "split.js";
 import {SearchResultsModel} from "./models/search-results-model";
 import {BlosumCollection} from "./model/models";
+import vent from "./vent";
 
 /**
  * Global spinner instance for displaying loading state on the main network page.
@@ -41,7 +42,6 @@ export const networkPageSpinner = new Spinner({
  * Only works in Chrome/Chromium-based browsers that support performance.memory API.
  * @private
  */
-// eslint-disable-next-line no-unused-vars
 function startMemoryMonitoring() {
     let logCount = 0;
     if (performance.memory) {
@@ -117,16 +117,11 @@ export function main(apiBase, annotatorURL) {
     const clmsModel = new SearchResultsModel();
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
+    const blosumCollInst = new BlosumCollection();
     // eslint-disable-next-line no-unused-vars
-    const blosumPromise = new Promise((resolve, reject) => {
-        // Collection of blosum matrices that will be fetched from a json file
-        window.blosumCollInst = new BlosumCollection(); // options if we want to override defaults
-        // when the blosum Collection is fetched (an async process), we select one of its models as being selected
-        window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
-            resolve(); // Resolve the promise when blosum data is ready
-        });
-        // Start the asynchronous blosum fetching after the above events have been set up
-        window.blosumCollInst.fetch();
+    const blosumPromise = new Promise((resolve) => {
+        blosumCollInst.listenToOnce(blosumCollInst, "sync", resolve);
+        blosumCollInst.fetch();
     });
 
     // Add the blosum promise to the tasks array
@@ -138,6 +133,7 @@ export function main(apiBase, annotatorURL) {
         .then((results) => {
             console.log("API data and blosum model are ready.");
             const compositeModelInst = models({}, clmsModel);
+            compositeModelInst.set("blosumColl", blosumCollInst);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
             setWindowTitle();
@@ -179,7 +175,7 @@ export function validationPage(apiBase, annotatorURL) {
             setWindowTitle();
             initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false});
-            window.vent.trigger("spectrumShow", true);
+            vent.trigger("spectrumShow", true);
             const allMatches = window.compositeModelInst.get("clmsModel").getMatches();
             compositeModelInst.setMarkedMatches("selection", allMatches);
             networkPageSpinner.stop();

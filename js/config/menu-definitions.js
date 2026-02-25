@@ -7,6 +7,7 @@
  */
 
 import packageInfo from "../../package.json";
+import vent from "../vent";
 
 /**
  * Get protein selection dropdown menu configuration
@@ -145,7 +146,7 @@ export function getLoadMenuConfig() {
     // Add event trigger functions to each button
     loadButtonData.forEach(function (bdata) {
         bdata.func = function () {
-            window.vent.trigger(bdata.eventName, true);
+            vent.trigger(bdata.eventName, true);
         };
     });
 

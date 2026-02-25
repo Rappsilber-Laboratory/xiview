@@ -2,7 +2,7 @@
  * @fileoverview xiNET network visualization controls view.
  * Provides UI controls for xiNET circular protein network: auto layout (force-directed),
  * auto grouping (by complex), save layout, show labels, fixed node size, crop labels,
- * thick links, PPI step controls, SVG download. Triggers events on window.vent for xiNET listener.
+ * thick links, PPI step controls, SVG download. Triggers events on vent for xiNET listener.
  * Creates dropdown menu with buttons, checkboxes, PPI step slider.
  */
 
@@ -13,12 +13,13 @@ import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {commonLabels, makeBackboneButtons} from "../utils";
 import d3 from "d3";
+import vent from "../vent";
 
 /**
  * xiNET controls view with layout/display options.
  * Creates dropdown menu with buttons (auto layout, auto group, save layout, SVG download),
  * checkboxes (show labels, fixed size, crop labels, thick links, fix selected proteins),
- * PPI steps slider. Triggers events on window.vent for xiNET to consume. Reads/updates xiNET settings.
+ * PPI steps slider. Triggers events on vent for xiNET to consume. Reads/updates xiNET settings.
  * @class
  * @extends Backbone.View
  */
@@ -38,11 +39,11 @@ export class xiNetControlsViewBB extends Backbone.View {
         }
         return _.extend({}, parentEvents, {
             "click .xinetSvgDownload": function () {
-                window.vent.trigger("xinetSvgDownload", true);
+                vent.trigger("xinetSvgDownload", true);
             },
             "click .autoLayoutButton": function () {
                 const fixSelected = d3.select("input.fixSelected").property("checked");
-                window.vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : []);
+                vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : []);
             },
             "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
@@ -91,7 +92,7 @@ export class xiNetControlsViewBB extends Backbone.View {
     //                         xmlhttp.send(params);
     //                     };
     //
-    //                     window.vent.trigger("xinetSaveLayout", callback);
+    //                     vent.trigger("xinetSaveLayout", callback);
     //                 }
     //             }
     //         };
@@ -117,7 +118,7 @@ export class xiNetControlsViewBB extends Backbone.View {
     //             xmlhttp.send(params);
     //         };
     //
-    //         window.vent.trigger("xinetSaveLayout", callback);
+    //         vent.trigger("xinetSaveLayout", callback);
     //     }
     // }
 
@@ -387,7 +388,7 @@ xiNetControlsViewBB.prototype.identifier = "xiNET Controls";
 //                     //     self.set("groups", new Map());
 //                     //     self.trigger("change:groups");
 //                     // });
-//                     window.vent.trigger("xinetLoadLayout", layouts[selectedKey]);
+//                     vent.trigger("xinetLoadLayout", layouts[selectedKey]);
 //                 },
 //                 context: window.compositeModelInst
 //             };

@@ -26,6 +26,7 @@ import {
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {crosslinkerSpecificityPerLinker} from "../modelUtils";
 import d3 from "d3";
+import vent from "../vent";
 
 /**
  * Backbone view for histogram/distogram visualization of crosslink attribute distributions.
@@ -436,8 +437,8 @@ export class DistogramBB extends BaseFrameView {
             });
         }); // update selection series
         this.listenTo(this.model, "change:distancesObj", distancesAvailable); // new distanceObj for new pdb
-        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
-        this.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", distancesAvailable); // changes to distancesObj with existing pdb (usually alignment change) or change in pdb assembly meaning certain chains can't be used
+        this.listenTo(vent, "linkMetadataUpdated", function (metaMetaData) {
             const columns = metaMetaData.columns;
             //console.log ("HELLO", arguments);
             const newOptions = columns.map(function (column) {

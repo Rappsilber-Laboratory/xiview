@@ -10,6 +10,7 @@ import {
     matchSequencesToExistingProteins
 } from "./NGLUtils";
 import {NGLModelWrapperBB} from "./NGLModelWrapperBB";
+import vent from "../../vent";
 
 /**
  * Namespace for NGL utilities, stores current PDB settings.
@@ -83,7 +84,7 @@ export function repopulateNGL(pdbInfo) {
                 // match by alignment func for searches where we don't know uniprot ids, don't have pdb codes, or when matching by uniprot ids returns no matches
                 function matchByXiAlignment(whichNGLSequences, pdbUniProtMap) {
                     const protAlignCollection = compositeModel.get("alignColl");
-                    window.vent.listenToOnce(window.vent, "sequenceMatchingDone", function (matchMatrix) {
+                    vent.listenToOnce(vent, "sequenceMatchingDone", function (matchMatrix) {
                         const pdbXiProtMap = matrixPairings(matchMatrix, whichNGLSequences);
                         xilog("XI PAIRED", pdbXiProtMap);
                         sequenceMapsAvailable(pdbXiProtMap.concat(pdbUniProtMap));    // concat uniprot service and xi matched pdb-protein pairs

@@ -8,6 +8,7 @@ import Backbone from "backbone";
 import * as _ from "underscore";
 import {makeLegalDomID} from "../utils";
 import d3 from "d3";
+import vent from "../vent";
 
 /**
  * Checkbox control view with two-way data binding to models or events.
@@ -99,7 +100,7 @@ export class checkBoxView extends Backbone.View {
             this.showState(this.model.get(this.options.toggleAttribute)); // initial state
             this.listenTo(this.model, "change:" + this.options.toggleAttribute, this.showState);
         } else if (this.options.eventName) {
-            this.listenTo(window.vent, this.options.eventName, this.showState);
+            this.listenTo(vent, this.options.eventName, this.showState);
         }
     }
 
@@ -129,7 +130,7 @@ export class checkBoxView extends Backbone.View {
         if (this.model && this.options.toggleAttribute) {
             this.model.set(this.options.toggleAttribute, checked);
         } else if (this.options.eventName) {
-            window.vent.trigger(this.options.eventName, checked);
+            vent.trigger(this.options.eventName, checked);
         }
     }
 }

@@ -19,6 +19,7 @@ import {
     updateUserAnnotationsMetadata
 } from "../modelUtils";
 import {loadUserFile} from "./load-user-file";
+import vent from "../vent";
 
 /**
  * Abstract base class for metadata file chooser views.
@@ -112,7 +113,7 @@ class AbstractMetaDataFileChooserBB extends BaseFrameView {
      */
     setUpCompletionListener() {
         const self = this;
-        this.listenToOnce(window.vent, self.options.loadedEventName, function (metaMetaData, sourceData) {
+        this.listenToOnce(vent, self.options.loadedEventName, function (metaMetaData, sourceData) {
             if (sourceData && sourceData.source === "file") {
                 const columns = metaMetaData.columns;
                 const matchedItemCount = metaMetaData.matchedItemCount;

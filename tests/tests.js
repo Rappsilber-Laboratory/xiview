@@ -42,6 +42,7 @@ import {blosumLoading, models, postDataLoaded} from "../js/networkFrame";
 import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {SearchResultsModel} from "../js/models/search-results-model";
+import vent from "../js/vent";
 
 // Enable full stack traces in console for test failures
 QUnit.config.notrycatch = true;
@@ -318,7 +319,7 @@ function testCallback(model) {
 
     test("Scoring", function (assert) {
         const scoringSystem = {
-            matrix: window.blosumCollInst.get("Blosum100").attributes,
+            matrix: window.compositeModelInst.get("blosumColl").get("Blosum100").attributes,
             match: 10,
             mis: -6,
             gapOpen: 10,
@@ -1453,7 +1454,7 @@ function testCallback(model) {
             items: clmsModel.getProteinsMap(),
             matchedItemCount: 1
         };
-        window.vent.listenToOnce(window.vent, "proteinMetadataUpdated", function (actualValue) {
+        vent.listenToOnce(vent, "proteinMetadataUpdated", function (actualValue) {
             assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as proteinmetadata event data, Passed!");
 
             const actualValue2 = clmsModel.getProtein("sp|P02768-A|ALBU").getMeta();
@@ -1474,7 +1475,7 @@ function testCallback(model) {
             matchedItemCount: 2,
             ppiCount: 2
         };
-        window.vent.listenToOnce(window.vent, "linkMetadataUpdated", function (actualValue) {
+        vent.listenToOnce(vent, "linkMetadataUpdated", function (actualValue) {
             console.log("CLLCC2", clmsModel, clmsModel.getCrosslinks());
             assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as linkmetadata event data, Passed!");
 
@@ -1494,7 +1495,7 @@ function testCallback(model) {
     test("Parse User Annotations", function (assert) {
         model.get("filterModel")
             .resetFilter();
-        window.vent.listenToOnce(window.vent, "userAnnotationsUpdated", function (actualValue) {
+        vent.listenToOnce(vent, "userAnnotationsUpdated", function (actualValue) {
             const expectedAnnotationTypes = [
                 {category: "User Defined", type: "Helix", source: "Search", colour: "blue"},
                 {category: "User Defined", type: "Strand", source: "Search", colour: "yellow"},
@@ -1674,17 +1675,14 @@ function waitForEvent(target, eventName) {
 // Helper function to load blosum data as a Promise
 function loadBlosumData(url) {
     return new Promise((resolve, reject) => {
-        // Initialize blosum loading
-        blosumLoading({ url: url });
+        const blosumCollInst = blosumLoading({ url: url });
 
-        // Listen for the sync event that indicates blosum data is loaded
-        window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
+        blosumCollInst.listenToOnce(blosumCollInst, "sync", function () {
             console.log("ASYNC. blosum models loaded in test");
-            resolve();
+            resolve(blosumCollInst);
         });
 
-        // Handle potential errors
-        window.blosumCollInst.listenToOnce(window.blosumCollInst, "error", function (model, response) {
+        blosumCollInst.listenToOnce(blosumCollInst, "error", function (model, response) {
             reject(new Error(`Failed to load blosum data in test: ${response.status} ${response.statusText}`));
         });
     });
@@ -1715,7 +1713,7 @@ function setupNGLStage() {
 }
 
 // Helper function to initialize models with loaded data
-function initializeModels(options) {
+function initializeModels(options, blosumCollInst) {
     console.log("Creating SearchResultsModel...");
     const clmsModel = new SearchResultsModel();
 
@@ -1732,6 +1730,8 @@ function initializeModels(options) {
 
     console.log("Creating composite model...");
     const compositeModelInst = models({}, clmsModel);
+
+    compositeModelInst.set("blosumColl", blosumCollInst);
 
     console.log("Calling postDataLoaded...");
     postDataLoaded(compositeModelInst);
@@ -1787,21 +1787,21 @@ export async function testSetupNew() {
 
         // Phase 1: Load all data concurrently using Promises
         console.log("Loading JSON and blosum data...");
-        const [jsonData] = await Promise.all([
+        const [jsonData, blosumCollInst] = await Promise.all([
             loadJsonData("10003.json"),
             loadBlosumData("../R/blosums.json")
         ]);
 
         console.log("Data loaded successfully, JSON data:", jsonData);
-        console.log("window.vent:", window.vent);
+        console.log("vent:", vent);
 
         // Set up event listener BEFORE initializing models (since initializeModels triggers the event)
         console.log("Setting up initialSetupDone event listener...");
-        const initialSetupPromise = waitForEvent(window.vent, "initialSetupDone");
+        const initialSetupPromise = waitForEvent(vent, "initialSetupDone");
 
         // Initialize models (this will trigger the initialSetupDone event)
         console.log("Initializing models...");
-        initializeModels(jsonData);
+        initializeModels(jsonData, blosumCollInst);
 
         // Wait for initial setup completion
         console.log("Waiting for initialSetupDone event...");

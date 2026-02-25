@@ -15,6 +15,7 @@ import {getLegalAccessionIDs} from "../modelUtils";
 import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 import {loadUserFile} from "./load-user-file";
+import vent from "../vent";
 
 /**
  * PDB file chooser view for loading 3D structural data into xiVIEW.
@@ -212,7 +213,7 @@ export class PDBFileChooserBB extends BaseFrameView {
             this.setStatusText(msg, success);
         });
 
-        this.listenTo(window.vent, "alignmentProgress", this.setStatusText);
+        this.listenTo(vent, "alignmentProgress", this.setStatusText);
 
         // Pre-load pdb if requested
         if (viewOptions.initPDBs) {

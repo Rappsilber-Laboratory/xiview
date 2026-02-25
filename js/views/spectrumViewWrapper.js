@@ -14,6 +14,7 @@ import {CompositeModel} from "../model/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, proteinConcat} from "../utils";
 import d3 from "d3";
+import vent from "../vent";
 
 /**
  * Spectrum viewer wrapper for xiSPEC integration.
@@ -182,9 +183,9 @@ export class SpectrumViewWrapper extends BaseFrameView {
             // const visible = !!match;
             if (!this.isVisible()){ //} !== visible) {
                 //console.log ("CHANGE VISIBILITY");
-                window.vent.trigger("spectrumShow", true); // visible);
+                vent.trigger("spectrumShow", true); // visible);
             }
-            window.vent.trigger("individualMatchSelected", match);
+            vent.trigger("individualMatchSelected", match);
             this.enableControls(match);
             if (match) {
                 d3.select(this.el).select("span.validatedState")
@@ -212,7 +213,7 @@ export class SpectrumViewWrapper extends BaseFrameView {
             this.triggerSpectrumViewer(selectedMatch.match, true);
         }
         // resize the spectrum on drag
-        window.vent.trigger("resizeSpectrumSubViews", true);
+        vent.trigger("resizeSpectrumSubViews", true);
 
         const altModel = this.alternativesModel.get("clmsModel");
         const keepDisplayNone = (altModel && altModel.get("matches").length === 1); // altModel check as sometime clmsModel isn't populated (undefined)

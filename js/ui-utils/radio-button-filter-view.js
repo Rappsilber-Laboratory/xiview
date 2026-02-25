@@ -7,6 +7,7 @@
 import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
+import vent from "../vent";
 
 // import {BaseFrameView} from "./base-frame-view";
 
@@ -69,7 +70,7 @@ export class RadioButtonFilterViewBB extends Backbone.View {
         };
         this.options = _.extend(defaultOptions, initData.myOptions);
         if (this.options.eventName) {
-            this.listenTo(window.vent, this.options.eventName, this.showState);
+            this.listenTo(vent, this.options.eventName, this.showState);
         }
         this.render();
     }
@@ -131,7 +132,7 @@ export class RadioButtonFilterViewBB extends Backbone.View {
      */
     changeFilter(evt) {
         if (this.options.eventName) {
-            window.vent.trigger(this.options.eventName, +evt.currentTarget.value);
+            vent.trigger(this.options.eventName, +evt.currentTarget.value);
         }
     }
 }

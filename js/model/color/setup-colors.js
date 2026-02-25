@@ -22,6 +22,7 @@ import {
 import {DefaultProteinColourModel, ManualColourModel} from "./protein-color-model";
 import {commonRegexes} from "../../utils";
 import d3 from "d3";
+import vent from "../../vent";
 
 window.linkColor = {};//todo - get rid
 
@@ -142,7 +143,7 @@ export const setupColourModels = function (userConfig) {
     });*/
 
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
-    linkColourCollection.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
+    linkColourCollection.listenTo(vent, "linkMetadataUpdated", function (metaMetaData) {
         const columns = metaMetaData.columns;
         const crosslinks = metaMetaData.items;
         const colMaps = columns.map(function (field) {
@@ -187,7 +188,7 @@ export const setupColourModels = function (userConfig) {
     };
 
     // All colour scales with ids in metadataFields array are removed (if already extant) and new scales added
-    proteinColourCollection.listenTo(window.vent, "proteinMetadataUpdated", function (metaMetaData) {
+    proteinColourCollection.listenTo(vent, "proteinMetadataUpdated", function (metaMetaData) {
         const columns = metaMetaData.columns;
         const proteins = metaMetaData.items;
         const colMaps = columns.map(function (field) {

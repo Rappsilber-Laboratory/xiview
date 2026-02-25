@@ -13,6 +13,7 @@ import * as $ from "jquery";
 import {xilog} from "../../utils";
 import {filterOutDecoyInteractors, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";
 import d3 from "d3";
+import vent from "../../vent";
 // import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
 // import {NGLModelWrapperBB} from "./ngl-wrapper-model"; // cyclic dependency, hack it into bottom of this file
 
@@ -207,7 +208,7 @@ export function matchSequencesToExistingProteins(protAlignCollection, sequenceOb
 
     function finished(matchMatrix) {
         // inflate score matrix to accommodate repeated sequences that were found and filtered out above
-        window.vent.trigger("sequenceMatchingDone", reinflateSequenceMap(matchMatrix, seqs, filteredSeqInfo));
+        vent.trigger("sequenceMatchingDone", reinflateSequenceMap(matchMatrix, seqs, filteredSeqInfo));
     }
 
     function updateMatchMatrix(protID, alignResults) {
@@ -217,7 +218,7 @@ export function matchSequencesToExistingProteins(protAlignCollection, sequenceOb
 
     // eslint-disable-next-line no-unused-vars
     const totalAlignments = filteredSeqInfo.uniqSeqs.length * proteins.length;
-    window.vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
+    vent.trigger("alignmentProgress", "Attempting to match " + proteins.length + " proteins to " + seqs.length + " additional sequences.");
 
     // webworker way, only do if enough proteins and cores to make it worthwhile
     // if ((!window || !!window.Worker) && proteins.length > 20 && workerpool.cpus > 2) {

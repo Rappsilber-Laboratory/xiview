@@ -22,6 +22,7 @@ import {
 import * as Spinner from "spin";
 import {download} from "../downloads";
 import d3 from "d3";
+import vent from "../vent";
 
 // https://stackoverflow.com/questions/32065257/having-a-static-variable-in-backbone-js-views#32820288
 export class BaseFrameView extends Backbone.View {
@@ -154,7 +155,7 @@ export class BaseFrameView extends Backbone.View {
             .call(drag);
 
         if (this.displayEventName) {
-            this.listenTo(window.vent, this.displayEventName, this.setVisible);
+            this.listenTo(vent, this.displayEventName, this.setVisible);
         }
 
         return this;
@@ -329,7 +330,7 @@ export class BaseFrameView extends Backbone.View {
      * @returns {BaseFrameView} This view instance for chaining
      */
     hideView() {
-        window.vent.trigger(this.displayEventName, false);
+        vent.trigger(this.displayEventName, false);
         return this;
     }
 

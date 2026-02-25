@@ -16,6 +16,7 @@ import d3 from "d3";
 import {xilog} from "../utils";
 import {ManualColourModel} from "./color/protein-color-model";
 import {getCrosslinkableResiduesAsFeatures, getDigestibleResiduesAsFeatures} from "./get-as-features";
+import vent from "../vent";
 
 /**
  * Main application model coordinating CLMS data, filtering, and UI state.
@@ -83,7 +84,7 @@ export class CompositeModel extends Backbone.Model {
         });
 
 
-        this.listenTo(window.vent, "recalcLinkDistances", function () {
+        this.listenTo(vent, "recalcLinkDistances", function () {
             if (this.get("clmsModel")) { //how does this work? may be mistake. // bar the alternative model from doing this because it has no crosslinks and will crash
                 this.getCrossLinkDistances(this.getAllCrossLinks());
             }
@@ -1023,7 +1024,7 @@ export class CompositeModel extends Backbone.Model {
      * @returns {void}
      */
     collapseGroups() {
-        window.vent.trigger("collapseGroups", true);
+        vent.trigger("collapseGroups", true);
     }
 
     /**
@@ -1031,7 +1032,7 @@ export class CompositeModel extends Backbone.Model {
      * @returns {void}
      */
     expandGroups() {
-        window.vent.trigger("expandGroups", true);
+        vent.trigger("expandGroups", true);
     }
 
     /**

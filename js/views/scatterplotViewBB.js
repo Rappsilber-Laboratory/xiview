@@ -21,6 +21,7 @@ import {
 import {radixSort} from "../modelUtils";
 import d3 from "d3";
 import {makeTooltipContents} from "../make-tooltip";
+import vent from "../vent";
 
 /**
  * Backbone view for 2D scatterplot visualization of crosslink metrics.
@@ -332,8 +333,8 @@ export class ScatterplotViewBB extends BaseFrameView {
             this.renderCrossLinks({isFiltering: true});
         });
         this.listenTo(this.model, "change:distancesObj", this.ifADistanceAxisRerender);
-        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
-        this.listenTo(window.vent, "linkMetadataUpdated", function (metaMetaData) {
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.ifADistanceAxisRerender);
+        this.listenTo(vent, "linkMetadataUpdated", function (metaMetaData) {
             //console.log ("HELLO", arguments);
             const columns = metaMetaData.columns;
             const newOptions = columns.map(function (column) {

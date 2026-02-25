@@ -7,6 +7,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 import colorbrewer from "colorbrewer";
+import vent from "../vent";
 
 /**
  * Annotation type model representing a category/type pair for protein annotations.
@@ -96,7 +97,7 @@ export class AnnotationTypeCollection extends Backbone.Collection {
      */
     // eslint-disable-next-line no-unused-vars
     initialize(models, options) {
-        this.listenTo(window.vent, "userAnnotationsUpdated", function (details) {
+        this.listenTo(vent, "userAnnotationsUpdated", function (details) {
             if (details.types) {
                 // modelId declaration below is needed to stop same ids getting added - https://github.com/jashkenas/backbone/issues/3533
                 this.add(details.types);

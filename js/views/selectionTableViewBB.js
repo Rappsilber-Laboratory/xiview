@@ -13,6 +13,7 @@ import d3 from "d3";
 
 import {checkBoxView} from "../ui-utils/checkbox-view";
 import {fullPosConcat, pepPosConcat, proteinConcat} from "../utils";
+import vent from "../vent";
 
 /**
  * Match selection table view with advanced DataTables integration.
@@ -70,7 +71,7 @@ export class SelectionTableViewBB extends Backbone.View {
         });
         this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", this.updateSwatchesOnly);
         // redraw datable on protein metadata change (possible protein name change)
-        this.listenTo(window.vent, "proteinMetadataUpdated", this.render);
+        this.listenTo(vent, "proteinMetadataUpdated", this.render);
 
         // emphasise selected match table row (or not if nothing selected)
         this.listenTo(this.model, "change:lastSelectedMatch", function (model) {
@@ -366,7 +367,7 @@ export class SelectionTableViewBB extends Backbone.View {
                 this.listenTo(this, "change:hidden", function (model, val) {
                     d3.select(self.el).selectAll("table").style("display", val ? "none" : null);
                     if (self.options.mainModel) {
-                        window.vent.trigger("resizeSpectrumSubViews", true);
+                        vent.trigger("resizeSpectrumSubViews", true);
                     }
                 });
             },

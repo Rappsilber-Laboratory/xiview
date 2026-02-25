@@ -5,6 +5,7 @@ import {filterOutDecoyInteractors} from "../modelUtils";
 import {GotohAligner} from "./bioseq32";
 import {SeqCollection} from "./sequence-model-collection";
 import d3 from "d3";
+import vent from "../vent";
 
 /**
  * Model for one protein's alignment settings and aligned sequences.
@@ -81,7 +82,7 @@ export class ProtAlignModel extends Backbone.Model {
         });
 
         // redo sequence name labels if protein metadata updates names
-        this.listenTo(window.vent, "proteinMetadataUpdated", function (metaMetaData) {
+        this.listenTo(vent, "proteinMetadataUpdated", function (metaMetaData) {
             const columns = metaMetaData.columns;
             const interactors = metaMetaData.items;
             if (!columns || columns.indexOf("name") >= 0) {

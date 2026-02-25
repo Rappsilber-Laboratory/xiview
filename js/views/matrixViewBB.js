@@ -20,6 +20,7 @@ import {getChainNameFromChainIndex, make3DAlignID} from "./ngl/NGLUtils";
 import {commonLabels, declutterAxis, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
+import vent from "../vent";
 
 /**
  * Backbone view for 2D crosslink distance matrix visualization.
@@ -319,11 +320,11 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         }); // colourScaleModel is pointer to distance colour model, so this triggers even if not current colour model (redraws background)
         this.listenTo(this.model, "change:distancesObj", this.distancesChanged); // Entire new set of distances
         // this.listenTo(this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally) - clmsModel no longer extends Backbone
-        this.listenTo(window.vent, "proteinMetadataUpdated", function () {
+        this.listenTo(vent, "proteinMetadataUpdated", function () {
             this.makeProteinPairingOptions();
             this.updateAxisLabels();
         });
-        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
 
         const entries = this.makeProteinPairingOptions();
         const startPairing = _.isEmpty(entries) ? undefined : entries[0].value;

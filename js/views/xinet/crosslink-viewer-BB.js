@@ -15,6 +15,7 @@ import {Group} from "./interactor/group";
 import {P_PLink} from "./link/p_p-link";
 import {G_GLink} from "./link/g_g-link";
 import {ManualColourModel} from "../../model/color/protein-color-model";
+import vent from "../../vent";
 
 /**
  * Main controller class for the xiNET crosslink network visualization.
@@ -264,15 +265,15 @@ export class CrosslinkViewer extends Backbone.View {
         this.listenTo(this.model, "change:selectedProteins", this.selectedProteinsChanged);
         this.listenTo(this.model, "change:highlightedProteins", this.highlightedProteinsChanged);
 
-        this.listenTo(window.vent, "proteinMetadataUpdated", this.proteinMetadataUpdated);
+        this.listenTo(vent, "proteinMetadataUpdated", this.proteinMetadataUpdated);
 
-        this.listenTo(window.vent, "xinetSvgDownload", this.downloadSVG);
-        this.listenTo(window.vent, "xinetAutoLayout", this.autoLayout);
-        this.listenTo(window.vent, "xinetLoadLayout", this.loadLayout);
-        this.listenTo(window.vent, "xinetSaveLayout", this.saveLayout);
+        this.listenTo(vent, "xinetSvgDownload", this.downloadSVG);
+        this.listenTo(vent, "xinetAutoLayout", this.autoLayout);
+        this.listenTo(vent, "xinetLoadLayout", this.loadLayout);
+        this.listenTo(vent, "xinetSaveLayout", this.saveLayout);
 
-        this.listenTo(window.vent, "collapseGroups", this.collapseGroups);
-        this.listenTo(window.vent, "expandGroups", this.expandGroups);
+        this.listenTo(vent, "collapseGroups", this.collapseGroups);
+        this.listenTo(vent, "expandGroups", this.expandGroups);
 
         this.listenTo(this.model, "change:xinetShowLabels", this.showLabels);
         this.listenTo(this.model, "change:xinetFixedSize", this.setFixedSize);

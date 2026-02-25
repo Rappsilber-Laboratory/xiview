@@ -16,6 +16,7 @@ import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 import d3 from "d3";
 import {circleArrange} from "./circleArrange";
 import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
+import vent from "../../vent";
 
 /**
  * Calculates circular layout positioning for proteins, crosslinks, and features.
@@ -637,7 +638,7 @@ export class CircularViewBB extends BaseFrameView {
         this.listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function () {
             self.renderPartial(["nodes"]);
         }); // either colour change or new colour model
-        this.listenTo(window.vent, "proteinMetadataUpdated", function () {   // generally a name change
+        this.listenTo(vent, "proteinMetadataUpdated", function () {   // generally a name change
             self.renderPartial(["nodes"]);
         });
         this.listenTo(this.model.get("annotationTypes"), "change:shown", function () {

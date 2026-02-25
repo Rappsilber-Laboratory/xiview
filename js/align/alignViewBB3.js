@@ -98,10 +98,11 @@ export class AlignCollectionViewBB extends BaseFrameView {
         holdingDiv.selectAll("DIV:not(.checkHolder)").attr("class", "alignSettings");
 
         this.tooltipModel = viewOptions.tooltipModel;
+        this.blosumColl = viewOptions.blosumColl;
 
         this.alignViewBlosumSelector = new CollectionAsSelectViewBB({
             el: "#" + modelViewID + "Controls2",
-            collection: window.blosumCollInst,
+            collection: this.blosumColl,
             label: "Set <a href='https://en.wikipedia.org/wiki/BLOSUM' target='_blank'>BLOSUM</a> Matrix",
             name: "BlosumSelector",
             optionLabelField: "id",
@@ -232,6 +233,7 @@ export class AlignCollectionViewBB extends BaseFrameView {
                 el: "#" + modelViewID,
                 model: model,
                 tooltipModel: this.tooltipModel,
+                blosumColl: this.blosumColl,
             });
 
             this.alignViewSettings = new AlignSettingsViewBB({
@@ -274,6 +276,7 @@ export class ProtAlignViewBB extends Backbone.View {
 
     initialize(viewOptions) {
         this.tooltipModel = viewOptions.tooltipModel;
+        this.blosumColl = viewOptions.blosumColl;
 
         const topElem = d3.select(this.el);
         const holdingDiv = topElem.append("DIV").attr("class", "alignView");
@@ -319,7 +322,7 @@ export class ProtAlignViewBB extends Backbone.View {
         });
 
         // Listen for change in blosum selection and pass it to model
-        this.listenTo(window.blosumCollInst, "blosumModelSelected", function (blosumMatrix) {
+        this.listenTo(this.blosumColl, "blosumModelSelected", function (blosumMatrix) {
             console.log("BLOSUM", this, arguments);
             this.model.set("scoreMatrix", blosumMatrix);
             this.model.collection.bulkAlignChangeFinished();

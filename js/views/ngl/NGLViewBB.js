@@ -25,6 +25,7 @@ import {filterOutDecoyInteractors, mergeContiguousFeatures, totalProteinLength} 
 import {NGLExportUtils} from "./NGLExportUtils";
 import {CrosslinkRepresentation} from "./crosslink-representation";
 import d3 from "d3";
+import vent from "../../vent";
 
 /**
  * Backbone view for 3D molecular structure visualization using NGL Viewer.
@@ -582,7 +583,7 @@ export class NGLViewBB extends BaseFrameView {
             mainDivSel.select(".exportHaddockButton").property("disabled", !stageModel.get("allowInterModelDistances") || stageModel.get("structureComp").structure.modelStore.count == 1);
         };
         // listen to vent rather than directly to newStageModel's change:allowInterModelDistances as we needed to recalc distances before informing views
-        this.listenTo(window.vent, "changeAllowInterModelDistances", function (stageModel, value) {
+        this.listenTo(vent, "changeAllowInterModelDistances", function (stageModel, value) {
             this.options.allowInterModelDistances = value;
             d3.select(this.el).selectAll(".allowInterModelDistancesCB input").property("checked", value);
             if (this.xlRepr) {
@@ -652,14 +653,14 @@ export class NGLViewBB extends BaseFrameView {
             disableHaddock(newStageModel);
         });
 
-        this.listenTo(window.vent, "proteinMetadataUpdated", function () {
+        this.listenTo(vent, "proteinMetadataUpdated", function () {
             if (this.xlRepr) {
                 this.xlRepr.redisplayChainLabels();
             }
         });
 
         // if the assembly structure has changed the chain sets that can be used in distance calculations, recalc and redraw distances
-        this.listenTo(window.vent, "PDBPermittedChainSetsUpdated", function () {
+        this.listenTo(vent, "PDBPermittedChainSetsUpdated", function () {
             if (this.xlRepr) {
                 this.showFiltered().centerView();
             }

@@ -3,7 +3,7 @@
  * Orchestrates model creation, view initialization, event wiring, and data loading.
  * Exports functions for phased initialization: models (FilterModel, CompositeModel, MinigramModel),
  * views (all UI components), postDataLoaded (annotations, filters), blosumLoading (async matrices).
- * Creates global window.compositeModelInst, window.blosumCollInst, window.vent (Backbone event bus).
+ * Creates global window.compositeModelInst. Uses vent (Backbone event bus) from js/vent.js.
  * Entry point for full xiVIEW application with network visualization, spectrum viewer, alignment,
  * NGL 3D viewer, filters, exports, and all interactive UI components.
  */
@@ -78,17 +78,14 @@ import {
     getExportMenuConfig,
     getHelpMenuConfig
 } from "./config/menu-definitions";
-
-// http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
-window.vent = {};
-_.extend(window.vent, Backbone.Events);
+import vent from "./vent";
 
 // only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
 export function postDataLoaded(compositeModelInst) {
 
     // Now we have blosum models and sequences, we can set blosum defaults for alignment models
     compositeModelInst.get("alignColl").models.forEach(function (protAlignModel) {
-        protAlignModel.set("scoreMatrix", window.blosumCollInst.get("Blosum100"));
+        protAlignModel.set("scoreMatrix", compositeModelInst.get("blosumColl").get("Blosum100"));
     });
 
     //init annotation types
@@ -118,7 +115,7 @@ export function postDataLoaded(compositeModelInst) {
     compositeModelInst.set("annotationTypes", annotationTypeCollection);
 
     //viewsThatNeedAsyncData(compositeModelInst);
-    window.vent.trigger("buildAsyncViews");
+    vent.trigger("buildAsyncViews");
 
 
     // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
@@ -137,7 +134,7 @@ export function postDataLoaded(compositeModelInst) {
     compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
     //folowing only used by tests
-    window.vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
+    vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
     if (compositeModelInst.get("clmsModel").getSearches().size > 1) {
@@ -229,26 +226,26 @@ export function postDataLoaded(compositeModelInst) {
 
 /**
  * Asynchronously loads BLOSUM substitution matrices from JSON file.
- * Creates global window.blosumCollInst collection, sets up sync listener for completion logging,
+ * Creates a BlosumCollection, sets up sync listener for completion logging,
  * initiates fetch. BLOSUM matrices used for protein sequence alignment scoring.
  * Must complete before alignment views can be initialized.
  * @param {Object} [options={}] - Options to override BlosumCollection defaults (e.g., URL)
- * @returns {undefined}
+ * @returns {BlosumCollection} The collection instance (fetch still in progress)
  */
 export function blosumLoading(options) {
     options = options || {};
 
     // Collection of blosum matrices that will be fetched from a json file
-    window.blosumCollInst = new BlosumCollection(options); // options if we want to override defaults
+    const blosumCollInst = new BlosumCollection(options);
 
     // when the blosum Collection is fetched (an async process), we select one of its models as being selected
-    window.blosumCollInst.listenToOnce(window.blosumCollInst, "sync", function () {
+    blosumCollInst.listenToOnce(blosumCollInst, "sync", function () {
         console.log("ASYNC. blosum models loaded");
-        // allDataLoaded();
     });
 
     // Start the asynchronous blosum fetching after the above events have been set up
-    window.blosumCollInst.fetch(options);
+    blosumCollInst.fetch(options);
+    return blosumCollInst;
 }
 
 /**
@@ -560,7 +557,7 @@ export function views(compositeModelInst) {
     // Set up a one-time event listener that is then called from allDataLoaded
     // Once this is done, the views depending on async loading data (blosum, uniprot) can be set up
     // Doing it here also means that we don't have to set up these views at all if these views aren't needed (e.g. for some testing or validation pages)
-    compositeModelInst.listenToOnce(window.vent, "buildAsyncViews", function () {
+    compositeModelInst.listenToOnce(vent, "buildAsyncViews", function () {
         viewsThatNeedAsyncData(compositeModelInst);
     });
 }
@@ -682,7 +679,7 @@ export function viewsEssential(compositeModelInst, options) {
             canBringToTop: options.spectrumToTop
         }
     });
-    // .listenTo(window.vent, "individualMatchSelected", function (match) {
+    // .listenTo(vent, "individualMatchSelected", function (match) {
     //todo - alternative explanations
     // if (match && (compositeModelInst.get("serverFlavour") === "XIVIEW.ORG")) {
     //     this.lastRequestedID = match.id; // async catch
@@ -717,7 +714,7 @@ export function viewsEssential(compositeModelInst, options) {
     //                 d3.select("#alternatives").style("display", altModel.get("matches").length === 1 ? "none" : "block");
     //                 //self.alternativesModel.set("selection", allCrossLinks);
     //                 self.alternativesModel.setMarkedCrossLinks("selection", allCrossLinks, false, false);
-    //                 window.vent.trigger("resizeSpectrumSubViews", true);
+    //                 vent.trigger("resizeSpectrumSubViews", true);
     //             }
     //         }
     //     });
@@ -745,13 +742,13 @@ export function viewsEssential(compositeModelInst, options) {
     const xispec_wrapper = new XispecWrapper(xiSPEC_options);
 
     // Update spectrum view when external resize event called
-    xispec_wrapper.activeSpectrum.listenTo(window.vent, "resizeSpectrumSubViews", function () {
+    xispec_wrapper.activeSpectrum.listenTo(vent, "resizeSpectrumSubViews", function () {
         window.xiSPECUI.vent.trigger("resize:spectrum");
     });
 
     // "individualMatchSelected" in vent is link event between selection table view and spectrum view
     // used to transport one Match between views
-    xispec_wrapper.activeSpectrum.listenTo(window.vent, "individualMatchSelected", function (match) {
+    xispec_wrapper.activeSpectrum.listenTo(vent, "individualMatchSelected", function (match) {
         if (match) {
             compositeModelInst.loadSpectrum(match);
         } else {
@@ -876,7 +873,8 @@ function viewsThatNeedAsyncData(compositeModelInst) {
         el: "#alignPanel",
         collection: compositeModelInst.get("alignColl"),
         displayEventName: "alignViewShow",
-        tooltipModel: compositeModelInst.get("tooltipModel")
+        tooltipModel: compositeModelInst.get("tooltipModel"),
+        blosumColl: compositeModelInst.get("blosumColl"),
     });
 
 

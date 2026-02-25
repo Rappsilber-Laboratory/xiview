@@ -12,6 +12,7 @@ import * as $ from "jquery";
 import {filterSequenceByResidueSet} from "../../modelUtils";
 import * as _ from "underscore";
 import {make3DAlignID, not3DHomomultimeric} from "./NGLUtils";
+import vent from "../../vent";
 
 /**
  * Distance calculation object for crosslinks in 3D structures.
@@ -561,8 +562,8 @@ export class DistancesObj {
         console.log("PCIS", this.permittedChainIndicesSet);
         if (!isNewObj) {
             // if changing existing object fire an event, otherwise hold off. Fire an event once whole new distancesObj object is installed.
-            window.vent.trigger("recalcLinkDistances"); // this needs listened to and link distances updated before views listen to next trigger
-            window.vent.trigger("PDBPermittedChainSetsUpdated", this.permittedChainIndicesSet);
+            vent.trigger("recalcLinkDistances"); // this needs listened to and link distances updated before views listen to next trigger
+            vent.trigger("PDBPermittedChainSetsUpdated", this.permittedChainIndicesSet);
         }
 
         return this;

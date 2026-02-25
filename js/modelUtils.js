@@ -9,6 +9,7 @@ import * as $ from "jquery";
 import * as d3 from "d3";
 import {octree as d3octree} from "../vendor/d3-octree";
 import {commonRegexes, xilog} from "./utils";
+import vent from "./vent";
 
 /**
  * Separates match scores into arrays based on whether they are decoys or not.
@@ -585,7 +586,7 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
     };
 
     if (columns) {
-        window.vent.trigger("linkMetadataUpdated", result, {source: "file"});
+        vent.trigger("linkMetadataUpdated", result, {source: "file"});
     }
 
     return result;
@@ -651,7 +652,7 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel) {
     });
 
     if (columns) {
-        window.vent.trigger("proteinMetadataUpdated", {
+        vent.trigger("proteinMetadataUpdated", {
             columns: columns,//_.difference (columns, ["name", "Name"]),
             items: proteins,
             matchedItemCount: matchedProteinCount
@@ -766,7 +767,7 @@ export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsM
         }
     });
 
-    window.vent.trigger("userAnnotationsUpdated", {
+    vent.trigger("userAnnotationsUpdated", {
         types: annotationMap.values(),
         columns: annotationMap.values(),
         items: newAnnotations,

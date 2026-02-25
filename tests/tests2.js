@@ -6,6 +6,7 @@ import {setupColourModels} from "../js/model/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
 import {SearchResultsModel} from "../js/models/search-results-model";
+import vent from "../js/vent";
 
 // Enable full stack traces in console for test failures
 QUnit.config.notrycatch = true;
@@ -37,7 +38,7 @@ export function testSetup2() {
                 console.log(`*loaded 15884.json for ${pdbFile}`);
 
                 // Create fresh model instance for this test
-                blosumLoading({ url: "../R/blosums.json" });
+                const blosumCollInst = blosumLoading({ url: "../R/blosums.json" });
                 const clmsModel = new SearchResultsModel();
                 clmsModel.storeMzIdentMLFiles(options.mzidentmlFiles);
                 clmsModel.storeAnalysisCollectionSpectrumIdentifications([]);//hack
@@ -50,9 +51,10 @@ export function testSetup2() {
                 clmsModel.storeSpectraData([]);
 
                 const compositeModelInst = models({}, clmsModel);
+                compositeModelInst.set("blosumColl", blosumCollInst);
 
                 // Wait for initialization
-                window.vent.listenToOnce(window.vent, "initialSetupDone", function () {
+                vent.listenToOnce(vent, "initialSetupDone", function () {
                     console.log(`*initialSetupDone for ${pdbFile}`);
                     setupColourModels();
 

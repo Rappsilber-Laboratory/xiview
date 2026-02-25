@@ -25,6 +25,7 @@ import {
     not3DHomomultimeric
 } from "./NGLUtils";
 import {DistancesObj} from "./DistancesObj";
+import vent from "../../vent";
 
 /**
  * Backbone model that wraps NGL 3D structure data and bridges it with CLMS crosslink data.
@@ -88,7 +89,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         this.listenTo(this, "change:allowInterModelDistances", function (model, val) {
             const compModel = this.get("compositeModel");
             compModel.getCrossLinkDistances(compModel.getAllCrossLinks());  // regenerate distances for all crosslinks
-            window.vent.trigger("changeAllowInterModelDistances", model, val);
+            vent.trigger("changeAllowInterModelDistances", model, val);
         });
 
         this.listenTo(this, "change:chainMap", function (model, val) {
