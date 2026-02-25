@@ -13,7 +13,7 @@ This is a merged, single-repository version of what was previously organised as 
 | spectrum (xiSPEC)        | dev    | `src/`                                         |
 | crosslink-viewer (xiNET) | master | `js/views/xinet/`                              |
 
-The entry point is `js/promises-load.js`, which loads CSS, initialises the spinner, imports core modules, and handles data fetching.
+The entry point is `js/main.js`, which loads CSS, initialises the spinner, imports core modules, and handles data fetching.
 
 ## Key Directories
 
@@ -85,7 +85,7 @@ The test runner automatically:
 ## Build System
 
 - **Webpack**: Separate development and production configurations (`webpack.dev.js`, `webpack.prod.js`)
-- **Entry Point**: `js/promises-load.js`
+- **Entry Point**: `js/main.js`
 - **Output**: Builds to `dist/xiview.js` as UMD library
 - **Babel**: ES2018 with preset-env for browser compatibility
 - **ESLint**: Unix line endings, semicolons required, 4-space indentation

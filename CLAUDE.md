@@ -22,7 +22,7 @@ What were previously four separate git submodules are now merged into this singl
 ### Key Directories
 
 - **`js/`** - Main application JavaScript
-  - **`js/promises-load.js`** - Application entry point and loader
+  - **`js/main.js`** - Application entry point and loader
   - **`js/networkFrame.js`** - Main application initialisation, wires up all views and models
   - **`js/models/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.) — originally CLMS-model
   - **`js/model/`** - Application-specific models extending the core CLMS models
@@ -89,7 +89,7 @@ npm run test-headless  # Run tests without building (requires prior build)
 ## Build System
 
 - **Webpack**: Uses `webpack.common.js` with separate `webpack.dev.js` / `webpack.prod.js`
-- **Entry point**: `js/promises-load.js`
+- **Entry point**: `js/main.js`
 - **Output**: Builds to `dist/xiview.js` as UMD library
 - **Babel**: Configured for ES2018 with preset-env
 - **ESLint**: Unix line endings, semicolons required, 4-space indentation, double quotes

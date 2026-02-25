@@ -3,7 +3,7 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        xiview: "./js/promises-load.js",
+        xiview: "./js/main.js",
     },
     output: {
         filename: "[name].js",
