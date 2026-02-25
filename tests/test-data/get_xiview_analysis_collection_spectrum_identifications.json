@@ -1,0 +1,71 @@
+[
+  {
+    "upload_id": 1,
+    "spectrum_identification_list_ref": "sil_HCD",
+    "spectrum_identification_protocol_ref": "SearchProtocol_HCD",
+    "spectra_data_refs": [
+      "peaklist_id"
+    ],
+    "search_database_refs": [
+      "database_id"
+    ]
+  },
+  {
+    "upload_id": 1,
+    "spectrum_identification_list_ref": "sil_ETD",
+    "spectrum_identification_protocol_ref": "SearchProtocol_ETD",
+    "spectra_data_refs": [
+      "peaklist_id"
+    ],
+    "search_database_refs": [
+      "database_id"
+    ]
+  },
+  {
+    "upload_id": 1,
+    "spectrum_identification_list_ref": "sil_MS3",
+    "spectrum_identification_protocol_ref": "SearchProtocol_MS3",
+    "spectra_data_refs": [
+      "peaklist_id"
+    ],
+    "search_database_refs": [
+      "database_id"
+    ]
+  },
+  {
+    "upload_id": 2,
+    "spectrum_identification_list_ref": "SIL_1",
+    "spectrum_identification_protocol_ref": "SIP",
+    "spectra_data_refs": [
+      "SD_1"
+    ],
+    "search_database_refs": [
+      "SDB_contaminants",
+      "SDB_PXD001538",
+      "SDB_SwissProt"
+    ]
+  },
+  {
+    "upload_id": 3,
+    "spectrum_identification_list_ref": "SII_LIST_1_1",
+    "spectrum_identification_protocol_ref": "SearchProtocol_1_17022",
+    "spectra_data_refs": [
+      "SD_17022_recal_B210619_02_Lumos_ZC_CO_190_D2I_SDA-WT1.mgf",
+      "SD_17022_recal_B210619_04_Lumos_ZC_CO_190_D2I_SDA-WT3.mgf"
+    ],
+    "search_database_refs": [
+      "SDB_17022_2120"
+    ]
+  },
+  {
+    "upload_id": 4,
+    "spectrum_identification_list_ref": "SII_LIST_1_1_16441_recal_E151023_06_Lumos_CS_AB_IN_190_HCD_HSA_SDA_2.mgf",
+    "spectrum_identification_protocol_ref": "SearchProtocol_1_16441",
+    "spectra_data_refs": [
+      "SD_16441_recal_E151023_06_Lumos_CS_AB_IN_190_HCD_HSA_SDA_2.mgf"
+    ],
+    "search_database_refs": [
+      "SDB_16441_1534"
+    ]
+  }
+]

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>QUnit CLMS-model Tests</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.21.1.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+<script type="text/javascript" src="../../dist/vendors.js"></script>
+<script type="text/javascript" src="../../dist/xiview.js"></script>
+
+<script>
+    // Wait for the xiview module to load
+    window.addEventListener('load', function() {
+        if (window.XIVIEW_TEST && window.XIVIEW_TEST.testClmsModel) {
+            window.XIVIEW_TEST.testClmsModel();
+        } else {
+            console.error('XIVIEW_TEST.testClmsModel is not available');
+            console.log('Available XIVIEW_TEST exports:', Object.keys(window.XIVIEW_TEST || {}));
+        }
+    });
+</script>
+
+</body>
+</html>

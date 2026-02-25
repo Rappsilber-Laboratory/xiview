@@ -1,0 +1,41 @@
+[
+  {
+    "id": "ENZ_0",
+    "upload_id": 2,
+    "protocol_id": "SIP",
+    "c_term_gain": "OH",
+    "min_distance": null,
+    "missed_cleavages": 4,
+    "n_term_gain": "H",
+    "name": "Trypsin/P",
+    "semi_specific": false,
+    "site_regexp": "(?<=[KR])",
+    "accession": "MS:1001313"
+  },
+  {
+    "id": "Trypsin_0",
+    "upload_id": 3,
+    "protocol_id": "SearchProtocol_1_17022",
+    "c_term_gain": "OH",
+    "min_distance": null,
+    "missed_cleavages": 2,
+    "n_term_gain": "H",
+    "name": "Trypsin",
+    "semi_specific": false,
+    "site_regexp": "(?<=[KR])(?\\!P)",
+    "accession": "MS:1001251"
+  },
+  {
+    "id": "Trypsin_0",
+    "upload_id": 4,
+    "protocol_id": "SearchProtocol_1_16441",
+    "c_term_gain": "OH",
+    "min_distance": null,
+    "missed_cleavages": 3,
+    "n_term_gain": "H",
+    "name": "Trypsin",
+    "semi_specific": false,
+    "site_regexp": "(?<=[KR])(?\\!P)",
+    "accession": "MS:1001251"
+  }
+]

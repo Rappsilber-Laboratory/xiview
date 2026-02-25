@@ -20,6 +20,7 @@ xiVIEW is the main application component within the build-xiview project. It pro
 
 - **`js/views/`**: UI view components using Backbone.js framework
 - **`js/model/`**: Application-specific models extending CLMS-model
+- **`js/models/`**: Core CLMS data models (from CLMS-model)
 - **`js/filter/`**: Data filtering and search functionality
 - **`js/controller/`**: Application controllers and event handling
 - **`css/`**: Stylesheets for the main application

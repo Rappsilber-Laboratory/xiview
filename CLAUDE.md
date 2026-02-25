@@ -21,6 +21,7 @@ xiview serves as the **main application orchestrator** within the build-xiview c
 
 - **`js/views/`**: UI view components using Backbone.js framework
 - **`js/model/`**: Application-specific models extending CLMS-model
+- **`js/models/`**: Core CLMS data models (from CLMS-model)
 - **`js/filter/`**: Data filtering and search functionality
 - **`js/controller/`**: Application controllers and event handling
 - **`css/`**: Stylesheets for the main application
