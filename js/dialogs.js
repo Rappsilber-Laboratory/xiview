@@ -7,9 +7,7 @@ import * as $ from "jquery";
 
 window.jQuery = $;
 import d3 from "d3";
-// eslint-disable-next-line no-unused-vars
 import "jquery-ui/ui/widgets/dialog";
-// eslint-disable-next-line no-unused-vars
 import "jquery-ui/themes/base/all.css";
 
 //todo - this wrapping object is unnecessary

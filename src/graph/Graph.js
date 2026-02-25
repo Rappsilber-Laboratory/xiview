@@ -449,7 +449,6 @@ Graph.prototype.measure = function (on) {
 
         self.disableZoom();
 
-        // eslint-disable-next-line no-inner-declarations
         function measureStart() {
             self.measureShow();
 
@@ -487,7 +486,6 @@ Graph.prototype.measure = function (on) {
                 .attr("y2", self.yscale(self.model.ymaxPrimary));
         }
 
-        // eslint-disable-next-line no-inner-declarations
         function measureMove() {
             let endPeak;
             const coords = d3.mouse(this);

@@ -122,7 +122,6 @@ Peak.prototype.draw = function () {
                 stickyHighlight(evt.ctrlKey);
             });
 
-        // eslint-disable-next-line no-inner-declarations
         function showTooltip(x, y, fragId) {
             let contents = [["m/z", self.x.toFixed(self.graph.model.get("showDecimals"))], ["Int", self.y.toFixed(self.graph.model.get("showDecimals"))]];
             let header = [];
@@ -180,7 +179,6 @@ Peak.prototype.draw = function () {
             }
         }
 
-        // eslint-disable-next-line no-inner-declarations
         function hideTooltip() {
             if (window.compositeModelInst !== undefined)
                 self.graph.tooltip.set("contents", null);
@@ -190,7 +188,6 @@ Peak.prototype.draw = function () {
             }
         }
 
-        // eslint-disable-next-line no-inner-declarations
         function startHighlight(fragId) {
             let fragments;
             if (fragId) {
@@ -204,13 +201,11 @@ Peak.prototype.draw = function () {
             self.graph.model.addHighlight(fragments);
         }
 
-        // eslint-disable-next-line no-inner-declarations
         function endHighlight() {
             //hideTooltip();
             self.graph.model.clearHighlight(self.fragments);
         }
 
-        // eslint-disable-next-line no-inner-declarations
         function stickyHighlight(ctrl, fragId) {
             let fragments = [];
             if (fragId) {

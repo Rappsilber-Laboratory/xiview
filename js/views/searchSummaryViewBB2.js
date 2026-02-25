@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import "../../css/searchSummary.css";
 
 import JSONFormatter from "json-formatter-js";

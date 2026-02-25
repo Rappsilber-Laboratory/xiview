@@ -38,6 +38,9 @@ module.exports = {
                         maxSize: 8192,
                     },
                 },
+                generator: {
+                    filename: "[name][ext][query]",
+                },
             }
         ]
     },

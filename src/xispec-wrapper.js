@@ -170,7 +170,6 @@ export const XispecWrapper = Backbone.View.extend({
         const re = /[^A-Z]+/g;
         let offset = 1;
         let result;
-        // eslint-disable-next-line no-cond-assign
         while (result = re.exec(seq_mods)) {
             peptide.sequence[result.index - offset]["Modification"] = result[0];
             offset += result[0].length;

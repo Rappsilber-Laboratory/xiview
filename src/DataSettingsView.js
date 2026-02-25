@@ -860,7 +860,6 @@ export const DataSettingsView = SettingsView.extend({
         let modifications = [];
         const re = /[^A-Z]+/g;
         let result;
-        // eslint-disable-next-line no-cond-assign
         while (result = re.exec(pepStrMods)) {
 
             let new_mod = {};

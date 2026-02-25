@@ -269,7 +269,7 @@ export class SpectrumMatch {
 
         let fromProt, toProt;
 
-        if (this.isNotCrosslinked()) {//!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
+        if (this.isNotCrosslinked()) {// !p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
             this.containingModel._linearsPresent = true;
             fromProt = proteins.get(p1ID);
             if (!fromProt) {

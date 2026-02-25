@@ -569,7 +569,7 @@ export class GoTermsViewBB extends BaseFrameView {
             );
         linkSel.style("display", function (dlink) {
             if (!term) return "none";
-            return /*!term ||*/ (term.id === dlink.source.id || term.id === dlink.target.id) ? null : "none";
+            return /* !term ||*/ (term.id === dlink.source.id || term.id === dlink.target.id) ? null : "none";
         });
     }
 

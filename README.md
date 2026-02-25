@@ -112,6 +112,9 @@ The test runner automatically:
 
 ## Citations
 
+Please cite xiVIEW as:
+> Combe, C. W., Graham, M., Kolbowski, L., Fischer, L., & Rappsilber, J. (2024). xiVIEW: Visualisation of Crosslinking Mass Spectrometry Data. Journal of Molecular Biology, 436(17), 168656. https://doi.org/10.1016/j.jmb.2024.168656
+
 If using xiSPEC functionality, cite:
 > Lars Kolbowski, Colin Combe, Juri Rappsilber; xiSPEC: web-based visualization, analysis and sharing of proteomics data, Nucleic Acids Research, gky353, https://doi.org/10.1093/nar/gky353
 
