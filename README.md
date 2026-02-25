@@ -6,12 +6,12 @@ Interactive visualization of protein crosslinking mass spectrometry data sets, d
 
 This is a merged, single-repository version of what was previously organised as a git submodule project. It combines four original components into a single codebase:
 
-| Original submodule | Branch | Now located at |
-|--------------------|--------|----------------|
-| xiview | v2 | `js/`, `css/`, `images/`, `tests/` (top level) |
-| CLMS-model | v2 | `js/models/` |
-| spectrum (xiSPEC) | dev | `src/` |
-| crosslink-viewer (xiNET) | master | `js/views/xinet/` |
+| Original submodule       | Branch | Now located at                                 |
+|--------------------------|--------|------------------------------------------------|
+| xiview                   | v2     | `js/`, `css/`, `images/`, `tests/` (top level) |
+| CLMS-model               | v2     | `js/models/`                                   |
+| spectrum (xiSPEC)        | dev    | `src/`                                         |
+| crosslink-viewer (xiNET) | master | `js/views/xinet/`                              |
 
 The entry point is `js/promises-load.js`, which loads CSS, initialises the spinner, imports core modules, and handles data fetching.
 
