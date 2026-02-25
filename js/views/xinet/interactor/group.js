@@ -534,7 +534,7 @@ export class Group extends Interactor {
     }
 
     updateCountLabel() {
-        this.labelSVG.innerHTML = this.labelText + " ("+ this.unhiddenParticipantCount + ")";
+        this.labelSVG.textContent = this.labelText + " (" + this.unhiddenParticipantCount + ")";
     }
 
     setExpanded(expanded, svgP) {

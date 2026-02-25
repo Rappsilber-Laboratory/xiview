@@ -166,7 +166,7 @@ export class ProteinInfoViewBB extends BaseFrameView {
                 if (Array.isArray(value)) {
                     cell2.textContent = value.length;
                 } else if (key === "sequence") {
-                    cell2.innerHTML = protein.sequence;//self.makeInteractiveSeqString(protein, protein.sequence, protein.crosslinks, true);
+                    cell2.textContent = protein.sequence;//self.makeInteractiveSeqString(protein, protein.sequence, protein.crosslinks, true);
                 } else {
                     cell2.textContent = value;
                 }

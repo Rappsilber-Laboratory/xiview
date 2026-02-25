@@ -333,7 +333,7 @@ export class PDBFileChooserBB extends BaseFrameView {
             };
             newtab.location = "https://www.rcsb.org/search?request=" + encodeURI(JSON.stringify(query));
         } else {
-            newtab.document.body.innerHTML = "No legal Accession IDs are in the current dataset. These are required to query the PDB service.";
+            newtab.document.body.textContent = "No legal Accession IDs are in the current dataset. These are required to query the PDB service.";
         }
     }
 
@@ -349,7 +349,7 @@ export class PDBFileChooserBB extends BaseFrameView {
         if (accessionIDs.length === 1) {
             newtab.location = "https://swissmodel.expasy.org/repository/uniprot/" + accessionIDs[0];
         } else {
-            newtab.document.body.innerHTML = "Select exactly one protein with legal Accession ID in the current dataset. SWISS-MODEL service can only query single protein.";
+            newtab.document.body.textContent = "Select exactly one protein with legal Accession ID in the current dataset. SWISS-MODEL service can only query single protein.";
         }
     }
 
