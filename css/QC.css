@@ -1,0 +1,109 @@
+
+.xispec_subViewHeader{
+  color: #ffffff;
+  padding-left: 0.5em;
+  border-top: 1px solid black;
+  border-bottom: 1px solid white;
+  background: rgba(117, 0, 0, 1);
+}
+
+.xispec_subViewHeader .xispec_btn{
+  padding: 0px 6px;
+  font-size: smaller;
+}
+
+.xispec_errSVG {
+    width: 100%;
+    flex-grow: 1;
+}
+
+.xispec_subViewContent {
+	flex-direction: row;
+	display:  flex;
+	height: calc(100% - 20px);
+	width: 100%;
+	background-color:  #fff;
+}
+
+#xispec_subViewContent-left {
+    flex-grow:  1;
+    display:  flex;
+	min-height: 1px; /* firefox fix */
+}
+
+#xispec_subViewContent-right {
+    flex-grow:  1;
+    /* position: relative; */
+    display:  flex;
+	min-height: 1px; /* firefox fix */
+}
+
+
+.xispec_subViewHeader .fa{
+  margin: 2px 3px;
+}
+
+.xispec_subViewHeader .xispec_toggleQCWrapper{
+  position: absolute;
+  right: 5px;
+}
+
+.xispec_subViewHeader .xispec_dockRight{
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.xispec_subViewHeader .xispec_dockBottom{
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.xispec_subViewHeader .xispec_dockLeft{
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+
+.xispec_QCdiv{
+	position: relative;
+}
+
+.xispec_subViewHeader .xispec_rightControls{
+  /* order; */
+  float: right;
+  margin-right: 20px;
+}
+
+
+.xispec_QCdiv-right{
+  border-left: 1px solid;
+  order: 1;
+}
+
+.xispec_subViewContent-plot{
+  display: flex;
+  flex-grow: 1;
+}
+
+.xispec_QCdiv-left{
+  order: -2;
+  border-right: 1px solid;
+}
+
+/* .xispec_QCdiv-left .xispec_subViewContent-plot{
+  margin-top: 1em;
+} */
+
+.xispec_rightControls{
+  /* order; */
+  float: right;
+  margin-right: 20px;
+}

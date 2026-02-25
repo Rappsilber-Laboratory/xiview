@@ -1,0 +1,431 @@
+@charset "UTF-8";
+@font-face {
+  font-family: 'Lato-Bold';
+  src: url('../fonts/lato/bold/Lato-Bold.eot'); /* IE9 Compat Modes */
+  src: url('../fonts/lato/bold/Lato-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/lato/bold/Lato-Bold.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/lato/bold/Lato-Bold.ttf')  format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/lato/bold/Lato-Bold.svg#svgLato-Bold') format('svg'); /* Legacy iOS */
+}
+@font-face {
+  font-family: 'Lato-Regular';
+  src: url('../fonts/lato/regular/Lato-Regular.eot'); /* IE9 Compat Modes */
+  src: url('../fonts/lato/regular/Lato-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/lato/regular/Lato-Regular.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/lato/regular/Lato-Regular.ttf')  format('truetype'), /* Safari, Android, iOS  */
+       url('../fonts/lato/regular/Lato-Regular.svg#svgLato-Regular') format('svg');  /* Legacy iOS */
+}
+
+/* xispec_form-control */
+.xispec_form-control select {
+    border: 0px!important;
+    overflow: hidden;
+}    .xispec_form-control:-moz-placeholder {
+      color: #b2bcc5;
+    }
+    .xispec_form-control::-moz-placeholder {
+      color: #b2bcc5;
+      opacity: 1;
+    }
+    .xispec_form-control:-ms-input-placeholder {
+      color: #b2bcc5;
+    }
+    .xispec_form-control::-webkit-input-placeholder {
+      color: #b2bcc5;
+    }
+    .xispec_form-control.placeholder {
+      color: #b2bcc5;
+    }
+
+    .xispec_form-control {
+      border: 1px solid #bdc3c7;
+      color: #333;
+      resize: none;
+      height: 20px;
+      overflow: auto;
+      font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+      font-size: 10pt;
+      text-shadow: 0px;
+      padding: 8px 12px;
+      height: 42px;
+      -webkit-appearance: none;
+      border-radius: 6px;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+      -webkit-transition: border .25s linear, color .25s linear, background-color .25s linear;
+      transition: border .25s linear, color .25s linear, background-color .25s linear;
+    }
+    .xispec_form-control:focus {
+      border-color: #750000;
+      outline: 0;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+    .xispec_form-control[disabled],
+    .xispec_form-control[readonly],
+    fieldset[disabled] .xispec_form-control {
+      background-color: -internal-light-dark-color(rgb(235, 235, 228), rgb(45, 45, 45));
+      color: #333;
+      cursor: default;
+      filter: alpha(opacity=70);
+    }
+    .xispec_form-control.flat {
+      border-color: transparent;
+    }
+    .xispec_form-control.flat:hover {
+      border-color: #bdc3c7;
+    }
+    .xispec_form-control.flat:focus {
+      border-color: #750000;
+  }
+.xispec_form-control::-moz-selection {
+    background-color: #750000;
+    color: #fff;
+}
+.xispec_form-control::selection {
+    background-color: #750000;
+    color: #fff;
+}
+
+/* xispec_btn */
+.xispec_btn {
+    border: none;
+    background-color: inherit!important;
+    font-family: inherit;
+    color: #fff;
+    background: 0 0;/*var(--main-color);*/
+    font-size: .6em;
+    cursor: pointer;
+    padding: 5px 15px;
+    margin: 2px 5px 2px 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 300;
+    outline: 0;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    transition: all .3s;
+}
+.xispec_btn:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    transition: all .3s;
+}
+.xispec_btn-1 {
+    border: 1px solid #fff;
+    color: #fff;
+}
+.xispec_btn-1a:active, .xispec_btn-1a:hover {
+    color: #000;
+    background: #fff!important;
+}
+
+.xispec_btn-topNav{
+    position: relative;
+    top: 3px;
+    font-size: 1.2em;
+    padding: 3px 4px;
+    margin: 2px 2px 0px 2px;
+}
+
+/* fa */
+.fa-times-circle{
+    vertical-align:baseline;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    transition: all .3s;
+    cursor:pointer;
+    float:right;
+    margin: 2px 22px 2px 2px;
+}
+.fa-times-circle:hover {
+    color: #333333;
+    background:white;
+}
+
+#xispec_spectrumControls {
+    display: table-row;
+    font-size: 1.5em;
+	width: 100%;
+	background-color: #750000;
+	display: block;
+	color: #FFF;
+}
+
+#xispec_spectrumControls #xispec_lock{
+    margin-left: -11px;
+    margin-right: -3px;
+}
+
+#xispec_butterflyControls{
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    margin-bottom: 0px;
+}
+
+#xispec_spectrumControls #xispec_butterflySwapIcon{
+    transform: rotate(90deg);
+}
+
+#xispec_spectrumControls label {
+    display: inline-block;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+#xispec_spectrumControls input {
+    vertical-align: middle;
+    line-height: normal;
+    text-align: center;
+}
+
+#xispec_spectrumControls form {
+    display: inline-block;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    margin-bottom: 0px;
+}
+
+#xispec_spectrumControls form > * {
+    margin-right: 0.3em;
+    vertical-align: middle;
+}
+
+#xispec_spectrumControls .xispec_form-control{
+    height: 2em;
+    padding: 0px;
+}
+
+.xispec_plotsDiv {
+    display: flex;
+    flex-direction: column;
+    flex-grow:  1;
+    flex-shrink:  0;
+    /* height: calc(100% - 35px); */
+    position: relative;
+    /* border-right: 1px solid black; */
+}
+
+.xispec_spectrumMainPlotDiv {
+    display: flex;
+    flex-flow: column;
+    flex-grow: 1;
+    min-height: 150px;
+}
+
+.xispec_Svg {
+    background-color: white;
+    flex-grow: 1;
+    height: 100%;
+    width: 100%;
+}
+
+#xispec_wrapper {
+    Font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    font-weight: 300;
+    line-height: 1.3em;
+    color: #888;
+    /*-webkit-text-stroke: .15px;*/ /* IDE complains about this - cc*/
+    overflow: hidden;
+}
+
+#xispec_revertAnnotation{
+  color: rgb(154, 186, 255);
+}
+
+.xispec_peakAnnot{
+    font-size:12px;
+}
+.xispec_peakAnnotHighlight{
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.xispec_fragBar{
+    stroke-width: 1.3px;
+    stroke-linecap:round;
+}
+.xispec_fragBarThick{
+    stroke-width: 2.6px;
+    stroke-linecap:round;
+}
+
+.resize path {
+  fill: #888;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.resize path.bevel {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2.5px;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.2px;
+}
+
+.dataTables_wrapper .xispec_form-control{
+    height: 2em;
+    margin: 4px 2px;
+    padding: 0px 2px;
+}
+/*
+.modal{
+  background: #333;
+  width:650px;
+  text-align: center;
+}
+
+.modal .content{
+  margin: 1em 1.5em;
+  color: #b1b1b1;
+  font-size: 1.2em;
+}
+
+.modal .content strong{
+  color: #ffffff;
+  font-weight: 400;
+}
+
+.modal .content .label{
+  margin-top: 1em;
+}
+
+.modal .header{
+  font-size: 1.3em;
+}*/
+
+/*#saveModal #saveDBerror{
+  margin-bottom: 5px;
+}*/
+
+.xispec_measureMasses {
+    font-size: 0.8em;
+    color: #666;
+}
+
+.xispec_label{
+    font-size: 0.9em;
+    line-height: 3.5em;
+    cursor: pointer;
+    letter-spacing: 0;
+    font-weight: 300;
+    outline: 0;
+    display: block;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* For use with Split.js */
+
+.gutter {
+  background-color: #333;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  position: relative; /* will overlay previous absolute divs i.e. distance slider */
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('../images/grips/vertical.png');
+  cursor: col-resize;
+}
+
+.gutter.gutter-vertical {
+  background-image: url('../images/grips/horizontal.png');
+  cursor: row-resize;
+}
+
+.xispec_btn:disabled {
+    color: gray;
+    border-color: gray;
+}
+
+#xispec_spectrumPanel {
+	width: 100%;
+	height:100%;
+	flex-grow: 1;
+	display: flex;
+	flex-flow: column;
+}
+
+.dropdown LI label.xispec_btn {
+    padding-left: 0;
+}
+
+.xispec_disabled{
+  color: #999!important;
+  cursor: default;
+}
+
+.xispec_userModified{
+    background-color: #a0bbde !important;
+    font-weight: bold !important;
+}
+
+.xispec_tooltip{
+    font-size: 0.9em;
+    padding: 0 5px;
+    border-radius: 6px;
+    background-color: black;
+    color: #ccc;
+    pointer-events: none;
+    position: absolute;
+    opacity: 0;
+    z-index: 50;
+    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    line-height: 1.3em;
+}
+
+.xispec_spectra{
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  height: calc(100% - 35px);
+}
+
+.xispec_specPanelControls{
+  position: absolute;
+  right: 0;
+  text-align: right;
+}
+
+.xispec_specPanelControls i{
+    padding: 2px;
+}
+
+.xispec_inactiveSpecHeader i:hover{
+    color: #750000;
+    background: #FFFFFF;
+    cursor: pointer;
+}
+
+.xispec_activeSpecHeader .fa-times:hover{
+    color: #750000;
+    background: #FFFFFF;
+    cursor: pointer;
+}
+
+.xispec_activeSpecHeader{
+    background: #999999;
+    color: #ffffff;
+    padding: 0 5px;
+}
+
+.xispec_activeSpecHeader .fa-thumb-tack{
+    transform: rotate(30deg);
+}
+
+.xispec_inactiveSpecHeader{
+    background: #eeeeee;
+    padding: 0 5px;
+}

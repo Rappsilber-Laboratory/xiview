@@ -2,6 +2,15 @@
 dist/
 build/
 
+# Project-specific config files
+xiSpecConfig.php
+XiDBConfig.conf
+phpinfo.php
+
+# Upload directories
+uploads/
+
+
 # Dependencies
 node_modules/
 bower_components/

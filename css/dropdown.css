@@ -1,0 +1,63 @@
+.xispec_multiSelect_dropdown {
+    display: inline-block!important;
+}
+
+.xispec_multiSelect_dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #750000;
+    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    font-size: 0.9em;
+    color: #fff;
+    min-width: 160px;
+    border: 1px solid #fff;
+    box-shadow: 5px 5px 3px rgba(0,0,0,0.5);
+    z-index: 5000;
+    margin-top: -6px;
+}
+.xispec_multiSelect_dropdown-content li{
+    line-height: 1.2;
+}
+.xispec_multiSelect_dropdown:hover .xispec_multiSelect_dropdown-content {
+    display: block;
+}
+
+.xispec_multiSelect_dropdown .menuTitle:hover {
+    color: var(--main-color);
+    background: #fff;
+}
+
+.xispec_multiSelect_dropdown DIV UL {
+    list-style-type: none;
+    padding: 0;
+    margin: 2px;
+}
+
+.xispec_multiSelect_dropdown li label {
+    cursor: pointer;
+    display: block;
+    line-height: 1em!important;
+    padding: 0px!important;
+    font-size: 0.8em;
+    margin: 0px!important;
+}
+
+.xispec_multiSelect_dropdown DIV LI:hover {
+    color: var(--main-color);
+    background: #fff;
+    cursor: pointer;
+}
+
+.xispec_multiSelect_dropdown DIV HR {
+    border: none;
+    border-top: 1px dotted white;
+    margin: 0;
+    padding: 0;
+}
+
+.xispec_multiSelect_dropdown .xispec_btn {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-left: 0;
+    margin-right: 0;
+}

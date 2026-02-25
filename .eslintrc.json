@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "indent": ["error", 4],
+    "linebreak-style": ["error", "unix" ],
+    "semi": ["error", "always" ],
+    "semi-style": ["error", "last"],
+    "semi-spacing": ["error", {"before": false, "after": true}],
+    "quotes": [ "warn", "double" ],
+    "brace-style": "warn",
+    "no-unused-vars": "warn"
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  }
+}
