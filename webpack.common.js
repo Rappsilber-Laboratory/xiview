@@ -9,8 +9,10 @@ module.exports = {
         filename: "[name].js",
         chunkFilename: "[name].js",
         path: path.resolve(__dirname, "dist"),
-        library: "[name]",
-        libraryTarget: "umd",
+        library: {
+            name: "[name]",
+            type: "umd",
+        },
         globalObject: "this"
     },
 
@@ -18,13 +20,8 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: [
-                    /node_modules/,
-                    /vendor/
-                ],
-                use: {
-                    loader: "babel-loader"
-                }
+                exclude: /node_modules|vendor/,
+                use: ["babel-loader"]
             },
             {
                 test: /\.(css|scss)$/i,

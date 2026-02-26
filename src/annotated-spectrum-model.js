@@ -3,7 +3,7 @@ import Backbone from "backbone";
 import * as $ from "jquery";
 import {Fragment} from "./graph/Fragment";
 
-import * as colorbrewer from "colorbrewer";
+import colorbrewer from "colorbrewer";
 
 /**
  * Backbone model for storing and managing annotated mass spectrum data.

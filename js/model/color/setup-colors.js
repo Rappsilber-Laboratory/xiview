@@ -11,7 +11,7 @@ import {GroupColourModel} from "./link-color-model";
 import {InterProteinColourModel} from "./link-color-model";
 import {DistanceColourModel} from "./link-color-model";
 
-const colorbrewer = require("colorbrewer");
+import colorbrewer from "colorbrewer";
 import {HighestScoreColourModel} from "./link-color-model";
 import {
     ColourModelCollection,

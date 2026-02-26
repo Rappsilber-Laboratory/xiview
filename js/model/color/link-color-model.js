@@ -6,7 +6,7 @@
  */
 import * as _ from "underscore";
 import d3 from "d3";
-import * as colorbrewer from "colorbrewer";
+import colorbrewer from "colorbrewer";
 import {ColourModel} from "./color-model";
 import {filterOutDecoyInteractors} from "../../modelUtils";
 
