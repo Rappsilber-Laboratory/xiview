@@ -33,6 +33,7 @@ import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
 
 import {XispecWrapper} from "../src/xispec-wrapper";
+import {xiSPECUI} from "../src/xispecui";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
     downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
@@ -745,7 +746,7 @@ export function viewsEssential(compositeModelInst, options) {
 
     // Update spectrum view when external resize event called
     xispec_wrapper.activeSpectrum.listenTo(vent, "resizeSpectrumSubViews", function () {
-        window.xiSPECUI.vent.trigger("resize:spectrum");
+        xiSPECUI.vent.trigger("resize:spectrum");
     });
 
     // "individualMatchSelected" in vent is link event between selection table view and spectrum view

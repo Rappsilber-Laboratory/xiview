@@ -1,4 +1,5 @@
 import "../css/QC.css";
+import {xiSPECUI} from "./xispecui";
 
 import * as _ from "underscore";
 import Backbone from "backbone";
@@ -31,7 +32,7 @@ export const QCwrapperView = Backbone.View.extend({
             gutterSize: 5,
             direction: "vertical",
             onDragEnd: function () {
-                window.xiSPECUI.vent.trigger("resize:spectrum");
+                xiSPECUI.vent.trigger("resize:spectrum");
             }
         });
 
@@ -113,7 +114,7 @@ export const QCwrapperView = Backbone.View.extend({
     },
 
     downloadQCSVG: function () {
-        window.xiSPECUI.vent.trigger("downloadQCSVG");
+        xiSPECUI.vent.trigger("downloadQCSVG");
     },
 
     splitHorizontal: function () {
@@ -128,7 +129,7 @@ export const QCwrapperView = Backbone.View.extend({
             gutterSize: 4,
             direction: "horizontal",
             onDragEnd: function () {
-                window.xiSPECUI.vent.trigger("resize:spectrum");
+                xiSPECUI.vent.trigger("resize:spectrum");
             }
         });
     },
@@ -145,14 +146,14 @@ export const QCwrapperView = Backbone.View.extend({
             gutterSize: 4,
             direction: "vertical",
             onDragEnd: function () {
-                window.xiSPECUI.vent.trigger("resize:spectrum");
+                xiSPECUI.vent.trigger("resize:spectrum");
             }
         });
     },
 
     toggleWrapper: function () {
         this.isVisible = !this.isVisible;
-        window.xiSPECUI.vent.trigger("QCWrapperShow", this.options.specPanelId);
+        xiSPECUI.vent.trigger("QCWrapperShow", this.options.specPanelId);
         if (this.isVisible) {
             $(this.controlsDiv[0]).show();
             $(this.dockQCxispec_btn[0]).hide();
@@ -177,7 +178,7 @@ export const QCwrapperView = Backbone.View.extend({
             if (this.plotSplit)
                 this.plotSplit.destroy();
         }
-        window.xiSPECUI.vent.trigger("resize:spectrum");
+        xiSPECUI.vent.trigger("resize:spectrum");
     },
 
     dockSide: function () {
@@ -185,7 +186,7 @@ export const QCwrapperView = Backbone.View.extend({
         $(this.el).parent().css("flex-direction", "row");
         $(this.contentDiv[0]).css("flex-direction", "column");
         this.splitHorizontal();
-        window.xiSPECUI.vent.trigger("resize:spectrum");
+        xiSPECUI.vent.trigger("resize:spectrum");
     },
 
     dockRight: function () {
@@ -206,13 +207,13 @@ export const QCwrapperView = Backbone.View.extend({
         $(this.el).removeClass("xispec_QCdiv-right");
         $(this.contentDiv[0]).css("flex-direction", "row");
         this.splitVertical();
-        window.xiSPECUI.vent.trigger("resize:spectrum");
+        xiSPECUI.vent.trigger("resize:spectrum");
     },
 
     updatePlots: function (e) {
         let plotId = $(e.target).attr("id");
-        window.xiSPECUI.vent.trigger("QCPlotToggle", this.options.specPanelId, plotId);
-        window.xiSPECUI.vent.trigger("resize:spectrum");
+        xiSPECUI.vent.trigger("QCPlotToggle", this.options.specPanelId, plotId);
+        xiSPECUI.vent.trigger("resize:spectrum");
     }
 
 });

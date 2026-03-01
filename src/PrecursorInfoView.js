@@ -2,6 +2,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";
 import * as $ from "jquery";
+import {xiSPECUI} from "./xispecui";
 
 export const PrecursorInfoView = Backbone.View.extend({
 
@@ -20,7 +21,7 @@ export const PrecursorInfoView = Backbone.View.extend({
         // event listeners
         this.listenTo(this.model, "change:butterfly", this.butterflyToggle);
         this.listenTo(this.model, "butterflySwap", this.butterflySwap);
-        this.listenTo(window.xiSPECUI.vent, "resize:spectrum", this.render);
+        this.listenTo(xiSPECUI.vent, "resize:spectrum", this.render);
 
         this.expand = true;
 

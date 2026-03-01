@@ -2,6 +2,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 import {Fragment} from "./graph/Fragment";
+import {xiSPECUI} from "./xispecui";
 
 import colorbrewer from "colorbrewer";
 
@@ -426,7 +427,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         if (this.get("JSONrequest") !== undefined) {
             let json_req = $.extend(true, {}, this.get("JSONrequest"));
             json_req.LinkSite = newLinkSites;
-            window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
+            xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
         } else {
             this.get("JSONdata").LinkSite = newLinkSites;
             this.setData();
@@ -466,7 +467,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 if (annotationMod[0].aminoAcids.indexOf(myNew.aminoAcid) === -1)
                     annotationMod[0].aminoAcids.push(myNew.aminoAcid);
             }
-            window.xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
+            xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
         } else {
             //Preview
             this.get("JSONdata").Peptides[newPepIndex].sequence[newPos].Modification = this.get("JSONdata").Peptides[oldPepIndex].sequence[oldPos].Modification;

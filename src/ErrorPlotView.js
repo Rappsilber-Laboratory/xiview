@@ -2,6 +2,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import * as $ from "jquery";
 import {svgUtils} from "../vendor/svgexp";
+import {xiSPECUI} from "./xispecui";
 import d3 from "d3";
 import {download} from "./download";
 
@@ -12,11 +13,11 @@ export const ErrorPlotView = Backbone.View.extend({
     initialize: function (viewOptions) {
 
         this.listenTo(this.model, "change:QCabsErr", this.toggleAbsErr);
-        this.listenTo(window.xiSPECUI.vent, "QCPlotToggle", this.toggleView);
-        this.listenTo(window, "resize", _.debounce(this.render));
-        this.listenTo(window.xiSPECUI.vent, "resize:spectrum", this.render);
-        this.listenTo(window.xiSPECUI.vent, "downloadQCSVG", this.downloadSVG);
-        this.listenTo(window.xiSPECUI.vent, "QCWrapperShow", this.wrapperVisToggle);
+        this.listenTo(xiSPECUI.vent, "QCPlotToggle", this.toggleView);
+        this.listenTo(xiSPECUI.vent, "resize", _.debounce(this.render));
+        this.listenTo(xiSPECUI.vent, "resize:spectrum", this.render);
+        this.listenTo(xiSPECUI.vent, "downloadQCSVG", this.downloadSVG);
+        this.listenTo(xiSPECUI.vent, "QCWrapperShow", this.wrapperVisToggle);
 
         const defaultOptions = {};
         this.options = _.extend(defaultOptions, viewOptions);

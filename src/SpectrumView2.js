@@ -6,6 +6,7 @@ import * as _ from "underscore";
 import Backbone from "backbone";
 import * as d3 from "d3";
 import * as Spinner from "spin";
+import {xiSPECUI} from "./xispecui";
 
 import {Graph} from "./graph/Graph";
 import {svgUtils} from "../vendor/svgexp";
@@ -61,7 +62,7 @@ export const SpectrumView = Backbone.View.extend({
 
         $(this.el).css("background-color", "#fff");
 
-        this.listenTo(window, "resize", _.debounce(this.resize));
+        this.listenTo(xiSPECUI.vent, "resize", _.debounce(this.resize));
 
         this.listenTo(this.model, "change:JSONdata", this.render);
         this.listenTo(this.model, "change:measureMode", this.measuringTool);
@@ -79,9 +80,9 @@ export const SpectrumView = Backbone.View.extend({
         this.listenTo(this.model, "change:hideNotSelectedFragments", this.updatePeakHighlighting);
         this.listenTo(this.model, "change:showLossLabels", this.showLossy);
 
-        this.listenTo(window.xiSPECUI.vent, "downloadSpectrumSVG", this.downloadSVG);
-        this.listenTo(window.xiSPECUI.vent, "resize:spectrum", this.resize);
-        this.listenTo(window.xiSPECUI.vent, "clearSpectrumHighlights", this.clearHighlights);
+        this.listenTo(xiSPECUI.vent, "downloadSpectrumSVG", this.downloadSVG);
+        this.listenTo(xiSPECUI.vent, "resize:spectrum", this.resize);
+        this.listenTo(xiSPECUI.vent, "clearSpectrumHighlights", this.clearHighlights);
 
         this.listenTo(this.model, "resetZoom", this.resetZoom);
         this.listenTo(this.model, "changed:Highlights", this.updateHighlights);

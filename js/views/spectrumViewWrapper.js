@@ -15,6 +15,7 @@ import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, proteinConcat} from "../utils";
 import d3 from "d3";
 import vent from "../vent";
+import {xiSPECUI} from "../../src/xispecui";
 
 /**
  * Spectrum viewer wrapper for xiSPEC integration.
@@ -311,6 +312,6 @@ export class SpectrumViewWrapper extends BaseFrameView {
     }
 
     clearSpectrumHighlights() {
-        window.xiSPECUI.vent.trigger("clearSpectrumHighlights"); //todo -looks like error? is normally called window.xiSPECUI.vent - cc
+        xiSPECUI.vent.trigger("clearSpectrumHighlights"); //todo -looks like error? is normally called xiSPECUI.vent - cc
     }
 }

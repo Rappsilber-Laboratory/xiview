@@ -1,5 +1,6 @@
 import "../css/settings.css";
 import "datatables.net-dt/css/jquery.dataTables.css";
+import {xiSPECUI} from "./xispecui";
 
 import * as _ from "underscore";
 import * as $ from "jquery";
@@ -39,7 +40,7 @@ export const DataSettingsView = SettingsView.extend({
 
         this.displayModel = this.options.displayModel;
         // event listeners
-        this.listenTo(window.xiSPECUI.vent, "dataSettingsToggle", this.toggleView);
+        this.listenTo(xiSPECUI.vent, "dataSettingsToggle", this.toggleView);
 
         if (!this.options.showCustomCfg) {
             this.menu.selectAll("#xispec_custom_config_Btn").style("display", "none");
@@ -360,7 +361,7 @@ export const DataSettingsView = SettingsView.extend({
     applyCustomCfg: function () {
         let json = this.model.get("JSONrequest");
         json.annotation.custom = $("#xispec_settingsCustomCfg-input").val().split("\n");
-        window.xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
+        xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
         this.displayModel.set("changedAnnotation", true);
         // this.render();
     },
@@ -369,7 +370,7 @@ export const DataSettingsView = SettingsView.extend({
         e.preventDefault();
         let json = this.model.get("JSONrequest");
         this.displayModel.set("annotatorURL", $("#xispec_annotatorDropdown").val());
-        window.xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
+        xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
         this.displayModel.set("changedAnnotation", true);
     },
 
@@ -396,9 +397,9 @@ export const DataSettingsView = SettingsView.extend({
 
         json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
         json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
-        json_request["annotation"]["requestID"] = window.xiSPECUI.lastRequestedID + Date.now();
+        json_request["annotation"]["requestID"] = xiSPECUI.lastRequestedID + Date.now();
         json_request["annotation"]["returnModSyntax"] = "Xmod";
-        window.xiSPECUI.vent.trigger("requestAnnotation", json_request, this.displayModel.get("annotatorURL"));
+        xiSPECUI.vent.trigger("requestAnnotation", json_request, this.displayModel.get("annotatorURL"));
         this.displayModel.set("changedAnnotation", true);
         this.displayModel.knownModifications = $.extend(true, [], this.model.knownModifications);
 

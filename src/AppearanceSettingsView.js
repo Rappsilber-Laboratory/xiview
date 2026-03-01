@@ -2,6 +2,7 @@ import "../css/settings.css";
 import * as _ from "underscore";
 import * as $ from "jquery";
 import * as jscolor from "@eastdesire/jscolor";
+import {xiSPECUI} from "./xispecui";
 import {SettingsView} from "./SettingsView";
 import * as d3 from "d3";
 
@@ -36,7 +37,7 @@ export const AppearanceSettingsView = SettingsView.extend({
 
         this.displayModel = this.options.displayModel;
         // event listeners
-        this.listenTo(window.xiSPECUI.vent, "appearanceSettingsToggle", this.toggleView);
+        this.listenTo(xiSPECUI.vent, "appearanceSettingsToggle", this.toggleView);
 
         // HTML elements
         //
@@ -179,7 +180,7 @@ export const AppearanceSettingsView = SettingsView.extend({
     absErrToggle: function (e) {
         let selected = $(e.target).is(":checked");
         this.displayModel.set("QCabsErr", selected);
-        // window.xiSPECUI.vent.trigger('QCabsErr', selected);
+        // xiSPECUI.vent.trigger('QCabsErr', selected);
     },
 
     accentuateCLcontainingToggle: function (e) {
@@ -195,7 +196,7 @@ export const AppearanceSettingsView = SettingsView.extend({
     chargeLabelToggle: function (e) {
         let selected = $(e.target).is(":checked");
         this.displayModel.set("labelFragmentCharge", selected);
-        // window.xiSPECUI.vent.trigger('labelFragmentCharge', selected);
+        // xiSPECUI.vent.trigger('labelFragmentCharge', selected);
     },
 
     changeColorScheme: function (e) {

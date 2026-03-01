@@ -1,4 +1,5 @@
 import {PeptideKeyFragment, CrosslinkKeyFragment} from "./FragKey/KeyFragment";
+import {xiSPECUI} from "./xispecui";
 
 import Backbone from "backbone";
 import * as _ from "underscore";
@@ -49,8 +50,8 @@ export const FragmentationKeyView = Backbone.View.extend({
         this.listenTo(this.model, "change:highlightColor", this.updateColors);
         this.listenTo(this.model, "change:butterfly", this.butterflyToggle);
         this.listenTo(this.model, "butterflySwap", this.butterflySwap);
-        this.listenTo(window, "resize", _.debounce(this.resize));
-        this.listenTo(window.xiSPECUI.vent, "resize:spectrum", this.resize);
+        this.listenTo(xiSPECUI.vent, "resize", _.debounce(this.resize));
+        this.listenTo(xiSPECUI.vent, "resize:spectrum", this.resize);
         this.listenTo(this.model, "change:accentuateCrossLinkContainingFragments", this.render);
 
         this.tooltip = d3.select("body").append("span")

@@ -3,7 +3,7 @@ import * as _ from "underscore";
 import * as Backbone from "backbone";
 import * as d3 from "d3";
 
-window.xiSPECUI = {};
+import {xiSPECUI} from "./xispecui";
 
 export const SettingsView = Backbone.View.extend({
 
@@ -25,7 +25,7 @@ export const SettingsView = Backbone.View.extend({
 
         // event listeners
         this.listenTo(this.model, "change:JSONdata", this.render);
-        this.listenTo(window.xiSPECUI.vent, "activeSpecPanel:changed", this.modelChanged);
+        this.listenTo(xiSPECUI.vent, "activeSpecPanel:changed", this.modelChanged);
 
         this.isVisible = false;
 
