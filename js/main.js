@@ -284,6 +284,7 @@ async function fetchAccessionsInBatches(accessions, batchSize = 5) {
             console.log(`Fetched batch: ${batch}`);
         } catch (error) {
             console.error("Error fetching batch:", error);
+            throw error;
         }
 
         // Optional: Pause between batches to avoid hitting rate limits
