@@ -16,11 +16,11 @@
 
     // Wait for the xiview module to load
     window.addEventListener('load', function() {
-        if (window.XIVIEW_TEST && window.XIVIEW_TEST.test2) {
-            window.XIVIEW_TEST.test2();
+        if (window.xiview._test && window.xiview._test.test2) {
+            window.xiview._test.test2();
         } else {
-            console.error('XIVIEW_TEST.test2 is not available');
-            console.log('window.XIVIEW_TEST:', window.XIVIEW_TEST);
+            console.error('xiview._test.test2 is not available');
+            console.log('window.xiview._test:', window.xiview._test);
         }
     });
 </script>

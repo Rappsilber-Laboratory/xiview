@@ -318,22 +318,19 @@ function fetchUniprotKB(accessions) {
         });
 }
 
-// Conditionally expose test functions only in development builds
-if (process.env.NODE_ENV !== "production") {
-    window.XIVIEW_TEST = {
-        test: async () => {
-            const { testSetupNew } = await import("../tests/tests");
-            return testSetupNew();
-        },
-        test2: async () => {
-            const { testSetup2 } = await import("../tests/tests2");
-            return testSetup2();
-        },
-        testClmsModel: async () => {
-            const { testSetup } = await import("../tests/clms-model-tests");
-            // eslint-disable-next-line no-undef
-            QUnit.config.notrycatch = true;
-            return testSetup();
-        }
-    };
-}
+export const _test = process.env.NODE_ENV !== "production" ? {
+    test: async () => {
+        const { testSetupNew } = await import("../tests/tests");
+        return testSetupNew();
+    },
+    test2: async () => {
+        const { testSetup2 } = await import("../tests/tests2");
+        return testSetup2();
+    },
+    testClmsModel: async () => {
+        const { testSetup } = await import("../tests/clms-model-tests");
+        // eslint-disable-next-line no-undef
+        QUnit.config.notrycatch = true;
+        return testSetup();
+    }
+} : undefined;
