@@ -292,8 +292,8 @@ export class G_GLink extends Link {
     // xiNET.P_PLink.prototype.update = function () {
     //     if (!this.renderedToProtein || // todo - ok... check why this is here
     //         //hide if prot either end is hidden
-    //         this.renderedFromProtein.participant.hidden ||
-    //         this.renderedToProtein.participant.hidden ||
+    //         this.renderedFromProtein.protein.hidden ||
+    //         this.renderedToProtein.protein.hidden ||
     //         // or either end is expanded to bar and not in collapsed group
     //         (this.renderedFromProtein.expanded && !this.renderedFromProtein.inCollapsedGroup()) ||
     //         (this.renderedToProtein.expanded && !this.renderedToProtein.inCollapsedGroup()) ||

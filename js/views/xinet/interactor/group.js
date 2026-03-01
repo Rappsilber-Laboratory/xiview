@@ -14,20 +14,20 @@ export class Group extends Interactor {
      * Creates a new Group instance.
      *
      * @param {string} id - Unique identifier for this group
-     * @param {string[]} participantIds - Array of protein IDs to include in this group
+     * @param {string[]} proteinIds - Array of protein IDs to include in this group
      * @param {CrosslinkViewer} controller - The parent crosslink viewer controller
      */
-    constructor(id, participantIds, controller) {
+    constructor(id, proteinIds, controller) {
         super(controller);
 
         this._id = id;
         this.name = id;
 
-        this.renderedParticipants = [];
-        for (let pId of participantIds) {
+        this.renderedProteins = [];
+        for (let pId of proteinIds) {
             const p = this.controller.renderedProteins.get(pId);
             if (p) { // no decoys in this.controller.renderedProteins
-                this.renderedParticipants.push(p);
+                this.renderedProteins.push(p);
             }
         }
         this.parentGroups = new Set();
@@ -98,8 +98,8 @@ export class Group extends Interactor {
 
     get proteins () {
         const proteins = [];
-        for (let renderedParticipant of this.renderedParticipants) {
-            proteins.push(renderedParticipant.participant);
+        for (let renderedProtein of this.renderedProteins) {
+            proteins.push(renderedProtein.protein);
         }
         return proteins;
     }
@@ -119,7 +119,7 @@ export class Group extends Interactor {
         // let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
         // const z = this.controller.z;//, pad = 5 * z;
         //
-        // for (let rp of this.renderedParticipants) {
+        // for (let rp of this.renderedProteins) {
         //     if (!rp.hidden && !this.containsInSubgroup(rp)) {
         //         const rpBbox = rp.bBox;
         //         if (!x1 || (rpBbox.x * z) + rp.ix < x1) {
@@ -149,23 +149,23 @@ export class Group extends Interactor {
 
     //only output the info needed to reproduce the layout, used by save layout function
     toJSON() {
-        const participantIds = [];
-        for (let rp of this.renderedParticipants) {
-            participantIds.push(rp.participant.id);
+        const proteinIds = [];
+        for (let rp of this.renderedProteins) {
+            proteinIds.push(rp.protein.id);
         }
         return {
             id: this.id,
             x: this.ix,
             y: this.iy,
             expanded: this.expanded,
-            participantIds: participantIds
+            proteinIds: proteinIds
         };
     }
 
-    get unhiddenParticipantCount () {
+    get unhiddenProteinCount () {
         let count = 0;
-        for (let renderedParticipant of this.renderedParticipants) {
-            if (!renderedParticipant.participant.hidden) {
+        for (let renderedProtein of this.renderedProteins) {
+            if (!renderedProtein.protein.hidden) {
                 count++;
             }
         }
@@ -174,8 +174,8 @@ export class Group extends Interactor {
 
     get selected () {
         const selectedProteins = this.controller.model.get("selectedProteins");
-        for (let rp of this.renderedParticipants) {
-            if (selectedProteins.indexOf(rp.participant) === -1) {
+        for (let rp of this.renderedProteins) {
+            if (selectedProteins.indexOf(rp.protein) === -1) {
                 return false;
             }
         }
@@ -202,8 +202,8 @@ export class Group extends Interactor {
 
     // result depends on whats hidden
     isSubsetOf(anotherGroup) {
-        for (let renderedParticipant of this.renderedParticipants) {
-            if (!renderedParticipant.participant.hidden && anotherGroup.renderedParticipants.indexOf(renderedParticipant) === -1) {
+        for (let renderedProtein of this.renderedProteins) {
+            if (!renderedProtein.protein.hidden && anotherGroup.renderedProteins.indexOf(renderedProtein) === -1) {
                 return false;
             }
         }
@@ -211,7 +211,7 @@ export class Group extends Interactor {
     }
 
     contains(renderedProtein) {
-        for (let rp of this.renderedParticipants) {
+        for (let rp of this.renderedProteins) {
             if (rp === renderedProtein) {
                 return true;
             }
@@ -235,9 +235,9 @@ export class Group extends Interactor {
      * @returns {boolean} True if this group overlaps with other groups
      */
     isOverlappingGroup() {
-        for (let renderedParticipant of this.renderedParticipants) {
-            if (!renderedParticipant.participant.hidden && renderedParticipant.parentGroups.size > 1) {
-                for (let parentGroup of renderedParticipant.parentGroups) {
+        for (let renderedProtein of this.renderedProteins) {
+            if (!renderedProtein.protein.hidden && renderedProtein.parentGroups.size > 1) {
+                for (let parentGroup of renderedProtein.parentGroups) {
                     if (!parentGroup.isSubsetOf(this) && !this.isSubsetOf(parentGroup)) {
                         return true;
                     }
@@ -272,8 +272,8 @@ export class Group extends Interactor {
     mouseOver(evt) {
         // this.showHighlight(true);
         const toHighlight = [];
-        for (let rp of this.renderedParticipants) {
-            toHighlight.push(rp.participant);
+        for (let rp of this.renderedProteins) {
+            toHighlight.push(rp.protein);
         }
         this.controller.model.setHighlightedProteins(toHighlight);
         //call in super?
@@ -295,8 +295,8 @@ export class Group extends Interactor {
     getAverageParticipantPosition() {
         let xSum = 0,
             ySum = 0;
-        const rpCount = this.renderedParticipants.length;
-        for (let rp of this.renderedParticipants) {
+        const rpCount = this.renderedProteins.length;
+        for (let rp of this.renderedProteins) {
             xSum += rp.ix;
             ySum += rp.iy;
         }
@@ -406,7 +406,7 @@ export class Group extends Interactor {
         let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
         const z = this.controller.z, pad = 5 * z;
 
-        for (let rp of this.renderedParticipants) {
+        for (let rp of this.renderedProteins) {
             if (!rp.hidden && !this.containsInSubgroup(rp)) {
                 const rpBbox = rp.bBox;
                 if (!x1 || (rpBbox.x * z) + rp.ix < x1) {
@@ -483,7 +483,7 @@ export class Group extends Interactor {
     // updateHighlight() {
     //     if (this.expanded) {
     //         let someHighlighted = false, allHighlighted = true;
-    //         for (let rp of this.renderedParticipants) {
+    //         for (let rp of this.renderedProteins) {
     //             if (!rp.hidden) {
     //                 if (rp.isHighlighted) {
     //                     someHighlighted = true;
@@ -509,7 +509,7 @@ export class Group extends Interactor {
 
     updateSelected() {
         let someSelected = false, allSelected = true;
-        for (let rp of this.renderedParticipants) {
+        for (let rp of this.renderedProteins) {
             if (rp.selected) {
                 someSelected = true;
             } else {
@@ -534,7 +534,7 @@ export class Group extends Interactor {
     }
 
     updateCountLabel() {
-        this.labelSVG.textContent = this.labelText + " (" + this.unhiddenParticipantCount + ")";
+        this.labelSVG.textContent = this.labelText + " (" + this.unhiddenProteinCount + ")";
     }
 
     setExpanded(expanded, svgP) {
@@ -591,7 +591,7 @@ export class Group extends Interactor {
         const self = this;
 
         if (transition) {
-            for (let rp of this.renderedParticipants) {
+            for (let rp of this.renderedProteins) {
                 originalProteinPositions.push([rp.ix, rp.iy]);
                 proteinXPositionInterpolations.push(d3.interpolate(rp.ix, newX));
                 proteinYPositionInterpolations.push(d3.interpolate(rp.iy, newY));
@@ -618,8 +618,8 @@ export class Group extends Interactor {
                 self.expanded = false;
                 self.setPositionFromXinet(newX, newY);
 
-                for (let i = 0; i < self.renderedParticipants.length; i++) {
-                    const rp = self.renderedParticipants[i];
+                for (let i = 0; i < self.renderedProteins.length; i++) {
+                    const rp = self.renderedProteins[i];
                     rp.setHidden(true);
                     if (transition){
                         rp.setPositionFromXinet(originalProteinPositions[i][0], originalProteinPositions[i][1]);
@@ -649,8 +649,8 @@ export class Group extends Interactor {
             } else if (interp > 1 || isNaN(interp)) {
                 return updateCollapsing(1);
             } else {
-                for (let i = 0; i < self.renderedParticipants.length; i++) {
-                    const rp = self.renderedParticipants[i];
+                for (let i = 0; i < self.renderedProteins.length; i++) {
+                    const rp = self.renderedProteins[i];
                     const x = proteinXPositionInterpolations[i](cubicInOut(interp));
                     const y = proteinYPositionInterpolations[i](cubicInOut(interp));
                     rp.setPositionFromXinet(x, y);
@@ -701,7 +701,7 @@ export class Group extends Interactor {
         // this.controller.groupsSVG.appendChild(this.upperGroup);
         // this.outline.setAttribute("fill-opacity", "0.5");
         //
-        // for (let rp of this.renderedParticipants) {
+        // for (let rp of this.renderedProteins) {
         //     rp.setHidden(rp.participant.hidden || rp.inCollapsedGroup());
         // }
 
@@ -732,7 +732,7 @@ export class Group extends Interactor {
             this.controller.hiddenProteinsChanged(); //needed for isOnScreen() to work
 
             let allOnScreen = true;
-            for (let rp of this.renderedParticipants) {
+            for (let rp of this.renderedProteins) {
                 if (!isOnScreen(rp)) {
                     allOnScreen = false;
                     // can't break here because we need to get the bbox of the expanded group
@@ -749,7 +749,7 @@ export class Group extends Interactor {
             }
 
             if (allOnScreen) {
-                for (let rp of this.renderedParticipants) {
+                for (let rp of this.renderedProteins) {
                     proteinXPositionInterpolations.push(d3.interpolate(ix, rp.ix));
                     proteinYPositionInterpolations.push(d3.interpolate(iy, rp.iy));
                 }
@@ -789,7 +789,7 @@ export class Group extends Interactor {
                     const xTrans = ix - bboxMidPoint.x;
                     const yTrans = iy - bboxMidPoint.y;
 
-                    for (let rp of this.renderedParticipants) {
+                    for (let rp of this.renderedProteins) {
                         const dx = rp.ix + xTrans - bboxMidPoint.x;
                         const dy = rp.iy + yTrans - bboxMidPoint.y;
                         // const dx = rp.ix + (ix - bboxMidPoint.x) - bboxMidPoint.x;
@@ -817,7 +817,7 @@ export class Group extends Interactor {
                     const xTrans = ix - bboxMidPoint.x;
                     const yTrans = iy - bboxMidPoint.y;
 
-                    for (let rp of this.renderedParticipants) {
+                    for (let rp of this.renderedProteins) {
                         proteinXPositionInterpolations.push(d3.interpolate(ix, rp.ix + xTrans));
                         proteinYPositionInterpolations.push(d3.interpolate(iy, rp.iy + yTrans));
                     }
@@ -831,7 +831,7 @@ export class Group extends Interactor {
             }
 
             //move all prots / subgroups to
-            for (let rp of this.renderedParticipants) {
+            for (let rp of this.renderedProteins) {
                 if (!rp.hidden){
                     rp.setPositionFromXinet(ix, iy);
                 }
@@ -851,8 +851,8 @@ export class Group extends Interactor {
             this.controller.groupsSVG.appendChild(this.upperGroup);
             this.outline.setAttribute("fill-opacity", "0.5");
 
-            for (let rp of this.renderedParticipants) {
-                rp.setHidden(rp.participant.hidden || rp.inCollapsedGroup());
+            for (let rp of this.renderedProteins) {
+                rp.setHidden(rp.protein.hidden || rp.inCollapsedGroup());
             }
 
             if (transition) { // yucky, transition is being used to indicate whether this is one interactor collapsing or from 'Collapse All'
@@ -901,8 +901,8 @@ export class Group extends Interactor {
             } else if (interp > 1 || isNaN(interp)) {
                 return updateExpanding(1);
             } else {
-                for (let i = 0; i < self.renderedParticipants.length; i++) {
-                    const rp = self.renderedParticipants[i];
+                for (let i = 0; i < self.renderedProteins.length; i++) {
+                    const rp = self.renderedProteins[i];
                     const x = proteinXPositionInterpolations[i](cubicInOut(interp));
                     const y = proteinYPositionInterpolations[i](cubicInOut(interp));
                     rp.setPosition(x, y);
@@ -942,13 +942,13 @@ export class Group extends Interactor {
 
     // update all lines (e.g after a move)
     setAllLinkCoordinates() {
-        for (let rp of this.renderedParticipants) {
+        for (let rp of this.renderedProteins) {
             rp.setAllLinkCoordinates();
         }
     }
 
     // addConnectedNodes (subgraph) {
-    //     for (let p of this.renderedParticipants) {
+    //     for (let p of this.renderedProteins) {
     //         for (let link of p.renderedP_PLinks.values()) {
     //             //visible, non-self links only
     //             if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
@@ -978,11 +978,11 @@ export class Group extends Interactor {
 
     // countExternalLinks () {
     //     // return this.renderedP_PLinks.length;
-    //     const renderedParticipantsLinkedTo = new Set();
+    //     const renderedProteinsLinkedTo = new Set();
     //
     //     for (let link of this.subgraph.links.values()) {
     //         const rp = link.getOtherEnd(this);
-    //         renderedParticipantsLinkedTo.add(rp);
+    //         renderedProteinsLinkedTo.add(rp);
     //     }
     //
     //
@@ -993,11 +993,11 @@ export class Group extends Interactor {
     //     //     {
     //     //         if (link.isPassingFilter()) {
     //     //             //countExternal++;
-    //     //             renderedParticipantsLinkedTo.add(link.getOtherEnd(this).getRenderedInteractor());
+    //     //             renderedProteinsLinkedTo.add(link.getOtherEnd(this).getRenderedInteractor());
     //     //         }
     //     //     }
     //     // }
-    //     return renderedParticipantsLinkedTo.size;
+    //     return renderedProteinsLinkedTo.size;
     //
     // }
 }

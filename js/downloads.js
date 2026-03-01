@@ -287,7 +287,7 @@ export function mostReadableMultipleId(compositeModelInst, match, matchedPeptide
 export function getMatchesCSV(compositeModelInst) {
     let csv = "\"Id\",\"Protein1\",\"SeqPos1\",\"PepPos1\",\"PepSeq1\",\"LinkPos1\",\"Protein2\",\"SeqPos2\",\"PepPos2\",\"PepSeq2\",\"LinkPos2\",\"Score\",\"PrecursorIntensity\",\"Charge\",\"ExpMz\",\"ExpMass\",\"CalcMz\",\"CalcMass\",\"MassError\",\"Missing Peaks\",\"Validated\",\"Search\",\"RawFileName\",\"PeakListFileName\",\"ScanNumber\",\"ScanIndex\",\"CrossLinkerModMass\",\"FragmentTolerance\",\"IonTypes\",\"Decoy1\",\"Decoy2\",\"3D Distance\",\"From Chain\",\"To Chain\",\"LinkType\",\"DecoyType\",\"Retention Time\"\r\n";
     const clmsModel = compositeModelInst.get("clmsModel");
-    const participants = clmsModel.getProteinsMap();
+    const proteins = clmsModel.getProteinsMap();
     const distance2dp = d3.format(".2f");
 
     const crosslinks = compositeModelInst.getFilteredCrossLinks("all");
@@ -313,9 +313,9 @@ export function getMatchesCSV(compositeModelInst) {
         const lp1 = fullPosConcat(match, 0);
         const lp2 = fullPosConcat(match, 1);
 
-        const decoy1 = participants.get(peptides1.prt[0]).is_decoy;
+        const decoy1 = proteins.get(peptides1.prt[0]).is_decoy;
         // TODO: looks to rely on "" == false, prob doesn't give right result for linears
-        const decoy2 = peptides2 ? participants.get(peptides2.prt[0]).is_decoy : "";
+        const decoy2 = peptides2 ? proteins.get(peptides2.prt[0]).is_decoy : "";
 
         // Work out distances for this match - ambiguous matches will have >1 crosslink
         const crosslinks = match.crosslinks;
@@ -335,7 +335,7 @@ export function getMatchesCSV(compositeModelInst) {
         let linkType;
         if (match.isAmbig()) {
             linkType = "Ambig.";
-        } else if (participants.get(match.matchedPeptides[0].prt[0]).accession === "___AMBIGUOUS___" || (match.matchedPeptides[1] && participants.get(match.matchedPeptides[1].prt[0]).accession === "___AMBIGUOUS___")) {
+        } else if (proteins.get(match.matchedPeptides[0].prt[0]).accession === "___AMBIGUOUS___" || (match.matchedPeptides[1] && proteins.get(match.matchedPeptides[1].prt[0]).accession === "___AMBIGUOUS___")) {
             linkType = "__AMBIG__";
         } else if (match.crosslinks[0].isSelfLink()) {
             linkType = "Self";

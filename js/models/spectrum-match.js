@@ -83,7 +83,7 @@ export class SpectrumMatch {
     /**
      * Create a SpectrumMatch linking a mass spectrum to peptide identifications
      * @param {SearchResultsModel} containingModel - The containing search results model
-     * @param {Map<string, Protein>} participants - Map of protein IDs to Protein objects
+     * @param {Map<string, Protein>} proteins - Map of protein IDs to Protein objects
      * @param {Map<string, Crosslink>} crosslinks - Map of crosslink IDs to Crosslink objects
      * @param {Map<string, Peptide>} peptides - Map of peptide IDs to Peptide objects
      * @param {Object} json - Raw identification data object
@@ -100,7 +100,7 @@ export class SpectrumMatch {
      * @param {string} json.sd - Spectra data identifier
      * @param {string} json.sip - Spectrum identification protocol identifier
      */
-    constructor(containingModel, participants, crosslinks, peptides, json) {
+    constructor(containingModel, proteins, crosslinks, peptides, json) {
         this.#containingModel = containingModel;
         this.#json = json;
 
@@ -152,12 +152,12 @@ export class SpectrumMatch {
             this.containingModel._linearsPresent = true;
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
-                this.#associateWithLink(participants, crosslinks, p1ID);
+                this.#associateWithLink(proteins, crosslinks, p1ID);
             }
             if (this.matchedPeptides[1]) {
                 for (let i = 0; i < this.matchedPeptides[1].prt.length; i++) {
                     p1ID = this.matchedPeptides[1].prt[i];
-                    this.#associateWithLink(participants, crosslinks, p1ID);
+                    this.#associateWithLink(proteins, crosslinks, p1ID);
                 }
             }
             return;
@@ -173,7 +173,7 @@ export class SpectrumMatch {
             this.couldBelongToSelfLink = true;
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
-                this.#associateWithLink(participants, crosslinks, p1ID, p1ID, this.matchedPeptides[0].pos[i] + this.linkPos1 - 1, this.matchedPeptides[0].pos[i] + this.linkPos2 - 1, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length);
+                this.#associateWithLink(proteins, crosslinks, p1ID, p1ID, this.matchedPeptides[0].pos[i] + this.linkPos1 - 1, this.matchedPeptides[0].pos[i] + this.linkPos2 - 1, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length);
             }
             return;
         }
@@ -204,7 +204,7 @@ export class SpectrumMatch {
                 res1 = +this.matchedPeptides[0].pos[i] - 1 + this.linkPos1;
                 res2 = +this.matchedPeptides[1].pos[j] - 1 + this.linkPos2;
 
-                this.#associateWithLink(participants, crosslinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
+                this.#associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
             }
         }
 

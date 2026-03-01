@@ -426,7 +426,7 @@ export class FilterModel extends Backbone.Model {
         if (searchString) {
             //protein name check
             const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
-            const participants = this.compositeModel.get("clmsModel").getProteinsMap();
+            const proteins = this.compositeModel.get("clmsModel").getProteinsMap();
             const matchedPeptides = match.matchedPeptides;
             const matchedPepCount = matchedPeptides.length;
 
@@ -445,18 +445,18 @@ export class FilterModel extends Backbone.Model {
                             const pids = matchedPeptide.prt;
                             const pidCount = pids.length;
                             for (let p = 0; p < pidCount; p++) {
-                                const interactor = participants.get(pids[p]);
-                                let toSearch = interactor[dataField];// + " " + interactor.description;
+                                const protein = proteins.get(pids[p]);
+                                let toSearch = protein[dataField];// + " " + protein.description;
 
                                 //hacky
                                 if (dataField === "description") {
-                                    if (interactor.uniprot) {
-                                        toSearch += interactor.uniprot.keywords;
+                                    if (protein.uniprot) {
+                                        toSearch += protein.uniprot.keywords;
                                     }
                                 }
 
-                                if (dataField == "name" && interactor.accession) {  // hacky nevermind
-                                    toSearch = toSearch + " " + interactor.accession;
+                                if (dataField == "name" && protein.accession) {  // hacky nevermind
+                                    toSearch = toSearch + " " + protein.accession;
                                 }
                                 if (toSearch && toSearch.toLowerCase().indexOf(partString) != -1) {
                                     found = true;

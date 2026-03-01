@@ -27,7 +27,7 @@ export class DefaultProteinColourModel extends ColourModel {
     /**
      * Returns the value for color assignment (always 0 for single-color scheme).
      * All proteins get the same value, so all map to the single color.
-     * @param {Object} obj - Protein/interactor object (unused)
+     * @param {Object} obj - Protein object (unused)
      * @returns {number} Always returns 0
      */
     getValue() {
@@ -68,9 +68,9 @@ export class ManualColourModel extends ColourModel {
     }
 
     /**
-     * Returns the assigned color for a protein/interactor.
-     * @param {Object} obj - Protein/interactor object with id property
-     * @param {string} obj.id - Unique protein/interactor identifier
+     * Returns the assigned color for a protein.
+     * @param {Object} obj - Protein object with id property
+     * @param {string} obj.id - Unique protein identifier
      * @returns {string} Hex color string (assigned color or "#FFFFFF" if no assignment)
      */
     getColour(obj) {
@@ -83,31 +83,31 @@ export class ManualColourModel extends ColourModel {
     }
 
     /**
-     * Sets the color for a specific protein/interactor.
-     * @param {string} interactorId - Unique protein/interactor identifier
+     * Sets the color for a specific protein.
+     * @param {string} proteinId - Unique protein identifier
      * @param {string} colour - Hex color string (e.g., "#FF0000")
      * @returns {undefined}
      */
-    setInteractorColour(interactorId, colour) {
-        this.colourAssignment.set(interactorId, colour);
+    setProteinColour(proteinId, colour) {
+        this.colourAssignment.set(proteinId, colour);
     }
 
     /**
-     * Checks if a protein/interactor has a manual color assignment.
-     * @param {string} interactorId - Unique protein/interactor identifier
+     * Checks if a protein has a manual color assignment.
+     * @param {string} proteinId - Unique protein identifier
      * @returns {boolean} True if protein has manual assignment, false otherwise
      */
-    hasManualAssignment(interactorId) {
-        return this.colourAssignment.has(interactorId);
+    hasManualAssignment(proteinId) {
+        return this.colourAssignment.has(proteinId);
     }
 
     /**
-     * Removes the manual color assignment for a protein/interactor.
-     * @param {string} interactorId - Unique protein/interactor identifier
+     * Removes the manual color assignment for a protein.
+     * @param {string} proteinId - Unique protein identifier
      * @returns {undefined}
      */
-    removeManualAssignment(interactorId) {
-        this.colourAssignment.delete(interactorId);
+    removeManualAssignment(proteinId) {
+        this.colourAssignment.delete(proteinId);
     }
 
     /**

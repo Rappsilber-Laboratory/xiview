@@ -188,7 +188,7 @@ export class RenderedCrosslink extends Link {
 
             //make domain rectangles
             const annoSize = pep[1] - 0.2;
-            let annoX = ((pep[0] + 0.6) - (renderedProtein.participant.size / 2));
+            let annoX = ((pep[0] + 0.6) - (renderedProtein.protein.size / 2));
             let annoLength = annoSize;
             annoColouredRect.setAttribute("x", annoX.toString());
             annoColouredRect.setAttribute("y", y.toString());
@@ -203,7 +203,7 @@ export class RenderedCrosslink extends Link {
             if (typeof pep[2] != "undefined") { //homomultimer like
                 annoColouredRect = document.createElementNS(CrosslinkViewer.svgns, "rect");
                 annoColouredRect.setAttribute("class", "protein");
-                annoX = ((pep[2] + 0.5) - (renderedProtein.participant.size / 2));
+                annoX = ((pep[2] + 0.5) - (renderedProtein.protein.size / 2));
                 annoLength = (pep[3] - pep[2]);
                 annoColouredRect.setAttribute("x", annoX.toString());
                 annoColouredRect.setAttribute("y", y.toString());
@@ -259,8 +259,8 @@ export class RenderedCrosslink extends Link {
         }
 
         // either end manually hidden? then hide
-        if (this.renderedFromProtein.participant.hidden === true ||
-            (this.renderedToProtein && this.renderedToProtein.participant.hidden === true)) {
+        if (this.renderedFromProtein.protein.hidden === true ||
+            (this.renderedToProtein && this.renderedToProtein.protein.hidden === true)) {
             this.hide();
             return false;
         }

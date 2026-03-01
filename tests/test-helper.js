@@ -44,7 +44,7 @@ export async function loadTestData(baseUrl = "./test-data") {
         clmsModel.storeMzIdentMLFiles(mzidentmlFilesData);
 
         // After loading all data, call parseJSON to construct internal structures
-        // This populates participants, crosslinks, matches arrays, etc.
+        // This populates proteins, crosslinks, matches arrays, etc.
         clmsModel.parseJSON({});
         console.log(clmsModel.toJSON());
         return clmsModel;

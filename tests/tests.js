@@ -106,7 +106,7 @@ function testCallback(model) {
     //
     //     const actual = clmsModel.getProteinSearchMap(peptides, matches);
     //
-    //     // OLD TEST CODE (function now returns Map with {participantIDSet, id} objects):
+    //     // OLD TEST CODE (function now returns Map with {proteinIDSet, id} objects):
     //     // //hack to get values into readable form
     //     // actual["S1"] = [...actual["S1"]];
     //     // actual["S2"] = [...actual["S2"]];
@@ -120,8 +120,8 @@ function testCallback(model) {
     //     assert.ok(actual instanceof Map, "Returns a Map");
     //     assert.ok(actual.get("S1"), "Search S1 exists");
     //     assert.ok(actual.get("S2"), "Search S2 exists");
-    //     assert.deepEqual([...actual.get("S1").participantIDSet].sort(), expectedS1, "S1 contains proteins " + expectedS1.join(", "));
-    //     assert.deepEqual([...actual.get("S2").participantIDSet].sort(), expectedS2, "S2 contains proteins " + expectedS2.join(", "));
+    //     assert.deepEqual([...actual.get("S1").proteinIDSet].sort(), expectedS1, "S1 contains proteins " + expectedS1.join(", "));
+    //     assert.deepEqual([...actual.get("S2").proteinIDSet].sort(), expectedS2, "S2 contains proteins " + expectedS2.join(", "));
     // });
 
     test("Readable ID Generation", function (assert) {
@@ -1356,7 +1356,7 @@ function testCallback(model) {
 
 
     test("Legal accession ID Filter", function (assert) {
-        const interactors = [
+        const proteins = [
             {is_decoy: true, accession: "Q10276"},  // is decoy, good accession
             {is_decoy: false, accession: "P12345"}, // good accession
             {is_decoy: false, accession: "GIBBER"}, // bad accession
@@ -1364,7 +1364,7 @@ function testCallback(model) {
             {is_decoy: false, accession: "WH&T"},   // bad accession
         ];
         const expectedValue = ["P12345", "A0A022YWF9"];
-        const actualValue = getLegalAccessionIDs(interactors);
+        const actualValue = getLegalAccessionIDs(proteins);
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as crosslink protein pairing value, Passed!");
     });

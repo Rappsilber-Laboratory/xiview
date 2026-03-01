@@ -234,10 +234,10 @@ export class ProteinInfoViewBB extends BaseFrameView {
                     const crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     // following breaks things if proteins have underscores in name
                     // var posData = self.splitDataAttr(d3sel, "data-pos", "_");
-                    // var interactor = self.model.get("clmsModel").getProteins().get(posData[0]);
+                    // var protein = self.model.get("clmsModel").getProteins().get(posData[0]);
                     //
                     // self.model.get("tooltipModel")
-                    //     .set("header", "Crosslinked with " + makeTooltipTitle.residue(interactor, +posData[1]))
+                    //     .set("header", "Crosslinked with " + makeTooltipTitle.residue(protein, +posData[1]))
                     //     .set("contents", makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
                     //     .set("location", {
                     //         pageX: d3.event.pageX,

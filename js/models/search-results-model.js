@@ -274,19 +274,19 @@ export class SearchResultsModel {
         // todo - saved config should end up including filter settings not just xiNET layout
         // this.#xiNETLayout = json.xiNETLayout;
         //process actual data
-        const participants = this.#proteins;
+        const proteins = this.#proteins;
         const peptides = new Map();
         if (!this.isAggregatedData()) { // use id as protein id
             for (let rawProtein of this._rawProteins) {
                 const protein = new Protein(rawProtein);
-                participants.set(protein.id, protein);
+                proteins.set(protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
                 peptide.sequence = peptide.base_seq;
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
                 for (let p = 0; p < peptide.prt.length; p++) {
                     if (peptide.dec[p]) {
-                        const protein = participants.get(peptide.prt[p]);
+                        const protein = proteins.get(peptide.prt[p]);
                         if (!protein) {
                             console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
                         }
@@ -323,7 +323,7 @@ export class SearchResultsModel {
                 }
             }
             for (let protein of tempProteins.values()) {
-                participants.set(protein.id, protein);
+                proteins.set(protein.id, protein);
             }
         }
 
@@ -338,7 +338,7 @@ export class SearchResultsModel {
 
         // Create all matches first (this populates _scoreExtents)
         for (let i = 0; i < l; i++) {
-            const match = new SpectrumMatch(this, participants, crosslinks, peptides, this._rawMatches[i]);
+            const match = new SpectrumMatch(this, proteins, crosslinks, peptides, this._rawMatches[i]);
             matches.push(match);
         }
 
@@ -356,7 +356,7 @@ export class SearchResultsModel {
      * Connect searches to proteins
      * @param {Map<string, Peptide>} peptideMap - Map of peptide IDs to Peptide objects
      * @param {Array<SpectrumMatch>} matchArray - Array of spectrum matches
-     * @returns {Map<string, Object>} Map of search IDs to search objects with participantIDSet and id
+     * @returns {Map<string, Object>} Map of search IDs to search objects with proteinIDSet and id
      */
     getProteinSearchMap(peptideMap, matchArray) {
         const searchMap = new Map();
@@ -365,11 +365,11 @@ export class SearchResultsModel {
                 const prots = peptide.prt;
                 const searchId = match.uploadId;
                 const search = searchMap.get(searchId) || (() => {
-                    const newSearch = {participantIDSet: new Set(), id: searchId};
+                    const newSearch = {proteinIDSet: new Set(), id: searchId};
                     searchMap.set(searchId, newSearch);
                     return newSearch;
                 })();
-                prots.forEach((prot) => search.participantIDSet.add(prot));
+                prots.forEach((prot) => search.proteinIDSet.add(prot));
             });
         });
         return searchMap;

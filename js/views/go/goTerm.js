@@ -1,13 +1,13 @@
 /**
  * @fileoverview Gene Ontology (GO) term class for xiVIEW.
  * Represents a single GO term with hierarchical relationships (is_a, part_of) and associated proteins.
- * Provides methods to traverse GO term hierarchy and collect interactors from subtrees.
+ * Provides methods to traverse GO term hierarchy and collect proteins from subtrees.
  */
 
 /**
  * Gene Ontology term with hierarchical relationships and protein associations.
  * Relationships are lazily instantiated Sets: is_a (superclasses), subclasses, part_of, parts.
- * The interactors Set contains protein objects associated with this term.
+ * The proteins Set contains protein objects associated with this term.
  * @class
  * @property {string} id - GO term ID (e.g., "GO:0005737")
  * @property {string} name - Human-readable GO term name
@@ -15,8 +15,8 @@
  * @property {Set<string>} [subclasses] - Set of child GO term IDs
  * @property {Set<string>} [part_of] - Set of GO term IDs this term is part of
  * @property {Set<string>} [parts] - Set of GO term IDs that are parts of this term
- * @property {Set<Object>} [interactors] - Set of protein objects with this GO annotation
- * @property {number} filtInteractorCount - Cached count of filtered interactors in subtree
+ * @property {Set<Object>} [proteins] - Set of protein objects with this GO annotation
+ * @property {number} filtInteractorCount - Cached count of filtered proteins in subtree
  */
 export class GoTerm {
     constructor() {
@@ -25,28 +25,28 @@ export class GoTerm {
         //this.subclasses = new Set();
         //this.part_of = new Set();
         //this.parts = new Set();
-        //this.interactors = new Set();
+        //this.proteins = new Set();
 
         this.filtInteractorCount = 0;
     }
 
-    // getInteractors (interactorSet) {
+    // getProteins (interactorSet) {
     //     var go = window.compositeModelInst.get("go");
     //     if (!interactorSet) {
     //         interactorSet = new Set();
     //     }
     //     if (this.parts) {
     //         for (let partId of this.parts) {
-    //             go.get(partId).getInteractors(interactorSet);
+    //             go.get(partId).getProteins(interactorSet);
     //         }
     //     }
     //     if (this.subclasses) {
     //         for (let subclassId of this.subclasses) {
-    //             go.get(subclassId).getInteractors(interactorSet);
+    //             go.get(subclassId).getProteins(interactorSet);
     //         }
     //     }
-    //     if (this.interactors) {
-    //         for (let i of this.interactors) {
+    //     if (this.proteins) {
+    //         for (let i of this.proteins) {
     //             if (i.hidden == false) {
     //                 interactorSet.add(i);
     //             }
@@ -56,24 +56,24 @@ export class GoTerm {
     // }
 
     /**
-     * Recursively collects all interactors (proteins) from this GO term and its subtree.
+     * Recursively collects all proteins from this GO term and its subtree.
      * Traverses parts and subclasses hierarchies to collect all associated proteins.
      * Only includes proteins where hidden === false.
      * @param {boolean} [storeCount] - If true, stores result count in filtInteractorCount property
-     * @returns {Set<Object>|null} Set of protein objects, or null if no interactors found
+     * @returns {Set<Object>|null} Set of protein objects, or null if no proteins found
      */
-    getInteractors(storeCount) {
+    getProteins(storeCount) {
         const go = this.go;
         // GoTerm.prototype.getCount++;
 
         let subTreeSet; // = new Set();
 
-        if (this.parts || this.subclasses || this.interactors) {
+        if (this.parts || this.subclasses || this.proteins) {
             subTreeSet = new Set();
 
             if (this.parts) {
                 for (let partId of this.parts) {
-                    let sub = go.get(partId).getInteractors(storeCount);
+                    let sub = go.get(partId).getProteins(storeCount);
                     if (sub) {
                         sub.forEach(subTreeSet.add, subTreeSet);
                     }
@@ -81,15 +81,15 @@ export class GoTerm {
             }
             if (this.subclasses) {
                 for (let subclassId of this.subclasses) {
-                    let sub = go.get(subclassId).getInteractors(storeCount);
+                    let sub = go.get(subclassId).getProteins(storeCount);
                     if (sub) {
                         sub.forEach(subTreeSet.add, subTreeSet);
                     }
                 }
             }
 
-            if (this.interactors) {
-                for (let i of this.interactors) {
+            if (this.proteins) {
+                for (let i of this.proteins) {
                     if (i.hidden === false) {
                         subTreeSet.add(i);
                     }

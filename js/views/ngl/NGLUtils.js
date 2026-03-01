@@ -11,7 +11,7 @@ import * as _ from "underscore";
 import $ from "jquery";
 // const workerpool = require('workerpool');
 import {xilog} from "../../utils";
-import {filterOutDecoyInteractors, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";
+import {filterOutDecoyProteins, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";
 import d3 from "d3";
 import vent from "../../vent";
 // import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
@@ -73,7 +73,7 @@ export function getChainSequencesFromNGLStage(stage) {
 // Except it depends on having pdb codes, not a standalone file, and all the uniprot ids present too
 // Therefore, we need to return umatched sequences so we can fallback to using our own pairing algorithm if necessary
 // eslint-disable-next-line no-unused-vars
-function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback) {
+function matchPDBChainsToUniprot(pdbUris, nglSequences, proteinArr, callback) {
 
     let count = nglSequences.length;//pdbUris.length;
     const dataArr = [];
@@ -117,7 +117,7 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback)
         xilog("PDB Service Map All", mapArr);
 
         if (callback) {
-            const interactors = filterOutDecoyInteractors(interactorArr);
+            const proteins = filterOutDecoyProteins(proteinArr);
 
             mapArr.forEach(function (mapping) {
                 const dotIndex = mapping.pdb.indexOf(".");
@@ -129,11 +129,11 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback)
                 });
                 //console.log ("SEQOBJS", matchSeqs);
                 mapping.seqObj = matchSeqs[0];
-                const matchingInteractors = interactors.filter(function (i) {
+                const matchingProteins = proteins.filter(function (i) {
                     const minLength = Math.min(i.accession.length, mapping.uniprot.length);
                     return i.accession.substr(0, minLength) === mapping.uniprot.substr(0, minLength);
                 });
-                mapping.id = _.isEmpty(matchingInteractors) ? "none" : matchingInteractors[0].id;
+                mapping.id = _.isEmpty(matchingProteins) ? "none" : matchingProteins[0].id;
             });
 
             requireXiAlign = mapArr.filter(function (mapping) {
@@ -196,7 +196,7 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, interactorArr, callback)
 export function matchSequencesToExistingProteins(protAlignCollection, sequenceObjs, proteins, extractFunc) {
     xilog("SEQS TO PAIR INTERNALLY", sequenceObjs);
 
-    proteins = filterOutDecoyInteractors(proteins)
+    proteins = filterOutDecoyProteins(proteins)
         .filter(function (protein) {
             return protAlignCollection.get(protein.id);
         });

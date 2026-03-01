@@ -9,7 +9,7 @@ export const ProteinVisibilityMixin = {
     /**
      * Sets highlighted proteins, optionally adding to existing highlights.
      * Removes duplicates before setting.
-     * @param {Array} pArr - Array of protein interactor objects to highlight
+     * @param {Array} pArr - Array of protein objects to highlight
      * @param {boolean} add - If true, add to existing highlights; if false, replace
      */
     setHighlightedProteins(pArr, add) {
@@ -23,7 +23,7 @@ export const ProteinVisibilityMixin = {
     /**
      * Sets selected proteins, optionally toggling with existing selection.
      * For toggle mode (add=true), proteins already selected are removed.
-     * @param {Array} pArr - Array of protein interactor objects to select
+     * @param {Array} pArr - Array of protein objects to select
      * @param {boolean} add - If true, toggle proteins in selection; if false, replace
      */
     setSelectedProteins(pArr, add) {
@@ -56,8 +56,8 @@ export const ProteinVisibilityMixin = {
         const selectedArr = this.get("selectedProteins");
         const selectedCount = selectedArr.length;
         for (let s = 0; s < selectedCount; s++) {
-            const participant = selectedArr[s];
-            participant.manuallyHidden = true;
+            const protein = selectedArr[s];
+            protein.manuallyHidden = true;
         }
         this.setSelectedProteins([]);
         this.get("filterModel").trigger("change", this.get("filterModel"));
@@ -69,9 +69,9 @@ export const ProteinVisibilityMixin = {
      */
     hideUnselectedProteins() {
         const selected = this.get("selectedProteins");
-        for (let participant of this.get("clmsModel").getProteinsIterator()) {
-            if (selected.indexOf(participant) == -1) {
-                participant.manuallyHidden = true;
+        for (let protein of this.get("clmsModel").getProteinsIterator()) {
+            if (selected.indexOf(protein) == -1) {
+                protein.manuallyHidden = true;
             }
         }
         this.get("filterModel").trigger("change", this.get("filterModel"));
@@ -82,8 +82,8 @@ export const ProteinVisibilityMixin = {
      * Triggers filter model change to reapply filtering.
      */
     showHiddenProteins() {
-        for (let participant of this.get("clmsModel").getProteinsIterator()) {
-            participant.manuallyHidden = false;
+        for (let protein of this.get("clmsModel").getProteinsIterator()) {
+            protein.manuallyHidden = false;
         }
         this.get("filterModel").trigger("change");
     },
@@ -97,8 +97,8 @@ export const ProteinVisibilityMixin = {
         const selectedCount = selectedArr.length;
         const toSelect = new Set();
         for (let s = 0; s < selectedCount; s++) {
-            const participant = selectedArr[s];
-            const crosslinks = participant.crosslinks;
+            const protein = selectedArr[s];
+            const crosslinks = protein.crosslinks;
             const clCount = crosslinks.length;
             for (let cl = 0; cl < clCount; cl++) {
                 const crosslink = crosslinks[cl];
@@ -126,9 +126,9 @@ export const ProteinVisibilityMixin = {
      */
     proteinSelectionTextFilter() {
         const filterText = d3.select("#proteinSelectionFilter").property("value").trim().toLowerCase();
-        const participantsArr = Array.from(this.get("clmsModel").getProteinsIterator());
+        const proteinsArr = Array.from(this.get("clmsModel").getProteinsIterator());
 
-        const toSelect = participantsArr.filter(function (p) {
+        const toSelect = proteinsArr.filter(function (p) {
             if (p.description) {
                 return (p.name.toLowerCase().indexOf(filterText) != -1 || p.description.toLowerCase().indexOf(filterText) != -1);
             }

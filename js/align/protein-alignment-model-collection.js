@@ -1,7 +1,7 @@
 // Model of sequence alignment settings for a protein (including the above collection as an attribute)
 import Backbone from "backbone";
 
-import {filterOutDecoyInteractors} from "../modelUtils";
+import {filterOutDecoyProteins} from "../modelUtils";
 import {GotohAligner} from "./bioseq32";
 import {SeqCollection} from "./sequence-model-collection";
 import d3 from "d3";
@@ -84,11 +84,11 @@ export class ProtAlignModel extends Backbone.Model {
         // redo sequence name labels if protein metadata updates names
         this.listenTo(vent, "proteinMetadataUpdated", function (metaMetaData) {
             const columns = metaMetaData.columns;
-            const interactors = metaMetaData.items;
+            const proteins = metaMetaData.items;
             if (!columns || columns.indexOf("name") >= 0) {
-                const interactor = interactors.get(this.get("id"));
-                if (interactor) {
-                    this.set("displayLabel", interactor.name.replace("_", " "));
+                const protein = proteins.get(this.get("id"));
+                if (protein) {
+                    this.set("displayLabel", protein.name.replace("_", " "));
                 }
             }
         });
@@ -365,7 +365,7 @@ export class ProtAlignCollection extends Backbone.Collection {
     }
 
     addNewProteins(proteinArray) {
-        const decoysOut = filterOutDecoyInteractors(proteinArray);
+        const decoysOut = filterOutDecoyProteins(proteinArray);
 
         decoysOut.forEach(function (prot) {
             //console.log ("entry", entry);

@@ -79,13 +79,13 @@ export function getDirectionalResidueType(xlink, getTo, seqAlignFunc) {
 }
 
 /**
- * Filters out decoy proteins/interactors from an array.
+ * Filters out decoy proteins from an array.
  * Used widely throughout the application.
- * @param {Object[]} interactorArr - Array of interactor objects with is_decoy property
- * @returns {Object[]} Filtered array containing only non-decoy interactors
+ * @param {Object[]} proteinArr - Array of protein objects with is_decoy property
+ * @returns {Object[]} Filtered array containing only non-decoy proteins
  */
-export function filterOutDecoyInteractors(interactorArr) {
-    return interactorArr.filter(function (i) {
+export function filterOutDecoyProteins(proteinArr) {
+    return proteinArr.filter(function (i) {
         return !i.is_decoy;
     });
 }
@@ -367,19 +367,19 @@ export function intersectObjectArrays(a, b, compFunc) {
 }
 
 /**
- * Extracts valid UniProt accession IDs from an interactor collection.
+ * Extracts valid UniProt accession IDs from a protein collection.
  * Filters out decoys and validates accessions against UniProt regex pattern.
  * Used by PDB file chooser and NGL utils.
- * @param {Map|Array} interactorCollection - Map or array of interactor objects
+ * @param {Map|Array} proteinCollection - Map or array of protein objects
  * @returns {string[]} Array of valid UniProt accession IDs
  */
-export function getLegalAccessionIDs(interactorCollection) {
+export function getLegalAccessionIDs(proteinCollection) {
     let ids = [];
-    if (interactorCollection) {
-        if (interactorCollection.length === undefined) {    // obj to array if necessary
-            interactorCollection = Array.from(interactorCollection.values());
+    if (proteinCollection) {
+        if (proteinCollection.length === undefined) {    // obj to array if necessary
+            proteinCollection = Array.from(proteinCollection.values());
         }
-        ids = _.pluck(filterOutDecoyInteractors(interactorCollection), "accession")
+        ids = _.pluck(filterOutDecoyProteins(proteinCollection), "accession")
             .filter(function (accession) {
                 return accession.match(commonRegexes.uniprotAccession);
             });
@@ -664,17 +664,17 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel, composite
     // update groups
     if (groupsFound) {
         const groupMap = new Map();
-        for (let participant of proteins.values()) {
-            if (participant.meta && participant.meta.complex) {
-                const groupMeta = participant.meta.complex;
+        for (let protein of proteins.values()) {
+            if (protein.meta && protein.meta.complex) {
+                const groupMeta = protein.meta.complex;
                 const groups = groupMeta.split(",");
                 for (let group of groups) {
                     if (groupMap.get(group)) {
-                        groupMap.get(group).add(participant.id);
+                        groupMap.get(group).add(protein.id);
                     } else {
-                        const groupParticipants = new Set();
-                        groupParticipants.add(participant.id);
-                        groupMap.set(group, groupParticipants);
+                        const groupProteins = new Set();
+                        groupProteins.add(protein.id);
+                        groupMap.set(group, groupProteins);
                     }
                 }
             }
@@ -688,7 +688,7 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel, composite
 }
 
 //used by fdr.js
-// objectArr can be crosslinks or protein interactors (or a mix of)
+// objectArr can be crosslinks or proteins (or a mix of)
 /**
  * Clears specified metadata fields from an array of objects.
  * @param {Object[]} objectArr - Array of objects to clear metadata from
@@ -1044,11 +1044,11 @@ export function makeURLQueryPairs(obj, commonKeyPrefix) {
 //nglview
 /**
  * Calculates total length of all protein sequences.
- * @param {Object[]} interactors - Array of protein/interactor objects with size property
+ * @param {Object[]} proteins - Array of protein objects with size property
  * @returns {number} Sum of all protein sequence lengths
  */
-export function totalProteinLength(interactors) {
-    return d3.sum(interactors, function (d) {
+export function totalProteinLength(proteins) {
+    return d3.sum(proteins, function (d) {
         return d.size;
     });
 }

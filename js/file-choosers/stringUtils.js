@@ -11,7 +11,7 @@ import * as _ from "underscore";
 import $ from "jquery";
 import d3 from "d3";
 import {getLocalStorage, setLocalStorage} from "../utils";
-import {filterOutDecoyInteractors} from "../modelUtils";
+import {filterOutDecoyProteins} from "../modelUtils";
 
 /**
  * STRING database utilities namespace with API integration functions.
@@ -23,9 +23,9 @@ export const STRINGUtils = {
     // Maximum number of proteins we can POST to STRING's network interaction API (found by trial and error)
     stringAPIMaxProteins: 2000,
 
-    // Filter the CLMS model's participants down to just those that have non-decoy inter-protein links
+    // Filter the CLMS model's proteins down to just those that have non-decoy inter-protein links
     filterProteinsToPPISet: function (clmsModel) {
-        const realProteins = filterOutDecoyInteractors(Array.from(clmsModel.getProteinsIterator()));
+        const realProteins = filterOutDecoyProteins(Array.from(clmsModel.getProteinsIterator()));
         const ppiProteins = realProteins.filter(function (prot) {
             return prot.crosslinks.some(function (clink) {
                 // is there a real crosslink going to another protein?

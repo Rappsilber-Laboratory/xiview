@@ -8,7 +8,7 @@ import * as _ from "underscore";
 import d3 from "d3";
 import colorbrewer from "colorbrewer";
 import {ColourModel} from "./color-model";
-import {filterOutDecoyInteractors} from "../../modelUtils";
+import {filterOutDecoyProteins} from "../../modelUtils";
 
 /**
  * Default crosslink color model - colors by link type (self/homomultimeric/heteromeric).
@@ -266,7 +266,7 @@ export class InterProteinColourModel extends ColourModel {
     initialize(properties, options) {
         let colScale;
         let labels = ["Same Protein"];
-        const proteinIDs = _.pluck(filterOutDecoyInteractors(Array.from(options.proteins.values())), "id");
+        const proteinIDs = _.pluck(filterOutDecoyProteins(Array.from(options.proteins.values())), "id");
 
         if (proteinIDs && proteinIDs.length > 2 && proteinIDs.length < 6) {
             const groupDomain = ["same"];

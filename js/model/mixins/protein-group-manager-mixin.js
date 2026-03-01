@@ -25,11 +25,11 @@ export const ProteinGroupManagerMixin = {
                 if (groups.has(groupName)) {
                     alert("Cannot group - duplicate group name");
                 } else {
-                    const participantIds = new Set();
+                    const proteinIds = new Set();
                     for (let p of self.get("selectedProteins")) {
-                        participantIds.add(p.id);
+                        proteinIds.add(p.id);
                     }
-                    groups.set(groupName, participantIds);
+                    groups.set(groupName, proteinIds);
                     self.trigger("change:groups");
                     d3.select("#groupSelected").property("value", "");
                 }
@@ -40,12 +40,12 @@ export const ProteinGroupManagerMixin = {
     /**
      * Removes a protein from a specified group. Deletes group if it becomes empty.
      * @param {string} groupName - Name of the group
-     * @param {string} participantId - Protein participant ID to remove
+     * @param {string} proteinId - Protein ID to remove
      */
-    removeProteinFromGroup(groupName, participantId) {
+    removeProteinFromGroup(groupName, proteinId) {
         const groups = this.get("groups");
         const group = groups.get(groupName);
-        group.delete(participantId);
+        group.delete(proteinId);
         if (group.size === 0) {
             groups.delete(groupName);
         }
@@ -55,12 +55,12 @@ export const ProteinGroupManagerMixin = {
     /**
      * Adds a protein to a specified group.
      * @param {string} groupName - Name of the group
-     * @param {string} participantId - Protein participant ID to add
+     * @param {string} proteinId - Protein ID to add
      */
-    addProteinToGroup(groupName, participantId) {
+    addProteinToGroup(groupName, proteinId) {
         const groups = this.get("groups");
         const group = groups.get(groupName);
-        group.add(participantId);
+        group.add(proteinId);
         this.trigger("change:groups");
     },
 
@@ -87,15 +87,15 @@ export const ProteinGroupManagerMixin = {
             const go = self.get("go");
             for (let goTerm of go.values()) {
                 if (!goTerm.subclasses && !goTerm.parts) {
-                    const interactors = goTerm.getInteractors();
-                    if (interactors && interactors.size > 1) {
+                    const proteins = goTerm.getProteins();
+                    if (proteins && proteins.size > 1) {
                         if (goTerm.isDescendantOf("GO0032991")) {
                             console.log(">" + goTerm.name);
-                            const participantIds = new Set();
-                            for (let p of interactors) {
-                                participantIds.add(p.id);
+                            const proteinIds = new Set();
+                            for (let p of proteins) {
+                                proteinIds.add(p.id);
                             }
-                            groupMap.set(goTerm.name, participantIds);
+                            groupMap.set(goTerm.name, proteinIds);
                         }
                     }
                 }
@@ -125,11 +125,11 @@ export const ProteinGroupManagerMixin = {
         const termOfInterest = ["0005634"];
         for (let term of termOfInterest) {
             const goTerm = this.get("go").get("GO" + term);
-            const interactors = goTerm.getInteractors();
-            if (interactors && interactors.size > 1) {
+            const proteins = goTerm.getProteins();
+            if (proteins && proteins.size > 1) {
                 console.log("Compartment>" + goTerm.name);
-                const participantIds = new Set();
-                groupMap.set(goTerm.name, participantIds);
+                const proteinIds = new Set();
+                groupMap.set(goTerm.name, proteinIds);
             }
         }
 

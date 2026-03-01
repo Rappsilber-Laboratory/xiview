@@ -92,24 +92,24 @@ export const makeTooltipContents = {
     },
 
     /**
-     * Generates tooltip content array for a protein (interactor).
+     * Generates tooltip content array for a protein.
      * Returns [label, value] pairs: ID, Accession, Size, Description, Keywords (if UniProt data available), plus metadata.
-     * @param {Object} interactor - Protein object
+     * @param {Object} protein - Protein object
      * @returns {Array<Array>} Array of [label, value] pairs
      */
-    interactor: function (interactor) {
+    protein: function (protein) {
         const contents = [
-            ["ID", interactor.id],
-            ["Accession", interactor.accession],
-            ["Size", interactor.size],
-            ["Desc.", interactor.description]
+            ["ID", protein.id],
+            ["Accession", protein.accession],
+            ["Size", protein.size],
+            ["Desc.", protein.description]
         ];
 
-        if (interactor.uniprot) {
-            contents.push(["Keywords", interactor.uniprot.keywords]);
+        if (protein.uniprot) {
+            contents.push(["Keywords", protein.uniprot.keywords]);
         }
 
-        d3.entries(interactor.getMeta()).forEach(function (entry) {
+        d3.entries(protein.getMeta()).forEach(function (entry) {
             const val = entry.value;
             const key = entry.key.toLocaleLowerCase();
             if (val !== undefined && !_.isObject(val)) {
@@ -247,13 +247,13 @@ export const makeTooltipContents = {
             // ["is_a", Array.from(goTerm.is_a.values()).join(", ")],
             // ["intersection_of", Array.from(goTerm.intersection_of.values()).join(", ")],
             // ["relationship", Array.from(goTerm.relationship.values()).join(", ")],
-            // ["interactors", goTerm.getInteractors(false).size]
+            // ["proteins", goTerm.getProteins(false).size]
         ];
     },
 
-    complex: function (interactor) {
+    complex: function (protein) {
         const contents = [
-            ["Complex", interactor.id],
+            ["Complex", protein.id],
             //  ["Members", Array.from(goTerm.relationship.values()).join(", ")]
             // ["Accession", interactor.accession],
             // ["Size", interactor.size],
@@ -296,12 +296,12 @@ export const makeTooltipTitle = {
     link: function (linkCount) {
         return "Linked Residue Pair" + (linkCount > 1 ? "s" : "");
     },
-    interactor: function (interactor) {
-        return interactor.name.replace("_", " ");
+    protein: function (protein) {
+        return protein.name.replace("_", " ");
     },
-    residue: function (interactor, residueIndex, residueExtraInfo) {
-        return interactor.name + ":" + residueIndex + "" + (residueExtraInfo ? residueExtraInfo : "") + " " +
-            makeTooltipContents.residueString(getResidueType(interactor, residueIndex));
+    residue: function (protein, residueIndex, residueExtraInfo) {
+        return protein.name + ":" + residueIndex + "" + (residueExtraInfo ? residueExtraInfo : "") + " " +
+            makeTooltipContents.residueString(getResidueType(protein, residueIndex));
     },
     feature: function () {
         return "Feature";
@@ -309,7 +309,7 @@ export const makeTooltipTitle = {
     linkList: function (linkCount) {
         return "Linked Residue Pair" + (linkCount > 1 ? "s" : "");
     },
-    complex: function (interactor) {
-        return interactor.name.replace("_", " ");
+    complex: function (protein) {
+        return protein.name.replace("_", " ");
     },
 };

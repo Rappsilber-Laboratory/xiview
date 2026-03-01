@@ -21,7 +21,7 @@ import {
     searchesToString, xilog
 } from "../../utils";
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
-import {filterOutDecoyInteractors, mergeContiguousFeatures, totalProteinLength} from "../../modelUtils";
+import {filterOutDecoyProteins, mergeContiguousFeatures, totalProteinLength} from "../../modelUtils";
 import {NGLExportUtils} from "./NGLExportUtils";
 import {CrosslinkRepresentation} from "./crosslink-representation";
 import d3 from "d3";
@@ -712,9 +712,9 @@ export class NGLViewBB extends BaseFrameView {
             "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
             " - " + stageModel.get("structureComp").structure.title;
 
-        const interactors = filterOutDecoyInteractors(Array.from(this.model.get("clmsModel").getProteinsIterator()));
+        const proteins = filterOutDecoyProteins(Array.from(this.model.get("clmsModel").getProteinsIterator()));
         const alignColl = this.model.get("alignColl");
-        const pdbLengthsPerProtein = interactors.map(function (inter) {
+        const pdbLengthsPerProtein = proteins.map(function (inter) {
             const pdbFeatures = alignColl.getAlignmentsAsFeatures(inter.id);
             const contigPDBFeatures = mergeContiguousFeatures(pdbFeatures);
 
@@ -725,7 +725,7 @@ export class NGLViewBB extends BaseFrameView {
             return totalLength;
         }, this);
         const totalPDBLength = d3.sum(pdbLengthsPerProtein);
-        const totalLength = totalProteinLength(interactors);
+        const totalLength = totalProteinLength(proteins);
         const pcent = d3.format(".0%")(totalPDBLength / totalLength);
         const commaFormat = d3.format(",");
 

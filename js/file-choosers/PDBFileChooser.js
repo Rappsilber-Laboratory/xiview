@@ -11,7 +11,7 @@ import d3 from "d3";
 import * as NGL from "ngl";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {getLegalAccessionIDs} from "../modelUtils";
+import {getLegalAccessionIDs, filterOutDecoyProteins} from "../modelUtils";
 import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 import {loadUserFile} from "./load-user-file";
@@ -235,7 +235,7 @@ export class PDBFileChooserBB extends BaseFrameView {
         addMultipleSelectControls({
             addToElem: parentElem,
             selectList: ["Proteins"],
-            optionList: filterOutDecoyInteractors(proteins),
+            optionList: filterOutDecoyProteins(proteins),
             keepOldOptions: false,
             selectLabelFunc: function () {
                 return "Select Protein for EBI Sequence Search ►";

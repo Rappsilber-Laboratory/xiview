@@ -17,12 +17,12 @@ export class RenderedProtein extends Interactor {
     /**
      * Creates a new RenderedProtein instance.
      *
-     * @param {Object} participant - The protein data model object
+     * @param {Object} protein - The protein data model object
      * @param {CrosslinkViewer} controller - The parent crosslink viewer controller
      */
-    constructor(participant, controller) {
+    constructor(protein, controller) {
         super(controller);
-        this.participant = participant;
+        this.protein = protein;
         this.busy = false;
         this.renderedP_PLinks = [];
         this.renderedCrosslinks = [];
@@ -80,11 +80,11 @@ export class RenderedProtein extends Interactor {
         this.labelSVG = document.createElementNS(CrosslinkViewer.svgns, "text");
         d3.select(this.labelSVG).attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
-            .attr("fill", this.participant.is_decoy ? "#FB8072" : "black")
+            .attr("fill", this.protein.is_decoy ? "#FB8072" : "black")
             .attr("x", 0)
             .attr("y", 0)
             .classed("protein xlv_text proteinLabel", true);
-        this.labelTextNode = document.createTextNode(this.participant.name);
+        this.labelTextNode = document.createTextNode(this.protein.name);
         this.updateName();
         this.labelSVG.appendChild(this.labelTextNode);
 
@@ -131,7 +131,7 @@ export class RenderedProtein extends Interactor {
     }
 
     get proteins() {
-        return [this.participant];
+        return [this.protein];
     }
 
     get bBox() {
@@ -149,7 +149,7 @@ export class RenderedProtein extends Interactor {
         if (!this.expanded) {
             return (approxLabelWidth > this.symbolRadius) ? approxLabelWidth : this.symbolRadius + 20;//this.upperGroup.getBBox().width + 10;
         } else {
-            return (this.participant.size * this.stickZoom) + approxLabelWidth;
+            return (this.protein.size * this.stickZoom) + approxLabelWidth;
         }
     }
 
@@ -161,7 +161,7 @@ export class RenderedProtein extends Interactor {
         if (this.controller.fixedSize) {
             return 12;
         } else {
-            return Math.sqrt(this.participant.size / Math.PI) * 0.6;
+            return Math.sqrt(this.protein.size / Math.PI) * 0.6;
         }
     }
 
@@ -185,9 +185,9 @@ export class RenderedProtein extends Interactor {
     updateName() {
         //choose label text
         if (!this.controller.cropLabels) {
-            this.labelText = this.participant.name;
+            this.labelText = this.protein.name;
         } else {
-            this.labelText = this.participant.name.split("_")[0];
+            this.labelText = this.protein.name.split("_")[0];
         }
         if (this.labelText.length > 25) {
             this.labelText = this.labelText.substr(0, 16) + "...";
@@ -196,12 +196,12 @@ export class RenderedProtein extends Interactor {
     }
 
     mouseOver(evt) {
-        this.controller.model.setHighlightedProteins([this.participant]);
+        this.controller.model.setHighlightedProteins([this.protein]);
         if (!this.controller.dragElement) {
             const p = this.controller.getEventPoint(evt);
             this.controller.model.get("tooltipModel")
-                .set("header", makeTooltipTitle.interactor(this.participant))
-                .set("contents", makeTooltipContents.interactor(this.participant))
+                .set("header", makeTooltipTitle.protein(this.protein))
+                .set("contents", makeTooltipContents.protein(this.protein))
                 .set("location", {
                     pageX: p.x,
                     pageY: p.y
@@ -236,15 +236,15 @@ export class RenderedProtein extends Interactor {
     //only output the info needed to reproduce the layout, used by save layout function
     toJSON() {
         return {
-            id: this.participant.id,
+            id: this.protein.id,
             x: this.ix,
             y: this.iy,
             rot: this.rotation,
             expanded: this.expanded,
             stickZoom: this.stickZoom,
             flipped: this.isFlipped,
-            manuallyHidden: this.participant.manuallyHidden,
-            name: this.participant.name // having this here is bit of hack
+            manuallyHidden: this.protein.manuallyHidden,
+            name: this.protein.name // having this here is bit of hack
         };
     }
 
@@ -303,7 +303,7 @@ export class RenderedProtein extends Interactor {
         // if (!this.hidden) { // todo - hacky
         //     xOffset = (this.width / 2 - (this.getBlobRadius()) + 5)
         // if (this.expanded) {
-        //   xOffset = xOffset + (this.participant.size / 2 * this.stickZoom );
+        //   xOffset = xOffset + (this.protein.size / 2 * this.stickZoom );
         // }
         // }
         this.setPosition(this.x /*- xOffset*/, this.y);
@@ -321,7 +321,7 @@ export class RenderedProtein extends Interactor {
         if (!this.hidden) { // todo - hacky
             xOffset = (this.width / 2 - (this.symbolRadius) + 5);
             //     // if (this.expanded) {
-            //     //   xOffset = xOffset + (this.participant.size / 2 * this.stickZoom );
+            //     //   xOffset = xOffset + (this.protein.size / 2 * this.stickZoom );
             //     // }
         }
         this.x = ix - xOffset;
@@ -396,12 +396,12 @@ export class RenderedProtein extends Interactor {
 
     scale() {
         d3.select(this.peptides).attr("transform", "scale(" + (this.stickZoom) + ", 1)");
-        const protLength = (this.participant.size) * this.stickZoom;
+        const protLength = (this.protein.size) * this.stickZoom;
         if (this.expanded) {
             const labelWidth = this.labelSVG.getBBox().width;
             const labelTransform = d3.transform(this.labelSVG.getAttribute("transform"));
             const k = this.controller.svgElement.createSVGMatrix().rotate(labelTransform.rotate)
-                .translate((-(((this.participant.size / 2) * this.stickZoom) + +(labelWidth / 2) + 10)), 0);
+                .translate((-(((this.protein.size / 2) * this.stickZoom) + +(labelWidth / 2) + 10)), 0);
             this.labelSVG.transform.baseVal.initialize(this.controller.svgElement.createSVGTransformFromMatrix(k));
             if (this.annotations) {
                 for (let anno of this.annotations.values()) {
@@ -442,7 +442,7 @@ export class RenderedProtein extends Interactor {
         this.lowerRotator.svg.setAttribute("transform",
             "translate(" + (this.getResXwithStickZoom(0.5) - RenderedProtein.rotOffset) + " 0)");
         this.upperRotator.svg.setAttribute("transform",
-            "translate(" + (this.getResXwithStickZoom(this.participant.size - 0 + 0.5) + RenderedProtein.rotOffset) + " 0)");
+            "translate(" + (this.getResXwithStickZoom(this.protein.size - 0 + 0.5) + RenderedProtein.rotOffset) + " 0)");
     }
 
     setScaleGroup() {
@@ -452,9 +452,9 @@ export class RenderedProtein extends Interactor {
         // const ScaleMajTick = 100;
         const ScaleTicksPerLabel = 2; // varies with scale?
         let tick = -1;
-        const lastTickX = this.getResXwithStickZoom(this.participant.size);
+        const lastTickX = this.getResXwithStickZoom(this.protein.size);
 
-        for (let res = 1; res <= this.participant.size; res++) {
+        for (let res = 1; res <= this.protein.size; res++) {
             if (res === 1 ||
                 ((res % 100 === 0) && (200 * this.stickZoom > RenderedProtein.minXDist)) ||
                 ((res % 10 === 0) && (20 * this.stickZoom > RenderedProtein.minXDist))
@@ -471,7 +471,7 @@ export class RenderedProtein extends Interactor {
                     }
                 }
             }
-            if (this.stickZoom >= 8 && this.participant.sequence) {
+            if (this.stickZoom >= 8 && this.protein.sequence) {
                 const seqLabelGroup = document.createElementNS(CrosslinkViewer.svgns, "g");
                 seqLabelGroup.setAttribute("transform", "translate(" + this.getResXwithStickZoom(res) + " " + 0 + ")");
                 const seqLabel = document.createElementNS(CrosslinkViewer.svgns, "text");
@@ -480,13 +480,13 @@ export class RenderedProtein extends Interactor {
                 seqLabel.setAttribute("text-anchor", "middle");
                 seqLabel.setAttribute("x", "0");
                 seqLabel.setAttribute("y", "3");
-                seqLabel.appendChild(document.createTextNode(this.participant.sequence[res - 1]));
+                seqLabel.appendChild(document.createTextNode(this.protein.sequence[res - 1]));
                 seqLabelGroup.appendChild(seqLabel);
                 this.scaleLabels.push(seqLabel);
                 this.ticks.appendChild(seqLabelGroup);
             }
         }
-        scaleLabelAt(this, this.participant.size, lastTickX);
+        scaleLabelAt(this, this.protein.size, lastTickX);
         if (this.stickZoom >= 8) {
             tickAt(this, lastTickX);
         }
@@ -564,14 +564,14 @@ export class RenderedProtein extends Interactor {
         CrosslinkViewer.removeDomElement(this.lowerRotator.svg);
         CrosslinkViewer.removeDomElement(this.upperRotator.svg);
 
-        // const protLength = this.participant.size * this.stickZoom;
+        // const protLength = this.protein.size * this.stickZoom;
         const r = this.symbolRadius;
         const protColourModel = this.controller.model.get("proteinColourAssignment");
 
         if (transition) {
             d3.select(this.outline).transition()
                 .attr("fill-opacity", 1)
-                .attr("fill", protColourModel.getColour(this.participant))
+                .attr("fill", protColourModel.getColour(this.protein))
                 .attr("x", -r).attr("y", -r)
                 .attr("width", r * 2).attr("height", r * 2)
                 .attr("rx", r).attr("ry", r)
@@ -579,7 +579,7 @@ export class RenderedProtein extends Interactor {
 
             d3.select(this.background).transition()
                 .attr("fill-opacity", 1)
-                .attr("fill", protColourModel.getColour(this.participant))
+                .attr("fill", protColourModel.getColour(this.protein))
                 .attr("x", -r).attr("y", -r)
                 .attr("width", r * 2).attr("height", r * 2)
                 .attr("rx", r).attr("ry", r)
@@ -595,14 +595,14 @@ export class RenderedProtein extends Interactor {
         } else {
             d3.select(this.outline)
                 .attr("fill-opacity", 1)
-                .attr("fill", protColourModel.getColour(this.participant))
+                .attr("fill", protColourModel.getColour(this.protein))
                 .attr("x", -r).attr("y", -r)
                 .attr("width", r * 2).attr("height", r * 2)
                 .attr("rx", r).attr("ry", r);
 
             d3.select(this.background)
                 .attr("fill-opacity", 1)
-                .attr("fill", protColourModel.getColour(this.participant))
+                .attr("fill", protColourModel.getColour(this.protein))
                 .attr("x", -r).attr("y", -r)
                 .attr("width", r * 2).attr("height", r * 2)
                 .attr("rx", r).attr("ry", r);
@@ -619,7 +619,7 @@ export class RenderedProtein extends Interactor {
         const rotationInterpol = d3.interpolate((this.rotation > 180) ? this.rotation - 360 : this.rotation, 0);
         //todo: should take current transform of label as start
         const labelTransform = d3.transform(this.labelSVG.getAttribute("transform"));
-        const labelStartPoint = labelTransform.translate[0]; //-(((this.participant.size / 2) * this.stickZoom) + 10);
+        const labelStartPoint = labelTransform.translate[0]; //-(((this.protein.size / 2) * this.stickZoom) + 10);
         const labelTranslateInterpol = d3.interpolate(labelStartPoint, 0); //-(r + 5));
 
         let xInterpol = null,
@@ -781,14 +781,14 @@ export class RenderedProtein extends Interactor {
         this.upperGroup.appendChild(this.upperRotator.svg);
         this.placeRotators();
 
-        const protLength = this.participant.size * this.stickZoom;
+        const protLength = this.protein.size * this.stickZoom;
         const r = this.symbolRadius;
 
         const lengthInterpol = d3.interpolate((2 * r), protLength);
         const stickZoomInterpol = d3.interpolate(0, this.stickZoom);
         const rotationInterpol = d3.interpolate(0, (this.rotation > 180) ? this.rotation - 360 : this.rotation);
         const labelWidth = this.labelSVG.getBBox().width;
-        const labelTranslateInterpol = d3.interpolate(0 /*-(r + 5)*/, -(((this.participant.size / 2) * this.stickZoom) + (labelWidth / 2) + 10));
+        const labelTranslateInterpol = d3.interpolate(0 /*-(r + 5)*/, -(((this.protein.size / 2) * this.stickZoom) + (labelWidth / 2) + 10));
 
         const origStickZoom = this.stickZoom;
         this.stickZoom = 0;
@@ -802,14 +802,14 @@ export class RenderedProtein extends Interactor {
 
         d3.select(this.outline).transition().attr("stroke-opacity", 1)
             .attr("fill-opacity", 0)
-            .attr("fill", protColourModel.getColour(this.participant))
+            .attr("fill", protColourModel.getColour(this.protein))
             .attr("height", RenderedProtein.STICKHEIGHT)
             .attr("y", -RenderedProtein.STICKHEIGHT / 2)
             .attr("rx", 0).attr("ry", 0)
             .duration(transitionTime);
 
         d3.select(this.background).transition().attr("stroke-opacity", 1)
-            .attr("fill", protColourModel.getColour(this.participant))
+            .attr("fill", protColourModel.getColour(this.protein))
             .attr("height", RenderedProtein.STICKHEIGHT)
             .attr("y", -RenderedProtein.STICKHEIGHT / 2)
             .attr("rx", 0).attr("ry", 0)
@@ -1001,7 +1001,7 @@ export class RenderedProtein extends Interactor {
      * @returns {number} The x-coordinate scaled by stickZoom
      */
     getResXwithStickZoom(r) {
-        return (r - (this.participant.size / 2)) * this.stickZoom;
+        return (r - (this.protein.size / 2)) * this.stickZoom;
     }
 
     /**
@@ -1035,7 +1035,7 @@ export class RenderedProtein extends Interactor {
         //create new annotations
 
         // does all of the commented out above, and picks up user-defined annotations
-        let featuresShown = this.controller.model.getFilteredFeatures(this.participant);
+        let featuresShown = this.controller.model.getFilteredFeatures(this.protein);
         const split = _.partition(featuresShown, function (f) {
             return f.type === RenderedProtein.disulfide;
         });
@@ -1061,7 +1061,7 @@ export class RenderedProtein extends Interactor {
 
                 let convStart = anno.begin;
                 let convEnd = anno.end;
-                const alignModel = this.controller.model.get("alignColl").get(this.participant.id);
+                const alignModel = this.controller.model.get("alignColl").get(this.protein.id);
                 let withinAlignedRange = true;
 
                 // mjg next 5 lines
@@ -1161,8 +1161,8 @@ export class RenderedProtein extends Interactor {
     }
 
     getAnnotationPieSliceArcPath(annotation) {
-        let startAngle = ((annotation.fstart - 1) / this.participant.size) * 360;
-        let endAngle = (annotation.fend / this.participant.size) * 360;
+        let startAngle = ((annotation.fstart - 1) / this.protein.size) * 360;
+        let endAngle = (annotation.fend / this.protein.size) * 360;
         //just in case
         if (startAngle > endAngle) {
             const temp = startAngle;
@@ -1177,7 +1177,7 @@ export class RenderedProtein extends Interactor {
         //hacky
         //actually its not clear there is better solution -
         // https://stackoverflow.com/questions/5737975/circle-drawing-with-svgs-arc-path
-        if (annotation.fstart === 1 && annotation.fend === this.participant.size) {
+        if (annotation.fstart === 1 && annotation.fend === this.protein.size) {
             startAngle = 0.1;
             endAngle = 359.9;
             sweepFlag = 1;
@@ -1192,8 +1192,8 @@ export class RenderedProtein extends Interactor {
 
     getAnnotationPieSliceApproximatePath(annotation) {
         //approximate pie slice
-        const startAngle = ((annotation.fstart - 1) / this.participant.size) * 360;
-        const endAngle = ((annotation.fend) / this.participant.size) * 360;
+        const startAngle = ((annotation.fstart - 1) / this.protein.size) * 360;
+        const endAngle = ((annotation.fend) / this.protein.size) * 360;
         const pieRadius = this.symbolRadius - 2;
         let approximatePiePath = "M 0,0";
         const stepsInArc = 5;
@@ -1249,7 +1249,7 @@ export class RenderedProtein extends Interactor {
     }
 
     get id() {
-        return this.participant.id;
+        return this.protein.id;
     }
 
     // addConnectedNodes (subgraph) {

@@ -111,8 +111,8 @@ export class P_PLink extends Link {
         this.controller.model.get("tooltipModel")
             .set("header", "Linked Protein Pair")
             .set("contents", [
-                ["From", this.renderedFromProtein.participant.name],
-                ["To", this.renderedToProtein.participant.name],
+                ["From", this.renderedFromProtein.protein.name],
+                ["To", this.renderedToProtein.protein.name],
                 ["Unique Linked Residue Pairs", this.filteredCrossLinkCount ? this.filteredCrossLinkCount : "filter not yet applied"],
                 ["Matches", this.filteredMatchCount ? this.filteredMatchCount : "filter not yet applied"]
                 //highest score
@@ -202,8 +202,8 @@ export class P_PLink extends Link {
     update() {
         if (!this.renderedToProtein || // not linear
             //or either end hidden hidden
-            this.renderedFromProtein.participant.hidden ||
-            this.renderedToProtein.participant.hidden ||
+            this.renderedFromProtein.protein.hidden ||
+            this.renderedToProtein.protein.hidden ||
             // or is self link in collapsed group
             (this.crosslinks[0].isSelfLink() && this.renderedFromProtein.inCollapsedGroup()) ||
             // or either end is expanded to bar and not in collapsed group

@@ -27,13 +27,13 @@ export async function testSetup() {
 
     test("Proteins loaded correctly", function (assert) {
         const proteins = clmsModel.getProteinsMap();
-        assert.ok(proteins instanceof Map, "participants is a Map");
+        assert.ok(proteins instanceof Map, "proteins is a Map");
         assert.ok(proteins.size > 0, `At least some proteins loaded (${proteins.size})`);
 
         // In aggregated data, protein IDs are changed to accessions during parseJSON
         // Check using accessions instead of original IDs
-        const participantKeys = Array.from(proteins.keys());
-        assert.ok(participantKeys.length > 0, `Participant keys exist: ${participantKeys.join(", ")}`);
+        const proteinKeys = Array.from(proteins.keys());
+        assert.ok(proteinKeys.length > 0, `Protein keys exist: ${proteinKeys.join(", ")}`);
 
         // Check if PA (protein_A accession) exists
         const proteinA = proteins.get("PA");
@@ -41,20 +41,20 @@ export async function testSetup() {
             assert.ok(true, "protein_A (PA) exists");
             assert.equal(proteinA.sequence, "MKVLVIGNGKPEPK", "protein_A sequence correct");
         } else {
-            assert.ok(false, "protein_A (PA) not found in participants");
+            assert.ok(false, "protein_A (PA) not found in proteins");
         }
     });
 
     test("Protein sequences loaded", function (assert) {
-        const participants = clmsModel.getProteinsMap();
+        const proteins = clmsModel.getProteinsMap();
 
         // Check protein B using its accession
-        const proteinB = participants.get("PB");
+        const proteinB = proteins.get("PB");
         if (proteinB) {
             assert.equal(proteinB.sequence, "DAHKSEVAHRFKDLGEENFKTIDEK", "protein_B sequence correct");
             assert.equal(proteinB.accession, "PB", "protein_B accession correct");
         } else {
-            assert.ok(false, "protein_B (PB) not found in participants");
+            assert.ok(false, "protein_B (PB) not found in proteins");
         }
     });
 
@@ -338,12 +338,12 @@ export async function testSetup() {
     // });
 
     test("Search IDs consistent", function (assert) {
-        const participants = clmsModel.getProteinsMap();
+        const proteins = clmsModel.getProteinsMap();
         const mzidFiles = clmsModel.getMzidentmlFiles();
 
         // Check all protein search_ids are in searches map
         let allValid = true;
-        participants.forEach(protein => {
+        proteins.forEach(protein => {
             if (protein.upload_id && !mzidFiles.has(protein.upload_id)) {
                 allValid = false;
                 console.error("Protein has invalid upload_id:", protein.id, protein.upload_id);
@@ -397,13 +397,13 @@ export async function testSetup() {
         assert.ok(searchMap, "getProteinSearchMap returns result");
         assert.ok(searchMap.get("S1"), "Search S1 exists in map");
         assert.ok(searchMap.get("S2"), "Search S2 exists in map");
-        assert.ok(searchMap.get("S1").participantIDSet instanceof Set, "S1 has participantIDSet as Set");
-        assert.ok(searchMap.get("S2").participantIDSet instanceof Set, "S2 has participantIDSet as Set");
+        assert.ok(searchMap.get("S1").proteinIDSet instanceof Set, "S1 has proteinIDSet as Set");
+        assert.ok(searchMap.get("S2").proteinIDSet instanceof Set, "S2 has proteinIDSet as Set");
         assert.equal(searchMap.get("S1").id, "S1", "S1 has correct id property");
         assert.equal(searchMap.get("S2").id, "S2", "S2 has correct id property");
-        // Check participantIDSet contents
-        assert.deepEqual([...searchMap.get("S1").participantIDSet].sort(), ["A", "B"], "S1 contains proteins A and B");
-        assert.deepEqual([...searchMap.get("S2").participantIDSet].sort(), ["C"], "S2 contains protein C");
+        // Check proteinIDSet contents
+        assert.deepEqual([...searchMap.get("S1").proteinIDSet].sort(), ["A", "B"], "S1 contains proteins A and B");
+        assert.deepEqual([...searchMap.get("S2").proteinIDSet].sort(), ["C"], "S2 contains protein C");
     });
 
     test("isAggregatedData method", function (assert) {

@@ -10,7 +10,7 @@
  *
  * Delegate objects (created in initialize(), kept up-to-date via listenTo):
  *   - _distanceCalc  (CrosslinkDistanceCalculator) — 3D distance computation
- *   - _featureService (ParticipantFeatureService)  — feature retrieval and filtering
+ *   - _featureService (ProteinFeatureService)  — feature retrieval and filtering
  *
  * Events fired on this model (must not change — 19+ view files listen to them):
  *   filteringDone, hiddenChanged,
@@ -30,7 +30,7 @@ import vent from "../vent";
 
 import {generateUrlString} from "./url-state-serializer";
 import {CrosslinkDistanceCalculator} from "./crosslink-distance-calculator";
-import {ParticipantFeatureService} from "./participant-feature-service";
+import {ProteinFeatureService} from "./protein-feature-service";
 
 import {FilteringPipelineMixin} from "./mixins/filtering-pipeline-mixin";
 import {SelectionHighlightMixin} from "./mixins/selection-highlight-mixin";
@@ -82,8 +82,8 @@ export class CompositeModel extends Backbone.Model {
             });
         });
 
-        // Delegate: participant feature retrieval
-        this._featureService = new ParticipantFeatureService({
+        // Delegate: protein feature retrieval
+        this._featureService = new ProteinFeatureService({
             clmsModel: this.get("clmsModel"),
             alignColl: this.get("alignColl"),
             annotationTypes: this.get("annotationTypes"),
@@ -159,30 +159,30 @@ export class CompositeModel extends Backbone.Model {
     // ─── Color ──────────────────────────────────────────────────────────────
 
     /**
-     * Opens color picker dialog for choosing a protein interactor color.
-     * @param {string} interactorId
+     * Opens color picker dialog for choosing a protein color.
+     * @param {string} proteinId
      */
-    chooseInteractorColor(interactorId) {
+    chooseProteinColor(proteinId) {
         const dialog = document.getElementById("colorDialog");
-        dialog.interactorId = interactorId;
+        dialog.proteinId = proteinId;
         const chooseColorLabel = document.getElementById("chooseColorLabel");
-        chooseColorLabel.textContent = "Select Colour for " + interactorId;
+        chooseColorLabel.textContent = "Select Colour for " + proteinId;
         dialog.showModal();
         const cancelChooseColorButton = document.getElementById("colorCancel");
         cancelChooseColorButton.focus();
     }
 
     /**
-     * Sets a custom color for a specific protein interactor.
-     * @param {string} interactorId
+     * Sets a custom color for a specific protein.
+     * @param {string} proteinId
      * @param {string} color
      */
-    setInteractorColor(interactorId, color) {
+    setProteinColor(proteinId, color) {
         const proteinColourModel = this.get("proteinColourAssignment");
         if (!(proteinColourModel instanceof ManualColourModel)) {
             this.set("proteinColourAssignment", linkColor.manualProteinColoursBB);
         }
-        linkColor.manualProteinColoursBB.setInteractorColour(interactorId, color);
+        linkColor.manualProteinColoursBB.setProteinColour(proteinId, color);
         this.trigger("currentProteinColourModelChanged", linkColor.manualProteinColoursBB);
     }
 
@@ -210,17 +210,17 @@ export class CompositeModel extends Backbone.Model {
 
     // ─── Feature delegate stubs ──────────────────────────────────────────────
 
-    /** @see ParticipantFeatureService#getParticipantFeatures */
-    getParticipantFeatures(participant) {
-        return this._featureService.getParticipantFeatures(participant);
+    /** @see ProteinFeatureService#getProteinFeatures */
+    getProteinFeatures(protein) {
+        return this._featureService.getProteinFeatures(protein);
     }
 
-    /** @see ParticipantFeatureService#getFilteredFeatures */
-    getFilteredFeatures(participant) {
-        return this._featureService.getFilteredFeatures(participant);
+    /** @see ProteinFeatureService#getFilteredFeatures */
+    getFilteredFeatures(protein) {
+        return this._featureService.getFilteredFeatures(protein);
     }
 
-    /** @see ParticipantFeatureService#getAttributeRange */
+    /** @see ProteinFeatureService#getAttributeRange */
     getAttributeRange(attrMetaData) {
         return this._featureService.getAttributeRange(attrMetaData, this.getAllCrossLinks());
     }

@@ -229,13 +229,13 @@ export const FilteringPipelineMixin = {
 
         // Stage 6: Hide proteins with no visible non-decoy non-linear links
         let visibleProteinCount = 0;
-        for (let participant of clmsModel.getProteinsIterator()) {
-            participant.hidden = true;
-            for (let pCrossLink of participant.crosslinks) {
+        for (let protein of clmsModel.getProteinsIterator()) {
+            protein.hidden = true;
+            for (let pCrossLink of protein.crosslinks) {
                 if (pCrossLink.filteredMatches_pp.length &&
                     !pCrossLink.isDecoyLink() &&
                     !pCrossLink.isLinearLink()) {
-                    participant.hidden = false;
+                    protein.hidden = false;
                     visibleProteinCount++;
                     break;
                 }

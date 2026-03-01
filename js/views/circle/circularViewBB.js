@@ -22,7 +22,7 @@ import vent from "../../vent";
  * Calculates circular layout positioning for proteins, crosslinks, and features.
  * Maps linear protein sequences to circular arcs with gaps, converts link/feature positions
  * to angular coordinates, handles alignment between different index spaces.
- * @param {Array} nodeArr - Array of protein/interactor objects with id, name, size
+ * @param {Array} nodeArr - Array of protein objects with id, name, size
  * @param {Array} linkArr - Array of crosslink objects
  * @param {Array} featureArrs - Array of feature arrays (one per protein)
  * @param {Array} range - Angular range [start, end] in degrees (e.g., [0, 360])
@@ -51,8 +51,8 @@ const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
     };
     const _options = _.extend(defaults, options);
 
-    let totalLength = nodeArr.reduce(function (total, interactor) {
-        return total + (interactor.size || 1); // for some reason, some people use an ambiguous protein with no size declared, which causes NaN's
+    let totalLength = nodeArr.reduce(function (total, protein) {
+        return total + (protein.size || 1); // for some reason, some people use an ambiguous protein with no size declared, which causes NaN's
     }, 0);
 
     const realRange = range[1] - range[0];
@@ -147,7 +147,7 @@ const circleLayout = function (nodeArr, linkArr, featureArrs, range, options) {
  * @property {Object} featureArc - D3 arc generator for feature arcs
  * @property {Object} resLabelArc - D3 arc generator for residue label positioning
  * @property {Object} nodeDrag - D3 drag behavior for manual protein reordering
- * @property {Array} interactorOrder - Current protein ordering (array of protein IDs)
+ * @property {Array} proteinOrder - Current protein ordering (array of protein IDs)
  * @property {Object} bespokeOrder - Custom protein ordering map from manual dragging
  */
 export class CircularViewBB extends BaseFrameView {
@@ -505,7 +505,7 @@ export class CircularViewBB extends BaseFrameView {
             const dragStartTheta = Math.atan2(mc[1] - self.radius, mc[0] - self.radius);
             self.nodeDrag.startDeg = (((dragStartTheta / degToRad) + 90) + 360) % 360;
             // draw drag representation if >1 protein displayed
-            if (self.filterInteractors(self.model.get("clmsModel").getProteinsMap()).length > 1) {
+            if (self.filterProteins(self.model.get("clmsModel").getProteinsMap()).length > 1) {
                 d3.select(this).classed("draggedNode", true);
             }
             self.nodeDrag.visited = true;
@@ -571,10 +571,10 @@ export class CircularViewBB extends BaseFrameView {
         };
 
         this.nodeTip = function (d) {
-            const interactor = self.model.get("clmsModel").getProtein(d.id);
+            const protein = self.model.get("clmsModel").getProtein(d.id);
             self.model.get("tooltipModel")
-                .set("header", makeTooltipTitle.interactor(interactor))
-                .set("contents", makeTooltipContents.interactor(interactor))
+                .set("header", makeTooltipTitle.protein(protein))
+                .set("contents", makeTooltipContents.protein(protein))
                 .set("location", {
                     pageX: d3.event.pageX,
                     pageY: d3.event.pageY
@@ -603,7 +603,7 @@ export class CircularViewBB extends BaseFrameView {
         };
 
         // return order as is
-        this.interactorOrder = _.pluck(Array.from(this.model.get("clmsModel").getProteinsIterator()), "id");
+        this.proteinOrder = _.pluck(Array.from(this.model.get("clmsModel").getProteinsIterator()), "id");
 
         let alignCall = 0;
 
@@ -665,7 +665,7 @@ export class CircularViewBB extends BaseFrameView {
         if (orderOptions.reverseConsecutive) {
             this.options.sortDir = -this.options.sortDir; // reverse direction of consecutive resorts
         }
-        const prots = this.filterInteractors(this.model.get("clmsModel").getProteinsMap());
+        const prots = this.filterProteins(this.model.get("clmsModel").getProteinsMap());
         const proteinSort = function (field) {
             const numberSort = prots.length ? !isNaN(prots[0][field]) : false; // stop undefined 'prots[0].field' bug when no prots
             const sortDir = this.options.sortDir;
@@ -678,7 +678,7 @@ export class CircularViewBB extends BaseFrameView {
         const self = this;
         const sortFuncs = {
             best: function () {
-                return circleArrange(self.filterInteractors(this.model.get("clmsModel").getProteinsMap()));
+                return circleArrange(self.filterProteins(this.model.get("clmsModel").getProteinsMap()));
             },
             size: function () {
                 return proteinSort.call(this, "size");
@@ -694,7 +694,7 @@ export class CircularViewBB extends BaseFrameView {
                 return _.pluck(prots, "id");
             }
         };
-        this.interactorOrder = sortFuncs[this.options.sort] ? sortFuncs[this.options.sort].call(this) : _.pluck(prots, "id");
+        this.proteinOrder = sortFuncs[this.options.sort] ? sortFuncs[this.options.sort].call(this) : _.pluck(prots, "id");
         return this;
     }
 
@@ -996,19 +996,19 @@ export class CircularViewBB extends BaseFrameView {
     }
 
     /**
-     * Filters interactors to non-decoys and optionally removes hidden ones.
-     * @param {Map} interactors - Native map of interactor objects
-     * @returns {Array} Array of filtered interactor objects
+     * Filters proteins to non-decoys and optionally removes hidden ones.
+     * @param {Map} proteins - Native map of protein objects
+     * @returns {Array} Array of filtered protein objects
      */
-    filterInteractors(interactors) {  // interactors is a native map
-        const filteredInteractors = [];
+    filterProteins(proteins) {  // proteins is a native map
+        const filteredProteins = [];
         const showLinkless = this.options.showLinkless;
-        interactors.forEach(function (value) {
+        proteins.forEach(function (value) {
             if (!value.is_decoy && (showLinkless || !value.hidden)) {
-                filteredInteractors.push(value);
+                filteredProteins.push(value);
             }
         });
-        return filteredInteractors;
+        return filteredProteins;
     }
 
     /**
@@ -1043,11 +1043,11 @@ export class CircularViewBB extends BaseFrameView {
             const svg = d3.select(this.el).select("svg");
             this.radius = this.getMaxRadius(svg);
 
-            const interactors = this.model.get("clmsModel").getProteinsMap();
-            //xilog ("interactorOrder", this.interactorOrder);
+            const proteins = this.model.get("clmsModel").getProteinsMap();
+            //xilog ("proteinOrder", this.proteinOrder);
             //xilog ("model", this.model);
 
-            let filteredInteractors = this.filterInteractors(interactors);
+            let filteredProteins = this.filterProteins(proteins);
             let filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
             if (this.options.showSelectedOnly) {
                 const selectedIDs = d3.set(_.pluck(this.model.getMarkedCrossLinks("selection"), "id"));
@@ -1062,38 +1062,38 @@ export class CircularViewBB extends BaseFrameView {
             d3.select(this.el).selectAll("button.flipIntraButton,#" + this.el.id + "Options")
                 .style("display", (this.model.get("clmsModel").targetProteinCount < 2) ? "none" : null);
 
-            if (filteredInteractors.length < 2) {
+            if (filteredProteins.length < 2) {
                 this.options.intraOutside = false;
             }
-            //xilog ("fi", filteredInteractors, interactors);
+            //xilog ("fi", filteredProteins, proteins);
 
-            const fmap = d3.map(filteredInteractors, function (d) {
+            const fmap = d3.map(filteredProteins, function (d) {
                 return d.id;
             });
 
-            // This line in case links are loaded via csv and interactorOrder isn't initialised or out of sync with interactors
-            if (filteredInteractors.length !== this.interactorOrder.length) { // interactors is map so size, interactorOrder is array so length
-                //console.log("REORDERING OK", filteredInteractors.length, this.interactorOrder.length)
+            // This line in case links are loaded via csv and proteinOrder isn't initialised or out of sync with proteins
+            if (filteredProteins.length !== this.proteinOrder.length) { // proteins is map so size, proteinOrder is array so length
+                //console.log("REORDERING OK", filteredProteins.length, this.proteinOrder.length)
                 this.reOrder();
             }
 
-            // reset filteredInteractors to same order as interactor order
-            filteredInteractors = this.interactorOrder
-                .filter(function (interactorId) {
-                    return fmap.has(interactorId);
+            // reset filteredProteins to same order as protein order
+            filteredProteins = this.proteinOrder
+                .filter(function (proteinId) {
+                    return fmap.has(proteinId);
                 })
-                .map(function (interactorId) {
-                    return fmap.get(interactorId);
+                .map(function (proteinId) {
+                    return fmap.get(proteinId);
                 });
 
-            // After rearrange interactors, because filtered features depends on the interactor order
+            // After rearrange proteins, because filtered features depends on the protein order
             // const alignColl = this.model.get("alignColl");
-            const filteredFeatures = filteredInteractors.map(function (inter) {
+            const filteredFeatures = filteredProteins.map(function (inter) {
                 return this.model.getFilteredFeatures(inter);
             }, this);
             //xilog ("filteredFeatures", filteredFeatures);
 
-            const layout = circleLayout(filteredInteractors, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
+            const layout = circleLayout(filteredProteins, filteredCrossLinks, filteredFeatures, [0, 360], this.options);
             //xilog ("layout", layout);
 
             const tickRadius = (this.radius - this.options.tickWidth) * (this.options.intraOutside ? 0.8 : 1.0); // shrink radius if some links drawn on outside
@@ -1254,8 +1254,8 @@ export class CircularViewBB extends BaseFrameView {
     selectNode(d) {
         const add = d3.event.ctrlKey || d3.event.shiftKey;
         this.actionNodeLinks(d.id, "selection", add);
-        const interactor = this.model.get("clmsModel").getProtein(d.id);
-        this.model.setSelectedProteins([interactor], add);
+        const protein = this.model.get("clmsModel").getProtein(d.id);
+        this.model.setSelectedProteins([protein], add);
         return this;
     }
 
@@ -1270,12 +1270,12 @@ export class CircularViewBB extends BaseFrameView {
     drawNodes(g, nodes) {
         const self = this;
 
-        const multipleNodes = true; //this.filterInteractors(this.model.get("clmsModel").getProteins()).length > 1;
+        const multipleNodes = true; //this.filterProteins(this.model.get("clmsModel").getProteins()).length > 1;
         let colourScheme = this.model.get("proteinColourAssignment");
         if (colourScheme.id === "Default Protein") {
             colourScheme = this.replacementDefaultNodeColourModel;
         }
-        const interactors = this.model.get("clmsModel").getProteinsMap();
+        const proteins = this.model.get("clmsModel").getProteinsMap();
 
         const nodeLayer = this.addOrGetGroupLayer(g, "nodeLayer");
         const nodeJoin = nodeLayer.selectAll(".circleNode").data(nodes, self.idFunc);
@@ -1288,8 +1288,8 @@ export class CircularViewBB extends BaseFrameView {
             .on("mouseenter", function (d) {
                 self.nodeTip(d);
                 self.actionNodeLinks(d.id, "highlights", false);
-                const interactor = self.model.get("clmsModel").getProtein(d.id);
-                self.model.setHighlightedProteins([interactor]);
+                const protein = self.model.get("clmsModel").getProtein(d.id);
+                self.model.setHighlightedProteins([protein]);
             })
             .on("mouseleave", function () {
                 self.clearTip();
@@ -1304,7 +1304,7 @@ export class CircularViewBB extends BaseFrameView {
         nodeJoin
             .attr("d", this.arc)
             .style("fill", function (d) {
-                return colourScheme.getColour(interactors.get(d.id));
+                return colourScheme.getColour(proteins.get(d.id));
             });
         this.showAccentOnTheseNodes(nodeJoin, "selection");
 

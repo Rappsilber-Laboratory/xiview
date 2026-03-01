@@ -195,8 +195,8 @@ export class GoTermsViewBB extends BaseFrameView {
                 for (let goId of protein.uniprot.go) {
                     const goTerm = go.get(goId);
                     if (goTerm) {
-                        goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
-                        goTerm.interactors.add(protein);
+                        goTerm.proteins = goTerm.proteins || new Set();  // Lazy instantiation
+                        goTerm.proteins.add(protein);
                     }
                 }
             }
@@ -214,7 +214,7 @@ export class GoTermsViewBB extends BaseFrameView {
         const val = evt.target.value;
         const regex = new RegExp(val, "i");
 
-        const allInteractorSet = new Set();
+        const allProteinSet = new Set();
         let goMatchCount = 0;
 
         const nodes = this.foregroundGroup.selectAll(".node")
@@ -222,9 +222,9 @@ export class GoTermsViewBB extends BaseFrameView {
                 d.strMatch = val && val.length > 1 && d.name.match(regex);
                 if (d.strMatch) {
                     goMatchCount++;
-                    const interactorSet = d.term.getInteractors();
-                    if (interactorSet) {
-                        interactorSet.forEach(allInteractorSet.add, allInteractorSet);
+                    const proteinSet = d.term.getProteins();
+                    if (proteinSet) {
+                        proteinSet.forEach(allProteinSet.add, allProteinSet);
                     }
                 }
             })
@@ -240,10 +240,10 @@ export class GoTermsViewBB extends BaseFrameView {
                 return d.strMatch ? null : d3.rgb(d.color).darker(2);
             });
 
-        const interactors = Array.from(allInteractorSet.values());
-        const msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + interactors.length + " proteins" : "No matches");
+        const proteins = Array.from(allProteinSet.values());
+        const msg = (!val || val.length < 2) ? "Enter at least 2 characters" : (goMatchCount ? goMatchCount + " matching GO terms, mapping to " + proteins.length + " proteins" : "No matches");
         d3.select(this.el).select(".goTextResult").text(msg);
-        this.model[evt.key === "Enter" || evt.keyCode === 13 || evt.which === 13 ? "setSelectedProteins" : "setHighlightedProteins"](interactors, false);
+        this.model[evt.key === "Enter" || evt.keyCode === 13 || evt.which === 13 ? "setSelectedProteins" : "setHighlightedProteins"](proteins, false);
     }
 
     /**
@@ -265,7 +265,7 @@ export class GoTermsViewBB extends BaseFrameView {
         const go = this.model.get("go");
         //associate go terms with proteins (clear them first)
         for (let g of go.values()) {
-            // const gints = g.interactors;
+            // const gints = g.proteins;
             // if (gints && gints.size > 0) {
             //     gints.clear();
             // }
@@ -278,8 +278,8 @@ export class GoTermsViewBB extends BaseFrameView {
         //         for (let goId of protein.uniprot.go) {
         //             const goTerm = go.get(goId);
         //             if (goTerm) {
-        //                 goTerm.interactors = goTerm.interactors || new Set();  // Lazy instantiation
-        //                 goTerm.interactors.add(protein);
+        //                 goTerm.proteins = goTerm.proteins || new Set();  // Lazy instantiation
+        //                 goTerm.proteins.add(protein);
         //             }
         //         }
         //     }
@@ -290,13 +290,13 @@ export class GoTermsViewBB extends BaseFrameView {
 
         // GoTerm.prototype.getCount = 0; // what?
         if (termType === "biological_process") {
-            go.get("GO0008150").getInteractors(true);
+            go.get("GO0008150").getProteins(true);
             sankeyNode("GO0008150");
         } else if (termType === "molecular_function") {
-            go.get("GO0003674").getInteractors(true);
+            go.get("GO0003674").getProteins(true);
             sankeyNode("GO0003674");
         } else { // default to cellular component
-            go.get("GO0005575").getInteractors(true);
+            go.get("GO0005575").getProteins(true);
             sankeyNode("GO0005575");
         }
 
@@ -452,7 +452,7 @@ export class GoTermsViewBB extends BaseFrameView {
                     .attr("class", "node")
                     .on("click", function (d) {
                         self.model.setSelectedProteins([], false);
-                        self.model.setSelectedProteins(Array.from(d.term.getInteractors().values()), true);
+                        self.model.setSelectedProteins(Array.from(d.term.getProteins().values()), true);
                         // self.model.get("groupedGoTerms").push(d.term);
                         // self.model.trigger("groupedGoTermsChanged");
                         d3.event.stopPropagation();
@@ -461,7 +461,7 @@ export class GoTermsViewBB extends BaseFrameView {
                         const term = d.term;
                         self.hideAllExceptMe(term);
                         self.hideAllLinksExceptTo(term);
-                        self.model.setHighlightedProteins(Array.from(term.getInteractors().values()));
+                        self.model.setHighlightedProteins(Array.from(term.getProteins().values()));
                     })
                     .on("mouseout", function () {
                         self.hideAllExceptMe();

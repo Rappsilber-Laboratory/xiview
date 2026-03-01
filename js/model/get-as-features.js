@@ -11,13 +11,13 @@ import * as d3 from "d3";
  * Applies post-constraint checks (e.g., "not followed by P" for trypsin).
  * Returns array of features with position, category "AA", type "DIGESTIBLE".
  * @param {Object} clmsModel - CLMS model with enzymeSpecificity array
- * @param {Object} participant - Protein object with sequence and id properties
+ * @param {Object} protein - Protein object with sequence and id properties
  * @returns {Array<Object>} Array of digestible residue feature objects
  */
-export function getDigestibleResiduesAsFeatures(clmsModel, participant) {
+export function getDigestibleResiduesAsFeatures(clmsModel, protein) {
     const digestibleResiduesAsFeatures = [];
 
-    const sequence = participant.sequence;
+    const sequence = protein.sequence;
     const seqLength = sequence.length;
     const specificity = clmsModel.get("enzymeSpecificity");
 
@@ -31,8 +31,8 @@ export function getDigestibleResiduesAsFeatures(clmsModel, participant) {
                         begin: s + 1,
                         end: s + 1,
                         name: "DIGESTIBLE",
-                        protID: participant.id,
-                        id: participant.id + " " + spec.type + (s + 1),
+                        protID: protein.id,
+                        id: protein.id + " " + spec.type + (s + 1),
                         category: "AA",
                         type: "DIGESTIBLE"
                     });
@@ -50,14 +50,14 @@ export function getDigestibleResiduesAsFeatures(clmsModel, participant) {
  * For heterobifunctional crosslinkers, reactiveGroup selects which reactive group (1 or 2).
  * Returns array of features with position, category "AA", type "CROSSLINKABLE-N".
  * @param {Object} clmsModel - CLMS model with crosslinkerSpecificity map
- * @param {Object} participant - Protein object with sequence and id properties
+ * @param {Object} protein - Protein object with sequence and id properties
  * @param {number} reactiveGroup - Reactive group number (1 for first/only, 2 for second if heterobifunctional)
  * @returns {Array<Object>} Array of crosslinkable residue feature objects
  */
-export function getCrosslinkableResiduesAsFeatures(clmsModel, participant, reactiveGroup) {
+export function getCrosslinkableResiduesAsFeatures(clmsModel, protein, reactiveGroup) {
     const crosslinkableResiduesAsFeatures = [];
 
-    const sequence = participant.sequence;
+    const sequence = protein.sequence;
     const seqLength = sequence.length;
     const linkedResSets = clmsModel.get("crosslinkerSpecificity");
 
@@ -81,8 +81,8 @@ export function getCrosslinkableResiduesAsFeatures(clmsModel, participant, react
                             begin: s + 1,
                             end: s + 1,
                             name: "CROSSLINKABLE-" + reactiveGroup,
-                            protID: participant.id,
-                            id: participant.id + " Crosslinkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
+                            protID: protein.id,
+                            id: protein.id + " Crosslinkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
                             category: "AA",
                             type: "CROSSLINKABLE-" + reactiveGroup
                         });

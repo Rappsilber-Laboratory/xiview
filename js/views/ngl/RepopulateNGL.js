@@ -90,7 +90,7 @@ export function repopulateNGL(pdbInfo) {
                         sequenceMapsAvailable(pdbXiProtMap.concat(pdbUniProtMap));    // concat uniprot service and xi matched pdb-protein pairs
                     });
                     // the above sequenceMatchingDone event is triggered in matchSequencesToExistingProteins when these further alignments done, sync or async
-                    matchSequencesToExistingProteins(protAlignCollection, whichNGLSequences, interactorArr,
+                    matchSequencesToExistingProteins(protAlignCollection, whichNGLSequences, proteinArr,
                         function (sObj) {
                             return sObj.data;
                         }
@@ -98,13 +98,13 @@ export function repopulateNGL(pdbInfo) {
                 }
 
                 const nglSequences = getChainSequencesFromNGLStructure(structureComp);
-                const interactorArr = Array.from(compositeModel.get("clmsModel").getProteinsIterator());
+                const proteinArr = Array.from(compositeModel.get("clmsModel").getProteinsIterator());
 
                 // If have a pdb code AND legal accession IDs use a web service in matchPDBChainsToUniprot to glean matches
                 // between ngl protein chains and clms proteins. This is asynchronous so we use a callback
-                // if (pdbSettings[0].pdbCode && getLegalAccessionIDs(interactorMap).length) {
+                // if (pdbSettings[0].pdbCode && getLegalAccessionIDs(proteinMap).length) {
                 //     console.log("WEB SERVICE CALLED");
-                //     NGLUtils.matchPDBChainsToUniprot(pdbSettings, nglSequences, interactorArr, function (uniprotMappingResults) {
+                //     NGLUtils.matchPDBChainsToUniprot(pdbSettings, nglSequences, proteinArr, function (uniprotMappingResults) {
                 //         xilog ("UniprotMapRes", uniprotMappingResults, nglSequences);
                 //         if (uniprotMappingResults.remaining.length) { // Some PDB sequences don't have unicode protein matches in this search
                 //             var remainingSequences = _.pluck (uniprotMappingResults.remaining, "seqObj");   // strip the remaining ones back to just sequence objects

@@ -94,9 +94,9 @@ export function postDataLoaded(compositeModelInst) {
 
     //  make uniprot feature types - done here as need proteins parsed and ready from xi
     const uniprotFeatureTypes = new Map();
-    for (let participant of compositeModelInst.get("clmsModel").getProteinsIterator()) { //todo - remove static ref?
-        if (participant.uniprot) {
-            const featureArray = Array.from(participant.uniprot.features);
+    for (let protein of compositeModelInst.get("clmsModel").getProteinsIterator()) { //todo - remove static ref?
+        if (protein.uniprot) {
+            const featureArray = Array.from(protein.uniprot.features);
             featureArray.forEach(function (feature) {
                 const key = feature.category + "-" + feature.type;
                 if (!uniprotFeatureTypes.has(key)) {
@@ -168,10 +168,10 @@ export function postDataLoaded(compositeModelInst) {
 //             }
 //             protein.rotation = protLayout["rot"] - 0;
 //             protein.flipped = protLayout["flipped"];
-//             protein.participant.manuallyHidden = protLayout["manuallyHidden"];
+//             protein.protein.manuallyHidden = protLayout["manuallyHidden"];
 //
 //             if (protLayout["name"]) {
-//                 protein.participant.name = protLayout["name"];
+//                 protein.protein.name = protLayout["name"];
 //                 namesChanged = true;
 //             }
 //
@@ -190,7 +190,7 @@ export function postDataLoaded(compositeModelInst) {
 //         for (const savedGroup of groups) {
 //             //gonna need to check for proteins now missing from results
 //             const presentProteins = new Set();
-//             for (let pId of savedGroup.participantIds) {
+//             for (let pId of savedGroup.proteinIds) {
 //                 if (this.renderedProteins.get(pId)) {
 //                     presentProteins.add(pId);
 //                 }
@@ -446,7 +446,7 @@ export function modelsEssential(options, clmsModelInst) {
  * Creates dynamic window divs for all panels, calls viewsEssential for core views,
  * generates view checkboxes and adds to dropdown menu with enable/disable logic based on data availability,
  * creates protein selection and groups dropdown menus with search/filter, creates load dropdown,
- * creates xiNET controls, initializes color chooser dialog with interactor color selection,
+ * creates xiNET controls, initializes color chooser dialog with protein color selection,
  * sets up one-time buildAsyncViews listener to call viewsThatNeedAsyncData when async data loaded.
  * @param {CompositeModel} compositeModelInst - Main composite model instance
  * @returns {undefined}
@@ -543,16 +543,16 @@ export function views(compositeModelInst, split) {
     const dialog = document.getElementById("colorDialog"); //todo : make spelling of colour consistent
     const colorCancelButton = document.getElementById("colorCancel");
     colorCancelButton.addEventListener("click", () => {
-        dialog.interactorId = "cancel";
+        dialog.proteinId = "cancel";
         dialog.close();
     });
     dialog.addEventListener("close", () => {
-        const iId = document.getElementById("colorDialog").interactorId;
+        const iId = document.getElementById("colorDialog").proteinId;
         const checkedColor = document.querySelector("input[name=\"aColor\"]:checked");
         if (!checkedColor) {
             alert("No colour selected.");
         } else if (iId !== "cancel") {
-            compositeModelInst.setInteractorColor(iId, checkedColor.value);
+            compositeModelInst.setProteinColor(iId, checkedColor.value);
         }
     });
 
