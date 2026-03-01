@@ -6,7 +6,7 @@
  */
 
 import "../../../css/circularViewBB.css";
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 
 import {BaseFrameView} from "../../ui-utils/base-frame-view";

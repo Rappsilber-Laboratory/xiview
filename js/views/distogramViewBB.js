@@ -9,7 +9,7 @@
 import "../../css/distogram.css";
 import "../../vendor/c3.css";
 
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 import * as c3 from "../../vendor/c3";
 

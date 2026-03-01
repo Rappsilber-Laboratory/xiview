@@ -8,7 +8,7 @@
  */
 
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 // const workerpool = require('workerpool');
 import {xilog} from "../../utils";
 import {filterOutDecoyInteractors, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";

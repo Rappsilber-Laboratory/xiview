@@ -8,7 +8,7 @@
 
 import "../../css/alignViewBB.css";
 
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 import Backbone from "backbone";
 

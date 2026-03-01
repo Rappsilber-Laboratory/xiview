@@ -14,7 +14,7 @@ import packageInfo from "../package.json";
 
 import * as _ from "underscore";
 import Backbone from "backbone";
-import * as $ from "jquery";
+import $ from "jquery";
 import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 

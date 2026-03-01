@@ -4,7 +4,7 @@
  * Includes factory function to dynamically create color models from metadata (numeric → threshold, hex → ordinal with hex values, categorical → ordinal).
  * Manages color model collections with event listeners for metadata updates.
  */
-import * as $ from "jquery";
+import $ from "jquery";
 
 import {DefaultLinkColourModel} from "./link-color-model";
 import {GroupColourModel} from "./link-color-model";

@@ -10,7 +10,7 @@ import "../../css/tooltip.css";
 
 import Backbone from "backbone";
 import d3 from "d3";
-import * as $ from "jquery";
+import $ from "jquery";
 
 /**
  * Global tooltip view for contextual information display.

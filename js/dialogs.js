@@ -3,9 +3,7 @@
  * Provides convenience wrappers for creating error dialogs and confirmation dialogs.
  * Uses jQuery UI dialog widget with modal behavior.
  */
-import * as $ from "jquery";
-
-window.jQuery = $;
+import $ from "jquery";
 import d3 from "d3";
 import "jquery-ui/ui/widgets/dialog";
 import "jquery-ui/themes/base/all.css";

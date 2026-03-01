@@ -8,7 +8,7 @@
 
 import {xilog} from "../../utils";
 import d3 from "d3";
-import * as $ from "jquery";
+import $ from "jquery";
 import {filterSequenceByResidueSet} from "../../modelUtils";
 import * as _ from "underscore";
 import {make3DAlignID, not3DHomomultimeric} from "./NGLUtils";

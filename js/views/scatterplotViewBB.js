@@ -7,7 +7,7 @@
 
 import "../../css/scatterplot.css";
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {attributeOptions} from "../models/attribute-options";

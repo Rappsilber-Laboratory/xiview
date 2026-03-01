@@ -5,7 +5,7 @@
  */
 
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 import * as d3 from "d3";
 import {octree as d3octree} from "../vendor/d3-octree";
 import {commonRegexes, xilog} from "./utils";

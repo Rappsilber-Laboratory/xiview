@@ -8,7 +8,7 @@
  */
 
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 import * as NGL from "ngl";
 import {xilog} from "../../utils";
 import d3 from "d3";

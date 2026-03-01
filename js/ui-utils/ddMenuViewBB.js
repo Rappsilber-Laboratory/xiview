@@ -7,7 +7,7 @@
 import "../../css/ddMenuViewBB.css";
 import * as _ from "underscore";
 import Backbone from "backbone";
-import * as $ from "jquery";
+import $ from "jquery";
 
 import {makeLegalDomID, makeLegalFileName, searchesToString, updateAnnotationColourKey} from "../utils";
 import {checkBoxView} from "./checkbox-view";

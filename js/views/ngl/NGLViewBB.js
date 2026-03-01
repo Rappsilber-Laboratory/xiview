@@ -8,7 +8,7 @@
 import "../../../css/nglViewBB.css";
 
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 
 import * as NGL from "ngl";
 

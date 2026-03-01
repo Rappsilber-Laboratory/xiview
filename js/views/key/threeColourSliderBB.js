@@ -7,7 +7,7 @@
  */
 import "../../../css/threeColourSlider.css";
 
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 import Backbone from "backbone";
 import d3 from "d3";

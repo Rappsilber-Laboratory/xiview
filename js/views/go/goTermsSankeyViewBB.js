@@ -6,7 +6,7 @@
  */
 import "../../../css/goTermsView.css";
 
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 import * as d3 from "d3";
 import {d3_sankey} from "./sankey";
