@@ -15,6 +15,7 @@ import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
 import {updateColourKey} from "../../utils";
 import {ManualColourModel} from "../../model/color/protein-color-model";
+import {linkColor} from "../../model/color/setup-colors";
 
 /**
  * Legend panel view displaying color schemes and view-specific legends.
@@ -102,7 +103,7 @@ export class KeyViewBB extends BaseFrameView {
 
         // update is only triggered once when adding/removing multiple models to/from a collection
         this.options.colourConfigs.forEach(function (config) {
-            this.listenTo(window.linkColor[config.collectionID], "update", this.render);
+            this.listenTo(linkColor[config.collectionID], "update", this.render);
         }, this);
 
         return this;
@@ -308,7 +309,7 @@ export class KeyViewBB extends BaseFrameView {
 
         sectionTable.call(this, sectionDiv, viewLegendSectionData, "keyInfo", ["Mark", "Meaning"], headerFunc, rowFilterFunc, cellFunc, [0], null);
 
-        const colScheme = window.linkColor.defaultColoursBB;
+        const colScheme = linkColor.defaultColoursBB;
         const notLinear = function () {
             return false;
         };

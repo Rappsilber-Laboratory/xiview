@@ -27,6 +27,7 @@ import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {crosslinkerSpecificityPerLinker} from "../modelUtils";
 import d3 from "d3";
 import vent from "../vent";
+import {linkColor} from "../model/color/setup-colors";
 
 /**
  * Backbone view for histogram/distogram visualization of crosslink attribute distributions.
@@ -536,7 +537,7 @@ export class DistogramBB extends BaseFrameView {
             // Get colour model. If chosen colour model is non-categorical, default to distance colours.
             let colModel = this.model.get("linkColourAssignment");
             if (!colModel.isCategorical()) {
-                colModel = window.linkColor.defaultColoursBB; // make default colour choice for histogram if current colour model is continuous
+                colModel = linkColor.defaultColoursBB; // make default colour choice for histogram if current colour model is continuous
             }
             this.colourScaleModel = colModel;
 

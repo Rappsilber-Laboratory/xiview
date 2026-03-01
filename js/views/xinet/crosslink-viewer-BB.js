@@ -15,6 +15,7 @@ import {Group} from "./interactor/group";
 import {P_PLink} from "./link/p_p-link";
 import {G_GLink} from "./link/g_g-link";
 import {ManualColourModel} from "../../model/color/protein-color-model";
+import {linkColor} from "../../model/color/setup-colors";
 import vent from "../../vent";
 
 /**
@@ -1285,8 +1286,8 @@ export class CrosslinkViewer extends Backbone.View {
         this.zoomToFullExtent();
 
         if (layout.manualColourAssignment) {
-            window.linkColor.manualProteinColoursBB.setMap(JSON.parse(layout.manualColourAssignment));
-            this.model.set("proteinColourAssignment", window.linkColor.manualProteinColoursBB);
+            linkColor.manualProteinColoursBB.setMap(JSON.parse(layout.manualColourAssignment));
+            this.model.set("proteinColourAssignment", linkColor.manualProteinColoursBB);
         }
 
         // if (layoutIsDodgy) {

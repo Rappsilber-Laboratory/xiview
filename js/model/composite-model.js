@@ -15,6 +15,7 @@ import {makeURLQueryPairs, mergeContiguousFeatures} from "../modelUtils";
 import d3 from "d3";
 import {xilog} from "../utils";
 import {ManualColourModel} from "./color/protein-color-model";
+import {linkColor} from "./color/setup-colors";
 import {getCrosslinkableResiduesAsFeatures, getDigestibleResiduesAsFeatures} from "./get-as-features";
 import vent from "../vent";
 
@@ -800,10 +801,10 @@ export class CompositeModel extends Backbone.Model {
     setInteractorColor(interactorId, color) {
         const proteinColourModel = window.compositeModelInst.get("proteinColourAssignment");
         if (!(proteinColourModel instanceof ManualColourModel)) {
-            this.set("proteinColourAssignment", window.linkColor.manualProteinColoursBB);
+            this.set("proteinColourAssignment", linkColor.manualProteinColoursBB);
         }
-        window.linkColor.manualProteinColoursBB.setInteractorColour(interactorId, color);
-        this.trigger("currentProteinColourModelChanged", window.linkColor.manualProteinColoursBB);
+        linkColor.manualProteinColoursBB.setInteractorColour(interactorId, color);
+        this.trigger("currentProteinColourModelChanged", linkColor.manualProteinColoursBB);
     }
 
     /**

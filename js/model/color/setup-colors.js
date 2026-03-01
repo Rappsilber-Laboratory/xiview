@@ -24,13 +24,13 @@ import {commonRegexes} from "../../utils";
 import d3 from "d3";
 import vent from "../../vent";
 
-window.linkColor = {};//todo - get rid
+export const linkColor = {};
 
 /**
  * Initializes all color models for crosslinks and proteins.
  * Creates predefined schemes (default, group, inter-protein, distance, highest score) and collections.
  * Sets up event listeners for metadata updates to dynamically add metadata-based color schemes.
- * Stores collections in window.linkColor for global access.
+ * Stores collections in the exported linkColor object.
  * @param {Object} [userConfig] - Optional user configuration to override defaults
  * @param {Object} [userConfig.default] - Default crosslink colors config
  * @param {Array<number>} [userConfig.default.domain] - Ordinal domain [0, 1, 2]
@@ -47,7 +47,7 @@ export const setupColourModels = function (userConfig) {
     };
     const config = $.extend(true, {}, defaultConfig, userConfig);    // true = deep merging
 
-    window.linkColor.defaultColoursBB = new DefaultLinkColourModel({
+    linkColor.defaultColoursBB = new DefaultLinkColourModel({
         colScale: d3.scale.ordinal().domain(config.default.domain).range(config.default.range),
         title: "Crosslink Type",
         longDescription: "Default colour scheme, differentiates self links with overlapping peptides.",
@@ -69,9 +69,9 @@ export const setupColourModels = function (userConfig) {
         });
     };
 
-    window.linkColor.groupColoursBB = makeGroupColourModel();
+    linkColor.groupColoursBB = makeGroupColourModel();
 
-    window.linkColor.interProteinColoursBB = new InterProteinColourModel({
+    linkColor.interProteinColoursBB = new InterProteinColourModel({
         title: "Protein-Protein Colouring",
         longDescription: "Differentiate crosslinks by the proteins they connect. Suitable for 3 to 5 proteins only.",
         id: "InterProtein",
@@ -80,7 +80,7 @@ export const setupColourModels = function (userConfig) {
         proteins: window.compositeModelInst.get("clmsModel").getProteinsMap()
     });
 
-    window.linkColor.distanceColoursBB = new DistanceColourModel({
+    linkColor.distanceColoursBB = new DistanceColourModel({
         colScale: d3.scale.threshold().domain(config.distance.domain).range(config.distance.range),
         title: "Distance (Å)",
         longDescription: "Colour crosslinks by adjustable distance category. Requires PDB file to be loaded (via Load -> PDB Data).",
@@ -110,7 +110,7 @@ export const setupColourModels = function (userConfig) {
 
     //const range = [minScore, quantiles[0], quantiles[1], maxScore];
 
-    window.linkColor.highestScoreColoursBB = new HighestScoreColourModel({
+    linkColor.highestScoreColoursBB = new HighestScoreColourModel({
         colScale: d3.scale.threshold().domain(quantiles).range(colorbrewer.Dark2[3].reverse()),
         title: "Highest Score",
         longDescription: "Highest score from supporting matches that meet current filter.",
@@ -119,11 +119,11 @@ export const setupColourModels = function (userConfig) {
     });
 
     const linkColourCollection = new ColourModelCollection([
-        window.linkColor.defaultColoursBB,
-        window.linkColor.interProteinColoursBB,
-        window.linkColor.groupColoursBB,
-        window.linkColor.distanceColoursBB,
-        window.linkColor.highestScoreColoursBB
+        linkColor.defaultColoursBB,
+        linkColor.interProteinColoursBB,
+        linkColor.groupColoursBB,
+        linkColor.distanceColoursBB,
+        linkColor.highestScoreColoursBB
     ]);
 
     // If necessary, swap in newly added colour scale with same id as removed (but current) scale pointed to by linkColourAssignment
@@ -137,8 +137,8 @@ export const setupColourModels = function (userConfig) {
     // Just the group colour scale is replaced for this event
     /*linkColourCollection.listenTo(window.compositeModelInst.get("clmsModel"), "change:matches", function() {
         this.remove("Group");   // remove old group scale
-        window.linkColor.groupColoursBB = makeGroupColourModel();
-        this.add (window.linkColor.groupColoursBB);    // add new group scale
+        linkColor.groupColoursBB = makeGroupColourModel();
+        this.add (linkColor.groupColoursBB);    // add new group scale
         replaceCurrentLinkColourAssignment(this);   // replace existing selected scale if necessary
     });*/
 
@@ -154,19 +154,19 @@ export const setupColourModels = function (userConfig) {
         replaceCurrentLinkColourAssignment(this);
     });
 
-    window.linkColor.Collection = linkColourCollection;
+    linkColor.Collection = linkColourCollection;
 
 
     // Protein colour schemes
 
-    window.linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({ //todo - linkColor looks wrong here
+    linkColor.defaultProteinColoursBB = new DefaultProteinColourModel({ //todo - linkColor looks wrong here
         colScale: d3.scale.ordinal().domain([0]).range(["#ffffff"]),
         title: "Default Protein Colour",
         longDescription: "Default protein colour.",
         id: "Default Protein"
     });
 
-    window.linkColor.manualProteinColoursBB = new ManualColourModel({
+    linkColor.manualProteinColoursBB = new ManualColourModel({
         colScale: null,//d3.scale.ordinal().domain([0]).range(["#00ffff"]),
         title: "Manual Protein Colour",
         longDescription: "Manually assigned protein colour.",
@@ -175,8 +175,8 @@ export const setupColourModels = function (userConfig) {
 
     // Can add other metadata-based schemes to this collection later
     const proteinColourCollection = new ColourModelCollection([
-        window.linkColor.defaultProteinColoursBB,
-        window.linkColor.manualProteinColoursBB
+        linkColor.defaultProteinColoursBB,
+        linkColor.manualProteinColoursBB
     ]);
 
     // If necessary, swap in newly added colour scale with same id as removed (but current) scale pointed to by linkColourAssignment
@@ -199,7 +199,7 @@ export const setupColourModels = function (userConfig) {
         replaceCurrentProteinColourAssignment(this);
     });
 
-    window.linkColor.ProteinCollection = proteinColourCollection;
+    linkColor.ProteinCollection = proteinColourCollection;
 };
 
 /**

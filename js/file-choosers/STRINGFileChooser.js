@@ -13,6 +13,7 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {STRINGUtils} from "./stringUtils";
 import {commonRegexes} from "../utils";
 import {updateLinkMetadata} from "../modelUtils";
+import {linkColor} from "../model/color/setup-colors";
 
 /**
  * STRING database chooser view for loading protein interaction scores.
@@ -166,7 +167,7 @@ export class STRINGFileChooserBB extends BaseFrameView {
                 //console.log ("assignt to links took", t/1000, "s");
                 statusText = result.ppiCount + " STRING interactions matched to protein set.<br>";
                 if (result.ppiCount > 0) {
-                    self.model.set("linkColourAssignment", window.linkColor.Collection.get("STRING Score"));  // Switch to STRING colouring if any STRING scores available
+                    self.model.set("linkColourAssignment", linkColor.Collection.get("STRING Score"));  // Switch to STRING colouring if any STRING scores available
                     statusText += "Colour Scheme switched to STRING Score - subscores via Legend View.";
                 }
             }

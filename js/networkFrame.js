@@ -64,7 +64,7 @@ import {
 import {GoTermsViewBB} from "./views/go/goTermsSankeyViewBB";
 import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
-import {setupColourModels} from "./model/color/setup-colors";
+import {setupColourModels, linkColor} from "./model/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
 import {prideLoadSpectrum} from "./models/load-spectrum/pride-load-spectrum";
 
@@ -301,7 +301,7 @@ export function models(options, clmsModelInst) {
     setupColourModels({distance: storedDistanceColourSettings});
 
     if (crosslinkerKeys.length === 1) {
-        window.compositeModelInst.listenTo(window.linkColor.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
+        window.compositeModelInst.listenTo(linkColor.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
             const obj = {distanceColours: {}};
             obj.distanceColours[crosslinkerKeys[0]] = attr;
             setLocalStorage(obj);
@@ -309,14 +309,14 @@ export function models(options, clmsModelInst) {
     }
 
     // A colour model's attributes have changed - is it the currently used model? If so, fire the currentColourModelChanged event
-    compositeModelInst.listenTo(window.linkColor.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
+    compositeModelInst.listenTo(linkColor.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("linkColourAssignment").id === colourModel.id) {
             this.trigger("currentColourModelChanged", colourModel, changedAttrs);
         }
     });
 
     // same for protein colour models
-    compositeModelInst.listenTo(window.linkColor.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
+    compositeModelInst.listenTo(linkColor.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("proteinColourAssignment").id === colourModel.id) {
             this.trigger("currentProteinColourModelChanged", colourModel, changedAttrs);
         }
@@ -326,9 +326,9 @@ export function models(options, clmsModelInst) {
     // If more than one search, set group colour scheme to be default. https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/72
     compositeModelInst
         .set("linkColourAssignment",
-            window.compositeModelInst.get("clmsModel").getSearches().size > 1 ? window.linkColor.groupColoursBB : window.linkColor.defaultColoursBB
+            window.compositeModelInst.get("clmsModel").getSearches().size > 1 ? linkColor.groupColoursBB : linkColor.defaultColoursBB
         )
-        .set("proteinColourAssignment", window.linkColor.defaultProteinColoursBB);
+        .set("proteinColourAssignment", linkColor.defaultProteinColoursBB);
 
     return compositeModelInst;
 }
@@ -854,7 +854,7 @@ function viewsThatNeedAsyncData(compositeModelInst) {
 
     new ColourCollectionOptionViewBB({
         el: "#linkColourDropdownPlaceholder",
-        model: window.linkColor.Collection,
+        model: linkColor.Collection,
         storeSelectedAt: {
             model: compositeModelInst,
             attr: "linkColourAssignment"
@@ -863,7 +863,7 @@ function viewsThatNeedAsyncData(compositeModelInst) {
 
     new ColourCollectionOptionViewBB({
         el: "#proteinColourDropdownPlaceholder",
-        model: window.linkColor.ProteinCollection,
+        model: linkColor.ProteinCollection,
         storeSelectedAt: {
             model: compositeModelInst,
             attr: "proteinColourAssignment"
@@ -884,9 +884,9 @@ function viewsThatNeedAsyncData(compositeModelInst) {
     new DistogramBB({
         el: "#distoPanel",
         model: compositeModelInst,
-        //colourScaleModel: window.linkColor.distanceColoursBB,
-        //colourScaleModel: window.linkColor.defaultColoursBB,
-        colourScaleModel: window.linkColor.groupColoursBB,
+        //colourScaleModel: linkColor.distanceColoursBB,
+        //colourScaleModel: linkColor.defaultColoursBB,
+        colourScaleModel: linkColor.groupColoursBB,
         displayEventName: "distoViewShow",
         myOptions: {
             chartTitle: "Histogram",
@@ -898,7 +898,7 @@ function viewsThatNeedAsyncData(compositeModelInst) {
     new DistanceMatrixViewBB({
         el: "#matrixPanel",
         model: compositeModelInst,
-        colourScaleModel: window.linkColor.distanceColoursBB,
+        colourScaleModel: linkColor.distanceColoursBB,
         displayEventName: "matrixViewShow",
     });
 
