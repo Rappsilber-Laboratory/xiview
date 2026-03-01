@@ -453,7 +453,7 @@ export function modelsEssential(options, clmsModelInst) {
  * @param {CompositeModel} compositeModelInst - Main composite model instance
  * @returns {undefined}
  */
-export function views(compositeModelInst) {
+export function views(compositeModelInst, split) {
     const windowIds = DYNAMIC_CONTAINER_IDS;
     // something funny happens if I do a data join and enter with d3 instead
     // ('distoPanel' datum trickles down into chart axes due to unintended d3 select.select inheritance)
@@ -467,7 +467,8 @@ export function views(compositeModelInst) {
     document.getElementById("pdbLoadButton")?.addEventListener("click", () => vent.trigger("pdbFileChooserShow", true));
 
     viewsEssential(compositeModelInst, {
-        "specWrapperDiv": "#spectrumPanelWrapper"
+        "specWrapperDiv": "#spectrumPanelWrapper",
+        split,
     });
 
     // Generate checkboxes for view dropdown
@@ -668,6 +669,7 @@ export function viewsEssential(compositeModelInst, options) {
     const selectionViewer = new SelectionTableViewBB({
         el: "#bottomDiv",
         model: compositeModelInst,
+        split: options.split,
     });
 
     selectionViewer.lastCount = 1;

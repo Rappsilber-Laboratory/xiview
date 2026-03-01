@@ -58,14 +58,14 @@ export class SelectionTableViewBB extends Backbone.View {
             this.render();
             if (window.location.pathname.indexOf("spectra.php") === -1) { //nice //TODO - wtf, fix
                 if (this.model.get("selection").length > 0) {
-                    if (!window.oldSplitterProportions || window.oldSplitterProportions[1] === 0) { //TODO
-                        window.oldSplitterProportions = [80, 20];
+                    if (!this.options.split.oldProportions || this.options.split.oldProportions[1] === 0) {
+                        this.options.split.oldProportions = [80, 20];
                     }
                     d3.select(".gutter").style("display", null);
-                    window.split.setSizes(window.oldSplitterProportions);
+                    this.options.split.setSizes(this.options.split.oldProportions);
                 } else {
                     d3.select(".gutter").style("display", "none");
-                    window.split.setSizes([100, 0]);
+                    this.options.split.setSizes([100, 0]);
                 }
             }
         });

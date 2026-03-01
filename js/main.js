@@ -137,8 +137,8 @@ export function main(apiBase, annotatorURL) {
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
             setWindowTitle();
-            initPageSplitter();
-            views(compositeModelInst);
+            const split = initPageSplitter();
+            views(compositeModelInst, split);
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
             networkPageSpinner.stop();
         })
@@ -173,8 +173,8 @@ export function validationPage(apiBase, annotatorURL) {
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
             setWindowTitle();
-            initPageSplitter();
-            viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false});
+            const split = initPageSplitter();
+            viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false, split});
             vent.trigger("spectrumShow", true);
             const allMatches = window.compositeModelInst.get("clmsModel").getMatches();
             compositeModelInst.setMarkedMatches("selection", allMatches);
@@ -238,15 +238,15 @@ function setWindowTitle() {
 /**
  * Initializes the page splitter that divides the main view from the selection table.
  * Creates a vertical split with 80% for main content and 20% for selection table.
- * @returns {void}
+ * @returns {object} The Split.js instance
  * @private
  */
 function initPageSplitter() {
-    window.split = Split(["#topDiv", "#bottomDiv"], //yuk, todo - get rid
+    const split = Split(["#topDiv", "#bottomDiv"],
         {
             direction: "vertical", sizes: [80, 20], minSize: [200, 0],
             onDragEnd: function () {
-                window.oldSplitterProportions = window.split.getSizes();
+                split.oldProportions = split.getSizes();
             },
             gutterStyle: function () {
                 return {/*"margin": "0 10px",*/ "height": "10px"};
@@ -254,6 +254,7 @@ function initPageSplitter() {
         },
     );
     d3.select(".gutter").attr("title", "Drag to change space available to selection table");
+    return split;
 }
 
 /**
