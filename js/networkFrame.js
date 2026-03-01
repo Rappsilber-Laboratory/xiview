@@ -463,6 +463,8 @@ export function views(compositeModelInst) {
             .attr("class", "dynDiv dynDiv_bodyLimit");
     });
 
+    document.getElementById("pdbLoadButton")?.addEventListener("click", () => vent.trigger("pdbFileChooserShow", true));
+
     viewsEssential(compositeModelInst, {
         "specWrapperDiv": "#spectrumPanelWrapper"
     });
