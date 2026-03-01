@@ -142,11 +142,11 @@ export class xiNetControlsViewBB extends Backbone.View {
             buttonHtml
         );
 
-        // !XI2 !XI1
-        if (window.loggedIn == false) {
-            const saveButtonSel = d3.select(".saveLayoutButton");
-            saveButtonSel.style("display", "none");
-        }
+        // !XI2 !XI1 // todo - address saving layouts
+        // if (window.loggedIn == false) {
+        //     const saveButtonSel = d3.select(".saveLayoutButton");
+        //     saveButtonSel.style("display", "none");
+        // }
 
         // if (this.model.get("clmsModel").get("xiNETLayout")) {
         //     d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);

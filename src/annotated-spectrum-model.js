@@ -32,7 +32,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
      */
     defaults: function () {
         return {
-            baseDir: "./",
+            baseDir: "./", // todo - is this needed
             knownModifications: [],
             highlightColor: "#FFFF00",
             highlightWidth: 8,
