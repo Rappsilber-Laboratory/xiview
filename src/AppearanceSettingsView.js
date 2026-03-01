@@ -1,6 +1,6 @@
 import "../css/settings.css";
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 import * as jscolor from "@eastdesire/jscolor";
 import {xiSPECUI} from "./xispecui";
 import {SettingsView} from "./SettingsView";

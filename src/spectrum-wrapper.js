@@ -1,6 +1,6 @@
 import * as _ from "underscore";
 import Backbone from "backbone";
-import * as $ from "jquery";
+import $ from "jquery";
 
 import {AnnotatedSpectrumModel} from "./annotated-spectrum-model";
 import {xiSPECUI} from "./xispecui";

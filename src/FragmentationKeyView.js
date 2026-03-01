@@ -4,7 +4,7 @@ import {xiSPECUI} from "./xispecui";
 import Backbone from "backbone";
 import * as _ from "underscore";
 import d3 from "d3";
-import * as $ from "jquery";
+import $ from "jquery";
 
 
 //TODO: find a better place for this?

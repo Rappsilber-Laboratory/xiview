@@ -1,7 +1,7 @@
 import "../css/spectrum.css";
 import "../css/dropdown.css";
 import "../css/font-awesome.min.css";
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 import Backbone from "backbone";
 import * as d3 from "d3";

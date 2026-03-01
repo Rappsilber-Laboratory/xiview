@@ -3,7 +3,7 @@ import "datatables.net-dt/css/jquery.dataTables.css";
 import {xiSPECUI} from "./xispecui";
 
 import * as _ from "underscore";
-import * as $ from "jquery";
+import $ from "jquery";
 import "datatables.net";
 import {SettingsView} from "./SettingsView";
 import {PepInputView} from "./PepInputView";

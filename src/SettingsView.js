@@ -1,4 +1,4 @@
-import * as $ from "jquery";
+import $ from "jquery";
 import * as _ from "underscore";
 import * as Backbone from "backbone";
 import * as d3 from "d3";

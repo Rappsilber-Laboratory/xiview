@@ -1,5 +1,5 @@
 import Backbone from "backbone";
-import * as $ from "jquery";
+import $ from "jquery";
 
 export const PepInputView = Backbone.View.extend({
 

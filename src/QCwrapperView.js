@@ -3,7 +3,7 @@ import {xiSPECUI} from "./xispecui";
 
 import * as _ from "underscore";
 import Backbone from "backbone";
-import * as $ from "jquery";
+import $ from "jquery";
 import Split from "split.js";
 import d3 from "d3";
 

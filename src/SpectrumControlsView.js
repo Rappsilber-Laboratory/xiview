@@ -1,6 +1,6 @@
 import Backbone from "backbone";
 import d3 from "d3";
-import * as $ from "jquery";
+import $ from "jquery";
 import {xiSPECUI} from "./xispecui";
 
 export const SpectrumControlsView = Backbone.View.extend({
