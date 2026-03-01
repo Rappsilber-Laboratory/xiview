@@ -69,7 +69,7 @@ export const prideLoadSpectrum = function (match) {
     formatted_data.stubs2 = match.matchedPeptides[1].stubs;
 
 
-    const url = window.compositeModelInst.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
+    const url = this.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
                     + "&sd_ref=" +  encodeURIComponent(match.spectraDataId)
                     + "&upload_id=" +  encodeURIComponent(match.uploadId);
 
@@ -93,7 +93,7 @@ export const prideLoadSpectrum = function (match) {
             }
 
             formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
-            window.compositeModelInst.get("xispec_wrapper").setData(formatted_data);
+            this.get("xispec_wrapper").setData(formatted_data);
         })
         .catch(error => {
             console.log("error getting peak list", error);

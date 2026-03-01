@@ -3,7 +3,7 @@
  * Orchestrates model creation, view initialization, event wiring, and data loading.
  * Exports functions for phased initialization: models (FilterModel, CompositeModel, MinigramModel),
  * views (all UI components), postDataLoaded (annotations, filters), blosumLoading (async matrices).
- * Creates global window.compositeModelInst. Uses vent (Backbone event bus) from js/vent.js.
+ * Uses vent (Backbone event bus) from js/vent.js.
  * Entry point for full xiVIEW application with network visualization, spectrum viewer, alignment,
  * NGL 3D viewer, filters, exports, and all interactive UI components.
  */
@@ -267,7 +267,7 @@ export function models(options, clmsModelInst) {
 
     const compositeModelInst = modelsEssential(options, clmsModelInst);
     alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").getProteinsIterator()));
-    // following listeners require window.compositeModelInst etc to be set up in modelsEssential() so placed afterwards
+    // following listeners are placed after modelsEssential() returns compositeModelInst
 
     // this listener adds new sequences obtained from pdb files to existing alignment sequence models
     alignmentCollectionInst.listenTo(compositeModelInst, "3dsync", function (sequences, removeThese) {
@@ -298,10 +298,10 @@ export function models(options, clmsModelInst) {
     // todo - BROKEN. FIX.
     const crosslinkerKeys = d3.keys(compositeModelInst.get("clmsModel").getCrosslinkerSpecificity());
     const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
-    setupColourModels({distance: storedDistanceColourSettings});
+    setupColourModels(compositeModelInst, {distance: storedDistanceColourSettings});
 
     if (crosslinkerKeys.length === 1) {
-        window.compositeModelInst.listenTo(linkColor.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
+        compositeModelInst.listenTo(linkColor.Collection.get("Distance"), "colourModelChanged", function (colourModel, attr) {
             const obj = {distanceColours: {}};
             obj.distanceColours[crosslinkerKeys[0]] = attr;
             setLocalStorage(obj);
@@ -326,7 +326,7 @@ export function models(options, clmsModelInst) {
     // If more than one search, set group colour scheme to be default. https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/72
     compositeModelInst
         .set("linkColourAssignment",
-            window.compositeModelInst.get("clmsModel").getSearches().size > 1 ? linkColor.groupColoursBB : linkColor.defaultColoursBB
+            compositeModelInst.get("clmsModel").getSearches().size > 1 ? linkColor.groupColoursBB : linkColor.defaultColoursBB
         )
         .set("proteinColourAssignment", linkColor.defaultProteinColoursBB);
 
@@ -393,8 +393,16 @@ export function modelsEssential(options, clmsModelInst) {
     minigramModels[0].data = function () {
         return flattenMatches(clmsModelInst.getMatches()); // matches is now an array of arrays - [matches, []];
     };
+    // overarching model
+    const compositeModel = new CompositeModel({
+        clmsModel: clmsModelInst,
+        filterModel: filterModelInst,
+        tooltipModel: tooltipModelInst,
+        alignColl: options.alignmentCollectionInst,
+        minigramModels: {distance: minigramModels[1], score: minigramModels[0]},
+    });
     minigramModels[1].data = function () {
-        const crosslinks = window.compositeModelInst.getAllCrossLinks();
+        const crosslinks = compositeModel.getAllCrossLinks();
         const distances = crosslinks
             .map(function (clink) {
                 return clink.getMeta("distance");
@@ -404,18 +412,8 @@ export function modelsEssential(options, clmsModelInst) {
             });
         return [distances];
     };
-
-
-    // overarching model
-    const compositeModel = new CompositeModel({
-        clmsModel: clmsModelInst,
-        filterModel: filterModelInst,
-        tooltipModel: tooltipModelInst,
-        alignColl: options.alignmentCollectionInst,
-        minigramModels: {distance: minigramModels[1], score: minigramModels[0]},
-    });
-    window.compositeModelInst = compositeModel;
-    window.compositeModelInst.loadSpectrum = prideLoadSpectrum;
+    compositeModel.loadSpectrum = prideLoadSpectrum;
+    filterModelInst.compositeModel = compositeModel;
 
     // change in distanceObj changes the distanceExtent in filter model and should trigger a re-filter for distance minigram model as dists may have changed
     minigramModels[1]
@@ -732,6 +730,8 @@ export function viewsEssential(compositeModelInst, options) {
         targetDiv: "modular_xispec",
         // baseDir: window.xiSpecBaseDir,
         xiAnnotatorBaseURL: compositeModelInst.get("annotatorURL"),
+        dbView: window.dbView,
+        compositeModelInst: compositeModelInst,
         showCustomConfig: true,
         showQualityControl: "min",
         colorScheme: "PRGn",
@@ -767,7 +767,17 @@ export function viewsEssential(compositeModelInst, options) {
     new DropDownMenuViewBB({
         el: "#expDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
-        myOptions: getExportMenuConfig(downloadMatches, downloadLinks, downloadPPIs, downloadResidueCount, downloadModificationCount, downloadProteinAccessions, downloadGroups, downloadSSL, downloadAlphaLink2)
+        myOptions: getExportMenuConfig(
+            () => downloadMatches(compositeModelInst),
+            () => downloadLinks(compositeModelInst),
+            () => downloadPPIs(compositeModelInst),
+            () => downloadResidueCount(compositeModelInst),
+            () => downloadModificationCount(compositeModelInst),
+            () => downloadProteinAccessions(compositeModelInst),
+            () => downloadGroups(compositeModelInst),
+            () => downloadSSL(compositeModelInst),
+            () => downloadAlphaLink2(compositeModelInst)
+        )
     })
         .wholeMenuEnabled(true);
 

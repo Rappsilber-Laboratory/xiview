@@ -56,7 +56,7 @@ export function testSetup2() {
                 // Wait for initialization
                 vent.listenToOnce(vent, "initialSetupDone", function () {
                     console.log(`*initialSetupDone for ${pdbFile}`);
-                    setupColourModels();
+                    setupColourModels(compositeModelInst);
 
                     // Load PDB file
                     fetch(pdbFile)

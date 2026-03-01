@@ -63,7 +63,7 @@ export class GoTerm {
      * @returns {Set<Object>|null} Set of protein objects, or null if no interactors found
      */
     getInteractors(storeCount) {
-        const go = window.compositeModelInst.get("go");
+        const go = this.go;
         // GoTerm.prototype.getCount++;
 
         let subTreeSet; // = new Set();
@@ -133,7 +133,7 @@ export class GoTerm {
      * @returns {boolean} True if this term descends from the specified term (or is the same term)
      */
     isDescendantOf(anotherGoTermId) {
-        const go = window.compositeModelInst.get("go");
+        const go = this.go;
         if (anotherGoTermId === this.id) {
             return true;
         }

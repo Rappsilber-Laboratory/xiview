@@ -301,7 +301,7 @@ export class BaseFrameView extends Backbone.View {
     addKey(options) {
         options = options || {};
         const tempSVG = (options.addToSelection || d3.select(this.el).select("svg")).append("svg").attr("class", "tempKey");
-        updateColourKey(window.compositeModelInst.get("linkColourAssignment"), tempSVG);
+        updateColourKey(this.model.get("linkColourAssignment"), tempSVG);
         if (options.addOrigin) {
             tempSVG.select("g.key").attr("transform", "translate(0,20)");
             const link = this.model.get("filterModel") ?
@@ -512,13 +512,13 @@ export class BaseFrameView extends Backbone.View {
 
     // Returns a useful filename given the view and filters current states
     filenameStateString() {
-        return makeLegalFileName(searchesToString() + "--" + this.identifier
-            + "-" + this.optionsToString() + "--" + filterStateToString());
+        return makeLegalFileName(searchesToString(this.model) + "--" + this.identifier
+            + "-" + this.optionsToString() + "--" + filterStateToString(this.model));
     }
 
     // Returns a useful image title string - omit type of view as user will see it
     imageOriginString() {
-        return makeLegalFileName(searchesToString() + "--" + filterStateToString());
+        return makeLegalFileName(searchesToString(this.model) + "--" + filterStateToString(this.model));
     }
 
     /* Following used in PDBFileChooser and StringFileChooser, though any of the views could take advantage of them */

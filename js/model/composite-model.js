@@ -799,7 +799,7 @@ export class CompositeModel extends Backbone.Model {
      * @returns {void}
      */
     setInteractorColor(interactorId, color) {
-        const proteinColourModel = window.compositeModelInst.get("proteinColourAssignment");
+        const proteinColourModel = this.get("proteinColourAssignment");
         if (!(proteinColourModel instanceof ManualColourModel)) {
             this.set("proteinColourAssignment", linkColor.manualProteinColoursBB);
         }

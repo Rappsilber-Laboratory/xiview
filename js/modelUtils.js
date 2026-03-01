@@ -413,8 +413,8 @@ export function makeSubIndexedMap(mmap, subIndexingProperty) {
  * @param {Object[]} searchArray - Array of search objects
  * @returns {Object} Crosslinker specificity object with name, searches, and linkables
  */
-export function crosslinkerSpecificityPerLinker(searchArray) {
-    return window.compositeModelInst.get("clmsModel").getCrosslinkerSpecificity() || {
+export function crosslinkerSpecificityPerLinker(clmsModel, searchArray) {
+    return clmsModel.getCrosslinkerSpecificity() || {
         default: {
             name: "all",
             searches: new Set(_.pluck(searchArray, "id")),
@@ -600,7 +600,7 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
  * @param {Object} clmsModel - The CLMS model to update
  * @returns {void}
  */
-export function updateProteinMetadata(metaDataFileContents, clmsModel) {
+export function updateProteinMetadata(metaDataFileContents, clmsModel, compositeModelInst) {
     const proteins = clmsModel.getProteinsMap();
     let first = true;
     let columns = [];
@@ -679,8 +679,10 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel) {
                 }
             }
         }
-        window.compositeModelInst.set("groups", groupMap);
-        window.compositeModelInst.trigger("change:groups");
+        if (compositeModelInst) {
+            compositeModelInst.set("groups", groupMap);
+            compositeModelInst.trigger("change:groups");
+        }
     }
 
 }

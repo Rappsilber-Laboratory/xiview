@@ -925,8 +925,8 @@ export class NGLViewBB extends BaseFrameView {
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
                 "Xi Crosslinks in CONECT and LINK records",
-                "Search ID: " + searchesToString(),
-                "Filter: " + filterStateToString()
+                "Search ID: " + searchesToString(this.model),
+                "Filter: " + filterStateToString(this.model)
             ]
         );
         return this;
@@ -944,8 +944,8 @@ export class NGLViewBB extends BaseFrameView {
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
-                "Search ID: " + searchesToString(),
-                "Filter: " + filterStateToString()
+                "Search ID: " + searchesToString(this.model),
+                "Filter: " + filterStateToString(this.model)
             ]
         );
         return this;
@@ -1042,8 +1042,8 @@ export class NGLViewBB extends BaseFrameView {
             stageModel.get("structureComp").structure, stageModel, this.pdbFilenameStateString(),
             ["PDB ID: " + stageModel.getStructureName(),
                 "Exported by " + this.identifier + " and XiView",
-                "Search ID: " + searchesToString(),
-                "Filter: " + filterStateToString()
+                "Search ID: " + searchesToString(this.model),
+                "Filter: " + filterStateToString(this.model)
             ],
             {
                 crosslinkerInfo: this.model.get("clmsModel").getCrosslinkerSpecificity(),
@@ -1269,7 +1269,7 @@ export class NGLViewBB extends BaseFrameView {
      */
     pdbFilenameStateString() {
         const stageModel = this.model.get("stageModel");
-        return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString() + "-" + filterStateToString());
+        return makeLegalFileName(stageModel.getStructureName() + "-CrossLinks-" + searchesToString(this.model) + "-" + filterStateToString(this.model));
     }
 
     /**
@@ -1280,7 +1280,7 @@ export class NGLViewBB extends BaseFrameView {
      */
     filenameStateString() {
         const stageModel = this.model.get("stageModel");
-        return makeLegalFileName(searchesToString() + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + filterStateToString());
+        return makeLegalFileName(searchesToString(this.model) + "--" + this.identifier + "-" + this.optionsToString() + "-PDB=" + stageModel.getStructureName() + "--" + filterStateToString(this.model));
     }
 }
 

@@ -246,7 +246,7 @@ export const DataSettingsView = SettingsView.extend({
             .attr("title", "Write the current custom config to the database.")
             .attr("id", "xispec_settingsCustomCfgDbSave")
             .attr("type", "submit");
-        if (window.dbView !== "true") {
+        if (this.options.dbView !== "true") {
             customConfigDbSave.style("display", "none");
         }
 

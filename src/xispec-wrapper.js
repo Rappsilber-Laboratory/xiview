@@ -86,6 +86,7 @@ export const XispecWrapper = Backbone.View.extend({
             displayModel: this.activeSpectrum.spectrumModel,
             el: "#xispec_dataSettingsWrapper",
             showCustomCfg: this.options.showCustomConfig,
+            dbView: this.options.dbView,
             title: "Data Settings"
         });
         this.appearanceSettingsView = new AppearanceSettingsView({

@@ -486,7 +486,7 @@ export class FilterViewBB extends Backbone.View {
         initMinigramFilterGroup.call(this, {
             attr: "matchScoreCutoff",
             extentProperty: "scoreExtent",
-            label: window.compositeModelInst.get("clmsModel").selectedScoreType, // todo - should be in compositeModel?
+            label: this.model.get("selectedScoreType"), // todo - should be in compositeModel?
             id: "matchScore",
             groupName: "Scores",
             tooltipIntro: "Filter out matches with scores"

@@ -198,7 +198,7 @@ export class ProteinMetaDataFileChooserBB extends AbstractMetaDataFileChooserBB 
      */
     onLoadFunction(fileContents) {
         this.setUpCompletionListener();
-        updateProteinMetadata(fileContents, this.model.get("clmsModel"));
+        updateProteinMetadata(fileContents, this.model.get("clmsModel"), this.model);
     }
 }
 

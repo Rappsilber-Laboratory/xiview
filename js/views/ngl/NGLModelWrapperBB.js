@@ -139,7 +139,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         // The point of this is to build a cache for Ca-Ca distances so we don't have to keep asking the ngl components for them
         // For very large structures we just store the distances that map to crosslinks, so we have to get other distances by reverting to the ngl stuff
         const distances = this.getChainDistances(chainInfo.resCount > this.defaults.fullDistanceCalcCutoff);
-        const distancesObj = new DistancesObj(distances, this.get("chainMap"), this.getStructureName());
+        const distancesObj = new DistancesObj(distances, this.get("chainMap"), this.getStructureName(), undefined, this.getCompositeModel());
 
         const compositeModel = this.getCompositeModel();
         // silent change and trigger, as loading in the same pdb file doesn't trigger the change automatically (as it generates an identical distance matrix)

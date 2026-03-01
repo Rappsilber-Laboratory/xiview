@@ -204,6 +204,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             el: "#xispec_spectrumSvgGroup" + this.id,
             measureTooltipSvgG: "#xispec_measureTooltipSvgGroup" + this.id,
             id: "curSpectrum",
+            compositeModelInst: options.opt.compositeModelInst,
         });
         let originalSpectrum = new SpectrumView({
             model: this.originalSpectrumModel,
@@ -212,6 +213,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             invert: true,
             hidden: true,
             id: "originalSpectrum",
+            compositeModelInst: options.opt.compositeModelInst,
         });
         let FragmentationKey = new FragmentationKeyView({
             model: this.spectrumModel,
@@ -251,6 +253,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             margin: {top: 10, right: 30, bottom: 20, left: 65},
             svg: "#xispec_errIntSVG" + this.id,
             specPanelId: this.id,
+            compositeModelInst: options.opt.compositeModelInst,
         });
         let ErrorMzPlot = new ErrorPlotView({
             model: this.spectrumModel,
@@ -259,6 +262,7 @@ export const SpectrumWrapper = Backbone.View.extend({
             margin: {top: 10, right: 30, bottom: 20, left: 65},
             svg: "#xispec_errMzSVG" + this.id,
             specPanelId: this.id,
+            compositeModelInst: options.opt.compositeModelInst,
         });
 
         this.views = {

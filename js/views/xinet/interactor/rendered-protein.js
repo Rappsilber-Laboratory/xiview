@@ -566,7 +566,7 @@ export class RenderedProtein extends Interactor {
 
         // const protLength = this.participant.size * this.stickZoom;
         const r = this.symbolRadius;
-        const protColourModel = window.compositeModelInst.get("proteinColourAssignment");
+        const protColourModel = this.controller.model.get("proteinColourAssignment");
 
         if (transition) {
             d3.select(this.outline).transition()
@@ -795,7 +795,7 @@ export class RenderedProtein extends Interactor {
         this.checkLinks();
         this.stickZoom = origStickZoom;
 
-        const protColourModel = window.compositeModelInst.get("proteinColourAssignment");
+        const protColourModel = this.controller.model.get("proteinColourAssignment");
 
         d3.select(this.circDomains).transition().attr("opacity", 0).duration(transitionTime);
         d3.select(this.rectDomains).transition().attr("opacity", 1).duration(transitionTime);

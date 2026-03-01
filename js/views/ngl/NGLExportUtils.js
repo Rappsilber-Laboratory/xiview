@@ -110,7 +110,7 @@ export const NGLExportUtils = {
     export3dLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
         const crosslinks = nglModelWrapper.getFullLinks();
         const linkExportArray = NGLExportUtils.make3dLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
-        const fileName = downloadFilename("CSV_NGL", "csv");
+        const fileName = downloadFilename(nglModelWrapper.get("compositeModel"), "CSV_NGL", "csv");
         download(linkExportArray.join("\r\n"), "plain/text", fileName);
     },
 
@@ -129,7 +129,7 @@ export const NGLExportUtils = {
                 chainProxy.index = link.residueB.chainIndex;
                 const chainB = chainProxy.chainname;
                 // .getXLinkDistanceFromPDBCoords (matrices, seqIndex1, seqIndex2, chainIndex1, chainIndex2);
-                const distObj = window.compositeModelInst.get("distancesObj");
+                const distObj = nglModelWrapper.get("compositeModel").get("distancesObj");
 
                 const xiviewLink = crosslinkMap.get(link.origId);
                 const p1 = xiviewLink.fromProtein.accession;

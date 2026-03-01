@@ -596,17 +596,18 @@ export function objectStateToAbbvString(object, fields, zeroFormatFields, abbvMa
  * Truncates to 160 characters maximum.
  * @returns {string} Filter state string
  */
-export function filterStateToString() {
-    const filterStr = window.compositeModelInst.get("filterModel").stateString();
+export function filterStateToString(compositeModelInst) {
+    const filterStr = compositeModelInst.get("filterModel").stateString();
     return filterStr.substring(0, 160);
 }
 
 /**
  * Converts the current searches to a string representation.
+ * @param {Object} compositeModelInst - The composite model instance
  * @returns {string} Search IDs joined with hyphens, prefixed with "SRCH="
  */
-export function searchesToString() {
-    const searches = Array.from(window.compositeModelInst.get("clmsModel").getSearches());
+export function searchesToString(compositeModelInst) {
+    const searches = Array.from(compositeModelInst.get("clmsModel").getSearches());
     const searchKeys = _.pluck(searches, 0); // just the keys
     const searchStr = ("SRCH=" + searchKeys.join("-"));// .substring(0, 40);
     return searchStr;

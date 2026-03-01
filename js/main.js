@@ -176,7 +176,7 @@ export function validationPage(apiBase, annotatorURL) {
             const split = initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false, split});
             vent.trigger("spectrumShow", true);
-            const allMatches = window.compositeModelInst.get("clmsModel").getMatches();
+            const allMatches = compositeModelInst.get("clmsModel").getMatches();
             compositeModelInst.setMarkedMatches("selection", allMatches);
             networkPageSpinner.stop();
         })

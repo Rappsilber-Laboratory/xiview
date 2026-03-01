@@ -40,8 +40,9 @@ export const ErrorPlotView = Backbone.View.extend({
             .attr("height", height)
             .attr("class", "wrapper");
 
-        if (window.compositeModelInst !== undefined)
-            this.tooltip = window.compositeModelInst.get("tooltipModel");
+        this.tooltipIsBBModel = this.options.compositeModelInst !== undefined;
+        if (this.tooltipIsBBModel)
+            this.tooltip = this.options.compositeModelInst.get("tooltipModel");
         else {
             this.tooltip = d3.select("body").append("span")
                 .attr("class", "xispec_tooltip");
@@ -313,7 +314,7 @@ export const ErrorPlotView = Backbone.View.extend({
 
 
         //Tooltip
-        if (window.compositeModelInst !== undefined) {
+        if (this.tooltipIsBBModel) {
             this.tooltip.set("contents", contents)
                 .set("header", header.join(" "))
                 .set("location", {pageX: x, pageY: y});
@@ -345,7 +346,7 @@ export const ErrorPlotView = Backbone.View.extend({
     },
 
     hideTooltip: function () {
-        if (window.compositeModelInst !== undefined)
+        if (this.tooltipIsBBModel)
             this.tooltip.set("contents", null);
         else {
             this.tooltip.style("opacity", 0);

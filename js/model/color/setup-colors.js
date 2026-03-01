@@ -40,7 +40,7 @@ export const linkColor = {};
  * @param {Array<string>} [userConfig.distance.range] - Three colors for within/borderline/overlong
  * @returns {undefined}
  */
-export const setupColourModels = function (userConfig) {
+export const setupColourModels = function (compositeModelInst, userConfig) {
     const defaultConfig = {
         default: {domain: [0, 1, 2], range: ["#7570b3FF", "#d95f02FF", "#1b9e77FF"]},
         distance: {domain: [15, 25], range: ["#5AAE61FF", "#FDB863FF", "#9970ABFF"]}
@@ -65,7 +65,7 @@ export const setupColourModels = function (userConfig) {
             longDescription: "Differentiate crosslinks by search group when multiple searches are viewed together.",
             id: "Group",
         }, {
-            searchMap: window.compositeModelInst.get("clmsModel").getSearches(),
+            searchMap: compositeModelInst.get("clmsModel").getSearches(),
         });
     };
 
@@ -77,7 +77,7 @@ export const setupColourModels = function (userConfig) {
         id: "InterProtein",
         type: "ordinal"
     }, {
-        proteins: window.compositeModelInst.get("clmsModel").getProteinsMap()
+        proteins: compositeModelInst.get("clmsModel").getProteinsMap()
     });
 
     linkColor.distanceColoursBB = new DistanceColourModel({
@@ -89,7 +89,7 @@ export const setupColourModels = function (userConfig) {
     });
 
     //init highest score colour model
-    const clmsModel = window.compositeModelInst.get("clmsModel"); //todo - shouldn't have this static reference to model here
+    const clmsModel = compositeModelInst.get("clmsModel"); //todo - shouldn't have this static reference to model here
     const scoreExtent = clmsModel.scoreExtents.get(clmsModel.selectedScoreType); // todo - compositeModel?
     const minScore = scoreExtent ? scoreExtent[0] : undefined;
     const maxScore = scoreExtent ? scoreExtent[1] : undefined;
@@ -128,9 +128,9 @@ export const setupColourModels = function (userConfig) {
 
     // If necessary, swap in newly added colour scale with same id as removed (but current) scale pointed to by linkColourAssignment
     const replaceCurrentLinkColourAssignment = function (collection) {
-        const currentColourModel = window.compositeModelInst.get("linkColourAssignment");
+        const currentColourModel = compositeModelInst.get("linkColourAssignment");
         if (currentColourModel && !currentColourModel.collection) {
-            window.compositeModelInst.set("linkColourAssignment", collection.get(currentColourModel.get("id")));
+            compositeModelInst.set("linkColourAssignment", collection.get(currentColourModel.get("id")));
         }
     };
 
@@ -181,9 +181,9 @@ export const setupColourModels = function (userConfig) {
 
     // If necessary, swap in newly added colour scale with same id as removed (but current) scale pointed to by linkColourAssignment
     const replaceCurrentProteinColourAssignment = function (collection) {
-        const currentColourModel = window.compositeModelInst.get("proteinColourAssignment");
+        const currentColourModel = compositeModelInst.get("proteinColourAssignment");
         if (currentColourModel && !currentColourModel.collection) {
-            window.compositeModelInst.set("proteinColourAssignment", collection.get(currentColourModel.get("id")));
+            compositeModelInst.set("proteinColourAssignment", collection.get(currentColourModel.get("id")));
         }
     };
 

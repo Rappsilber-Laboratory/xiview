@@ -802,7 +802,7 @@ export class DistogramBB extends BaseFrameView {
      */
     recalcRandomBinning(linkCount) {
         const searchArray = Array.from(this.model.get("clmsModel").getSearches().values());
-        const crosslinkerSpecificityMap = crosslinkerSpecificityPerLinker(searchArray);
+        const crosslinkerSpecificityMap = crosslinkerSpecificityPerLinker(this.model.get("clmsModel"), searchArray);
         const distObj = this.model.get("distancesObj");
         const rscope = this.options.randomScope;
         const randArr = distObj ? distObj.getSampleDistances(

@@ -1312,7 +1312,7 @@ export class CrosslinkViewer extends Backbone.View {
         const height = Math.round(bBox.height);
         svgXML = svgXML.replace("width=\"100%\"", "width=\"" + width + "px\"");
         svgXML = svgXML.replace("height=\"100%\"", "height=\"" + height + "px\"");
-        const fileName = makeLegalFileName(searchesToString() + "--xiNET--" + filterStateToString());
+        const fileName = makeLegalFileName(searchesToString(this.model) + "--xiNET--" + filterStateToString(this.model));
         download(svgXML, "application/svg", fileName + ".svg");
     }
 
@@ -1433,7 +1433,7 @@ export class CrosslinkViewer extends Backbone.View {
     }
 
     proteinColoursUpdated() {
-        const proteinColourModel = window.compositeModelInst.get("proteinColourAssignment");
+        const proteinColourModel = this.model.get("proteinColourAssignment");
         for (let renderedParticipant of this.renderedProteins.values()) {
             if (proteinColourModel) {
                 const c = proteinColourModel.getColour(renderedParticipant.participant);

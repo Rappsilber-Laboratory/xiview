@@ -134,7 +134,7 @@ function testCallback(model) {
         });
 
         const fakeMatch = {matchedPeptides: [{prt: ["sp|P02768-A|ALBU", "REV_sp|P02768-A|ALBU"]}, {prt: ["sp|P02768-A|ALBU"]}]};
-        const actual = mostReadableMultipleId(fakeMatch, 0, clmsModel);
+        const actual = mostReadableMultipleId(model, fakeMatch, 0, clmsModel);
         decoys.forEach(function (decoy) {
             clmsModel.getProteinsMap().delete(decoy.accession);
         });
@@ -319,7 +319,7 @@ function testCallback(model) {
 
     test("Scoring", function (assert) {
         const scoringSystem = {
-            matrix: window.compositeModelInst.get("blosumColl").get("Blosum100").attributes,
+            matrix: model.get("blosumColl").get("Blosum100").attributes,
             match: 10,
             mis: -6,
             gapOpen: 10,
@@ -344,7 +344,7 @@ function testCallback(model) {
             {seq: "BY", expScore: 12},   // aligner inserts B (no penalty as at start) and matches Y-Y
         ];
 
-        // const stageModel = window.compositeModelInst.get("stageModel");
+        // const stageModel = model.get("stageModel");
         const actual = tests.map(function (test) {
             return GotohAligner.align(test.seq, refSeq, scoringSystem, false, true, 1000);
         });
@@ -365,7 +365,7 @@ function testCallback(model) {
             {chainName: "B", chainIndex: 1, modelIndex: 0, residueOffset: 578, data: dseq1AO6, structureID: "1ao6.bcif.gz"},
         ];
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const actual = getChainSequencesFromNGLStage(stageModel.get("structureComp").stage);
         assert.deepEqual(actual, expected, "Expected " + JSON.stringify(expected) + " when generating sequences from `1AO6`");
     });
@@ -394,9 +394,9 @@ function testCallback(model) {
 
 
     test("Align test", function (assert) {
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const chainSequences = getChainSequencesFromNGLStage(stageModel.get("structureComp").stage);
-        const alignCollection = window.compositeModelInst.get("alignColl");
+        const alignCollection = model.get("alignColl");
         const protAlignModel = alignCollection.get("sp|P02768-A|ALBU");
         const actualValue = protAlignModel.alignWithoutStoring(
             _.pluck(chainSequences, "data"),
@@ -425,7 +425,7 @@ function testCallback(model) {
             10002: [{key: "1", values: [{modelIndex: 1, chain: "4"}]}]
         };
 
-        // const stageModel = window.compositeModelInst.get("stageModel");
+        // const stageModel = model.get("stageModel");
         const actualValue = makeSubIndexedMap(data, "modelIndex");
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " when mapping from " + JSON.stringify(data));
     });
@@ -524,7 +524,7 @@ function testCallback(model) {
         const expectedValue4 = "(( /0 AND (:A OR :B) ) )";
         const data2 = [data[0], data[2]];
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
 
         let actualValue = stageModel.getSelectionFromResidueList(data);
         assert.deepEqual(actualValue, expectedValue, "Expected " + expectedValue + " when mapping from " + JSON.stringify(data));
@@ -540,7 +540,7 @@ function testCallback(model) {
     });
 
     test("Get Chain Start Positions as Atom Indices (for label representation)", function (assert) {
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const chainStartSele = stageModel.makeFirstAtomPerChainSelectionString(d3.set([0, 1]));
         const expectedValue = "@0,4599";
         assert.deepEqual(chainStartSele, expectedValue, "Expected " + expectedValue + " for chain start atom NGL selection, Passed!");
@@ -548,7 +548,7 @@ function testCallback(model) {
 
 
     test("Get Just Chain Selection", function (assert) {
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const chainSele = stageModel.makeChainSelectionString({showAll: false, chainIndices: [0, 1]});
         const expectedValue = "(( /0 AND (:A OR :B) ) )";
         assert.deepEqual(chainSele, expectedValue, "Expected " + expectedValue + " for just chain selection, Passed!");
@@ -560,7 +560,7 @@ function testCallback(model) {
     test("Mapping to PDB", function (assert) {
         const expectedMapping = [411, 493];
 
-        const alignCollection = window.compositeModelInst.get("alignColl");
+        const alignCollection = model.get("alignColl");
         const alignModel = alignCollection.get("sp|P02768-A|ALBU");
         const actualMapping = alignModel.bulkMapFromSearch("1AO6.bcif.gz:A:0", [415, 497]);
 
@@ -570,7 +570,7 @@ function testCallback(model) {
     test("Mapping from PDB", function (assert) {
         const expectedMapping = [415, 497];
 
-        const alignCollection = window.compositeModelInst.get("alignColl");
+        const alignCollection = model.get("alignColl");
         const alignModel = alignCollection.get("sp|P02768-A|ALBU");
         const actualMapping = alignModel.bulkMapToSearch("1AO6.bcif.gz:A:0", [411, 493]);
 
@@ -580,7 +580,7 @@ function testCallback(model) {
     test("Chain Info", function (assert) {
         const expectedMapping = {viableChainIndices: [0, 1], resCount: 1156};
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const actualMapping = stageModel.getChainInfo();
 
         assert.deepEqual(actualMapping, expectedMapping, "Expected " + JSON.stringify(expectedMapping) + " chain info, Passed!");
@@ -589,7 +589,7 @@ function testCallback(model) {
     test("C-Alpha Atom Selection String", function (assert) {
         const expectedMapping = ":A/0 AND 5-582.CA";
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const chainProxy = stageModel.get("structureComp").structure.getChainProxy();
         chainProxy.index = 0;
         const actualMapping = getRangedCAlphaResidueSelectionForChain(chainProxy);
@@ -603,7 +603,7 @@ function testCallback(model) {
             1: [9054, 9062, 9071, 9080, 9087, 9093, 9104, 9109, 9118, 9127, 9131, 9140, 9149, 9157, 9164, 9169, 9174, 9180, 9189, 9194]
         };	// last 20 in each
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const shortenThese = [0, 1];
         const actualMapping = $.extend({}, stageModel.calculateAllCaAtomIndices(shortenThese));	// copy object so as not to affect original (causes error)
         shortenThese.forEach(function (index) {
@@ -618,7 +618,7 @@ function testCallback(model) {
         // const singleCrossLink = crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497");
         const expectedDistance = 9.13;	// as measured on nglviewer (2 decimal places)
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         // -5 cos 4 difference in pdb / search alignments, and another 1 because this function is 0-indexed.
         let actualDistance = stageModel.getSingleDistanceBetween2Residues(415 - 5, 497 - 5, 0, 0);	// 0 chain has slightly longer distance
         actualDistance = +(actualDistance.toFixed(2));
@@ -629,12 +629,12 @@ function testCallback(model) {
     test("Same Crosslink Distance, different indexing methods 1", function (assert) {
         const crosslinks = clmsModel.getCrosslinks();
         const singleCrossLink = crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497");
-        const alignCollection = window.compositeModelInst.get("alignColl");
+        const alignCollection = model.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
         const actualDistance = model.get("distancesObj").getXLinkDistance(singleCrossLink, alignCollection);
 
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         // -5 cos 4 difference in pdb / search alignments, and another 1 because this function is 0-indexed.
         const actualDistance2 = stageModel.getSingleDistanceBetween2Residues(415 - 5, 497 - 5, 1, 1);	// 1 appears to be shortest distance
 
@@ -645,10 +645,10 @@ function testCallback(model) {
     test("2 different functions for returning atom indices", function (assert) {
         // const crosslinks = clmsModel.getCrosslinks();
         // const singleCrossLink = crosslinks.get("sp|P02768-A|ALBU_415-sp|P02768-A|ALBU_497");
-        // const alignCollection = window.compositeModelInst.get("alignColl");
+        // const alignCollection = model.get("alignColl");
 
         // this will be shortest distance of chain possibilities - 0-0, 0-1, 1-0, 1-1
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const cproxy = stageModel.get("structureComp").structure.getChainProxy();
         const atomIndexA = stageModel.getAtomIndex(0, 0); // residue 0-indexed here
         const resObj = {resno: 5, seqIndex: 0, chainIndex: 0};
@@ -659,7 +659,7 @@ function testCallback(model) {
 
 
     test("Compare Link-Only Distance Generation with All Distance Generation", function (assert) {
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const crosslinks = stageModel.get("linkList");
 
         const matrices1 = stageModel.getChainDistances(true);
@@ -686,7 +686,7 @@ function testCallback(model) {
 
 
     test("Compare Distances from Atom Coords with All Distance Generation", function (assert) {
-        const stageModel = window.compositeModelInst.get("stageModel");
+        const stageModel = model.get("stageModel");
         const crosslinks = stageModel.get("linkList");
 
         const matrices1 = stageModel.getChainDistances(false); //this test will fail if the defualt value for AUTO in filtermodel is true, to make it pass you need to change this call's param to true - todo - wtf?
@@ -891,7 +891,7 @@ function testCallback(model) {
     test("Include Terminal Indices", function (assert) {
         const expected = {ntermList: [], ctermList: []};	// because pdb for 1ao6 is within the larger sequence so neither cterm nor nterm match
 
-        const alignCollBB = window.compositeModelInst.get("alignColl");
+        const alignCollBB = model.get("alignColl");
         const alignID = make3DAlignID("1AO6.bcif.gz", "A", 0);
         const seqRange = alignCollBB.getRangeAsSearchSeq("sp|P02768-A|ALBU", alignID);
         $.extend(seqRange, {alignID: alignID, chainIndex: 0, protID: "sp|P02768-A|ALBU"});
@@ -923,10 +923,10 @@ function testCallback(model) {
         const expected2 = d3.range(0, dseq1AO6.length);	// everything
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const residueSets = crosslinkerSpecificityPerLinker(searchArray);
+        const residueSets = crosslinkerSpecificityPerLinker(clmsModel, searchArray);
         const linkableResidues = residueSets["wrong mass SDA "].linkables;
 
-        const alignCollBB = window.compositeModelInst.get("alignColl");
+        const alignCollBB = model.get("alignColl");
         const alignID = make3DAlignID("1AO6.bcif.gz", "A", 0);
         const seqRange = alignCollBB.getRangeAsSearchSeq("sp|P02768-A|ALBU", alignID);
         let actualFilteredSubSeqIndices = filterSequenceByResidueSet(seqRange.subSeq, linkableResidues[1], false);	// 1 is KSTY
@@ -948,7 +948,7 @@ function testCallback(model) {
         });
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distanceableSequences = [
             {
                 first: 5,
@@ -984,7 +984,7 @@ function testCallback(model) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distanceableSequences = [
             {
                 first: 5,
@@ -1021,7 +1021,7 @@ function testCallback(model) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distanceableSequences = [
             {
                 first: 5,
@@ -1060,7 +1060,7 @@ function testCallback(model) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distanceableSequences = [
             {
                 first: 5,
@@ -1099,7 +1099,7 @@ function testCallback(model) {
         const expectedValue = [28, 33, 39, 50, 47, 55, 28, 10, 27, 46, 47, 40, 38, 44, 39, 34, 36, 64, 34, 29, 13, 20, 20, 28, 40, 34, 46, 43, 35, 20, 18, 18, 22, 50, 51, 24, 26, 47, 37, 29, 31, 60, 32, 35, 56, 47, 36, 31, 28, 34, 39, 50, 47, 56, 29, 10, 27, 46, 47, 39, 38, 45, 39, 35, 36, 65, 34, 29, 13, 20, 21, 28, 40, 34, 46, 43, 35, 21, 18, 18, 22, 50, 51, 24, 25, 47, 38, 29, 31, 60, 32, 35, 56, 48, 36, 31];
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distanceableSequences = [
             {
                 first: 5,
@@ -1145,7 +1145,7 @@ function testCallback(model) {
         const expectedValue = [27, 36, 58, 41, 99, 77, 88, 93, 84, 44, 29, 48, 64, 47, 55, 38, 55, 69, 53, 26, 21, 17, 33, 23, 91, 68, 72, 73, 70, 44, 28, 29, 15, 11, 89, 69, 63, 66, 69, 41, 19, 47, 44, 20, 78, 64, 61, 78, 74, 99, 78, 88, 93, 84, 27, 36, 58, 41, 55, 38, 55, 69, 53, 45, 29, 48, 64, 47, 90, 68, 72, 73, 70, 26, 21, 17, 33, 23, 89, 69, 64, 66, 69, 44, 28, 29, 15, 11, 78, 64, 61, 78, 74, 42, 19, 48, 44, 20];
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distanceableSequences = [
             {
                 first: 5,
@@ -1192,7 +1192,7 @@ function testCallback(model) {
 
 
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distObj = model.get("distancesObj");
 
         const sampleDists = distObj.getSampleDistances(100, crosslinkerSpecificityList, {
@@ -1211,7 +1211,7 @@ function testCallback(model) {
         const crossSpec = clmsModel.getCrosslinkerSpecificity();
         clmsModel._crosslinkerSpecificity = null;	// null crosslink specificity for this test
         const searchArray = Array.from(clmsModel.getSearches().values());
-        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(searchArray));
+        const crosslinkerSpecificityList = d3.values(crosslinkerSpecificityPerLinker(clmsModel, searchArray));
         const distObj = model.get("distancesObj");
 
         const sampleDists = distObj.getSampleDistances(100, crosslinkerSpecificityList, {
@@ -1606,7 +1606,7 @@ function testCallback(model) {
             .resetFilter()
             .set({AUTO: false});
         const expectedValue = "\"Residue(s)\",\"Occurences(in_unique_links)\"\r\n\"D-L\",\"1\"\r\n\"A-K\",\"13\"\r\n\"C-K\",\"6\"\r\n\"K-L\",\"15\"\r\n\"E-K\",\"17\"\r\n\"K-V\",\"12\"\r\n\"F-K\",\"13\"\r\n\"L-Y\",\"3\"\r\n\"E-Y\",\"6\"\r\n\"V-Y\",\"3\"\r\n\"K-N\",\"5\"\r\n\"P-T\",\"4\"\r\n\"G-S\",\"2\"\r\n\"K-S\",\"3\"\r\n\"H-S\",\"1\"\r\n\"H-K\",\"2\"\r\n\"F-S\",\"1\"\r\n\"L-T\",\"1\"\r\n\"G-T\",\"2\"\r\n\"A-Y\",\"3\"\r\n\"C-T\",\"1\"\r\n\"K-R\",\"1\"\r\n\"E-S\",\"2\"\r\n\"D-K\",\"9\"\r\n\"C-S\",\"1\"\r\n\"D-F\",\"1\"\r\n\"K-T\",\"4\"\r\n\"L-S\",\"1\"\r\n\"H-T\",\"1\"\r\n\"D-V\",\"1\"\r\n\"A-D\",\"1\"\r\n\"D-D\",\"1\"\r\n\"D-E\",\"1\"\r\n\"K-K\",\"2\"\r\n\"T-V\",\"1\"\r\n\"R-S\",\"1\"\r\n\"F-Y\",\"1\"\r\n\"C-Y\",\"2\"\r\n\"D-T\",\"2\"\r\n\"K-M\",\"1\"\r\n\"P-Y\",\"3\"\r\n\"D-S\",\"1\"\r\n\"Q-T\",\"1\"\r\n\"K-Y\",\"3\"\r\n\"F-T\",\"2\"\r\n\"T-Y\",\"1\"\r\n\"K-Q\",\"1\"\r\n\"I-S\",\"1\"\r\n\"M-Y\",\"1\"\r\n\"D\",\"19\"\r\n\"L\",\"21\"\r\n\"A\",\"17\"\r\n\"K\",\"109\"\r\n\"C\",\"10\"\r\n\"E\",\"26\"\r\n\"V\",\"17\"\r\n\"F\",\"18\"\r\n\"Y\",\"26\"\r\n\"N\",\"5\"\r\n\"P\",\"7\"\r\n\"T\",\"20\"\r\n\"G\",\"4\"\r\n\"S\",\"14\"\r\n\"H\",\"4\"\r\n\"R\",\"2\"\r\n\"M\",\"2\"\r\n\"Q\",\"2\"\r\n\"I\",\"1\"\r\n";
-        const actualValue = getResidueCount();
+        const actualValue = getResidueCount(model);
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as Residues CSV, Passed!");
 
@@ -1624,7 +1624,7 @@ function testCallback(model) {
             + "ALBU,190,ALBU,425,3,5\n";
         updateLinkMetadata(fileContents, clmsModel);
 
-        const actualValue = getLinksCSV();
+        const actualValue = getLinksCSV(model);
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as Crosslinks CSV, Passed!");
 
@@ -1638,7 +1638,7 @@ function testCallback(model) {
             .resetFilter()
             .set({pepLength: 13});
         const expectedValue = '"Id","Protein1","SeqPos1","PepPos1","PepSeq1","LinkPos1","Protein2","SeqPos2","PepPos2","PepSeq2","LinkPos2","Score","PrecursorIntensity","Charge","ExpMz","ExpMass","CalcMz","CalcMass","MassError","Missing Peaks","Validated","Search","RawFileName","PeakListFileName","ScanNumber","ScanIndex","CrossLinkerModMass","FragmentTolerance","IonTypes","Decoy1","Decoy2","3D Distance","From Chain","To Chain","LinkType","DecoyType","Retention Time"\r\n"14","sp|P02768-A|ALBU","426","414","KVPQVSTPTLVEVSR","13","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","11.74","","5","721.996424273029","3604.94573903075","721.9955428789152","3604.941332060181","1.222480524012838","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.67","B","B","Self","TT",""\r\n"15","sp|P02768-A|ALBU","425","414","KVPQVSTPTLVEVSR","12","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","9.49","","5","738.405240897058","3686.9898221508947","738.4038061309335","3686.9826483202723","1.9457185744137258","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"20","sp|P02768-A|ALBU","414","414","KVPQVSTPTLVEVSR","1","sp|P02768-A|ALBU","415","414","KVPQVSTPTLVEVSR","2","9.9","","4","861.4939999999999","3441.9468941324835","861.4931672319244","3441.9435630601815","0.9677881815783963","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","64.11","B","A","Self","TT",""\r\n"24","sp|P02768-A|ALBU","99","99","NECFLQHKDDNPNLPR","1","sp|P02768-A|ALBU","93","82","ETYGEMoxADCCAKQEPER","12","13.08","","4","1042.70465934211","4166.789531500925","1042.7028029169014","4166.78210580009","1.7821188259970435","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","8.85","B","B","Self","TT",""\r\n"25","sp|P02768-A|ALBU","499","485","RPCFSALEVDETYVPK","15","sp|P02768-A|ALBU","508","501","EFNAETFTFHADICTLSEKER","8","9.68","","4","1155.55001317647","4618.170946838364","1155.5488082319239","4618.16612706018","1.043656302469069","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","19.59","A","A","Self","TT",""\r\n"26","sp|P02768-A|ALBU","395","390","QNCELFEQLGEYK","6","sp|P02768-A|ALBU","262","258","ADLAKYICENQDSISSK","5","11.25","","3","1227.5735","3679.6986705993627","1227.574489733576","3679.7016398000906","-0.8069134453076857","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","35.79","B","A","Self","TT",""\r\n"27","sp|P02768-A|ALBU","505","501","EFNAETFTFHADICTLSEKER","5","sp|P02768-A|ALBU","519","501","EFNAETFTFHADICTLSEKER","19","10.46","","4","1314.10858495249","5252.405233942444","1314.1074837319245","5252.400829060182","0.8386416812632597","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","48.92","A","B","Self","TT",""\r\n"155","sp|P02768-A|ALBU","426","415","VPQVSTPTLVEVSR","12","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAK","9","13.42","","4","778.6697294146891","3110.64981179124","778.6686174169017","3110.6453638000908","1.4299255071484673","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.67","B","B","Self","TT",""\r\n"157","sp|P02768-A|ALBU","425","415","VPQVSTPTLVEVSR","11","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAK","9","15.42","","5","623.137060325913","3110.64891929517","623.1363492268973","3110.6453638000917","1.1430088172679143","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"158","sp|P02768-A|ALBU","422","415","VPQVSTPTLVEVSR","8","sp|P02768-A|ALBU","189","182","LDELRDEGKASSAK","8","12.32","","3","1037.89099352466","3110.6511511733424","1037.8890644002427","3110.6453638000908","1.8605056426644946","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","18.90","B","B","Self","TT",""\r\n"170","sp|P02768-A|ALBU","425","414","KVPQVSTPTLVEVSR","12","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAK","9","14.8","","5","648.756796029914","3238.7475978151747","648.7553418268973","3238.740326800091","2.245013292141513","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"171","sp|P02768-A|ALBU","425","414","KVPQVSTPTLVEVSR","12","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAK","9","15.19","","5","648.756764758622","3238.747441458715","648.7553418268973","3238.740326800091","2.196736356077894","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"172","sp|P02768-A|ALBU","425","414","KVPQVSTPTLVEVSR","12","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAK","9","17.34","","4","810.6938261982699","3238.7461989255635","810.6923581669017","3238.7403268000908","1.8130893125685763","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"181","sp|P02768-A|ALBU","570","561","ADDKETCFAEEGK","10","sp|P02768-A|ALBU","557","546","AVMDDFAAFVEKCCK","12","10.91","","5","675.097978042907","3370.45350788014","675.0972064268973","3370.4496498000913","1.1446781437565208","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.57","A","A","Self","TT",""\r\n"188","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","sp|P02768-A|ALBU","427","415","VPQVSTPTLVEVSR","13","8.67","","3","1159.95808259874","3476.852418395583","1159.9560661536066","3476.8463690601825","1.7398914873490758","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","15.06","B","B","Self","TT",""\r\n"189","sp|P02768-A|ALBU","425","415","VPQVSTPTLVEVSR","11","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","10.73","","5","696.3778967291589","3476.8531013113998","696.3765502789154","3476.846369060182","1.9363096620075289","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"190","sp|P02768-A|ALBU","425","415","VPQVSTPTLVEVSR","11","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","11.19","","5","696.37736376397","3476.8504364854552","696.3765502789154","3476.846369060182","1.169860511928654","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"191","sp|P02768-A|ALBU","425","415","VPQVSTPTLVEVSR","11","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","11.15","","3","1159.9580970159","3476.8524616470627","1159.9560661536066","3476.8463690601825","1.7523313467062573","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.07","B","B","Self","TT",""\r\n"192","sp|P02768-A|ALBU","570","561","ADDKETCFAEEGKK","10","sp|P02768-A|ALBU","557","546","AVMDDFAAFVEKCCK","12","11.95","","5","700.716175549082","3498.544495411015","700.7161990268972","3498.5446128000913","-0.03355368858028104","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.57","A","A","Self","TT",""\r\n"195","sp|P02768-A|ALBU","54","52","TCVADESAENCDK","3","sp|P02768-A|ALBU","73","65","SLHTLFGDKLCTVATLR","9","13.14","","5","703.13609928505","3510.644114090855","703.1357464268971","3510.6423498000904","0.5025549710983602","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","19.28","A","A","Self","TT",""\r\n"196","sp|P02768-A|ALBU","65","65","SLHTLFGDKLCTVATLR","1","sp|P02768-A|ALBU","63","52","TCVADESAENCDK","12","13.17","","4","878.6690892636329","3510.6472511870156","878.6678639169015","3510.64234980009","1.3961510280151406","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","6.60","B","B","Self","TT",""\r\n"200","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","sp|P02768-A|ALBU","415","414","KVPQVSTPTLVEVSR","2","10.59","","3","1211.30772095426","3630.901333462143","1211.3060024002427","3630.896177800091","1.419942019678313","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","8.79","B","B","Self","TT",""\r\n"204","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","sp|P02768-A|ALBU","415","414","KVPQVSTPTLVEVSR","2","19","","4","908.7326220276891","3630.9013822432403","908.7313209169015","3630.89617780009","1.43337702197425","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","8.79","B","B","Self","TT",""\r\n"208","sp|P02768-A|ALBU","161","161","YKAAFTECCQAADK","1","sp|P02768-A|ALBU","154","145","RHPYFYAPELLFFAKR","10","12.62","","6","633.9830791575171","3797.8548161438284","633.9819644335607","3797.8481278000904","1.7610877299298104","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","10.25","A","A","Self","TT",""\r\n"218","sp|P02768-A|ALBU","182","182","LDELRDEGKASSAKQR","1","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","12.7","","3","1311.68376145873","3932.0294549755527","1311.6811876603329","3932.0217335803613","1.9637213918143948","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","28.27","B","A","Self","TT",""\r\n"219","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","sp|P02768-A|ALBU","416","411","YTKKVPQVSTPTLVEVSR","6","13.69","","5","822.037383194996","4105.150533640585","822.0359692789152","4105.143464060181","1.722127488641999","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","7.00","B","B","Self","TT",""\r\n"221","sp|P02768-A|ALBU","125","115","LVRPEVDVMCTAFHDNEETFLK","11","sp|P02768-A|ALBU","165","161","YKAAFTECCQAADK","5","13.38","","5","879.611316343597","4393.02019938359","879.6104362268973","4393.015798800091","1.0017226662526069","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.99","A","A","Self","TT",""\r\n"222","sp|P02768-A|ALBU","124","115","LVRPEVDVMoxCTAFHDNEETFLK","10","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","15.11","","6","735.842462712475","4409.011117473576","735.8423946002276","4409.010708800091","0.0926905175186693","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","10.91","A","A","Self","TT",""\r\n"224","sp|P02768-A|ALBU","505","501","EFNAETFTFHADICTLSEKER","5","sp|P02768-A|ALBU","525","522","QIKKQTALVELVK","4","10.82","","4","1072.81150282099","4287.216905416444","1072.8102907969471","4287.212057320273","1.1308272384367364","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","14.99","A","A","Self","TT",""\r\n"225","sp|P02768-A|ALBU","125","115","LVRPEVDVMCTAFHDNEETFLK","11","sp|P02768-A|ALBU","161","161","YKAAFTECCQAADK","1","17.32","","6","733.1774255465871","4393.020894478248","733.1765762668942","4393.015798800091","1.159949881894001","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","15.26","A","A","Self","TT",""\r\n"226","sp|P02768-A|ALBU","452","446","MPCAEDYLSVVLNQLCVLHEK","7","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","11.82","","6","748.211275533336","4483.2239943987415","748.2101854769094","4483.217454060182","1.4588492810656064","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.87","B","B","Self","TT",""\r\n"227","sp|P02768-A|ALBU","452","446","MPCAEDYLSVVLNQLCVLHEK","7","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAK","9","11.96","","6","687.17635310693","4117.014459840306","687.1766846002275","4117.016448800091","-0.48310707764453925","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.87","B","B","Self","TT",""\r\n"229","sp|P02768-A|ALBU","132","115","LVRPEVDVMCTAFHDNEETFLK","18","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","13.17","","4","1099.2625224338499","4393.020983867884","1099.2612261669015","4393.01579880009","1.1802980073812712","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.88","A","A","Self","TT",""\r\n"230","sp|P02768-A|ALBU","495","485","RPCFSALEVDETYVPK","11","sp|P02768-A|ALBU","414","411","YTKKVPQVSTPTLVEVSR","4","11.15","","4","1027.29498065632","4105.150816757764","1027.2931424819242","4105.143464060181","1.7910939404055486","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.23","A","A","Self","TT",""\r\n"232","sp|P02768-A|ALBU","506","501","EFNAETFTFHADICTLSEK","6","sp|P02768-A|ALBU","499","485","RPCFSALEVDETYVPK","15","12.46","","4","1063.75412771493","4250.987404992205","1063.7525531669016","4250.981106800091","1.4815855341354125","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","15.12","A","A","Self","TT",""\r\n"233","sp|P02768-A|ALBU","525","522","QIKKQTALVELVK","4","sp|P02768-A|ALBU","505","501","EFNAETFTFHADICTLSEKER","5","10.93","","4","1072.81136417616","4287.216350837124","1072.8102907969471","4287.212057320273","1.0014706046363","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","14.99","A","A","Self","TT",""\r\n"234","sp|P02768-A|ALBU","132","115","LVRPEVDVMCTAFHDNEETFLK","18","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","14.37","","6","733.1774255465871","4393.020894478248","733.1765762668942","4393.015798800091","1.159949881894001","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.88","A","A","Self","TT",""\r\n"235","sp|P02768-A|ALBU","129","115","LVRPEVDVMoxCTAFHDNEETFLK","15","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","11.52","","6","735.8431786741149","4409.015413243415","735.8423946002276","4409.010708800091","1.0670065542491538","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","13.75","A","A","Self","TT",""\r\n"236","sp|P02768-A|ALBU","190","182","LDELRDEGKASSAKQR","9","sp|P02768-A|ALBU","452","446","MPCAEDYLSVVLNQLCVLHEK","7","12.76","","6","748.2111857049921","4483.223455428678","748.2101854769094","4483.217454060182","1.3386298027183947","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.87","B","B","Self","TT",""\r\n"237","sp|P02768-A|ALBU","130","115","LVRPEVDVMCTAFHDNEETFLK","16","sp|P02768-A|ALBU","162","160","RYKAAFTECCQAADK","3","12.91","","5","910.831659994432","4549.121917637765","910.8306584268972","4549.116909800091","1.1008373215460252","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","11.99","A","A","Self","TT",""\r\n"238","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","sp|P02768-A|ALBU","414","411","YTKKVPQVSTPTLVEVSR","4","15.83","","4","1027.2948563707598","4105.150319615524","1027.2931424819242","4105.143464060181","1.669991658652906","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.72","A","A","Self","TT",""\r\n"239","sp|P02768-A|ALBU","135","115","LVRPEVDVMCTAFHDNEETFLKK","21","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","14.89","","5","905.230560249288","4521.116418912045","905.2294288268973","4521.1107618000915","1.2512659503389054","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","7.22","B","B","Self","TT",""\r\n"243","sp|P02768-A|ALBU","124","115","LVRPEVDVMCTAFHDNEETFLK","10","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","15.7","","5","879.611316343597","4393.02019938359","879.6104362268973","4393.015798800091","1.0017226662526069","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","10.91","A","A","Self","TT",""\r\n"244","sp|P02768-A|ALBU","413","411","YTKKVPQVSTPTLVEVSR","3","sp|P02768-A|ALBU","494","485","RPCFSALEVDETYVPK","10","9.75","","5","822.037572412362","4105.151479727415","822.0359692789154","4105.143464060182","1.952591256095","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","6.19","B","B","Self","TT",""\r\n"245","sp|P02768-A|ALBU","134","115","LVRPEVDVMCTAFHDNEETFLK","20","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","11.03","","4","1099.2620106077302","4393.018936563405","1099.2612261669015","4393.01579880009","0.7142617870416583","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.15","A","A","Self","TT",""\r\n"246","sp|P02768-A|ALBU","124","115","LVRPEVDVMCTAFHDNEETFLK","10","sp|P02768-A|ALBU","161","161","YKAAFTECCQAADK","1","15.16","","6","733.1775986284019","4393.021932969137","733.1765762668942","4393.015798800091","1.3963457740895535","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.22","B","B","Self","TT",""\r\n"247","sp|P02768-A|ALBU","162","160","RYKAAFTECCQAADK","3","sp|P02768-A|ALBU","127","115","LVRPEVDVMCTAFHDNEETFLK","13","12.33","","7","650.882648730252","4549.127605843611","650.8811207240349","4549.116909800091","2.351235136771095","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","8.96","B","B","Self","TT",""\r\n"249","sp|P02768-A|ALBU","134","115","LVRPEVDVMCTAFHDNEETFLK","20","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","16.94","","5","879.611569966556","4393.0214674983845","879.6104362268973","4393.015798800091","1.2903887791608466","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.15","A","A","Self","TT",""\r\n"250","sp|P02768-A|ALBU","131","115","LVRPEVDVMCTAFHDNEETFLK","17","sp|P02768-A|ALBU","161","161","YKAAFTECCQAADK","1","14.5","","5","879.6112559189751","4393.01989726048","879.6104362268973","4393.015798800091","0.9329491577075782","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","11.07","A","A","Self","TT",""\r\n"251","sp|P02768-A|ALBU","104","99","NECFLQHKDDNPNLPR","6","sp|P02768-A|ALBU","93","82","ETYGEMADCCAKQEPER","12","10.44","","5","831.165307267896","4150.790154005085","831.1647156268971","4150.787195800091","0.7126852944128584","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","13.22","A","A","Self","TT",""\r\n"252","sp|P02768-A|ALBU","125","115","LVRPEVDVMCTAFHDNEETFLKK","11","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","12.66","","6","754.526665408302","4521.116333648538","754.5257367668942","4521.110761800091","1.232406977145289","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","13.49","A","A","Self","TT",""\r\n"253","sp|P02768-A|ALBU","124","115","LVRPEVDVMCTAFHDNEETFLK","10","sp|P02768-A|ALBU","161","160","RYKAAFTECCQAADK","2","13.72","","7","650.882223005845","4549.124625772763","650.8811207240349","4549.116909800091","1.6961473676251124","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","12.22","B","B","Self","TT",""\r\n"254","sp|P02768-A|ALBU","414","411","YTKKVPQVSTPTLVEVSR","4","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","10.56","","4","1027.29498065632","4105.150816757764","1027.2931424819244","4105.143464060182","1.791093940183998","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.72","A","A","Self","TT",""\r\n"256","sp|P02768-A|ALBU","509","501","EFNAETFTFHADICTLSEKER","9","sp|P02768-A|ALBU","525","522","QIKKQTALVELVK","4","11.59","","5","858.451213920858","4287.219687269895","858.4496879309334","4287.212057320272","1.779699609242199","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.02","A","A","Self","TT",""\r\n"257","sp|P02768-A|ALBU","135","115","LVRPEVDVMCTAFHDNEETFLK","21","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","13.99","","4","1099.2629585120699","4393.022728180764","1099.2612261669015","4393.01579880009","1.5773630214521446","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","7.22","B","B","Self","TT",""\r\n"258","sp|P02768-A|ALBU","452","446","MPCAEDYLSVVLNQLCVLHEK","7","sp|P02768-A|ALBU","184","182","LDELRDEGKASSAK","3","9.33","","5","824.411595380754","4117.021594569374","824.4105662268972","4117.016448800091","1.2498782425181758","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","18.57","A","A","Self","TT",""\r\n"259","sp|P02768-A|ALBU","131","115","LVRPEVDVMCTAFHDNEETFLK","17","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","17.03","","6","733.177163905215","4393.019324630016","733.1765762668942","4393.015798800091","0.8025989630799508","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","8.30","A","A","Self","TT",""\r\n"260","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","sp|P02768-A|ALBU","414","411","YTKKVPQVSTPTLVEVSR","4","15.62","","4","1027.29508869715","4105.1512489210845","1027.2931424819242","4105.143464060181","1.8963675622154552","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.72","A","A","Self","TT",""\r\n"261","sp|P02768-A|ALBU","505","501","EFNAETFTFHADICTLSEKER","5","sp|P02768-A|ALBU","525","522","QIKKQTALVELVK","4","11.38","","5","858.4508990684151","4287.218113007681","858.4496879309334","4287.212057320272","1.4125000880984149","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","14.99","A","A","Self","TT",""\r\n"262","sp|P02768-A|ALBU","135","115","LVRPEVDVMCTAFHDNEETFLK","21","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","15.23","","4","1099.2620106077302","4393.018936563405","1099.2612261669015","4393.01579880009","0.7142617870416583","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","7.22","B","B","Self","TT",""\r\n"263","sp|P02768-A|ALBU","414","411","YTKKVPQVSTPTLVEVSR","4","sp|P02768-A|ALBU","497","485","RPCFSALEVDETYVPK","13","8.1","","3","1369.3904260160302","4105.149448647453","1369.3884311536065","4105.143464060182","1.457826583523977","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.72","A","A","Self","TT",""\r\n"264","sp|P02768-A|ALBU","427","415","VPQVSTPTLVEVSR","13","sp|P02768-A|ALBU","520","501","EFNAETFTFHADICTLSEKER","20","13.78","","3","1380.021384247","4137.042323340363","1380.019248733576","4137.0359168000905","1.5485822218979366","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","14.66","A","A","Self","TT",""\r\n"265","sp|P02768-A|ALBU","134","115","LVRPEVDVMCTAFHDNEETFLK","20","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","13.67","","4","1099.2625224338499","4393.020983867884","1099.2612261669015","4393.01579880009","1.1802980073812712","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.15","A","A","Self","TT",""\r\n"267","sp|P02768-A|ALBU","509","501","EFNAETFTFHADICTLSEKER","9","sp|P02768-A|ALBU","525","522","QIKKQTALVELVK","4","10.8","","4","1072.81141373502","4287.216549072565","1072.8102907969471","4287.212057320273","1.0477093812516156","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","9.02","A","A","Self","TT",""\r\n"268","sp|P02768-A|ALBU","124","115","LVRPEVDVMCTAFHDNEETFLKK","10","sp|P02768-A|ALBU","162","161","YKAAFTECCQAADK","2","10.72","","6","768.200254301344","4603.157867006789","768.1992894769091","4603.15207806018","1.2576049000069018","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","10.91","A","A","Self","TT",""\r\n"269","sp|P02768-A|ALBU","132","115","LVRPEVDVMCTAFHDNEETFLK","18","sp|P02768-A|ALBU","159","146","HPYFYAPELLFFAKR","14","13.89","","5","926.866161842965","4629.2944268804295","926.8644654268973","4629.285944800091","1.8322653730449754","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","11.89","A","A","Self","TT",""\r\n"270","sp|P02768-A|ALBU","361","352","TYETTLEKCCAAADPHECYAK","10","sp|P02768-A|ALBU","378","373","VFDEFKPLVEEPQNLIK","6","13.02","","5","929.646530063165","4643.19626798143","929.6453668268973","4643.190451800091","1.2526260550662323","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","21.67","A","A","Self","TT",""\r\n"271","sp|P02768-A|ALBU","125","115","LVRPEVDVMCTAFHDNEETFLK","11","sp|P02768-A|ALBU","156","146","HPYFYAPELLFFAKR","11","12.68","","6","772.556159616591","4629.293298898272","772.5549339335608","4629.285944800091","1.588603138552738","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","22.97","A","A","Self","TT",""\r\n"272","sp|P02768-A|ALBU","378","373","VFDEFKPLVEEPQNLIK","6","sp|P02768-A|ALBU","363","352","TYETTLEKCCAAADPHECYAK","12","11.87","","5","929.646530063165","4643.19626798143","929.6453668268973","4643.190451800091","1.2526260550662323","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","23.48","B","B","Self","TT",""\r\n"273","sp|P02768-A|ALBU","131","115","LVRPEVDVMCTAFHDNEETFLK","17","sp|P02768-A|ALBU","159","146","HPYFYAPELLFFAKR","14","12.16","","6","772.5559295451241","4629.29191846947","772.5549339335608","4629.285944800091","1.2904083805803597","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","11.87","A","A","Self","TT",""\r\n"274","sp|P02768-A|ALBU","125","115","LVRPEVDVMCTAFHDNEETFLK","11","sp|P02768-A|ALBU","159","145","RHPYFYAPELLFFAKR","15","12.39","","7","684.634579361082","4785.391120259422","684.6339987240348","4785.387055800091","0.8493480848161937","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","18.60","A","A","Self","TT",""\r\n"275","sp|P02768-A|ALBU","124","115","LVRPEVDVMCTAFHDNEETFLK","10","sp|P02768-A|ALBU","159","145","RHPYFYAPELLFFAKR","15","11.75","","7","684.634579361082","4785.391120259422","684.6339987240348","4785.387055800091","0.8493480848161937","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","16.12","B","B","Self","TT",""\r\n"277","sp|P02768-A|ALBU","125","115","LVRPEVDVMCTAFHDNEETFLK","11","sp|P02768-A|ALBU","174","163","AAFTECCQAADKAACLLPK","12","10.33","","6","810.221440897326","4855.284986582682","810.2203164335609","4855.278239800091","1.3895769218338037","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","11.90","B","B","Self","TT",""\r\n"278","sp|P02768-A|ALBU","359","349","LAKTYETTLEKCCAAADPHECYAK","11","sp|P02768-A|ALBU","377","373","VFDEFKPLVEEPQNLIK","5","9.63","","5","1024.9066323879","5119.496779605104","1024.9051215309337","5119.489225320273","1.47559346222291","0","","24070","","","","","82.0413162600906","","[{"type":"BIon"},{"type":"YIon"},{"type":"PeptideIon"},{"type":"Ion"}]","false","false","16.12","A","A","Self","TT",""\r\n';
-        const actualValue = getMatchesCSV();
+        const actualValue = getMatchesCSV(model);
 
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as Matches CSV, Passed!");
 
@@ -1689,7 +1689,7 @@ function loadBlosumData(url) {
 }
 
 // Helper function to setup NGL stage
-function setupNGLStage() {
+function setupNGLStage(compositeModelInst) {
     const stage = new NGL.Stage("ngl", {tooltip: false});
     const pdbCode = "1AO6";
 
@@ -1706,7 +1706,7 @@ function setupNGLStage() {
     repopulateNGL({
         pdbSettings: pdbSettings,
         stage: stage,
-        compositeModel: window.compositeModelInst
+        compositeModel: compositeModelInst
     });
 
     return stage;
@@ -1736,7 +1736,7 @@ function initializeModels(options, blosumCollInst) {
     console.log("Calling postDataLoaded...");
     postDataLoaded(compositeModelInst);
 
-    window.compositeModelInst.get("clmsModel")._crosslinkerSpecificity =
+    compositeModelInst.get("clmsModel")._crosslinkerSpecificity =
         {
             "wrong mass SDA ": {
                 "searches": new Set([24070]),
@@ -1801,7 +1801,7 @@ export async function testSetupNew() {
 
         // Initialize models (this will trigger the initialSetupDone event)
         console.log("Initializing models...");
-        initializeModels(jsonData, blosumCollInst);
+        const compositeModelInst = initializeModels(jsonData, blosumCollInst);
 
         // Wait for initial setup completion
         console.log("Waiting for initialSetupDone event...");
@@ -1809,18 +1809,18 @@ export async function testSetupNew() {
 
         // Now setup components that depend on the models being fully ready
         console.log("Setting up color models and NGL stage...");
-        setupColourModels();
-        setupNGLStage();
+        setupColourModels(compositeModelInst);
+        setupNGLStage(compositeModelInst);
 
         // Wait for distances object to be ready
         console.log("Waiting for distances object to be ready...");
-        await waitForEvent(window.compositeModelInst, "change:distancesObj");
+        await waitForEvent(compositeModelInst, "change:distancesObj");
 
         console.log("distances obj changed");
-        console.log("About to call test callback with:", window.compositeModelInst);
+        console.log("About to call test callback with:", compositeModelInst);
 
         // Execute test callback
-        testCallback(window.compositeModelInst);
+        testCallback(compositeModelInst);
 
         console.log("Test callback completed");
 

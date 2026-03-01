@@ -33,9 +33,9 @@ function csvField(value) {
  * @param {string} [suffix="csv"] - File extension
  * @returns {string} Legal filename with filter state encoded
  */
-export function downloadFilename(type, suffix) {
+export function downloadFilename(compositeModelInst, type, suffix) {
     suffix = suffix || "csv";
-    return makeLegalFileName(searchesToString() + "--" + type + "--" + filterStateToString()) + "." + suffix;
+    return makeLegalFileName(searchesToString(compositeModelInst) + "--" + type + "--" + filterStateToString(compositeModelInst)) + "." + suffix;
 }
 
 /**
@@ -44,8 +44,8 @@ export function downloadFilename(type, suffix) {
  * Each row represents one match. Ambiguous matches (belonging to multiple crosslinks) included once.
  * @returns {undefined}
  */
-export function downloadMatches() {
-    download(getMatchesCSV(), "text/csv", downloadFilename("matches"));
+export function downloadMatches(compositeModelInst) {
+    download(getMatchesCSV(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "matches"));
 }
 
 /**
@@ -54,7 +54,7 @@ export function downloadMatches() {
  * Only includes TT (target-target) matches. Modifications converted to [+mass] or [-mass] notation.
  * @returns {undefined}
  */
-export function downloadSSL() {
+export function downloadSSL(compositeModelInst) {
 
     // $("#newGroupName").dialog({
     //   modal: true,
@@ -62,7 +62,7 @@ export function downloadSSL() {
     //     'OK': function () {
     //       var newGroupName = $('input[name="newGroupName"]').val();
     //       alert(name);
-    download(getSSL(), "text/csv", "test.ssl"); //downloadFilename("ssl"));
+    download(getSSL(compositeModelInst), "text/csv", "test.ssl"); //downloadFilename("ssl"));
     //       // storeData(name);
     //       $(this).dialog('close');
     //     },
@@ -81,9 +81,9 @@ export function downloadSSL() {
  * Only includes selected proteins, TT links, filtered crosslinks. Chains labeled A-Z, a-z, 0-9.
  * @returns {undefined}
  */
-export function downloadAlphaLink2(){
-    download(getAlphaLink2CSV().csv, "text/csv", "alphalink.txt");
-    download(getAlphaLink2CSV().fasta, "text/csv", "alphalink.fasta");
+export function downloadAlphaLink2(compositeModelInst){
+    download(getAlphaLink2CSV(compositeModelInst).csv, "text/csv", "alphalink.txt");
+    download(getAlphaLink2CSV(compositeModelInst).fasta, "text/csv", "alphalink.fasta");
 }
 
 /**
@@ -92,8 +92,8 @@ export function downloadAlphaLink2(){
  * validation status, FDR, 3D distance/chains, presence in each search, custom metadata columns.
  * @returns {undefined}
  */
-export function downloadLinks() {
-    download(getLinksCSV(), "text/csv", downloadFilename("links"));
+export function downloadLinks(compositeModelInst) {
+    download(getLinksCSV(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "links"));
 }
 
 /**
@@ -102,8 +102,8 @@ export function downloadLinks() {
  * decoy type, presence in each search. One row per PPI.
  * @returns {undefined}
  */
-export function downloadPPIs() {
-    download(getPPIsCSV(), "text/csv", downloadFilename("PPIs"));
+export function downloadPPIs(compositeModelInst) {
+    download(getPPIsCSV(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "PPIs"));
 }
 
 /**
@@ -112,8 +112,8 @@ export function downloadPPIs() {
  * Counts unique crosslinks, not matches.
  * @returns {undefined}
  */
-export function downloadResidueCount() {
-    download(getResidueCount(), "text/csv", downloadFilename("residueCount"));
+export function downloadResidueCount(compositeModelInst) {
+    download(getResidueCount(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "residueCount"));
 }
 
 /**
@@ -122,8 +122,8 @@ export function downloadResidueCount() {
  * Parses peptide sequences for modifications in format like "Kox", "Sph".
  * @returns {undefined}
  */
-export function downloadModificationCount() {
-    download(getModificationCount(), "text/csv", downloadFilename("modificationCount"));
+export function downloadModificationCount(compositeModelInst) {
+    download(getModificationCount(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "modificationCount"));
 }
 
 /**
@@ -131,8 +131,8 @@ export function downloadModificationCount() {
  * Simple format for external tool integration.
  * @returns {undefined}
  */
-export function downloadProteinAccessions() {
-    download(getProteinAccessions(), "text/csv", downloadFilename("proteinAccessions"));
+export function downloadProteinAccessions(compositeModelInst) {
+    download(getProteinAccessions(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "proteinAccessions"));
 }
 
 /**
@@ -141,8 +141,8 @@ export function downloadProteinAccessions() {
  * One row per non-decoy protein.
  * @returns {undefined}
  */
-export function downloadGroups() {
-    download(getGroups(), "text/csv", downloadFilename("groups"));
+export function downloadGroups(compositeModelInst) {
+    download(getGroups(compositeModelInst), "text/csv", downloadFilename(compositeModelInst, "groups"));
 }
 
 /**
@@ -238,10 +238,10 @@ export function download(content, contentType, fileName) {
  * @param {Object} protein - Protein object with id, accession, name properties
  * @returns {string} Most readable protein identifier
  */
-function mostReadableId(protein) {
+function mostReadableId(compositeModelInst, protein) {
 
     //if serverFlavour is XI2
-    if (window.compositeModelInst.get("serverFlavour") === "XI2"){
+    if (compositeModelInst && compositeModelInst.get("serverFlavour") === "XI2"){
         if (protein.accession && protein.name && (protein.accession !== protein.name)) {
             return protein.accession + "|" + protein.name;
         } else if (protein.name) {
@@ -265,13 +265,13 @@ function mostReadableId(protein) {
  * @param {Object} clmsModel - CLMS model instance for protein lookup
  * @returns {string} Semicolon-separated protein IDs (e.g., "P12345|PROT1;P67890|PROT2")
  */
-export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
+export function mostReadableMultipleId(compositeModelInst, match, matchedPeptideIndex, clmsModel) {
     const mpeptides = match.matchedPeptides[matchedPeptideIndex];
     const proteins = mpeptides ? mpeptides.prt.map(function (pid) {
         return clmsModel.getProtein(pid);
     }) : [];
     return proteins.map(function (prot) {
-        return mostReadableId(prot);
+        return mostReadableId(compositeModelInst, prot);
     }, this).join(";");
 }
 
@@ -284,13 +284,13 @@ export function mostReadableMultipleId(match, matchedPeptideIndex, clmsModel) {
  * Performance logging for map building and string concatenation phases.
  * @returns {string} CSV content with header row and one row per match
  */
-export function getMatchesCSV() {
+export function getMatchesCSV(compositeModelInst) {
     let csv = "\"Id\",\"Protein1\",\"SeqPos1\",\"PepPos1\",\"PepSeq1\",\"LinkPos1\",\"Protein2\",\"SeqPos2\",\"PepPos2\",\"PepSeq2\",\"LinkPos2\",\"Score\",\"PrecursorIntensity\",\"Charge\",\"ExpMz\",\"ExpMass\",\"CalcMz\",\"CalcMass\",\"MassError\",\"Missing Peaks\",\"Validated\",\"Search\",\"RawFileName\",\"PeakListFileName\",\"ScanNumber\",\"ScanIndex\",\"CrossLinkerModMass\",\"FragmentTolerance\",\"IonTypes\",\"Decoy1\",\"Decoy2\",\"3D Distance\",\"From Chain\",\"To Chain\",\"LinkType\",\"DecoyType\",\"Retention Time\"\r\n";
-    const clmsModel = window.compositeModelInst.get("clmsModel");
+    const clmsModel = compositeModelInst.get("clmsModel");
     const participants = clmsModel.getProteinsMap();
     const distance2dp = d3.format(".2f");
 
-    const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = compositeModelInst.getFilteredCrossLinks("all");
     //todo get rid d3 map
     const matchMap = d3.map();
 
@@ -319,7 +319,7 @@ export function getMatchesCSV() {
 
         // Work out distances for this match - ambiguous matches will have >1 crosslink
         const crosslinks = match.crosslinks;
-        const distances = window.compositeModelInst.getCrossLinkDistances(crosslinks, {
+        const distances = compositeModelInst.getCrossLinkDistances(crosslinks, {
             includeUndefineds: true,
             returnChainInfo: true,
             calcDecoyProteinDistances: true
@@ -347,7 +347,7 @@ export function getMatchesCSV() {
         const retentionTime = match.retentionTime !== undefined ? match.retentionTime : (match.elution_time_end === -1 ? match.elution_time_start : "");
 
         const data = [
-            match.id, mostReadableMultipleId(match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursor_intensity, match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.validated, match.uploadId, "", match.peaklistFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, ...distancesJoined, linkType, decoyType, retentionTime
+            match.id, mostReadableMultipleId(compositeModelInst, match, 0, clmsModel), lp1, pp1, peptides1.seq_mods, match.linkPos1, (peptides2 ? mostReadableMultipleId(compositeModelInst, match, 1, clmsModel) : ""), lp2, pp2, (peptides2 ? peptides2.seq_mods : ""), match.linkPos2, match.score(), match.precursor_intensity, match.precursorCharge, match.expMZ(), match.expMass(), match.calcMZ(), match.calcMass(), match.massError(), match.missingPeaks(), match.validated, match.uploadId, "", match.peaklistFileName(), match.scanNumber, match.scanIndex, match.crosslinkerModMass(), match.fragmentToleranceString(), match.ionTypesString(), decoy1, decoy2, ...distancesJoined, linkType, decoyType, retentionTime
         ];
         csv += "\"" + data.map(csvField).join("\",\"") + "\"\r\n";
         /*
@@ -369,16 +369,16 @@ export function getMatchesCSV() {
  * Crosslinker mass included as modification at link positions.
  * @returns {string} SSL content with header row and one row per TT match
  */
-function getSSL() {
+function getSSL(compositeModelInst) {
     let csv = "file\tscan\tcharge\tsequence\tscore-type\tscore\r\n";
     // "\tId\tProtein1\tSeqPos1\tPepPos1\tPepSeq1\tLinkPos1\tProtein2\tSeqPos2\tPepPos2\tPepSeq2\tLinkPos2\tCharge\tExpMz\tExpMass\tCalcMz\tCalcMass\tMassError\tAutoValidated\tValidated\tSearch\tRawFileName\tPeakListFileName\tScanNumber\tScanIndex\tCrossLinkerModMass\tFragmentTolerance\tIonTypes\r\n";
-    const clmsModel = window.compositeModelInst.get("clmsModel");
+    const clmsModel = compositeModelInst.get("clmsModel");
     var mass6dp = d3.format(".6f");
     const modifications = clmsModel.get("modifications");
     console.log("*modifications", modifications);
 
     // its this filtering that necessitates the strange way of building the match list below
-    const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = compositeModelInst.getFilteredCrossLinks("all");
     const matchMap = d3.map();
 
     // do it like this so ambiguous matches (belonging to >1 crosslink) aren't repeated
@@ -443,8 +443,8 @@ function getSSL() {
  * One row per unique crosslink. Distance info includes chain identifiers. Dynamic columns for searches and metadata.
  * @returns {string} CSV content with dynamic header and one row per crosslink
  */
-export function getLinksCSV() {
-    const clmsModel = window.compositeModelInst.get("clmsModel");
+export function getLinksCSV(compositeModelInst) {
+    const clmsModel = compositeModelInst.get("clmsModel");
 
     let headerArray = ["Protein1", "SeqPos1", "LinkedRes1", "Protein2", "SeqPos2", "LinkedRes2", "Highest Score", "Match Count", "DecoyType", "Self", "AutoValidated", "Validated", "Link FDR", "3D Distance", "From Chain", "To Chain"];//, "PDB SeqPos 1", "PDB SeqPos 2"];
     const searchIDs = Array.from(clmsModel.getSearches().keys());
@@ -458,9 +458,9 @@ export function getLinksCSV() {
 
     const headerRow = "\"" + headerArray.join("\",\"") + "\"";
 
-    const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = compositeModelInst.getFilteredCrossLinks("all");
 
-    const physicalDistances = window.compositeModelInst.getCrossLinkDistances(crosslinks, {
+    const physicalDistances = compositeModelInst.getCrossLinkDistances(crosslinks, {
         includeUndefineds: true,
         returnChainInfo: true,
         calcDecoyProteinDistances: true
@@ -473,8 +473,8 @@ export function getLinksCSV() {
         const linear = crosslink.isLinearLink();
         const filteredMatchesAndPepPos = crosslink.filteredMatches_pp;
         row.push(
-            mostReadableId(crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence ? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
-            (linear ? "" : mostReadableId(crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence ? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
+            mostReadableId(compositeModelInst, crosslink.fromProtein), crosslink.fromResidue, crosslink.fromProtein.sequence ? crosslink.fromProtein.sequence[crosslink.fromResidue - 1] : "",
+            (linear ? "" : mostReadableId(compositeModelInst, crosslink.toProtein)), crosslink.toResidue, !linear && crosslink.toResidue && crosslink.toProtein.sequence ? crosslink.toProtein.sequence[crosslink.toResidue - 1] : ""
         );
 
         let highestScore = null;
@@ -550,8 +550,8 @@ export function getLinksCSV() {
  * where both ends are selected. Eliminates duplicate crosslinks. Chains labeled A-Z, a-z, 0-9 (max 62 chains).
  * @returns {Object} Object with {csv: restraints, fasta: sequences}
  */
-function getAlphaLink2CSV(){
-    const selectedProteins = window.compositeModelInst.get("selectedProteins");
+function getAlphaLink2CSV(compositeModelInst){
+    const selectedProteins = compositeModelInst.get("selectedProteins");
     const proteins = new Map();
     let csv = "", fasta = "";
 
@@ -618,8 +618,8 @@ function getAlphaLink2CSV(){
  * presence in each search (dynamic columns). One row per PPI.
  * @returns {string} CSV content with dynamic header and one row per PPI
  */
-function getPPIsCSV() {
-    const clmsModel = window.compositeModelInst.get("clmsModel");
+function getPPIsCSV(compositeModelInst) {
+    const clmsModel = compositeModelInst.get("clmsModel");
     const headerArray = ["Protein1", "Protein2", "Unique Distance Restraints", "DecoyType"];
     const searchIDs = Array.from(clmsModel.getSearches().keys());
     searchIDs.forEach(function (sid) {
@@ -629,7 +629,7 @@ function getPPIsCSV() {
     const headerRow = "\"" + headerArray.join("\",\"") + "\"";
     const rows = [headerRow];
 
-    const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all");
+    const crosslinks = compositeModelInst.getFilteredCrossLinks("all");
 
     const ppiMap = new Map();
 
@@ -662,7 +662,7 @@ function getPPIsCSV() {
             }
         }
 
-        row.push(mostReadableId(aCrosslink.fromProtein), (linear ? "" : mostReadableId(aCrosslink.toProtein)), ppi.length, decoyType);
+        row.push(mostReadableId(compositeModelInst, aCrosslink.fromProtein), (linear ? "" : mostReadableId(compositeModelInst, aCrosslink.toProtein)), ppi.length, decoyType);
 
         // // Add presence in searches
         for (let s = 0; s < searchIDs.length; s++) {
@@ -718,14 +718,14 @@ function getDecoyTypeFromCrosslink(aCrosslink) {
  * Uses helper function incrementCount to build occurrence maps.
  * @returns {string} CSV content with residue pair counts followed by individual residue counts
  */
-export function getResidueCount() {
+export function getResidueCount(compositeModelInst) {
     let csv = "\"Residue(s)\",\"Occurences(in_unique_links)\"\r\n";
     //~ var matches = xlv.matches;//.values();
     //~ var matchCount = matches.length;
     const residueCountMap = d3.map();
     const residuePairCountMap = d3.map();
 
-    const crosslinks = window.compositeModelInst.getFilteredCrossLinks("all"); // already pre-filtered
+    const crosslinks = compositeModelInst.getFilteredCrossLinks("all"); // already pre-filtered
     crosslinks.forEach(function (residueLink) {
         const linkedRes1 = residueLink.fromProtein.sequence[residueLink.fromResidue - 1] || "";
         const linkedRes2 = residueLink.isLinearLink() ? "" : residueLink.toProtein.sequence[residueLink.toResidue - 1];
@@ -766,15 +766,15 @@ export function getResidueCount() {
  * Applies subset, validation, score, and decoy filters. Counts by decoy type (TT/TD/DD).
  * @returns {string} CSV content with modification ID section, blank rows, then residue+modification section
  */
-function getModificationCount() {
+function getModificationCount(compositeModelInst) {
     let csv = "\"Modification(s)\",\"TT\",\"TD\",\"DD\"\r\n";
-    const matches = window.compositeModelInst.get("clmsModel").getMatches();
+    const matches = compositeModelInst.get("clmsModel").getMatches();
 
     const modCountMap = new Map();
     const modByResCountMap = new Map();
     const regex = /[A-Z]([a-z0-9]+)/g;
-    const filterModel = window.compositeModelInst.get("filterModel");
-    const clmsModel = window.compositeModelInst.get("clmsModel");
+    const filterModel = compositeModelInst.get("filterModel");
+    const clmsModel = compositeModelInst.get("clmsModel");
 
     for (let match of matches) {
         const pass = filterModel.subsetFilter(match) &&
@@ -870,9 +870,9 @@ function getModificationCount() {
  * Simple export format for external tool integration (e.g., paste into web forms).
  * @returns {string} Comma-separated accessions
  */
-function getProteinAccessions() {
+function getProteinAccessions(compositeModelInst) {
     const accs = [];
-    const proteins = window.compositeModelInst.get("clmsModel").getProteinsIterator();
+    const proteins = compositeModelInst.get("clmsModel").getProteinsIterator();
     for (let p of proteins) {
         if (!p.hidden) {
             accs.push(p.accession);
@@ -887,13 +887,13 @@ function getProteinAccessions() {
  * One row per non-decoy protein. Iterates all groups to find memberships for each protein.
  * @returns {string} CSV content with header and one row per non-decoy protein
  */
-function getGroups() {
+function getGroups(compositeModelInst) {
     const headerArray = ["ProteinID", "Name", "Complex"];
     const headerRow = "\"" + headerArray.join("\",\"") + "\"";
     const rows = [headerRow];
 
-    const clmsModel = window.compositeModelInst.get("clmsModel");
-    const groups = window.compositeModelInst.get("groups");
+    const clmsModel = compositeModelInst.get("clmsModel");
+    const groups = compositeModelInst.get("groups");
     console.log("**", groups);
     const proteins = clmsModel.getProteinsIterator();
     for (let p of proteins) {

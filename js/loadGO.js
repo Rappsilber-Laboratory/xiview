@@ -86,6 +86,11 @@ export function loadGOAnnotations(txt) {
     console.log(zz - z, "ms. first pass (is_a, part_of)", performance.now() - zz, "ms. second pass (subclasses, parts)");
     console.log("for obo parsing", l, "lines into map size", go.size);
 
+    // Store back-reference so GoTerm methods can traverse the map without needing the global
+    for (term of go.values()) {
+        term.go = go;
+    }
+
     return go;
 }
 

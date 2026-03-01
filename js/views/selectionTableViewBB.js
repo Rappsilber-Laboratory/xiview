@@ -149,7 +149,7 @@ export class SelectionTableViewBB extends Backbone.View {
                 return false;
             },
             "validated": function() {
-                return !window.compositeModelInst.get("serverFlavour") === "XI2";
+                return !self.model.get("serverFlavour") === "XI2";
             }, //CLMS.model.manualValidatedFound; },
             homom: function () {
                 return false;
@@ -158,19 +158,19 @@ export class SelectionTableViewBB extends Backbone.View {
                 return false;
             },
             "precursorIntensity": function() {
-                return window.compositeModelInst.get("serverFlavour") === "XI2";
+                return self.model.get("serverFlavour") === "XI2";
             },
             "elutionStart": function() {
-                return window.compositeModelInst.get("serverFlavour") === "XI2";
+                return self.model.get("serverFlavour") === "XI2";
             },
             "elutionEnd": function() {
                 return false;
             },
             "missingPeaks": function() {
-                return window.compositeModelInst.get("serverFlavour") === "XI2";
+                return self.model.get("serverFlavour") === "XI2";
             },
             "modificationCount": function() {
-                return window.compositeModelInst.get("serverFlavour") === "XI2";
+                return self.model.get("serverFlavour") === "XI2";
             },
             "expMissedCleavages": function() {
                 return false;

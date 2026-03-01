@@ -34,11 +34,12 @@ export class DistancesObj {
      * @param {string} structureName - Structure name
      * @param {Array} residueCoords - Residue coordinates
      */
-    constructor(matrices, chainMap, structureName, residueCoords) {
+    constructor(matrices, chainMap, structureName, residueCoords, compositeModel) {
         this.matrices = matrices;
         this.chainMap = chainMap;
         this.structureName = structureName;
         this.residueCoords = residueCoords;
+        this.compositeModel = compositeModel;
         this.setAllowedChainNameSet(undefined, true);
     }
 
@@ -222,7 +223,7 @@ export class DistancesObj {
                 const maxIndex = seqIndex2; // < seqIndex1 ? seqIndex1 : seqIndex2;
                 dist = distanceMatrix[minIndex][maxIndex];
             } else {
-                const sm = window.compositeModelInst.get("stageModel");
+                const sm = this.compositeModel ? this.compositeModel.get("stageModel") : undefined;
                 dist = sm ? sm.getSingleDistanceBetween2Residues(seqIndex1, seqIndex2, chainIndex1, chainIndex2) : 0;
             }
         } else {
@@ -243,8 +244,8 @@ export class DistancesObj {
         xilog(crosslinkerSpecificityList, "STOTS", specificitySearchTotal, this, this.matrices);
         const sampleLinksPerSearch = Math.ceil(sampleLinkQuantity / specificitySearchTotal);
 
-        const alignCollBB = window.compositeModelInst.get("alignColl");
-        const clmsModel = window.compositeModelInst.get("clmsModel");
+        const alignCollBB = this.compositeModel.get("alignColl");
+        const clmsModel = this.compositeModel.get("clmsModel");
 
         const distanceableSequences = this.calcDistanceableSequenceData();
         const distanceableSequencesByProtein = d3.map(d3.nest().key(function (d) {
@@ -304,7 +305,7 @@ export class DistancesObj {
     // 2. Mapping the remaining 3d chain sequences to the search sequences
     // 3. Then extracting those sub-portions of the search sequence that the 3d sequences cover
     calcDistanceableSequenceData() {
-        const alignCollBB = window.compositeModelInst.get("alignColl");
+        const alignCollBB = this.compositeModel.get("alignColl");
 
         let seqs = d3.entries(this.chainMap).map(function (chainEntry) {
             const protID = chainEntry.key;
@@ -371,7 +372,7 @@ export class DistancesObj {
     // If the crosslinker is not heterobifunctional we only do one as it'll be the same at both ends.
     calcFilteredSequenceResidues(crosslinkerSpecificity, distanceableSequences, alignedTerminalIndices) {
         const linkableResidueSets = crosslinkerSpecificity.linkables;
-        const alignCollBB = window.compositeModelInst.get("alignColl");
+        const alignCollBB = this.compositeModel.get("alignColl");
 
         const rmaps = linkableResidueSets.map(function (linkableResSet) {  // might be >1 set, some linkers bind differently at each end (heterobifunctional)
             const all = linkableResSet.has("*") || linkableResSet.has("X") || linkableResSet.size === 0;

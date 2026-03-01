@@ -393,7 +393,7 @@ export class FilterModel extends Backbone.Model {
      */
     pdbProteinFilter(match) {
         if (this.get("protPDB")) {
-            const dObj = window.compositeModelInst.get("distancesObj");
+            const dObj = this.compositeModel.get("distancesObj");
             if (dObj) {
                 const chainMap = dObj.chainMap;
                 if (chainMap) {
@@ -426,7 +426,7 @@ export class FilterModel extends Backbone.Model {
         if (searchString) {
             //protein name check
             const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
-            const participants = window.compositeModelInst.get("clmsModel").getProteinsMap();
+            const participants = this.compositeModel.get("clmsModel").getProteinsMap();
             const matchedPeptides = match.matchedPeptides;
             const matchedPepCount = matchedPeptides.length;
 

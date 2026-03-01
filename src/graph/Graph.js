@@ -105,8 +105,9 @@ export const Graph = function (targetSvg, model, options) {
     }.bind(this));
 
     //Tooltip
-    if (window.compositeModelInst !== undefined)
-        this.tooltip = window.compositeModelInst.get("tooltipModel");
+    this.tooltipIsBBModel = options.compositeModelInst !== undefined;
+    if (this.tooltipIsBBModel)
+        this.tooltip = options.compositeModelInst.get("tooltipModel");
     else {
         // target = this.g.node().parentNode.parentNode; //this would get you #spectrumPanel
         this.tooltip = d3.select("body").append("span")

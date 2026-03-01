@@ -656,7 +656,7 @@ export class AnnotationDropDownMenuViewBB extends DropDownMenuViewBB {
      * @returns {string} Legal filename string without extension
      */
     filenameStateString() {
-        return makeLegalFileName(searchesToString() + "--" + this.identifier);
+        return makeLegalFileName(searchesToString(this.model) + "--" + this.identifier);
     }
 }
 

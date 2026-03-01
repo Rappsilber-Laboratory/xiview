@@ -140,7 +140,7 @@ export class ProteinInfoViewBB extends BaseFrameView {
             let tBody = table.createTBody();
 
             const self = this;
-            const goTermsMap = window.compositeModelInst.get("go");
+            const goTermsMap = this.model.get("go");
 
             for (let key of this.options.orderedKeys) {
                 addRow(key);
