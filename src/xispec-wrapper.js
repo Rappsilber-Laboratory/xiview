@@ -100,25 +100,39 @@ export const XispecWrapper = Backbone.View.extend({
         ByRei_dynDiv.init.main();
     },
 
-    setData: function (data) {
-        // EXAMPLE:
-        // xiSPEC.setData({
-        // sequence1: "KQTALVELVK",
-        // sequence2: "QNCcarbamidomethylELFEQLGEYKFQNALLVR",
-        // linkPos1: 1,
-        // linkPos2: 13,
-        // crossLinkerModMass: 0,
-        // modifications: [{id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['C']}],
-        // losses: [{ id: 'H2O', specificity: ['D', 'S', 'T', 'E', 'CTerm'], mass: 18.01056027}],
-        // precursorCharge: 3,
-        // fragmentTolerance: {"tolerance": '20.0', 'unit': 'ppm'},
-        // ionTypes: "peptide;b;y",
-        // precursorMz: 1012.1,
-        // peakList: [[mz, int], [mz, int], ...],
-        // requestId: 1,
-        // }
-        let json_request = this.convert_to_json_request(data);
+    // setData: function (data) {
+    //     // EXAMPLE:
+    //     // xiSPEC.setData({
+    //     // sequence1: "KQTALVELVK",
+    //     // sequence2: "QNCcarbamidomethylELFEQLGEYKFQNALLVR",
+    //     // linkPos1: 1,
+    //     // linkPos2: 13,
+    //     // crossLinkerModMass: 0,
+    //     // modifications: [{id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['C']}],
+    //     // losses: [{ id: 'H2O', specificity: ['D', 'S', 'T', 'E', 'CTerm'], mass: 18.01056027}],
+    //     // precursorCharge: 3,
+    //     // fragmentTolerance: {"tolerance": '20.0', 'unit': 'ppm'},
+    //     // ionTypes: "peptide;b;y",
+    //     // precursorMz: 1012.1,
+    //     // peakList: [[mz, int], [mz, int], ...],
+    //     // requestId: 1,
+    //     // }
+    //     let json_request = this.convert_to_json_request(data);
+    //
+    //     let activeSpecModel = this.activeSpectrum.spectrumModel;
+    //     activeSpecModel.set("butterfly", false);
+    //     activeSpecModel.set("changedAnnotation", false);
+    //     activeSpecModel.reset_all_modifications();
+    //     activeSpecModel.set("spectrum_id", data.spectrum_id);
+    //     activeSpecModel.set("spectrum_title", data.spectrum_title);
+    //     this.activeSpectrum.originalMatchRequest = $.extend(true, {}, json_request);
+    //     let originalAnnotator = this.activeSpectrum.originalSpectrumModel.get("annotatorURL");
+    //     activeSpecModel.set("annotatorURL", originalAnnotator);
+    //     this.activeSpectrum.requestAnnotation(json_request, activeSpecModel.get("annotatorURL"), true);
+    //     this.activeSpectrum.setTitle(data.spectrum_title);
+    // },
 
+    receiveAnnotatedData: function (data, json_request) {
         let activeSpecModel = this.activeSpectrum.spectrumModel;
         activeSpecModel.set("butterfly", false);
         activeSpecModel.set("changedAnnotation", false);
@@ -128,8 +142,17 @@ export const XispecWrapper = Backbone.View.extend({
         this.activeSpectrum.originalMatchRequest = $.extend(true, {}, json_request);
         let originalAnnotator = this.activeSpectrum.originalSpectrumModel.get("annotatorURL");
         activeSpecModel.set("annotatorURL", originalAnnotator);
-        this.activeSpectrum.requestAnnotation(json_request, activeSpecModel.get("annotatorURL"), true);
-        this.activeSpectrum.setTitle(data.spectrum_title);
+
+        let spec = this.activeSpectrum;
+        spec.spectrumModel.trigger("requestAnnotation:pending");
+        spec.spectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
+        spec.settingsSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
+        spec.settingsSpectrumModel.trigger("change:JSONdata");
+        spec.spectrumModel.trigger("requestAnnotation:done");
+        spec.originalSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
+        spec.originalSpectrumModel.updateKnownModifications();
+        spec.spectrumModel.updateKnownModifications();
+        spec.originalAnnotator = originalAnnotator;
     },
 
     requestAnnotation: function (...args) {
@@ -154,131 +177,131 @@ export const XispecWrapper = Backbone.View.extend({
         return true;
     },
 
-    arrayifyPeptide: function (seq_mods) {
-        let peptide = {};
-        peptide.sequence = [];
-
-        const seq_AAonly = seq_mods.replace(/[^A-Z]/g, "");
-        let seq_length = seq_AAonly.length;
-
-        for (let i = 0; i < seq_length; i++) {
-            peptide.sequence[i] = {"aminoAcid": seq_AAonly[i], "Modification": ""};
-        }
-
-        const re = /[^A-Z]+/g;
-        let offset = 1;
-        let result;
-        while (result = re.exec(seq_mods)) {
-            peptide.sequence[result.index - offset]["Modification"] = result[0];
-            offset += result[0].length;
-        }
-        return peptide;
-    },
-
-    convert_to_json_request: function (data) {
-
-        if (!this.sanityChecks(data)) return false;
-
-        // defaults
-        if (data.ionTypes === undefined) {
-            data.ionTypes = "peptide;b;y";
-        }
-        if (data.crossLinkerModMass === undefined) {
-            data.crossLinkerModMass = 0;
-        }
-        if (data.modifications === undefined) {
-            data.modifications = [];
-        }
-        if (data.fragmentTolerance === undefined) {
-            data.fragmentTolerance = {"tolerance": "10.0", "unit": "ppm"};
-        }
-        if (data.requestID === undefined) {
-            data.requestID = -1;
-        }
-        // if (data.crosslinkerID === undefined) {
-        //     data.crosslinkerID = -1;
-        // }
-
-        let annotationRequest = {};
-        let peptides = [];
-        let linkSites = [];
-        // xi1annotator style modified peptides
-        peptides[0] = this.arrayifyPeptide(data.sequence1);
-        if (data.sequence2 !== undefined) {
-            peptides[1] = this.arrayifyPeptide(data.sequence2);
-            linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
-        }
-        // xi2annotator style modified peptides
-        if (data.base_sequence1 !== undefined){
-            peptides[0]["base_sequence"] = data.base_sequence1;
-        }
-        if (data.base_sequence2 !== undefined){
-            peptides[1]["base_sequence"] = data.base_sequence2;
-        }
-        if (data.mod_pos1 !== undefined) {
-            peptides[0]["modification_positions"] = data.mod_pos1;
-        }
-        if (data.mod_pos2 !== undefined) {
-            peptides[1]["modification_positions"] = data.mod_pos2;
-        }
-        if (data.mod_ids1 !== undefined) {
-            peptides[0]["modification_ids"] = data.mod_ids1;
-        }
-        if (data.mod_ids2 !== undefined) {
-            peptides[1]["modification_ids"] = data.mod_ids2;
-        }
-
-        if (data.linkPos1 !== undefined) {
-            linkSites[0] = {"id": 0, "peptideId": 0, "linkSite": data.linkPos1};
-        }
-
-        let peaks = [];
-        for (let i = 0; i < data.peakList.length; i++) {
-            peaks.push(
-                {"intensity": data.peakList[i][1], "mz": data.peakList[i][0]}
-            );
-        }
-
-        annotationRequest.Peptides = peptides;
-        annotationRequest.LinkSite = linkSites;
-        annotationRequest.peaks = peaks;
-        annotationRequest.annotation = {};
-        annotationRequest.annotation.requestID = data.requestID.toString();
-        annotationRequest.annotation.crosslinkerID = data.crosslinkerID;
-        annotationRequest.annotation.precursorCharge = +data.precursorCharge;
-        annotationRequest.annotation.modifications = data.modifications;
-        annotationRequest.annotation.precursorMZ = +data.precursorMZ;
-        annotationRequest.annotation.returnModSyntax = "Xmod";
-        annotationRequest.annotation.crosslinker = {};
-        annotationRequest.annotation.crosslinker.stubs1 = data.stubs1 || []; //['A:82.041864:S']; // crosslink acceptor stubs
-        annotationRequest.annotation.crosslinker.stubs2 = data.stubs2 || []; //['S:0.0:A']; // crosslink donor stubs
-
-
-        // check if it's xi1 or xi2 style annotation
-        if(data.config !== undefined){
-            annotationRequest.annotation.config = data.config;
-            if (annotationRequest.annotation.crosslinkerID === undefined){
-                annotationRequest.annotation.config.crosslinker = [];
-            }
-        } else {
-
-            let ionTypes = data.ionTypes.split(";");
-            //remove empty strings from list
-            ionTypes = ionTypes.filter(Boolean);
-            let ions = [];
-            for (let it = 0; it < ionTypes.length; it++) {
-                let ionType = ionTypes[it];
-                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-            }
-            annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
-            annotationRequest.annotation.ions = ions;
-            annotationRequest.annotation.crosslinker.modMass = data.crossLinkerModMass;
-            annotationRequest.annotation.losses = data.losses;
-        }
-
-        console.log("request", annotationRequest);
-        return annotationRequest;
-    },
+    // arrayifyPeptide: function (seq_mods) {
+    //     let peptide = {};
+    //     peptide.sequence = [];
+    //
+    //     const seq_AAonly = seq_mods.replace(/[^A-Z]/g, "");
+    //     let seq_length = seq_AAonly.length;
+    //
+    //     for (let i = 0; i < seq_length; i++) {
+    //         peptide.sequence[i] = {"aminoAcid": seq_AAonly[i], "Modification": ""};
+    //     }
+    //
+    //     const re = /[^A-Z]+/g;
+    //     let offset = 1;
+    //     let result;
+    //     while (result = re.exec(seq_mods)) {
+    //         peptide.sequence[result.index - offset]["Modification"] = result[0];
+    //         offset += result[0].length;
+    //     }
+    //     return peptide;
+    // },
+    //
+    // convert_to_json_request: function (data) {
+    //
+    //     if (!this.sanityChecks(data)) return false;
+    //
+    //     // defaults
+    //     if (data.ionTypes === undefined) {
+    //         data.ionTypes = "peptide;b;y";
+    //     }
+    //     if (data.crossLinkerModMass === undefined) {
+    //         data.crossLinkerModMass = 0;
+    //     }
+    //     if (data.modifications === undefined) {
+    //         data.modifications = [];
+    //     }
+    //     if (data.fragmentTolerance === undefined) {
+    //         data.fragmentTolerance = {"tolerance": "10.0", "unit": "ppm"};
+    //     }
+    //     if (data.requestID === undefined) {
+    //         data.requestID = -1;
+    //     }
+    //     // if (data.crosslinkerID === undefined) {
+    //     //     data.crosslinkerID = -1;
+    //     // }
+    //
+    //     let annotationRequest = {};
+    //     let peptides = [];
+    //     let linkSites = [];
+    //     // xi1annotator style modified peptides
+    //     peptides[0] = this.arrayifyPeptide(data.sequence1);
+    //     if (data.sequence2 !== undefined) {
+    //         peptides[1] = this.arrayifyPeptide(data.sequence2);
+    //         linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
+    //     }
+    //     // xi2annotator style modified peptides
+    //     if (data.base_sequence1 !== undefined){
+    //         peptides[0]["base_sequence"] = data.base_sequence1;
+    //     }
+    //     if (data.base_sequence2 !== undefined){
+    //         peptides[1]["base_sequence"] = data.base_sequence2;
+    //     }
+    //     if (data.mod_pos1 !== undefined) {
+    //         peptides[0]["modification_positions"] = data.mod_pos1;
+    //     }
+    //     if (data.mod_pos2 !== undefined) {
+    //         peptides[1]["modification_positions"] = data.mod_pos2;
+    //     }
+    //     if (data.mod_ids1 !== undefined) {
+    //         peptides[0]["modification_ids"] = data.mod_ids1;
+    //     }
+    //     if (data.mod_ids2 !== undefined) {
+    //         peptides[1]["modification_ids"] = data.mod_ids2;
+    //     }
+    //
+    //     if (data.linkPos1 !== undefined) {
+    //         linkSites[0] = {"id": 0, "peptideId": 0, "linkSite": data.linkPos1};
+    //     }
+    //
+    //     let peaks = [];
+    //     for (let i = 0; i < data.peakList.length; i++) {
+    //         peaks.push(
+    //             {"intensity": data.peakList[i][1], "mz": data.peakList[i][0]}
+    //         );
+    //     }
+    //
+    //     annotationRequest.Peptides = peptides;
+    //     annotationRequest.LinkSite = linkSites;
+    //     annotationRequest.peaks = peaks;
+    //     annotationRequest.annotation = {};
+    //     annotationRequest.annotation.requestID = data.requestID.toString();
+    //     annotationRequest.annotation.crosslinkerID = data.crosslinkerID;
+    //     annotationRequest.annotation.precursorCharge = +data.precursorCharge;
+    //     annotationRequest.annotation.modifications = data.modifications;
+    //     annotationRequest.annotation.precursorMZ = +data.precursorMZ;
+    //     annotationRequest.annotation.returnModSyntax = "Xmod";
+    //     annotationRequest.annotation.crosslinker = {};
+    //     annotationRequest.annotation.crosslinker.stubs1 = data.stubs1 || []; //['A:82.041864:S']; // crosslink acceptor stubs
+    //     annotationRequest.annotation.crosslinker.stubs2 = data.stubs2 || []; //['S:0.0:A']; // crosslink donor stubs
+    //
+    //
+    //     // check if it's xi1 or xi2 style annotation
+    //     if(data.config !== undefined){
+    //         annotationRequest.annotation.config = data.config;
+    //         if (annotationRequest.annotation.crosslinkerID === undefined){
+    //             annotationRequest.annotation.config.crosslinker = [];
+    //         }
+    //     } else {
+    //
+    //         let ionTypes = data.ionTypes.split(";");
+    //         //remove empty strings from list
+    //         ionTypes = ionTypes.filter(Boolean);
+    //         let ions = [];
+    //         for (let it = 0; it < ionTypes.length; it++) {
+    //             let ionType = ionTypes[it];
+    //             ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+    //         }
+    //         annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
+    //         annotationRequest.annotation.ions = ions;
+    //         annotationRequest.annotation.crosslinker.modMass = data.crossLinkerModMass;
+    //         annotationRequest.annotation.losses = data.losses;
+    //     }
+    //
+    //     console.log("request", annotationRequest);
+    //     return annotationRequest;
+    // },
 
     updatePlotSplit: function () {
         //  destroy the plotSplit if it exists

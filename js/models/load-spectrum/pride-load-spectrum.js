@@ -69,34 +69,163 @@ export const prideLoadSpectrum = function (match) {
     formatted_data.stubs2 = match.matchedPeptides[1].stubs;
 
 
-    const url = this.get("apiBase") + "get_peaklist" + "?id=" +  encodeURIComponent(match.spectrumId)
-                    + "&sd_ref=" +  encodeURIComponent(match.spectraDataId)
-                    + "&upload_id=" +  encodeURIComponent(match.uploadId);
+    formatted_data.peakList = [];
+    const json_request = this.get("xispec_wrapper").convert_to_json_request(formatted_data);
 
-    fetch(url)
+    const url = this.get("apiBase") + "get_annotated_peaklist"
+        + "?id=" + encodeURIComponent(match.spectrumId)
+        + "&sd_ref=" + encodeURIComponent(match.spectraDataId)
+        + "&upload_id=" + encodeURIComponent(match.uploadId);
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(json_request),
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
             return response.json();
         })
-        .then(json => {
+        .then(data => {
             const rangeErrorEl = document.querySelector("#range-error");
             if (rangeErrorEl) {
                 rangeErrorEl.textContent = "";
             }
-
-            const peakArray = [];
-            const peakCount = json.mz.length;
-            for (let i = 0; i < peakCount; i++) {
-                peakArray.push([json.mz[i], json.intensity[i]]);
-            }
-
-            formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
-            this.get("xispec_wrapper").setData(formatted_data);
+            this.get("xispec_wrapper").receiveAnnotatedData(data, json_request);
         })
         .catch(error => {
-            console.log("error getting peak list", error);
+            console.log("error getting annotated peak list", error);
         });
     // }
 };
+
+function arrayifyPeptide (seq_mods) {
+    let peptide = {};
+    peptide.sequence = [];
+
+    const seq_AAonly = seq_mods.replace(/[^A-Z]/g, "");
+    let seq_length = seq_AAonly.length;
+
+    for (let i = 0; i < seq_length; i++) {
+        peptide.sequence[i] = {"aminoAcid": seq_AAonly[i], "Modification": ""};
+    }
+
+    const re = /[^A-Z]+/g;
+    let offset = 1;
+    let result;
+    while (result = re.exec(seq_mods)) {
+        peptide.sequence[result.index - offset]["Modification"] = result[0];
+        offset += result[0].length;
+    }
+    return peptide;
+}
+
+function convert_to_json_request(data) {
+
+    if (!this.sanityChecks(data)) return false;
+
+    // defaults
+    if (data.ionTypes === undefined) {
+        data.ionTypes = "peptide;b;y";
+    }
+    if (data.crossLinkerModMass === undefined) {
+        data.crossLinkerModMass = 0;
+    }
+    if (data.modifications === undefined) {
+        data.modifications = [];
+    }
+    if (data.fragmentTolerance === undefined) {
+        data.fragmentTolerance = {"tolerance": "10.0", "unit": "ppm"};
+    }
+    if (data.requestID === undefined) {
+        data.requestID = -1;
+    }
+    // if (data.crosslinkerID === undefined) {
+    //     data.crosslinkerID = -1;
+    // }
+
+    let annotationRequest = {};
+    let peptides = [];
+    let linkSites = [];
+    // xi1annotator style modified peptides
+    peptides[0] = this.arrayifyPeptide(data.sequence1);
+    if (data.sequence2 !== undefined) {
+        peptides[1] = this.arrayifyPeptide(data.sequence2);
+        linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
+    }
+    // xi2annotator style modified peptides
+    if (data.base_sequence1 !== undefined){
+        peptides[0]["base_sequence"] = data.base_sequence1;
+    }
+    if (data.base_sequence2 !== undefined){
+        peptides[1]["base_sequence"] = data.base_sequence2;
+    }
+    if (data.mod_pos1 !== undefined) {
+        peptides[0]["modification_positions"] = data.mod_pos1;
+    }
+    if (data.mod_pos2 !== undefined) {
+        peptides[1]["modification_positions"] = data.mod_pos2;
+    }
+    if (data.mod_ids1 !== undefined) {
+        peptides[0]["modification_ids"] = data.mod_ids1;
+    }
+    if (data.mod_ids2 !== undefined) {
+        peptides[1]["modification_ids"] = data.mod_ids2;
+    }
+
+    if (data.linkPos1 !== undefined) {
+        linkSites[0] = {"id": 0, "peptideId": 0, "linkSite": data.linkPos1};
+    }
+
+    let peaks = [];
+    for (let i = 0; i < data.peakList.length; i++) {
+        peaks.push(
+            {"intensity": data.peakList[i][1], "mz": data.peakList[i][0]}
+        );
+    }
+
+    annotationRequest.Peptides = peptides;
+    annotationRequest.LinkSite = linkSites;
+    annotationRequest.peaks = peaks;
+    annotationRequest.annotation = {};
+    annotationRequest.annotation.requestID = data.requestID.toString();
+    annotationRequest.annotation.crosslinkerID = data.crosslinkerID;
+    annotationRequest.annotation.precursorCharge = +data.precursorCharge;
+    annotationRequest.annotation.modifications = data.modifications;
+    annotationRequest.annotation.precursorMZ = +data.precursorMZ;
+    annotationRequest.annotation.returnModSyntax = "Xmod";
+    annotationRequest.annotation.crosslinker = {};
+    annotationRequest.annotation.crosslinker.stubs1 = data.stubs1 || []; //['A:82.041864:S']; // crosslink acceptor stubs
+    annotationRequest.annotation.crosslinker.stubs2 = data.stubs2 || []; //['S:0.0:A']; // crosslink donor stubs
+
+
+    // check if it's xi1 or xi2 style annotation
+    if(data.config !== undefined){
+        annotationRequest.annotation.config = data.config;
+        if (annotationRequest.annotation.crosslinkerID === undefined){
+            annotationRequest.annotation.config.crosslinker = [];
+        }
+    } else {
+
+        let ionTypes = data.ionTypes.split(";");
+        //remove empty strings from list
+        ionTypes = ionTypes.filter(Boolean);
+        let ions = [];
+        for (let it = 0; it < ionTypes.length; it++) {
+            let ionType = ionTypes[it];
+            ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+        }
+        annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
+        annotationRequest.annotation.ions = ions;
+        annotationRequest.annotation.crosslinker.modMass = data.crossLinkerModMass;
+        annotationRequest.annotation.losses = data.losses;
+    }
+
+    console.log("request", annotationRequest);
+    return annotationRequest;
+}

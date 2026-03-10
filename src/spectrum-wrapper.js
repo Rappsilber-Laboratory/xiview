@@ -318,55 +318,55 @@ export const SpectrumWrapper = Backbone.View.extend({
     //     });
     // },
 
-    requestAnnotation: function (json_request, annotatorURL, isOriginalMatchRequest) {
-        if (json_request.annotation.requestID) {
-            xiSPECUI.lastRequestedID = json_request.annotation.requestID;
-        }
-
-        this.spectrumModel.trigger("requestAnnotation:pending");
-        console.log("annotation request:", json_request);
-
-        let self = this;
-
-        fetch(this.xiAnnotatorBaseURL + annotatorURL, {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(json_request),
-            referrer: window.location.href  // Setting referrer to the current page URL
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data && data.annotation && data.annotation.requestID &&
-                    data.annotation.requestID === xiSPECUI.lastRequestedID) {
-                    // ToDo: Error handling -> https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/330
-                    console.log("annotation response:", data);
-
-                    self.spectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-                    self.settingsSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-                    self.settingsSpectrumModel.trigger("change:JSONdata");
-                    self.spectrumModel.trigger("requestAnnotation:done");
-
-                    if (isOriginalMatchRequest) {
-                        self.originalSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-                        self.originalSpectrumModel.updateKnownModifications();
-                        self.spectrumModel.updateKnownModifications();
-                        self.originalMatchRequest = Object.assign({}, json_request); // Deep copy of json_request
-                        self.originalAnnotator = annotatorURL;
-                    }
-                }
-            })
-            .catch(error => {
-                console.error("Error during annotation request:", error);
-            });
-    },
+    // requestAnnotation: function (json_request, annotatorURL, isOriginalMatchRequest) {
+    //     if (json_request.annotation.requestID) {
+    //         xiSPECUI.lastRequestedID = json_request.annotation.requestID;
+    //     }
+    //
+    //     this.spectrumModel.trigger("requestAnnotation:pending");
+    //     console.log("annotation request:", json_request);
+    //
+    //     let self = this;
+    //
+    //     fetch(this.xiAnnotatorBaseURL + annotatorURL, {
+    //         method: "POST",
+    //         headers: {
+    //             "Accept": "application/json",
+    //             "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify(json_request),
+    //         referrer: window.location.href  // Setting referrer to the current page URL
+    //     })
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error(`HTTP error! status: ${response.status}`);
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             if (data && data.annotation && data.annotation.requestID &&
+    //                 data.annotation.requestID === xiSPECUI.lastRequestedID) {
+    //                 // ToDo: Error handling -> https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/330
+    //                 console.log("annotation response:", data);
+    //
+    //                 self.spectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
+    //                 self.settingsSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
+    //                 self.settingsSpectrumModel.trigger("change:JSONdata");
+    //                 self.spectrumModel.trigger("requestAnnotation:done");
+    //
+    //                 if (isOriginalMatchRequest) {
+    //                     self.originalSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
+    //                     self.originalSpectrumModel.updateKnownModifications();
+    //                     self.spectrumModel.updateKnownModifications();
+    //                     self.originalMatchRequest = Object.assign({}, json_request); // Deep copy of json_request
+    //                     self.originalAnnotator = annotatorURL;
+    //                 }
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error("Error during annotation request:", error);
+    //         });
+    // },
 
 
     revertAnnotation: function () {
