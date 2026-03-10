@@ -20,7 +20,7 @@ import {
     viewsEssential,
     postDataLoaded
 } from "./networkFrame";
-import {displayError} from "./utils";
+import {showMessage} from "./message-popup";
 import Split from "split.js";
 import {SearchResultsModel} from "./models/search-results-model";
 import {BlosumCollection} from "./model/models";
@@ -143,9 +143,7 @@ export function main(apiBase, annotatorURL) {
             networkPageSpinner.stop();
         })
         .catch((error) => {
-            displayError(function () {
-                return true;
-            }, (error.stack || (error.message || error)));
+            showMessage(error.stack || error.message || error, "error");
             console.error(error);
             networkPageSpinner.stop();
         });
@@ -179,11 +177,13 @@ export function validationPage(apiBase, annotatorURL) {
             const allMatches = compositeModelInst.get("clmsModel").getMatches();
             compositeModelInst.setMarkedMatches("selection", allMatches);
             networkPageSpinner.stop();
+            const targetProteinCount = clmsModel.getTargetProteinCount();
+            if (targetProteinCount > 2000) {
+                showMessage("More than 2000 proteins (" + targetProteinCount + ") — network view not available.", "info");
+            }
         })
         .catch((error) => {
-            displayError(function () {
-                return true;
-            }, (error.stack || (error.message || error)));
+            showMessage(error.stack || error.message || error, "error");
             console.error(error);
             networkPageSpinner.stop();
         });

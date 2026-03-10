@@ -268,7 +268,7 @@
     user-select: none;
 }
 
-#keyPanel, #spectrumPanelWrapper, #spectrumSettingsWrapper, #nglPanel, #distoPanel, #alignPanel, #proteinInfoPanel, #circularPanel, #clmsErrorBox, #csvPanel, #searchSummaryPanel, #urlSearchBox, #xiNetHelpPanel, #listPanel {
+#keyPanel, #spectrumPanelWrapper, #spectrumSettingsWrapper, #nglPanel, #distoPanel, #alignPanel, #proteinInfoPanel, #circularPanel, #clmsMessageBox, #csvPanel, #searchSummaryPanel, #urlSearchBox, #xiNetHelpPanel, #listPanel {
     display: none;
     top: 80px;
 }
@@ -731,7 +731,7 @@ svg.tempKey text {
     font-size: 12px;
 }
 
-.errorCloseButton {
+.messageCloseButton {
 	position: absolute;
 	top: 0;
 	right: -0.7em;

@@ -160,10 +160,10 @@ tbody tr:hover td, tbody tr:hover td a, .spectrumShown{
     transition: all 200ms ease;
 }
 
-#clmsErrorBox {
+#clmsMessageBox {
     z-index: 3;
     font-size: 2em;
-    border: 4px solid red;
+    border: 4px solid;
     margin-left: 3em;
     padding: 1em;
     position: absolute;
@@ -179,11 +179,17 @@ tbody tr:hover td, tbody tr:hover td a, .spectrumShown{
     background: white;
 }
 
-#clmsErrorBox .errorReason {
+#clmsMessageBox .errorReason {
 	margin-top: 0.25em;
 	font-weight: bold;
 }
 
-#clmsErrorBox .errorReason:before {
+#clmsMessageBox .errorReason:before {
 	content: ">> ";
+}
+
+.messageTypeIcon {
+    font-size: 1.5em;
+    margin-right: 0.4em;
+    vertical-align: top;
 }

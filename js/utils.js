@@ -222,45 +222,6 @@ export function toNearest(val, interval) {
 }
 
 
-/**
- * Displays an error message in a modal dialog box.
- * Creates the error box on first use, then shows it with the provided message.
- * Used by main and network frame.
- * @param {Function} condition - Function that returns true if error should be displayed
- * @param {string} message - HTML message to display in the error box
- * @param {string} [borderColour] - Optional CSS color for the border
- * @param {string} [scale] - Optional CSS transform scale value
- * @returns {void}
- */
-export function displayError(condition, message, borderColour, scale) {
-    if (condition()) {
-        let box = d3.select("#clmsErrorBox");
-        if (box.empty()) {
-            box = d3.select("body").append("div").attr("id", "clmsErrorBox");
-            box.append("div");
-            box.append("i")
-                .attr("class", "fa fa-times-circle errorCloseButton closeButton")
-                .attr("title", "Close Dialog")
-                .on("click", function () {
-                    box.style("display", "none");
-                });
-        }
-
-        box
-            .style("opacity", 0)
-            .style("display", "block")
-            .style("border-color", borderColour || null)
-            .style("transform", "scale(" + (scale || "1") + ")")
-            .style("margin", "3em 9em")
-            .select("div")
-            .html(message);
-        box
-            .transition()
-            .duration(500)
-            .style("opacity", 1);
-    }
-}
-
 
 /**
  * Creates or reuses a canvas element with the specified dimensions.

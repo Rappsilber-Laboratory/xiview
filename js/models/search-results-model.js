@@ -470,6 +470,14 @@ export class SearchResultsModel {
     }
 
     /**
+     * Get the count of non-decoy target proteins
+     * @returns {number} Number of target proteins
+     */
+    getTargetProteinCount() {
+        return this.#targetProteinCount;
+    }
+
+    /**
      * Check if decoy proteins are present in the data
      * @returns {boolean} True if decoys present
      */
