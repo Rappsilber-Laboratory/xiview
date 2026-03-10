@@ -70,7 +70,7 @@ export const prideLoadSpectrum = function (match) {
 
 
     formatted_data.peakList = [];
-    const json_request = this.get("xispec_wrapper").convert_to_json_request(formatted_data);
+    const json_request = convert_to_json_request(formatted_data);
 
     const url = this.get("apiBase") + "get_annotated_peaklist"
         + "?id=" + encodeURIComponent(match.spectrumId)
@@ -127,7 +127,7 @@ function arrayifyPeptide (seq_mods) {
 
 function convert_to_json_request(data) {
 
-    if (!this.sanityChecks(data)) return false;
+    //if (!this.sanityChecks(data)) return false;
 
     // defaults
     if (data.ionTypes === undefined) {
@@ -153,9 +153,9 @@ function convert_to_json_request(data) {
     let peptides = [];
     let linkSites = [];
     // xi1annotator style modified peptides
-    peptides[0] = this.arrayifyPeptide(data.sequence1);
+    peptides[0] = arrayifyPeptide(data.sequence1);
     if (data.sequence2 !== undefined) {
-        peptides[1] = this.arrayifyPeptide(data.sequence2);
+        peptides[1] = arrayifyPeptide(data.sequence2);
         linkSites[1] = {"id": 0, "peptideId": 1, "linkSite": data.linkPos2};
     }
     // xi2annotator style modified peptides
