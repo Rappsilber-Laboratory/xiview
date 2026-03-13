@@ -1,9 +1,9 @@
-import {SearchResultsModel} from "../js/models/search-results-model";
+import {SearchResultsModel} from "../js/clms-model/search-results-model";
 
 /**
  * Loads test data from JSON files and populates a SearchResultsModel
  * @param {string} baseUrl - Base URL for fetching test data files
- * @returns {Promise<SearchResultsModel>} - Promise that resolves with populated model
+ * @returns {Promise<SearchResultsModel>} - Promise that resolves with populated backbone-models
  */
 export async function loadTestData(baseUrl = "./test-data") {
     const clmsModel = new SearchResultsModel();

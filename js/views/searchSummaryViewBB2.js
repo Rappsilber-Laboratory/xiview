@@ -57,7 +57,7 @@ export class SearchSummaryViewBB extends BaseFrameView {
 
     /**
      * Renders the search summary data as an interactive JSON tree.
-     * Retrieves mzIdentML file metadata from the model and displays it
+     * Retrieves mzIdentML file metadata from the backbone-models and displays it
      * using the JSONFormatter library.
      *
      * @returns {SearchSummaryViewBB} This view instance for chaining

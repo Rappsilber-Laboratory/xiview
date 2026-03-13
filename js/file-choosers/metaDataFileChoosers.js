@@ -4,7 +4,7 @@
  * LinkMetaDataFileChooserBB (crosslink/PPI metadata CSV), UserAnnotationsMetaDataFileChooserBB
  * (user-defined annotations CSV/GAF). All extend AbstractMetaDataFileChooserBB with shared UI
  * (file selector, message bar, format help link) and completion listener for parsing feedback.
- * Updates CLMS model with parsed metadata, triggers appropriate events for view updates.
+ * Updates CLMS backbone-models with parsed metadata, triggers appropriate events for view updates.
  */
 
 import "../../css/csvUpload.css";
@@ -191,7 +191,7 @@ export class ProteinMetaDataFileChooserBB extends AbstractMetaDataFileChooserBB 
     }
 
     /**
-     * Parses protein metadata CSV and updates CLMS model.
+     * Parses protein metadata CSV and updates CLMS backbone-models.
      * Sets up completion listener, calls updateProteinMetadata to parse CSV and update protein objects.
      * @param {string} fileContents - CSV file contents as string
      * @returns {undefined}
@@ -235,7 +235,7 @@ export class LinkMetaDataFileChooserBB extends AbstractMetaDataFileChooserBB {
     }
 
     /**
-     * Parses link metadata CSV and updates CLMS model.
+     * Parses link metadata CSV and updates CLMS backbone-models.
      * Sets up completion listener, calls updateLinkMetadata to parse CSV and update crosslink objects.
      * @param {string} fileContents - CSV file contents as string
      * @returns {undefined}
@@ -279,7 +279,7 @@ export class UserAnnotationsMetaDataFileChooserBB extends AbstractMetaDataFileCh
     }
 
     /**
-     * Parses user annotations CSV/GAF and updates CLMS model.
+     * Parses user annotations CSV/GAF and updates CLMS backbone-models.
      * Sets up completion listener, calls updateUserAnnotationsMetadata to parse file and create annotation types.
      * @param {string} fileContents - CSV or GAF file contents as string
      * @returns {undefined}

@@ -1,12 +1,12 @@
 /**
- * Configuration for CLMS-model diagram generation
+ * Configuration for CLMS-backbone-models diagram generation
  * This file defines what to include/exclude and how to layout the diagram
  */
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./CLMS-model/js/models/mzidentml-metadata",
-    outputFile: "./CLMS-model/js/models/mzidentml-metadata/mzidentml-metadata.dia",
+    sourceDir: "./CLMS-backbone-models/js/clms-backbone-models/mzidentml-metadata",
+    outputFile: "./CLMS-backbone-models/js/clms-backbone-models/mzidentml-metadata/mzidentml-metadata.dia",
 
     // Which classes to include
     classes: {

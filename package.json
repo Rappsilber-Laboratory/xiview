@@ -1,6 +1,6 @@
 {
   "name": "xiview",
-  "version": "2.0.1a1",
+  "version": "2.0.1a2",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
     "xiVIEW",
@@ -41,17 +41,8 @@
   ],
   "main": "./js/main.js",
   "scripts": {
-    "lint": "eslint js src",
+    "lint": "eslint js",
     "test": "node scripts/run-tests.js",
-    "diagram:clms": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/clms-model-config.js",
-    "diagram:xiview": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/xiview-config.js",
-    "diagram:crosslink": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/crosslink-viewer-config.js",
-    "diagram:spectrum": "node scripts/diagram-gen/generate-diagram.js --config scripts/diagram-gen/configs/spectrum-config.js",
-    "diagram:all": "npm run diagram:clms && npm run diagram:xiview && npm run diagram:crosslink && npm run diagram:spectrum",
-    "update:clms": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/clms-model-config.js",
-    "update:xiview": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/xiview-config.js",
-    "update:crosslink": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/crosslink-viewer-config.js",
-    "update:spectrum": "node scripts/diagram-gen/update-diagram.js --config scripts/diagram-gen/configs/spectrum-config.js",
     "build-dev": "rm -rf dist && webpack --mode development --config webpack.dev.js;",
     "build-prod": "rm -rf dist && webpack --mode production --config webpack.prod.js;",
     "copy-to-xiview-server": "cp dist/* ../xiview-server/static/ ;",

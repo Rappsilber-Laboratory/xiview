@@ -52,7 +52,7 @@ export class AlignSettingsViewBB extends Backbone.View {
             min: 0,
             max: 10
         },
-            //{label: "Score Matrix", prop:"scoreMatrix", type:"select", options: this.model.scoreMatrices },
+            //{label: "Score Matrix", prop:"scoreMatrix", type:"select", options: this.backbone-models.scoreMatrices },
         ];
         const inputSel = controls.selectAll("div.controlBlock")
             .data(inputArray, function (d) {
@@ -109,7 +109,7 @@ export class AlignSettingsViewBB extends Backbone.View {
             const control = d3.select(evt.target);
             const controlDatum = control.datum();
             this.model.set(controlDatum.prop, controlDatum.type === "number" ? +control.property("value") : control.property("value"));
-            // previous set will cause all sequences in this model to recalc
+            // previous set will cause all sequences in this backbone-models to recalc
             // this line inform views that wish to know of such events at a bulk level, rather than individually
             this.model.collection.bulkAlignChangeFinished();
         }
@@ -130,7 +130,7 @@ export class AlignSettingsViewBB extends Backbone.View {
                 return i == control.property("selectedIndex");
             });
         this.model.set(controlDatum.prop, selectedOption.datum().value); // actual matrix dataset is stored in d3 data, not in html option attributes
-        // previous set will cause all sequences in this model to recalc
+        // previous set will cause all sequences in this backbone-models to recalc
         // this line inform views that wish to know of such events at a bulk level, rather than individually
         this.model.collection.bulkAlignChangeFinished();
     }
@@ -138,11 +138,11 @@ export class AlignSettingsViewBB extends Backbone.View {
 
 /**
  * Generic dropdown view for selecting from Backbone collection.
- * Creates select element with options from collection models. Used for BLOSUM matrix selection.
+ * Creates select element with options from collection clms-backbone-models. Used for BLOSUM matrix selection.
  * Triggers "blosumModelSelected" event on collection when selection changes.
  * @class
  * @extends Backbone.View
- * @property {string} lastSelected - CID of last selected model
+ * @property {string} lastSelected - CID of last selected backbone-models
  */
 export class CollectionAsSelectViewBB extends Backbone.View {
     constructor(options) {
@@ -203,7 +203,7 @@ export class CollectionAsSelectViewBB extends Backbone.View {
         return this;
     }
 
-    // In case the selected score matrix is set from another view or model, we should reflect that choice here
+    // In case the selected score matrix is set from another view or backbone-models, we should reflect that choice here
     setSelected(aModel) {
         if (aModel && aModel.cid !== this.lastSelected) {
             this.lastSelected = aModel.cid;

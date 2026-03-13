@@ -16,7 +16,7 @@ const path = require('path');
 const TEST_FILES = [
     'tests/qunit.html',
     'tests/qunit2.html',
-    'tests/qunit-clms-model.html'
+    'tests/qunit-clms-backbone-models.html'
 ];
 
 const SERVER_PORT = 8080;

@@ -35,7 +35,7 @@ import vent from "../vent";
  * @property {Object} brush - D3 brush behavior for rectangular selection
  * @property {Object} canvas - Canvas element for rendering distance heatmap background
  * @property {Object} svg - SVG element for rendering crosslinks and axes
- * @property {Object} colourScaleModel - Color scale model for distance coloring
+ * @property {Object} colourScaleModel - Color scale backbone-models for distance coloring
  */
 export class DistanceMatrixViewBB extends BaseFrameView {
     constructor(options) {
@@ -306,7 +306,7 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         this.listenTo(this.model, "change:selection filteringDone", this.renderCrossLinks);
         // eslint-disable-next-line no-unused-vars
         this.listenTo(this.model, "currentColourModelChanged", function (colourModel, domain) {
-            if (colourModel.get("id") !== this.colourScaleModel.get("id")) {    // todo - test if model is distances, if so rendering is already guaranteed
+            if (colourModel.get("id") !== this.colourScaleModel.get("id")) {    // todo - test if backbone-models is distances, if so rendering is already guaranteed
                 this.renderCrossLinks();
             }
         });
@@ -317,9 +317,9 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         this.listenTo(this.model, "change:selectedProteins", this.makeProteinPairingOptions);
         this.listenTo(this.colourScaleModel, "colourModelChanged", function () {
             this.render({noResize: true});
-        }); // colourScaleModel is pointer to distance colour model, so this triggers even if not current colour model (redraws background)
+        }); // colourScaleModel is pointer to distance colour backbone-models, so this triggers even if not current colour backbone-models (redraws background)
         this.listenTo(this.model, "change:distancesObj", this.distancesChanged); // Entire new set of distances
-        // this.listenTo(this.model.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally) - clmsModel no longer extends Backbone
+        // this.listenTo(this.backbone-models.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally) - clmsModel no longer extends Backbone
         this.listenTo(vent, "proteinMetadataUpdated", function () {
             this.makeProteinPairingOptions();
             this.updateAxisLabels();
@@ -626,7 +626,7 @@ export class DistanceMatrixViewBB extends BaseFrameView {
         const linkWrappers = this.grabNeighbourhoodLinks(highlightExtent);
         const crosslinks = _.pluck(linkWrappers, "crosslink");
 
-        // invoke tooltip before setting highlights model change for quicker tooltip response
+        // invoke tooltip before setting highlights backbone-models change for quicker tooltip response
         this.invokeTooltip(evt, linkWrappers);
         this.model.setMarkedCrossLinks("highlights", crosslinks, true, false);
     }
@@ -677,7 +677,7 @@ export class DistanceMatrixViewBB extends BaseFrameView {
                 .set("header", makeTooltipTitle.linkList(crosslinks.length))
                 .set("contents", makeTooltipContents.linkList(crosslinks, {"Distance": linkDistances}))
                 .set("location", evt);
-            //this.trigger("change:location", this.model, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
+            //this.trigger("change:location", this.backbone-models, evt); // necessary to change position 'cos d3 event is a global property, it won't register as a change
         }
     }
     // end of tooltip functions

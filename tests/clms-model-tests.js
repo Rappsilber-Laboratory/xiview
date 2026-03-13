@@ -2,11 +2,11 @@ import {module, test, start} from "qunit";
 import {loadTestData} from "./test-helper";
 
 /**
- * CLMS-model Test Suite
- * Tests core model functionality without UI dependencies
+ * CLMS-backbone-models Test Suite
+ * Tests core backbone-models functionality without UI dependencies
  */
 export async function testSetup() {
-    console.log("Loading test data for CLMS-model tests...");
+    console.log("Loading test data for CLMS-backbone-models tests...");
 
     let clmsModel;
     try {
@@ -412,5 +412,5 @@ export async function testSetup() {
     });
 
     start();
-    console.log("CLMS-model tests completed");
+    console.log("CLMS-backbone-models tests completed");
 }

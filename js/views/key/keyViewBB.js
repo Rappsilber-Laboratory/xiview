@@ -14,14 +14,14 @@ import {ThreeColourSliderBB} from "./threeColourSliderBB";
 import {BaseFrameView} from "../../ui-utils/base-frame-view";
 import {sectionTable} from "../../ui-utils/section-table";
 import {updateColourKey} from "../../utils";
-import {ManualColourModel} from "../../model/color/protein-color-model";
-import {linkColor} from "../../model/color/setup-colors";
+import {ManualColourModel} from "../../backbone-models/color/protein-color-model";
+import {linkColor} from "../../backbone-models/color/setup-colors";
 
 /**
  * Legend panel view displaying color schemes and view-specific legends.
  * Shows two main sections: (1) Current color schemes with interactive controls (categorical color pickers
  * or threshold sliders), and (2) Static view legends (XiNet, circular, matrix, scatterplot, alignment).
- * Listens to color model changes and re-renders automatically. Supports downloading color schemes as SVG.
+ * Listens to color backbone-models changes and re-renders automatically. Supports downloading color schemes as SVG.
  * @class
  * @extends BaseFrameView
  * @property {string} identifier - View type name ("Legend")
@@ -52,7 +52,7 @@ export class KeyViewBB extends BaseFrameView {
     /**
      * Default options for color scheme configurations.
      * Defines two color scheme sections: crosslinks and proteins, with their associated
-     * model IDs, collection IDs, and dropdown placeholder IDs.
+     * backbone-models IDs, collection IDs, and dropdown placeholder IDs.
      * @returns {Object} Default options object
      */
     get defaultOptions() {
@@ -76,7 +76,7 @@ export class KeyViewBB extends BaseFrameView {
     /**
      * Initializes the legend panel with color scheme and view legend sections.
      * Calls parent initialize, creates panel structure, sets up color and legend sections,
-     * and listens to color model and collection changes for automatic re-rendering.
+     * and listens to color backbone-models and collection changes for automatic re-rendering.
      * @param {Object} viewOptions - Initialization options from BaseFrameView
      * @returns {KeyViewBB} This view instance for chaining
      */
@@ -93,7 +93,7 @@ export class KeyViewBB extends BaseFrameView {
         this.setupLegendSection(chartDiv);
         this.sliderSubViews = [];
 
-        // re-render if colour models changed outside of here
+        // re-render if colour clms-backbone-models changed outside of here
         const changeString = this.options.colourConfigs.map(function (config) {
             return "change:" + config.modelID;
         }).join(" ");
@@ -101,7 +101,7 @@ export class KeyViewBB extends BaseFrameView {
 
         this.listenTo(this.model, "currentProteinColourModelChanged", this.render);
 
-        // update is only triggered once when adding/removing multiple models to/from a collection
+        // update is only triggered once when adding/removing multiple clms-backbone-models to/from a collection
         this.options.colourConfigs.forEach(function (config) {
             this.listenTo(linkColor[config.collectionID], "update", this.render);
         }, this);
@@ -360,9 +360,9 @@ export class KeyViewBB extends BaseFrameView {
 
     /**
      * Handles color picker change events for categorical color schemes.
-     * Extracts the color model from parent section datum, updates the color scale range
+     * Extracts the color backbone-models from parent section datum, updates the color scale range
      * at the appropriate index, or updates undefinedColour if changing the undefined category color.
-     * Triggers color model change event which cascades to all views using that scheme.
+     * Triggers color backbone-models change event which cascades to all views using that scheme.
      * @param {Event} evt - Change event from color picker input
      * @returns {undefined}
      */
@@ -383,7 +383,7 @@ export class KeyViewBB extends BaseFrameView {
             } else {
                 colScaleRange[i] = newValue;
             }
-            // this will fire a change event for this colour model
+            // this will fire a change event for this colour backbone-models
             colourAssign.setRange(colScale.range());
         }
     }

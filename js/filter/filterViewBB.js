@@ -3,7 +3,7 @@
  * Creates comprehensive UI with 20+ filter controls including validation mode (manual/FDR),
  * target/decoy, protein names, peptide sequences, distance/score ranges, and search group toggles.
  * Dynamically builds collapsible filter sections with text inputs, number inputs, checkboxes, and sliders.
- * All controls sync bidirectionally with FilterModel - UI updates trigger model changes, model changes update UI.
+ * All controls sync bidirectionally with FilterModel - UI updates trigger backbone-models changes, backbone-models changes update UI.
  */
 import "../../css/filter.css";
 import Backbone from "backbone";
@@ -16,7 +16,7 @@ import d3 from "d3";
  * Dynamically constructs filter controls from config array, supporting multiple filter types:
  * mode selection (manual/FDR), boolean toggles, text search, numeric thresholds, min/max ranges.
  * Organized into collapsible sections (Mode, Protein, Peptide, Crosslink, Distances, Scores, Groups, etc.).
- * Bidirectional sync: UI changes update FilterModel via event handlers, model changes update UI via setInputValuesFromModel.
+ * Bidirectional sync: UI changes update FilterModel via event handlers, backbone-models changes update UI via setInputValuesFromModel.
  * @class
  * @extends Backbone.View
  * @property {d3.map} configMap - Map of filter configs indexed by id
@@ -50,7 +50,7 @@ export class FilterViewBB extends Backbone.View {
      * Initializes filter panel view by building complete UI from config array.
      * Creates extensive filter config (20+ controls), dynamically adds search group toggles,
      * defines helper functions for UI construction, builds all filter sections using helpers,
-     * sets up model change listener for bidirectional sync, triggers initial UI update.
+     * sets up backbone-models change listener for bidirectional sync, triggers initial UI update.
      * Helper functions: makeFilterControlDiv (collapsible sections), addFilterGroup (filter controls),
      * initMinigramFilterGroup (min/max sliders), initFDRPlaceholder, addScrollRightButton.
      * @param {Object} viewOptions - View initialization options
@@ -309,13 +309,13 @@ export class FilterViewBB extends Backbone.View {
 
         /**
          * Helper function: Creates min/max range filter with text inputs and optional "undefined" checkbox.
-         * Builds collapsible section with two numeric inputs (min/max cutoffs) that update model attribute.
-         * Values constrained between extent limits. Listens to model changes to update displayed values.
+         * Builds collapsible section with two numeric inputs (min/max cutoffs) that update backbone-models attribute.
+         * Values constrained between extent limits. Listens to backbone-models changes to update displayed values.
          * Used for Distance and Score filters.
          * @param {Object} config - Range filter configuration
          * @param {string} config.attr - Model attribute name for cutoff values (array: [min, max])
          * @param {string} config.extentProperty - Model property name for valid extent range
-         * @param {string} [config.undefAttr] - Optional model attribute for "show undefined" checkbox
+         * @param {string} [config.undefAttr] - Optional backbone-models attribute for "show undefined" checkbox
          * @param {string} config.label - Display label for filter
          * @param {string} config.id - Filter ID
          * @param {string} config.groupName - Section name
@@ -332,7 +332,7 @@ export class FilterViewBB extends Backbone.View {
                 sliderSection.html(tpl({
                     eid: self.el.id + config.id + "SliderHolder"
                 }));
-                // sliderSection.style('display', (self.model.get("scores") === null) ? 'none' : null);
+                // sliderSection.style('display', (self.backbone-models.get("scores") === null) ? 'none' : null);
                 sliderSection.selectAll("p.cutoffLabel")
                     .attr("title", function () {
                         const isMinInput = d3.select(this).classed("vmin");
@@ -352,7 +352,7 @@ export class FilterViewBB extends Backbone.View {
                         return val !== undefined ? val : "";
                     })
                     .on("change", function () { // "input" activates per keypress which knackers typing in anything >1 digit
-                        //console.log ("model", self.model);
+                        //console.log ("backbone-models", self.backbone-models);
                         const val = +this.value;
                         const isMinInput = d3.select(this.parentNode).classed("vmin");
                         const cutoff = self.model.get(config.attr);
@@ -639,7 +639,7 @@ export class FilterViewBB extends Backbone.View {
 
     /**
      * Handles checkbox/radio button change events.
-     * Updates model with new boolean value. Special handling for "crosslinks" and "selfLinks"
+     * Updates backbone-models with new boolean value. Special handling for "crosslinks" and "selfLinks"
      * filters which control visibility of dependent filter sections (Crosslink group, Self Links).
      * @param {Event} evt - Change event from checkbox/radio input
      * @returns {undefined}
@@ -662,8 +662,8 @@ export class FilterViewBB extends Backbone.View {
 
     /**
      * Handles text input change events.
-     * Validates input using HTML5 validation (pattern attribute if present), then updates model.
-     * Only updates model if input passes validation.
+     * Validates input using HTML5 validation (pattern attribute if present), then updates backbone-models.
+     * Only updates backbone-models if input passes validation.
      * @param {Event} evt - Input event from text field
      * @returns {undefined}
      */
@@ -678,7 +678,7 @@ export class FilterViewBB extends Backbone.View {
     /**
      * Handles search group toggle checkbox events.
      * Manages set of active search groups - adds or removes group from set based on checkbox state,
-     * then updates model with new group array.
+     * then updates backbone-models with new group array.
      * @param {Event} evt - Click event from group toggle checkbox
      * @returns {undefined}
      */
@@ -695,7 +695,7 @@ export class FilterViewBB extends Backbone.View {
 
     /**
      * Handles number input change events (keyup and mouseup).
-     * Updates model with new numeric value if value has changed.
+     * Updates backbone-models with new numeric value if value has changed.
      * @param {Event} evt - Keyup or mouseup event from number input
      * @returns {undefined}
      */
@@ -711,7 +711,7 @@ export class FilterViewBB extends Backbone.View {
 
     /**
      * Handles validation mode radio button changes (Manual vs FDR).
-     * Reads checked radio button value and updates model with mutually exclusive mode flags.
+     * Reads checked radio button value and updates backbone-models with mutually exclusive mode flags.
      * One of manualMode or fdrMode will be true, the other false.
      * @returns {undefined}
      */
@@ -727,13 +727,13 @@ export class FilterViewBB extends Backbone.View {
     }
 
     /**
-     * Syncs UI input values with model state (model → UI direction).
-     * Updates all text/number input values and checkbox states from model attributes.
+     * Syncs UI input values with backbone-models state (backbone-models → UI direction).
+     * Updates all text/number input values and checkbox states from backbone-models attributes.
      * Also handles show/hide logic for mode-dependent sections (FDR vs Manual validation).
-     * Called automatically on model "change" events and manually during initialization.
+     * Called automatically on backbone-models "change" events and manually during initialization.
      * Special handling: hides FDR panel in manual mode, hides validation/score filters in FDR mode,
      * disables "ambig" filter in FDR mode, hides groups/distances filters if not applicable.
-     * @param {Backbone.Model} [model=this.model] - Filter model instance
+     * @param {Backbone.Model} [model=this.backbone-models] - Filter backbone-models instance
      * @param {Object} [options={}] - Options object
      * @param {boolean} [options.showHide] - If true, force show/hide logic to run
      * @returns {undefined}
@@ -795,7 +795,7 @@ export class FDRViewBB extends Backbone.View {
     /**
      * Initializes FDR threshold selection UI.
      * Creates radio buttons for preset FDR values (1%, 5%, 10%, 20%, 50%) and custom number input.
-     * Sets up click handlers to update model's fdrThreshold. Listens for model changes to sync UI.
+     * Sets up click handlers to update backbone-models's fdrThreshold. Listens for backbone-models changes to sync UI.
      * @returns {FDRViewBB} this for chaining
      */
     initialize() {
@@ -846,17 +846,17 @@ export class FDRViewBB extends Backbone.View {
     }
 
     /**
-     * Syncs UI with model's fdrThreshold value.
+     * Syncs UI with backbone-models's fdrThreshold value.
      * Checks appropriate radio button if value matches preset, updates custom input field.
-     * Called automatically on model fdrThreshold changes.
-     * @param {Backbone.Model} [model=this.model] - Filter model instance
+     * Called automatically on backbone-models fdrThreshold changes.
+     * @param {Backbone.Model} [model=this.backbone-models] - Filter backbone-models instance
      * @returns {undefined}
      */
     setInputValuesFromModel(model) {
         model = model || this.model;
         const fdrThreshold = model.get("fdrThreshold");
         const d3el = d3.select(this.el);
-        //d3el.style("display", model.get("fdrMode") ? null : "none");
+        //d3el.style("display", backbone-models.get("fdrMode") ? null : "none");
         d3el.selectAll("input[name='fdrPercent']").property("checked", function (d) {
             return d === fdrThreshold;
         });
@@ -884,7 +884,7 @@ export class ProteinSummaryViewBB extends Backbone.View {
 
     /**
      * Initializes view and sets up filteringDone listener.
-     * Automatically re-renders when model fires filteringDone event.
+     * Automatically re-renders when backbone-models fires filteringDone event.
      * @returns {undefined}
      */
     initialize() {

@@ -12,7 +12,7 @@ class FunctionAnalyzer {
         this.callSites = new Map(); // functionKey -> array of call sites
         this.importGraph = new Map(); // file -> imports/exports
         this.fileContents = new Map(); // file -> source code
-        this.callGraph = null; // Call graph model (built in Pass 4)
+        this.callGraph = null; // Call graph backbone-models (built in Pass 4)
     }
 
     /**
@@ -43,7 +43,7 @@ class FunctionAnalyzer {
         console.log(`  Found ${this.callSites.size} unique functions called\n`);
 
         // Pass 4: Build call graph
-        console.log('Pass 4: Building call graph model...');
+        console.log('Pass 4: Building call graph backbone-models...');
         this.buildCallGraph();
         console.log(`  Graph model ready (${this.callGraph.nodes.size} nodes, ${this.callGraph.edges.size} edges)\n`);
 
@@ -770,7 +770,7 @@ class FunctionAnalyzer {
     }
 
     /**
-     * Build call graph model from existing data structures
+     * Build call graph backbone-models from existing data structures
      */
     buildCallGraph() {
         this.callGraph = {
@@ -1327,7 +1327,7 @@ class FunctionAnalyzer {
             if (node.type === 'module') {
                 let component = 'other';
                 if (node.relativePath.startsWith('xiview/')) component = 'xiview';
-                else if (node.relativePath.startsWith('CLMS-model/')) component = 'CLMS-model';
+                else if (node.relativePath.startsWith('CLMS-backbone-models/')) component = 'CLMS-backbone-models';
                 else if (node.relativePath.startsWith('crosslink-viewer/')) component = 'crosslink-viewer';
 
                 if (!components.has(component)) {
@@ -1596,7 +1596,7 @@ Just copy the contents of the .dot file and paste into the online editor.
      */
     getComponentName(relativePath) {
         if (relativePath.startsWith('xiview/')) return 'xiview';
-        if (relativePath.startsWith('CLMS-model/')) return 'CLMS-model';
+        if (relativePath.startsWith('CLMS-backbone-models/')) return 'CLMS-backbone-models';
         if (relativePath.startsWith('crosslink-viewer/')) return 'crosslink-viewer';
         return 'other';
     }
@@ -1836,7 +1836,7 @@ Just copy the contents of the .dot file and paste into the online editor.
             },
             groups: {
                 'xiview': { color: { background: '#D2E5FF', border: '#2B7CE9' } },
-                'CLMS-model': { color: { background: '#FFE5D2', border: '#FF8C00' } },
+                'CLMS-backbone-models': { color: { background: '#FFE5D2', border: '#FF8C00' } },
                 'crosslink-viewer': { color: { background: '#E5FFE5', border: '#32CD32' } }
             },
             physics: {
@@ -2014,7 +2014,7 @@ const analyzer = new FunctionAnalyzer({
     rootDir: path.join(__dirname, '..'),
     includeDirs: [
         'xiview/js',
-        'CLMS-model/js/models',
+        'CLMS-backbone-models/js/clms-backbone-models',
         'crosslink-viewer/js'
     ],
     excludePatterns: [

@@ -471,7 +471,7 @@ export class BaseFrameView extends Backbone.View {
      * For categorical color schemes, breaks down counts by category label. Adds hover tooltip
      * showing category breakdown. Used by views with categorical data (scatter plot, distogram, etc.).
      * @param {number[]} counts - Array of counts per category (parallel to color scheme labels)
-     * @param {Object} colourScheme - Color scheme model with labels and categorical status
+     * @param {Object} colourScheme - Color scheme backbone-models with labels and categorical status
      * @param {d3.selection} titleElem - D3 selection of title element to update
      * @param {boolean} [matchLevel=false] - True for "Matches", false for "Crosslinks"
      * @returns {BaseFrameView} This view instance for chaining

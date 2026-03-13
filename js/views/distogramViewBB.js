@@ -14,7 +14,7 @@ import * as _ from "underscore";
 import * as c3 from "../../vendor/c3";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {attributeOptions} from "../models/attribute-options";
+import {attributeOptions} from "../clms-model/attribute-options";
 import {
     addMultipleSelectControls,
     commonLabels,
@@ -27,7 +27,7 @@ import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {crosslinkerSpecificityPerLinker} from "../modelUtils";
 import d3 from "d3";
 import vent from "../vent";
-import {linkColor} from "../model/color/setup-colors";
+import {linkColor} from "../backbone-models/color/setup-colors";
 
 /**
  * Backbone view for histogram/distogram visualization of crosslink attribute distributions.
@@ -38,7 +38,7 @@ import {linkColor} from "../model/color/setup-colors";
  * @class
  * @extends BaseFrameView
  * @property {Object} chart - C3 chart instance
- * @property {Object} colourScaleModel - Color scale model for categorical series
+ * @property {Object} colourScaleModel - Color scale backbone-models for categorical series
  * @property {Array} currentBins - Array of current bin data for each series
  * @property {Object} precalcedDistributions - Cache of precalculated distributions (e.g., Random)
  * @property {Object} attrExtraOptions - Extra options for specific attributes (e.g., Distance)
@@ -420,18 +420,18 @@ export class DistogramBB extends BaseFrameView {
             }
         }
 
-        this.listenTo(this.model, "filteringDone", this.render); // listen for custom filteringDone event from model
+        this.listenTo(this.model, "filteringDone", this.render); // listen for custom filteringDone event from backbone-models
         this.listenTo(this.model, "currentColourModelChanged", function () {
             this.render({
                 noAxesRescale: true,
                 recolourOnly: true
             });
-        }); // have details (range, domain, colour) of current colour model changed?
+        }); // have details (range, domain, colour) of current colour backbone-models changed?
         this.listenTo(this.model, "change:linkColourAssignment", function () {
             this.render({
                 newColourModel: true
             });
-        }); // listen for colour model getting swapped in and out
+        }); // listen for colour backbone-models getting swapped in and out
         this.listenTo(this.model, "selectionMatchesLinksChanged", function () {
             this.render({
                 noAxesRescale: true
@@ -509,7 +509,7 @@ export class DistogramBB extends BaseFrameView {
      * @param {Object} [options] - Render options
      * @param {boolean} [options.noAxesRescale] - Don't rescale X/Y axes (selection/color change only)
      * @param {boolean} [options.recolourOnly] - Only update colors without data changes
-     * @param {boolean} [options.newColourModel] - New color model swapped in
+     * @param {boolean} [options.newColourModel] - New color backbone-models swapped in
      * @returns {DistogramBB} This view instance for chaining
      */
     render(options) {
@@ -534,10 +534,10 @@ export class DistogramBB extends BaseFrameView {
                 DD = 2;
             const seriesData = this.getDataCount(); // get series data, split into colour scheme sub-categories later
 
-            // Get colour model. If chosen colour model is non-categorical, default to distance colours.
+            // Get colour backbone-models. If chosen colour backbone-models is non-categorical, default to distance colours.
             let colModel = this.model.get("linkColourAssignment");
             if (!colModel.isCategorical()) {
-                colModel = linkColor.defaultColoursBB; // make default colour choice for histogram if current colour model is continuous
+                colModel = linkColor.defaultColoursBB; // make default colour choice for histogram if current colour backbone-models is continuous
             }
             this.colourScaleModel = colModel;
 
@@ -1064,7 +1064,7 @@ export class DistogramBB extends BaseFrameView {
         const extras = this.attrExtraOptions[funcMeta.id] || {};
         const d3el = d3.select(this.el);
         d3el.select("#distoPanelRandomOptions")
-            .style("display", /*self.model.get("clmsModel").targetProteinCount > 1 && */ extras.showRandoms ? null : "none");
+            .style("display", /*self.backbone-models.get("clmsModel").targetProteinCount > 1 && */ extras.showRandoms ? null : "none");
         d3el.select("#distoPanelMaxXValue")
             .style("display", extras.showDistMaxInput ? null : "none");
         d3el.selectAll(".c3-axis-y2,c3-axis-y2-label").style("display", extras.showY2Axis ? null : "none");
@@ -1091,7 +1091,7 @@ export class DistogramBB extends BaseFrameView {
 
     /**
      * Gets color mapping for categorical sub-series.
-     * Maps series names to colors from current color scale model.
+     * Maps series names to colors from current color scale backbone-models.
      * @param {Array} seriesNames - Array of series names
      * @returns {Object} Map of series names to color strings
      */

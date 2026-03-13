@@ -164,7 +164,7 @@ export class G_GLink extends Link {
     /*xiNET.P_PLink.prototype.touchStart = function(evt) {
         this.controller.d3cola.stop();
         this.controller.dragElement = this;
-        this.controller.model.setMarkedCrossLinks("selection", this.crosslinks);
+        this.controller.backbone-models.setMarkedCrossLinks("selection", this.crosslinks);
         //store start location
         //var p = this.controller.getTouchEventPoint(evt);// oh dear, now broken
         this.controller.dragStart = evt;

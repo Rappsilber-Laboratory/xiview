@@ -30,7 +30,7 @@ import vent from "../../vent";
 /**
  * Backbone view for 3D molecular structure visualization using NGL Viewer.
  * Renders protein structures from PDB files with crosslink distance representations,
- * supports multiple visual styles, color schemes, assembly/model selection,
+ * supports multiple visual styles, color schemes, assembly/backbone-models selection,
  * and exports to various structural biology formats.
  * @class
  * @extends BaseFrameView
@@ -113,7 +113,7 @@ export class NGLViewBB extends BaseFrameView {
     /**
      * Initializes the NGL 3D viewer with UI controls, NGL stage, and event listeners.
      * Creates toolbar with display toggle buttons, dropdown menus for exports/representation/coloring,
-     * initializes NGL stage with viewer canvas, sets up model change listeners,
+     * initializes NGL stage with viewer canvas, sets up backbone-models change listeners,
      * configures crosslink representation handlers, and populates initial structure.
      * @param {Object} viewOptions - View initialization options
      * @returns {void}
@@ -202,7 +202,7 @@ export class NGLViewBB extends BaseFrameView {
             class: "exportHaddockButton",
             label: "Haddock Distance Restraints File",
             id: "haddockExport",
-            d3tooltip: "Export a Haddock command script containing the complete filtered inter-pdb(model) crosslinks. Requires 'Show > Inter-Model Distances' to be set"
+            d3tooltip: "Export a Haddock command script containing the complete filtered inter-pdb(backbone-models) crosslinks. Requires 'Show > Inter-Model Distances' to be set"
         },
         {
             class: "exportChimeraPB",
@@ -554,8 +554,8 @@ export class NGLViewBB extends BaseFrameView {
         this.chartDiv.append("div").attr("class", "linkInfo").html("...");
 
         this
-            //.listenTo (this.model, "filteringDone", this.showFiltered) // any property changing in the filter model means rerendering this view
-            .listenTo(this.model.get("filterModel"), "change", this.showFiltered) // any property changing in the filter model means rerendering this view
+            //.listenTo (this.backbone-models, "filteringDone", this.showFiltered) // any property changing in the filter backbone-models means rerendering this view
+            .listenTo(this.model.get("filterModel"), "change", this.showFiltered) // any property changing in the filter backbone-models means rerendering this view
             .listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function () {
                 if (this.xlRepr) {
                     this.rerenderColourSchemes([{
@@ -570,13 +570,13 @@ export class NGLViewBB extends BaseFrameView {
                 } else {
                     this.rerenderColourSchemes([{nglRep: null, colourScheme: null}]);
                 }
-            })  // if crosslink colour model changes internally, or is swapped for new one
+            })  // if crosslink colour backbone-models changes internally, or is swapped for new one
             .listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function () {
                 this.rerenderColourSchemes([this.xlRepr ? {
                     nglRep: this.xlRepr.sstrucRepr,
                     colourScheme: this.xlRepr.colorOptions.residueColourScheme
                 } : {nglRep: null, colourScheme: null}]);
-            })  // if cross-view protein colour model changes, or is swapped for new one
+            })  // if cross-view protein colour backbone-models changes, or is swapped for new one
             .listenTo(this.model, "change:selection", this.showSelectedLinks)
             .listenTo(this.model, "change:highlights", this.showHighlightedLinks);
         const disableHaddock = function (stageModel) {
@@ -594,13 +594,13 @@ export class NGLViewBB extends BaseFrameView {
 
 
         this.listenTo(this.model, "change:stageModel", function (model, newStageModel) {
-            // swap out stage models and listeners
+            // swap out stage clms-backbone-models and listeners
             const prevStageModel = model.previous("stageModel");
             xilog("STAGE MODEL CHANGED", arguments, this, prevStageModel);
             if (prevStageModel) {
                 this.stopListening(prevStageModel); // remove old stagemodel linklist change listener;
             }
-            // set xlRepr to null on stage model change as it's now an overview of old data
+            // set xlRepr to null on stage backbone-models change as it's now an overview of old data
             // (it gets reset to a correct new value in repopulate() when distancesObj changes - eventlistener above)
             // Plus keeping a value there would mean the listener below using it when a new linklist
             // was generated for the first time (causing error)
@@ -632,7 +632,7 @@ export class NGLViewBB extends BaseFrameView {
                     }
                 });
 
-            // Copy view state settings to new model
+            // Copy view state settings to new backbone-models
             newStageModel
                 .set("allowInterModelDistances", this.options.allowInterModelDistances, {silent: true})    // firing change at this point causes error
                 .set("showShortestLinksOnly", this.options.shortestLinksOnly);
@@ -649,7 +649,7 @@ export class NGLViewBB extends BaseFrameView {
             // can't save pdb files with 100,000 or more atoms
             d3.select(this.el).select(".savePDBButton").property("disabled", newStageModel.get("structureComp").structure.atomCount > 99999);
 
-            // can't do haddocky stuff if only 1 model
+            // can't do haddocky stuff if only 1 backbone-models
             disableHaddock(newStageModel);
         });
 
@@ -750,7 +750,7 @@ export class NGLViewBB extends BaseFrameView {
 
     /**
      * Renders the NGL view by showing filtered crosslinks.
-     * Only renders if view is visible. Called on model changes or view visibility changes.
+     * Only renders if view is visible. Called on backbone-models changes or view visibility changes.
      * @returns {NGLViewBB} This view instance for chaining
      */
     render() {
@@ -1113,8 +1113,8 @@ export class NGLViewBB extends BaseFrameView {
     }
 
     /**
-     * Toggles whether inter-model distances are allowed in calculations.
-     * When enabled, distances can be calculated between chains in different NMR models.
+     * Toggles whether inter-backbone-models distances are allowed in calculations.
+     * When enabled, distances can be calculated between chains in different NMR clms-backbone-models.
      * @param {Event} event - Checkbox change event
      * @returns {NGLViewBB} This view instance for chaining
      */
@@ -1190,7 +1190,7 @@ export class NGLViewBB extends BaseFrameView {
 
     /**
      * Updates display to show currently highlighted crosslinks.
-     * Visually emphasizes highlighted links retrieved from the model wrapper.
+     * Visually emphasizes highlighted links retrieved from the backbone-models wrapper.
      * @returns {NGLViewBB} This view instance for chaining
      */
     showHighlightedLinks() {
@@ -1203,7 +1203,7 @@ export class NGLViewBB extends BaseFrameView {
 
     /**
      * Updates display to show currently selected crosslinks.
-     * Visually emphasizes selected links retrieved from the model wrapper.
+     * Visually emphasizes selected links retrieved from the backbone-models wrapper.
      * @returns {NGLViewBB} This view instance for chaining
      */
     showSelectedLinks() {
@@ -1216,7 +1216,7 @@ export class NGLViewBB extends BaseFrameView {
 
     /**
      * Updates display with currently filtered crosslinks.
-     * Triggers stage model to recalculate and display filtered link list,
+     * Triggers stage backbone-models to recalculate and display filtered link list,
      * then reports link statistics.
      * @returns {NGLViewBB} This view instance for chaining
      */
@@ -1244,7 +1244,7 @@ export class NGLViewBB extends BaseFrameView {
     /**
      * Generates abbreviated string representation of current view options.
      * Includes representation type, label visibility, selection mode, residue display,
-     * shortest-links-only, and inter-model distance settings.
+     * shortest-links-only, and inter-backbone-models distance settings.
      * @returns {string} Abbreviated options string for filenames
      */
     optionsToString() {

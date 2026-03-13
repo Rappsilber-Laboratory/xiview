@@ -23,7 +23,7 @@ This tool analyzes JavaScript classes using Babel parser and generates Dia diagr
 Generate diagrams for specific submodules:
 
 ```bash
-# Generate CLMS-model diagram
+# Generate CLMS-backbone-models diagram
 npm run diagram:clms
 
 # Generate xiview views diagram
@@ -79,8 +79,8 @@ Edit these files to customize diagram generation for each submodule:
 ### Source and Output
 
 ```javascript
-sourceDir: "./CLMS-model/src",     // Directory to analyze
-outputFile: "./CLMS-model/clms-model-diagram.dia",  // Output file path
+sourceDir: "./CLMS-backbone-models/xispec",     // Directory to analyze
+outputFile: "./CLMS-backbone-models/clms-backbone-models-diagram.dia",  // Output file path
 ```
 
 ### Class Filtering
@@ -253,7 +253,7 @@ Generates `.dia` XML files compatible with Dia diagram editor. The output can be
 ```javascript
 // minimal-config.js
 module.exports = {
-    sourceDir: "./src",
+    sourceDir: "./xispec",
     outputFile: "./diagram.dia",
     classes: { include: ["*"], exclude: [] },
     properties: { includePrivate: true },

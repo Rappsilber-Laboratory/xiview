@@ -1,5 +1,5 @@
 /**
- * @fileoverview Sequence pairing models for aligning PDB/Uniprot sequences to search sequences.
+ * @fileoverview Sequence pairing clms-backbone-models for aligning PDB/Uniprot sequences to search sequences.
  * SeqModel: stores one sequence alignment (PDB/Uniprot vs search) with bidirectional index mapping,
  * alignment strings, scores, CIGAR. SeqCollection: collection of SeqModels, auto-aligns on add.
  * Provides mapping functions (1-indexed), blockification (split by gaps), feature extraction.
@@ -47,8 +47,8 @@ class SeqModel extends Backbone.Model {
     /**
      * Performs sequence alignment against parent protein's reference sequence.
      * Calls parent ProtAlignModel's alignWithoutStoring, stores results in refAlignment and compAlignment,
-     * sets alignStr for change monitoring, marks blocks dirty. Triggered automatically on model add.
-     * @returns {SeqModel} This model for chaining
+     * sets alignStr for change monitoring, marks blocks dirty. Triggered automatically on backbone-models add.
+     * @returns {SeqModel} This backbone-models for chaining
      */
     align() {
         const fullResult = this.collection.containingModel.alignWithoutStoring(
@@ -226,7 +226,7 @@ class SeqModel extends Backbone.Model {
 }
 
 
-// Collection of multiple single sequence pairing models from above
+// Collection of multiple single sequence pairing clms-backbone-models from above
 export class SeqCollection extends Backbone.Collection {
     constructor(attributes, options) {
         super(attributes, options);
@@ -235,7 +235,7 @@ export class SeqCollection extends Backbone.Collection {
 
     /**
      * Initializes collection to auto-align sequences on add.
-     * Listens to "add" event, calls align() on new sequence models.
+     * Listens to "add" event, calls align() on new sequence clms-backbone-models.
      * @returns {SeqCollection} This collection for chaining
      */
     initialize() {

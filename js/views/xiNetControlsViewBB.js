@@ -101,7 +101,7 @@ export class xiNetControlsViewBB extends Backbone.View {
     //         const self = this;
     //         const callback = function (layoutJson) {
     //             const xmlhttp = new XMLHttpRequest();
-    //             const url = self.model.get("saveLayoutPath");
+    //             const url = self.backbone-models.get("saveLayoutPath");
     //             xmlhttp.open("POST", url, true);
     //             //Send the proper header information along with the request
     //             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -148,8 +148,8 @@ export class xiNetControlsViewBB extends Backbone.View {
         //     saveButtonSel.style("display", "none");
         // }
 
-        // if (this.model.get("clmsModel").get("xiNETLayout")) {
-        //     d3.select(".savedLayoutName").property("value", this.model.get("clmsModel").get("xiNETLayout").name);
+        // if (this.backbone-models.get("clmsModel").get("xiNETLayout")) {
+        //     d3.select(".savedLayoutName").property("value", this.backbone-models.get("clmsModel").get("xiNETLayout").name);
         // }
 
         const tooltips = {
@@ -170,7 +170,7 @@ export class xiNetControlsViewBB extends Backbone.View {
         // Generate load layout drop down
         // new xiNetLayoutListViewBB({
         //     el: "#loadLayoutButton",
-        //     model: window.compositeModelInst,
+        //     backbone-models: window.compositeModelInst,
         //     myOptions: {
         //         title: "Load ▼",
         //     }
@@ -252,7 +252,7 @@ export class xiNetControlsViewBB extends Backbone.View {
             .attr("max", 10)
             .attr("value", 2)
             .attr("id", "xiNetButtonBarppiStep1")
-            // .attr("disabled", self.model.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
+            // .attr("disabled", self.backbone-models.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
             .classed("xinetPpiStep", true);
 
         d3.select("body")
@@ -264,7 +264,7 @@ export class xiNetControlsViewBB extends Backbone.View {
             .attr("max", 100)
             .attr("value", 3)
             .attr("id", "xiNetButtonBarppiStep2")
-            // .attr("disabled", self.model.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
+            // .attr("disabled", self.backbone-models.get("xinetThickLinks")) // todo - not working right? but currently enabled by default so doesn't matter
             .classed("xinetPpiStep", true);
 
         const self = this;
@@ -297,7 +297,7 @@ export class xiNetControlsViewBB extends Backbone.View {
                 }),
                 closeOnClick: false,
                 tooltip: "Display options for xiNET (centre view)"
-                // tooltipModel: self.model.get("tooltipModel"),
+                // tooltipModel: self.backbone-models.get("tooltipModel"),
             }
         });
     }
@@ -352,7 +352,7 @@ xiNetControlsViewBB.prototype.identifier = "xiNET Controls";
 //         xiNetLayoutListViewBB.__super__.setVis.call(self, show);
 //         if (show) {
 //             const xmlhttp = new XMLHttpRequest();
-//             let url = this.model.get("loadLayoutPath");
+//             let url = this.backbone-models.get("loadLayoutPath");
 //             xmlhttp.open("POST", url, true);
 //             //Send the proper header information along with the request
 //             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");

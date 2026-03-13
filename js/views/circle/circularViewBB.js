@@ -265,7 +265,7 @@ export class CircularViewBB extends BaseFrameView {
             };
         };
 
-        // if protein default colour model use this instead for legibility
+        // if protein default colour backbone-models use this instead for legibility
         this.replacementDefaultNodeColourModel = {
             getColour: function () {
                 return "#dde";
@@ -607,7 +607,7 @@ export class CircularViewBB extends BaseFrameView {
 
         let alignCall = 0;
 
-        // listen to custom filteringDone event from model
+        // listen to custom filteringDone event from backbone-models
         this.listenTo(this.model, "filteringDone", function () {
             // filtering can change node and thus feature positioning too if proteins are hidden or rearranged by sorting
             if (!self.options.showLinkless || self.options.sort === "best") {
@@ -634,17 +634,17 @@ export class CircularViewBB extends BaseFrameView {
         });
         this.listenTo(this.model, "change:linkColourAssignment currentColourModelChanged", function () {
             self.renderPartial(["links"]);
-        }); // either colour change or new colour model
+        }); // either colour change or new colour backbone-models
         this.listenTo(this.model, "change:proteinColourAssignment currentProteinColourModelChanged", function () {
             self.renderPartial(["nodes"]);
-        }); // either colour change or new colour model
+        }); // either colour change or new colour backbone-models
         this.listenTo(vent, "proteinMetadataUpdated", function () {   // generally a name change
             self.renderPartial(["nodes"]);
         });
         this.listenTo(this.model.get("annotationTypes"), "change:shown", function () {
             self.renderPartial(["features"]);
         });
-        //this.listenTo (this.model.get("clmsModel"), "change:matches", this.reOrder);
+        //this.listenTo (this.backbone-models.get("clmsModel"), "change:matches", this.reOrder);
         this.reOrderAndRender();
 
         return this;
@@ -865,7 +865,7 @@ export class CircularViewBB extends BaseFrameView {
                 (link.toProtein.id === nodeId && (anyPos || (link.toResidue >= startPos && endPos >= link.toResidue)));
         });
         this.model.setMarkedCrossLinks(actionType, matchLinks, actionType === "highlights", add);
-        //this.model.set (actionType, matchLinks);
+        //this.backbone-models.set (actionType, matchLinks);
         return this;
     }
 
@@ -1045,7 +1045,7 @@ export class CircularViewBB extends BaseFrameView {
 
             const proteins = this.model.get("clmsModel").getProteinsMap();
             //xilog ("proteinOrder", this.proteinOrder);
-            //xilog ("model", this.model);
+            //xilog ("backbone-models", this.backbone-models);
 
             let filteredProteins = this.filterProteins(proteins);
             let filteredCrossLinks = this.model.getFilteredCrossLinks(); //modelUtils.getFilteredNonDecoyCrossLinks (crosslinks);
@@ -1087,7 +1087,7 @@ export class CircularViewBB extends BaseFrameView {
                 });
 
             // After rearrange proteins, because filtered features depends on the protein order
-            // const alignColl = this.model.get("alignColl");
+            // const alignColl = this.backbone-models.get("alignColl");
             const filteredFeatures = filteredProteins.map(function (inter) {
                 return this.model.getFilteredFeatures(inter);
             }, this);
@@ -1177,7 +1177,7 @@ export class CircularViewBB extends BaseFrameView {
 
     /**
      * Draws crosslink curves as SVG paths.
-     * Creates thin visible links (colored by link color model, ambiguous dashed) and thick invisible
+     * Creates thin visible links (colored by link color backbone-models, ambiguous dashed) and thick invisible
      * ghost links for mouse events (hover tooltip/highlight, click select). Links are D3-joined by ID
      * for efficient updates. Uses cached paths from convertLinks.
      * @param {Object} g - D3 selection of parent group
@@ -1261,7 +1261,7 @@ export class CircularViewBB extends BaseFrameView {
 
     /**
      * Draws protein arcs as colored paths around circle.
-     * Creates arc paths colored by protein color model, with mouse events for tooltips/highlights/selection.
+     * Creates arc paths colored by protein color backbone-models, with mouse events for tooltips/highlights/selection.
      * If multiple proteins, enables drag behavior for manual reordering.
      * @param {Object} g - D3 selection of parent group
      * @param {Array} nodes - Array of node objects with id, start, end angles
@@ -1270,7 +1270,7 @@ export class CircularViewBB extends BaseFrameView {
     drawNodes(g, nodes) {
         const self = this;
 
-        const multipleNodes = true; //this.filterProteins(this.model.get("clmsModel").getProteins()).length > 1;
+        const multipleNodes = true; //this.filterProteins(this.backbone-models.get("clmsModel").getProteins()).length > 1;
         let colourScheme = this.model.get("proteinColourAssignment");
         if (colourScheme.id === "Default Protein") {
             colourScheme = this.replacementDefaultNodeColourModel;

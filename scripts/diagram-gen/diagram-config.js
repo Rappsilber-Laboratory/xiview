@@ -1,12 +1,12 @@
 /**
- * Configuration for CLMS-model diagram generation
+ * Configuration for CLMS-backbone-models diagram generation
  * This file defines what to include/exclude and how to layout the diagram
  */
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./CLMS-model/src",
-    outputFile: "./CLMS-model/clms-model-diagram.dia",
+    sourceDir: "./CLMS-backbone-models/xispec",
+    outputFile: "./CLMS-backbone-models/clms-backbone-models-diagram.dia",
 
     // Which classes to include
     classes: {

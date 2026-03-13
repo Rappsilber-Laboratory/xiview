@@ -13,7 +13,7 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {STRINGUtils} from "./stringUtils";
 import {commonRegexes} from "../utils";
 import {updateLinkMetadata} from "../modelUtils";
-import {linkColor} from "../model/color/setup-colors";
+import {linkColor} from "../backbone-models/color/setup-colors";
 
 /**
  * STRING database chooser view for loading protein interaction scores.

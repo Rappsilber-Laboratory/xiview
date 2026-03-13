@@ -1,7 +1,7 @@
 /**
  * @fileoverview Main application initialization and setup for xiVIEW network interface.
- * Orchestrates model creation, view initialization, event wiring, and data loading.
- * Exports functions for phased initialization: models (FilterModel, CompositeModel, MinigramModel),
+ * Orchestrates backbone-models creation, view initialization, event wiring, and data loading.
+ * Exports functions for phased initialization: clms-backbone-models (FilterModel, CompositeModel, MinigramModel),
  * views (all UI components), postDataLoaded (annotations, filters), blosumLoading (async matrices).
  * Uses vent (Backbone event bus) from js/vent.js.
  * Entry point for full xiVIEW application with network visualization, spectrum viewer, alignment,
@@ -18,22 +18,22 @@ import $ from "jquery";
 import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 
-import {BlosumCollection} from "./model/models";
+import {BlosumCollection} from "./backbone-models/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
 import {getLocalStorage, setLocalStorage} from "./utils";
 import {flattenMatches, getSearchGroups, matchScoreRange, parseURLQueryString} from "./modelUtils";
 import {FilterModel} from "./filter/filter-model";
-import {TooltipModel} from "./model/models";
-import {MinigramModel} from "./model/models";
-import {CompositeModel} from "./model/composite-model";
+import {TooltipModel} from "./backbone-models/models";
+import {MinigramModel} from "./backbone-models/models";
+import {CompositeModel} from "./backbone-models/composite-model";
 import {FDRSummaryViewBB, FDRViewBB, FilterViewBB, ProteinSummaryViewBB} from "./filter/filterViewBB";
 import {FilterSummaryViewBB} from "./filter/filterViewBB";
 import {MinigramViewBB} from "./filter/minigramViewBB";
 import {SelectionTableViewBB} from "./views/selectionTableViewBB";
 import {SpectrumViewWrapper} from "./views/spectrumViewWrapper";
 
-import {XispecWrapper} from "../src/xispec-wrapper";
-import {xiSPECUI} from "../src/xispecui";
+import {XispecWrapper} from "./views/xispec/xispec-wrapper";
+import {xiSPECUI} from "./views/xispec/xispecui";
 import {DropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {
     downloadMatches, downloadSSL, downloadLinks, downloadResidueCount,
@@ -43,8 +43,8 @@ import {TooltipViewBB} from "./views/tooltipViewBB";
 import {checkBoxView} from "./ui-utils/checkbox-view";
 import {xiNetControlsViewBB} from "./views/xiNetControlsViewBB";
 import {CrosslinkViewer} from "./views/xinet/crosslink-viewer-BB";
-import {AnnotationType} from "./model/annotation-model-collection";
-import {AnnotationTypeCollection} from "./model/annotation-model-collection";
+import {AnnotationType} from "./backbone-models/annotation-model-collection";
+import {AnnotationTypeCollection} from "./backbone-models/annotation-model-collection";
 import {KeyViewBB} from "./views/key/keyViewBB";
 import {SearchSummaryViewBB} from "./views/searchSummaryViewBB2";
 import {CircularViewBB} from "./views/circle/circularViewBB";
@@ -64,9 +64,9 @@ import {
 import {GoTermsViewBB} from "./views/go/goTermsSankeyViewBB";
 import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
-import {setupColourModels, linkColor} from "./model/color/setup-colors";
+import {setupColourModels, linkColor} from "./backbone-models/color/setup-colors";
 import {DistanceMatrixViewBB} from "./views/matrixViewBB";
-import {prideLoadSpectrum} from "./models/load-spectrum/pride-load-spectrum";
+import {loadSpectrum} from "./load-spectrum";
 
 // Configuration imports
 import {createDefaultAnnotationTypes} from "./config/annotation-types";
@@ -81,10 +81,10 @@ import {
 } from "./config/menu-definitions";
 import vent from "./vent";
 
-// only when sequences and blosums have been loaded, if only one or other either no align models = crash, or no blosum matrices = null
+// only when sequences and blosums have been loaded, if only one or other either no align clms-backbone-models = crash, or no blosum matrices = null
 export function postDataLoaded(compositeModelInst) {
 
-    // Now we have blosum models and sequences, we can set blosum defaults for alignment models
+    // Now we have blosum clms-backbone-models and sequences, we can set blosum defaults for alignment clms-backbone-models
     compositeModelInst.get("alignColl").models.forEach(function (protAlignModel) {
         protAlignModel.set("scoreMatrix", compositeModelInst.get("blosumColl").get("Blosum100"));
     });
@@ -135,7 +135,7 @@ export function postDataLoaded(compositeModelInst) {
     compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
     //folowing only used by tests
-    vent.trigger("initialSetupDone"); //	Message that models and views are ready for action, with filter set initially
+    vent.trigger("initialSetupDone"); //	Message that clms-backbone-models and views are ready for action, with filter set initially
 
     //todo - bit hacky having this here, but it works here and not elsewhere (for reasons unknown)
     if (compositeModelInst.get("clmsModel").getSearches().size > 1) {
@@ -197,8 +197,8 @@ export function postDataLoaded(compositeModelInst) {
 //             }
 //             modelGroupMap.set(savedGroup.id, presentProteins);
 //         }
-//         this.model.set("groups", modelGroupMap);
-//         this.model.trigger("change:groups");
+//         this.backbone-models.set("groups", modelGroupMap);
+//         this.backbone-models.trigger("change:groups");
 //
 //         for (const savedGroup of groups) {
 //             const xiNetGroup = this.groupMap.get(savedGroup.id);
@@ -209,7 +209,7 @@ export function postDataLoaded(compositeModelInst) {
 //         }
 //     }
 //
-//     this.model.get("filterModel").trigger("change", this.model.get("filterModel"));
+//     this.backbone-models.get("filterModel").trigger("change", this.backbone-models.get("filterModel"));
 //
 //     // this.zoomToFullExtent();
 //
@@ -239,9 +239,9 @@ export function blosumLoading(options) {
     // Collection of blosum matrices that will be fetched from a json file
     const blosumCollInst = new BlosumCollection(options);
 
-    // when the blosum Collection is fetched (an async process), we select one of its models as being selected
+    // when the blosum Collection is fetched (an async process), we select one of its clms-backbone-models as being selected
     blosumCollInst.listenToOnce(blosumCollInst, "sync", function () {
-        console.log("ASYNC. blosum models loaded");
+        console.log("ASYNC. blosum clms-backbone-models loaded");
     });
 
     // Start the asynchronous blosum fetching after the above events have been set up
@@ -250,18 +250,18 @@ export function blosumLoading(options) {
 }
 
 /**
- * Creates all models for full xiVIEW application including alignment collection.
- * Calls modelsEssential to create core models, then adds alignment models for all proteins,
- * sets up 3dsync listener to add/remove PDB sequences from alignments, configures color models
- * with distance color settings from localStorage, wires color model change listeners to trigger
+ * Creates all clms-backbone-models for full xiVIEW application including alignment collection.
+ * Calls modelsEssential to create core clms-backbone-models, then adds alignment clms-backbone-models for all proteins,
+ * sets up 3dsync listener to add/remove PDB sequences from alignments, configures color clms-backbone-models
+ * with distance color settings from localStorage, wires color backbone-models change listeners to trigger
  * currentColourModelChanged/currentProteinColourModelChanged events, sets initial color schemes
  * (Group if multiple searches, default otherwise).
  * @param {Object} options - Options object with alignmentCollectionInst property
- * @param {SearchResultsModel} clmsModelInst - CLMS data model with crosslinks, matches, proteins
- * @returns {CompositeModel} Composite model instance with all models configured
+ * @param {SearchResultsModel} clmsModelInst - CLMS data backbone-models with crosslinks, matches, proteins
+ * @returns {CompositeModel} Composite backbone-models instance with all clms-backbone-models configured
  */
 export function models(options, clmsModelInst) {
-    // define alignment model and listeners first, so they're ready to pick up events from other models
+    // define alignment backbone-models and listeners first, so they're ready to pick up events from other clms-backbone-models
     const alignmentCollectionInst = new ProtAlignCollection();
     options.alignmentCollectionInst = alignmentCollectionInst;
 
@@ -269,7 +269,7 @@ export function models(options, clmsModelInst) {
     alignmentCollectionInst.addNewProteins(Array.from(compositeModelInst.get("clmsModel").getProteinsIterator()));
     // following listeners are placed after modelsEssential() returns compositeModelInst
 
-    // this listener adds new sequences obtained from pdb files to existing alignment sequence models
+    // this listener adds new sequences obtained from pdb files to existing alignment sequence clms-backbone-models
     alignmentCollectionInst.listenTo(compositeModelInst, "3dsync", function (sequences, removeThese) {
         if (!_.isEmpty(sequences)) { // if sequences passed and it has a non-zero length...
             console.log("3dsync", arguments);
@@ -294,7 +294,7 @@ export function models(options, clmsModelInst) {
         }
     });
 
-    // Set up colour models, some (most) of which depend on data properties
+    // Set up colour clms-backbone-models, some (most) of which depend on data properties
     // todo - BROKEN. FIX.
     const crosslinkerKeys = d3.keys(compositeModelInst.get("clmsModel").getCrosslinkerSpecificity());
     const storedDistanceColourSettings = crosslinkerKeys.length === 1 ? _.propertyOf(getLocalStorage())(["distanceColours", crosslinkerKeys[0]]) : undefined;
@@ -308,14 +308,14 @@ export function models(options, clmsModelInst) {
         });
     }
 
-    // A colour model's attributes have changed - is it the currently used model? If so, fire the currentColourModelChanged event
+    // A colour backbone-models's attributes have changed - is it the currently used backbone-models? If so, fire the currentColourModelChanged event
     compositeModelInst.listenTo(linkColor.Collection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("linkColourAssignment").id === colourModel.id) {
             this.trigger("currentColourModelChanged", colourModel, changedAttrs);
         }
     });
 
-    // same for protein colour models
+    // same for protein colour clms-backbone-models
     compositeModelInst.listenTo(linkColor.ProteinCollection, "colourModelChanged", function (colourModel, changedAttrs) {
         if (this.get("proteinColourAssignment").id === colourModel.id) {
             this.trigger("currentProteinColourModelChanged", colourModel, changedAttrs);
@@ -364,7 +364,7 @@ export function modelsEssential(options, clmsModelInst) {
 
     const tooltipModelInst = new TooltipModel();
 
-    // Make score and distance minigram models, and add listeners to make sure they synchronise to attributes in filter model
+    // Make score and distance minigram clms-backbone-models, and add listeners to make sure they synchronise to attributes in filter backbone-models
     const minigramModels = ["matchScoreCutoff", "distanceCutoff"].map(function (filterAttrName) {
         const filterAttr = filterModelInst.get(filterAttrName);
         const miniModel = new MinigramModel({
@@ -379,7 +379,7 @@ export function modelsEssential(options, clmsModelInst) {
                 });
             });
 
-        // When the range changes on these models pass the values onto the appropriate value in the filter model
+        // When the range changes on these clms-backbone-models pass the values onto the appropriate value in the filter backbone-models
         filterModelInst.listenTo(miniModel, "change", function (model) {
             this.set(filterAttrName, [model.get("domainStart"), model.get("domainEnd")]);
         }, this);
@@ -389,11 +389,11 @@ export function modelsEssential(options, clmsModelInst) {
 
     // minigramModels[0].set("extent", scoreExtentInstance);
 
-    // Data generation routines for minigram models
+    // Data generation routines for minigram clms-backbone-models
     minigramModels[0].data = function () {
         return flattenMatches(clmsModelInst.getMatches()); // matches is now an array of arrays - [matches, []];
     };
-    // overarching model
+    // overarching backbone-models
     const compositeModel = new CompositeModel({
         clmsModel: clmsModelInst,
         filterModel: filterModelInst,
@@ -412,10 +412,10 @@ export function modelsEssential(options, clmsModelInst) {
             });
         return [distances];
     };
-    compositeModel.loadSpectrum = prideLoadSpectrum;
+    compositeModel.loadSpectrum = loadSpectrum;
     filterModelInst.compositeModel = compositeModel;
 
-    // change in distanceObj changes the distanceExtent in filter model and should trigger a re-filter for distance minigram model as dists may have changed
+    // change in distanceObj changes the distanceExtent in filter backbone-models and should trigger a re-filter for distance minigram backbone-models as dists may have changed
     minigramModels[1]
         .listenTo(compositeModel, "change:distancesObj", function (clmsModel, distObj) {
             //console.log ("minigram arguments", arguments, this);
@@ -448,7 +448,7 @@ export function modelsEssential(options, clmsModelInst) {
  * creates protein selection and groups dropdown menus with search/filter, creates load dropdown,
  * creates xiNET controls, initializes color chooser dialog with protein color selection,
  * sets up one-time buildAsyncViews listener to call viewsThatNeedAsyncData when async data loaded.
- * @param {CompositeModel} compositeModelInst - Main composite model instance
+ * @param {CompositeModel} compositeModelInst - Main composite backbone-models instance
  * @returns {undefined}
  */
 export function views(compositeModelInst, split) {
@@ -573,7 +573,7 @@ export function views(compositeModelInst, split) {
  * creates SelectionTableViewBB (match table), creates SpectrumViewWrapper with xiSPEC integration,
  * creates xiSPEC wrapper with configuration, wires spectrum resize and match selection events,
  * creates export dropdown menu, creates help dropdown with Rappsilber lab logo, creates tooltip view.
- * @param {CompositeModel} compositeModelInst - Main composite model instance
+ * @param {CompositeModel} compositeModelInst - Main composite backbone-models instance
  * @param {Object} options - Options with specWrapperDiv selector and spectrumToTop flag
  * @returns {undefined}
  */
@@ -690,7 +690,7 @@ export function viewsEssential(compositeModelInst, options) {
     //     this.primaryMatch = match; // the 'dynamic_rank = true' match
     //     const dataPath = compositeModelInst.get("dataPath");
     //     const url = dataPath + "?upload=" +
-    //         this.model.get("clmsModel").get("sid") +
+    //         this.backbone-models.get("clmsModel").get("sid") +
     //         "&unval=1&linears=1&spectrum=" + match.spectrumId + "&matchid=" + match.id;
     //     const self = this;
     //     d3.json(url, function (error, json) {
@@ -705,7 +705,7 @@ export function viewsEssential(compositeModelInst, options) {
     //                 altModel.parseJSON(json);
     //                 const allCrossLinks = Array.from(altModel.get("crosslinks").values());
     //                 // empty selection first
-    //                 // (important or it will crash coz selection contains links to proteins not in clms model)
+    //                 // (important or it will crash coz selection contains links to proteins not in clms backbone-models)
     //                 self.alternativesModel
     //                     .set("selection", [])
     //                     .set("clmsModel", altModel)
@@ -722,7 +722,7 @@ export function viewsEssential(compositeModelInst, options) {
     //         }
     //     });
     // } else {
-    //     //~ //this.model.clear();
+    //     //~ //this.backbone-models.clear();
     // }
     // });
 
@@ -816,7 +816,7 @@ export function viewsEssential(compositeModelInst, options) {
  * ScatterplotViewBB, metadata file choosers (link, protein, user annotations), GoTermsViewBB (GO terms Sankey),
  * ProteinInfoViewBB (protein details), FDRViewBB (FDR threshold selection), FDRSummaryViewBB (FDR summary),
  * initializes ByRei_dynDiv window system, creates CrosslinkViewer (xiNET network visualization).
- * @param {CompositeModel} compositeModelInst - Main composite model instance
+ * @param {CompositeModel} compositeModelInst - Main composite backbone-models instance
  * @returns {undefined}
  */
 function viewsThatNeedAsyncData(compositeModelInst) {
@@ -837,7 +837,7 @@ function viewsThatNeedAsyncData(compositeModelInst) {
         model: compositeModelInst.get("clmsModel"),
     });
 
-    /* 'cos circle listens to annotation model which is formed from uniprot async data */
+    /* 'cos circle listens to annotation backbone-models which is formed from uniprot async data */
     new CircularViewBB({
         el: "#circularPanel",
         displayEventName: "circularViewShow",

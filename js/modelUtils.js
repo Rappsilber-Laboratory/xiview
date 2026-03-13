@@ -389,7 +389,7 @@ export function getLegalAccessionIDs(proteinCollection) {
 
 /**
  * Creates a nested map structure by sub-indexing values by a specified property.
- * Used by NGL utils and NGL wrapper model.
+ * Used by NGL utils and NGL wrapper backbone-models.
  * @param {Object} mmap - Map to be sub-indexed
  * @param {string} subIndexingProperty - Property name to use for sub-indexing
  * @returns {Object} Nested map with sub-indexed values
@@ -407,7 +407,7 @@ export function makeSubIndexedMap(mmap, subIndexingProperty) {
 }
 
 /**
- * Gets crosslinker specificity information per linker from the CLMS model.
+ * Gets crosslinker specificity information per linker from the CLMS backbone-models.
  * Returns default specificity if none defined.
  * Used by distogram view and search summary view.
  * @param {Object[]} searchArray - Array of search objects
@@ -468,9 +468,9 @@ function parseProteinID(protMap, pid) {
 //metadatafilechooser, STRINGfilechooser
 /**
  * Updates crosslink metadata from a CSV/TSV file.
- * Parses metadata file and assigns metadata to matching crosslinks in the CLMS model.
+ * Parses metadata file and assigns metadata to matching crosslinks in the CLMS backbone-models.
  * @param {string} metaDataFileContents - CSV/TSV file contents with crosslink metadata
- * @param {Object} clmsModel - The CLMS model to update
+ * @param {Object} clmsModel - The CLMS backbone-models to update
  * @returns {void}
  */
 export function updateLinkMetadata(metaDataFileContents, clmsModel) {
@@ -595,9 +595,9 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
 //metadatafilechoosers
 /**
  * Updates protein metadata from a CSV/TSV file.
- * Parses metadata file and assigns metadata to matching proteins in the CLMS model.
+ * Parses metadata file and assigns metadata to matching proteins in the CLMS backbone-models.
  * @param {string} metaDataFileContents - CSV/TSV file contents with protein metadata
- * @param {Object} clmsModel - The CLMS model to update
+ * @param {Object} clmsModel - The CLMS backbone-models to update
  * @returns {void}
  */
 export function updateProteinMetadata(metaDataFileContents, clmsModel, compositeModelInst) {
@@ -710,9 +710,9 @@ export function clearObjectMetaData(objectArr, metaFields) {
 //metadatafilechoosers
 /**
  * Updates user annotations metadata from a CSV/TSV file.
- * Creates annotation objects and adds them to proteins in the CLMS model.
+ * Creates annotation objects and adds them to proteins in the CLMS backbone-models.
  * @param {string} userAnnotationsFileContents - CSV/TSV file contents with user annotations
- * @param {Object} clmsModel - The CLMS model to update
+ * @param {Object} clmsModel - The CLMS backbone-models to update
  * @returns {void}
  */
 export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsModel) {
@@ -863,7 +863,7 @@ export function mergeContiguousFeatures(features) {
     return merged;
 }
 
-//nglutils / ngl-model-wrapper
+//nglutils / ngl-backbone-models-wrapper
 // merges array of single numbers
 // assumes vals are already sorted numerically (though each val is a string)
 /**
@@ -1055,9 +1055,9 @@ export function totalProteinLength(proteins) {
 
 //networkframe
 /**
- * Gets search groups from the CLMS model.
+ * Gets search groups from the CLMS backbone-models.
  * Returns array of search group objects with their associated searches.
- * @param {Object} clmsModel - The CLMS model
+ * @param {Object} clmsModel - The CLMS backbone-models
  * @returns {Object[]} Array of search group objects
  */
 export function getSearchGroups(clmsModel) {

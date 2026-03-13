@@ -24,11 +24,11 @@ export const NGLUtils = {};
  * Clears existing stage, loads all PDB files via Promise.all, extracts chain sequences,
  * aligns to search proteins, creates NGLModelWrapperBB with chainMap and distance matrices,
  * triggers "3dsync" event on compositeModel with aligned sequences. Handles merging multiple PDBs,
- * structure copying across models, chain mapping. Catches errors and triggers 3dsync with failureReason.
+ * structure copying across clms-backbone-models, chain mapping. Catches errors and triggers 3dsync with failureReason.
  * @param {Object} pdbInfo - PDB loading information
  * @param {Array<Object>} pdbInfo.pdbSettings - Array of PDB load settings {id, uri, params}
  * @param {NGL.Stage} pdbInfo.stage - NGL stage instance
- * @param {CompositeModel} pdbInfo.compositeModel - Main composite model
+ * @param {CompositeModel} pdbInfo.compositeModel - Main composite backbone-models
  * @returns {undefined}
  */
 export function repopulateNGL(pdbInfo) {
@@ -141,13 +141,13 @@ export function repopulateNGL(pdbInfo) {
                     xilog("chainmap", chainMap, "stage", stage, "\nhas sequences", sequenceMap);
 
                     if (compositeModel.get("stageModel")) {
-                        compositeModel.get("stageModel").stopListening(); // Stop the following 3dsync event triggering stuff in the old stage model
+                        compositeModel.get("stageModel").stopListening(); // Stop the following 3dsync event triggering stuff in the old stage backbone-models
                     }
                     const removeThese = compositeModel.get("stageModel") ? [compositeModel.get("stageModel").getStructureName()] : [];    // old alignments to remove
                     compositeModel.trigger("3dsync", sequenceMap, removeThese);
                     // Now 3d sequence is added we can make a new NGL Model wrapper (as it needs aligning)
 
-                    // Make a new model and set of data ready for the ngl viewer
+                    // Make a new backbone-models and set of data ready for the ngl viewer
                     const newNGLModelWrapper = new NGLModelWrapperBB();
                     newNGLModelWrapper.set({
                         structureComp: structureComp,
@@ -156,7 +156,7 @@ export function repopulateNGL(pdbInfo) {
                         name: "NGLModelWrapper " + structureComp.structure.name,
                     });
                     compositeModel.set("stageModel", newNGLModelWrapper);
-                    // important that the new stagemodel is set first ^^^ before we setupLinks() on the model
+                    // important that the new stagemodel is set first ^^^ before we setupLinks() on the backbone-models
                     // otherwise the listener in the 3d viewer is still pointing to the old stagemodel when the
                     // changed:linklist event is received. (i.e. it broke the other way round)
                     newNGLModelWrapper.setupLinks();

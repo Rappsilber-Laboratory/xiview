@@ -3,7 +3,7 @@
  * Interactive D3 brush-based slider showing three color regions (low/middle/high) separated by two draggable thresholds.
  * Used exclusively by KeyViewBB for threshold-based color schemes (e.g., score, distance, FDR).
  * Supports vertical or horizontal orientation, includes triangle drag handles and numeric input boxes for precise control.
- * Two-way binding: dragging thresholds updates inputs and model, typing values updates brush and model.
+ * Two-way binding: dragging thresholds updates inputs and backbone-models, typing values updates brush and backbone-models.
  */
 import "../../../css/threeColourSlider.css";
 
@@ -16,7 +16,7 @@ import d3 from "d3";
  * Three-color threshold slider widget with D3 brush interaction.
  * Creates an SVG slider with draggable threshold handles and numeric input boxes.
  * Shows three colored regions representing low/middle/high value ranges based on two threshold cutoffs.
- * Syncs with threshold-based color model - dragging or typing updates model domain which triggers
+ * Syncs with threshold-based color backbone-models - dragging or typing updates backbone-models domain which triggers
  * re-coloring of all visualizations using that scheme.
  * @class
  * @extends Backbone.View
@@ -51,11 +51,11 @@ export class ThreeColourSliderBB extends Backbone.View {
      * Initializes the slider with SVG structure, brush behavior, and event listeners.
      * Creates numeric input boxes (min/max), SVG with colored regions and draggable brush,
      * triangle handles, threshold value labels. Sets up window resize listener and
-     * model change listener. Supports vertical or horizontal orientation.
+     * backbone-models change listener. Supports vertical or horizontal orientation.
      * @param {Object} viewOptions - Initialization options
      * @param {string} [viewOptions.unitText=""] - Unit suffix for displayed values (e.g., " Å", " %")
-     * @param {number[]} [viewOptions.extent] - Initial threshold values [min, max], defaults to model domain
-     * @param {number[]} [viewOptions.domain] - Full slider range [min, max], defaults to model superDomain
+     * @param {number[]} [viewOptions.extent] - Initial threshold values [min, max], defaults to backbone-models domain
+     * @param {number[]} [viewOptions.domain] - Full slider range [min, max], defaults to backbone-models superDomain
      * @param {Object} [viewOptions.margin] - SVG margins {top, right, bottom, left}
      * @param {string} [viewOptions.orientation="vertical"] - "vertical" or "horizontal"
      * @param {boolean} [viewOptions.absolutePosition=true] - Use absolute CSS positioning
@@ -183,7 +183,7 @@ export class ThreeColourSliderBB extends Backbone.View {
         // this was causing problems. Basically when distance colour scheme is selected in the legend,
         // a change:linkColourAssignment event is fired. This is followed by initialising this slider, which in brushmove
         // sets the domain and fires a colourModelChanged event. Thanks to linkColourAssignment getting changed, further
-        // on this is interpreted as a change to the current model, and a CurrentColourModelChanged event is fired
+        // on this is interpreted as a change to the current backbone-models, and a CurrentColourModelChanged event is fired
         // The LinkColourAssignment and CurrentColourModelChanged events arriving almost in tandem at the distogram
         // caused c3 to freak out with hiding / showing series (known c3 bugginess) and things went wrong.
         // Essentially though we don't need to run brushmove here, the rounding caused by running it doesn't change anything
@@ -200,7 +200,7 @@ export class ThreeColourSliderBB extends Backbone.View {
             return top.select("div.vmin").remove().node();
         });
 
-        this.listenTo(this.model, "colourModelChanged", this.render); // if range  (or domain) changes in current colour model
+        this.listenTo(this.model, "colourModelChanged", this.render); // if range  (or domain) changes in current colour backbone-models
 
         return this;
     }
@@ -254,9 +254,9 @@ export class ThreeColourSliderBB extends Backbone.View {
      * Renders the slider visual elements with current threshold values.
      * Updates brush extent from args.domain (if provided) or current brush state,
      * applies colors to three regions from color scale, updates threshold value labels and inputs.
-     * Called automatically on model colourModelChanged event or manually after resize.
-     * @param {Object} [args] - Optional arguments from model change event
-     * @param {number[]} [args.domain] - New threshold domain [min, max] from color model
+     * Called automatically on backbone-models colourModelChanged event or manually after resize.
+     * @param {Object} [args] - Optional arguments from backbone-models change event
+     * @param {number[]} [args.domain] - New threshold domain [min, max] from color backbone-models
      * @returns {ThreeColourSliderBB} This view instance for chaining
      */
     render(args) {
@@ -326,7 +326,7 @@ export class ThreeColourSliderBB extends Backbone.View {
     /**
      * D3 brush "brush" event handler - called continuously during drag.
      * Rounds threshold values to 2 decimal places (matching display format) and updates
-     * color model domain. Model change triggers re-render and cascades to all views using this scheme.
+     * color backbone-models domain. Model change triggers re-render and cascades to all views using this scheme.
      * @returns {ThreeColourSliderBB} This view instance for chaining
      */
     brushmove() {
@@ -352,7 +352,7 @@ export class ThreeColourSliderBB extends Backbone.View {
      * Handles direct numeric input from text boxes.
      * Validates and clamps input value to slider domain, updates appropriate threshold
      * (min or max based on input box class), ensures thresholds don't cross, and updates brush.
-     * Triggers brushmove to propagate change to model.
+     * Triggers brushmove to propagate change to backbone-models.
      * @param {Event} evt - Change event from numeric input
      * @returns {undefined}
      */

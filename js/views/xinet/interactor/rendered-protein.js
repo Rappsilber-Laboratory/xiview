@@ -17,7 +17,7 @@ export class RenderedProtein extends Interactor {
     /**
      * Creates a new RenderedProtein instance.
      *
-     * @param {Object} protein - The protein data model object
+     * @param {Object} protein - The protein data backbone-models object
      * @param {CrosslinkViewer} controller - The parent crosslink viewer controller
      */
     constructor(protein, controller) {

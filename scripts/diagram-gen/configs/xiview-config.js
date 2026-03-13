@@ -70,7 +70,7 @@ module.exports = {
         // Color scheme for different class types
         colors: {
             view: "#ffffcc",            // Yellow for view classes
-            model: "#e8f4f8",           // Blue for model classes
+            model: "#e8f4f8",           // Blue for backbone-models classes
             default: "#ffffff",         // Default color
         },
 

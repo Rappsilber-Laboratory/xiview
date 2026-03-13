@@ -25,7 +25,7 @@ import {isViableChain, make3DAlignID} from "./NGLUtils";
  * @property {NGL.Stage} stage - NGL stage instance
  * @property {Object} chainMap - Protein → chain mapping
  * @property {NGL.StructureComponent} structureComp - NGL structure component
- * @property {NGLModelWrapperBB} nglModelWrapper - Parent model wrapper
+ * @property {NGLModelWrapperBB} nglModelWrapper - Parent backbone-models wrapper
  * @property {Object} options - Display options (colors, visibility, label size, chain rep type)
  * @property {Object} colorOptions - Color scheme objects
  * @property {NGL.Representation} sstrucRepr - Structure representation (cartoon/ribbon/surface)
@@ -39,7 +39,7 @@ export class CrosslinkRepresentation {
      * Creates CrosslinkRepresentation, initializes all NGL representations.
      * Sets default options (colors, visibility, label size), calls setup to initialize representations,
      * registers stage click/hover listeners for selection/highlighting.
-     * @param {NGLModelWrapperBB} newNGLModelWrapper - Parent model wrapper with structure, chainMap
+     * @param {NGLModelWrapperBB} newNGLModelWrapper - Parent backbone-models wrapper with structure, chainMap
      * @param {Object} params - Display parameters (colors, visibility, label size, chain rep)
      */
     constructor(newNGLModelWrapper, params) {

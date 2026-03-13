@@ -262,7 +262,7 @@ function mostReadableId(compositeModelInst, protein) {
  * Handles ambiguous peptides that map to multiple proteins. Uses mostReadableId for each protein.
  * @param {Object} match - Match object
  * @param {number} matchedPeptideIndex - Index into match.matchedPeptides array (0 or 1)
- * @param {Object} clmsModel - CLMS model instance for protein lookup
+ * @param {Object} clmsModel - CLMS backbone-models instance for protein lookup
  * @returns {string} Semicolon-separated protein IDs (e.g., "P12345|PROT1;P67890|PROT2")
  */
 export function mostReadableMultipleId(compositeModelInst, match, matchedPeptideIndex, clmsModel) {

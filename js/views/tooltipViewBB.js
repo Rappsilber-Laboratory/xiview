@@ -37,7 +37,7 @@ export class TooltipViewBB extends Backbone.View {
     }
 
     /**
-     * Initializes tooltip view with DOM structure and model listeners.
+     * Initializes tooltip view with DOM structure and backbone-models listeners.
      * Creates h2 (header) and p (contents) elements, sets up fade/position parameters,
      * listens to change:location (setPosition), change:contents/header (render).
      * @returns {undefined}

@@ -228,15 +228,15 @@ export class ProteinInfoViewBB extends BaseFrameView {
                     self.model.setMarkedCrossLinks("selection", crosslinks, true, d3.event.ctrlKey);
                 })
                 .on("mouseover", function () {
-                    //console.log ("model", self.model);
+                    //console.log ("backbone-models", self.backbone-models);
                     const d3sel = d3.select(this);
                     const idArray = self.splitDataAttr(d3sel, "data-linkids");
                     const crosslinks = self.getCrossLinksFromIDs(idArray, true);
                     // following breaks things if proteins have underscores in name
                     // var posData = self.splitDataAttr(d3sel, "data-pos", "_");
-                    // var protein = self.model.get("clmsModel").getProteins().get(posData[0]);
+                    // var protein = self.backbone-models.get("clmsModel").getProteins().get(posData[0]);
                     //
-                    // self.model.get("tooltipModel")
+                    // self.backbone-models.get("tooltipModel")
                     //     .set("header", "Crosslinked with " + makeTooltipTitle.residue(protein, +posData[1]))
                     //     .set("contents", makeTooltipContents.multilinks(crosslinks, posData[0], +posData[1]))
                     //     .set("location", {

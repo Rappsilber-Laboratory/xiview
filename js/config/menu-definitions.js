@@ -11,7 +11,7 @@ import vent from "../vent";
 
 /**
  * Get protein selection dropdown menu configuration
- * @param {Object} compositeModel - The composite model instance
+ * @param {Object} compositeModel - The composite backbone-models instance
  * @returns {Object} Menu configuration object
  */
 export function getProteinSelectionMenuConfig(compositeModel) {
@@ -57,7 +57,7 @@ export function getProteinSelectionMenuConfig(compositeModel) {
 
 /**
  * Get groups dropdown menu configuration
- * @param {Object} compositeModel - The composite model instance
+ * @param {Object} compositeModel - The composite backbone-models instance
  * @returns {Object} Menu configuration object
  */
 export function getGroupsMenuConfig(compositeModel) {

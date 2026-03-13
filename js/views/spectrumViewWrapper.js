@@ -10,12 +10,12 @@ import "../../css/spectrumViewWrapper.css";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import * as _ from "underscore";
-import {CompositeModel} from "../model/composite-model";
+import {CompositeModel} from "../backbone-models/composite-model";
 import {SelectionTableViewBB} from "./selectionTableViewBB";
 import {makeLegalFileName, proteinConcat} from "../utils";
 import d3 from "d3";
 import vent from "../vent";
-import {xiSPECUI} from "../../src/xispecui";
+import {xiSPECUI} from "./xispec/xispecui";
 
 /**
  * Spectrum viewer wrapper for xiSPEC integration.

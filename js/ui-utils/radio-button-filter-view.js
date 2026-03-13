@@ -126,7 +126,7 @@ export class RadioButtonFilterViewBB extends Backbone.View {
     /**
      * Handles radio button click events and triggers global event.
      * Converts clicked radio value to number (using unary +) and triggers eventName event.
-     * Two-way binding: user interaction → global event (listened to by filter models, etc.).
+     * Two-way binding: user interaction → global event (listened to by filter clms-backbone-models, etc.).
      * @param {Event} evt - Click event from radio button
      * @returns {undefined}
      */

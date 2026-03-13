@@ -127,6 +127,12 @@ export class PDBFileChooserBB extends BaseFrameView {
             .property("required", true);
         pdbCodeSpan.append("span").text("& Press Enter");
 
+        const prideBox = box.append("div")
+            .attr("class", "verticalFlexContainer prideStructuresBox")
+            .style("display", "none");
+        prideBox.append("p").attr("class", "smallHeading").text("Structures from PRIDE dataset");
+        prideBox.append("div").attr("class", "prideStructuresList");
+
         const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
 
         queryBox.append("p").attr("class", "smallHeading").text("PDB Query Services");
@@ -221,6 +227,8 @@ export class PDBFileChooserBB extends BaseFrameView {
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
+
+        this.lookupPRIDEPDBs();
     }
 
     // Return selected proteins, or all proteins if nothing selected
@@ -492,6 +500,97 @@ export class PDBFileChooserBB extends BaseFrameView {
     isPDBCodeValid() {
         const elem = d3.select(this.el).select(".inputPDBCode");
         return elem.node().checkValidity();
+    }
+
+    /**
+     * Extracts unique PRIDE PXD accessions from the loaded mzIdentML files.
+     * @returns {string[]} Array of unique PXD accession strings (uppercased)
+     */
+    getPRIDEAccessions() {
+        const pxdPattern = /^PXD\d+$/i;
+        const candidates = new Set();
+        for (const mzidFile of this.model.get("clmsModel").getMzidentmlFiles().values()) {
+            const pid = mzidFile.projectId;
+            if (pid && pxdPattern.test(pid)) {
+                candidates.add(pid.toUpperCase());
+            }
+        }
+        return Array.from(candidates);
+    }
+
+    /**
+     * Queries RCSB Search API for IHM structures linked to PRIDE accessions found in the current dataset.
+     * Shows a "Structures from PRIDE dataset" section with clickable PDB ID buttons if any are found.
+     * Silently hides the section if no PRIDE accessions exist or no structures are found.
+     * @returns {undefined}
+     */
+    lookupPRIDEPDBs() {
+        const accessions = this.getPRIDEAccessions();
+        if (accessions.length === 0) return;
+
+        const prideBox = d3.select(this.el).select(".prideStructuresBox");
+        prideBox.style("display", null);
+        const listDiv = prideBox.select(".prideStructuresList");
+        listDiv.text("Checking RCSB...");
+
+        const self = this;
+        const queries = accessions.map(accession => {
+            const payload = {
+                query: {
+                    type: "group", logical_operator: "and", label: "text",
+                    nodes: [{
+                        type: "group", logical_operator: "and", label: "nested-attribute",
+                        nodes: [
+                            { type: "terminal", service: "text", parameters: {
+                                attribute: "rcsb_ihm_dataset_source_db_reference.accession_code",
+                                operator: "exact_match", negation: false, value: accession
+                            }},
+                            { type: "terminal", service: "text", parameters: {
+                                attribute: "rcsb_ihm_dataset_source_db_reference.db_name",
+                                operator: "exact_match", negation: false, value: "PRIDE"
+                            }}
+                        ]
+                    }]
+                },
+                return_type: "entry",
+                request_options: {
+                    paginate: { start: 0, rows: 100 },
+                    results_content_type: ["experimental"],
+                    sort: [{ sort_by: "score", direction: "desc" }]
+                }
+            };
+            return fetch("https://search.rcsb.org/rcsbsearch/v2/query", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+                .then(r => r.ok ? r.json() : { result_set: [] })
+                .then(data => ({ accession, ids: (data.result_set || []).map(r => r.identifier) }))
+                .catch(() => ({ accession, ids: [] }));
+        });
+
+        Promise.all(queries).then(results => {
+            listDiv.html("");
+            let anyFound = false;
+            for (const { accession, ids } of results) {
+                if (ids.length === 0) continue;
+                anyFound = true;
+                listDiv.append("span").attr("class", "prideAccessionLabel").text(accession + ": ");
+                for (const pdbId of ids) {
+                    listDiv.append("button")
+                        .attr("class", "btn btn-1 btn-1a pridePdbButton")
+                        .attr("title", "Load " + pdbId + " from RCSB")
+                        .text(pdbId)
+                        .on("click", function() {
+                            d3.select(self.el).select(".inputPDBCode").property("value", pdbId);
+                            self.loadPDBCode();
+                        });
+                }
+            }
+            if (!anyFound) {
+                prideBox.style("display", "none");
+            }
+        });
     }
 
     // toggleCAlphaSetting(evt) {

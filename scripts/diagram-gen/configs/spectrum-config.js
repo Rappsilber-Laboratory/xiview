@@ -5,7 +5,7 @@
 
 module.exports = {
     // Source and output paths
-    sourceDir: "./spectrum/src",
+    sourceDir: "./spectrum/xispec",
     outputFile: "./spectrum/spectrum-diagram.dia",
 
     // Which classes to include
@@ -61,7 +61,7 @@ module.exports = {
         // Color scheme
         colors: {
             view: "#ffccff",            // Pink for spectrum views
-            model: "#e8f4f8",           // Blue for models
+            model: "#e8f4f8",           // Blue for clms-backbone-models
             default: "#ffffff",
         },
 

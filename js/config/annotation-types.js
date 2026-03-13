@@ -4,7 +4,7 @@
  * Provides factory function to create AnnotationType instances from configurations.
  */
 import {ANNOTATION_COLORS} from "./color-constants";
-import {AnnotationType} from "../model/annotation-model-collection";
+import {AnnotationType} from "../backbone-models/annotation-model-collection";
 
 /**
  * Default annotation type configurations.

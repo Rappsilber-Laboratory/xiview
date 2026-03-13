@@ -122,8 +122,8 @@ export class GoTermsViewBB extends BaseFrameView {
         // SVG element
         this.svg = this.chartDiv.append("svg");
         /* this.svg.on("click", function (d) {
-            // self.model.set("groupedGoTerms", []);
-            // self.model.trigger("groupedGoTermsChanged");
+            // self.backbone-models.set("groupedGoTerms", []);
+            // self.backbone-models.trigger("groupedGoTermsChanged");
         })
             .on("contextmenu", function (d) {
                 //d3.event.preventDefault();
@@ -136,7 +136,7 @@ export class GoTermsViewBB extends BaseFrameView {
         this.backgroundGroup = this.vis.append("g");
         // this.linkGroup = vis.append("g");
         this.foregroundGroup = this.vis.append("g");
-        // this.listenTo(this.model.get("clmsModel"), "change:matches", this.updateThenRender); // New matches added (via csv generally) - clmsModel no longer extends Backbone
+        // this.listenTo(this.backbone-models.get("clmsModel"), "change:matches", this.updateThenRender); // New matches added (via csv generally) - clmsModel no longer extends Backbone
         this.listenTo(this.model, "hiddenChanged", this.updateThenRender);
 
         this.sankey = d3_sankey().nodeWidth(15);
@@ -272,7 +272,7 @@ export class GoTermsViewBB extends BaseFrameView {
             g.filtInteractorCount = 0;
         }
 
-        // const proteins = this.model.get("clmsModel").getProteins().values();
+        // const proteins = this.backbone-models.get("clmsModel").getProteins().values();
         // for (let protein of proteins) {
         //     if (protein.uniprot) {
         //         for (let goId of protein.uniprot.go) {
@@ -453,8 +453,8 @@ export class GoTermsViewBB extends BaseFrameView {
                     .on("click", function (d) {
                         self.model.setSelectedProteins([], false);
                         self.model.setSelectedProteins(Array.from(d.term.getProteins().values()), true);
-                        // self.model.get("groupedGoTerms").push(d.term);
-                        // self.model.trigger("groupedGoTermsChanged");
+                        // self.backbone-models.get("groupedGoTerms").push(d.term);
+                        // self.backbone-models.trigger("groupedGoTermsChanged");
                         d3.event.stopPropagation();
                     })
                     .on("mouseover", function (d) {

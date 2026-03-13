@@ -10,7 +10,7 @@ import * as _ from "underscore";
 import $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {attributeOptions} from "../models/attribute-options";
+import {attributeOptions} from "../clms-model/attribute-options";
 import {
     addMultipleSelectControls, ceil, commonLabels,
     crossBrowserElementX,
@@ -326,7 +326,7 @@ export class ScatterplotViewBB extends BaseFrameView {
 
 
         // Listen to these events (and generally re-render in some fashion)
-        // if highlighted/selection matches change, or colour model change, then recolour cross links
+        // if highlighted/selection matches change, or colour backbone-models change, then recolour cross links
         this.listenTo(this.model, "selectionMatchesLinksChanged change:linkColourAssignment currentColourModelChanged", this.recolourCrossLinks);
         this.listenTo(this.model, "highlightsMatchesLinksChanged", this.rehighlightCrossLinks);
         this.listenTo(this.model, "filteringDone", function () {
@@ -557,7 +557,7 @@ export class ScatterplotViewBB extends BaseFrameView {
      * Gets data values for all crosslinks using specified attribute function.
      * @param {Object} funcMeta - Attribute metadata with linkFunc or unfilteredLinkFunc
      * @param {boolean} filteredFlag - Whether to use filtered (true) or all (false) crosslinks
-     * @param {Array} [optionalLinks] - Optional crosslink array to use instead of model's links
+     * @param {Array} [optionalLinks] - Optional crosslink array to use instead of backbone-models's links
      * @returns {Array} Array of data value arrays, one per crosslink
      */
     getData(funcMeta, filteredFlag, optionalLinks) {
@@ -606,7 +606,7 @@ export class ScatterplotViewBB extends BaseFrameView {
      * Gets axis data including label, data values, and formatting info.
      * @param {string} axisLetter - "X" or "Y" to specify which axis
      * @param {boolean} filteredFlag - Whether to use filtered (true) or all (false) crosslinks
-     * @param {Array} [optionalLinks] - Optional crosslink array to use instead of model's links
+     * @param {Array} [optionalLinks] - Optional crosslink array to use instead of backbone-models's links
      * @returns {Object} Axis data object with label, data array, formatting options, and flags
      */
     getAxisData(axisLetter, filteredFlag, optionalLinks) {

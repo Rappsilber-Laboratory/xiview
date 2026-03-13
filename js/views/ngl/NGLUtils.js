@@ -14,13 +14,13 @@ import {xilog} from "../../utils";
 import {filterOutDecoyProteins, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";
 import d3 from "d3";
 import vent from "../../vent";
-// import {DistancesObj} from "../../model/distances";//cyclic dependency, hack it into bottom of this file
-// import {NGLModelWrapperBB} from "./ngl-wrapper-model"; // cyclic dependency, hack it into bottom of this file
+// import {DistancesObj} from "../../backbone-models/distances";//cyclic dependency, hack it into bottom of this file
+// import {NGLModelWrapperBB} from "./ngl-wrapper-backbone-models"; // cyclic dependency, hack it into bottom of this file
 
 /**
  * Extracts chain sequences from NGL structure component.
  * Iterates all chains, filters viable chains (>5 residues), extracts residue sequences,
- * records chain name, index, model index, residue offset, structure ID. Returns array of sequence objects.
+ * records chain name, index, backbone-models index, residue offset, structure ID. Returns array of sequence objects.
  * @param {NGL.StructureComponent} structureComponent - NGL structure component
  * @returns {Array<Object>} Array of {chainName, chainIndex, modelIndex, residueOffset, structureID, data (sequence string)}
  */
@@ -323,7 +323,7 @@ function getReasonableDistanceLimit (nglStageModel) {
 // test to ignore short chains and those that aren't polymer chains (such as water molecules)
 export function isViableChain(chainProxy) {
     //console.log ("cp", chainProxy.entity, chainProxy.residueCount, chainProxy);
-    // should be chainProxy.entity.isPolymer() but some hand-built ngl models muff these settings up
+    // should be chainProxy.entity.isPolymer() but some hand-built ngl clms-backbone-models muff these settings up
     return chainProxy.residueCount > 10 && (!chainProxy.entity || (!chainProxy.entity.isWater() && !chainProxy.entity.isMacrolide()));
 }
 

@@ -121,7 +121,7 @@ jsonifyGoMap (goMap) {
             if (error) {
                 console.log("error", error, "for", url, arguments);
             } else {
-                go = modelUtils.loadGOAnnotations (txt);  // temp store until CLMS model is built
+                go = modelUtils.loadGOAnnotations (txt);  // temp store until CLMS backbone-models is built
                 jsongo = modelUtils.jsonifyGoMap (go);
             }
         });

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>QUnit CLMS Backbone Models Tests</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.21.1.css">
+    <script type="text/javascript" src="../dist/vendors.js"></script>
+    <script type="text/javascript" src="../dist/xiview.js"></script>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+<script>
+
+    // Wait for the xiview module to load
+    window.addEventListener('load', function() {
+        if (window.xiview._test && window.xiview._test.testClmsModel) {
+            window.xiview._test.testClmsModel();
+        } else {
+            console.error('xiview._test.testClmsModel is not available');
+            console.log('window.xiview._test:', window.xiview._test);
+        }
+    });
+</script>
+
+</body>
+</html>

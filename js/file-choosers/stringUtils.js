@@ -23,7 +23,7 @@ export const STRINGUtils = {
     // Maximum number of proteins we can POST to STRING's network interaction API (found by trial and error)
     stringAPIMaxProteins: 2000,
 
-    // Filter the CLMS model's proteins down to just those that have non-decoy inter-protein links
+    // Filter the CLMS backbone-models's proteins down to just those that have non-decoy inter-protein links
     filterProteinsToPPISet: function (clmsModel) {
         const realProteins = filterOutDecoyProteins(Array.from(clmsModel.getProteinsIterator()));
         const ppiProteins = realProteins.filter(function (prot) {
@@ -261,10 +261,10 @@ export const STRINGUtils = {
     },
 
     /**
-     * Main entry point for loading STRING data from CLMS model.
+     * Main entry point for loading STRING data from CLMS backbone-models.
      * Filters proteins to PPI set (non-decoy inter-protein links), further filters to non-hidden if needed
      * to stay under stringAPIMaxProteins limit, delegates to loadStringData with protein IDs.
-     * @param {SearchResultsModel} clmsModel - CLMS model with proteins
+     * @param {SearchResultsModel} clmsModel - CLMS backbone-models with proteins
      * @param {string} taxonID - NCBI Taxon ID
      * @param {Function} callback - Callback(csv, errorReason) called with CSV string or error
      * @returns {undefined}

@@ -22,8 +22,8 @@ import {
 } from "./networkFrame";
 import {showMessage} from "./message-popup";
 import Split from "split.js";
-import {SearchResultsModel} from "./models/search-results-model";
-import {BlosumCollection} from "./model/models";
+import {SearchResultsModel} from "./clms-model/search-results-model";
+import {BlosumCollection} from "./backbone-models/models";
 import vent from "./vent";
 
 /**
@@ -104,7 +104,7 @@ const fetchDataAndProcess = (url, processFunction) => {
 
 /**
  * Main application initialization function for the full xiVIEW interface.
- * Loads all necessary data (API endpoints, BLOSUM matrices), initializes models and views,
+ * Loads all necessary data (API endpoints, BLOSUM matrices), initializes clms-backbone-models and views,
  * and sets up the complete application UI.
  * @param {string} apiBase - Base URL for API endpoints
  * @param {string} annotatorURL - URL for the annotation service
@@ -131,7 +131,7 @@ export function main(apiBase, annotatorURL) {
     Promise.all(allTasks)
         // eslint-disable-next-line no-unused-vars
         .then((results) => {
-            console.log("API data and blosum model are ready.");
+            console.log("API data and blosum backbone-models are ready.");
             const compositeModelInst = models({}, clmsModel);
             compositeModelInst.set("blosumColl", blosumCollInst);
             compositeModelInst.set("apiBase", apiBase);
@@ -191,9 +191,9 @@ export function validationPage(apiBase, annotatorURL) {
 
 /**
  * Creates an array of data fetching tasks for all required API endpoints.
- * Each task fetches data from an API endpoint and processes it into the CLMS model.
+ * Each task fetches data from an API endpoint and processes it into the CLMS backbone-models.
  * @param {string} apiBase - Base URL for API endpoints
- * @param {SearchResultsModel} clmsModel - The search results model to populate with data
+ * @param {SearchResultsModel} clmsModel - The search results backbone-models to populate with data
  * @returns {Promise[]} Array of promises for parallel data fetching
  * @private
  */

@@ -2,7 +2,7 @@
  * @fileoverview Minigram histogram view with interactive brush selection.
  * Displays small histogram visualization of score/distance distributions with brushable range selection.
  * Supports target and decoy data overlays. Uses requestAnimationFrame for efficient batch rendering.
- * Brush interaction updates model's domainStart/domainEnd attributes for range filtering.
+ * Brush interaction updates backbone-models's domainStart/domainEnd attributes for range filtering.
  */
 import Backbone from "backbone";
 import d3 from "d3";
@@ -10,8 +10,8 @@ import d3 from "d3";
 /**
  * Minigram histogram view with interactive brush selection for range filtering.
  * Creates compact histogram (300x65px) showing data distribution with optional decoy overlay (red bars).
- * D3 brush tool enables range selection - dragging updates model's domainStart/domainEnd.
- * Efficient rendering with requestAnimationFrame batching. Automatically redraws on model changes.
+ * D3 brush tool enables range selection - dragging updates backbone-models's domainStart/domainEnd.
+ * Efficient rendering with requestAnimationFrame batching. Automatically redraws on backbone-models changes.
  * @class
  * @extends Backbone.View
  * @property {d3.selection} chartDiv - D3 selection of chart container div
@@ -35,7 +35,7 @@ export class MinigramViewBB extends Backbone.View {
     /**
      * Initializes minigram view by creating SVG structure, scales, axis, and brush.
      * Sets up 300x65px SVG with margins, linear scales for x/y axes, bottom-oriented x-axis with 5 ticks,
-     * D3 brush for range selection. Listens to model changes to redraw brush. Triggers initial render.
+     * D3 brush for range selection. Listens to backbone-models changes to redraw brush. Triggers initial render.
      * @param {Object} viewOptions - View initialization options (unused)
      * @returns {MinigramViewBB} this for chaining
      */
@@ -108,7 +108,7 @@ export class MinigramViewBB extends Backbone.View {
 
     /**
      * Performs actual histogram rendering with D3 data join pattern.
-     * Algorithm: 1) Gets data from model, 2) Calculates min/max for x-domain, 3) Creates histogram with 30 bins,
+     * Algorithm: 1) Gets data from backbone-models, 2) Calculates min/max for x-domain, 3) Creates histogram with 30 bins,
      * 4) Updates y-domain from histogram max, 5) Updates/adds/removes target bars (blue), 6) If present, updates decoy bars (red, half-width),
      * 7) Updates x-axis, 8) Redraws brush. Uses efficient enter/update/exit pattern.
      * @returns {undefined}
@@ -194,7 +194,7 @@ export class MinigramViewBB extends Backbone.View {
 
     /**
      * Handles brush interaction events (user dragging brush extent).
-     * If brush extent is empty (no selection), clears brush. Otherwise, updates model
+     * If brush extent is empty (no selection), clears brush. Otherwise, updates backbone-models
      * with selected range (domainStart/domainEnd) to trigger filtering.
      * @returns {undefined}
      */
@@ -216,7 +216,7 @@ export class MinigramViewBB extends Backbone.View {
     // }
 
     /**
-     * Clears brush selection and resets model's domain range to null.
+     * Clears brush selection and resets backbone-models's domain range to null.
      * Removes visual brush extent and sets domainStart/domainEnd to null (no filtering).
      * @returns {undefined}
      */
@@ -230,9 +230,9 @@ export class MinigramViewBB extends Backbone.View {
     }
 
     /**
-     * Recalculates and redraws brush extent from model's domain range.
+     * Recalculates and redraws brush extent from backbone-models's domain range.
      * If domainStart is defined, sets brush extent to [domainStart, domainEnd] and redraws.
-     * Used to sync brush visualization with model state.
+     * Used to sync brush visualization with backbone-models state.
      * @returns {MinigramViewBB} this for chaining
      */
     brushRecalc() {
@@ -246,7 +246,7 @@ export class MinigramViewBB extends Backbone.View {
     /**
      * Model change listener that triggers brush recalculation.
      * Calls brushRecalc unless stopRebounds flag is set (prevents infinite update loops).
-     * Automatically invoked when model changes to keep brush in sync.
+     * Automatically invoked when backbone-models changes to keep brush in sync.
      * @returns {MinigramViewBB} this for chaining
      */
     redrawBrush() {

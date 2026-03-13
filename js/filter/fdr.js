@@ -29,9 +29,9 @@ export const clearFdr = function (crosslinksArr) {
  * @param {Function} [options.scoreCalcFunc] - Custom scoring function (default: quadratic mean of match scores)
  * @param {number} [options.threshold] - FDR threshold (e.g., 0.05 for 5% FDR), undefined for no FDR filtering
  * @param {boolean} [options.filterLinears=false] - If true, exclude linear links from FDR calculation
- * @param {Object} options.filterModel - Filter model instance for subset filtering
- * @param {Object} options.CLMSModel - CLMS model instance
- * @returns {Array<Object>|null} Array with 2 objects (Inter, Intra) containing cutoff info, or null if required models missing
+ * @param {Object} options.filterModel - Filter backbone-models instance for subset filtering
+ * @param {Object} options.CLMSModel - CLMS backbone-models instance
+ * @returns {Array<Object>|null} Array with 2 objects (Inter, Intra) containing cutoff info, or null if required clms-backbone-models missing
  */
 export const fdr = function (crosslinksArr, options) {
 

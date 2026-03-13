@@ -28,20 +28,20 @@ import {DistancesObj} from "./DistancesObj";
 import vent from "../../vent";
 
 /**
- * Backbone model that wraps NGL 3D structure data and bridges it with CLMS crosslink data.
+ * Backbone backbone-models that wraps NGL 3D structure data and bridges it with CLMS crosslink data.
  * Manages complex mapping of proteins to PDB chains, converts crosslinks into 3D link representations
  * (full links with both ends in structure, half links with one end), calculates distance matrices,
  * maintains multiple index structures for efficient lookups, and generates NGL selection strings.
  * @class
  * @extends Backbone.Model
- * @property {Object} compositeModel - Main application model
+ * @property {Object} compositeModel - Main application backbone-models
  * @property {Object} structureComp - NGL structure component
  * @property {Object} chainMap - Map of protein IDs to arrays of chain objects
  * @property {Object} reverseChainMap - Map of chain indices to protein IDs
  * @property {Array} linkList - Array of full link objects (both ends in PDB)
  * @property {Array} halfLinkList - Array of half link objects (one end in PDB)
  * @property {number} fullDistanceCalcCutoff - Residue count threshold for full vs partial distance calculation (default 1200)
- * @property {boolean} allowInterModelDistances - Whether to allow distance calculation between different NMR models (default false)
+ * @property {boolean} allowInterModelDistances - Whether to allow distance calculation between different NMR clms-backbone-models (default false)
  * @property {boolean} showShortestLinksOnly - Whether to filter to shortest alternative links (default true)
  */
 export class NGLModelWrapperBB extends Backbone.Model {
@@ -50,7 +50,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
     }
 
     /**
-     * Returns default values for model attributes.
+     * Returns default values for backbone-models attributes.
      * @returns {Object} Default attribute values
      */
     defaults() {
@@ -69,15 +69,15 @@ export class NGLModelWrapperBB extends Backbone.Model {
     // in a PDB structure.
 
     /**
-     * Initializes the model and sets up event listeners.
+     * Initializes the backbone-models and sets up event listeners.
      * Listens for alignment collection changes (triggers link recalculation),
      * allowInterModelDistances changes (triggers distance recalculation),
      * and chainMap changes (triggers reverse map generation).
      */
     initialize() {
-        // When compositeModel is declared, hang a listener on it that listens to change in alignment model as this
-        // possibly changes links and distances in 3d model
-        // this is in case 3d stuff has been set up before main model (used to happen that pdb's were autoloaded for some searches)
+        // When compositeModel is declared, hang a listener on it that listens to change in alignment backbone-models as this
+        // possibly changes links and distances in 3d backbone-models
+        // this is in case 3d stuff has been set up before main backbone-models (used to happen that pdb's were autoloaded for some searches)
         this.listenToOnce(this, "change:compositeModel", function () { // only do this once (should only happen once anyways but better safe than sorry)
             // alignment change may mean distances are different so recalc
             this.listenTo(this.getCompositeModel().get("alignColl"), "bulkAlignChange", function () {
@@ -113,8 +113,8 @@ export class NGLModelWrapperBB extends Backbone.Model {
     }
 
     /**
-     * Gets the main application composite model.
-     * @returns {Object} The composite model instance
+     * Gets the main application composite backbone-models.
+     * @returns {Object} The composite backbone-models instance
      */
     getCompositeModel() {
         return this.get("compositeModel");
@@ -165,7 +165,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
      * Converts crosslinks to link data objects, optionally filters to shortest alternatives,
      * and wraps with index structures for efficient lookups.
      * @param {Array} crosslinkArr - Array of crosslink objects to convert
-     * @returns {NGLModelWrapperBB} This model instance for chaining
+     * @returns {NGLModelWrapperBB} This backbone-models instance for chaining
      */
     setLinkList(crosslinkArr) {
         const linkDataObj = this.makeLinkList(crosslinkArr);
@@ -182,7 +182,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
      * Core method that maps CLMS crosslinks to NGL 3D space by resolving protein-to-chain mappings,
      * handling sequence alignments, filtering homomultimeric links, and categorizing links into
      * full links (both ends in PDB) and half links (one end in PDB).
-     * @param {Array} crosslinkArr - Array of crosslink objects from CLMS model
+     * @param {Array} crosslinkArr - Array of crosslink objects from CLMS backbone-models
      * @returns {Object} Object with fullLinkList and halfLinkList arrays containing link objects
      */
     makeLinkList(crosslinkArr) {
@@ -200,7 +200,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
         function getResidueId(globalNGLResIndex) {
             // TODO add structureId to key
-            // TODO in NMR structures there are multiple models // mjg - chainIndex is unique across models
+            // TODO in NMR structures there are multiple clms-backbone-models // mjg - chainIndex is unique across clms-backbone-models
             if (residueDict[globalNGLResIndex] === undefined) {
                 residueDict[globalNGLResIndex] = nextResidueId;
                 nextResidueId++;
@@ -286,7 +286,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
             //console.log ("chainMap", chainMap, chainSet);
         }
 
-        // divide map of protein --> array of chains into two-deep map of protein --> model --> array of chains, in case we don't want to make links between different models
+        // divide map of protein --> array of chains into two-deep map of protein --> backbone-models --> array of chains, in case we don't want to make links between different clms-backbone-models
         const modelIndexedChainMap = makeSubIndexedMap(chainMap, "modelIndex");
 
         // d3.mapped and wrapped versions of chainMap and modelIndexedChainMap. Easier to use for some operations.
@@ -324,7 +324,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
         crosslinkArr.forEach(function (xlink) {
             // Check from chain - to chain pairings for valid crosslink possibilities.
-            // Where inter-model links barred, divide from and to chains into sets per model and
+            // Where inter-backbone-models links barred, divide from and to chains into sets per backbone-models and
             // loop through the pairings in subsets.
             const fromProtID = xlink.fromProtein.id;
             const toProtID = xlink.toProtein.id;
@@ -347,13 +347,13 @@ export class NGLModelWrapperBB extends Backbone.Model {
                 };
 
                 fromPerModelChains.forEach(function (fromPerModelChainEntry) {
-                    // If inter-model links allowed, pick all toChains, else pick only toChains
+                    // If inter-backbone-models links allowed, pick all toChains, else pick only toChains
                     // with same modelID as current set of fromModelChains
                     const toChains = allowInterModelDistances ? toChainMap : toPerModelChainMap.get(fromPerModelChainEntry.key);
 
                     //console.log ("XLINK CHAINS", xlink.id, fromPerModelChains, toPerModelChains);
 
-                    if (toChains) { // don't proceed if inter model distances barred and no 'to' chains within current model
+                    if (toChains) { // don't proceed if inter backbone-models distances barred and no 'to' chains within current backbone-models
 
                         let fromPDBResidues = makePDBIndexedResidues(fromPerModelChainEntry, xlink.fromResidue, fromProtID);
                         let toPDBResidues = makePDBIndexedResidues(toChains, xlink.toResidue, toProtID);
@@ -704,7 +704,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         }, this);
     }
 
-    // Return original crosslinks from this model's link objects using origId property value
+    // Return original crosslinks from this backbone-models's link objects using origId property value
     getOriginalCrossLinks(linkObjs) {
         const xlinks = this.getCompositeModel().get("clmsModel").getCrosslinks();
         return linkObjs.map(function (linkObj) {
@@ -963,10 +963,10 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
     /**
      * Calculates distance between two atoms via proxies.
-     * Returns undefined if atoms are in different models and allowInterModelDistances is false.
+     * Returns undefined if atoms are in different clms-backbone-models and allowInterModelDistances is false.
      * @param {Object} ap1 - First atom proxy
      * @param {Object} ap2 - Second atom proxy
-     * @returns {number|undefined} Distance in Angstroms, or undefined if inter-model distance not allowed
+     * @returns {number|undefined} Distance in Angstroms, or undefined if inter-backbone-models distance not allowed
      */
     getAtomProxyDistance(ap1, ap2) {
         return ap1.modelIndex === ap2.modelIndex || this.get("allowInterModelDistances") ? ap1.distanceTo(ap2) : undefined;
@@ -1071,7 +1071,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
 
     /**
      * Generates efficient NGL selection string from residue list.
-     * Builds hierarchical model→chain→residue selection with optimized syntax for fast NGL parsing.
+     * Builds hierarchical backbone-models→chain→residue selection with optimized syntax for fast NGL parsing.
      * Groups consecutive residues into ranges for efficiency.
      * @param {Array|string} resnoList - Array of residue objects, "all" for all residues, or null/empty for "none"
      * @param {Object} [options] - Options object
@@ -1108,7 +1108,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
             const tmp = resnoList.map(function (r) {
                 cp.index = r.chainIndex;
 
-                // Make a hierarchy of models --> chains --> residues to build a string from later
+                // Make a hierarchy of clms-backbone-models --> chains --> residues to build a string from later
                 let modelBranch = modelTree.get(cp.modelIndex);
                 if (!modelBranch) {
                     let a = new d3.map();
@@ -1139,7 +1139,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
             //console.log ("sele", sele);
             //console.log ("MODELTREE", modelTree);
 
-            // Build an efficient selection string out of this tree i.e. don't repeat model and chain values for
+            // Build an efficient selection string out of this tree i.e. don't repeat backbone-models and chain values for
             // every residue, group the relevant residues together and surround with a bracket
             const modParts = modelTree.entries().map(function (modelEntry) {
                 const modelBranch = modelEntry.value;

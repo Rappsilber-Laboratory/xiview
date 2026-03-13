@@ -52,10 +52,8 @@ coverage/
 _notes/
 */_notes/dwsync.xml
 build/_notes/dwsync.xml
-src/_notes/dwsync.xml
 uml/_notes/dwsync.xml
 vendor/_notes/dwsync.xml
-src/graph/_notes/dwsync.xml
 
 # KDE directory preferences
 .directory

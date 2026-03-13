@@ -24,10 +24,10 @@ import d3 from "d3";
  * Dynamically creates/destroys child views (AlignSettingsViewBB, CollectionAsSelectViewBB) on tab change.
  * @class
  * @extends BaseFrameView
- * @property {TooltipModel} tooltipModel - Tooltip model for tab hover info
+ * @property {TooltipModel} tooltipModel - Tooltip backbone-models for tab hover info
  * @property {CollectionAsSelectViewBB} alignViewBlosumSelector - BLOSUM matrix dropdown
  * @property {AlignSettingsViewBB} alignViewSettings - Gap penalty controls
- * @property {ProtAlignModel} modelView - Currently focused protein model
+ * @property {ProtAlignModel} modelView - Currently focused protein backbone-models
  */
 export class AlignCollectionViewBB extends BaseFrameView {
     constructor(options) {
@@ -220,13 +220,13 @@ export class AlignCollectionViewBB extends BaseFrameView {
             //this.alignViewSettings.remove();
         }
 
-        // Safely swap these models in/out, maybe by generating new views altogether
+        // Safely swap these clms-backbone-models in/out, maybe by generating new views altogether
         // http://stackoverflow.com/questions/9271507/how-to-render-and-append-sub-views-in-backbone-js
         // http://stackoverflow.com/questions/8591992/backbone-change-model-of-view
         // http://stackoverflow.com/questions/21411059/backbone-reusable-view-set-new-model-to-existing-view?lq=1
 
         if (model) {
-            //console.log("model", model);
+            //console.log("backbone-models", backbone-models);
             const modelViewID = d3.select(this.el).attr("id") + "IndView";
 
             this.modelView = new ProtAlignViewBB({
@@ -321,7 +321,7 @@ export class ProtAlignViewBB extends Backbone.View {
             this.render({affectedSeqModel: affectedSeqModel, affectedAction: "remove"});
         });
 
-        // Listen for change in blosum selection and pass it to model
+        // Listen for change in blosum selection and pass it to backbone-models
         this.listenTo(this.blosumColl, "blosumModelSelected", function (blosumMatrix) {
             console.log("BLOSUM", this, arguments);
             this.model.set("scoreMatrix", blosumMatrix);
@@ -455,18 +455,18 @@ export class ProtAlignViewBB extends Backbone.View {
         const self = this;
 
         const selectedRadioValue = d3.select(this.el).select("input[name='alignChoice']:checked").property("value");
-        // keep this value and set it as a default for this view. Seems OK as this only affects visual output, not the model
+        // keep this value and set it as a default for this view. Seems OK as this only affects visual output, not the backbone-models
         // that is supplying the information. Plus there is only 1 of these views at a time, so changing the defaults doesn't bother any other views.
         this.defaults.defaultSeqShowSetting = +selectedRadioValue;
         const showSimilar = (selectedRadioValue & 2) > 0;
         const showDiff = (selectedRadioValue & 1) > 0;
 
-        // I suppose I could do a view per model rather than this, but it fits the d3 way of doing things
+        // I suppose I could do a view per backbone-models rather than this, but it fits the d3 way of doing things
         // remove treated special, because it will be missing from the collection by this point
         const seqModels = (affectedAction === "remove") ? [affectedSeqModel] : this.model.get("seqCollection").filter(function (m) {
             return !affectedSeqModel || (affectedSeqModel.id === m.id);
         });
-        //var seqModels = affectedSeqModel ? [affectedSeqModel] : this.model.get("seqCollection").models;
+        //var seqModels = affectedSeqModel ? [affectedSeqModel] : this.backbone-models.get("seqCollection").clms-backbone-models;
         const comps = seqModels.map(function (seqModel) {
             return seqModel.get("compAlignment");
         });
@@ -490,7 +490,7 @@ export class ProtAlignViewBB extends Backbone.View {
 
         tbodybind.enter().append("tbody");
         tbodybind.each(function (d) {
-            self.stringGeneration(d, showSimilar, showDiff);   // calculate sequence strings per comparator sequence model
+            self.stringGeneration(d, showSimilar, showDiff);   // calculate sequence strings per comparator sequence backbone-models
         });
 
         // add 2 rows to each tbody

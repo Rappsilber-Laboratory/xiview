@@ -1,9 +1,9 @@
 /**
  * @fileoverview Distance calculation object for crosslinks in 3D structures.
  * DistancesObj: stores distance matrices, chain map, residue coordinates. Calculates shortest distances
- * between crosslink residue pairs across all chain/model alternatives. Supports filtering by allowed chains,
+ * between crosslink residue pairs across all chain/backbone-models alternatives. Supports filtering by allowed chains,
  * self-links, homomultimeric complexes. Caches distances in crosslink metadata. Used by NGLViewBB
- * for distance coloring and distance filtering. Handles multiple models, multiple chains per protein.
+ * for distance coloring and distance filtering. Handles multiple clms-backbone-models, multiple chains per protein.
  */
 
 import {xilog} from "../../utils";
@@ -17,10 +17,10 @@ import vent from "../../vent";
 /**
  * Distance calculation object for crosslinks in 3D structures.
  * Stores precomputed C-alpha distance matrices, chain-to-protein map, residue coordinates.
- * Provides methods to calculate shortest crosslink distances across all chain/model alternatives,
+ * Provides methods to calculate shortest crosslink distances across all chain/backbone-models alternatives,
  * filter by allowed chains, handle self-links and homomultimeric complexes.
  * @class
- * @property {Array<Array<number>>} matrices - Precomputed C-alpha distance matrices (one per model)
+ * @property {Array<Array<number>>} matrices - Precomputed C-alpha distance matrices (one per backbone-models)
  * @property {Object} chainMap - Map of proteinID → array of chain info objects
  * @property {string} structureName - PDB structure name
  * @property {Array} residueCoords - Residue coordinate data
@@ -45,7 +45,7 @@ export class DistancesObj {
 
     /**
      * Tie-breaker for sorting link alternatives with equal distances.
-     * Compares by total model index, then total chain index, then min chain index.
+     * Compares by total backbone-models index, then total chain index, then min chain index.
      * Ensures consistent ordering when multiple chain pairs have same distance.
      * @param {Object} link1resA - Residue A of link 1 with modelIndex, chainIndex
      * @param {Object} link1resB - Residue B of link 1
@@ -73,7 +73,7 @@ export class DistancesObj {
     }
 
     /**
-     * Finds shortest distance alternative for each crosslink from multiple chain/model possibilities.
+     * Finds shortest distance alternative for each crosslink from multiple chain/backbone-models possibilities.
      * Calculates distances for all link alternatives, filters NaN distances, groups by origId (crosslink),
      * sorts by distance (with tieBreaker for equal distances), returns shortest alternative per crosslink.
      * @param {Array<Object>} nglLinkWrappers - Array of link wrapper objects with residueA/B, origId
@@ -163,7 +163,7 @@ export class DistancesObj {
                 if (seqIndex1 >= 0) {
                     for (let m = 0; m < chains2.length; m++) {
                         const modelIndex2 = chains2[m].modelIndex;
-                        if (modelIndex1 === modelIndex2 || options.allowInterModelDistances) {  // bar distances between models
+                        if (modelIndex1 === modelIndex2 || options.allowInterModelDistances) {  // bar distances between clms-backbone-models
                             const chainIndex2 = chains2[m].index;
                             const chainName2 = chains2[m].name;
                             const alignId2 = make3DAlignID(this.structureName, chainName2, chainIndex2);
@@ -428,18 +428,18 @@ export class DistancesObj {
     }
 
     // metaData.restrictToChain == true for sample distances internal to same PDB chain only
-    // metaData.restrictToModel == true for sample distances internal to same PDB model only
+    // metaData.restrictToModel == true for sample distances internal to same PDB backbone-models only
     // metaData.restrictToProtein == true for sample distances internal to same protein only
-    // Note: same protein may be present in multiple models
+    // Note: same protein may be present in multiple clms-backbone-models
     generateSubDividedSampleDistancesBySearch(srmap, randDists, metaData, chainToModelMap) {
 
         chainToModelMap = chainToModelMap || this.makeChainIndexToModelIndexMap();
         //console.log ("chainMap", this.chainMap, chainToModelMap, srmap);
-        // if not dividing random generation by chain or protein or model (or all model indices are the same), shortcut with the following
+        // if not dividing random generation by chain or protein or backbone-models (or all backbone-models indices are the same), shortcut with the following
         if (!metaData.restrictToChain && !metaData.restrictToProtein && (!metaData.restrictToModel || d3.set(chainToModelMap.values()).size() === 1)) {
             this.generateSampleDistancesBySearch(srmap[0], srmap[1], randDists, metaData);
         } else {
-            // Convenience: Divide into list per protein / chain / model for selecting intra-protein or intra-chain samples only
+            // Convenience: Divide into list per protein / chain / backbone-models for selecting intra-protein or intra-chain samples only
             const srmapPerProtChain = [{}, {}];
             const protChainSet = d3.set();
             srmap.forEach(function (dirMap, i) {
@@ -548,7 +548,7 @@ export class DistancesObj {
     }
 
     // set of chain names that are allowed to be in distance calculations
-    // needed as others are restricted by the assembly in the ngl model
+    // needed as others are restricted by the assembly in the ngl backbone-models
     // If chainNameSet is undefined all chain names are permitted
     setAllowedChainNameSet(chainNameSet, isNewObj) {
         this.permittedChainIndicesSet = d3.set();

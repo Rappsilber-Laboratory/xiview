@@ -48,7 +48,7 @@ export const commonRegexes = {
  * Used by downloads, selection table view, and spectrum wrapper view.
  * @param {Object} match - The match object containing matchedPeptides
  * @param {number} matchedPeptideIndex - Index (0 or 1) of the matched peptide
- * @param {Object} clmsModel - The CLMS model containing protein information
+ * @param {Object} clmsModel - The CLMS backbone-models containing protein information
  * @returns {string} Semicolon-separated protein names
  */
 export function proteinConcat(match, matchedPeptideIndex, clmsModel) {
@@ -209,7 +209,7 @@ export function floor(val, decimalPlaces) {
 /**
  * Rounds a value to the nearest interval.
  * Handles both large (>1) and small (<1) intervals correctly to avoid floating point issues.
- * Used by NGL utils, NGL model wrapper, and distances.
+ * Used by NGL utils, NGL backbone-models wrapper, and distances.
  * @param {number} val - The value to round
  * @param {number} interval - The interval to round to
  * @returns {number} The rounded value, or original value if interval is falsy
@@ -514,7 +514,7 @@ export function makeBackboneButtons(targetDiv, baseID, buttonData) {
 /**
  * Converts object state to an abbreviated string representation for use in filenames.
  * Filters out empty/false/undefined values and formats them with abbreviations.
- * @param {Object} object - Object to convert (can be Backbone model or plain object)
+ * @param {Object} object - Object to convert (can be Backbone backbone-models or plain object)
  * @param {string[]} fields - Array of field names to include
  * @param {Set} zeroFormatFields - Set of field names that should be formatted with 4 decimal places
  * @param {Object} abbvMap - Map of field names to their abbreviations
@@ -564,7 +564,7 @@ export function filterStateToString(compositeModelInst) {
 
 /**
  * Converts the current searches to a string representation.
- * @param {Object} compositeModelInst - The composite model instance
+ * @param {Object} compositeModelInst - The composite backbone-models instance
  * @returns {string} Search IDs joined with hyphens, prefixed with "SRCH="
  */
 export function searchesToString(compositeModelInst) {
@@ -591,7 +591,7 @@ export function makeLegalFileName(fileNameStr) {
 /**
  * Creates or updates a crosslink colour key as an SVG group element.
  * Generates a visual legend showing the color scheme with labels and optionally a gradient.
- * @param {Object} colourAssign - Color assignment model containing scale and scheme information
+ * @param {Object} colourAssign - Color assignment backbone-models containing scale and scheme information
  * @param {Object} svgElem - d3 selection of the SVG element to add the key to
  * @returns {void}
  */
@@ -700,13 +700,13 @@ export function updateColourKey(colourAssign, svgElem) {
 }
 
 /**
- * Creates or updates an annotation colour key from Backbone model array.
- * Each model in the array is rendered as a colored swatch with label.
- * @param {Object[]} bbModelArray - Array of Backbone models to display in the key
+ * Creates or updates an annotation colour key from Backbone backbone-models array.
+ * Each backbone-models in the array is rendered as a colored swatch with label.
+ * @param {Object[]} bbModelArray - Array of Backbone clms-backbone-models to display in the key
  * @param {Object} svgElem - d3 selection of the SVG element to add the key to
  * @param {Object} [myOptions] - Options to customize the key display
- * @param {Function} [myOptions.colour] - Function to extract color from model JSON (default: d => d.colour)
- * @param {Function} [myOptions.label] - Function to extract label from model JSON (default: d => d.label || d.name)
+ * @param {Function} [myOptions.colour] - Function to extract color from backbone-models JSON (default: d => d.colour)
+ * @param {Function} [myOptions.label] - Function to extract label from backbone-models JSON (default: d => d.label || d.name)
  * @param {string} [myOptions.title] - Title for the key (default: "Key")
  * @returns {void}
  */

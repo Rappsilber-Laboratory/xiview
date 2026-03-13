@@ -15,7 +15,7 @@ import vent from "../vent";
  * @class
  * @extends Backbone.Model
  * @property {string} displayLabel - Protein name for display
- * @property {Object} scoreMatrix - BLOSUM matrix model (e.g., BLOSUM62, BLOSUM80)
+ * @property {Object} scoreMatrix - BLOSUM matrix backbone-models (e.g., BLOSUM62, BLOSUM80)
  * @property {number} matchScore - Match score for simple scoring (superceded by scoreMatrix)
  * @property {number} misScore - Mismatch penalty for simple scoring
  * @property {number} gapOpenScore - Gap open penalty
@@ -33,11 +33,11 @@ export class ProtAlignModel extends Backbone.Model {
         super(attributes, options);
     }
 
-    // return defaults as result of a function means arrays aren't shared between model instances
+    // return defaults as result of a function means arrays aren't shared between backbone-models instances
     // http://stackoverflow.com/questions/17318048/should-my-backbone-defaults-be-an-object-or-a-function
     defaults() {
         return {
-            displayLabel: "A Protein",    // label to display in collection view for this model
+            displayLabel: "A Protein",    // label to display in collection view for this backbone-models
             scoreMatrix: undefined,   // slot for a BLOSUM type matrix
             matchScore: 6,    // match and mis should be superceded by the score matrix if present
             misScore: -6,
@@ -53,16 +53,16 @@ export class ProtAlignModel extends Backbone.Model {
     }
 
     /**
-     * Initializes protein alignment model.
+     * Initializes protein alignment backbone-models.
      * Sets up bidirectional link with seqCollection, listens for setting changes to trigger realignment,
      * listens for alignStr changes in sequences to trigger nonTrivialAlignmentChange event,
      * updates displayLabel when protein metadata changes.
-     * @returns {ProtAlignModel} This model for chaining
+     * @returns {ProtAlignModel} This backbone-models for chaining
      */
     initialize() {
         //alert("!");
-        // https://github.com/jashkenas/backbone/issues/56 - What is the best way to model a Collection inside of a Model?
-        this.get("seqCollection").containingModel = this;  // Reference to parent model for this collection
+        // https://github.com/jashkenas/backbone/issues/56 - What is the best way to backbone-models a Collection inside of a Model?
+        this.get("seqCollection").containingModel = this;  // Reference to parent backbone-models for this collection
 
         // this is where changes to gap scores and blosum choices are picked up
         this.listenTo(this, "change", function () {
@@ -77,7 +77,7 @@ export class ProtAlignModel extends Backbone.Model {
 
         // if the alignStr between a refAlignment and compAlignment has changed then declare a non-trivial change
         this.listenTo(this.get("seqCollection"), "change:alignStr", function (seqModel) {
-            //console.log ("collection catching one of its model's alignStr changing", arguments);
+            //console.log ("collection catching one of its backbone-models's alignStr changing", arguments);
             this.trigger("nonTrivialAlignmentChange", seqModel);
         });
 
@@ -208,18 +208,18 @@ export class ProtAlignModel extends Backbone.Model {
     }
 
     /**
-     * Gets sequence model by name/ID from seqCollection.
+     * Gets sequence backbone-models by name/ID from seqCollection.
      * @param {string} seqName - Sequence name/ID (e.g., PDB code, "Canonical")
-     * @returns {SeqModel} Sequence model or undefined if not found
+     * @returns {SeqModel} Sequence backbone-models or undefined if not found
      */
     getSequenceModel(seqName) {
         return this.get("seqCollection").get(seqName);
     }
 
     /**
-     * Gets array of sequence models matching predicate function.
-     * @param {Function} predicateFunc - Predicate function (model) => boolean
-     * @returns {Array<SeqModel>} Array of matching sequence models
+     * Gets array of sequence clms-backbone-models matching predicate function.
+     * @param {Function} predicateFunc - Predicate function (backbone-models) => boolean
+     * @returns {Array<SeqModel>} Array of matching sequence clms-backbone-models
      */
     getSequenceModelsByPredicate(predicateFunc) {
         return this.get("seqCollection").filter(function (m) {
@@ -289,7 +289,7 @@ export class ProtAlignModel extends Backbone.Model {
     }
 
     PDBAlignmentsAsFeatures(includeCanonical) {
-        // get array of arrays = each sequence in the model can have a number of blocks
+        // get array of arrays = each sequence in the backbone-models can have a number of blocks
         const featuresPerSeq = this.get("seqCollection")
             .map(function (seqModel) {
                 return seqModel.PDBAlignmentAsFeatures();
@@ -415,7 +415,7 @@ export class ProtAlignCollection extends Backbone.Collection {
         }
     }
 
-    // Moved here from NGLViewBB.js, convenience function to convert an index in a given align sequence in a given align model to the search sequence
+    // Moved here from NGLViewBB.js, convenience function to convert an index in a given align sequence in a given align backbone-models to the search sequence
     // (or vice versa)
     // TODO, need to check for decoys (protein has no alignment)
     // conversion here works to and from the seqIndex local to a chain

@@ -29,7 +29,7 @@ import {download} from "../downloads";
  * @property {string} options.labelByAttribute - Model attribute for item labels (default: "name")
  * @property {string} options.toggleAttribute - Model attribute for checkbox state (default: "state")
  * @property {Function} options.sectionHeader - Function to generate section header text
- * @property {Object} options.tooltipModel - Optional tooltip model for hover tooltips
+ * @property {Object} options.tooltipModel - Optional tooltip backbone-models for hover tooltips
  */
 export class DropDownMenuViewBB extends Backbone.View {
     constructor(options) {
@@ -66,7 +66,7 @@ export class DropDownMenuViewBB extends Backbone.View {
      * @param {Function} [viewOptions.myOptions.sectionHeader] - Function to generate section headers
      * @param {string} [viewOptions.myOptions.classed] - Additional CSS class to apply
      * @param {Object} [viewOptions.myOptions.titleTooltip] - Tooltip for menu button
-     * @param {Object} [viewOptions.myOptions.tooltipModel] - Tooltip model for item tooltips
+     * @param {Object} [viewOptions.myOptions.tooltipModel] - Tooltip backbone-models for item tooltips
      * @returns {DropDownMenuViewBB} This view instance for chaining
      */
     initialize(viewOptions) {
@@ -128,7 +128,7 @@ export class DropDownMenuViewBB extends Backbone.View {
 
     /**
      * Updates the menu button hover tooltip.
-     * Sets up tooltip model event listeners to show/hide tooltip on mouse enter/leave.
+     * Sets up tooltip backbone-models event listeners to show/hide tooltip on mouse enter/leave.
      * @param {Object} tooltipObj - Tooltip configuration object
      * @param {string} tooltipObj.header - Tooltip header text
      * @param {string|string[]} tooltipObj.contents - Tooltip content text or array of lines
@@ -154,7 +154,7 @@ export class DropDownMenuViewBB extends Backbone.View {
 
     /**
      * Updates menu items from the Backbone collection.
-     * Iterates collection models, creates data objects with id/label/tooltip, handles section grouping,
+     * Iterates collection clms-backbone-models, creates data objects with id/label/tooltip, handles section grouping,
      * and creates checkBoxView instances for each item if not already present.
      * Sets "User Defined" category items to initially checked state.
      * @returns {DropDownMenuViewBB} This view instance for chaining
@@ -165,7 +165,7 @@ export class DropDownMenuViewBB extends Backbone.View {
             let lastCat = null;
             const adata = [];
             this.collection.each(function (model) {
-                const cbdata = model.toJSON(); // doesn't actually make json, just copies model attributes to object that can then be jsonified (or overwritten safely)
+                const cbdata = model.toJSON(); // doesn't actually make json, just copies backbone-models attributes to object that can then be jsonified (or overwritten safely)
                 $.extend(cbdata, {
                     id: model.get("id") || (model.get(self.options.labelByAttribute) + "Placeholder"), // ids may not contain spaces
                     label: model.get(self.options.labelByAttribute),
@@ -497,7 +497,7 @@ export class AnnotationDropDownMenuViewBB extends DropDownMenuViewBB {
 
         this.decideSVGButtonEnabled();
 
-        // listen to a checkbox on one of this collection's models getting clicked and firing a change in the model
+        // listen to a checkbox on one of this collection's clms-backbone-models getting clicked and firing a change in the backbone-models
         this.listenTo(this.collection, "change:shown", function (featureTypeModel, shown) {
             this.setColour(featureTypeModel, shown);
         });
@@ -523,7 +523,7 @@ export class AnnotationDropDownMenuViewBB extends DropDownMenuViewBB {
 
         function colourChange(d) {
             const value = d3.select(this).property("value");
-            const model = self.collection.get(d.id); // d3 id's are same as model id's ('cos ddmenu generates the d3 elements using the collection)
+            const model = self.collection.get(d.id); // d3 id's are same as backbone-models id's ('cos ddmenu generates the d3 elements using the collection)
             model.set("colour", value);
             self.collection.trigger("change:shown", model, model.get("shown"));
         }
@@ -578,7 +578,7 @@ export class AnnotationDropDownMenuViewBB extends DropDownMenuViewBB {
      * Updates color swatch visibility and color when annotation shown state changes.
      * Shows/hides color swatch label, updates swatch background color (50% tint of annotation color),
      * and re-evaluates SVG button enabled state.
-     * @param {Backbone.Model} featureTypeModel - Annotation type model that changed
+     * @param {Backbone.Model} featureTypeModel - Annotation type backbone-models that changed
      * @param {boolean} shown - New shown state (true if annotation type should be visible)
      * @returns {AnnotationDropDownMenuViewBB} This view instance for chaining
      */

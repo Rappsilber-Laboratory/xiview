@@ -13,7 +13,7 @@ export class RenderedCrosslink extends Link {
     /**
      * Creates a new RenderedCrosslink instance.
      *
-     * @param {Object} crosslink - The crosslink data model object
+     * @param {Object} crosslink - The crosslink data backbone-models object
      * @param {CrosslinkViewer} crosslinkViewer - The parent crosslink viewer controller
      */
     constructor(crosslink, crosslinkViewer) {
@@ -123,7 +123,7 @@ export class RenderedCrosslink extends Link {
         this.controller.d3cola.stop();
         this.controller.dragElement = this;
         var add = evt.shiftKey || evt.ctrlKey;
-        this.controller.model.setMarkedCrossLinks("selection", [this.crosslink], false, add);
+        this.controller.backbone-models.setMarkedCrossLinks("selection", [this.crosslink], false, add);
         //store start location
         //var p = this.controller.getTouchEventPoint(evt);// broke
         this.controller.dragStart = evt; //this.controller.mouseToSVG(p.x, p.y);

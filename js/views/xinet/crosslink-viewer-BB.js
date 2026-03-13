@@ -14,8 +14,8 @@ import {RenderedCrosslink} from "./link/rendered-crosslink";
 import {Group} from "./interactor/group";
 import {P_PLink} from "./link/p_p-link";
 import {G_GLink} from "./link/g_g-link";
-import {ManualColourModel} from "../../model/color/protein-color-model";
-import {linkColor} from "../../model/color/setup-colors";
+import {ManualColourModel} from "../../backbone-models/color/protein-color-model";
+import {linkColor} from "../../backbone-models/color/setup-colors";
 import vent from "../../vent";
 
 /**
@@ -44,7 +44,7 @@ export class CrosslinkViewer extends Backbone.View {
     /**
      * Initializes the CrosslinkViewer.
      * Sets up SVG elements, event listeners, layout groups, and the cola force-directed layout.
-     * Creates context menus and initializes the model listeners.
+     * Creates context menus and initializes the backbone-models listeners.
      */
     initialize() {
         // this.debug = true;
@@ -59,7 +59,7 @@ export class CrosslinkViewer extends Backbone.View {
             const menuUL = contextMenuSel.append("div").classed("custom-menu", true)
                 .append("ul");
             contextMenuSel.node().onmouseover = function () {
-                // self.contextMenuParticipant.highlighted = true; // todo - look at - change hidden proteins in model
+                // self.contextMenuParticipant.highlighted = true; // todo - look at - change hidden proteins in backbone-models
                 self.model.setHighlightedProteins(self.contextMenuParticipant.proteins);
             };
             contextMenuSel.node().onmouseout = function (evt) {
@@ -579,8 +579,8 @@ export class CrosslinkViewer extends Backbone.View {
         this.d3cola.stop();
         if (this.firstRender) { // first render
             this.firstRender = false;
-            // if (this.model.get("clmsModel").get("xiNETLayout")) {
-            //     this.loadLayout(this.model.get("clmsModel").get("xiNETLayout").layout);
+            // if (this.backbone-models.get("clmsModel").get("xiNETLayout")) {
+            //     this.loadLayout(this.backbone-models.get("clmsModel").get("xiNETLayout").layout);
             // } else {
             this.autoLayout([]); //layout all
             // }
@@ -1687,10 +1687,10 @@ export class CrosslinkViewer extends Backbone.View {
                         if (renderedParticipant.hidden !== true) {
                             const intersects = this.svgElement.getIntersectionList(svgRect, renderedParticipant.upperGroup);
                             if (intersects.length > 0) {
-                                renderedParticipant.highlighted = true; // todo - use model
+                                renderedParticipant.highlighted = true; // todo - use backbone-models
                                 this.toSelect.push(renderedParticipant.protein);
                             } else {
-                                renderedParticipant.highlighted = false; // todo - use model
+                                renderedParticipant.highlighted = false; // todo - use backbone-models
                             }
                         }
 
@@ -1699,12 +1699,12 @@ export class CrosslinkViewer extends Backbone.View {
                         if (renderedGroup.hidden !== true && renderedGroup.expanded === false) {
                             const intersects = this.svgElement.getIntersectionList(svgRect, renderedGroup.upperGroup);
                             if (intersects.length > 0) {
-                                renderedGroup.highlighted = true;  // todo - use model?
+                                renderedGroup.highlighted = true;  // todo - use backbone-models?
                                 for (let renderedParticipant of renderedGroup.renderedProteins) {
                                     this.toSelect.push(renderedParticipant.protein);
                                 }
                             } else {
-                                renderedGroup.highlighted = false;  // todo - use model?
+                                renderedGroup.highlighted = false;  // todo - use backbone-models?
                             }
                         }
                     }

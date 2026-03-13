@@ -27,7 +27,7 @@ export class FilterModel extends Backbone.Model {
     /**
      * Creates a new FilterModel instance and initializes filter constraints.
      * Sets up value extents, validation patterns, and type definitions for all filter properties.
-     * @param {Object} attributes - Initial model attributes
+     * @param {Object} attributes - Initial backbone-models attributes
      * @param {Object} options - Configuration options
      */
     constructor(attributes, options) {
@@ -139,7 +139,7 @@ export class FilterModel extends Backbone.Model {
     }
 
     /**
-     * Initializes the filter model with score/distance extents and preprocessing structures.
+     * Initializes the filter backbone-models with score/distance extents and preprocessing structures.
      * Sets up matchScoreCutoff and distanceCutoff arrays (avoiding shared array references in defaults),
      * initializes scoreExtent and distanceExtent from secondarySettings or current values,
      * and creates preprocessing data structures (valMap, preprocessedInputValues).
@@ -150,7 +150,7 @@ export class FilterModel extends Backbone.Model {
     initialize(options, secondarySettings) {
         if (!this.get("matchScoreCutoff")) {
             this.set("matchScoreCutoff", [undefined, undefined]);
-            // ^^^setting an array in defaults passes that same array reference to every instantiated model, so do it in initialize
+            // ^^^setting an array in defaults passes that same array reference to every instantiated backbone-models, so do it in initialize
         }
         // scoreExtent used to restrain text input values
         this.scoreExtent = (secondarySettings ? secondarySettings.scoreExtent : undefined) || this.get("matchScoreCutoff").slice(0);
@@ -174,7 +174,7 @@ export class FilterModel extends Backbone.Model {
     /**
      * Resets all filter values to their initial state.
      * Only used by tests. Restores values stored during initialization.
-     * @returns {FilterModel} This model instance for chaining
+     * @returns {FilterModel} This backbone-models instance for chaining
      */
     resetFilter() {
         this

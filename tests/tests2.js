@@ -2,10 +2,10 @@ import * as NGL from "ngl";
 import * as d3 from "d3";
 import {module, start, test} from "qunit";
 import {blosumLoading, models, postDataLoaded, pretendLoad} from "../js/networkFrame";
-import {setupColourModels} from "../js/model/color/setup-colors";
+import {setupColourModels} from "../js/backbone-models/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {NGLExportUtils} from "../js/views/ngl/NGLExportUtils";
-import {SearchResultsModel} from "../js/models/search-results-model";
+import {SearchResultsModel} from "../js/clms-model/search-results-model";
 import vent from "../js/vent";
 
 // Enable full stack traces in console for test failures
@@ -37,7 +37,7 @@ export function testSetup2() {
             d3.json("15884.json", function (options) {
                 console.log(`*loaded 15884.json for ${pdbFile}`);
 
-                // Create fresh model instance for this test
+                // Create fresh backbone-models instance for this test
                 const blosumCollInst = blosumLoading({ url: "../R/blosums.json" });
                 const clmsModel = new SearchResultsModel();
                 clmsModel.storeMzIdentMLFiles(options.mzidentmlFiles);
@@ -139,9 +139,9 @@ export function testCallback2(model) {
 // COMMENTED OUT: JSON parsing test (Parsing2 module)
 // This test was redundant as it ran 6 times with identical expectations
 /*
-export function testCallback2(model) {
+export function testCallback2(backbone-models) {
     start();
-    const clmsModel = model.get("clmsModel");
+    const clmsModel = backbone-models.get("clmsModel");
     console.log("HERE");
     module("Parsing2");
     test("JSON to Model Parsing", function (assert) {

@@ -120,7 +120,7 @@ export const NGLExportUtils = {
         const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
         const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").getCrosslinks();
 
-        const header = ["model,protein1,chain1,res1,protein2,chain2,res2,distance"];
+        const header = ["backbone-models,protein1,chain1,res1,protein2,chain2,res2,distance"];
         const crosslinkLines = [];
         for (let link of links) {
             if (!selectedOnly || selectedLinkIds.indexOf(link.origId) !== -1) {
@@ -159,7 +159,7 @@ export const NGLExportUtils = {
         const selectedLinkIds = nglModelWrapper.get("compositeModel").get("selection").map(l => l.id);
         const crosslinkMap = nglModelWrapper.get("compositeModel").get("clmsModel").getCrosslinks();
 
-        const header = ["model,protein1,chain1,res1,protein2"];
+        const header = ["backbone-models,protein1,chain1,res1,protein2"];
         const crosslinkLines = [];
         for (let link of links) {
             if (!selectedOnly || selectedLinkIds.indexOf(link.origId) !== -1) {

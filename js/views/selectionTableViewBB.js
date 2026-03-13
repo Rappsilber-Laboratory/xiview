@@ -150,7 +150,7 @@ export class SelectionTableViewBB extends Backbone.View {
             },
             "validated": function() {
                 return !self.model.get("serverFlavour") === "XI2";
-            }, //CLMS.model.manualValidatedFound; },
+            }, //CLMS.backbone-models.manualValidatedFound; },
             homom: function () {
                 return false;
             },
@@ -460,7 +460,7 @@ export class SelectionTableViewBB extends Backbone.View {
         // draw if selected crosslink count > 0 or is 'freshly' zero
         if (selectedXLinkCount > 0 || this.lastCount > 0) {
             this.lastCount = selectedXLinkCount;
-            //console.log("rendering table view of selected crosslinks", this, this.model);
+            //console.log("rendering table view of selected crosslinks", this, this.backbone-models);
 
             const headerRow = d3.select(this.el).select("THEAD TR");
             const headerJoin = headerRow.selectAll("TH").data(this.filteredProps, function (d) {
@@ -586,7 +586,7 @@ export class SelectionTableViewBB extends Backbone.View {
 
         filteredProps = filteredProps || this.filteredProps;
         const self = this;
-        //var proteinMap = this.model.get("clmsModel").getProteins();
+        //var proteinMap = this.backbone-models.get("clmsModel").getProteins();
         const identityFunc = function (d) {
             return d.id;
         };
@@ -767,7 +767,7 @@ export class SelectionTableViewBB extends Backbone.View {
     }
 
     // this is called when mouse moved over a row
-    // and should via the backbone models and events eventually call setTableHighlights above too
+    // and should via the backbone clms-backbone-models and events eventually call setTableHighlights above too
     highlight(evt) {
         const datum = d3.select(evt.currentTarget).datum();
         return this.highlightFromDatum(datum, evt);
@@ -859,7 +859,7 @@ export class SelectionTableViewBB extends Backbone.View {
         } else {
             //d3.select(".validationControls").style("display", "block");
         }
-        //if (d.src) { // if the src att is missing its from a csv file
+        //if (d.xispec) { // if the xispec att is missing its from a csv file
         // always trigger change event even if same (in some situations we redisplay spectrum viewer through this event)
         this.model
             .set("lastSelectedMatch", {
