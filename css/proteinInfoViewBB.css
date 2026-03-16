@@ -1,12 +1,15 @@
  .panelInner {
     overflow-y: auto;
-    /*height: 100%;*/
+
+    /* height: 100%; */
 }
 
 #proteinInfoPanel .protTab {
     cursor: pointer;
-    /*color:white;*/
-    /*background: blue;*/
+
+    /* color:white; */
+
+    /* background: blue; */
 }
 
 #proteinInfoPanel .selectedTab {
@@ -50,13 +53,14 @@
 }
 
 .proteinInfoPanel tbody td {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     line-height: 1.4em;
 }
 
 .proteinInfoPanel .hit {
     color: #00c;
-    /*background: white;*/
+
+    /* background: white; */
     cursor: pointer;
     font-weight: bold;
     text-decoration: underline;

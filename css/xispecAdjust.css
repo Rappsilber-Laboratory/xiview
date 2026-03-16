@@ -10,35 +10,43 @@
 .xispec_subViewHeader{
   background: rgb(9, 29, 66)!important;
 }
+
 .xispec_settings_menu{
     margin: -2px -9px!important;
 }
+
 .xispec_settings_menu .xispec_btn{
       background: #e3e3e3!important;
       color: var(--main-color)!important;
 }
+
 .xispec_dynDiv_moveParentDiv {
     border: none!important;
 }
+
 .xispec_settings_menu .xispec_btn:hover{
       background: #fff!important;
 }
+
 .xispec_settings_menu .xispec_active{
-  background: rgba(192,206,224,1)!important;
+  background: rgb(192,206,224,1)!important;
 }
+
 .xispec_settings_menu .xispec_active:hover{
-  background: rgba(192,206,224,1)!important;
+  background: rgb(192,206,224,1)!important;
   color: var(--main-color)!important;
 }
 
 .xispec_settings_menu .xispec_btn{
-    /*background: #666!important;*/
+    /* background: #666!important; */
 }
+
 .xispec_settings_menu .xispec_active{
-    /*background: #333!important;*/
+    /* background: #333!important; */
 }
+
 .xispec_settings_menu .xispec_active:hover {
-    /*color: #fff;*/
+    /* color: #fff; */
 }
 
 
@@ -47,15 +55,19 @@
     border: 1px solid var(--main-color)!important;
     color: var(--main-color)!important;
 }
+
 .xispec_multiSelect_dropdown-content {
     background-color: var(--main-color)!important;
 }
+
 .xispec_form-control:focus {
   border-color: var(--main-color)!important;
 }
+
 #xispec_settingsCustomCfgApply{
 	display: inline!important;
 }
+
 #xispec_settingsAnnotatorApply{
     display: inline!important;
 }

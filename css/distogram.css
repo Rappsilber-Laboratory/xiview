@@ -1,6 +1,9 @@
 .distoDiv {
     background: #eee;
-    /*display: table-row;*/ /* not needed, now a flex-box approach */
+
+    /* display: table-row; */
+
+ /* not needed, now a flex-box approach */
     height: 100%;
 }
 
@@ -14,12 +17,12 @@
 
 .distoDiv .c3-axis .tick text {
     font-size: 1.3em;
-    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    font-family: Lato-Regular, Helvetica, Arial, sans-serif;
 }
 
 .distoDiv .c3-title {
     font-size: 1.25em;
-    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    font-family: Lato-Regular, Helvetica, Arial, sans-serif;
 }
 
 .distoDiv rect.c3-event-rect:hover {
@@ -34,5 +37,5 @@
 .distoDiv #selectedStripe line {
 	stroke: black;
 	stroke-width: 1;
-	shape-rendering: crispEdges;
+	shape-rendering: crispedges;
 }

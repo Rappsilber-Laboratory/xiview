@@ -3,69 +3,70 @@
     overflow: hidden;
 }
 
-.selectView > DIV.scrollHolder {
+.selectView > div.scrollHolder {
     /* height: calc(100% - 45px); */
     flex-grow: 1;
     overflow: auto;
     min-height: 1px;
 }
 
-.selectView TABLE  {
+.selectView table  {
     border-collapse: separate;
 }
 
-.selectView TABLE TH  {
+.selectView table th  {
     vertical-align: bottom;
 }
 
-.selectView THEAD {
+.selectView thead {
     background: #eee;
 }
 
 .selectView tbody tr:nth-child(even) {
-    background: #eee;/*#e8e8ff;*/
+    background: #eee;/* #e8e8ff; */
 }
 
-.selectView TBODY TR:first-child {
-    /*background: #99f;*/
+.selectView tbody tr:first-child {
+    /* background: #99f; */
     color: #444;
     font-size: 1em;
 }
 
 /* this replaces a .selectView TBODY rule which doesn't work when border-collapse is set to separate */
-.selectView TBODY TR:first-child TD {
+.selectView tbody tr:first-child td {
     border-top: 2px solid #668;
 }
 
-.selectView TBODY TR.matchRow td:not(:first-child), .selectView THEAD TR th:not(:first-child) {
+.selectView tbody tr.matchRow td:not(:first-child), .selectView thead tr th:not(:first-child) {
     border-left: 1px solid #ddd;
 }
 
-.selectView THEAD TR {
+.selectView thead tr {
     line-height: 1.3em;
-    /*height: 1.5em;*/
+
+    /* height: 1.5em; */
 }
 
-.selectView TBODY TR {
+.selectView tbody tr {
     white-space: nowrap;
     line-height: 1.8em;
     height: 1.8em;
 }
 
-.selectView TR.matchRow {
+.selectView tr.matchRow {
     line-height: 1.1em;
     height: 1.1em;
 }
 
-.selectView TBODY TR.matchRow td.colSectionStart:not(:first-child), .selectView THEAD TR th.colSectionStart:not(:first-child) {
+.selectView tbody tr.matchRow td.colSectionStart:not(:first-child), .selectView thead tr th.colSectionStart:not(:first-child) {
     border-left: 3px solid #bbb;
 }
 
-.selectView TD.number {
+.selectView td.number {
     text-align: right;
 }
 
-.selectView TD.monospaced {
+.selectView td.monospaced {
     font-family: monospace;
     font-size: 1.1em;
 }
@@ -75,22 +76,22 @@
     font-weight: bold;
 }
 
-.selectView TD.maxWidth {
+.selectView td.maxWidth {
     max-width: 12em;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.selectView TD.minWidth, .selectView TH.minWidth {
+.selectView td.minWidth, .selectView th.minWidth {
     min-width: 7em;
 }
 
-.selectView TD.emphasise {
+.selectView td.emphasise {
     font-weight: bold;
     transform: scaleX(1.1);
 }
 
-.selectView tbody TR.spectrumShown2 {
+.selectView tbody tr.spectrumShown2 {
     color: black;
     background: #afa;
 }
@@ -116,11 +117,11 @@
     max-width: 3.5em;
 }
 
-.selectView .pager:before {
+.selectView .pager::before {
     content: "Page";
 }
 
-.selectView TR.matchRow.highlighted {
+.selectView tr.matchRow.highlighted {
     fill: #fdc086;
     background-color: #fdc086;
     color: #222;
@@ -131,7 +132,8 @@
     background-color: inherit;
     -webkit-transition: initial;
     -moz-transition: initial;
-    /*-ms-transition: initial;*/
+
+    /* -ms-transition: initial; */
     -o-transition: initial;
     transition: initial;
 }
@@ -157,7 +159,7 @@
     color: #a8a8a8;
 }
 
-.selectView tr:hover .smallText, .selectView TR.matchRow.highlighted .smallText, .selectView TR.spectrumShown2 .smallText {
+.selectView tr:hover .smallText, .selectView tr.matchRow.highlighted .smallText, .selectView tr.spectrumShown2 .smallText {
     color: inherit;
 }
 
@@ -166,8 +168,9 @@
      -moz-appearance: textfield;
           appearance: textfield;
 }
-.selectView input[type=number]::-webkit-inner-spin-button,
-.selectView input[type=number]::-webkit-outer-spin-button {
+
+.selectView input[type="number"]::-webkit-inner-spin-button,
+.selectView input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
 }
 

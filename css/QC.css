@@ -1,14 +1,14 @@
 
 .xispec_subViewHeader{
-  color: #ffffff;
+  color: #fff;
   padding-left: 0.5em;
   border-top: 1px solid black;
   border-bottom: 1px solid white;
-  background: rgba(117, 0, 0, 1);
+  background: rgb(117, 0, 0, 1);
 }
 
 .xispec_subViewHeader .xispec_btn{
-  padding: 0px 6px;
+  padding: 0 6px;
   font-size: smaller;
 }
 
@@ -33,6 +33,7 @@
 
 #xispec_subViewContent-right {
     flex-grow:  1;
+
     /* position: relative; */
     display:  flex;
 	min-height: 1px; /* firefox fix */

@@ -18,8 +18,7 @@
     text-anchor: middle;
 }
 
-.matrixView canvas {
-    image-rendering: -moz-crisp-edges;          /* Firefox */
+.matrixView canvas {          /* Firefox */
     -ms-interpolation-mode: nearest-neighbor;   /* IE */
     image-rendering: pixelated;                 /* Opera 'n' Chrome */
     -ms-transform-origin: 0 0;
@@ -30,8 +29,7 @@
 }
 
 /* For svg output */
-.matrixView image {
-    image-rendering: -moz-crisp-edges;          /* Firefox */
+.matrixView image {          /* Firefox */
     -ms-interpolation-mode: nearest-neighbor;   /* IE */
     image-rendering: pixelated;                 /* Opera 'n' Chrome */
 }

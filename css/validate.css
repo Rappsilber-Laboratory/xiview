@@ -7,15 +7,15 @@ span.validatedState {
 }
 
 button.A:hover, button.A.validatedState, tr.A, span.A.validatedState {
-    background-color:#7fc97f;/*#4daf4a;*/
+    background-color:#7fc97f;/* #4daf4a; */
 }
 
 button.B:hover, button.B.validatedState, tr.B, span.B.validatedState {
-    background-color:#fdc086;/*#ff7f00;*/
+    background-color:#fdc086;/* #ff7f00; */
 }
 
 button.C:hover, button.C.validatedState, tr.C, span.C.validatedState {
-    background-color:#ffff99;/*#ffff33;*/
+    background-color:#ff9;/* #ffff33; */
 }
 
 button.Q:hover, button.Q.validatedState, tr.Q, span.Q.validateState {

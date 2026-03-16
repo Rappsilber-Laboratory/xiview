@@ -19,62 +19,61 @@
     font-weight: bold;
 }
 
-DIV.tableWrapper TABLE {
-    /*table-layout: fixed;*/
+div.tableWrapper table {
+    /* table-layout: fixed; */
     font-size: 10pt;
 	color: #000;
 	position: inherit;
 }
 
-DIV.tableWrapper DIV.seqDiv {
+div.tableWrapper div.seqDiv {
      /* always show scrollbar even if not needed so content underneath doesn't jump (which it does with auto) */
-    overflow-x: scroll;
-    overflow-y: auto;
+    overflow: scroll auto;
     max-height: 25em;
 	border-left: 8em solid #eee;
 }
 
-DIV.tableWrapper TABLE TH:first-child {
+div.tableWrapper table th:first-child {
      width:8em;
 }
 
-DIV.tableWrapper TABLE THEAD {
+div.tableWrapper table thead {
     /* display: block; */
     margin: 0;
     background: #eee;
 	height: 1em;
 }
 
-DIV.tableWrapper TABLE.seqTable TBODY TH:first-child {
+div.tableWrapper table.seqTable tbody th:first-child {
     position: absolute;    /* 'fixed' caused overflow of container */
     overflow: hidden;
     text-overflow: ellipsis;
 	left: 0;
 }
 
-DIV.tableWrapper TBODY {
+div.tableWrapper tbody {
     border-top: 0.5em solid #eee;
 }
 
-DIV.tableWrapper TD, DIV.tableWrapper TH {
+div.tableWrapper td, div.tableWrapper th {
     margin: 0;
     padding: 0 0.1em;
     line-height: 1em;
     height: 1em;
 }
 
-DIV.tableWrapper TH {
+div.tableWrapper th {
     background: #eee;
 	text-align: left;
 }
 
-DIV.tableWrapper THEAD TH {
+div.tableWrapper thead th {
     color: #668;
     padding: 0.2em 0.1em;
 }
 
 
-DIV.tableWrapper TABLE SPAN {
+div.tableWrapper table span {
     white-space: pre;
 }
 
@@ -90,30 +89,32 @@ DIV.tableWrapper TABLE SPAN {
 	background: #fc6;
 }
 
-P.seq, TD.seq {
+p.seq, td.seq {
     font-family: monospace;
 }
 
-DIV.checkHolder {
+div.checkHolder {
 	padding-top: 1px;
     padding-bottom: 1px;
     margin-bottom: 0;
     line-height: normal;
     max-height: 10em;
     overflow-y: auto;
+
 	/* this makes the tabs appear to fill from the bottom up */
 	display: flex;
-	/*flex-wrap: wrap-reverse;*/
+
+	/* flex-wrap: wrap-reverse; */
 	flex-wrap: wrap;
 }
 
 /* allows breaking after a span tab but not in the label it contains */
-DIV.checkHolder SPAN.alignTab:after {
+div.checkHolder span.alignTab::after {
     content: ' ';
 }
 
 /* Next 3 rules give a tab like appearance to input-label sibling pairs inside spans */
-DIV.checkHolder SPAN LABEL {
+div.checkHolder span label {
     padding: 0 0.4em;
     margin: 0;
     border: 1px solid #bbb;
@@ -122,11 +123,11 @@ DIV.checkHolder SPAN LABEL {
     white-space: nowrap;
 }
 
-DIV.checkHolder SPAN INPUT {
+div.checkHolder span input {
     display: none;
 }
 
-DIV.checkHolder SPAN INPUT:checked + label {
+div.checkHolder span input:checked + label {
     background: white;
     border: 1px solid #444;
 	border-bottom: none;
@@ -134,7 +135,7 @@ DIV.checkHolder SPAN INPUT:checked + label {
     color: black;
 }
 
-DIV.alignSettings {
+div.alignSettings {
     font-size: 1em
 }
 
@@ -150,7 +151,7 @@ DIV.alignSettings {
     padding: 0;
 }
 
-.controlBlock input[type=number] {
+.controlBlock input[type="number"] {
     width: 3em;
 }
 
@@ -167,7 +168,7 @@ DIV.alignSettings {
     content: "";
 }
 
-.alignSettings .alignChoiceGroup input[type=radio] {
+.alignSettings .alignChoiceGroup input[type="radio"] {
 	vertical-align: text-bottom;
 }
 

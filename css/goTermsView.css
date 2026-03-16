@@ -9,14 +9,18 @@
  .goTermsView svg {
     height: 100%;
     width: 100%;
+
     /* position: absolute; */
+
     /* shape-rendering: crispedges; */
     pointer-events: auto;
 }
 
 .goLink {
   fill: none;
+
   /* stroke: #000; */
+
   /* stroke-opacity: .6; */
   stroke-width: 1;
 }
@@ -27,8 +31,9 @@ div.goTermsView > div > div.panelInner {
 
 .node rect {
   /* cursor: move; */
+
   /* fill-opacity: .9; */
-  shape-rendering: crispEdges;
+  shape-rendering: crispedges;
 }
 
 .node text {

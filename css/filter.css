@@ -6,7 +6,8 @@
 .filterControlGroup {
 	position: relative;
 	vertical-align: top;
-    /*display: inline-block;*/
+
+    /* display: inline-block; */
 	display: inline-flex;
     padding: 0 0.2em 0 0;
 	border-right: 1px solid #bbb;
@@ -41,7 +42,7 @@
     line-height: 1.3em;
 }
 
-.filterControlGroup input[type=checkbox] {
+.filterControlGroup input[type="checkbox"] {
     margin-left: 0;
 }
 
@@ -61,7 +62,7 @@ div.filterItem, div.scoreSlider > div {
 }
 
 
-.filterItem span:after, .scoreSlider span:after {
+.filterItem span::after, .scoreSlider span::after {
     content: ' ';
     display: block;
 }
@@ -74,6 +75,7 @@ div.filterItem, div.scoreSlider > div {
 
 .scoreSlider  {
     display: inline-block;
+
 /*
     border-left: 1px solid #bbb;
     border-right: 1px solid #bbb;
@@ -91,7 +93,7 @@ div.filterItem, div.scoreSlider > div {
 	transform: scaleY(1.4);
 }
 
-.scoreSlider P:not(.cutoffLabel):last-child {
+.scoreSlider p:not(.cutoffLabel):last-child {
     line-height: 1.2em;
 }
 

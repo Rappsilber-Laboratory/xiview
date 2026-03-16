@@ -1,10 +1,13 @@
 .CLMStooltip {
     position: absolute;
-    border: 4px solid #fdc086; /*#444*/
-    /*border-radius: 10px;*/
-    /*background: #add;*/
+    border: 4px solid #fdc086; /* #444 */
+
+    /* border-radius: 10px; */
+
+    /* background: #add; */
     background: #eee;
-    /*opacity: 0.9;*/
+
+    /* opacity: 0.9; */
     z-index: 1001;
     max-width: 350px;
     line-height: 1em;
@@ -12,13 +15,16 @@
 }
 
 .CLMStooltip h2 {
-    padding: 2px 4px 4px 4px;
+    padding: 2px 4px 4px;
     font-size: 12pt;
     margin: 0;
-    /*border-radius: 8px 8px 0px 0px;*/
-    /*color: #000;*/
-    /*background: #1c94c4;*/
-    color: #ffffff;
+
+    /* border-radius: 8px 8px 0px 0px; */
+
+    /* color: #000; */
+
+    /* background: #1c94c4; */
+    color: #fff;
     background: var(--main-color);
 }
 
@@ -43,13 +49,13 @@
 .CLMStooltip table {
     border-collapse: collapse;
     background: none;
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     margin: 0;
     padding: 0;
 }
 
 .CLMStooltip table tr:nth-child(2n) {
-    background: rgba(255,255,255,0.25);
+    background: rgb(255,255,255,0.25);
 }
 
 .CLMStooltip table tr td {
@@ -79,7 +85,8 @@
 .c3-tooltip-container {
     z-index: 10;
     border: 2px solid #444;
-    /*border-radius: 10px;*/
+
+    /* border-radius: 10px; */
     background: #add;
     opacity: 0.9;
     line-height: 1em;
@@ -96,14 +103,15 @@ table.c3-tooltip tr {
 }
 
 table.c3-tooltip tr:nth-child(2n) {
-    background: rgba(255,255,255,0.25);
+    background: rgb(255,255,255,0.25);
 }
 
 table.c3-tooltip th {
-    padding: 2px 4px 4px 4px;
+    padding: 2px 4px 4px;
     font-size: 12pt;
     margin: 0;
-    /*border-radius: 8px 8px 0px 0px;*/
+
+    /* border-radius: 8px 8px 0px 0px; */
     color: #000;
     background: #1c94c4;
     height: 1em;

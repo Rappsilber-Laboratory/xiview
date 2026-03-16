@@ -16,8 +16,7 @@
     text-anchor: middle;
 }
 
-.scatterplotView canvas {
-    image-rendering: -moz-crisp-edges;          /* Firefox */
+.scatterplotView canvas {          /* Firefox */
     -ms-interpolation-mode: nearest-neighbor;   /* IE */
     image-rendering: pixelated;                 /* Opera 'n' Chrome */
     -ms-transform-origin: 0 0;
@@ -28,8 +27,7 @@
 }
 
 /* For svg output */
-.scatterplotView image {
-    image-rendering: -moz-crisp-edges;          /* Firefox */
+.scatterplotView image {          /* Firefox */
     -ms-interpolation-mode: nearest-neighbor;   /* IE */
     image-rendering: pixelated;                 /* Opera 'n' Chrome */
 }

@@ -44,7 +44,7 @@ changes there are automatically reflected in the legend
 .miniKey {
     width: 52px;
     height: 30px;
-    shape-rendering: crispEdges;
+    shape-rendering: crispedges;
     background: white;
     padding-left: 1px;
 }
@@ -162,6 +162,6 @@ changes there are automatically reflected in the legend
     margin-bottom: 1.5em;
 }
 
-.keyPanel .sectionTable H2 {
+.keyPanel .sectionTable h2 {
     text-transform: capitalize;
 }

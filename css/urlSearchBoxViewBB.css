@@ -1,4 +1,4 @@
-.urlSearchBox input[type=text] {
+.urlSearchBox input[type="text"] {
 	min-width: 25em;
 	width: 100%;
 	line-height: 2em;

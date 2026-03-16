@@ -1,5 +1,5 @@
 #spectrumControls {
-    /*display: table-row;*/
+    /* display: table-row; */
     flex-shrink: 0;
 }
 
@@ -34,7 +34,7 @@
 
 /* Important, let's the div with this class take up the remaining height inside a div declared with display:table */
 .heightFill {
-    /*display: table-row;*/
+    /* display: table-row; */
     flex-grow: 1;
     overflow: hidden;
     height: 100%;
@@ -45,6 +45,7 @@
 	padding:5px;
 	background: white;
     flex-shrink: 0;
+
 /*
     display: table-row;
 */
@@ -55,6 +56,7 @@
     height: 100%;
     flex-grow: 1;
 }
+
 .spectrumPlotsDiv {
     display: flex;
     flex-direction: column;
@@ -74,14 +76,16 @@
 
 #measureTooltip {
     position: absolute;
-    /*max-width: 8em;*/
+
+    /* max-width: 8em; */
     text-align:center;
-    pointer-events:none; /*let mouse events pass through*/
-    /*transition: opacity 0.3s;*/
+    pointer-events:none; /* let mouse events pass through */
+
+    /* transition: opacity 0.3s; */
     color: black;
-    background: rgba(230,230,230,0.4);
+    background: rgb(230,230,230,0.4);
     padding: 0.2em;
-    border: 1px solid rgba(128,128,128,0.5);
+    border: 1px solid rgb(128,128,128,0.5);
     line-height: normal;
 }
 
@@ -102,6 +106,7 @@
 #alternatives {
     /* height:200px; */
 	max-height: 200px;
+
 	/*
     flex-shrink: 1;
 	flex-grow: 1;

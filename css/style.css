@@ -1,10 +1,12 @@
 /* Styles specific to xiVIEW visualisation page */
 
-/*span, */label {
+/* span, */label {
     -webkit-user-select: none;
-    /*-khtml-user-select: none;*/
+
+    /* -khtml-user-select: none; */
     -moz-user-select: none;
-    /*-o-user-select: none;*/
+
+    /* -o-user-select: none; */
     user-select: none;
 }
 
@@ -15,7 +17,8 @@
 /* class not named .background as that clashes with d3 brush stuff */
 .backdrop {
 	background: #eee;
-	/*background-color: #eee;*/
+
+	/* background-color: #eee; */
 }
 
 /* fa */
@@ -28,6 +31,7 @@
     padding: 0 1px;
 	user-select: none;
 }
+
 .fa-xi:hover {
     color: var(--main-color);
     background:white;
@@ -44,6 +48,7 @@
     margin-right: 0.5em;
     color: white;
 }
+
 .fa-times-circle {
     margin-right:22px;
 }
@@ -67,8 +72,10 @@
     background-color: var(--main-color);
     color: #fff;
     position: absolute;
+
     /* increased z-index to 50 so it's children (i.e. drop-down menus) overlay floating windows */
-    /*z-index: 50;*/
+
+    /* z-index: 50; */
     width: 100%;
 }
 
@@ -81,11 +88,11 @@
 #main {
     height:100vh;
     width:100vw;
-    /* position: absolute; */ /* because this stops menus overlaying views */
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+
+    /* position: absolute; */
+
+ /* because this stops menus overlaying views */
+    inset: 0;
     overflow:hidden;
     z-index:0;
 }
@@ -126,9 +133,11 @@
 .histoLabel{
     color:black;
 }
+
 .dist{
     height:100px;
 }
+
 .bar rect {
   fill: steelblue;
 }
@@ -140,6 +149,7 @@
 .peakAnnot{
     font-size:12px;
 }
+
 .fragBar{
     stroke-width:1.3px;
     stroke-linecap:round;
@@ -153,28 +163,33 @@
 }
 
 #bottomDiv {
-    /*background: rgba(9, 29, 66, 0.9);*/
-    /*padding:0 10px;*/
+    /* background: rgba(9, 29, 66, 0.9); */
+
+    /* padding:0 10px; */
     position: relative; /* will overlay previous absolute divs i.e. distance slider */
 }
+
 .noMarg{
     margin:0 !important;
 }
 
 .dynDiv, .xispec_dynDiv{
     padding:20px 10px;
-    /*background: rgba(9, 29, 66, 0.9);*/
+
+    /* background: rgba(9, 29, 66, 0.9); */
     overflow: hidden;
     color:var(--main-color)!important;
     position:fixed;
     pointer-events:all;
-    background: rgba(224,224,224,1)!important;
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.5)!important;
+    background: rgb(224,224,224,1)!important;
+    box-shadow: 5px 5px 10px rgb(0,0,0,0.5)!important;
     border: 1px solid #888!important;
+
 /*
     height:400px;
 */
 }
+
 .dynDiv_moveParentDiv, .xispec_dynDiv_moveParentDiv{
     height:20px;
     background:var(--main-color)!important;
@@ -192,9 +207,11 @@
 .dynDiv_resizeDiv_tr {
     transform: rotate(90deg);
 }
+
 .dynDiv_resizeDiv_bl {
     transform: rotate(270deg);
 }
+
 .dynDiv_resizeDiv_br {
     transform: rotate(180deg);
 }
@@ -205,17 +222,17 @@
 }
 
 /* window drop-down menus should have grey background */
-.dynDiv .dropdown DIV {
+.dynDiv .dropdown div {
     background: #ddd;
 }
 
 /* Buttons in window drop-down menus shouldn't have borders */
-.dynDiv .dropdown LI .btn-1 {
+.dynDiv .dropdown li .btn-1 {
     padding: 0.25em 1em;
     border: none;
 }
 
-.dynDiv .dropdown LI .btn-1a:hover {
+.dynDiv .dropdown li .btn-1a:hover {
     background: transparent;
 }
 
@@ -246,25 +263,27 @@
 }
 
 #main .controls{
-    overflow-y: hidden;
-	overflow-x: visible;
-    /*display: table-row;*/
+    overflow: visible hidden;
+
+    /* display: table-row; */
 
     position: fixed;
     bottom: 0;
     height: 65px;
-
     border-top: 1px solid #ccc!important;
-
     width: 100%;
     background:#ecedf2!important;
     color:var(--main-color)!important;
-    /*padding-left: 10px;*/
-    /*padding-right: 10px;*/
+
+    /* padding-left: 10px; */
+
+    /* padding-right: 10px; */
     -webkit-user-select: none;
-    /*-khtml-user-select: none;*/
+
+    /* -khtml-user-select: none; */
     -moz-user-select: none;
-    /*-o-user-select: none;*/
+
+    /* -o-user-select: none; */
     user-select: none;
 }
 
@@ -307,11 +326,13 @@
     width: 100%;
     height: 100%;
 }
+
 #spectrumPanelWrapper{
     left: 280px;
     width: 750px;
     height: 600px;
 }
+
 #spectrumSettingsWrapper{
   left: 200px;
   top: 100px;
@@ -320,6 +341,7 @@
   min-width: 550px;
   min-height: 530px;
 }
+
 #nglPanel{
     left: 40px;
     width: 60em;
@@ -327,6 +349,7 @@
 	min-width: 45em;
 	min-height: 30em;
 }
+
 #distoPanel{
     left: 40px;
     width:50em;
@@ -397,7 +420,8 @@
     left: 40px;
     width: 70em;
 	min-width: 30em;
-    /*height:80px;*/
+
+    /* height:80px; */
 }
 
 label.horizontalFlow:not(:last-child) {
@@ -406,13 +430,13 @@ label.horizontalFlow:not(:last-child) {
     margin-right: 0.4em;
 }
 
-label.horizontalFlow input[type=number] {
+label.horizontalFlow input[type="number"] {
     margin-left: 0.2em;
 }
 
 /* See http://jsfiddle.net/7jx02upg/1/ */
-label.horizontalFlow input[type=radio], label.horizontalFlow input[type=checkbox] {
-    /*vertical-align: normal;*/
+label.horizontalFlow input[type="radio"], label.horizontalFlow input[type="checkbox"] {
+    /* vertical-align: normal; */
 }
 
 /* <label class='horizontalFlow'><span class='noBreak'>stuff you dont want split over multiple lines</span></label><more labels n spans...>
@@ -451,7 +475,7 @@ label.horizontalFlow::after, #nglPanel label.btn::before, #pdbPanel label.btn::b
 	vertical-align: sub;
 }
 
-A.btn {
+a.btn {
     text-decoration: none;
 }
 
@@ -468,7 +492,6 @@ A.btn {
 /* For use with Split.js */
 
 .gutter {
-
     background-color: var(--main-color);
   background-repeat: no-repeat;
   background-position: 50%;
@@ -512,7 +535,7 @@ A.btn {
 }
 
 .axis {
-    shape-rendering: crispEdges;
+    shape-rendering: crispedges;
 }
 
 
@@ -557,11 +580,13 @@ A.btn {
     background: inherit;
     -webkit-transition: none;
     -moz-transition: none;
-    /*-ms-transition: none;*/
+
+    /* -ms-transition: none; */
     -o-transition: none;
     transition: none;
-    /*border-top-color: #444;
-    border-bottom-color: #444;*/
+
+    /* border-top-color: #444;
+    border-bottom-color: #444; */
 }
 
 .sectionTable table {
@@ -580,7 +605,7 @@ A.btn {
 
 .toolbar {
     margin-bottom: 0.15em;
-    border-bottom: 1px solid rgba(0,0,0,0.5);
+    border-bottom: 1px solid rgb(0,0,0,0.5);
     flex-shrink: 0; /* fixes toolbar overflow in ie11 */
 }
 
@@ -603,13 +628,13 @@ div.columnbar[disabled], div.columnbar[disabled], label.fakeButton[disabled] {
 }
 
 .toolbar > .sectionDividerRight {
-	border-right: 1px solid rgba(0,0,0,0.5);
+	border-right: 1px solid rgb(0,0,0,0.5);
 	margin-right: 0.5em;
 	padding-right: 0.5em;
 }
 
 .toolbar > .sectionDivider2 {
-	border-right: 1px solid rgba(0,0,0,0.5);
+	border-right: 1px solid rgb(0,0,0,0.5);
 	margin-right: 0.5em;
 	padding-right: 1em;
 }
@@ -619,41 +644,43 @@ div.columnbar[disabled], div.columnbar[disabled], label.fakeButton[disabled] {
 }
 
 .sectionDividerLeft {
-	border-left: 1px solid rgba(0,0,0,0.5);
+	border-left: 1px solid rgb(0,0,0,0.5);
 	margin-left: 0.5em;
 	padding-left: 0.5em;
 }
 
 .toolbar hr.toolbarSeparator {
     display: block;
-    margin: 0.4em 0 0 0;
+    margin: 0.4em 0 0;
 }
 
 .pdbWindowButton {
 	vertical-align: text-bottom;
 }
 
-/*button.pdbWindowButton {*/
-/*    margin-bottom: 2em;*/
-/*}*/
+/* button.pdbWindowButton { */
 
-DIV.messagebar {
+/*    margin-bottom: 2em; */
+
+/* } */
+
+div.messagebar {
 	font-size: 1.4em;
 	height: 3em;
 }
 
 /* if div has class 'messagebar' give it this style providing it is not the last div in its container (it's different to div.messageBar) */
-DIV[class='messagebar']:not(:last-of-type) {
+div[class='messagebar']:not(:last-of-type) {
 	margin-bottom: 0.15em;
-	border-bottom: 1px solid rgba(0,0,0,0.5);
+	border-bottom: 1px solid rgb(0,0,0,0.5);
 }
 
 .expectedFormatPanel {
 	margin-bottom: 0.15em;
-	border-bottom: 1px solid rgba(0,0,0,0.5);
+	border-bottom: 1px solid rgb(0,0,0,0.5);
 }
 
-.expectedFormatPanel TABLE TBODY {
+.expectedFormatPanel table tbody {
 	color: grey;
 	font-size: 0.7rem;
 	font-family: monospace;
@@ -703,7 +730,7 @@ DIV[class='messagebar']:not(:last-of-type) {
 svg.tempKey {
 	text-transform: initial;	/* reset text-transforms for temporary svgs */
 	letter-spacing: 0;
-	font-family: "Helvetica";
+	font-family: Helvetica;
     font-size: 12px;
 }
 
@@ -727,7 +754,7 @@ svg.tempKey .keyPoint rect {
 
 svg.tempKey text {
     text-anchor: start;
-    font-family: "Helvetica";
+    font-family: Helvetica;
     font-size: 12px;
 }
 
@@ -741,10 +768,7 @@ svg.tempKey text {
 #subPanelLimiter {
 	position: absolute;
 	pointer-events: none;
-	top: 39px;
-	bottom: 65px;
-	left: 0;
-	right: 0;
+	inset: 39px 0 65px;
 }
 
 .rappsilberImage {
@@ -772,7 +796,7 @@ input {
 
 input.xiNetLinkWidth {
     width: 5em;
-    color: #cccccc;
+    color: #ccc;
 }
 
 input.withSideMargins, select.withSideMargins {
@@ -790,12 +814,12 @@ sup {font-size:xx-small; vertical-align:super;}
 }
 
 .smallHeadingBar {
-    background: rgba(0,0,0,0.1);
+    background: rgb(0,0,0,0.1);
 }
 
 .btn-tight {
 	margin: 0;
-	padding: 2px 2px;
+	padding: 2px;
 	border: 1px solid grey;
 }
 
@@ -806,9 +830,10 @@ sup {font-size:xx-small; vertical-align:super;}
     margin-right: 0.5em;
     vertical-align: middle;
     margin-left: -1.5em;
+
 	/* generated at http://www.colorzilla.com/gradient-editor/ */
-	background: -moz-linear-gradient(left, #fc3932 0%, #e4e82c 25%, #20cc3d 50%, #0436ea 75%, #f986bc 100%); /* FF3.6-15 */
-	background: -webkit-linear-gradient(left, #fc3932 0%,#e4e82c 25%,#20cc3d 50%,#0436ea 75%,#f986bc 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(left, #fc3932 0%, #e4e82c 25%, #20cc3d 50%, #0436ea 75%, #f986bc 100%); /* FF3.6-15 */
+	background: linear-gradient(left, #fc3932 0%,#e4e82c 25%,#20cc3d 50%,#0436ea 75%,#f986bc 100%); /* Chrome10-25,Safari5.1-6 */
 	background: linear-gradient(to right, #fc3932 0%,#e4e82c 25%,#20cc3d 50%,#0436ea 75%,#f986bc 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
@@ -825,8 +850,7 @@ input:invalid:focus {
 }
 
 image.sharpImage {
-    image-rendering: optimizeSpeed;
-    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor;
     image-rendering: pixelated;
 }

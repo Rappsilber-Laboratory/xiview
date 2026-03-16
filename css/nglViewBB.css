@@ -2,7 +2,7 @@
     position: absolute;
     color: #666;
     padding: 0 0.5em;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgb(255, 255, 255, 0.7);
     z-index: 1; /* to overlay ngl div which is now position:relative */
 }
 
@@ -18,7 +18,7 @@
     color: #9f9;
 }
 
-label.btn input[type=file] {
+label.btn input[type="file"] {
     width: 0.1px;
     height: 0.1px;
     opacity: 0;
@@ -29,8 +29,10 @@ label.btn input[type=file] {
 
 .fakeButton {
     display: inline-block;
-    /*vertical-align: top;*/
-    /*height: 32px;*/
+
+    /* vertical-align: top; */
+
+    /* height: 32px; */
     margin-bottom: 0.2em;
     padding-top: 2px;
     padding-bottom: 2px;

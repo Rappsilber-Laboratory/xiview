@@ -8,6 +8,7 @@
     float: right;
     background-color: var(--main-color);
     text-transform: uppercase;
+
     /* padding-left:15px; */
 }
 
@@ -17,7 +18,7 @@
 
 
 #ppiMessage{
-    /*display: none;*/
+    /* display: none; */
     z-index: 1;
     position: fixed;
     overflow: hidden;
@@ -25,9 +26,10 @@
     background-color: var(--main-color);
     color: #fff;
     padding:10px;
-    /*margin: 10px;*/
+
+    /* margin: 10px; */
     top:47px;
-    left: 0px;
+    left: 0;
     text-align: right;
     width:125px;
 }
@@ -42,9 +44,10 @@
     background-color: var(--main-color);
     color: #fff;
     padding:10px;
-    /*margin: 10px;*/
+
+    /* margin: 10px; */
     top: 171px;
-    left: 0px;
+    left: 0;
     text-align: right;
     width:125px;
 }
@@ -81,6 +84,6 @@
 }
 
 #xiNetButtonBar > .sectionDividerLeft {
-    border-left: 1px solid rgba(255,255,255,255);
+    border-left: 1px solid rgb(255,255,255,255);
     margin-left: 0.5em;
 }

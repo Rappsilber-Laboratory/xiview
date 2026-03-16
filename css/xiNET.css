@@ -13,7 +13,7 @@
 }
 
 .selectedProtein {
-    stroke: #ffff99;
+    stroke: #ff9;
 }
 
 .highlightedLink {
@@ -21,7 +21,7 @@
 }
 
 .selectedLink {
-    stroke: #ffff99;
+    stroke: #ff9;
 }
 
 .highlightedPeptide {
@@ -29,7 +29,7 @@
 }
 
 .selectedPeptide {
-    fill: #ffff99;
+    fill: #ff9;
 }
 
 .peptideOverlap {
@@ -42,13 +42,15 @@
     }
 }
 
-/*you need this to stop horrible looking flickering of text as you drag*/
+/* you need this to stop horrible looking flickering of text as you drag */
 
 svg {
     -webkit-user-select: none;
-    /*-khtml-user-select: none;*/
+
+    /* -khtml-user-select: none; */
     -moz-user-select: none;
-    /*-o-user-select: none;*/
+
+    /* -o-user-select: none; */
     user-select: none;
 }
 
@@ -75,6 +77,7 @@ svg {
     overflow: hidden;
     border: 1px solid #CCC;
     white-space: nowrap;
+
     /*
   font-family: sans-serif;
 */
@@ -90,9 +93,11 @@ svg {
     padding: 8px 12px;
     cursor: pointer;
     -webkit-user-select: none;
-    /*-khtml-user-select: none;*/
+
+    /* -khtml-user-select: none; */
     -moz-user-select: none;
-    /*-o-user-select: none;*/
+
+    /* -o-user-select: none; */
     user-select: none;
 }
 

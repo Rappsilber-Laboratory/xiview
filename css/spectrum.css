@@ -1,14 +1,16 @@
 @charset "UTF-8";
+
 @font-face {
-  font-family: 'Lato-Bold';
+  font-family: Lato-Bold;
   src: url('../fonts/lato/bold/Lato-Bold.eot'); /* IE9 Compat Modes */
   src: url('../fonts/lato/bold/Lato-Bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
        url('../fonts/lato/bold/Lato-Bold.woff') format('woff'), /* Modern Browsers */
        url('../fonts/lato/bold/Lato-Bold.ttf')  format('truetype'), /* Safari, Android, iOS */
        url('../fonts/lato/bold/Lato-Bold.svg#svgLato-Bold') format('svg'); /* Legacy iOS */
 }
+
 @font-face {
-  font-family: 'Lato-Regular';
+  font-family: Lato-Regular;
   src: url('../fonts/lato/regular/Lato-Regular.eot'); /* IE9 Compat Modes */
   src: url('../fonts/lato/regular/Lato-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
        url('../fonts/lato/regular/Lato-Regular.woff') format('woff'), /* Modern Browsers */
@@ -18,21 +20,27 @@
 
 /* xispec_form-control */
 .xispec_form-control select {
-    border: 0px!important;
+    border: 0!important;
     overflow: hidden;
-}    .xispec_form-control:-moz-placeholder {
+}
+
+    .xispec_form-control:placeholder {
       color: #b2bcc5;
     }
-    .xispec_form-control::-moz-placeholder {
+
+    .xispec_form-control::placeholder {
       color: #b2bcc5;
       opacity: 1;
     }
-    .xispec_form-control:-ms-input-placeholder {
+
+    .xispec_form-control:input-placeholder {
       color: #b2bcc5;
     }
-    .xispec_form-control::-webkit-input-placeholder {
+
+    .xispec_form-control::input-placeholder {
       color: #b2bcc5;
     }
+
     .xispec_form-control.placeholder {
       color: #b2bcc5;
     }
@@ -41,11 +49,10 @@
       border: 1px solid #bdc3c7;
       color: #333;
       resize: none;
-      height: 20px;
       overflow: auto;
-      font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+      font-family: Lato-Regular, Helvetica, Arial, sans-serif;
       font-size: 10pt;
-      text-shadow: 0px;
+      text-shadow: 0;
       padding: 8px 12px;
       height: 42px;
       -webkit-appearance: none;
@@ -55,12 +62,14 @@
       -webkit-transition: border .25s linear, color .25s linear, background-color .25s linear;
       transition: border .25s linear, color .25s linear, background-color .25s linear;
     }
+
     .xispec_form-control:focus {
       border-color: #750000;
       outline: 0;
       -webkit-box-shadow: none;
       box-shadow: none;
     }
+
     .xispec_form-control[disabled],
     .xispec_form-control[readonly],
     fieldset[disabled] .xispec_form-control {
@@ -69,19 +78,24 @@
       cursor: default;
       filter: alpha(opacity=70);
     }
+
     .xispec_form-control.flat {
       border-color: transparent;
     }
+
     .xispec_form-control.flat:hover {
       border-color: #bdc3c7;
     }
+
     .xispec_form-control.flat:focus {
       border-color: #750000;
   }
-.xispec_form-control::-moz-selection {
+
+.xispec_form-control::selection {
     background-color: #750000;
     color: #fff;
 }
+
 .xispec_form-control::selection {
     background-color: #750000;
     color: #fff;
@@ -93,11 +107,11 @@
     background-color: inherit!important;
     font-family: inherit;
     color: #fff;
-    background: 0 0;/*var(--main-color);*/
+    background: 0 0;/* var(--main-color); */
     font-size: .6em;
     cursor: pointer;
     padding: 5px 15px;
-    margin: 2px 5px 2px 5px;
+    margin: 2px 5px;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 300;
@@ -106,7 +120,8 @@
     -moz-transition: all .3s;
     transition: all .3s;
 }
-.xispec_btn:after {
+
+.xispec_btn::after {
     content: '';
     position: absolute;
     z-index: -1;
@@ -114,10 +129,12 @@
     -moz-transition: all .3s;
     transition: all .3s;
 }
+
 .xispec_btn-1 {
     border: 1px solid #fff;
     color: #fff;
 }
+
 .xispec_btn-1a:active, .xispec_btn-1a:hover {
     color: #000;
     background: #fff!important;
@@ -128,7 +145,7 @@
     top: 3px;
     font-size: 1.2em;
     padding: 3px 4px;
-    margin: 2px 2px 0px 2px;
+    margin: 2px 2px 0;
 }
 
 /* fa */
@@ -141,13 +158,13 @@
     float:right;
     margin: 2px 22px 2px 2px;
 }
+
 .fa-times-circle:hover {
-    color: #333333;
+    color: #333;
     background:white;
 }
 
 #xispec_spectrumControls {
-    display: table-row;
     font-size: 1.5em;
 	width: 100%;
 	background-color: #750000;
@@ -163,7 +180,7 @@
 #xispec_butterflyControls{
     border-left: 1px solid white;
     border-right: 1px solid white;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 #xispec_spectrumControls #xispec_butterflySwapIcon{
@@ -188,7 +205,7 @@
     display: inline-block;
     border-left: 1px solid white;
     border-right: 1px solid white;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 #xispec_spectrumControls form > * {
@@ -198,7 +215,7 @@
 
 #xispec_spectrumControls .xispec_form-control{
     height: 2em;
-    padding: 0px;
+    padding: 0;
 }
 
 .xispec_plotsDiv {
@@ -206,8 +223,10 @@
     flex-direction: column;
     flex-grow:  1;
     flex-shrink:  0;
+
     /* height: calc(100% - 35px); */
     position: relative;
+
     /* border-right: 1px solid black; */
 }
 
@@ -226,12 +245,15 @@
 }
 
 #xispec_wrapper {
-    Font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    Font-family: Lato-Regular, Helvetica, Arial, sans-serif;
     font-size: 10pt;
     font-weight: 300;
     line-height: 1.3em;
     color: #888;
-    /*-webkit-text-stroke: .15px;*/ /* IDE complains about this - cc*/
+
+    /* -webkit-text-stroke: .15px; */
+
+ /* IDE complains about this - cc */
     overflow: hidden;
 }
 
@@ -242,14 +264,17 @@
 .xispec_peakAnnot{
     font-size:12px;
 }
+
 .xispec_peakAnnotHighlight{
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+
 .xispec_fragBar{
     stroke-width: 1.3px;
     stroke-linecap:round;
 }
+
 .xispec_fragBarThick{
     stroke-width: 2.6px;
     stroke-linecap:round;
@@ -276,8 +301,9 @@
 .dataTables_wrapper .xispec_form-control{
     height: 2em;
     margin: 4px 2px;
-    padding: 0px 2px;
+    padding: 0 2px;
 }
+
 /*
 .modal{
   background: #333;
@@ -302,11 +328,11 @@
 
 .modal .header{
   font-size: 1.3em;
-}*/
+} */
 
-/*#saveModal #saveDBerror{
+/* #saveModal #saveDBerror{
   margin-bottom: 5px;
-}*/
+} */
 
 .xispec_measureMasses {
     font-size: 0.8em;
@@ -357,7 +383,7 @@
 	flex-flow: column;
 }
 
-.dropdown LI label.xispec_btn {
+.dropdown li label.xispec_btn {
     padding-left: 0;
 }
 
@@ -381,7 +407,7 @@
     position: absolute;
     opacity: 0;
     z-index: 50;
-    font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
+    font-family: Lato-Regular, Helvetica, Arial, sans-serif;
     font-weight: 300;
     line-height: 1.3em;
 }
@@ -405,19 +431,19 @@
 
 .xispec_inactiveSpecHeader i:hover{
     color: #750000;
-    background: #FFFFFF;
+    background: #FFF;
     cursor: pointer;
 }
 
 .xispec_activeSpecHeader .fa-times:hover{
     color: #750000;
-    background: #FFFFFF;
+    background: #FFF;
     cursor: pointer;
 }
 
 .xispec_activeSpecHeader{
-    background: #999999;
-    color: #ffffff;
+    background: #999;
+    color: #fff;
     padding: 0 5px;
 }
 
@@ -426,6 +452,6 @@
 }
 
 .xispec_inactiveSpecHeader{
-    background: #eeeeee;
+    background: #eee;
     padding: 0 5px;
 }

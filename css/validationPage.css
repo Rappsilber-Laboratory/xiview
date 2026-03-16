@@ -8,16 +8,18 @@
 	display: none;
 }
 
-/*#filterModeDiv {*/
-/*	display: none !important;*/
-/*}*/
+/* #filterModeDiv { */
+
+/*	display: none !important; */
+
+/* } */
 
 .movePeakLabels {
 	display: none !important;
 }
 
 #spectrumControls {
-	/*float:right;*/
+	/* float:right; */
     margin-left: auto;
     text-align: right;  /* fix for ie 11 */
     flex-shrink: 0;
@@ -44,9 +46,11 @@
 #spectrum {
 	width: 100%;
 }
+
 #spectrumPanel {
 	width: 100%;
 	height:100%;
+
 /*
 	padding: 0px 10px;
 */
@@ -55,13 +59,18 @@
 #colorSelector{
 	display: none;
 }
+
 #spectrumControls label#colorSelectorLabel{
 	display: none;
 }
+
 #alternatives {
-    background: rgba(9, 29, 66, 0.9);
+    background: rgb(9, 29, 66, 0.9);
     margin: 0 10px;
-    /* height:150px; */ /* otherwise hide button doesn't work */
+
+    /* height:150px; */
+
+ /* otherwise hide button doesn't work */
 }
 
 button {
@@ -73,12 +82,15 @@ button {
 }
 
 
-/*div.validationControls{*/
-/*    display: block;*/
-/*}*/
+/* div.validationControls{ */
+
+/*    display: block; */
+
+/* } */
 #targetDecoy {
     display: flex!important;
 }
+
 #filterModeDiv{
     display:none;
 }
