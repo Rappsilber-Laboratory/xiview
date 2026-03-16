@@ -479,7 +479,7 @@ export class PDBFileChooserBB extends BaseFrameView {
             return {
                 id: code,
                 pdbCode: code,
-                uri: "rcsb://" + code,
+                uri: "rcsb://" + code.toLowerCase() + ".cif",
                 local: false,
                 params: {calphaOnly: this.cAlphaOnly, firstModelOnly: true}
             };
