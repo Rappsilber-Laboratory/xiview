@@ -64,7 +64,7 @@
     "jquery-ui": "~1.14.1",
     "json-formatter-js": "^2.5.23",
     "jsonview": "~1.2.0",
-    "ngl": "~2.4.0",
+    "ngl": "~2.3.1",
     "path-browserify": "^1.0.1",
     "spin": "~0.0.1",
     "split.js": "~1.6.4",

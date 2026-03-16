@@ -90,6 +90,12 @@ export class PDBFileChooserBB extends BaseFrameView {
         */
 
 
+        const prideBox = box.append("div")
+            .attr("class", "verticalFlexContainer prideStructuresBox")
+            .style("display", "none");
+        prideBox.append("p").attr("class", "smallHeading").text("Structures from PRIDE dataset");
+        prideBox.append("div").attr("class", "prideStructuresList");
+
         box.append("p").attr("class", "smallHeading").text("PDB Source");
 
         box.append("div")
@@ -126,12 +132,6 @@ export class PDBFileChooserBB extends BaseFrameView {
             })
             .property("required", true);
         pdbCodeSpan.append("span").text("& Press Enter");
-
-        const prideBox = box.append("div")
-            .attr("class", "verticalFlexContainer prideStructuresBox")
-            .style("display", "none");
-        prideBox.append("p").attr("class", "smallHeading").text("Structures from PRIDE dataset");
-        prideBox.append("div").attr("class", "prideStructuresList");
 
         const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
 
