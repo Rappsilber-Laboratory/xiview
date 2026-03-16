@@ -6,7 +6,7 @@
  */
 import * as d3 from "d3";
 import * as _ from "underscore";
-import {amino1to3Map, getDirectionalResidueType, getResidueType, highestScore} from "./modelUtils";
+import {amino1to3Map, getDirectionalResidueType, getResidueType, highestScore} from "../modelUtils";
 
 /**
  * Tooltip content formatters for various xiVIEW data types.

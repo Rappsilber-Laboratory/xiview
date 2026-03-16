@@ -12,7 +12,7 @@ import $ from "jquery";
 import * as NGL from "ngl";
 import {xilog} from "../../utils";
 import d3 from "d3";
-import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
+import {makeTooltipContents, makeTooltipTitle} from "../../ui-utils/make-tooltip";
 import {isViableChain, make3DAlignID} from "./NGLUtils";
 
 /**

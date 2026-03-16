@@ -15,7 +15,7 @@ import {commonLabels, makeBackboneButtons, niceRound, objectStateToAbbvString, x
 import {DropDownMenuViewBB} from "../../ui-utils/ddMenuViewBB";
 import d3 from "d3";
 import {circleArrange} from "./circleArrange";
-import {makeTooltipContents, makeTooltipTitle} from "../../make-tooltip";
+import {makeTooltipContents, makeTooltipTitle} from "../../ui-utils/make-tooltip";
 import vent from "../../vent";
 
 /**

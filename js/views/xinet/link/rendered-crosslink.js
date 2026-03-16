@@ -2,7 +2,7 @@ import {Link} from "./link";
 import {CrosslinkViewer} from "../crosslink-viewer-BB";
 import {RenderedProtein} from "../interactor/rendered-protein";
 import d3 from "d3";
-import {makeTooltipContents, makeTooltipTitle} from "../../../make-tooltip";
+import {makeTooltipContents, makeTooltipTitle} from "../../../ui-utils/make-tooltip";
 import {rotatePointAboutPoint} from "../trig";
 
 /**

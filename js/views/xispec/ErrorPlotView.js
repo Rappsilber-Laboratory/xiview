@@ -1,7 +1,7 @@
 import * as _ from "underscore";
 import Backbone from "backbone";
 import $ from "jquery";
-import {svgUtils} from "../../../vendor/svgexp";
+import {capture, makeXMLStr} from "../../svgexp";
 import {xiSPECUI} from "./xispecui";
 import d3 from "d3";
 import {download} from "./download";
@@ -64,8 +64,8 @@ export const ErrorPlotView = Backbone.View.extend({
         if (this.isVisible) {
             let svgSel = d3.select(this.el).selectAll("svg");
             let svgArr = svgSel[0];
-            let svgStrings = svgUtils.capture(svgArr);
-            let svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+            let svgStrings = capture(svgArr);
+            let svgXML = makeXMLStr(new XMLSerializer(), svgStrings[0]);
 
             let charge = this.model.precursor.charge;
             let pepStrs = this.model.pepStrsMods;

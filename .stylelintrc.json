@@ -1,0 +1,17 @@
+{
+    "extends": ["stylelint-config-standard"],
+    "ignoreFiles": [
+        "css/font-awesome.min.css",
+        "css/multiple-select.css",
+        "css/reset.css",
+        "node_modules/**",
+        "vendor/**"
+    ],
+    "rules": {
+        "property-no-vendor-prefix": null,
+        "selector-class-pattern": null,
+        "color-function-notation": null,
+        "alpha-value-notation": null,
+        "no-descending-specificity": null
+    }
+}

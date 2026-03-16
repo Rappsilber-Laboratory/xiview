@@ -42,10 +42,12 @@
   "main": "./js/main.js",
   "scripts": {
     "lint": "eslint js",
+    "lint:css": "stylelint \"css/**/*.css\"",
+    "lint:css-fix": "stylelint \"css/**/*.css\" --fix",
     "test": "node scripts/run-tests.js",
     "build-dev": "rm -rf dist && webpack --mode development --config webpack.dev.js;",
     "build-prod": "rm -rf dist && webpack --mode production --config webpack.prod.js;",
-    "copy-to-xiview-server": "cp dist/* ../xiview-server/static/ ;",
+    "copy-to-xiview-server": "find dist/ -maxdepth 1 -type f ! -name 'tests_*' -exec cp {} ../xiview-server/static/ \\; ;",
     "build-dev-and-copy-to-xiview-server": "npm run build-dev && npm run copy-to-xiview-server;",
     "build-prod-and-copy-to-xiview-server": "rm -rf dist && npm run build-prod && npm run copy-to-xiview-server;",
     "all-dev": "npm run lint && npm run build-dev && npm run test && npm run copy-to-xiview-server;"
@@ -81,6 +83,8 @@
     "puppeteer": "^24.0.0",
     "qunit": "2.21.1",
     "style-loader": "^3.3.2",
+    "stylelint": "^17.4.0",
+    "stylelint-config-standard": "^40.0.0",
     "webpack": "^5.104.1",
     "webpack-cli": "^5.0.2",
     "webpack-merge": "^5.8.0",

@@ -26,7 +26,6 @@ pids
 .env.production.local
 
 # Package manager files
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

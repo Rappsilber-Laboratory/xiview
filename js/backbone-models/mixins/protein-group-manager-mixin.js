@@ -4,7 +4,7 @@
  * All Backbone get/set/trigger calls operate on the CompositeModel.
  */
 
-import {jqdialogs} from "../../dialogs";
+import {jqdialogs} from "../../ui-utils/dialogs";
 import d3 from "d3";
 import vent from "../../vent";
 

@@ -19,7 +19,7 @@ import {
 import {getChainNameFromChainIndex, make3DAlignID} from "./ngl/NGLUtils";
 import {commonLabels, declutterAxis, makeBackboneButtons} from "../utils";
 import d3 from "d3";
-import {makeTooltipContents, makeTooltipTitle} from "../make-tooltip";
+import {makeTooltipContents, makeTooltipTitle} from "../ui-utils/make-tooltip";
 import vent from "../vent";
 
 /**

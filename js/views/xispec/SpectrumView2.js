@@ -9,7 +9,7 @@ import * as Spinner from "spin";
 import {xiSPECUI} from "./xispecui";
 
 import {Graph} from "./graph/Graph";
-import {svgUtils} from "../../../vendor/svgexp";
+import {capture, makeXMLStr} from "../../svgexp";
 import {download} from "./download";
 
 /**
@@ -318,8 +318,8 @@ export const SpectrumView = Backbone.View.extend({
     downloadSVG: function () {
         let svgSel = d3.select(this.el.parentNode);
         let svgArr = svgSel[0];
-        let svgStrings = svgUtils.capture(svgArr);
-        let svgXML = svgUtils.makeXMLStr(new XMLSerializer(), svgStrings[0]);
+        let svgStrings = capture(svgArr);
+        let svgXML = makeXMLStr(new XMLSerializer(), svgStrings[0]);
 
         let charge = this.model.get("JSONdata").annotation.precursorCharge;
         let pepStrs = this.model.pepStrsMods;

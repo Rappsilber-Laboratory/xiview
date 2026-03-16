@@ -20,7 +20,7 @@ import {
 } from "../utils";
 import {radixSort} from "../modelUtils";
 import d3 from "d3";
-import {makeTooltipContents} from "../make-tooltip";
+import {makeTooltipContents} from "../ui-utils/make-tooltip";
 import vent from "../vent";
 
 /**

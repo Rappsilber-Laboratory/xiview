@@ -4,7 +4,7 @@
  * Builds bidirectional relationships: is_a/subclasses (inheritance) and part_of/parts (composition).
  * Optimized for performance with minimal string splitting and efficient line parsing.
  */
-import {GoTerm} from "./views/go/goTerm";
+import {GoTerm} from "./goTerm";
 
 /**
  * Parses GO OBO format text into Map of GoTerm objects with hierarchical relationships.

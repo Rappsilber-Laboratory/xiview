@@ -99,6 +99,46 @@ The test runner automatically:
 - **datatables.net** - Data table components
 - **split.js** - UI panel splitting
 
+## Data Loading and API Integration
+
+xiVIEW loads crosslinking data from a REST API at runtime. `js/main.js` exports `xiview.main(apiBase, annotatorURL)`, which is called from the HTML entry point (`network.html` in xiview-server):
+
+```javascript
+xiview.main("https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/", "xiAnnotator/");
+```
+
+### URL parameters
+
+Every data fetch in `main.js` appends `window.location.search` to the API base URL, forwarding the page's query string to the API. Supported parameters:
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `project` | yes | PRIDE project accession, e.g. `PXD53341` |
+| `file` | no | Specific mzIdentML filename. Omit to aggregate all files in the project. |
+
+Example URLs:
+- All files: `network.html?project=PXD53341`
+- Specific file: `network.html?project=PXD53341&file=SomeSearch.mzid`
+
+### crosslinking-api
+
+The backend REST API is provided by the `crosslinking-api` project (FastAPI, PostgreSQL). The xiVIEW-specific endpoints are all under `/pride/ws/archive/crosslinking/v3/data/`:
+
+- `GET /data/visualisations/{project_id}` — list available files and xiVIEW links for a project
+- `GET /data/get_xiview_matches` — spectral matches / PSMs
+- `GET /data/get_xiview_peptides` — peptide sequences
+- `GET /data/get_xiview_proteins` — protein sequences and accessions
+- `GET /data/get_xiview_enzymes`, `get_xiview_search_modifications`, `get_xiview_spectrum_identification_protocols`, `get_xiview_spectra_data`, `get_xiview_mzidentml_files`, `get_xiview_analysis_collection_spectrum_identifications` — search/protocol metadata
+- `GET /data/get_peaklist` — raw spectrum peak list
+
+Production API: `https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/`
+
+### network.html (xiview-server)
+
+`xiview-server/static/network.html` is the HTML shell that bootstraps xiVIEW. It loads the built JS bundles (`vendors.js`, `xiview.js`) and calls `xiview.main(...)`. The `pride.css` stylesheet is conditionally loaded when a `pride` param is present or the host ends with `ebi.ac.uk`.
+
+To run locally with a local API, edit the `xiview.main(...)` call in `network.html` to use the local API base (e.g. `http://127.0.0.1:8000/pride/ws/archive/crosslinking/v2/data/`).
+
 ## Troubleshooting
 
 ### Build Failures

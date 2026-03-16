@@ -111,6 +111,68 @@ npm run test-headless  # Run tests without building (requires prior build)
 - **Styles**: Add to appropriate file in `css/`
 - **Tests**: Add to `tests/`
 
+## Data Loading and API Integration
+
+### How data is loaded
+
+`js/main.js` exports `xiview.main(apiBase, annotatorURL)`. The entry HTML (`network.html` in xiview-server) calls it with the production API base URL:
+
+```javascript
+xiview.main("https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/", "xiAnnotator/");
+```
+
+Inside `main()`, every data fetch appends `window.location.search` verbatim to the `apiBase` URL. This means the page's own URL query parameters are forwarded to every API call. For example:
+
+```
+page URL:  network.html?project=PXD53341&file=some_file.mzid
+API call:  https://.../data/get_xiview_matches?project=PXD53341&file=some_file.mzid
+```
+
+### URL parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `project` | yes | PRIDE project accession, e.g. `PXD53341` |
+| `file` | no | Specific mzIdentML filename within the project. If omitted, data from all files in the project is aggregated. |
+
+Example URLs:
+- All files in a project: `network.html?project=PXD53341`
+- Single file: `network.html?project=PXD53341&file=SomeSearch.mzid`
+
+### The crosslinking-api backend (sibling submodule)
+
+The API is provided by the `crosslinking-api` submodule (FastAPI, Python 3.11, PostgreSQL). Base path: `/pride/ws/archive/crosslinking/v3`.
+
+**xiVIEW data endpoints** (all under `/data/`, all accept `?project=&file=`):
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /data/visualisations/{project_id}` | Lists available files and their xiVIEW links for a project |
+| `GET /data/get_xiview_matches` | Spectral matches / PSMs with crosslink info |
+| `GET /data/get_xiview_peptides` | Peptide sequences with modifications |
+| `GET /data/get_xiview_proteins` | Protein sequences and accessions |
+| `GET /data/get_xiview_enzymes` | Enzyme configuration |
+| `GET /data/get_xiview_search_modifications` | Search modification parameters |
+| `GET /data/get_xiview_spectrum_identification_protocols` | Protocol / search configuration |
+| `GET /data/get_xiview_spectra_data` | Spectra data metadata |
+| `GET /data/get_xiview_mzidentml_files` | mzIdentML file metadata |
+| `GET /data/get_xiview_analysis_collection_spectrum_identifications` | Analysis collection data |
+| `GET /data/get_peaklist` | Raw peak list for a spectrum (`id`, `sd_ref`, `upload_id`) |
+
+Production API base: `https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/`
+
+Local dev API base (from the commented-out line in `network.html`): `http://127.0.0.1:8000/pride/ws/archive/crosslinking/v2/data/`
+
+### network.html (xiview-server)
+
+`xiview-server/static/network.html` is the main HTML entry point served by xiview-server (Flask). It loads `vendors.js` and `xiview.js` (built output), then calls `xiview.main(...)`. The `pride.css` stylesheet is conditionally applied when a `pride` URL param is present or the host ends with `ebi.ac.uk`.
+
+xiview-server serves `network.html` at `/network.html` via Flask's static file handling. To run locally with a local API:
+1. Build xiview: `npm run build-dev` (outputs `dist/xiview.js`)
+2. Copy or symlink build output into `xiview-server/static/`
+3. Edit the `xiview.main(...)` call in `network.html` to point at your local API
+4. Run xiview-server and open `http://localhost:{port}/network.html?project=PXD53341`
+
 ## Important Rules
 
 - crosslink and crosslinking are not hyphenated

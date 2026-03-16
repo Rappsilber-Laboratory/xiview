@@ -20,7 +20,7 @@ import {
     viewsEssential,
     postDataLoaded
 } from "./networkFrame";
-import {showMessage} from "./message-popup";
+import {showMessage} from "./ui-utils/message-popup";
 import Split from "split.js";
 import {SearchResultsModel} from "./clms-model/search-results-model";
 import {BlosumCollection} from "./backbone-models/models";
@@ -118,7 +118,6 @@ export function main(apiBase, annotatorURL) {
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
     const blosumCollInst = new BlosumCollection();
-    // eslint-disable-next-line no-unused-vars
     const blosumPromise = new Promise((resolve) => {
         blosumCollInst.listenToOnce(blosumCollInst, "sync", resolve);
         blosumCollInst.fetch();

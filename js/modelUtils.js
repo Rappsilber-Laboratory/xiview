@@ -989,7 +989,7 @@ function tryParseJSON(jsonString) {
             return o;
         }
     } catch (e) {
-        //console.log(e); //yes, its throws errors here
+        // not JSON, that's fine
     }
 
     return false;
