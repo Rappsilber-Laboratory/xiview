@@ -52,7 +52,7 @@ import {AnnotationDropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {ColourCollectionOptionViewBB} from "./ui-utils/color-collection-option-view";
 import {AlignCollectionViewBB} from "./align/alignViewBB3";
 import {DistogramBB} from "./views/distogramViewBB";
-import {NGLViewBB} from "./views/ngl/NGLViewBB";
+import {MolstarViewBB as NGLViewBB} from "./views/molstar/MolstarViewBB";
 import {PDBFileChooserBB} from "./file-choosers/PDBFileChooser";
 import {STRINGFileChooserBB} from "./file-choosers/STRINGFileChooser";
 import {ScatterplotViewBB} from "./views/scatterplotViewBB";

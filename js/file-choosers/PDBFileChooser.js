@@ -8,12 +8,12 @@
 
 import * as _ from "underscore";
 import d3 from "d3";
-import * as NGL from "ngl";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {getLegalAccessionIDs, filterOutDecoyProteins} from "../modelUtils";
 import {commonRegexes} from "../utils";
-import {repopulateNGL} from "../views/ngl/RepopulateNGL";
+import {repopulateMolstar} from "../views/molstar/RepopulateMolstar";
+import {createMolstarPlugin} from "../views/molstar/MolstarPlugin";
 import {loadUserFile} from "./load-user-file";
 import vent from "../vent";
 
@@ -179,9 +179,10 @@ export class PDBFileChooserBB extends BaseFrameView {
 
         d3.select(this.el).selectAll(".smallHeading").classed("smallHeadingBar", true);
 
-        this.stage = new NGL.Stage("ngl", { /*fogNear: 20, fogFar: 100,*/
-            backgroundColor: "white",
-            tooltip: false
+        // Create Molstar plugin - mounts into the #ngl div created by MolstarViewBB
+        const nglEl = document.getElementById("ngl");
+        createMolstarPlugin(nglEl || document.createElement("div")).then((plugin) => {
+            this.plugin = plugin;
         });
 
         //console.log("STAGE", this.stage);
@@ -413,9 +414,9 @@ export class PDBFileChooserBB extends BaseFrameView {
         const fileCount = evt.target.files.length;
 
         const onLastLoad = _.after(fileCount, function () {
-            repopulateNGL({
+            repopulateMolstar({
                 pdbSettings: pdbSettings,
-                stage: self.stage,
+                plugin: self.plugin,
                 compositeModel: self.model
             });
         }
@@ -485,9 +486,9 @@ export class PDBFileChooserBB extends BaseFrameView {
             };
         }, this);
 
-        repopulateNGL({
+        repopulateMolstar({
             pdbSettings: pdbSettings,
-            stage: this.stage,
+            plugin: this.plugin,
             compositeModel: this.model
         });
     }

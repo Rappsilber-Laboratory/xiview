@@ -15,6 +15,17 @@ module.exports = {
         globalObject: "this"
     },
 
+    resolve: {
+        fallback: {
+            "path": require.resolve("path-browserify"),
+            "fs": false,
+            "crypto": false,
+            "buffer": false,
+            "os": false,
+            "stream": false,
+        }
+    },
+    performance: { hints: false },
     module: {
         rules: [
             {
