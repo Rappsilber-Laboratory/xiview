@@ -380,6 +380,7 @@ export class FilterViewBB extends Backbone.View {
                         myOptions: {
                             toggleAttribute: config.undefAttr,
                             id: self.el.id + config.undefAttr,
+                            initialState: self.model.get(config.undefAttr),
                             label: "Ø"
                         },
                     });
