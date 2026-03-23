@@ -147,6 +147,7 @@ export class NGLModelWrapperBB extends Backbone.Model {
         // Also want to recalculate link distances with this object, before informing views the object is new (otherwise may draw with old data)
         compositeModel.set("distancesObj", null, {silent: true});
         compositeModel.set("distancesObj", distancesObj, {silent: true});
+        compositeModel._distanceCalc.update({ distancesObj }); // sync before getHomomDistances, which reads _distanceCalc.distancesObj
         distancesObj.maxDistance = d3.max(this.getCompositeModel().getHomomDistances(this.getCompositeModel().getAllCrossLinks()));
         this.getCompositeModel().trigger("change:distancesObj", compositeModel, distancesObj);
         return this;
