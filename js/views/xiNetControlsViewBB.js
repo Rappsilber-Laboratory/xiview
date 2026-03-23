@@ -130,12 +130,12 @@ export class xiNetControlsViewBB extends Backbone.View {
         const mainDivSel = d3.select(this.el);
 
         const buttonHtml = "<p id='displayOptionsPlaceholder' class='btn btn-1 btn-1a'></p>" +
-            "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
-            "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto</button>" +
+            // "<span class='layoutLabel noBreak sectionDividerLeft' >Layout:</span>" +
+            "<button class='btn btn-1 btn-1a autoLayoutButton'>Auto Layout</button>" +
             "<p id='loadLayoutButton' class='btn btn-1 btn-1a'></p>" +
             "<input type='text' name='name' id='name' class='savedLayoutName' value='' placeholder='Enter Save Layout Name'>" +
             "<button class='btn btn-1 btn-1a saveLayoutButton'>Save</button>" +
-            "<span class='noBreak sectionDividerLeft' ></span>" +
+            // "<span class='noBreak sectionDividerLeft' ></span>" +
             "<button class='btn btn-1 btn-1a xinetSvgDownload sectionDividerLeft'>" + commonLabels.downloadImg + "SVG" + "</button>";
 
         mainDivSel.html(

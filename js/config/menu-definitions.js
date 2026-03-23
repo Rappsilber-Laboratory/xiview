@@ -219,7 +219,7 @@ export function getExportMenuConfig(downloadMatches, downloadLinks, downloadPPIs
                 sectionBegin: true,
             },
             {
-                name: "AlphaLink2 for selected proteins [DEV]",  // extra space to differentiate from first entry in menu
+                name: "AlphaLink2 for selected proteins",  // extra space to differentiate from first entry in menu
                 func: downloadAlphaLink2,
                 tooltip: "Exports AlphaLink2 csv file and corresponding FASTA. Prototype! Exported FDR values are wrong (all set to 0.05).",
                 categoryTitle: "AlphaLink2",

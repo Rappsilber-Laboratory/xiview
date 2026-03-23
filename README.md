@@ -4,15 +4,6 @@ Interactive visualization of protein crosslinking mass spectrometry data sets, d
 
 ## Project Architecture
 
-This is a merged, single-repository version of what was previously organised as a git submodule project. It combines four original components into a single codebase:
-
-| Original submodule       | Branch | Now located at                                 |
-|--------------------------|--------|------------------------------------------------|
-| xiview                   | v2     | `js/`, `css/`, `images/`, `tests/` (top level) |
-| CLMS-model               | v2     | `js/models/`                                   |
-| spectrum (xiSPEC)        | dev    | `src/`                                         |
-| crosslink-viewer (xiNET) | master | `js/views/xinet/`                              |
-
 The entry point is `js/main.js`, which loads CSS, initialises the spinner, imports core modules, and handles data fetching.
 
 ## Key Directories
@@ -21,9 +12,8 @@ The entry point is `js/main.js`, which loads CSS, initialises the spinner, impor
   - **`js/models/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.)
   - **`js/views/xinet/`** - xiNET crosslink network visualization component
   - **`js/model/`** - Application-specific models extending the core CLMS models
-  - **`js/views/`** - UI view components using Backbone.js
+  - **`js/views/`** - UI view components using Backbone.js, inlcluding xiNET and xiSPEC
   - **`js/filter/`** - Data filtering and search functionality
-- **`src/`** - xiSPEC spectrum viewer component
 - **`css/`** - All stylesheets
 - **`images/`** - Icons, logos, and UI graphics
 - **`tests/`** - Test files and test data

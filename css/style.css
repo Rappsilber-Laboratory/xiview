@@ -68,7 +68,7 @@
 
 .page-header{
     height:37px;
-    padding-left: 10px;
+    /*padding-left: 10px;*/
     background-color: var(--main-color);
     color: #fff;
     position: absolute;
