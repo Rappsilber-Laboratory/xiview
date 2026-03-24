@@ -11,7 +11,7 @@ import d3 from "d3";
 import * as NGL from "ngl";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {getLegalAccessionIDs, filterOutDecoyProteins} from "../modelUtils";
+import {getLegalAccessionIDs} from "../modelUtils";
 import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 import {loadUserFile} from "./load-user-file";
@@ -71,17 +71,11 @@ export class PDBFileChooserBB extends BaseFrameView {
 
         const box = wrapperPanel.append("div").attr("class", "columnbar");
 
-        box.append("p").attr("class", "smallHeading").text("PDB Source");
+        box.append("p").attr("class", "smallHeading").text("Local Filesystem");
 
-        box.append("div")
-            .attr("class", "btn nopadLeft nopadRight")
-            .text("Either")
-            .append("span")
-            .append("label")
+        box.append("label")
             .attr("class", "btn btn-1 btn-1a fakeButton")
-            .append("span")
-            //.attr("class", "noBreak")
-            .text("Select Local PDB Files")
+            .text("Select PDB or mmCIF Files")
             .append("input")
             .attr({
                 type: "file",
@@ -89,9 +83,12 @@ export class PDBFileChooserBB extends BaseFrameView {
                 class: "selectPdbButton"
             })
             .property("multiple", true);
+
+        box.append("p").attr("class", "smallHeading").text("By Accession");
+
         const pdbCodeSpan = box.append("span")
             .attr("class", "btn nopadLeft")
-            .text("or Enter 4-character PDB IDs");
+            .text("Enter 4-character PDB IDs");
 
         pdbCodeSpan.append("input")
             .attr({
@@ -102,26 +99,29 @@ export class PDBFileChooserBB extends BaseFrameView {
                 maxlength: 100,
                 pattern: commonRegexes.multiPdbPattern,
                 size: 8,
-                title: "Enter PDB IDs here e.g. 1AO6 for one structure, 1YSX 1BKE to merge two",
+                title: "Enter PDB ID here e.g. 1AO6",
                 //placeholder: "eg 1AO6"
             })
             .property("required", true);
         pdbCodeSpan.append("span").text("& Press Enter");
 
+        box.append("p").attr("class", "smallHeading").text("AlphaFold");
+
+        box.append("button")
+            .attr("class", "alphafoldButton btn btn-1 btn-1a")
+            .text("AlphaFold Structure (SELECT ONE PROTEIN)")
+            .attr("title", "Fetches AlphaFold predicted structure from EBI using UniProt accession and loads it into the 3D viewer - select exactly one protein")
+            .append("i").attr("class", "fa fa-xi fa-external-link");
+
         const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
 
-        queryBox.append("p").attr("class", "smallHeading").text("PDB Query Services");
+        queryBox.append("p").attr("class", "smallHeading").text("PDB Query Service");
 
         const qButtonData = [
             {
-                class: "pdbWindowButton",
+                class: "pdbWindowButton btn btn-1 btn-1a",
                 text: "Show PDBs Matching UniProt Accessions @ RCSB.org",
                 tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"
-            },
-            {
-                class: "alphafoldButton",
-                text: "AlphaFold Structure (SELECT ONE PROTEIN)",
-                tooltip: "Fetches AlphaFold predicted structure from EBI using UniProt accession and loads it into the 3D viewer - select exactly one protein"
             },
         ];
         queryBox.selectAll("button").data(qButtonData, function (d) {
@@ -137,17 +137,15 @@ export class PDBFileChooserBB extends BaseFrameView {
             })
             .attr("title", function (d) {
                 return d.tooltip;
-            });
-        queryBox.selectAll("button")
-            .classed("btn btn-1 btn-1a", true)
+            })
             .append("i").attr("class", "fa fa-xi fa-external-link");
 
         wrapperPanel.append("p").attr("class", "smallHeading").text("Results:");
-        wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
+        wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;");
 
         d3.select(this.el).selectAll(".smallHeading").classed("smallHeadingBar", true);
 
-        this.stage = new NGL.Stage("ngl", { /*fogNear: 20, fogFar: 100,*/
+        this.stage = new NGL.Stage("ngl", {
             backgroundColor: "white",
             tooltip: false
         });
@@ -293,13 +291,13 @@ export class PDBFileChooserBB extends BaseFrameView {
         this.loadRoute = "file";
         const self = this;
         fetch("https://alphafold.ebi.ac.uk/api/prediction/" + accession)
-            .then(function(response) {
+            .then(function (response) {
                 if (!response.ok) {
                     throw new Error("AlphaFold API returned status " + response.status + " for " + accession);
                 }
                 return response.json();
             })
-            .then(function(data) {
+            .then(function (data) {
                 if (!data || data.length === 0) {
                     throw new Error("No AlphaFold prediction found for " + accession);
                 }
@@ -312,13 +310,13 @@ export class PDBFileChooserBB extends BaseFrameView {
                         id: "AlphaFold-" + accession,
                         uri: cifUrl,
                         local: false,
-                        params: { firstModelOnly: true }
+                        params: {firstModelOnly: true}
                     }],
                     stage: self.stage,
                     compositeModel: self.model
                 });
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 self.setStatusText("AlphaFold lookup failed: " + err.message, false);
             });
     }
