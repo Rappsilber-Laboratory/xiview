@@ -14,27 +14,16 @@ export const loadSpectrum = function (match) {
      * @returns {void}
      */
     function collectMods(peptide) { // yeah, this is awful, tidy up once knwo what annotator really needs
-        // let seqMods = "";
-        const pepLen = peptide.sequence.length;
-        for (let i = 0; i < pepLen; i++) {
-            // seqMods += peptide.sequence[i];
-            if (peptide.mod_pos.indexOf(i + 1) !== -1){
-                const modIndex = peptide.mod_pos.indexOf(i + 1); //?
-
-                const allModCvs = peptide.mod_acc[modIndex]; // take out the crosslinker mods
-                const allModCvsKeys = Object.keys(allModCvs);
-                if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
-                    // const modName = "(" + peptide.mod_masses[modIndex] + ")";
-                    const modName = "(" + Object.values(peptide.mod_acc[modIndex])[0].toLowerCase().replace(/\s+/g, "") + ")";
-                    // seqMods += modName;
-                    if (!modMap.has(modName)) {
-                        modMap.set(modName, peptide.mod_masses[modIndex]);
-                    }
+        for (let i = 0; i < peptide.mod_pos.length; i++) {
+            const allModCvs = peptide.mod_acc[i]; // take out the crosslinker mods
+            const allModCvsKeys = Object.keys(allModCvs);
+            if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
+                const modName = "(" + Object.values(allModCvs)[0].toLowerCase().replace(/\s+/g, "") + ")";
+                if (!modMap.has(modName)) {
+                    modMap.set(modName, peptide.mod_masses[i]);
                 }
             }
         }
-
-        // return seqMods;
     }
 
     collectMods(match.matchedPeptides[0]);
@@ -119,7 +108,8 @@ function arrayifyPeptide (seq_mods) {
     let offset = 1;
     let result;
     while (result = re.exec(seq_mods)) {
-        peptide.sequence[result.index - offset]["Modification"] = result[0];
+        const seqIndex = Math.max(0, result.index - offset);
+        peptide.sequence[seqIndex]["Modification"] = result[0];
         offset += result[0].length;
     }
     return peptide;
