@@ -744,6 +744,7 @@ export class NGLViewBB extends BaseFrameView {
             }
         );
 
+        this.relayout(); // sync NGL canvas dimensions in case panel was hidden when stage was first initialised
         this.showFiltered();
         return this;
     }

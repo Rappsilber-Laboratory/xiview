@@ -1,6 +1,6 @@
 /**
- * @fileoverview PDB file chooser view for loading 3D structural data.
- * Provides UI for loading PDB files from local filesystem or RCSB PDB database via 4-character codes.
+ * @fileoverview File chooser view for loading 3D structural data.
+ * Provides UI for loading structure files from local filesystem or RCSB PDB database via 4-character codes.
  * Integrates with NGL viewer for 3D molecular visualization. Supports PDB query services (RCSB, SWISS-MODEL).
  * Parses PDB/CIF files, aligns sequences with search data, triggers 3dsync event with aligned sequences.
  * Displays success/failure messages with sequence match counts. Caches NGL Stage for rendering.
@@ -18,10 +18,10 @@ import {loadUserFile} from "./load-user-file";
 import vent from "../vent";
 
 /**
- * PDB file chooser view for loading 3D structural data into xiVIEW.
+ * File chooser view for loading 3D structural data into xiVIEW.
  * Creates UI with file selector (local PDB/CIF files), text input (PDB codes), query service buttons
- * (RCSB UniProt search, SWISS-MODEL lookup). Maintains NGL Stage instance. Listens to 3dsync event
- * to display success/failure messages with sequence alignment counts. Supports multiple PDB files/codes.
+ * (RCSB UniProt search, AlphaFold lookup). Maintains NGL Stage instance. Listens to 3dsync event
+ * to display success/failure messages with sequence alignment counts. Supports multiple PDB files/codes (kind of).
  * @class
  * @extends BaseFrameView
  * @property {NGL.Stage} stage - NGL Stage instance for 3D rendering
@@ -34,7 +34,7 @@ export class PDBFileChooserBB extends BaseFrameView {
     }
 
     /**
-     * Event handlers for PDB chooser interactions.
+     * Event handlers for 3D file chooser interactions.
      * @returns {Object} Event map with selectors and handler method names
      */
     get events() {
@@ -44,19 +44,17 @@ export class PDBFileChooserBB extends BaseFrameView {
         }
         return _.extend({}, parentEvents, {
             "click .pdbWindowButton": "launchExternalPDBWindow",
-            "click .swissmodelWindowButton": "launchExternalSwissmodelWindow",
-            // "click .ebiPdbWindowButton": "launchExternalEBIPDBWindow",
+            "click .alphafoldButton": "loadAlphaFoldStructure",
             "change .selectPdbButton": "selectPDBFile",
             "keyup .inputPDBCode": "enteringPDBCode",
             "click button.PDBSubmit": "loadPDBCode",
-            // "click .cAlphaOnly": "toggleCAlphaSetting",
         });
     }
 
     /**
-     * Initializes PDB chooser view with UI elements and NGL Stage.
+     * Initializes 3D file chooser view with UI elements and NGL Stage.
      * Creates file selector (multiple .txt/.cif/.pdb files), PDB code input (accepts multiple space-separated codes),
-     * query service buttons (RCSB, SWISS-MODEL), results message bar. Creates NGL Stage for 3D rendering.
+     * query service buttons (RCSB, AlphaFold), results message bar. Creates NGL Stage for 3D rendering.
      * Sets up 3dsync listener to display load success/failure with sequence counts. Pre-loads PDBs if initPDBs option provided.
      * @param {Object} viewOptions - Options including initPDBs (space-separated PDB codes to load on init)
      * @returns {undefined}
@@ -65,7 +63,6 @@ export class PDBFileChooserBB extends BaseFrameView {
         super.initialize(...arguments);
         this.cAlphaOnly = false;
 
-        // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el);
         mainDivSel.classed("metaLoadPanel", true);
 
@@ -73,28 +70,6 @@ export class PDBFileChooserBB extends BaseFrameView {
             .attr("class", "panelInner");
 
         const box = wrapperPanel.append("div").attr("class", "columnbar");
-
-        /*
-        box.append("p").attr("class", "smallHeading").text("Pre-Load Options");
-        var buttonData = [{
-                label: "Load C-Alpha Atoms Only",
-                class: "cAlphaOnly",
-                type: "checkbox",
-                id: "cAlphaOnly",
-                tooltip: "Faster & Less Cluttered 3D Rendering on Large PDBs",
-                inputFirst: true,
-                value: this.cAlphaOnly,
-            },
-        ];
-        makeBackboneButtons (box.append("div"), this.el.id, buttonData);
-        */
-
-
-        const prideBox = box.append("div")
-            .attr("class", "verticalFlexContainer prideStructuresBox")
-            .style("display", "none");
-        prideBox.append("p").attr("class", "smallHeading").text("Structures from PRIDE dataset");
-        prideBox.append("div").attr("class", "prideStructuresList");
 
         box.append("p").attr("class", "smallHeading").text("PDB Source");
 
@@ -144,15 +119,10 @@ export class PDBFileChooserBB extends BaseFrameView {
                 tooltip: "Queries RCSB with Uniprot accession numbers of selected proteins (all if none selected)"
             },
             {
-                class: "swissmodelWindowButton",
-                text: "SWISS-MODEL lookup (SELECT ONE PROTEIN) ",
-                tooltip: "Queries SWISS-MODEL with Uniprot accession number - select exactly one protein"
+                class: "alphafoldButton",
+                text: "AlphaFold Structure (SELECT ONE PROTEIN)",
+                tooltip: "Fetches AlphaFold predicted structure from EBI using UniProt accession and loads it into the 3D viewer - select exactly one protein"
             },
-            // {
-            //     class: "ebiPdbWindowButton",
-            //     text: "Show PDBs Matching a Protein Sequence @ EBI",
-            //     tooltip: "Queries EBI with an individual protein sequence to find relevant PDBs"
-            // }
         ];
         queryBox.selectAll("button").data(qButtonData, function (d) {
             return d.text;
@@ -171,8 +141,6 @@ export class PDBFileChooserBB extends BaseFrameView {
         queryBox.selectAll("button")
             .classed("btn btn-1 btn-1a", true)
             .append("i").attr("class", "fa fa-xi fa-external-link");
-        //
-        // this.updateProteinDropdown(queryBox);
 
         wrapperPanel.append("p").attr("class", "smallHeading").text("Results:");
         wrapperPanel.append("div").attr("class", "messagebar").html("&nbsp;"); //.style("display", "none");
@@ -184,19 +152,9 @@ export class PDBFileChooserBB extends BaseFrameView {
             tooltip: false
         });
 
-        //console.log("STAGE", this.stage);
-
         function sanitise(str) {
             return str.replace(/[^a-z0-9 ,.?!]/ig, "");
         }
-
-        // function updatePD() {
-        //     this.updateProteinDropdown(d3.select(this.el).select(".queryBox"));
-        // }
-        //
-        // // this.listenTo (this.model.get("clmsModel"), "change:matches", updatePD);
-        // this.listenTo(this.model, "change:selectedProteins", updatePD);
-        // this.listenTo(vent, "proteinMetadataUpdated", updatePD);
 
         this.listenTo(this.model, "3dsync", function (newSequences) {
             const count = _.isEmpty(newSequences) ? 0 : newSequences.length;
@@ -215,6 +173,7 @@ export class PDBFileChooserBB extends BaseFrameView {
                     ". Please check the PDB file or code is correct.");
             if (success) {
                 this.model.set("pdbCode", this.loadRoute === "pdb" ? sanitise(pdbString) : undefined);
+                vent.trigger("nglViewShow", true);
             }
             this.setStatusText(msg, success);
         });
@@ -227,8 +186,6 @@ export class PDBFileChooserBB extends BaseFrameView {
             d3.select(this.el).select(".inputPDBCode").property("value", viewOptions.initPDBs);
             this.loadPDBCode();
         }
-
-        this.lookupPRIDEPDBs();
     }
 
     // Return selected proteins, or all proteins if nothing selected
@@ -236,34 +193,7 @@ export class PDBFileChooserBB extends BaseFrameView {
         const selectedProteins = this.model.get("selectedProteins");
         return _.isEmpty(selectedProteins) ? Array.from(this.model.get("clmsModel").getProteinsIterator()) : selectedProteins;
     }
-    /*
-    updateProteinDropdown: function (parentElem) {
-        const proteins = this.getSelectedProteins();
 
-        addMultipleSelectControls({
-            addToElem: parentElem,
-            selectList: ["Proteins"],
-            optionList: filterOutDecoyProteins(proteins),
-            keepOldOptions: false,
-            selectLabelFunc: function () {
-                return "Select Protein for EBI Sequence Search ►";
-            },
-            optionLabelFunc: function (d) {
-                return d.name;
-            },
-            optionValueFunc: function (d) {
-                return d.id;
-            },
-            optionSortFunc: function (a, b) {
-                return a.name.localeCompare(b.name);
-            },
-            idFunc: function (d) {
-                return d.id;
-            },
-        });
-
-    }
-*/
     /**
      * Opens RCSB PDB search in new tab querying for structures matching selected proteins' UniProt accessions.
      * Constructs complex JSON query for RCSB API v2 search. Opens blank window immediately (to avoid popup blocker),
@@ -347,54 +277,51 @@ export class PDBFileChooserBB extends BaseFrameView {
     }
 
     /**
-     * Opens SWISS-MODEL repository in new tab for selected protein's UniProt accession.
-     * Requires exactly one protein selected with legal accession ID. Opens SWISS-MODEL repository page
-     * showing homology models for that protein. Displays error if zero or multiple proteins selected.
+     * Fetches an AlphaFold predicted structure from EBI for the selected protein and loads it into the NGL viewer.
+     * Requires exactly one protein selected with a valid UniProt accession.
+     * Calls the AlphaFold REST API, extracts the CIF URL from the response, and loads it via repopulateNGL.
      * @returns {undefined}
      */
-    launchExternalSwissmodelWindow() {
-        const newtab = window.open("", "_blank");
+    loadAlphaFoldStructure() {
         const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
-        if (accessionIDs.length === 1) {
-            newtab.location = "https://swissmodel.expasy.org/repository/uniprot/" + accessionIDs[0];
-        } else {
-            newtab.document.body.textContent = "Select exactly one protein with legal Accession ID in the current dataset. SWISS-MODEL service can only query single protein.";
+        if (accessionIDs.length !== 1) {
+            this.setStatusText("Select exactly one protein with a valid UniProt accession for AlphaFold lookup.", false);
+            return;
         }
-    }
-
-    /**
-     * Helper to get selected option data from dropdown select element.
-     * Filters selects by name, finds selected option, returns its bound data.
-     * @param {d3.selection} higherElem - Parent D3 selection containing select elements
-     * @param {string} selectName - Name of select element to query
-     * @returns {*} Data bound to selected option
-     */
-    getSelectedOption(higherElem, selectName) {
-        let funcMeta;
-
-        //this.controlDiv
-        higherElem
-            .selectAll("select")
-            .filter(function (d) {
-                return d === selectName;
+        const accession = accessionIDs[0];
+        this.setWaitingEffect();
+        this.loadRoute = "file";
+        const self = this;
+        fetch("https://alphafold.ebi.ac.uk/api/prediction/" + accession)
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error("AlphaFold API returned status " + response.status + " for " + accession);
+                }
+                return response.json();
             })
-            .selectAll("option")
-            .filter(function () {
-                return d3.select(this).property("selected");
+            .then(function(data) {
+                if (!data || data.length === 0) {
+                    throw new Error("No AlphaFold prediction found for " + accession);
+                }
+                const cifUrl = data[0].cifUrl;
+                if (!cifUrl) {
+                    throw new Error("No CIF URL in AlphaFold response for " + accession);
+                }
+                repopulateNGL({
+                    pdbSettings: [{
+                        id: "AlphaFold-" + accession,
+                        uri: cifUrl,
+                        local: false,
+                        params: { firstModelOnly: true }
+                    }],
+                    stage: self.stage,
+                    compositeModel: self.model
+                });
             })
-            .each(function (d) {
-                funcMeta = d;
+            .catch(function(err) {
+                self.setStatusText("AlphaFold lookup failed: " + err.message, false);
             });
-        return funcMeta;
     }
-
-    /*
-    launchExternalEBIPDBWindow: function () {
-        const chosenSeq = (this.getSelectedOption(d3.select(this.el).select(".columnbar"), "Proteins") || {
-            sequence: ""
-        }).sequence;
-        window.open("http://www.ebi.ac.uk/pdbe-srv/PDBeXplore/sequence/?seq=" + chosenSeq + "&tab=PDB%20entries", "_blank");
-    }*/
 
     /**
      * Handles local PDB file selection event.
@@ -502,102 +429,6 @@ export class PDBFileChooserBB extends BaseFrameView {
         return elem.node().checkValidity();
     }
 
-    /**
-     * Extracts unique PRIDE PXD accessions from the loaded mzIdentML files.
-     * @returns {string[]} Array of unique PXD accession strings (uppercased)
-     */
-    getPRIDEAccessions() {
-        const pxdPattern = /^PXD\d+$/i;
-        const candidates = new Set();
-        for (const mzidFile of this.model.get("clmsModel").getMzidentmlFiles().values()) {
-            const pid = mzidFile.projectId;
-            if (pid && pxdPattern.test(pid)) {
-                candidates.add(pid.toUpperCase());
-            }
-        }
-        return Array.from(candidates);
-    }
-
-    /**
-     * Queries RCSB Search API for IHM structures linked to PRIDE accessions found in the current dataset.
-     * Shows a "Structures from PRIDE dataset" section with clickable PDB ID buttons if any are found.
-     * Silently hides the section if no PRIDE accessions exist or no structures are found.
-     * @returns {undefined}
-     */
-    lookupPRIDEPDBs() {
-        const accessions = this.getPRIDEAccessions();
-        if (accessions.length === 0) return;
-
-        const prideBox = d3.select(this.el).select(".prideStructuresBox");
-        prideBox.style("display", null);
-        const listDiv = prideBox.select(".prideStructuresList");
-        listDiv.text("Checking RCSB...");
-
-        const self = this;
-        const queries = accessions.map(accession => {
-            const payload = {
-                query: {
-                    type: "group", logical_operator: "and", label: "text",
-                    nodes: [{
-                        type: "group", logical_operator: "and", label: "nested-attribute",
-                        nodes: [
-                            { type: "terminal", service: "text", parameters: {
-                                attribute: "rcsb_ihm_dataset_source_db_reference.accession_code",
-                                operator: "exact_match", negation: false, value: accession
-                            }},
-                            { type: "terminal", service: "text", parameters: {
-                                attribute: "rcsb_ihm_dataset_source_db_reference.db_name",
-                                operator: "exact_match", negation: false, value: "PRIDE"
-                            }}
-                        ]
-                    }]
-                },
-                return_type: "entry",
-                request_options: {
-                    paginate: { start: 0, rows: 100 },
-                    results_content_type: ["experimental"],
-                    sort: [{ sort_by: "score", direction: "desc" }]
-                }
-            };
-            return fetch("https://search.rcsb.org/rcsbsearch/v2/query", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            })
-                .then(r => r.ok ? r.json() : { result_set: [] })
-                .then(data => ({ accession, ids: (data.result_set || []).map(r => r.identifier) }))
-                .catch(() => ({ accession, ids: [] }));
-        });
-
-        Promise.all(queries).then(results => {
-            listDiv.html("");
-            let anyFound = false;
-            for (const { accession, ids } of results) {
-                if (ids.length === 0) continue;
-                anyFound = true;
-                listDiv.append("span").attr("class", "prideAccessionLabel").text(accession + ": ");
-                for (const pdbId of ids) {
-                    listDiv.append("button")
-                        .attr("class", "btn btn-1 btn-1a pridePdbButton")
-                        .attr("title", "Load " + pdbId + " from RCSB")
-                        .text(pdbId)
-                        .on("click", function() {
-                            d3.select(self.el).select(".inputPDBCode").property("value", pdbId);
-                            self.loadPDBCode();
-                        });
-                }
-            }
-            if (!anyFound) {
-                prideBox.style("display", "none");
-            }
-        });
-    }
-
-    // toggleCAlphaSetting(evt) {
-    //     var val = evt.target.checked;
-    //     this.cAlphaOnly = val;
-    //     return this;
-    // }
 }
 
-PDBFileChooserBB.prototype.identifier = "PDB File Chooser";
+PDBFileChooserBB.prototype.identifier = "3D Structure File Chooser";
