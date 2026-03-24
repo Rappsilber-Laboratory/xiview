@@ -19,7 +19,7 @@ export function getDigestibleResiduesAsFeatures(clmsModel, protein) {
 
     const sequence = protein.sequence;
     const seqLength = sequence.length;
-    const specificity = clmsModel.get("enzymeSpecificity");
+    const specificity = clmsModel.getEnzymeSpecificity();
 
     const specifCount = specificity.length;
     for (let i = 0; i < specifCount; i++) {
@@ -59,7 +59,7 @@ export function getCrosslinkableResiduesAsFeatures(clmsModel, protein, reactiveG
 
     const sequence = protein.sequence;
     const seqLength = sequence.length;
-    const linkedResSets = clmsModel.get("crosslinkerSpecificity");
+    const linkedResSets = clmsModel.getCrosslinkerSpecificity();
 
     const temp = d3.values(linkedResSets);
     for (let cl = 0; cl < temp.length; cl++) {

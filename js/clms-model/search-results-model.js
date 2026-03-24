@@ -106,6 +106,8 @@ export class SearchResultsModel {
      */
     _crosslinkerSpecificity = [];
 
+    _enzymeSpecificity = [];
+
     /**
      * Stores mzIdentML file metadata for later processing
      * @param {Array<Object>} json - Array of mzIdentML file data objects
@@ -217,6 +219,25 @@ export class SearchResultsModel {
             const enzyme = new Enzyme(enzymeJson);
             indexedEnzymes.get(enzymeJson.upload_id).set(enzymeJson.protocol_id, enzyme);
         }
+        // Populate _enzymeSpecificity from unique site_regexp values
+        const seenRegexps = new Set();
+        for (const uploadEnzymes of indexedEnzymes.values()) {
+            for (const enzyme of uploadEnzymes.values()) {
+                const siteRegexp = enzyme.siteRegexp;
+                if (!siteRegexp || seenRegexps.has(siteRegexp)) continue;
+                seenRegexps.add(siteRegexp);
+
+                const lookbehindMatch = siteRegexp.match(/\(\?<=\[?([A-Z]+)]?\)/);
+                const residues = lookbehindMatch ? lookbehindMatch[1].split("") : [];
+                const lookaheadMatch = siteRegexp.match(/\(\?!\[?([A-Z]+)]?\)/);
+                const postConstraint = lookaheadMatch ? lookaheadMatch[1].split("") : null;
+
+                for (const aa of residues) {
+                    this._enzymeSpecificity.push({ aa, type: "DIGESTIBLE", postConstraint });
+                }
+            }
+        }
+
         //index search modifications
         const indexedSMs = new Map(); // this will be map of upload ids to map of protocol ids to SearchModification
         for (let searchModificationJson of this._searchModificationsJson) {
@@ -226,6 +247,51 @@ export class SearchResultsModel {
             const sm = new SearchModification(searchModificationJson);
             indexedSMs.get(searchModificationJson.upload_id).set(searchModificationJson.protocol_id, sm);
         }
+        // Populate _crosslinkerSpecificity from search modifications with crosslinker_id
+        // const linkableResSets = {};
+        // for (const smJson of this._searchModificationsJson) {
+        //     if (!smJson.crosslinker_id) continue;
+        //     const acc = smJson.accessions || {};
+        //
+        //     // Determine reactive group (0 = donor/group1, 1 = acceptor/group2)
+        //     let groupIndex;
+        //     if ("MS:1002509" in acc) groupIndex = 0;
+        //     else if ("MS:1002510" in acc) groupIndex = 1;
+        //     else continue;
+        //
+        //     // Name from UNIMOD accession value (e.g. "Xlink:DSSO"), else strip suffix from MS:1003392, else crosslinker_id
+        //     let name = null;
+        //     let unimodKey = null;
+        //     for (const [k, v] of Object.entries(acc)) {
+        //         if (k.startsWith("UNIMOD:")) { name = v; unimodKey = k; break; }
+        //     }
+        //     if (!name) {
+        //         const xlName = acc["MS:1003392"];
+        //         name = xlName ? xlName.replace(/_crosslink_(donor|acceptor)(_n_term)?$/, "") : String(smJson.crosslinker_id);
+        //     }
+        //
+        //     const key = smJson.upload_id + ":" + (unimodKey || smJson.crosslinker_id);
+        //     let resSet = linkableResSets[key];
+        //     if (!resSet) {
+        //         resSet = { name, linkables: [] };
+        //         linkableResSets[key] = resSet;
+        //     }
+        //     if (!resSet.linkables[groupIndex]) {
+        //         resSet.linkables[groupIndex] = new Set();
+        //     }
+        //
+        //     // Each character in residues is an amino acid; "." alone means position-only (N/C-term handled by CV terms)
+        //     const residues = smJson.residues || "";
+        //     if (residues !== ".") {
+        //         for (const aa of residues) {
+        //             resSet.linkables[groupIndex].add(aa);
+        //         }
+        //     }
+        //     if ("MS:1002057" in acc) resSet.linkables[groupIndex].add("nterm");
+        //     if ("MS:1002058" in acc) resSet.linkables[groupIndex].add("cterm");
+        // }
+        // this._crosslinkerSpecificity = linkableResSets;
+
         //index spectrum identiifcation protocols
         const indexedSIPs = new Map(); // this will be map of upload ids to map of protocol ids to SIP
         for (let sipJson of this._spectrumIdentificationProtocolsJson) {
@@ -576,6 +642,10 @@ export class SearchResultsModel {
      */
     getCrosslinkerSpecificity() {
         return this._crosslinkerSpecificity;
+    }
+
+    getEnzymeSpecificity() {
+        return this._enzymeSpecificity;
     }
 
     /**

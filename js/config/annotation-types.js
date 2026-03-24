@@ -19,31 +19,31 @@ import {AnnotationType} from "../backbone-models/annotation-model-collection";
  */
 export const DEFAULT_ANNOTATION_TYPE_CONFIGS = [
     {
-        category: "AA",
+        category: "Amino Acids",
         type: "Digestible",
-        tooltip: "Mark Digestible Residues",
-        source: "Search",
+        tooltip: "Mark enzyme digestible residues",
+        // source: "Search",
         colour: ANNOTATION_COLORS.DIGESTIBLE,
     },
+    // {
+    //     category: "AA",
+    //     type: "Crosslinkable-1",
+    //     tooltip: "Mark CrossLinkable residues (first or only reactive group)",
+    //     source: "Search",
+    //     colour: ANNOTATION_COLORS.NOT_DIGESTIBLE,
+    // },
+    // {
+    //     category: "AA",
+    //     type: "Cross-linkable-2",
+    //     tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
+    //     source: "Search",
+    //     colour: ANNOTATION_COLORS.NOT_DIGESTIBLE,
+    // },
     {
-        category: "AA",
-        type: "Crosslinkable-1",
-        tooltip: "Mark CrossLinkable residues (first or only reactive group)",
-        source: "Search",
-        colour: ANNOTATION_COLORS.NOT_DIGESTIBLE,
-    },
-    {
-        category: "AA",
-        type: "Cross-linkable-2",
-        tooltip: "Mark CrossLinkable residues (second reactive group if heterobifunctional cross-linker)",
-        source: "Search",
-        colour: ANNOTATION_COLORS.NOT_DIGESTIBLE,
-    },
-    {
-        category: "Alignment",
-        type: "PDB aligned region",
-        tooltip: "Show regions that align to currently loaded PDB Data",
-        source: "PDB",
+        category: "3D Alignment",
+        type: "3D structure aligned region",
+        tooltip: "Show regions that align to currently loaded 3D structure",
+        // source: "PDB",
         colour: ANNOTATION_COLORS.LINKER_MODIFIED,
     }
 ];

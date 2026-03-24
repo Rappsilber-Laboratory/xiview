@@ -12,6 +12,8 @@
  * @property {string} LINKER_MODIFIED - Light green (#b2df8a) for residues with linker modifications
  * @property {string} CROSSLINKABLE - Dark green (#33a02c) for residues that can form crosslinks (typically lysines)
  */
+
+//TODO - the names of these aren't right
 export const ANNOTATION_COLORS = {
     DIGESTIBLE: "#1f78b4",
     NOT_DIGESTIBLE: "#a6cee3",

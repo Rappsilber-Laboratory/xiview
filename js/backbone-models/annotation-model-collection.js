@@ -116,14 +116,9 @@ export class AnnotationTypeCollection extends Backbone.Collection {
         return (attrs.category + "-" + attrs.type).toLocaleLowerCase();
     }
 
-    /**
-     * Comparator function for sorting collection by backbone-models ID.
-     * @param {AnnotationType} model - Annotation type backbone-models to extract sort key from
-     * @returns {string} Model ID for sorting
-     */
-    comparator(model) {
-        return model.get("id");
-    }
+    // comparator(model) {
+    //     return model.get("id");
+    // }
 
     /**
      * Gets or generates color for annotation category/type combination.

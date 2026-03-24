@@ -240,20 +240,13 @@ export function getHelpMenuConfig() {
     return {
         title: "Help",
         menu: [{
-            name: "version " + packageInfo.version,
-        },{
-            name: "Xi Docs",
+            name: "Tutorials",
             func: function () {
                 window.open("./docs/html/xiview.html", "_blank");
             },
-            tooltip: "Documentation for xiVIEW"
+            tooltip: "Documentation and video tutorials for xiVIEW"
         }, {
-            name: "Online Videos",
-            func: function () {
-                //                    window.open("https://vimeo.com/user64900020", "_blank");
-                window.open("https://rappsilberlab.org/software/xiview/", "_blank");
-            },
-            tooltip: "A number of how-to videos are available via this link to the lab homepage",
-        }],
+            name: "version " + packageInfo.version,
+        }, ],
     };
 }

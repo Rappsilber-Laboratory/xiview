@@ -1559,6 +1559,8 @@ function testCallback(model) {
             const modelsFromCollection = annotColl.where({category: "User Defined"});
             actualValue = modelsFromCollection.map(function (model) {
                 return model.toJSON();
+            }).sort(function (a, b) {
+                return a.id.localeCompare(b.id);
             });
 
             assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue) + " as generated userAnnotation Models, Passed!");
