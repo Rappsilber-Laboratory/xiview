@@ -53,7 +53,7 @@ import {ColourCollectionOptionViewBB} from "./ui-utils/color-collection-option-v
 import {AlignCollectionViewBB} from "./align/alignViewBB3";
 import {DistogramBB} from "./views/distogramViewBB";
 import {NGLViewBB} from "./views/ngl/NGLViewBB";
-import {PDBFileChooserBB} from "./file-choosers/PDBFileChooser";
+import {PDBFileChooserBB} from "./file-choosers/pdb-file-chooser";
 import {STRINGFileChooserBB} from "./file-choosers/STRINGFileChooser";
 import {ScatterplotViewBB} from "./views/scatterplotViewBB";
 import {
