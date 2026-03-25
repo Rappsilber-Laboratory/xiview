@@ -201,8 +201,8 @@ class SeqModel extends Backbone.Model {
             block.name = alignment.label;
             block.protID = this.collection.containingModel.id;
             block.id = this.collection.containingModel.id + " " + alignment.label;
-            block.category = "Alignment";
-            block.type = "PDB aligned region";
+            block.category = "3D Alignment";
+            block.type = "3D model aligned region";
             //block.alignmentID = this.get("compID")   // not needed if indices already in search index terms (which blockify results are)
             return block;
         }, this);
@@ -217,8 +217,8 @@ class SeqModel extends Backbone.Model {
             name: alignment.label,
             protID: this.collection.containingModel.id,
             id: this.collection.containingModel.id+" "+alignment.label,
-            category: "Alignment",
-            type: "PDB aligned region",
+            category: "3D Alignment",
+            type: "3D model aligned region",
             alignmentID: this.get("compID")   // not needed if indices already in search index terms
         }];
         */
