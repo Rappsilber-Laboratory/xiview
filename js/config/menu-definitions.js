@@ -240,7 +240,7 @@ export function getHelpMenuConfig() {
     return {
         title: "Help",
         menu: [{
-            name: "Tutorials",
+            name: "Documentation",
             func: function () {
                 window.open("./docs/html/xiview.html", "_blank");
             },

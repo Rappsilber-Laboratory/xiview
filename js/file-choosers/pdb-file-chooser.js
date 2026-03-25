@@ -109,7 +109,7 @@ export class PDBFileChooserBB extends BaseFrameView {
 
         box.append("button")
             .attr("class", "alphafoldButton btn btn-1 btn-1a")
-            .text("AlphaFold Structure (SELECT ONE PROTEIN)")
+            .text("AlphaFold Model (SELECT ONE PROTEIN)")
             .attr("title", "Fetches AlphaFold predicted structure from EBI using UniProt accession and loads it into the 3D viewer - select exactly one protein")
             .append("i").attr("class", "fa fa-xi fa-external-link");
 
@@ -429,4 +429,4 @@ export class PDBFileChooserBB extends BaseFrameView {
 
 }
 
-PDBFileChooserBB.prototype.identifier = "3D Structure File Chooser";
+PDBFileChooserBB.prototype.identifier = "3D Model Chooser";

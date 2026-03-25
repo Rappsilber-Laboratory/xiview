@@ -463,6 +463,7 @@ export function views(compositeModelInst, split) {
     });
 
     document.getElementById("pdbLoadButton")?.addEventListener("click", () => vent.trigger("pdbFileChooserShow", true));
+    document.getElementById("showHiddenProteinsBtn")?.addEventListener("click", () => compositeModelInst.showHiddenProteins());
 
     viewsEssential(compositeModelInst, {
         "specWrapperDiv": "#spectrumPanelWrapper",

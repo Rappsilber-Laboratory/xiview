@@ -41,8 +41,8 @@ export const DEFAULT_ANNOTATION_TYPE_CONFIGS = [
     // },
     {
         category: "3D Alignment",
-        type: "3D structure aligned region",
-        tooltip: "Show regions that align to currently loaded 3D structure",
+        type: "3D model aligned region",
+        tooltip: "Show regions that align to currently loaded 3D model",
         // source: "PDB",
         colour: ANNOTATION_COLORS.LINKER_MODIFIED,
     }
