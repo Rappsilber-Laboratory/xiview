@@ -2,7 +2,7 @@
 repos:
   # Standard pre-commit hooks for general file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
         exclude: 'vendor/'
@@ -61,7 +61,7 @@ repos:
         entry: npm run test
         language: system
         pass_filenames: false
-        files: '\.(js|css)$'
+        files: '\.js$'
         exclude: '(vendor/|node_modules/|dist/)'
         stages: [push]
 

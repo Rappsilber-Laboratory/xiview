@@ -5,6 +5,7 @@
 
 .xispec_dynDiv_moveParentDiv {
 	font-size: 15px!important;
+    border: none!important;
 }
 
 .xispec_subViewHeader{
@@ -20,10 +21,6 @@
       color: var(--main-color)!important;
 }
 
-.xispec_dynDiv_moveParentDiv {
-    border: none!important;
-}
-
 .xispec_settings_menu .xispec_btn:hover{
       background: #fff!important;
 }
@@ -35,18 +32,6 @@
 .xispec_settings_menu .xispec_active:hover{
   background: rgb(192,206,224,1)!important;
   color: var(--main-color)!important;
-}
-
-.xispec_settings_menu .xispec_btn{
-    /* background: #666!important; */
-}
-
-.xispec_settings_menu .xispec_active{
-    /* background: #333!important; */
-}
-
-.xispec_settings_menu .xispec_active:hover {
-    /* color: #fff; */
 }
 
 

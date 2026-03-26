@@ -96,18 +96,13 @@
     color: #fff;
 }
 
-.xispec_form-control::selection {
-    background-color: #750000;
-    color: #fff;
-}
-
 /* xispec_btn */
 .xispec_btn {
     border: none;
+    background: 0 0;/* var(--main-color); */
     background-color: inherit!important;
     font-family: inherit;
     color: #fff;
-    background: 0 0;/* var(--main-color); */
     font-size: .6em;
     cursor: pointer;
     padding: 5px 15px;

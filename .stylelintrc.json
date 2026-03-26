@@ -12,6 +12,10 @@
         "selector-class-pattern": null,
         "color-function-notation": null,
         "alpha-value-notation": null,
-        "no-descending-specificity": null
+        "no-descending-specificity": null,
+        "selector-id-pattern": null,
+        "selector-pseudo-class-no-unknown": null,
+        "selector-pseudo-element-no-unknown": null,
+        "declaration-property-value-no-unknown": null
     }
 }

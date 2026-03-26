@@ -46,13 +46,11 @@
 
 .xispec_settings_main .xispec_flex-column{
    display: flex;
-   display: flex;
    -webkit-flex-direction: column;
    flex-direction: column;
 }
 
 .xispec_settings_main .xispec_flex-row{
-   display: flex;
    display: flex;
    -webkit-flex-direction: row;
    flex-direction: row;
@@ -317,18 +315,6 @@
 }
 
 /* just need 1 background image and rotate it for corner orientations */
-.xispec_dynDiv_resizeDiv_tr {
-    transform: rotate(90deg);
-}
-
-.xispec_dynDiv_resizeDiv_bl {
-    transform: rotate(270deg);
-}
-
-.xispec_dynDiv_resizeDiv_br {
-    transform: rotate(180deg);
-}
-
 .xispec_dynDiv_resizeDiv_tl,.xispec_dynDiv_resizeDiv_tr,.xispec_dynDiv_resizeDiv_bl,.xispec_dynDiv_resizeDiv_br {
  position: absolute;
 }
@@ -340,18 +326,21 @@
 }
 
 .xispec_dynDiv_resizeDiv_tr {
+ transform: rotate(90deg);
  top: -1px;
  right: -1px;
  cursor: ne-resize;
 }
 
 .xispec_dynDiv_resizeDiv_bl {
+ transform: rotate(270deg);
  bottom: -1px;
  left: -1px;
  cursor: sw-resize;
 }
 
 .xispec_dynDiv_resizeDiv_br {
+ transform: rotate(180deg);
  bottom: -1px;
  right: -1px;
  cursor: se-resize;

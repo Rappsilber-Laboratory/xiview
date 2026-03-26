@@ -68,7 +68,8 @@
 
 .page-header{
     height:37px;
-    /*padding-left: 10px;*/
+
+    /* padding-left: 10px; */
     background-color: var(--main-color);
     color: #fff;
     position: absolute;
@@ -609,7 +610,7 @@ a.btn {
     flex-shrink: 0; /* fixes toolbar overflow in ie11 */
 }
 
-div.columnbar[disabled], div.columnbar[disabled], label.fakeButton[disabled] {
+div.columnbar[disabled], label.fakeButton[disabled] {
 	color: grey;
 	pointer-events: none;
 	border-color: grey;
@@ -730,7 +731,7 @@ div[class='messagebar']:not(:last-of-type) {
 svg.tempKey {
 	text-transform: initial;	/* reset text-transforms for temporary svgs */
 	letter-spacing: 0;
-	font-family: Helvetica;
+	font-family: Helvetica, sans-serif;
     font-size: 12px;
 }
 
@@ -754,7 +755,7 @@ svg.tempKey .keyPoint rect {
 
 svg.tempKey text {
     text-anchor: start;
-    font-family: Helvetica;
+    font-family: Helvetica, sans-serif;
     font-size: 12px;
 }
 
@@ -786,12 +787,12 @@ svg.tempKey text {
 select {
 	color: var(--main-color);
 	border-color: var(--main-color);
-	font-family: Lato-Bold;
+	font-family: Lato-Bold, sans-serif;
 }
 
 input {
 	color: var(--main-color);
-	font-family: Lato-Bold;
+	font-family: Lato-Bold, sans-serif;
 }
 
 input.xiNetLinkWidth {
@@ -804,7 +805,10 @@ input.withSideMargins, select.withSideMargins {
     margin-right: 0.5em;
 }
 
-sup {font-size:xx-small; vertical-align:super;}
+sup {
+    font-size: xx-small;
+    vertical-align: super;
+}
 
 .smallHeading {
 	margin-top: 0.5em;
@@ -832,7 +836,8 @@ sup {font-size:xx-small; vertical-align:super;}
     margin-left: -1.5em;
 
 	/* generated at http://www.colorzilla.com/gradient-editor/ */
-	background: linear-gradient(left, #fc3932 0%, #e4e82c 25%, #20cc3d 50%, #0436ea 75%, #f986bc 100%); /* FF3.6-15 */
+
+ /* FF3.6-15 */
 	background: linear-gradient(left, #fc3932 0%,#e4e82c 25%,#20cc3d 50%,#0436ea 75%,#f986bc 100%); /* Chrome10-25,Safari5.1-6 */
 	background: linear-gradient(to right, #fc3932 0%,#e4e82c 25%,#20cc3d 50%,#0436ea 75%,#f986bc 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
@@ -850,7 +855,6 @@ input:invalid:focus {
 }
 
 image.sharpImage {
-    image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor;
     image-rendering: pixelated;
 }
