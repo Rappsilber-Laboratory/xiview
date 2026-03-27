@@ -140,10 +140,30 @@ export function repopulateNGL(pdbInfo) {
                     });
                     xilog("chainmap", chainMap, "stage", stage, "\nhas sequences", sequenceMap);
 
-                    if (compositeModel.get("stageModel")) {
-                        compositeModel.get("stageModel").stopListening(); // Stop the following 3dsync event triggering stuff in the old stage backbone-models
+
+                    // bug was introduced by commit 2d27785c, which added vent.trigger("nglViewShow", true) to pdb-file-chooser.js's 3dsync listener — the change that auto-shows the NGL panel when a PDB loads.
+                    //
+                    // Here's the exact crash sequence on the second PDB load:
+                    //
+                    // 1. compositeModel.trigger("3dsync", sequenceMap, removeThese) fires
+                    // 2. networkFrame.js listener fires first — removes the OLD structure's alignment sequences from alignColl (e.g. "1ABC:A:0", "1ABC:B:1", …) and adds the new ones
+                    // 3. pdb-file-chooser.js listener fires next — vent.trigger("nglViewShow", true) → NGLViewBB.setVisible(true) → render() → showFiltered()
+                    // 4. showFiltered() sees this.xlRepr is still non-null (set from the first load; change:stageModel hasn't fired yet to clear it) → calls oldStageModel.setFilteredLinkList()
+                    // 5. makeLinkList() on the OLD stageModel constructs alignID = "1ABC:A:0" etc. — but those sequences were already removed from alignColl in step 2
+                    // 6. getSequenceModel("1ABC:A:0") → undefined → TypeError: Cannot read properties of undefined (reading 'getAlignedIndex')
+                    //
+                    // Why the null-guard-only fix didn't work: with the guard, makeLinkList returns an empty link list, which triggers change:linkList on the old stageModel. NGLViewBB's listener fires xlRepr._handleDataChange() — but the old NGL structure component was already destroyed by stage.removeAllComponents() at the
+                    // top of repopulateNGL, so that crashes too.
+                    //
+                    //     The fix: Clear xlRepr before 3dsync fires. Setting compositeModel.set("stageModel", null) triggers change:stageModel → xlRepr = null. When nglViewShow then fires inside 3dsync, showFiltered() sees xlRepr === null and is a no-op. The null guard in change:stageModel handles the transient null case safely.
+                    //
+
+                    const oldStageModel = compositeModel.get("stageModel");
+                    const removeThese = oldStageModel ? [oldStageModel.getStructureName()] : [];    // old alignments to remove
+                    if (oldStageModel) {
+                        oldStageModel.stopListening(); // Stop bulkAlignChange triggering setupLinks on the old stage model
+                        compositeModel.set("stageModel", null); // Clear xlRepr in NGLViewBB before 3dsync fires nglViewShow
                     }
-                    const removeThese = compositeModel.get("stageModel") ? [compositeModel.get("stageModel").getStructureName()] : [];    // old alignments to remove
                     compositeModel.trigger("3dsync", sequenceMap, removeThese);
                     // Now 3d sequence is added we can make a new NGL Model wrapper (as it needs aligning)
 

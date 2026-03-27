@@ -1,6 +1,6 @@
 {
   "name": "xiview",
-  "version": "2.0.1a5",
+  "version": "2.0.1a6",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
     "xiVIEW",
@@ -50,7 +50,8 @@
     "copy-to-xiview-server": "find dist/ -maxdepth 1 -type f ! -name 'tests_*' -exec cp {} ../xiview-server/static/ \\; ;",
     "build-dev-and-copy-to-xiview-server": "npm run build-dev && npm run copy-to-xiview-server;",
     "build-prod-and-copy-to-xiview-server": "rm -rf dist && npm run build-prod && npm run copy-to-xiview-server;",
-    "all-dev": "npm run lint && npm run build-dev && npm run test && npm run copy-to-xiview-server;"
+    "all-dev": "npm run lint && npm run build-dev && npm run test && npm run copy-to-xiview-server;",
+    "prepare": "pre-commit install && pre-commit install --hook-type pre-push"
   },
   "dependencies": {
     "@eastdesire/jscolor": "~2.5.2",

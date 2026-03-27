@@ -617,6 +617,8 @@ export class NGLViewBB extends BaseFrameView {
                 this.xlRepr = null;
             }
 
+            if (!newStageModel) return; // transient null state during PDB reload — listeners below require a valid model
+
             this
                 .listenTo(newStageModel, "change:linkList", function () {
                     if (this.xlRepr) {

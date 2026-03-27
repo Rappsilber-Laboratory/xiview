@@ -195,9 +195,17 @@ export class NGLModelWrapperBB extends Backbone.Model {
         const fullLinkList = [];  // links where both ends are in pdb
         const halfLinkList = [];  // links where one end is in the pdb
         const residueProxy1 = structure.getResidueProxy();
-        const chainProxy = structure.getChainProxy();
         const atomProxy = structure.getAtomProxy();
         const alignColl = this.getCompositeModel().get("alignColl");
+
+        // Pre-compute per-chain residue index lookup. chainProxy.residueOffset is unreliable
+        // for some structure formats
+        const chainResidueIndexCache = {};
+        structure.eachChain(function (cp) {
+            const indices = [];
+            cp.eachResidue(function (rp) { indices.push(rp.index); });
+            chainResidueIndexCache[cp.index] = indices;
+        });
 
         function getResidueId(globalNGLResIndex) {
             // TODO add structureId to key
@@ -252,8 +260,11 @@ export class NGLModelWrapperBB extends Backbone.Model {
         function addResidueListsExtraInfo(residueObjLists) {
             residueObjLists.forEach(function (residueObjList) {
                 residueObjList.forEach(function (residueObj) {
-                    chainProxy.index = residueObj.chainIndex;
-                    residueProxy1.index = residueObj.seqIndex + chainProxy.residueOffset;
+                    const residueIndices = chainResidueIndexCache[residueObj.chainIndex];
+                    if (!residueIndices) return;
+                    const globalIndex = residueIndices[residueObj.seqIndex];
+                    if (globalIndex === undefined) return;
+                    residueProxy1.index = globalIndex;
                     addResidueExtraInfo(residueObj, residueProxy1);
                 }, this);
             });
