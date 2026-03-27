@@ -246,6 +246,12 @@ export function getHelpMenuConfig() {
             },
             tooltip: "Documentation and video tutorials for xiVIEW"
         }, {
+            name: "Report Bug",
+            func: function () {
+                window.open("https://github.com/Rappsilber-Laboratory/xiview/issues", "_blank");
+            },
+            tooltip: "Documentation and video tutorials for xiVIEW"
+        }, {
             name: "version " + packageInfo.version,
         }, ],
     };
