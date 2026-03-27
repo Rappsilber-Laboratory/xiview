@@ -13,8 +13,8 @@ What were previously four separate git submodules are now merged into this singl
 | Original submodule | Original branch | Now located at |
 |--------------------|-----------------|----------------|
 | xiview | v2 | `js/`, `css/`, `images/`, `tests/` (top level) |
-| CLMS-model | v2 | `js/models/` |
-| spectrum (xiSPEC) | dev | `src/` |
+| CLMS-model | v2 | `js/clms-model/` |
+| spectrum (xiSPEC) | dev | `js/views/xispec/` |
 | crosslink-viewer (xiNET) | master | `js/views/xinet/` |
 
 ## Architecture
@@ -24,22 +24,22 @@ What were previously four separate git submodules are now merged into this singl
 - **`js/`** - Main application JavaScript
   - **`js/main.js`** - Application entry point and loader
   - **`js/networkFrame.js`** - Main application initialisation, wires up all views and models
-  - **`js/models/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.) — originally CLMS-model
-  - **`js/model/`** - Application-specific models extending the core CLMS models
+  - **`js/clms-model/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.) — originally CLMS-model
+  - **`js/backbone-models/`** - Application-specific models extending the core CLMS models
   - **`js/views/`** - UI view components using Backbone.js
   - **`js/views/xinet/`** - xiNET crosslink network visualization — originally crosslink-viewer
+  - **`js/views/xispec/`** - xiSPEC spectrum viewer — originally spectrum submodule
   - **`js/filter/`** - Data filtering and search functionality
   - **`js/align/`** - Sequence alignment utilities
   - **`js/config/`** - Configuration and menu definitions
   - **`js/file-choosers/`** - File import UI components
   - **`js/ui-utils/`** - Shared UI utilities
-- **`src/`** - xiSPEC spectrum viewer — originally spectrum submodule
 - **`css/`** - All stylesheets
 - **`images/`** - Icons, logos, and UI graphics
 - **`tests/`** - Test files and test data
 - **`vendor/`** - Third-party libraries (do not modify)
 
-### Core Data Models (`js/models/`)
+### Core Data Models (`js/clms-model/`)
 
 - **`search-results-model.js`** - Top-level container for all experiment data
 - **`crosslink.js`** - CrossLink model
@@ -72,13 +72,20 @@ npm run build-prod
 
 ### Linting
 ```bash
-npm run lint
+npm run lint        # ESLint (JS only)
+npm run lint:css    # stylelint (CSS only)
 ```
+
+Note: `stylelint` currently reports ~166 pre-existing errors (camelCase IDs, duplicate properties, etc.) that have not yet been resolved.
+
+### Pre-commit hooks
+
+Hooks are configured in `.pre-commit-config.yaml` and installed automatically via the `prepare` npm script (runs on `npm install`). On commit: trailing whitespace, EOF, YAML/JSON checks, ESLint, stylelint. On push: webpack build + QUnit tests.
 
 ### Testing
 ```bash
-npm test           # Full test suite (builds first)
-npm run test-headless  # Run tests without building (requires prior build)
+npm run build-dev && npm test  # Build then run tests
+npm test                       # Run tests against existing build in dist/
 ```
 
 **Test Infrastructure**:
@@ -106,8 +113,8 @@ npm run test-headless  # Run tests without building (requires prior build)
 ### Adding New Components
 
 - **Views**: Place in `js/views/`, extend Backbone.View
-- **Core models**: Place in `js/models/`
-- **App-specific models**: Place in `js/model/`, extend core CLMS models where possible
+- **Core models**: Place in `js/clms-model/`
+- **App-specific models**: Place in `js/backbone-models/`, extend core CLMS models where possible
 - **Styles**: Add to appropriate file in `css/`
 - **Tests**: Add to `tests/`
 

@@ -9,11 +9,16 @@ The entry point is `js/main.js`, which loads CSS, initialises the spinner, impor
 ## Key Directories
 
 - **`js/`** - Main application code (views, models, filters, controllers)
-  - **`js/models/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.)
+  - **`js/clms-model/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.)
+  - **`js/backbone-models/`** - Application-specific models extending the core CLMS models
+  - **`js/views/`** - UI view components using Backbone.js, including xiNET and xiSPEC
   - **`js/views/xinet/`** - xiNET crosslink network visualization component
-  - **`js/model/`** - Application-specific models extending the core CLMS models
-  - **`js/views/`** - UI view components using Backbone.js, inlcluding xiNET and xiSPEC
+  - **`js/views/xispec/`** - xiSPEC spectrum viewer component
   - **`js/filter/`** - Data filtering and search functionality
+  - **`js/align/`** - Sequence alignment utilities
+  - **`js/config/`** - Configuration and menu definitions
+  - **`js/file-choosers/`** - File import UI components
+  - **`js/ui-utils/`** - Shared UI utilities
 - **`css/`** - All stylesheets
 - **`images/`** - Icons, logos, and UI graphics
 - **`tests/`** - Test files and test data
@@ -21,10 +26,12 @@ The entry point is `js/main.js`, which loads CSS, initialises the spinner, impor
 
 ## Quick Start
 
-Install dependencies:
+Requires Node >=24.13.1. Install dependencies:
 ```bash
 npm install
 ```
+
+Pre-commit git hooks are installed automatically by the `prepare` script during `npm install`.
 
 ### Development Build
 
@@ -50,11 +57,8 @@ npm run build-prod
 # Run ESLint
 npm run lint
 
-# Run automated tests (builds first, then tests)
+# Run automated tests (requires a prior build)
 npm test
-
-# Run tests without building (requires prior build)
-npm run test-headless
 ```
 
 ## Testing Infrastructure
@@ -62,10 +66,10 @@ npm run test-headless
 xiVIEW includes automated testing using QUnit and Puppeteer:
 
 - **Test Location**: `tests/` directory
-- **Test Files**: `qunit.html`, `qunit2.html` (browser), `tests.js`, `tests2.js` (logic), `clms-model-tests.js`
+- **Test Files**: `qunit.html`, `qunit2.html`, `qunit-clms-backbone-models.html` (browser), `tests.js`, `tests2.js`, `clms-model-tests.js` (logic)
 - **Test Data**: JSON test datasets (`10003.json`, `15884.json`, `blosums.json`)
-- **Execution**: Headless browser testing via Puppeteer with local HTTP server
-- **Coverage**: 67 tests covering data parsing, filtering, selection, scoring, alignment, distance calculations, and CSV export
+- **Execution**: Headless browser testing via Puppeteer with local HTTP server; requires a prior build (`npm run build-dev`)
+- **Coverage**: Data parsing, filtering, selection, scoring, alignment, distance calculations, and CSV export
 
 The test runner automatically:
 1. Starts a local HTTP server to serve test files
@@ -85,7 +89,7 @@ The test runner automatically:
 - **d3** (~3.5.17) - Data visualization (note: intentionally staying on v3)
 - **backbone** (~1.6.0) - MVC framework
 - **jquery** (~3.7.1) - DOM manipulation
-- **ngl** (~2.3.1) - 3D molecular visualization
+- **ngl** (~2.4.0) - 3D molecular visualization
 - **datatables.net** - Data table components
 - **split.js** - UI panel splitting
 
