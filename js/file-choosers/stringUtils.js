@@ -1,6 +1,6 @@
 /**
  * @fileoverview STRING database utility functions for protein ID resolution and network queries.
- * Provides API integration with STRING v11 for protein-protein interaction scores.
+ * Provides API integration with STRING for protein-protein interaction scores.
  * Features: protein ID resolution (UniProt → STRING IDs), network query (fetch interaction scores),
  * CSV translation (TSV network → CSV metadata format), localStorage caching (IDs + networks),
  * LZW compression (reduce cache size). Handles large protein sets (max 2000) with error messaging.
@@ -78,11 +78,11 @@ export const STRINGUtils = {
         console.log(stringIDCache, identifiersBySpecies, todo);
 
         if (todo.length) {
-            const pidString = todo.join("%0d");
+            const pidString = todo.join("\r");
             const promiseObj = new Promise(function (resolve, reject) {
                 $.ajax({
                     type: "post",
-                    url: "https://version-11-0.string-db.org/api/json/get_string_ids",
+                    url: "https://string-db.org/api/json/get_string_ids",
                     data: {
                         identifiers: pidString,
                         species: taxonID,
@@ -137,7 +137,7 @@ export const STRINGUtils = {
         const stringIDs = d3.values(idMap);
         if (stringIDs.length > 1) {
             stringIDs.sort(); // sort string ids
-            const networkKey = stringIDs.join("%0d");     // id/key made of string IDs joined together
+            const networkKey = stringIDs.join("\r");     // id/key made of string IDs joined together
 
             const stringNetworkScoreCache = getLocalStorage("StringNetworkScores");
             const idBySpecies = stringNetworkScoreCache[taxonID] || {};
@@ -161,7 +161,7 @@ export const STRINGUtils = {
                 const promiseObj = new Promise(function (resolve, reject) {
                     $.ajax({
                         type: "post",
-                        url: "https://version-11-0.string-db.org/api/tsv/network",
+                        url: "https://string-db.org/api/tsv/network",
                         data: {
                             identifiers: networkKey,
                             species: taxonID,
