@@ -11,7 +11,7 @@ import d3 from "d3";
 import * as NGL from "ngl";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {getLegalAccessionIDs} from "../modelUtils";
+import {getLegalAccessionIDs, filterOutDecoyProteins} from "../modelUtils";
 import {commonRegexes} from "../utils";
 import {repopulateNGL} from "../views/ngl/RepopulateNGL";
 import {loadUserFile} from "./load-user-file";
@@ -110,7 +110,7 @@ export class PDBFileChooserBB extends BaseFrameView {
         box.append("button")
             .attr("class", "alphafoldButton btn btn-1 btn-1a")
             .text("AlphaFold Model (SELECT ONE PROTEIN)")
-            .attr("title", "Fetches AlphaFold predicted structure from EBI using UniProt accession and loads it into the 3D viewer - select exactly one protein")
+            .attr("title", "Searches AlphaFold by protein sequence and loads predicted structure into the 3D viewer - select exactly one protein (min 20 amino acids)")
             .append("i").attr("class", "fa fa-xi fa-external-link");
 
         const queryBox = box.append("div").attr("class", "verticalFlexContainer queryBox");
@@ -275,40 +275,50 @@ export class PDBFileChooserBB extends BaseFrameView {
     }
 
     /**
-     * Fetches an AlphaFold predicted structure from EBI for the selected protein and loads it into the NGL viewer.
-     * Requires exactly one protein selected with a valid UniProt accession.
-     * Calls the AlphaFold REST API, extracts the CIF URL from the response, and loads it via repopulateNGL.
+     * Searches AlphaFold for a predicted structure using the selected protein's sequence and loads it into the NGL viewer.
+     * Requires exactly one non-decoy protein selected with a sequence of at least 20 amino acids.
+     * Uses the AlphaFold sequence search API, picks the best MMCIF hit by sequence identity, and loads via repopulateNGL.
      * @returns {undefined}
      */
     loadAlphaFoldStructure() {
-        const accessionIDs = getLegalAccessionIDs(this.getSelectedProteins());
-        if (accessionIDs.length !== 1) {
-            this.setStatusText("Select exactly one protein with a valid UniProt accession for AlphaFold lookup.", false);
+        const proteins = filterOutDecoyProteins(this.getSelectedProteins());
+        if (proteins.length !== 1) {
+            this.setStatusText("Select exactly one protein for AlphaFold sequence search.", false);
             return;
         }
-        const accession = accessionIDs[0];
+        const sequence = proteins[0].sequence;
+        if (!sequence || sequence.length < 20) {
+            this.setStatusText("Selected protein has no sequence or is too short (AlphaFold requires \u2265 20 amino acids).", false);
+            return;
+        }
         this.setWaitingEffect();
         this.loadRoute = "file";
         const self = this;
-        fetch("https://alphafold.ebi.ac.uk/api/prediction/" + accession)
+        fetch("https://alphafold.ebi.ac.uk/api/sequence/summary?id=" + encodeURIComponent(sequence))
             .then(function (response) {
                 if (!response.ok) {
-                    throw new Error("AlphaFold API returned status " + response.status + " for " + accession);
+                    throw new Error("AlphaFold sequence search returned status " + response.status);
                 }
                 return response.json();
             })
             .then(function (data) {
-                if (!data || data.length === 0) {
-                    throw new Error("No AlphaFold prediction found for " + accession);
+                const structures = data.structures;
+                if (!structures || structures.length === 0) {
+                    throw new Error("No AlphaFold entry found for this protein sequence.");
                 }
-                const cifUrl = data[0].cifUrl;
-                if (!cifUrl) {
-                    throw new Error("No CIF URL in AlphaFold response for " + accession);
+                // Pick best MMCIF hit sorted by sequence_identity descending
+                const hits = structures
+                    .map(function (s) { return s.summary; })
+                    .filter(function (s) { return s && s.model_url && s.model_format === "MMCIF"; })
+                    .sort(function (a, b) { return (b.sequence_identity || 0) - (a.sequence_identity || 0); });
+                if (hits.length === 0) {
+                    throw new Error("No AlphaFold MMCIF structure found for this sequence.");
                 }
+                const hit = hits[0];
                 repopulateNGL({
                     pdbSettings: [{
-                        id: "AlphaFold-" + accession,
-                        uri: cifUrl,
+                        id: hit.model_identifier || "AlphaFold",
+                        uri: hit.model_url,
                         local: false,
                         params: {firstModelOnly: true}
                     }],
