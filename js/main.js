@@ -7,6 +7,7 @@
 import "../css/reset.css";
 import "../css/common.css";
 import "../vendor/byrei-dyndiv_0.5.css";
+import "jsonview/dist/jquery.jsonview.css";
 import "../css/style.css";
 import "../css/xiView.css";
 
