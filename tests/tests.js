@@ -1601,6 +1601,37 @@ function testCallback(model) {
         assert.deepEqual(actualValue, expectedValue, "Expected " + JSON.stringify(expectedValue.slice(-200)) + " as compressed then decompressed large string, Passed!");
     });
 
+    test("translateToCSV basic", function (assert) {
+        const idMap = {
+            "P12345": "9606.ENSP00000001",
+            "Q67890": "9606.ENSP00000002"
+        };
+        const tsv = "stringId_A\tstringId_B\tpreferredName_A\tpreferredName_B\tncbiTaxonId\tscore\n" +
+                    "ENSP00000001\tENSP00000002\tGENE1\tGENE2\t9606\t0.900\n";
+
+        const result = STRINGUtils.translateToCSV(idMap, tsv);
+
+        assert.ok(result.includes("STRING Score"), "score column renamed to STRING Score");
+        assert.ok(result.includes("P12345"), "Protein1 resolved to UniProt ID");
+        assert.ok(result.includes("Q67890"), "Protein2 resolved to UniProt ID");
+        assert.notOk(result.includes("ncbiTaxonId"), "ncbiTaxonId column stripped");
+        assert.notOk(result.includes("stringId_A"), "stringId_A column stripped");
+        assert.notOk(result.includes("preferredName_A"), "preferredName_A column stripped");
+    });
+
+    test("translateToCSV filters rows where IDs not in map", function (assert) {
+        const idMap = {
+            "P12345": "9606.ENSP00000001"
+            // Q67890 / ENSP00000002 intentionally absent
+        };
+        const tsv = "stringId_A\tstringId_B\tpreferredName_A\tpreferredName_B\tncbiTaxonId\tscore\n" +
+                    "ENSP00000001\tENSP00000002\tGENE1\tGENE2\t9606\t0.900\n";
+
+        const result = STRINGUtils.translateToCSV(idMap, tsv);
+
+        assert.notOk(result.includes("P12345"), "Row with unresolvable partner is filtered out");
+    });
+
     module("File download string generation");
 
     test("Residues CSV", function (assert) {
