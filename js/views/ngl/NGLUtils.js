@@ -11,7 +11,7 @@ import * as _ from "underscore";
 import $ from "jquery";
 // const workerpool = require('workerpool');
 import {xilog} from "../../utils";
-import {filterOutDecoyProteins, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";
+import {filterOutDecoyProteins, filterTargetProteinsWithCrosslinks, filterRepeatedSequences, reinflateSequenceMap} from "../../modelUtils";
 import d3 from "d3";
 import vent from "../../vent";
 // import {DistancesObj} from "../../backbone-models/distances";//cyclic dependency, hack it into bottom of this file
@@ -196,7 +196,7 @@ function matchPDBChainsToUniprot(pdbUris, nglSequences, proteinArr, callback) {
 export function matchSequencesToExistingProteins(protAlignCollection, sequenceObjs, proteins, extractFunc) {
     xilog("SEQS TO PAIR INTERNALLY", sequenceObjs);
 
-    proteins = filterOutDecoyProteins(proteins)
+    proteins = filterTargetProteinsWithCrosslinks(proteins)
         .filter(function (protein) {
             return protAlignCollection.get(protein.id);
         });

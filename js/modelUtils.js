@@ -90,6 +90,12 @@ export function filterOutDecoyProteins(proteinArr) {
     });
 }
 
+export function filterTargetProteinsWithCrosslinks(proteinArr) {
+    return filterOutDecoyProteins(proteinArr).filter(function (protein) {
+        return protein.crosslinks.length > 0;
+    });
+}
+
 /**
  * Returns the highest score among a crosslink's filtered matches.
  * Used by make-tooltip.

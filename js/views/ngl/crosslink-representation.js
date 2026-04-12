@@ -609,7 +609,6 @@ export class CrosslinkRepresentation {
 
         this.structureComp.structure.spatialHash = null;
         this.structureComp.structure.bondHash = null;
-        this.structureComp.viewer.dispose();
 
         return this;
     }
