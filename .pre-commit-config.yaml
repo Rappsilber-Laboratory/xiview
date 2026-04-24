@@ -51,7 +51,7 @@ repos:
         pass_filenames: false
         files: '\.(js|css|json)$'
         exclude: '(vendor/|node_modules/|dist/)'
-        stages: [push]
+        stages: [pre-push]
 
   # Run automated tests
   - repo: local
@@ -63,9 +63,9 @@ repos:
         pass_filenames: false
         files: '\.js$'
         exclude: '(vendor/|node_modules/|dist/)'
-        stages: [push]
+        stages: [pre-push]
 
 
 # Global configuration
-default_stages: [ commit ]
+default_stages: [ pre-commit ]
 fail_fast: false

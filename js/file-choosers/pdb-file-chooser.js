@@ -327,6 +327,7 @@ export class PDBFileChooserBB extends BaseFrameView {
                 });
             })
             .catch(function (err) {
+                self.setCompletedEffect();
                 self.setStatusText("AlphaFold lookup failed: " + err.message, false);
             });
     }
