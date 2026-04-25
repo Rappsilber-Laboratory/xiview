@@ -195,11 +195,27 @@ export class FilterViewBB extends Backbone.View {
                 }
             ]
         };
+        const clmsModel = viewOptions && viewOptions.myOptions ? viewOptions.myOptions.clmsModel : null;
+        const searches = clmsModel ? Array.from(clmsModel.getSearches().values()) : [];
+        const mzidFiles = clmsModel ? clmsModel.getMzidentmlFiles() : null;
         defaultOptions.searchGroupToggles = this.model.possibleSearchGroups.map(function (group) {
+            let tooltip = "Pass matches from Group " + group;
+            if (mzidFiles) {
+                const filenames = searches
+                    .filter(function (s) { return s.group === group; })
+                    .map(function (s) {
+                        const f = mzidFiles.get(s.id);
+                        return f ? f.identificationFileName : null;
+                    })
+                    .filter(Boolean);
+                if (filenames.length) {
+                    tooltip += " (" + filenames.join(", ") + ")";
+                }
+            }
             return {
                 id: group,
                 label: group,
-                tooltip: "Pass matches from Group " + group,
+                tooltip: tooltip,
                 inputClass: "groupToggleFilter",
                 type: "boolean",
             };

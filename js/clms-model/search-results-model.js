@@ -426,12 +426,13 @@ export class SearchResultsModel {
      */
     getProteinSearchMap(peptideMap, matchArray) {
         const searchMap = new Map();
+        let nextGroup = 1;
         matchArray.forEach((match) => {
             match.matchedPeptides.forEach((peptide) => {
                 const prots = peptide.prt;
                 const searchId = match.uploadId;
                 const search = searchMap.get(searchId) || (() => {
-                    const newSearch = {proteinIDSet: new Set(), id: searchId};
+                    const newSearch = {proteinIDSet: new Set(), id: searchId, group: nextGroup++};
                     searchMap.set(searchId, newSearch);
                     return newSearch;
                 })();

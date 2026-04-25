@@ -593,7 +593,7 @@ export class FilterModel extends Backbone.Model {
      */
     groupFilter(match) {
         if (this.possibleSearchGroups.length > 1) {
-            const matchGroup = this.precalcedSearchToGroupMap.get(match.datasetId);
+            const matchGroup = this.precalcedSearchToGroupMap.get(match.uploadId);
             return this.precalcedSearchGroupsSet.has(matchGroup);
         }
         return true;
@@ -603,15 +603,15 @@ export class FilterModel extends Backbone.Model {
      * Filters match arrays by search group homogeneity.
      * When multipleGroup flag is false and multiple search groups exist, only passes
      * match arrays where all matches belong to the same search group.
-     * @param {Array} matchArr - Array of match objects with match.match.datasetId
+     * @param {Array} matchArr - Array of match objects with match.match.uploadId
      * @returns {boolean} True if match array passes group filter (or filter inactive), false otherwise
      */
     groupFilter2(matchArr) {
         if (matchArr.length > 1 && this.possibleSearchGroups.length > 1 && !this.get("multipleGroup")) {
             const smap = this.precalcedSearchToGroupMap;
-            const firstMatchGroup = smap.get(matchArr[0].match.datasetId);
+            const firstMatchGroup = smap.get(matchArr[0].match.uploadId);
             return matchArr.every(function (match) {
-                return smap.get(match.match.datasetId) === firstMatchGroup;
+                return smap.get(match.match.uploadId) === firstMatchGroup;
             }, this);
         }
         return true;

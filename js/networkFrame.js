@@ -587,6 +587,7 @@ export function viewsEssential(compositeModelInst, options) {
         el: "#filterPlaceholder",
         model: filterModel,
         myOptions: {
+            clmsModel: compositeModelInst.get("clmsModel"),
             hide: {
                 "ambig": !compositeModelInst.get("clmsModel").getAmbiguousPresent(),
                 "unval": !compositeModelInst.get("clmsModel").getUnvalidatedPresent(),

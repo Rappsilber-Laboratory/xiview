@@ -115,7 +115,7 @@ export class SelectionTableViewBB extends Backbone.View {
             validated: "Manual",
             homom: "Homom",
             group: "Group",
-            searchId: "Search Id",
+            searchId: "mzIdentML File",
             peaklistName: "Peak List",
             scanNumber: "Scan Number",
             precursorCharge: "Charge (Z)",
@@ -229,7 +229,7 @@ export class SelectionTableViewBB extends Backbone.View {
                 return d.confirmedHomomultimer === undefined ? "?" : d.confirmedHomomultimer;
             },
             searchId: function (d) {
-                return d.uploadId;
+                return self.model.get("clmsModel").getMzidentmlFiles().get(d.uploadId).identificationFileName;
             },
             pos1: function (d) {
                 return fullPosConcat(d, 0);
