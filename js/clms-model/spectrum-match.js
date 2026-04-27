@@ -474,7 +474,7 @@ export class SpectrumMatch {
      * @returns {number} Number of missing peaks
      */
     missingPeaks() {
-        const errorMZ = this.expMZ() - this.calcMZ();
+        const errorMZ = this.precursorMZ - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
         //how many peaks assumed missing/miss-assigned
         return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
@@ -643,13 +643,6 @@ export class SpectrumMatch {
     }
 
 
-    // /**
-    //  * Get experimental m/z value, just a synonym for precursorMZ
-    //  * @returns {number} Experimental m/z
-    //  */
-    // expMZ() {
-    //     return this.precursorMZ;
-    // }
 
     // /**
     //  * Get precursor intensity

@@ -1,6 +1,6 @@
 {
   "name": "xiview",
-  "version": "2.0.2a1",
+  "version": "2.0.2a2",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
     "xiVIEW",
@@ -67,6 +67,7 @@
     "jsonview": "~1.2.0",
     "ngl": "~2.4.0",
     "path-browserify": "^1.0.1",
+    "plotly.js-basic-dist-min": "~3.5.0",
     "spin": "~0.0.1",
     "split.js": "~1.6.4",
     "sprintf-js": "~1.1.3",

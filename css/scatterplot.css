@@ -2,56 +2,47 @@
     display: none;
     left: 6em;
     top: 6em;
-    width:500px;
-    height:500px;
+    width: 500px;
+    height: 500px;
 }
 
-.scatterplotView svg {
-    height: 100%;
+.scatterplotView .toolbar {
+    position: relative;
+    z-index: 10; /* keep dropdowns clickable above any Plotly overlay */
+    flex: 0 0 auto;
+}
+
+/* Override the global .panelInner block layout so it can host a flex column.
+   flex: 1 1 auto + min-height: 0 lets it consume the height the toolbar leaves. */
+.scatterplotView .panelInner {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
     width: 100%;
-    position: absolute;
+    height: auto;
 }
 
-.scatterplotView text {
-    text-anchor: middle;
+.scatterplotView .scatterChartTitle {
+    font-size: 1.1em;
+    font-family: Lato-Regular, Helvetica, Arial, sans-serif;
+    text-align: center;
+    padding: 4px 0;
+    flex: 0 0 auto;
 }
 
-.scatterplotView canvas {          /* Firefox */
-    -ms-interpolation-mode: nearest-neighbor;   /* IE */
-    image-rendering: pixelated;                 /* Opera 'n' Chrome */
-    -ms-transform-origin: 0 0;
-	-moz-transform-origin: 0 0;
-	-o-transform-origin: 0 0;
-	-webkit-transform-origin: 0 0;
-	transform-origin: 0 0;
+.scatterplotView .plotlyHost {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
 }
 
-/* For svg output */
-.scatterplotView image {          /* Firefox */
-    -ms-interpolation-mode: nearest-neighbor;   /* IE */
-    image-rendering: pixelated;                 /* Opera 'n' Chrome */
-}
-
-.scatterplotView .viewDiv {
-    width: auto;
-    height: 100%;
-}
-
-.scatterplotBackground {
-    fill: #ddd;
-}
-
-.scatterplotView .brush .extent {
-    fill-opacity: 0.2;
-    stroke: grey;
-    stroke-width: 1;
-}
-
-.scatterplotView .brush .resize text {
-    text-anchor: start;
-    font-size: 0.8em;
-}
-
-.scatterplotView .brush .resize.e text {
-    transform: rotate(90deg);
+.scatterplotView .js-plotly-plot,
+.scatterplotView .plot-container,
+.scatterplotView .plot-container .svg-container {
+    width: 100% !important;
+    height: 100% !important;
 }

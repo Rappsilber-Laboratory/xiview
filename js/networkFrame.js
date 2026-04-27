@@ -51,11 +51,11 @@ import {CircularViewBB} from "./views/circle/circularViewBB";
 import {AnnotationDropDownMenuViewBB} from "./ui-utils/ddMenuViewBB";
 import {ColourCollectionOptionViewBB} from "./ui-utils/color-collection-option-view";
 import {AlignCollectionViewBB} from "./align/alignViewBB3";
-import {DistogramBB} from "./views/distogramViewBB";
+import {DistogramBB} from "./views/distogramViewBBPlotly";
 import {NGLViewBB} from "./views/ngl/NGLViewBB";
 import {PDBFileChooserBB} from "./file-choosers/pdb-file-chooser";
 import {STRINGFileChooserBB} from "./file-choosers/STRINGFileChooser";
-import {ScatterplotViewBB} from "./views/scatterplotViewBB";
+import {ScatterplotViewBB} from "./views/scatterplotViewBBPlotly";
 import {
     LinkMetaDataFileChooserBB,
     ProteinMetaDataFileChooserBB,
