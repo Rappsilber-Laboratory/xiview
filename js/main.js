@@ -217,7 +217,7 @@ function getTasks(apiBase, clmsModel) {
         fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.storeSpectraData(data)),
         fetchDataAndProcess(enzymesUrl, (data) => clmsModel.storeEnzymes(data)),
         fetchDataAndProcess(searchModificationsUrl, (data) => clmsModel.storeSearchModifications(data)),
-        fetchDataAndProcess(proteinUrl, (data) => clmsModel.storeProteins(data)), // .then(() => {fetchUniprotKB(accessions);}),
+        fetchDataAndProcess(proteinUrl, (data) => clmsModel.storeProteins(data)),
         fetchDataAndProcess(peptidesUrl, (data) => clmsModel.storePeptides(data)),
         fetchDataAndProcess(matchesUrl, (data) => clmsModel.storeMatches(data)),
     ];
@@ -261,63 +261,80 @@ function initPageSplitter() {
  * Fetches protein data from UniProt in batches to avoid rate limiting.
  * Queries the UniProt REST API for multiple accession IDs in batches.
  * @param {string[]} accessions - Array of UniProt accession IDs to fetch
- * @param {number} [batchSize=5] - Number of accessions to fetch per batch
+ * @param {number} [batchSize=50] - Number of accessions to fetch per batch
  * @returns {Promise<Object[]>} Promise that resolves to array of UniProt entry objects
  * @private
  */
-async function fetchAccessionsInBatches(accessions, batchSize = 5) {
+async function fetchAccessionsInBatches(accessions, batchSize = 50) {
     const baseURL = "https://rest.uniprot.org/uniprotkb/search";
-    let allResults = []; // To store results from all batches
+    let allResults = [];
 
-    // Split the accessions into chunks/batches
     for (let i = 0; i < accessions.length; i += batchSize) {
         const batch = accessions.slice(i, i + batchSize);
         const query = `accession:${batch.join(" OR accession:")}`;
-        const url = `${baseURL}?query=${encodeURIComponent(query)}&format=json`;
+        const url = `${baseURL}?query=${encodeURIComponent(query)}&format=json&size=${batchSize}`;
 
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Failed to fetch data for batch: ${batch}`);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`UniProt fetch failed (${response.status}) for batch starting ${batch[0]}`);
+        const data = await response.json();
+        allResults.push(...data.results);
 
-            const data = await response.json();
-            allResults.push(...data.results); // Collect results from each batch
-            console.log(`Fetched batch: ${batch}`);
-        } catch (error) {
-            console.error("Error fetching batch:", error);
-            throw error;
+        // Light throttle to stay polite to the public endpoint
+        if (i + batchSize < accessions.length) {
+            await new Promise(resolve => setTimeout(resolve, 400));
         }
-
-        // Optional: Pause between batches to avoid hitting rate limits
-        await new Promise(resolve => setTimeout(resolve, 400)); // Wait 1 second
     }
 
     return allResults;
 }
 
-// Example usage with a list of accession IDs
-// eslint-disable-next-line no-unused-vars
-const accessions = [
-    "O35004", "P12345", "Q67890", "A12345", "B67890", "C13579",
-    "D24680", "E11223", "F33445", "G55667", "H77889", "I99001"
-];
-
 /**
- * Fetches UniProt KB data for a list of protein accessions.
- * Uses batch fetching to retrieve data in groups of 50.
- * @param {string[]} accessions - Array of UniProt accession IDs
- * @returns {void}
- * @private
+ * Fetches UniProt KB data for the proteins in clmsModel and assigns each
+ * returned entry to its matching Protein.uniprot. Fires vent.trigger("uniprotLoaded")
+ * on success. Soft-fails: errors are logged and proteins keep uniprot=null.
+ * @param {string[]} accessions - Array of UniProt accession IDs (already filtered/legal)
+ * @param {SearchResultsModel} clmsModel - The CLMS results model whose Protein objects to populate
+ * @returns {Promise<void>}
  */
-// eslint-disable-next-line no-unused-vars
-function fetchUniprotKB(accessions) {
-    fetchAccessionsInBatches(accessions, 50)
-        .then(results => {
-            console.log("All Fetched Data:", results);
-            // Process or use results here
-        })
-        .catch(error => {
-            console.error("Batch Fetch Error:", error);
-        });
+export async function fetchUniprotKB(accessions, clmsModel) {
+    try {
+        const results = await fetchAccessionsInBatches(accessions, 50);
+
+        // UniProt may return an entry under any of its accessions (primary or secondary).
+        // Build a lookup keyed by every accession an entry could be matched against.
+        const lookup = new Map();
+        for (const entry of results) {
+            if (entry.primaryAccession) lookup.set(entry.primaryAccession, entry);
+            if (Array.isArray(entry.secondaryAccessions)) {
+                for (const sec of entry.secondaryAccessions) lookup.set(sec, entry);
+            }
+        }
+
+        let assigned = 0;
+        for (const protein of clmsModel.getProteinsIterator()) {
+            const entry = lookup.get(protein.accession);
+            if (entry) {
+                if (Array.isArray(entry.features)) {
+                    for (const feature of entry.features) {
+                        feature.category = "uniprot";
+                        // v2 API nests positions; flatten to the begin/end/start the renderers expect
+                        if (feature.location) {
+                            feature.begin = feature.location.start?.value;
+                            feature.start = feature.begin;
+                            feature.end = feature.location.end?.value;
+                        }
+                    }
+                }
+                protein.uniprot = entry;
+                assigned++;
+            }
+        }
+        console.log(`UniProt: assigned data to ${assigned} of ${accessions.length} requested proteins`);
+
+        vent.trigger("uniprotLoaded");
+    } catch (error) {
+        console.error("UniProt fetch failed, continuing without annotations:", error);
+    }
 }
 
 export const _test = process.env.NODE_ENV !== "production" ? {

@@ -100,3 +100,7 @@
 .proteinInfoPanel tbody tr:hover td.fixedSizeFont {
     color: grey;
 }
+
+.proteinInfoPanel .json-formatter-row a:hover {
+    background-color: transparent;
+}

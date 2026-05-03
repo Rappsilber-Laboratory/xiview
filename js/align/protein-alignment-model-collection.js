@@ -252,21 +252,21 @@ export class ProtAlignModel extends Backbone.Model {
 
     rangeToSearch(seqName, index1, index2) {
         const seqModel = this.getSequenceModel(seqName);
-        return seqModel.rangeToSearch(index1, index2);
+        return seqModel ? seqModel.rangeToSearch(index1, index2) : undefined;
     }
 
     // find the first and last residues in a sequence that map to existing residues in the search sequence (i.e aren't
     // opening or trailing gaps), and return these coordinates in terms of the search sequence
     getRangeAsSearchSeq(seqName) {
         const seqModel = this.getSequenceModel(seqName);
-        return seqModel.getRangeAsSearchSeq();
+        return seqModel ? seqModel.getRangeAsSearchSeq() : undefined;
     }
 
     // For a given sequence return a list of the sequential indices
     // i.e. as above but split for gaps
     blockify(seqName) {
         const seqModel = this.getSequenceModel(seqName);
-        return seqModel.blockify();
+        return seqModel ? seqModel.blockify() : undefined;
     }
 
 

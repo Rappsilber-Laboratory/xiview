@@ -9,6 +9,7 @@
 import "../../css/proteinInfoViewBB.css";
 import * as _ from "underscore";
 import d3 from "d3";
+import JSONFormatter from "json-formatter-js";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {makeLegalDomID} from "../utils";
@@ -182,6 +183,29 @@ export class ProteinInfoViewBB extends BaseFrameView {
                 cell1.textContent = key;
                 cell1.colSpan = 1;
                 let cell2 = row.insertCell();
+
+                // UniProt entries contain deeply nested objects (proteinDescription, organism,
+                // comments, genes, ...) that the table-of-tables renderer below would print as
+                // "[object Object]". Render via json-formatter-js (already used by
+                // searchSummaryViewBB2) for a collapsible tree.
+                if (key === "uniprot" && metaObj && typeof metaObj === "object") {
+                    const filtered = {};
+                    for (const subkey in metaObj) {
+                        if (subkey !== "sequence" && subkey !== "features") {
+                            filtered[subkey] = metaObj[subkey];
+                        }
+                    }
+                    // JSON.parse(JSON.stringify(...)) drops any non-serializable cruft, matching
+                    // the pattern in searchSummaryViewBB2.js:83.
+                    const formatter = new JSONFormatter(JSON.parse(JSON.stringify(filtered)), 1, {
+                        hoverPreviewEnabled: false,
+                        animateOpen: true,
+                        animateClose: true,
+                    });
+                    cell2.appendChild(formatter.render());
+                    return;
+                }
+
                 const innerTable = document.createElement("table");
                 let innerTBody = innerTable.createTBody();
                 for (let subkey in metaObj) {

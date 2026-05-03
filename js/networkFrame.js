@@ -21,7 +21,8 @@ import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
 import {BlosumCollection} from "./backbone-models/models";
 import {ProtAlignCollection} from "./align/protein-alignment-model-collection";
 import {getLocalStorage, setLocalStorage} from "./utils";
-import {flattenMatches, getSearchGroups, matchScoreRange, parseURLQueryString} from "./modelUtils";
+import {flattenMatches, getLegalAccessionIDs, getSearchGroups, matchScoreRange, parseURLQueryString} from "./modelUtils";
+import {fetchUniprotKB} from "./main";
 import {FilterModel} from "./filter/filter-model";
 import {TooltipModel} from "./backbone-models/models";
 import {MinigramModel} from "./backbone-models/models";
@@ -89,31 +90,56 @@ export function postDataLoaded(compositeModelInst) {
         protAlignModel.set("scoreMatrix", compositeModelInst.get("blosumColl").get("Blosum100"));
     });
 
-    //init annotation types
-    let annotationTypes = createDefaultAnnotationTypes();
+    //init annotation types — defaults now, UniProt feature types added later when fetch resolves
+    const defaultAnnotationTypes = createDefaultAnnotationTypes();
+    compositeModelInst.set("annotationTypes", new AnnotationTypeCollection(defaultAnnotationTypes));
 
-    //  make uniprot feature types - done here as need proteins parsed and ready from xi
-    const uniprotFeatureTypes = new Map();
-    for (let protein of compositeModelInst.get("clmsModel").getProteinsIterator()) { //todo - remove static ref?
-        if (protein.uniprot) {
-            const featureArray = Array.from(protein.uniprot.features);
-            featureArray.forEach(function (feature) {
-                const key = feature.category + "-" + feature.type;
-                if (!uniprotFeatureTypes.has(key)) {
-                    const annotationType = new AnnotationType(feature);
-                    annotationType
-                        .set("source", "Uniprot")
-                        .set("typeAlignmentID", "Canonical");
-                    uniprotFeatureTypes.set(key, annotationType);
+    // When UniProt data arrives, add UniProt feature types into the existing collection.
+    // Adding (rather than replacing the collection) fires `update` on the collection — which
+    // AnnotationDropDownMenuViewBB and other consumers listen to — and avoids leaving views
+    // bound to a stale collection instance. Feature services read the collection live, so
+    // they pick up the new types without needing a rebuild.
+    vent.once("uniprotLoaded", function () {
+        const alignColl = compositeModelInst.get("alignColl");
+        const annotationTypeCollection = compositeModelInst.get("annotationTypes");
+        const uniprotFeatureTypes = new Map();
+        for (let protein of compositeModelInst.get("clmsModel").getProteinsIterator()) {
+            if (protein.uniprot) {
+                // addNewProteins ran before UniProt data arrived so Canonical was never added
+                const seq = protein.uniprot.sequence;
+                if (seq) {
+                    alignColl.addSequence(protein.id, "Canonical", seq.value || seq);
                 }
-            });
+            }
+            if (protein.uniprot && Array.isArray(protein.uniprot.features)) {
+                protein.uniprot.features.forEach(function (feature) {
+                    const key = feature.category + "-" + feature.type;
+                    if (!uniprotFeatureTypes.has(key)) {
+                        const annotationType = new AnnotationType(feature);
+                        annotationType
+                            .set("source", "Uniprot")
+                            .set("typeAlignmentID", "Canonical");
+                        uniprotFeatureTypes.set(key, annotationType);
+                    }
+                });
+            }
         }
-    }
+        if (uniprotFeatureTypes.size) {
+            annotationTypeCollection.add(Array.from(uniprotFeatureTypes.values()));
+        }
 
-    // add uniprot feature types
-    annotationTypes = annotationTypes.concat(Array.from(uniprotFeatureTypes.values()));
-    const annotationTypeCollection = new AnnotationTypeCollection(annotationTypes);
-    compositeModelInst.set("annotationTypes", annotationTypeCollection);
+        // // Refresh the "Selected Protein Info" panel — it iterates protein.uniprot for nested
+        // // key/value rows (proteinInfoViewBB.js:47, :71) and was rendered before this data arrived.
+        // // Triggered on the model (not vent) because that's what proteinInfoViewBB listens on, and
+        // // because some vent listeners require a {columns, items} payload that we don't have.
+        // compositeModelInst.trigger("proteinMetadataUpdated");
+    });
+
+    // Fire-and-forget UniProt fetch; non-blocking and soft-fail.
+    const accessions = getLegalAccessionIDs(compositeModelInst.get("clmsModel").getProteinsMap());
+    if (accessions.length) {
+        fetchUniprotKB(accessions, compositeModelInst.get("clmsModel"));
+    }
 
     //viewsThatNeedAsyncData(compositeModelInst);
     vent.trigger("buildAsyncViews");
