@@ -46,8 +46,8 @@ export const STRINGUtils = {
         let rows = d3.tsv.parse(networkTsvString, function (d) {
             d.SeqPos1 = null;
             d.SeqPos2 = null;
-            d.Protein1 = stringToUniprotIDMap[d.ncbiTaxonId + "." + d.stringId_A];
-            d.Protein2 = stringToUniprotIDMap[d.ncbiTaxonId + "." + d.stringId_B];
+            d.Protein1 = stringToUniprotIDMap[d.stringId_A];
+            d.Protein2 = stringToUniprotIDMap[d.stringId_B];
             // return empty string if protein ids not in current id map
             return (d.Protein1 && d.Protein2 ? _.omit(d, ["ncbiTaxonId", "stringId_A", "stringId_B", "preferredName_A", "preferredName_B"]) : null);
         });
@@ -81,7 +81,7 @@ export const STRINGUtils = {
             const pidString = todo.join("\r");
             const promiseObj = new Promise(function (resolve, reject) {
                 $.ajax({
-                    type: "post",
+                    type: "get",
                     url: "https://string-db.org/api/json/get_string_ids",
                     data: {
                         identifiers: pidString,
@@ -160,7 +160,7 @@ export const STRINGUtils = {
                 }
                 const promiseObj = new Promise(function (resolve, reject) {
                     $.ajax({
-                        type: "post",
+                        type: "get",
                         url: "https://string-db.org/api/tsv/network",
                         data: {
                             identifiers: networkKey,
