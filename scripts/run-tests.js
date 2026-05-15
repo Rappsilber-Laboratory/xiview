@@ -83,6 +83,35 @@ async function runTest(browser, baseUrl, testFile) {
     });
 
     try {
+        // Inject failure collector before page loads so QUnit hooks fire
+        await page.evaluateOnNewDocument(() => {
+            window.__qunitFailures = [];
+            const origDefine = Object.defineProperty;
+            // Intercept QUnit assignment to register hooks early
+            let _qunit = undefined;
+            Object.defineProperty(window, 'QUnit', {
+                configurable: true,
+                get() { return _qunit; },
+                set(v) {
+                    _qunit = v;
+                    if (v && v.testDone) {
+                        v.testDone((details) => {
+                            if (details.failed > 0) {
+                                window.__qunitFailures.push({
+                                    name: details.name,
+                                    module: details.module,
+                                    assertions: (details.assertions || [])
+                                        .filter(a => !a.result)
+                                        .map(a => ({ message: a.message, actual: a.actual, expected: a.expected }))
+                                });
+                            }
+                        });
+                    }
+                    Object.defineProperty(window, 'QUnit', { configurable: true, writable: true, value: v });
+                }
+            });
+        });
+
         // Navigate to the test page
         const url = `${baseUrl}/${testFile}`;
         console.log(`Loading: ${url}`);
@@ -127,7 +156,8 @@ async function runTest(browser, baseUrl, testFile) {
                                 passed: config.stats.all - config.stats.bad,
                                 failed: config.stats.bad,
                                 total: config.stats.all,
-                                runtime: config.stats.runtime || 0
+                                runtime: config.stats.runtime || 0,
+                                failures: window.__qunitFailures || []
                             });
                             return;
                         }
@@ -139,7 +169,8 @@ async function runTest(browser, baseUrl, testFile) {
                                 passed: details.passed,
                                 failed: details.failed,
                                 total: details.total,
-                                runtime: details.runtime
+                                runtime: details.runtime,
+                                failures: window.__qunitFailures || []
                             });
                         });
                         return;
@@ -163,6 +194,14 @@ async function runTest(browser, baseUrl, testFile) {
 
         if (results.failed > 0) {
             console.log(`  ⚠️  ${results.failed} test(s) failed`);
+            (results.failures || []).forEach(f => {
+                console.log(`\n  FAILED: [${f.module}] ${f.name}`);
+                f.assertions.forEach(a => {
+                    console.log(`    ✗ ${a.message || '(no message)'}`);
+                    if (a.expected !== undefined) console.log(`      expected: ${JSON.stringify(a.expected)}`);
+                    if (a.actual !== undefined)   console.log(`      actual:   ${JSON.stringify(a.actual)}`);
+                });
+            });
         } else {
             console.log(`  ✓ All tests passed`);
         }

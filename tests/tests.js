@@ -1607,7 +1607,7 @@ function testCallback(model) {
             "Q67890": "9606.ENSP00000002"
         };
         const tsv = "stringId_A\tstringId_B\tpreferredName_A\tpreferredName_B\tncbiTaxonId\tscore\n" +
-                    "ENSP00000001\tENSP00000002\tGENE1\tGENE2\t9606\t0.900\n";
+                    "9606.ENSP00000001\t9606.ENSP00000002\tGENE1\tGENE2\t9606\t0.900\n";
 
         const result = STRINGUtils.translateToCSV(idMap, tsv);
 
@@ -1622,10 +1622,10 @@ function testCallback(model) {
     test("translateToCSV filters rows where IDs not in map", function (assert) {
         const idMap = {
             "P12345": "9606.ENSP00000001"
-            // Q67890 / ENSP00000002 intentionally absent
+            // Q67890 / 9606.ENSP00000002 intentionally absent
         };
         const tsv = "stringId_A\tstringId_B\tpreferredName_A\tpreferredName_B\tncbiTaxonId\tscore\n" +
-                    "ENSP00000001\tENSP00000002\tGENE1\tGENE2\t9606\t0.900\n";
+                    "9606.ENSP00000001\t9606.ENSP00000002\tGENE1\tGENE2\t9606\t0.900\n";
 
         const result = STRINGUtils.translateToCSV(idMap, tsv);
 
