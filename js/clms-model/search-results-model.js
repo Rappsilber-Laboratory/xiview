@@ -2,6 +2,7 @@ import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
 import {Protein} from "./protein";
 import {SpectrumIdentificationProtocol} from "./mzidentml-metadata/spectrum-identification-protocol";
+import {Xi2SpectrumIdentificationProtocol} from "./xi2-metadata/xi2-spectrum-identification-protocol";
 import {SpectraData} from "./mzidentml-metadata/spectra-data";
 import {MzidentmlFile} from "./mzidentml-metadata/mzidentml-file";
 import {AnalysisCollection_SpectrumIdentification} from "./mzidentml-metadata/analysis-collection-spectrum-identification";
@@ -209,9 +210,9 @@ export class SearchResultsModel {
      * @returns {void}
      */
     parseJSON() {
-        //process mzid meta data
+        //process mzid metadata
         //index enzymes
-        const indexedEnzymes = new Map(); // thsi will be map of upload ids to map of protocol ids to Enzymes
+        const indexedEnzymes = new Map(); // this will be map of upload ids to map of protocol ids to Enzymes
         for (let enzymeJson of this._enzymesJson) {
             if (!indexedEnzymes.has(enzymeJson.upload_id)) {
                 indexedEnzymes.set(enzymeJson.upload_id, new Map());
@@ -292,17 +293,32 @@ export class SearchResultsModel {
         // }
         // this._crosslinkerSpecificity = linkableResSets;
 
-        //index spectrum identiifcation protocols
-        const indexedSIPs = new Map(); // this will be map of upload ids to map of protocol ids to SIP
-        for (let sipJson of this._spectrumIdentificationProtocolsJson) {
-            if (!indexedSIPs.has(sipJson.upload_id)) {
-                indexedSIPs.set(sipJson.upload_id, new Map());
+        //index spectrum identification protocols
+        // PRIDE returns an array of SIP records; XI2 returns a dict keyed by resultset id.
+        const indexedSIPs = new Map(); // PRIDE: upload_id -> Map(protocol_id -> SIP). XI2: resultset_id -> Map(resultset_id -> Xi2SIP).
+        const sipJsonRaw = this._spectrumIdentificationProtocolsJson;
+        const xi2SipJsonsByResultsetId = new Map(); // populated only in xi2 path; used below to build bogus MzidentmlFiles
+        if (Array.isArray(sipJsonRaw)) {
+            for (let sipJson of sipJsonRaw) {
+                if (!indexedSIPs.has(sipJson.upload_id)) {
+                    indexedSIPs.set(sipJson.upload_id, new Map());
+                }
+                const sip = new SpectrumIdentificationProtocol(sipJson,
+                    indexedEnzymes.get(sipJson.upload_id)?.get(sipJson.id),
+                    indexedSMs.get(sipJson.upload_id)?.get(sipJson.id));
+                indexedSIPs.get(sipJson.upload_id).set(sipJson.id, sip);
             }
-            const sip = new SpectrumIdentificationProtocol(sipJson,
-                indexedEnzymes.get(sipJson.upload_id)?.get(sipJson.id),
-                indexedSMs.get(sipJson.upload_id)?.get(sipJson.id));
-            indexedSIPs.get(sipJson.upload_id).set(sipJson.id, sip);
+        } else {
+            for (const [resultsetId, sipJson] of Object.entries(sipJsonRaw)) {
+                const sip = new Xi2SpectrumIdentificationProtocol(sipJson);
+                const perFile = new Map();
+                perFile.set(resultsetId, sip);
+                indexedSIPs.set(resultsetId, perFile);
+                xi2SipJsonsByResultsetId.set(resultsetId, sipJson);
+            }
         }
+
+
         //index spectra data
         const indexedSpectraData = new Map(); // this will be map of upload ids to map of spectra data ids to SpectraData
         for (let spectraDataJson of this._spectraDataJson) {
@@ -329,6 +345,25 @@ export class SearchResultsModel {
             this.#mzidentmlFiles.set(mzidJson.id, new MzidentmlFile(mzidJson,
                 spectrumIdentificationsMap.get(mzidJson.id),
                 indexedSpectraData.get(mzidJson.id), indexedSIPs.get(mzidJson.id)));
+        }
+        // Xi2 has no mzIdentML files; synthesise one stub per resultset so the
+        // SpectrumMatch.spectrumIdentificationProtocol lookup path (mzidentmlFiles
+        // .get(uploadId).getSpectrumIdentificationProtocolById(sip)) still resolves.
+        if (this._mzidentmlFilesJson.length === 0 && xi2SipJsonsByResultsetId.size > 0) {
+            for (const [resultsetId, sipJson] of xi2SipJsonsByResultsetId) {
+                const stub = {
+                    id: resultsetId,
+                    project_id: new URLSearchParams(window.location.search).get("project") ?? "",
+                    identification_file_name: sipJson.rs_name ?? "",
+                    analysis_software_list: { AnalysisSoftware: [] },
+                    provider: {},
+                    audit_collection: {},
+                    analysis_sample_collection: {},
+                    spectra_formats: [],
+                    bib: []
+                };
+                this.#mzidentmlFiles.set(resultsetId, new MzidentmlFile(stub, [], new Map(), indexedSIPs.get(resultsetId)));
+            }
         }
         //clear some temp data
         delete this._analysisCollectionSpectrumIdentificationsJson;

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>STRING API CORS test</title>
+    <style>
+        body { font-family: monospace; padding: 1em; }
+        .result { margin: 1em 0; padding: 1em; border: 1px solid #ccc; white-space: pre-wrap; }
+        .ok  { border-color: green; background: #f0fff0; }
+        .err { border-color: red;   background: #fff0f0; }
+    </style>
+</head>
+<body>
+<h2>STRING API CORS test</h2>
+<p>Page origin: <strong id="origin"></strong></p>
+<p>Tests TP53 (P04637) + MDM2 (Q00987) against <code>string-db.org</code>.
+   Open the browser Network tab before running to see raw request/response headers.</p>
+<button onclick="runTests()">Run tests</button>
+<div id="results"></div>
+
+<script>
+document.getElementById("origin").textContent = window.location.origin;
+
+const IDENTIFIERS = "P04637\rQ00987";
+const PARAMS = new URLSearchParams({
+    identifiers: IDENTIFIERS,
+    species: "9606",
+    limit: "1",
+    caller_identity: "xiview",
+    echo_query: "1"
+});
+const BASE = "https://string-db.org/api/json/get_string_ids";
+
+async function test(label, fetchPromise) {
+    const div = document.createElement("div");
+    div.className = "result";
+    div.textContent = label + " … waiting";
+    document.getElementById("results").appendChild(div);
+    try {
+        const r = await fetchPromise;
+        const body = await r.text();
+        div.className = "result ok";
+        div.textContent = `${label}\nHTTP ${r.status} ${r.statusText}\nAccess-Control-Allow-Origin: ${r.headers.get("access-control-allow-origin") ?? "(missing)"}\n\n${body.slice(0, 300)}`;
+    } catch (e) {
+        div.className = "result err";
+        div.textContent = `${label}\nFAILED: ${e}`;
+    }
+}
+
+async function runTests() {
+    document.getElementById("results").innerHTML = "";
+
+    // 1. GET — as documented by STRING
+    await test(
+        "GET (documented approach)",
+        fetch(`${BASE}?${PARAMS}`)
+    );
+
+    // 2. POST with application/x-www-form-urlencoded — as jQuery $.ajax sends it
+    await test(
+        "POST application/x-www-form-urlencoded (jQuery default)",
+        fetch(BASE, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+            body: PARAMS.toString()
+        })
+    );
+
+    // 3. OPTIONS preflight — what the browser sends before any non-simple request
+    await test(
+        "OPTIONS preflight (browser sends this before non-simple requests)",
+        fetch(BASE, {
+            method: "OPTIONS",
+            headers: {
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type"
+            }
+        })
+    );
+}
+</script>
+</body>
+</html>
