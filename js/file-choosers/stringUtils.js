@@ -59,7 +59,7 @@ export const STRINGUtils = {
             const pidString = todo.join("%0d");
             const promiseObj = new Promise(function (resolve, reject) {
                 $.ajax({
-                    type: "get",
+                    type: "post",
                     url: "https://version-11-0.string-db.org/api/json/get_string_ids",
                     data: {
                         identifiers: pidString,
@@ -126,7 +126,7 @@ export const STRINGUtils = {
                 }
                 const promiseObj = new Promise(function (resolve, reject) {
                     $.ajax({
-                        type: "get",
+                        type: "post",
                         url: "https://version-11-0.string-db.org/api/tsv/network",
                         data: {
                             identifiers: networkKey,
