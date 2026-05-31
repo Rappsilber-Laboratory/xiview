@@ -192,18 +192,18 @@ export class Interactor {
         return false;
     }
 
-    // getSubgraph () {
-    //     if (this.subgraph == null) {
-    //         const subgraph = {
-    //             nodes: new Map(),
-    //             links: new Map()
-    //         };
-    //         const thisNode = this.getRenderedInteractor();
-    //         subgraph.nodes.set(thisNode.id, thisNode);
-    //         this.subgraph = this.addConnectedNodes(subgraph);
-    //         thisNode.subgraph = subgraph;
-    //         this.controller.subgraphs.push(subgraph);
-    //     }
-    //     return this.subgraph;
-    // }
+    getSubgraph () {
+        if (this.subgraph == null) {
+            const subgraph = {
+                nodes: new Map(),
+                links: new Map()
+            };
+            const thisNode = this.getRenderedInteractor();
+            subgraph.nodes.set(thisNode.id, thisNode);
+            this.subgraph = this.addConnectedNodes(subgraph);
+            thisNode.subgraph = subgraph;
+            this.controller.subgraphs.push(subgraph);
+        }
+        return this.subgraph;
+    }
 }

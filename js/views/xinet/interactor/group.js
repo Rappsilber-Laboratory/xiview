@@ -947,57 +947,57 @@ export class Group extends Interactor {
         }
     }
 
-    // addConnectedNodes (subgraph) {
-    //     for (let p of this.renderedProteins) {
-    //         for (let link of p.renderedP_PLinks.values()) {
-    //             //visible, non-self links only
-    //             if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
-    //                 if (!subgraph.links.has(link.id)) {
-    //                     subgraph.links.set(link.id, link);
-    //                     let otherEnd;
-    //                     if (link.renderedFromProtein === this) {
-    //                         otherEnd = link.renderedToProtein;
-    //                     } else {
-    //                         otherEnd = link.renderedFromProtein;
-    //                     }
-    //                     // if (otherEnd !== null) {
-    //                     const renderedOtherEnd = otherEnd.getRenderedInteractor();
-    //                     renderedOtherEnd.subgraph = subgraph;
-    //                     //if (!subgraph.nodes.has(renderedOtherEnd.id)) {
-    //                     subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
-    //                     otherEnd.subgraph = subgraph;
-    //                     otherEnd.addConnectedNodes(subgraph);
-    //                     //}
-    //                     // }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return subgraph;
-    // }
+    addConnectedNodes (subgraph) {
+        for (let p of this.renderedProteins) {
+            for (let link of p.renderedP_PLinks.values()) {
+                //visible, non-self links only
+                if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
+                    if (!subgraph.links.has(link.id)) {
+                        subgraph.links.set(link.id, link);
+                        let otherEnd;
+                        if (link.renderedFromProtein === this) {
+                            otherEnd = link.renderedToProtein;
+                        } else {
+                            otherEnd = link.renderedFromProtein;
+                        }
+                        // if (otherEnd !== null) {
+                        const renderedOtherEnd = otherEnd.getRenderedInteractor();
+                        renderedOtherEnd.subgraph = subgraph;
+                        //if (!subgraph.nodes.has(renderedOtherEnd.id)) {
+                        subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
+                        otherEnd.subgraph = subgraph;
+                        otherEnd.addConnectedNodes(subgraph);
+                        //}
+                        // }
+                    }
+                }
+            }
+        }
+        return subgraph;
+    }
 
-    // countExternalLinks () {
-    //     // return this.renderedP_PLinks.length;
-    //     const renderedProteinsLinkedTo = new Set();
-    //
-    //     for (let link of this.subgraph.links.values()) {
-    //         const rp = link.getOtherEnd(this);
-    //         renderedProteinsLinkedTo.add(rp);
-    //     }
-    //
-    //
-    //
-    //     // //let countExternal = 0;
-    //     // for (let link of this.renderedP_PLinks) {
-    //     //     if (link.crosslinks[0].isSelfLink() === false)
-    //     //     {
-    //     //         if (link.isPassingFilter()) {
-    //     //             //countExternal++;
-    //     //             renderedProteinsLinkedTo.add(link.getOtherEnd(this).getRenderedInteractor());
-    //     //         }
-    //     //     }
-    //     // }
-    //     return renderedProteinsLinkedTo.size;
-    //
-    // }
+    countExternalLinks () {
+        // return this.renderedP_PLinks.length;
+        const renderedParticipantsLinkedTo = new Set();
+
+        for (let link of this.subgraph.links.values()) {
+            const rp = link.getOtherEnd(this);
+            renderedParticipantsLinkedTo.add(rp);
+        }
+
+
+
+        // //let countExternal = 0;
+        // for (let link of this.renderedP_PLinks) {
+        //     if (link.crosslinks[0].isSelfLink() === false)
+        //     {
+        //         if (link.isPassingFilter()) {
+        //             //countExternal++;
+        //             renderedParticipantsLinkedTo.add(link.getOtherEnd(this).getRenderedInteractor());
+        //         }
+        //     }
+        // }
+        return renderedParticipantsLinkedTo.size;
+
+    }
 }

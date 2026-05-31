@@ -500,7 +500,7 @@ export class CrosslinkViewer extends Backbone.View {
             }
         }
 
-        /*
+
         this.subgraphs = [];
 
         for (let interactor of this.renderedProteins.values()) {
@@ -561,7 +561,7 @@ export class CrosslinkViewer extends Backbone.View {
             } else {
                 this.nonLinearGraphs.push(graph);
             }
-        }*/
+        }
 
         return this;
     }
@@ -865,7 +865,7 @@ export class CrosslinkViewer extends Backbone.View {
         const width = this.svgElement.parentNode.clientWidth;
         const height = this.svgElement.parentNode.clientHeight;
 
-        /*        const tempGroupMap = new Map (this.groupMap);
+        const tempGroupMap = new Map (this.groupMap);
 
         //Grid layout linear graphs
         var column = 0, row = 0;
@@ -910,7 +910,7 @@ export class CrosslinkViewer extends Backbone.View {
             }
         }
         //remember edge of gridded proteins
-        const layoutXOffset = this.xForColumn(column + 1);*/
+        const layoutXOffset = this.xForColumn(column + 1);
 
         for (let renderedProtein of this.renderedProteins.values()) {
             if (fixedParticipants.length === 0) {
@@ -934,35 +934,35 @@ export class CrosslinkViewer extends Backbone.View {
             g.leaves = []; // clear this, it's used by cola, gets filled by auto
         }
 
-        this.d3cola.size([height - /*layoutXOffset -*/ 40, width - 40]).symmetricDiffLinkLengths(linkLength);
+        this.d3cola.size([height - layoutXOffset - 40, width - 40]).symmetricDiffLinkLengths(linkLength);
 
         const self = this;
 
         const links = new Map();
         const nodeSet = new Set();
-        for (let crosslink of self.model.getFilteredCrossLinks()) {
-        // for (let graph of this.nonLinearGraphs) {
-        //     for (let link of graph.links.values()) {
-            if (crosslink.toProtein) { // not linears
-            // if (link.crosslinks[0].isSelfLink() === false) {
-                const source = self.renderedProteins.get(crosslink.fromProtein.id).getRenderedInteractor();
-                const target = self.renderedProteins.get(crosslink.toProtein.id).getRenderedInteractor();
-                nodeSet.add(source);
-                const fromId = crosslink.fromProtein.id;
-                const toId = crosslink.toProtein.id;
-                const linkId = fromId + "-" + toId;
-                if (!links.has(linkId)) {
-                    const linkObj = {};
-                    // todo - maybe do use indexes, might avoid probs in cola
-                    linkObj.source = source;
-                    linkObj.target = target;
-                    nodeSet.add(target); // bit weird doing ths here
-                    linkObj.id = linkId;
-                    links.set(linkId, linkObj);
+        //for (let crosslink of self.model.getFilteredCrossLinks()) {
+        for (let graph of this.nonLinearGraphs) {
+            for (let link of graph.links.values()) {
+                // if (crosslink.toProtein) { // not linears
+                if (link.crosslinks[0].isSelfLink() === false) {
+                    const source = self.renderedProteins.get(link.renderedFromProtein.protein.id).getRenderedInteractor();
+                    const target = self.renderedProteins.get(link.renderedToProtein.protein.id).getRenderedInteractor();
+                    nodeSet.add(source);
+                    const fromId = link.renderedFromProtein.protein.id;
+                    const toId = link.renderedToProtein.protein.id;
+                    const linkId = fromId + "-" + toId;
+                    if (!links.has(linkId)) {
+                        const linkObj = {};
+                        // todo - maybe do use indexes, might avoid probs in cola
+                        linkObj.source = source;
+                        linkObj.target = target;
+                        nodeSet.add(target); // bit weird doing ths here
+                        linkObj.id = linkId;
+                        links.set(linkId, linkObj);
+                    }
                 }
             }
         }
-        // }
         const nodeArr = Array.from(nodeSet);
         const linkArr = Array.from(links.values());
         doLayout(nodeArr, linkArr);
@@ -1124,75 +1124,75 @@ export class CrosslinkViewer extends Backbone.View {
         }
     }
 
-    // //functions used...
-    // xForColumn(c) {
-    //     const maxBlobRadius = 40;
-    //     // var LABELMAXLENGTH = 0;
-    //     // return (c * ((2 * maxBlobRadius) + LABELMAXLENGTH)) - maxBlobRadius;
-    //     return c * maxBlobRadius - (maxBlobRadius / 2);
-    // }
-    //
-    // yForRow(r) {
-    //     const maxBlobRadius = 50;
-    //     return (r * maxBlobRadius) - 10;
-    // }
-    //
-    // reorderedNodes(linearGraph) {
-    //     const reorderedNodes = [];
-    //     appendNode(getStartNode(), new Set ());
-    //     return reorderedNodes;
-    //
-    //     function getStartNode() {
-    //         // var ns = Array.from(linearGraph.nodes.values());
-    //         // var count = ns.length;
-    //         // //                    alert (nodeCount);
-    //         // for (var n = 0; n < count; n++) {
-    //         //     if (ns[n].countExternalLinks() < 2) {
-    //         //         //                            alert("got start");
-    //         //         return ns[n];
-    //         //     }
-    //         // }
-    //         for (let node of linearGraph.nodes.values()) {
-    //             if (node.countExternalLinks() < 2) {
-    //                 console.log("StartNode", node.id);
-    //                 return node;
-    //             }
-    //         }
-    //         console.error("missed linear subgraph start");
-    //         return null;
-    //     }
-    //
-    //     function appendNode(currentNode, checkedNodes) {
-    //         checkedNodes.add(currentNode.id); // yeah, wierdness, this all needs tidied up
-    //         if (!currentNode.hidden) {
-    //             reorderedNodes.push(currentNode.participant.id);
-    //         }
-    //
-    //         // var proteinLinksArr = Array.from(currentNode.renderedP_PLinks.values());
-    //         // for (var l = 0; l < proteinLinksArr.length; l++) {
-    //         //     var link = proteinLinksArr[l];
-    //         //     if (link.isPassingFilter()) {
-    //         //         var nextNode = link.getOtherEnd(currentNode);
-    //         //         if (reorderedNodes.indexOf(nextNode.participant.id) === -1) {
-    //         //             //                    alert("here");
-    //         //             appendNode(nextNode);
-    //         //             break;
-    //         //         }
-    //         //     }
-    //         // }
-    //
-    //         for (let link of currentNode.renderedP_PLinks.values()) {
-    //             if (link.isPassingFilter()) {
-    //                 const nextNode = link.getOtherEnd(currentNode);
-    //                 if (!checkedNodes.has(nextNode.id)) {
-    //                     console.log("nextNode", nextNode.id);
-    //                     appendNode(nextNode, checkedNodes);
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+    //functions used...
+    xForColumn(c) {
+        const maxBlobRadius = 40;
+        // var LABELMAXLENGTH = 0;
+        // return (c * ((2 * maxBlobRadius) + LABELMAXLENGTH)) - maxBlobRadius;
+        return c * maxBlobRadius - (maxBlobRadius / 2);
+    }
+
+    yForRow(r) {
+        const maxBlobRadius = 50;
+        return (r * maxBlobRadius) - 10;
+    }
+
+    reorderedNodes(linearGraph) {
+        const reorderedNodes = [];
+        appendNode(getStartNode(), new Set ());
+        return reorderedNodes;
+
+        function getStartNode() {
+            // var ns = Array.from(linearGraph.nodes.values());
+            // var count = ns.length;
+            // //                    alert (nodeCount);
+            // for (var n = 0; n < count; n++) {
+            //     if (ns[n].countExternalLinks() < 2) {
+            //         //                            alert("got start");
+            //         return ns[n];
+            //     }
+            // }
+            for (let node of linearGraph.nodes.values()) {
+                if (node.countExternalLinks() < 2) {
+                    console.log("StartNode", node.id);
+                    return node;
+                }
+            }
+            console.error("missed linear subgraph start");
+            return null;
+        }
+
+        function appendNode(currentNode, checkedNodes) {
+            checkedNodes.add(currentNode.id); // yeah, wierdness, this all needs tidied up
+            if (!currentNode.hidden) {
+                reorderedNodes.push(currentNode.id);
+            }
+
+            // var proteinLinksArr = Array.from(currentNode.renderedP_PLinks.values());
+            // for (var l = 0; l < proteinLinksArr.length; l++) {
+            //     var link = proteinLinksArr[l];
+            //     if (link.isPassingFilter()) {
+            //         var nextNode = link.getOtherEnd(currentNode);
+            //         if (reorderedNodes.indexOf(nextNode.participant.id) === -1) {
+            //             //                    alert("here");
+            //             appendNode(nextNode);
+            //             break;
+            //         }
+            //     }
+            // }
+
+            for (let link of currentNode.renderedP_PLinks.values()) {
+                if (link.isPassingFilter()) {
+                    const nextNode = link.getOtherEnd(currentNode);
+                    if (!checkedNodes.has(nextNode.id)) {
+                        console.log("nextNode", nextNode.id);
+                        appendNode(nextNode, checkedNodes);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     saveLayout(callback) {
         const layout = {};
