@@ -1181,16 +1181,31 @@ export class CrosslinkViewer extends Backbone.View {
             //     }
             // }
 
-            for (let link of currentNode.renderedP_PLinks.values()) {
-                if (link.isPassingFilter()) {
-                    const nextNode = link.getOtherEnd(currentNode);
-                    if (!checkedNodes.has(nextNode.id)) {
-                        console.log("nextNode", nextNode.id);
-                        appendNode(nextNode, checkedNodes);
-                        break;
+            // currentNode may be a RenderedProtein or a Group; only proteins have
+            // renderedP_PLinks, so resolve neighbours via the rendered interactor of
+            // each link's other end (same approach as countExternalLinks).
+            for (let nextNode of getNeighbours(currentNode)) {
+                if (!checkedNodes.has(nextNode.id)) {
+                    console.log("nextNode", nextNode.id);
+                    appendNode(nextNode, checkedNodes);
+                    break;
+                }
+            }
+        }
+
+        function getNeighbours(node) {
+            const neighbours = new Set();
+            // groups have no renderedP_PLinks of their own - gather from members
+            const proteins = node.renderedP_PLinks ? [node] : node.renderedProteins;
+            for (let protein of proteins) {
+                for (let link of protein.renderedP_PLinks) {
+                    if (link.crosslinks[0].isSelfLink() === false && link.isPassingFilter()) {
+                        neighbours.add(link.getOtherEnd(protein).getRenderedInteractor());
                     }
                 }
             }
+            neighbours.delete(node); // drop self (e.g. links internal to a group)
+            return neighbours;
         }
     }
 
