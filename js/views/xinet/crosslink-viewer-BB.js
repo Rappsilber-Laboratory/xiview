@@ -934,7 +934,7 @@ export class CrosslinkViewer extends Backbone.View {
             g.leaves = []; // clear this, it's used by cola, gets filled by auto
         }
 
-        this.d3cola.size([height - layoutXOffset - 40, width - 40]).symmetricDiffLinkLengths(linkLength);
+        this.d3cola.size([width - layoutXOffset - 120, height - 60]).symmetricDiffLinkLengths(linkLength);
 
         const self = this;
 
@@ -1054,30 +1054,29 @@ export class CrosslinkViewer extends Backbone.View {
                 participantDebugSel.exit().remove();
             }
             self.d3cola.nodes(nodes).groups(groups).links(links).start(23, 10, 1, 0, true).on("tick", function () { //.start(23, 10, 1, 0, true)
-                // let x1 = null, y1 = null, x2 = null, y2 = null;
-                // for (let node of self.d3cola.nodes()) {
-                //     if (!x1 || node.x < x1) {
-                //         x1 = node.x;
-                //     }
-                //     if (!y1 || node.y < y1) {
-                //         y1 = node.y;
-                //     }
-                //     if (!x2 || node.x > x2) {
-                //         x2 = node.x;
-                //     }
-                //     if (!y2 || node.y > y2) {
-                //         y2 = node.y;
-                //     }
-                // }
-                //
-                // let c = 0;
-                // let xr = (width - /*layoutXOffset -*/ 120) / (x2 - x1);
-                // let yr = ((height - 60) / (y2 - y1));
+                let x1 = null, y1 = null, x2 = null, y2 = null;
+                for (let node of self.d3cola.nodes()) {
+                    if (!x1 || node.x < x1) {
+                        x1 = node.x;
+                    }
+                    if (!y1 || node.y < y1) {
+                        y1 = node.y;
+                    }
+                    if (!x2 || node.x > x2) {
+                        x2 = node.x;
+                    }
+                    if (!y2 || node.y > y2) {
+                        y2 = node.y;
+                    }
+                }
+
+                let xr = (width - layoutXOffset - 120) / (x2 - x1);
+                let yr = ((height - 60) / (y2 - y1));
 
                 for (let node of self.d3cola.nodes()) {
-                    // node.setPositionFromCola((node.x * xr) - (x1 * xr) /*+ layoutXOffset*/,
-                    //     (node.y * yr) - (y1 * yr) + 30);
-                    node.setPositionFromCola();
+                    node.setPositionFromCola((node.x * xr) - (x1 * xr) + layoutXOffset,
+                        (node.y * yr) - (y1 * yr) + 30);
+                    // node.setPositionFromCola();
                     node.setAllLinkCoordinates();
                 }
                 for (let g of self.d3cola.groups()) { // todo -  seems a bit of a weird way to have done this?

@@ -307,17 +307,12 @@ export class Group extends Interactor {
         calculate centre of interactor's glyph,
         call setPosition with those
     */
-    setPositionFromCola() {
+    setPositionFromCola(ix, iy) {
         this.px = this.x;
         this.py = this.y;
-        // let xOffset = 0;
-        // if (!this.hidden) { // todo - hacky
-        //     xOffset = (this.width / 20); // - (this.getBlobRadius()) + 5)
-        //     // if (this.expanded) {
-        //     //   xOffset = xOffset + (this.participant.size / 2 * this.stickZoom );
-        //     // }
-        // }
-        this.setPosition(this.x /*- xOffset*/, this.y);
+        // leave this.x/this.y as cola set them (cola recomputes from them each tick);
+        // render at the scaled coords passed in.
+        this.setPosition(ix, iy);
     }
 
     /* calculate top left of interactor's glyph,
