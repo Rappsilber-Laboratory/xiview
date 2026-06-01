@@ -868,6 +868,9 @@ export class CrosslinkViewer extends Backbone.View {
         const tempGroupMap = new Map (this.groupMap);
 
         //Grid layout linear graphs
+        // push the first column down so it clears the #ppiText summary overlay (top-left of the panel)
+        const ppiTextEl = document.getElementById("ppiText");
+        const firstColumnYOffset = ppiTextEl ? ppiTextEl.getBoundingClientRect().height : 0;
         var column = 0, row = 0;
         if (this.linearGraphs.length > 0) {
             column++;
@@ -890,18 +893,17 @@ export class CrosslinkViewer extends Backbone.View {
                     }
                     var x, y;
                     row++;
+                    // only the first column sits under #ppiText, so only it needs the offset
+                    const yOffset = (column === 1) ? firstColumnYOffset : 0;
                     x = this.xForColumn(column);
-                    y = this.yForRow(row);
-                    var lastNodeY = this.yForRow(row + ((nodeCount - 1 - n) * 2));
+                    y = this.yForRow(row) + yOffset;
+                    var lastNodeY = this.yForRow(row + (nodeCount - 1 - n)) + yOffset;
                     let lowerBound = height;
-                    if (column < 4) {
-                        lowerBound = lowerBound - 100;
-                    }
                     if ((lastNodeY + 20) > lowerBound) {
                         column++;
                         row = 1;
                         x = this.xForColumn(column);
-                        y = this.yForRow(row);
+                        y = this.yForRow(row) + ((column === 1) ? firstColumnYOffset : 0);
                     }
                     // console.log("??", p.id, column, row);
                     p.setPosition(x, y);
@@ -943,8 +945,9 @@ export class CrosslinkViewer extends Backbone.View {
         //for (let crosslink of self.model.getFilteredCrossLinks()) {
         for (let graph of this.nonLinearGraphs) {
             for (let link of graph.links.values()) {
-                // if (crosslink.toProtein) { // not linears
-                if (link.crosslinks[0].isSelfLink() === false) {
+                // structural self-link test (see countExternalLinks): crosslinks[0] is
+                // unreliable for ambiguous links bundling several crosslinks.
+                if (link.renderedFromProtein !== link.renderedToProtein) {
                     const source = self.renderedProteins.get(link.renderedFromProtein.protein.id).getRenderedInteractor();
                     const target = self.renderedProteins.get(link.renderedToProtein.protein.id).getRenderedInteractor();
                     nodeSet.add(source);
@@ -1153,7 +1156,6 @@ export class CrosslinkViewer extends Backbone.View {
             // }
             for (let node of linearGraph.nodes.values()) {
                 if (node.countExternalLinks() < 2) {
-                    console.log("StartNode", node.id);
                     return node;
                 }
             }
@@ -1185,7 +1187,6 @@ export class CrosslinkViewer extends Backbone.View {
             // each link's other end (same approach as countExternalLinks).
             for (let nextNode of getNeighbours(currentNode)) {
                 if (!checkedNodes.has(nextNode.id)) {
-                    console.log("nextNode", nextNode.id);
                     appendNode(nextNode, checkedNodes);
                     break;
                 }
@@ -1198,7 +1199,9 @@ export class CrosslinkViewer extends Backbone.View {
             const proteins = node.renderedP_PLinks ? [node] : node.renderedProteins;
             for (let protein of proteins) {
                 for (let link of protein.renderedP_PLinks) {
-                    if (link.crosslinks[0].isSelfLink() === false && link.isPassingFilter()) {
+                    // structural self-link test (see countExternalLinks): crosslinks[0] is
+                    // unreliable for ambiguous links bundling several crosslinks.
+                    if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
                         neighbours.add(link.getOtherEnd(protein).getRenderedInteractor());
                     }
                 }
@@ -1507,7 +1510,7 @@ export class CrosslinkViewer extends Backbone.View {
             scaleFactor = xr;
         }
         this.container.setAttribute("transform", "scale(" + scaleFactor
-            + ") translate(" + ((width / scaleFactor) - bbox.width - bbox.x + (margin / scaleFactor)) + " " + (-bbox.y + (margin / scaleFactor)) + ")");
+            + ") translate(" + (-bbox.x + (margin / scaleFactor)) + " " + (-bbox.y + (margin / scaleFactor)) + ")");
         this.scale();
     }
 

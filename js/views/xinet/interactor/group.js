@@ -346,10 +346,6 @@ export class Group extends Interactor {
             const cornerRadii = 5 * this.controller.z;
 
             const updateOutline = function (svgElement) {
-                if (!x){
-                    console.log("!x");
-                }
-
                 svgElement.setAttribute("x", x);
                 svgElement.setAttribute("y", y);
                 svgElement.setAttribute("width", scaledWidth);
@@ -972,27 +968,23 @@ export class Group extends Interactor {
     }
 
     countExternalLinks () {
-        // return this.renderedP_PLinks.length;
-        const renderedParticipantsLinkedTo = new Set();
-
-        for (let link of this.subgraph.links.values()) {
-            const rp = link.getOtherEnd(this);
-            renderedParticipantsLinkedTo.add(rp);
+        // Count distinct rendered interactors this group links to *outside itself*.
+        // A group has no renderedP_PLinks of its own, so gather from member proteins'
+        // links, resolve each far end to its rendered interactor, and drop links that
+        // stay inside the group (they resolve back to this group). Mirrors getNeighbours()
+        // in crosslink-viewer-BB so the linear/non-linear classification and the grid
+        // traversal agree — the old version walked the whole subgraph's links and counted
+        // the wrong ends, badly undercounting a group's degree (a star then read as a
+        // chain, stranding the dropped branches).
+        const externalInteractors = new Set();
+        for (let protein of this.renderedProteins) {
+            for (let link of protein.renderedP_PLinks) {
+                if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
+                    externalInteractors.add(link.getOtherEnd(protein).getRenderedInteractor());
+                }
+            }
         }
-
-
-
-        // //let countExternal = 0;
-        // for (let link of this.renderedP_PLinks) {
-        //     if (link.crosslinks[0].isSelfLink() === false)
-        //     {
-        //         if (link.isPassingFilter()) {
-        //             //countExternal++;
-        //             renderedParticipantsLinkedTo.add(link.getOtherEnd(this).getRenderedInteractor());
-        //         }
-        //     }
-        // }
-        return renderedParticipantsLinkedTo.size;
-
+        externalInteractors.delete(this); // drop internal links between own members
+        return externalInteractors.size;
     }
 }

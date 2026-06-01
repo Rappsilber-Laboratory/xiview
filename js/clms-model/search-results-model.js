@@ -604,6 +604,34 @@ export class SearchResultsModel {
     }
 
     /**
+     * Flag that ambiguous matches are present in the data.
+     * Called from SpectrumMatch during parsing (private #ambiguousPresent is not
+     * accessible from outside this class).
+     * @returns {undefined}
+     */
+    setAmbiguousPresent() {
+        this.#ambiguousPresent = true;
+    }
+
+    /**
+     * Flag that linear peptides are present in the data.
+     * Called from SpectrumMatch during parsing.
+     * @returns {undefined}
+     */
+    setLinearsPresent() {
+        this.#linearsPresent = true;
+    }
+
+    /**
+     * Flag that decoy matches are present in the data.
+     * Called from SpectrumMatch during parsing.
+     * @returns {undefined}
+     */
+    setDecoysPresent() {
+        this.#decoysPresent = true;
+    }
+
+    /**
      * Check if crosslinks are present in the data
      * @returns {boolean} True if crosslinks present
      */

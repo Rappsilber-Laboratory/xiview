@@ -1280,7 +1280,10 @@ export class RenderedProtein extends Interactor {
         const renderedParticipantsLinkedTo = new Set();
         //let countExternal = 0;
         for (let link of this.renderedP_PLinks) {
-            if (link.crosslinks[0].isSelfLink() === false) {
+            // a p-p link is a self-link iff both ends are the same protein; don't rely on
+            // crosslinks[0].isSelfLink() — an ambiguous link bundles several crosslinks and
+            // its first one may be a self-link even when the link spans two proteins.
+            if (link.renderedFromProtein !== link.renderedToProtein) {
                 if (link.isPassingFilter()) {
                     //countExternal++;
                     renderedParticipantsLinkedTo.add(link.getOtherEnd(this).getRenderedInteractor());

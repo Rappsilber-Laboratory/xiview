@@ -122,7 +122,7 @@ export class SpectrumMatch {
         } else {
             if (this.matchedPeptides[0].is_decoy.indexOf("1") != -1) {
                 this.is_decoy = true;
-                this.#containingModel._decoysPresent = true;
+                this.#containingModel.setDecoysPresent();
             }
         }
         if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
@@ -131,7 +131,7 @@ export class SpectrumMatch {
                 alert("peptide error (missing peptide evidence?) for:" + +json.pi2);
             } else if (this.matchedPeptides[1].is_decoy.indexOf("1") != -1) {
                 this.is_decoy = true;
-                this.#containingModel._decoysPresent = true;
+                this.#containingModel.setDecoysPresent();
             }
         }
         //if the match is ambiguous it will relate to many crosslinks
@@ -149,7 +149,7 @@ export class SpectrumMatch {
 
         if (this.isNotCrosslinked()) {
             //its a linear
-            this.containingModel._linearsPresent = true;
+            this.#containingModel.setLinearsPresent();
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
                 this.#associateWithLink(proteins, crosslinks, p1ID);
@@ -184,7 +184,7 @@ export class SpectrumMatch {
             for (let j = 0; j < this.matchedPeptides[1].pos.length; j++) {
 
                 if (i > 0 || j > 0) {
-                    this.#containingModel._ambiguousPresent = true;
+                    this.#containingModel.setAmbiguousPresent();
                 }
 
                 //some files (must be csv) are not puting in duplicate protein ids in ambig links
@@ -270,7 +270,7 @@ export class SpectrumMatch {
         let fromProt, toProt;
 
         if (this.isNotCrosslinked()) {// !p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
-            this.containingModel._linearsPresent = true;
+            this.#containingModel.setLinearsPresent();
             fromProt = proteins.get(p1ID);
             if (!fromProt) {
                 alert("FAIL: not protein with ID " + p1ID);
