@@ -26,6 +26,10 @@ import Split from "split.js";
 import {SearchResultsModel} from "./clms-model/search-results-model";
 import {BlosumCollection} from "./backbone-models/models";
 import vent from "./vent";
+// Debugging helper (not for production): exposes window.applySavedLayout() to apply the
+// bundled Juri_sorted layout from the browser console.
+import {applySavedLayout} from "./debug/apply-saved-layout";
+window.applySavedLayout = applySavedLayout;
 
 /**
  * Global spinner instance for displaying loading state on the main network page.
