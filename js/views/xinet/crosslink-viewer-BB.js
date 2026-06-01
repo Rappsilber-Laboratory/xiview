@@ -872,6 +872,7 @@ export class CrosslinkViewer extends Backbone.View {
         const ppiTextEl = document.getElementById("ppiText");
         const firstColumnYOffset = ppiTextEl ? ppiTextEl.getBoundingClientRect().height : 0;
         var column = 0, row = 0;
+        const _gridPlacements = []; // DIAGNOSTIC (temporary)
         if (this.linearGraphs.length > 0) {
             column++;
             for (let graph of this.linearGraphs) {
@@ -906,6 +907,9 @@ export class CrosslinkViewer extends Backbone.View {
                         y = this.yForRow(row) + ((column === 1) ? firstColumnYOffset : 0);
                     }
                     // console.log("??", p.id, column, row);
+                    _gridPlacements.push({ id: p.id, column, row,
+                        isGroup: p.protein === undefined,
+                        inCollapsedGroup: p.inCollapsedGroup ? p.inCollapsedGroup() : "n/a" });
                     p.setPosition(x, y);
                     p.setAllLinkCoordinates();
                 }
@@ -968,6 +972,21 @@ export class CrosslinkViewer extends Backbone.View {
         }
         const nodeArr = Array.from(nodeSet);
         const linkArr = Array.from(links.values());
+        // DIAGNOSTIC (temporary): grid placements that may leave a blank row — a
+        // collapsed-group member (renders inside its group symbol, not the slot) or a
+        // node also in the cola set (the cola tick repositions it away from the slot).
+        {
+            const _inCola = new Set(nodeArr.map(n => n.id));
+            for (const pl of _gridPlacements) {
+                if (pl.inCollapsedGroup === true || _inCola.has(pl.id)) {
+                    console.warn("AUTOLAYOUT: gridded node may leave a blank row:", pl.id,
+                        "| col", pl.column, "row", pl.row,
+                        "| isGroup:", pl.isGroup,
+                        "| inCollapsedGroup:", pl.inCollapsedGroup,
+                        "| inCola:", _inCola.has(pl.id));
+                }
+            }
+        }
         doLayout(nodeArr, linkArr);
 
         function doLayout(nodes, links) {
