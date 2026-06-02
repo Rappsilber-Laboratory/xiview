@@ -726,7 +726,7 @@ export class CrosslinkViewer extends Backbone.View {
             this.scale();
         }
 
-        const linkLength = (this.renderedProteins.size < 20) ? 40 : 20;
+        const linkLength = (this.renderedProteins.size < 20) ? 40 : 30;
         const width = this.svgElement.parentNode.clientWidth;
         const height = this.svgElement.parentNode.clientHeight;
 
@@ -1007,7 +1007,7 @@ export class CrosslinkViewer extends Backbone.View {
     }
 
     yForRow(r) {
-        const maxBlobRadius = 50;
+        const maxBlobRadius = 60;
         return (r * maxBlobRadius) - 10;
     }
 
@@ -1369,7 +1369,7 @@ export class CrosslinkViewer extends Backbone.View {
     }
 
     zoomToFullExtent() {
-        const margin = 50;
+        const margin = 10;
         const width = this.svgElement.parentNode.clientWidth - (2 * margin);
         const height = this.svgElement.parentNode.clientHeight - (2 * margin);
         const bbox = this.container.getBBox();

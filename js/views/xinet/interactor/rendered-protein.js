@@ -154,12 +154,12 @@ export class RenderedProtein extends Interactor {
     }
 
     get height() {
-        return 60;
+        return 50;
     }
 
     get symbolRadius() {
         if (this.controller.fixedSize) {
-            return 12;
+            return 10;
         } else {
             return Math.sqrt(this.protein.size / Math.PI) * 0.6;
         }
