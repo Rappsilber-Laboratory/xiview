@@ -828,14 +828,25 @@ export class CrosslinkViewer extends Backbone.View {
         }
         const nodeArr = Array.from(nodeSet);
         const linkArr = Array.from(links.values());
-        doLayout(nodeArr, linkArr);
+        doLayout(nodeArr, linkArr, true);   // groups-free warm-start
+        doLayout(nodeArr, linkArr, false);  // restart with groups, seeded from warm-start
 
-        function doLayout(nodes, links) {
+        function doLayout(nodes, links, preRun) {
             //don't know how necessary these deletions are
             delete self.d3cola._lastStress;
             delete self.d3cola._alpha;
             delete self.d3cola._descent;
             delete self.d3cola._rootGroup;
+
+            if (preRun) {
+                // Run the layout briefly without groups first; this warm-starts the grouped
+                // layout below. The grouped run uses start(0, ...) so cola's group-aware
+                // initialLayout is a no-op and these settled node positions are retained.
+                self.d3cola.nodes(nodes).links(links);
+                const initialUnconstrainedIterations = nodes.length < 10 ? 10 : 23;
+                self.d3cola.groups([]).start(initialUnconstrainedIterations, 10, 1, 0, false);
+                return;
+            }
 
             const groups = [];
             if (self.groupMap) {
@@ -843,6 +854,7 @@ export class CrosslinkViewer extends Backbone.View {
                     delete g.index;
                     if (!g.hidden && g.expanded) {
                         g.groups = [];
+                        g.leaves = [];
                         // put any rp not contained in a subgroup in group1.leaves
                         for (let rp of g.renderedProteins) {
                             if (!rp.hidden) {
@@ -916,7 +928,7 @@ export class CrosslinkViewer extends Backbone.View {
                 groupDebugSel.exit().remove();
                 participantDebugSel.exit().remove();
             }
-            self.d3cola.nodes(nodes).groups(groups).links(links).start(23, 10, 1, 0, true).on("tick", function () { //.start(23, 10, 1, 0, true)
+            self.d3cola.nodes(nodes).groups(groups).links(links).start(0, 10, 1, 0, true).on("tick", function () { // start(0, ...) keeps the groups-free pre-run positions
                 let x1 = null, y1 = null, x2 = null, y2 = null;
                 for (let node of self.d3cola.nodes()) {
                     if (!x1 || node.x < x1) {
