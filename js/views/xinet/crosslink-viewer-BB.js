@@ -733,9 +733,6 @@ export class CrosslinkViewer extends Backbone.View {
         const tempGroupMap = new Map (this.groupMap);
 
         //Grid layout linear graphs
-        // push the first column down so it clears the #ppiText summary overlay (top-left of the panel)
-        const ppiTextEl = document.getElementById("ppiText");
-        const firstColumnYOffset = ppiTextEl ? ppiTextEl.getBoundingClientRect().height : 0;
         var column = 0, row = 0;
         if (this.linearGraphs.length > 0) {
             column++;
@@ -758,17 +755,15 @@ export class CrosslinkViewer extends Backbone.View {
                     }
                     var x, y;
                     row++;
-                    // only the first column sits under #ppiText, so only it needs the offset
-                    const yOffset = (column === 1) ? firstColumnYOffset : 0;
                     x = this.xForColumn(column);
-                    y = this.yForRow(row) + yOffset;
-                    var lastNodeY = this.yForRow(row + (nodeCount - 1 - n)) + yOffset;
+                    y = this.yForRow(row);
+                    var lastNodeY = this.yForRow(row + (nodeCount - 1 - n));
                     let lowerBound = height;
                     if ((lastNodeY + 20) > lowerBound) {
                         column++;
                         row = 1;
                         x = this.xForColumn(column);
-                        y = this.yForRow(row) + ((column === 1) ? firstColumnYOffset : 0);
+                        y = this.yForRow(row);
                     }
                     // console.log("??", p.id, column, row);
                     p.setPosition(x, y);

@@ -29,7 +29,7 @@
 
     /* margin: 10px; */
     top:47px;
-    left: 0;
+    right: 0;
     text-align: right;
     width:125px;
 }
@@ -47,7 +47,7 @@
 
     /* margin: 10px; */
     top: 171px;
-    left: 0;
+    right: 0;
     text-align: right;
     width:125px;
 }
