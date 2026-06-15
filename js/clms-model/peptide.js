@@ -23,7 +23,7 @@ export class Peptide {
      * @param {number} json.cl_m - Crosslinker modification mass
      */
     constructor(json){ //}, containingModel) {
-        console.assert(json.m_as.length == json.m_ms.length &&  json.m_ms.length == json.m_as.length, "Inconsistent mod data on peptide", json);
+        console.assert(json.m_ps.length == json.m_as.length &&  (!json.m_ms || json.m_ps.length == json.m_ms.length), "Inconsistent mod data on peptide", json);
         this.#json = json;
 
         // this.modificationNames = containingModel.get("modificationNames");

@@ -139,3 +139,49 @@
         // addEnzymeSpecificityResidues(postAaSet, "DIGESTIBLE"); //"Post AA constrained");
         // addEnzymeSpecificityResidues(aaConstrainedCTermSet, "DIGESTIBLE"); // "AA constrained c-term");
         // addEnzymeSpecificityResidues(aaConstrainedNTermSet, "DIGESTIBLE"); // "AA constrained n-term");
+
+
+        // Populate _crosslinkerSpecificity from search modifications with crosslinker_id
+        // const linkableResSets = {};
+        // for (const smJson of this._searchModificationsJson) {
+        //     if (!smJson.crosslinker_id) continue;
+        //     const acc = smJson.accessions || {};
+        //
+        //     // Determine reactive group (0 = donor/group1, 1 = acceptor/group2)
+        //     let groupIndex;
+        //     if ("MS:1002509" in acc) groupIndex = 0;
+        //     else if ("MS:1002510" in acc) groupIndex = 1;
+        //     else continue;
+        //
+        //     // Name from UNIMOD accession value (e.g. "Xlink:DSSO"), else strip suffix from MS:1003392, else crosslinker_id
+        //     let name = null;
+        //     let unimodKey = null;
+        //     for (const [k, v] of Object.entries(acc)) {
+        //         if (k.startsWith("UNIMOD:")) { name = v; unimodKey = k; break; }
+        //     }
+        //     if (!name) {
+        //         const xlName = acc["MS:1003392"];
+        //         name = xlName ? xlName.replace(/_crosslink_(donor|acceptor)(_n_term)?$/, "") : String(smJson.crosslinker_id);
+        //     }
+        //
+        //     const key = smJson.upload_id + ":" + (unimodKey || smJson.crosslinker_id);
+        //     let resSet = linkableResSets[key];
+        //     if (!resSet) {
+        //         resSet = { name, linkables: [] };
+        //         linkableResSets[key] = resSet;
+        //     }
+        //     if (!resSet.linkables[groupIndex]) {
+        //         resSet.linkables[groupIndex] = new Set();
+        //     }
+        //
+        //     // Each character in residues is an amino acid; "." alone means position-only (N/C-term handled by CV terms)
+        //     const residues = smJson.residues || "";
+        //     if (residues !== ".") {
+        //         for (const aa of residues) {
+        //             resSet.linkables[groupIndex].add(aa);
+        //         }
+        //     }
+        //     if ("MS:1002057" in acc) resSet.linkables[groupIndex].add("nterm");
+        //     if ("MS:1002058" in acc) resSet.linkables[groupIndex].add("cterm");
+        // }
+        // this._crosslinkerSpecificity = linkableResSets;

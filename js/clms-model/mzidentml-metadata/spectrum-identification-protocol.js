@@ -118,6 +118,22 @@ export class SpectrumIdentificationProtocol {
         return this.#json.threshold;
     }
 
+    /**
+     * Get the enzymes used in this protocol
+     * @returns {Array<Enzyme>} Array of Enzyme instances (a protocol may use several)
+     */
+    get enzymes() {
+        return this.#enzymes;
+    }
+
+    /**
+     * Get the search modifications used in this protocol
+     * @returns {Array<SearchModification>} Array of SearchModification instances
+     */
+    get searchModifications() {
+        return this.#searchModifications;
+    }
+
     // /**
     //  * Get fragment tolerance settings
     //  * @returns {Object} Object with tolerance and unit properties

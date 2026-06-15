@@ -10,38 +10,19 @@ import {SearchModification} from "./mzidentml-metadata/search-modification";
 import {Enzyme} from "./mzidentml-metadata/enzyme";
 
 export class SearchResultsModel {
-    /**
-     * Private map of mzIdentML file objects keyed by upload ID
-     * @type {Map<int, MzidentmlFile>}
-     * @private
-     */
+    /** @type {Map<number, MzidentmlFile>} Map of mzIdentML file objects keyed by upload ID */
     #mzidentmlFiles = new Map();
 
-    /**
-     * Private array of all spectrum matches in the search results
-     * @type {Array<SpectrumMatch>}
-     * @private
-     */
+    /** @type {Array<SpectrumMatch>} Array of all spectrum matches in the search results */
     #matches = [];
 
-    /**
-     * Private map of crosslink objects keyed by crosslink ID
-     * @type {Map<string, Crosslink>}
-     * @private
-     */
+    /** @type {Map<string, Crosslink>} Map of crosslink objects keyed by crosslink ID */
     #crosslinks = new Map();
 
-    /**
-     * Private map of protein objects keyed by protein ID
-     * @type {Map<string, Protein>}
-     * @private
-     */
+    /** @type {Map<string, Protein>} Map of protein objects keyed by protein ID */
     #proteins = new Map();
 
-    /**
-     * Map of score type names to ScoreExtent objects
-     * @type {Map<string, ScoreExtent>}
-     */
+    /** @type {Map<string, ScoreExtent>} Map of score type names to ScoreExtent objects */
     scoreExtents = new Map();
 
     /**
@@ -52,62 +33,40 @@ export class SearchResultsModel {
      */
     selectedScoreType = null;
 
-    /**
-     * Private map of
-     * @type {Map<int, {particpantIdSet:Set(string), group:int}>
-     * @private
-     */
+    /** @type {Map<number, {proteinIDSet: Set<string>, id: string, group: number}>} Map of search/upload IDs to search info */
     #uploadIdToProteinIdsAndGroup = new Map();
 
-    /**
-     * Private flag indicating whether decoy proteins are present in results
-     * @type {boolean}
-     * @private
-     */
+    /** @type {boolean} Whether decoy proteins are present in results */
     #decoysPresent = false;
 
-    /**
-     * Private flag indicating whether ambiguous matches are present
-     * @type {boolean}
-     * @private
-     */
+    /** @type {boolean} Whether ambiguous matches are present */
     #ambiguousPresent = false;
 
-    /**
-     * Private flag indicating whether unvalidated matches are present
-     * @type {boolean}
-     * @private
-     */
+    /** @type {boolean} Whether unvalidated matches are present */
     #unvalidatedPresent = false;
 
-    /**
-     * Private flag indicating whether crosslinked peptides are present
-     * @type {boolean}
-     * @private
-     */
+    /** @type {boolean} Whether crosslinked peptides are present */
     #crosslinksPresent = false;
 
-    /**
-     * Private flag indicating whether linear (non-crosslinked) peptides are present
-     * @type {boolean}
-     * @private
-     */
+    /** @type {boolean} Whether linear (non-crosslinked) peptides are present */
     #linearsPresent = false;
 
-    /**
-     * Private count of non-decoy target proteins
-     * @type {number}
-     * @private
-     */
+    /** @type {number} Count of non-decoy target proteins */
     #targetProteinCount;
 
-    /**
-     * Array of crosslinker specificity rules
-     * @type {Array}
-     */
+    /** @type {Array} Array of crosslinker specificity rules */
     _crosslinkerSpecificity = [];
 
     _enzymeSpecificity = [];
+
+    /** @type {Map<*, Map<*, Array<Enzyme>>>} upload id -> protocol id -> Enzymes (a protocol may use several) */
+    _indexedEnzymes = new Map();
+
+    /** @type {Map<*, Map<*, Array<SearchModification>>>} upload id -> protocol id -> SearchModifications */
+    _indexedSearchModifications = new Map();
+
+    /** @type {Map<*, Map<*, SpectraData>>} upload id -> spectra data id -> SpectraData */
+    _indexedSpectraData = new Map();
 
     /**
      * Stores mzIdentML file metadata for later processing
@@ -145,8 +104,13 @@ export class SearchResultsModel {
      * @returns {void}
      */
     storeSpectraData(json) {
-        // this var will be deleted after data is processed
-        this._spectraDataJson = json;
+        // index spectra data by upload id then spectra data id (each id maps to one SpectraData)
+        for (let spectraDataJson of json) {
+            if (!this._indexedSpectraData.has(spectraDataJson.upload_id)) {
+                this._indexedSpectraData.set(spectraDataJson.upload_id, new Map());
+            }
+            this._indexedSpectraData.get(spectraDataJson.upload_id).set(spectraDataJson.id, new SpectraData(spectraDataJson));
+        }
     }
 
     /**
@@ -155,8 +119,37 @@ export class SearchResultsModel {
      * @returns {void}
      */
     storeEnzymes(json) {
-        // this var will be deleted after data is processed
-        this._enzymesJson = json;
+        // index enzymes by upload id then protocol id; a protocol may use several enzymes
+        for (let enzymeJson of json) {
+            if (!this._indexedEnzymes.has(enzymeJson.upload_id)) {
+                this._indexedEnzymes.set(enzymeJson.upload_id, new Map());
+            }
+            const perUpload = this._indexedEnzymes.get(enzymeJson.upload_id);
+            if (!perUpload.has(enzymeJson.protocol_id)) {
+                perUpload.set(enzymeJson.protocol_id, []);
+            }
+            perUpload.get(enzymeJson.protocol_id).push(new Enzyme(enzymeJson));
+        }
+        // derive _enzymeSpecificity from unique site_regexp values
+        const seenRegexps = new Set();
+        for (const uploadEnzymes of this._indexedEnzymes.values()) {
+            for (const enzymes of uploadEnzymes.values()) {
+                for (const enzyme of enzymes) {
+                    const siteRegexp = enzyme.siteRegexp;
+                    if (!siteRegexp || seenRegexps.has(siteRegexp)) continue;
+                    seenRegexps.add(siteRegexp);
+
+                    const lookbehindMatch = siteRegexp.match(/\(\?<=\[?([A-Z]+)]?\)/);
+                    const residues = lookbehindMatch ? lookbehindMatch[1].split("") : [];
+                    const lookaheadMatch = siteRegexp.match(/\(\?!\[?([A-Z]+)]?\)/);
+                    const postConstraint = lookaheadMatch ? lookaheadMatch[1].split("") : null;
+
+                    for (const aa of residues) {
+                        this._enzymeSpecificity.push({ aa, type: "DIGESTIBLE", postConstraint });
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -165,8 +158,17 @@ export class SearchResultsModel {
      * @returns {void}
      */
     storeSearchModifications(json) {
-        // this var will be deleted after data is processed
-        this._searchModificationsJson = json;//searchModifications;
+        // index search modifications by upload id then protocol id; a protocol has many modifications
+        for (let searchModificationJson of json) {
+            if (!this._indexedSearchModifications.has(searchModificationJson.upload_id)) {
+                this._indexedSearchModifications.set(searchModificationJson.upload_id, new Map());
+            }
+            const perUpload = this._indexedSearchModifications.get(searchModificationJson.upload_id);
+            if (!perUpload.has(searchModificationJson.protocol_id)) {
+                perUpload.set(searchModificationJson.protocol_id, []);
+            }
+            perUpload.get(searchModificationJson.protocol_id).push(new SearchModification(searchModificationJson));
+        }
     }
 
     /**
@@ -211,87 +213,8 @@ export class SearchResultsModel {
      */
     parseJSON() {
         //process mzid metadata
-        //index enzymes
-        const indexedEnzymes = new Map(); // this will be map of upload ids to map of protocol ids to Enzymes
-        for (let enzymeJson of this._enzymesJson) {
-            if (!indexedEnzymes.has(enzymeJson.upload_id)) {
-                indexedEnzymes.set(enzymeJson.upload_id, new Map());
-            }
-            const enzyme = new Enzyme(enzymeJson);
-            indexedEnzymes.get(enzymeJson.upload_id).set(enzymeJson.protocol_id, enzyme);
-        }
-        // Populate _enzymeSpecificity from unique site_regexp values
-        const seenRegexps = new Set();
-        for (const uploadEnzymes of indexedEnzymes.values()) {
-            for (const enzyme of uploadEnzymes.values()) {
-                const siteRegexp = enzyme.siteRegexp;
-                if (!siteRegexp || seenRegexps.has(siteRegexp)) continue;
-                seenRegexps.add(siteRegexp);
-
-                const lookbehindMatch = siteRegexp.match(/\(\?<=\[?([A-Z]+)]?\)/);
-                const residues = lookbehindMatch ? lookbehindMatch[1].split("") : [];
-                const lookaheadMatch = siteRegexp.match(/\(\?!\[?([A-Z]+)]?\)/);
-                const postConstraint = lookaheadMatch ? lookaheadMatch[1].split("") : null;
-
-                for (const aa of residues) {
-                    this._enzymeSpecificity.push({ aa, type: "DIGESTIBLE", postConstraint });
-                }
-            }
-        }
-
-        //index search modifications
-        const indexedSMs = new Map(); // this will be map of upload ids to map of protocol ids to SearchModification
-        for (let searchModificationJson of this._searchModificationsJson) {
-            if (!indexedSMs.has(searchModificationJson.upload_id)) {
-                indexedSMs.set(searchModificationJson.upload_id, new Map());
-            }
-            const sm = new SearchModification(searchModificationJson);
-            indexedSMs.get(searchModificationJson.upload_id).set(searchModificationJson.protocol_id, sm);
-        }
-        // Populate _crosslinkerSpecificity from search modifications with crosslinker_id
-        // const linkableResSets = {};
-        // for (const smJson of this._searchModificationsJson) {
-        //     if (!smJson.crosslinker_id) continue;
-        //     const acc = smJson.accessions || {};
-        //
-        //     // Determine reactive group (0 = donor/group1, 1 = acceptor/group2)
-        //     let groupIndex;
-        //     if ("MS:1002509" in acc) groupIndex = 0;
-        //     else if ("MS:1002510" in acc) groupIndex = 1;
-        //     else continue;
-        //
-        //     // Name from UNIMOD accession value (e.g. "Xlink:DSSO"), else strip suffix from MS:1003392, else crosslinker_id
-        //     let name = null;
-        //     let unimodKey = null;
-        //     for (const [k, v] of Object.entries(acc)) {
-        //         if (k.startsWith("UNIMOD:")) { name = v; unimodKey = k; break; }
-        //     }
-        //     if (!name) {
-        //         const xlName = acc["MS:1003392"];
-        //         name = xlName ? xlName.replace(/_crosslink_(donor|acceptor)(_n_term)?$/, "") : String(smJson.crosslinker_id);
-        //     }
-        //
-        //     const key = smJson.upload_id + ":" + (unimodKey || smJson.crosslinker_id);
-        //     let resSet = linkableResSets[key];
-        //     if (!resSet) {
-        //         resSet = { name, linkables: [] };
-        //         linkableResSets[key] = resSet;
-        //     }
-        //     if (!resSet.linkables[groupIndex]) {
-        //         resSet.linkables[groupIndex] = new Set();
-        //     }
-        //
-        //     // Each character in residues is an amino acid; "." alone means position-only (N/C-term handled by CV terms)
-        //     const residues = smJson.residues || "";
-        //     if (residues !== ".") {
-        //         for (const aa of residues) {
-        //             resSet.linkables[groupIndex].add(aa);
-        //         }
-        //     }
-        //     if ("MS:1002057" in acc) resSet.linkables[groupIndex].add("nterm");
-        //     if ("MS:1002058" in acc) resSet.linkables[groupIndex].add("cterm");
-        // }
-        // this._crosslinkerSpecificity = linkableResSets;
+        // enzymes, search modifications and spectra data were already indexed by their store* methods
+        // as the data arrived; parseJSON only performs the joins between metadata entities below.
 
         //index spectrum identification protocols
         // PRIDE returns an array of SIP records; XI2 returns a dict keyed by resultset id.
@@ -304,8 +227,8 @@ export class SearchResultsModel {
                     indexedSIPs.set(sipJson.upload_id, new Map());
                 }
                 const sip = new SpectrumIdentificationProtocol(sipJson,
-                    indexedEnzymes.get(sipJson.upload_id)?.get(sipJson.id),
-                    indexedSMs.get(sipJson.upload_id)?.get(sipJson.id));
+                    this._indexedEnzymes.get(sipJson.upload_id)?.get(sipJson.id),
+                    this._indexedSearchModifications.get(sipJson.upload_id)?.get(sipJson.id));
                 indexedSIPs.get(sipJson.upload_id).set(sipJson.id, sip);
             }
         } else {
@@ -318,16 +241,6 @@ export class SearchResultsModel {
             }
         }
 
-
-        //index spectra data
-        const indexedSpectraData = new Map(); // this will be map of upload ids to map of spectra data ids to SpectraData
-        for (let spectraDataJson of this._spectraDataJson) {
-            if (!indexedSpectraData.has(spectraDataJson.upload_id)) {
-                indexedSpectraData.set(spectraDataJson.upload_id, new Map());
-            }
-            const spectraData = new SpectraData(spectraDataJson);
-            indexedSpectraData.get(spectraDataJson.upload_id).set(spectraDataJson.id, spectraData);
-        }
         //index analysis collection spectrum identifications
         const spectrumIdentificationsMap = new Map(); // map of upload ids to array of spectrum identification objects
         for (let spectrumIdentificationJson of this._analysisCollectionSpectrumIdentificationsJson) {
@@ -337,14 +250,14 @@ export class SearchResultsModel {
             spectrumIdentificationsMap.get(spectrumIdentificationJson.upload_id).push(
                 new AnalysisCollection_SpectrumIdentification(spectrumIdentificationJson,
                     indexedSIPs.get(spectrumIdentificationJson.upload_id).get(spectrumIdentificationJson.protocol_id),
-                    Array.from(indexedSpectraData.get(spectrumIdentificationJson.upload_id).values()).filter(sd => spectrumIdentificationJson.spectra_data_refs.indexOf(sd.id) !== -1))
+                    Array.from(this._indexedSpectraData.get(spectrumIdentificationJson.upload_id).values()).filter(sd => spectrumIdentificationJson.spectra_data_refs.indexOf(sd.id) !== -1))
             );
         }
 
         for (let mzidJson of this._mzidentmlFilesJson) {
             this.#mzidentmlFiles.set(mzidJson.id, new MzidentmlFile(mzidJson,
                 spectrumIdentificationsMap.get(mzidJson.id),
-                indexedSpectraData.get(mzidJson.id), indexedSIPs.get(mzidJson.id)));
+                this._indexedSpectraData.get(mzidJson.id), indexedSIPs.get(mzidJson.id)));
         }
         // Xi2 has no mzIdentML files; synthesise one stub per resultset so the
         // SpectrumMatch.spectrumIdentificationProtocol lookup path (mzidentmlFiles
@@ -365,12 +278,13 @@ export class SearchResultsModel {
                 this.#mzidentmlFiles.set(resultsetId, new MzidentmlFile(stub, [], new Map(), indexedSIPs.get(resultsetId)));
             }
         }
-        //clear some temp data
+        //clear some temp data; the enzyme/search-mod/spectra-data objects survive via the
+        //SIP and MzidentmlFile objects that now reference them, so only the index wrappers go
         delete this._analysisCollectionSpectrumIdentificationsJson;
         delete this._spectrumIdentificationProtocolsJson;
-        delete this._searchModificationsJson;
-        delete this._enzymesJson;
-        delete this._spectraDataJson;
+        delete this._indexedSearchModifications;
+        delete this._indexedEnzymes;
+        delete this._indexedSpectraData;
 
         // todo - saved config should end up including filter settings not just xiNET layout
         // this.#xiNETLayout = json.xiNETLayout;
@@ -385,14 +299,16 @@ export class SearchResultsModel {
             for (let peptide of this._rawPeptides) {
                 peptide.sequence = peptide.base_seq;
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-                for (let p = 0; p < peptide.prt.length; p++) {
-                    if (peptide.dec[p]) {
-                        const protein = proteins.get(peptide.prt[p]);
-                        if (!protein) {
-                            console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+                if (peptide.dec) { // in xi2 the isDecoy info is in the protein
+                    for (let p = 0; p < peptide.prt.length; p++) {
+                        if (peptide.dec[p]) {
+                            const protein = proteins.get(peptide.prt[p]);
+                            if (!protein) {
+                                console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+                            }
+                            protein.is_decoy = true;
+                            this.#decoysPresent = true;
                         }
-                        protein.is_decoy = true;
-                        this.#decoysPresent = true;
                     }
                 }
             }
@@ -694,7 +610,7 @@ export class SearchResultsModel {
 
     /**
      * Get all mzIdentML files idexed by upload id
-     * @returns {Map<int, MzidentmlFile>} Map of upload id's to MzidentmlFile objects
+     * @returns {Map<number, MzidentmlFile>} Map of upload id's to MzidentmlFile objects
      */
     getMzidentmlFiles() {
         return this.#mzidentmlFiles;

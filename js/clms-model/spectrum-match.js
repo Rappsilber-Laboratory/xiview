@@ -116,7 +116,8 @@ export class SpectrumMatch {
             scoreExtent.processScore(scoreValue);
         }
 
-        this.matchedPeptides[0] = peptides.get(this.uploadId + "_" + json.pi1);
+        this.matchedPeptides[0] = peptides.get(this.uploadId + "_" + json.pi1); // u r here
+
         if (!this.matchedPeptides[0]) {
             alert("peptide error (missing peptide evidence?) for:" + json.pi1);
         } else {

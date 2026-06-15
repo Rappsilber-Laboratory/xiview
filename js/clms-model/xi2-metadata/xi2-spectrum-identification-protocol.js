@@ -9,7 +9,8 @@
  * Constructed from one value of the dict returned by
  *   GET /xi2/data/get_xiview_spectrum_identification_protocols
  * where each value carries: id (resultset id), rs_name, rs_note, rs_config
- * (JSON string), rs_main_score, resultset_type, s_id, s_name, s_config
+ * (already-parsed object when it is JSON, otherwise a raw text report
+ * string), rs_main_score, resultset_type, s_id, s_name, s_config
  * (already-parsed search config object), s_note.
  *
  * Enzymes / search modifications / crosslinkers / fragmentation rules all
@@ -24,18 +25,8 @@ export class Xi2SpectrumIdentificationProtocol {
     constructor(json) {
         this.#json = json;
         this.#sConfig = json?.s_config ?? {};
-
-        let parsedRsConfig = {};
-        if (json?.rs_config) {
-            try {
-                parsedRsConfig = typeof json.rs_config === "string"
-                    ? JSON.parse(json.rs_config)
-                    : json.rs_config;
-            } catch (e) {
-                console.warn("Xi2SpectrumIdentificationProtocol: failed to parse rs_config", e);
-            }
-        }
-        this.#rsConfig = parsedRsConfig;
+        // this could be JSON or text string.
+        this.#rsConfig = json.rs_config;
     }
 
     get id() {
