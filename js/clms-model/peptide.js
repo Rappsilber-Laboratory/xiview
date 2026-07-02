@@ -63,7 +63,7 @@ export class Peptide {
     }
 
     /**
-     * Get link site 1 position
+     * Get link site 1 position // *xi2 vrs pride difference*  - remove?
      * @returns {number} Link site 1 position
      */
     get linkSite1(){
@@ -71,7 +71,7 @@ export class Peptide {
     }
 
     /**
-     * Get link site 2 position (for loop links)
+     * Get link site 2 position (for loop links) // *xi2 vrs pride difference* - remove?
      * @returns {number} Link site 2 position
      */
     get linkSite2(){
