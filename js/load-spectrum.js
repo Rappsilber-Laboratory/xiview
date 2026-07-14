@@ -6,59 +6,96 @@
 export const loadSpectrum = function (match) {
     // if (match.spectrum && match.spectrum.pks) {
     const formatted_data = {};
+    const pep0 = match.matchedPeptides[0];
+    const pep1 = match.matchedPeptides[1];
 
-    const modMap = new Map();
-    /**
-     * Collect modifications from a peptide
-     * @param {Peptide} peptide - The peptide to collect modifications from
-     * @returns {void}
-     */
-    function collectMods(peptide) { // yeah, this is awful, tidy up once knwo what annotator really needs
-        for (let i = 0; i < peptide.mod_pos.length; i++) {
-            const allModCvs = peptide.mod_acc[i]; // take out the crosslinker mods
-            const allModCvsKeys = Object.keys(allModCvs);
-            if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
-                const modName = "(" + Object.values(allModCvs)[0].toLowerCase().replace(/\s+/g, "") + ")";
-                if (!modMap.has(modName)) {
-                    modMap.set(modName, peptide.mod_masses[i]);
-                }
-            }
-        }
-    }
-
-    collectMods(match.matchedPeptides[0]);
-    formatted_data.sequence1 = match.matchedPeptides[0].seq_mods;
+    // Fields common to both data sources.
     formatted_data.linkPos1 = match.linkPos1 - 1;
-    if (match.matchedPeptides[1]) {
-        collectMods(match.matchedPeptides[1]);
-        formatted_data.sequence2 = match.matchedPeptides[1].seq_mods;
+    if (pep1) {
         formatted_data.linkPos2 = match.linkPos2 - 1;
     }
-    formatted_data.crossLinkerModMass = match.crosslinkerModMass();
-
-    const modifications = [];
-    modMap.forEach(function (value, key) {
-        modifications.push({id: key, mass: value, aminoAcids: ["*"]});
-        if (value === undefined || value === null) {
-            alert("Failed: modification mass is undefined");
-        }
-    });
-
-    formatted_data.modifications = modifications;
     formatted_data.precursorCharge = match.precursorCharge;
-    formatted_data.fragmentTolerance = match.fragmentTolerance();
-
-    const ions = match.ionTypes();
-    formatted_data.ionTypes = ions.map(function (ion) {
-        return ion.type.replace("Ion", "");
-    }).join(";");
     formatted_data.precursorMZ = match.precursorMZ;
     formatted_data.requestID = match.id;
-    formatted_data.stubs1 = match.matchedPeptides[0].stubs;
-    formatted_data.stubs2 = match.matchedPeptides[1].stubs;
-
-
     formatted_data.peakList = [];
+
+    // The xi2 SIP surfaces the raw search config; the mzIdentML SIP does not.
+    // Its presence selects the request style.
+    const sip = match.spectrumIdentificationProtocol;
+    const xi2Config = sip ? sip.searchConfig : undefined;
+
+    if (xi2Config) {
+        // xi2 style: pass base sequence + modification indexes + the search config,
+        // and let the xi2 annotator resolve modification masses / stubs from the
+        // config (some config mods carry only a composition, no mass - by design).
+        // sequence1/2 are still required by convert_to_json_request (arrayifyPeptide).
+        formatted_data.sequence1 = pep0.seq_mods;
+        formatted_data.base_sequence1 = pep0.sequence;
+        formatted_data.mod_pos1 = pep0.mod_pos;
+        formatted_data.mod_ids1 = pep0.mod_acc;
+        if (pep1) {
+            formatted_data.sequence2 = pep1.seq_mods;
+            formatted_data.base_sequence2 = pep1.sequence;
+            formatted_data.mod_pos2 = pep1.mod_pos;
+            formatted_data.mod_ids2 = pep1.mod_acc;
+        }
+        // Clone so downstream mutation (e.g. the spectrum controls form) can't
+        // corrupt the config shared by the SIP.
+        formatted_data.config = JSON.parse(JSON.stringify(xi2Config));
+        // TODO(verify at runtime): crosslinkerID indexes config.crosslinker[]; without
+        // it convert_to_json_request empties config.crosslinker. Assumes a single
+        // crosslinker (index 0). Also confirm mod_pos convention (annotator may want
+        // 0-based with -1=Nterm / 32767=Cterm rather than the 1-based API positions).
+        if (xi2Config.crosslinker && xi2Config.crosslinker.length) {
+            formatted_data.crosslinkerID = 0;
+        }
+    } else {
+        // mzIdentML style: peptides self-describe their mods via CV objects.
+        const modMap = new Map();
+        /**
+         * Collect modifications from a peptide
+         * @param {Peptide} peptide - The peptide to collect modifications from
+         * @returns {void}
+         */
+        const collectMods = function (peptide) { // yeah, this is awful, tidy up once knwo what annotator really needs
+            for (let i = 0; i < peptide.mod_pos.length; i++) {
+                const allModCvs = peptide.mod_acc[i]; // take out the crosslinker mods
+                const allModCvsKeys = Object.keys(allModCvs);
+                if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
+                    const modName = "(" + Object.values(allModCvs)[0].toLowerCase().replace(/\s+/g, "") + ")";
+                    if (!modMap.has(modName)) {
+                        modMap.set(modName, peptide.mod_masses[i]);
+                    }
+                }
+            }
+        };
+
+        collectMods(pep0);
+        formatted_data.sequence1 = pep0.seq_mods;
+        formatted_data.stubs1 = pep0.stubs;
+        if (pep1) {
+            collectMods(pep1);
+            formatted_data.sequence2 = pep1.seq_mods;
+            formatted_data.stubs2 = pep1.stubs;
+        }
+        formatted_data.crossLinkerModMass = match.crosslinkerModMass();
+
+        const modifications = [];
+        modMap.forEach(function (value, key) {
+            modifications.push({id: key, mass: value, aminoAcids: ["*"]});
+            if (value === undefined || value === null) {
+                alert("Failed: modification mass is undefined");
+            }
+        });
+        formatted_data.modifications = modifications;
+        formatted_data.fragmentTolerance = match.fragmentTolerance();
+
+        const ions = match.ionTypes();
+        formatted_data.ionTypes = ions.map(function (ion) {
+            return ion.type.replace("Ion", "");
+        }).join(";");
+    }
+
     const json_request = convert_to_json_request(formatted_data);
 
     const url = this.get("apiBase") + "get_annotated_peaklist"

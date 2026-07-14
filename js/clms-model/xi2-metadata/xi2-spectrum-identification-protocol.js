@@ -41,6 +41,46 @@ export class Xi2SpectrumIdentificationProtocol {
         return this.#json.id;
     }
 
+    /**
+     * Search id (peptides carry this as their u_id, so it is used to map a
+     * peptide back to the protocol that defines its modifications).
+     * @returns {string}
+     */
+    get searchId() {
+        return this.#json.s_id;
+    }
+
+    /**
+     * The raw search config (s_config) object. Passed verbatim as the
+     * `config` field of the xi2-style annotator request, from which the
+     * annotator resolves modification masses, crosslinker stubs, etc.
+     * @returns {Object}
+     */
+    get searchConfig() {
+        return this.#sConfig;
+    }
+
+    /**
+     * The ordered modifications list from the search config. In xi2 a
+     * peptide's/match's modification ids are 0-based indexes into this array.
+     * Mirrors the `searchModifications` getter on the mzIdentML
+     * SpectrumIdentificationProtocol so consumers need not branch on source.
+     * Note: some entries carry only `composition` (no `mass`).
+     * @returns {Array<Object>} modification defs {name, long_name, mass?, composition?, specificity, type, level}
+     */
+    get searchModifications() {
+        return this.#sConfig?.modification?.modifications ?? [];
+    }
+
+    /**
+     * Resolve a 0-based modification index to its config definition.
+     * @param {number} index
+     * @returns {Object|undefined}
+     */
+    modificationByIndex(index) {
+        return this.searchModifications[index];
+    }
+
     get fragmentTolerance() {
         return this.#parsedFragTol().value;
     }

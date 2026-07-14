@@ -81,6 +81,16 @@ export class SpectraData {
     }
 
     /**
+     * Get the bare spectra source file name.
+     * Handles both PRIDE (location is a full path) and xi2 (name is a bare filename, no location).
+     * @returns {string} File name without directory path
+     */
+    fileName() {
+        const raw = this.location ?? this.name ?? "";
+        return raw.split("/").pop().split("\\").pop();
+    }
+
+    /**
      * Convert to JSON object for serialization
      * @returns {Object} Object with all getter values
      */

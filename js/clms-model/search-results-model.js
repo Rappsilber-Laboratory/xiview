@@ -221,6 +221,10 @@ export class SearchResultsModel {
         const indexedSIPs = new Map(); // PRIDE: upload_id -> Map(protocol_id -> SIP). XI2: resultset_id -> Map(resultset_id -> Xi2SIP).
         const sipJsonRaw = this._spectrumIdentificationProtocolsJson;
         const xi2SipJsonsByResultsetId = new Map(); // populated only in xi2 path; used below to build bogus MzidentmlFiles
+        // xi2 only: search id -> ordered config modification list. A peptide's u_id is
+        // its search id and its m_as are 0-based indexes into this list. Empty for PRIDE
+        // (there peptides self-describe their mods via CV objects).
+        const xi2ModificationsBySearchId = new Map();
         if (Array.isArray(sipJsonRaw)) {
             for (let sipJson of sipJsonRaw) {
                 if (!indexedSIPs.has(sipJson.upload_id)) {
@@ -238,6 +242,7 @@ export class SearchResultsModel {
                 perFile.set(resultsetId, sip);
                 indexedSIPs.set(resultsetId, perFile);
                 xi2SipJsonsByResultsetId.set(resultsetId, sipJson);
+                xi2ModificationsBySearchId.set(sip.searchId, sip.searchModifications);
             }
         }
 
@@ -275,7 +280,8 @@ export class SearchResultsModel {
                     spectra_formats: [],
                     bib: []
                 };
-                this.#mzidentmlFiles.set(resultsetId, new MzidentmlFile(stub, [], new Map(), indexedSIPs.get(resultsetId)));
+                this.#mzidentmlFiles.set(resultsetId, new MzidentmlFile(stub, [],
+                    this._indexedSpectraData.get(resultsetId) ?? new Map(), indexedSIPs.get(resultsetId)));
             }
         }
         //clear some temp data; the enzyme/search-mod/spectra-data objects survive via the
@@ -298,7 +304,7 @@ export class SearchResultsModel {
             }
             for (let peptide of this._rawPeptides) {
                 peptide.sequence = peptide.base_seq;
-                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
+                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
                 if (peptide.dec) { // in xi2 the isDecoy info is in the protein
                     for (let p = 0; p < peptide.prt.length; p++) {
                         if (peptide.dec[p]) {
@@ -319,7 +325,7 @@ export class SearchResultsModel {
                 tempProteins.set(protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
-                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
+                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
                     const protein = tempProteins.get(peptide.prt[pe]);
                     if (!protein) {

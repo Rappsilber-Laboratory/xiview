@@ -456,8 +456,8 @@ export class SpectrumMatch {
      * @returns {string} The peaklist file name
      */
     peaklistFileName() {
-        const spectraData = this.#containingModel.getMzidentmlFiles().get(this.uploadId).getSpectraDataById(this.#json.sd);
-        return spectraData.location.split("/").pop().split("\\").pop();
+        const spectraData = this.#containingModel.getMzidentmlFiles().get(this.uploadId)?.getSpectraDataById(this.spectraDataId);
+        return spectraData ? spectraData.fileName() : "";
     }
 
     /**
