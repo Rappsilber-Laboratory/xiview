@@ -96,6 +96,16 @@ export class SearchResultsModel {
     storeSpectrumIdentificationProtocols(json) {
         // this var will be deleted after data is processed
         this._spectrumIdentificationProtocolsJson = json;
+        //xi2
+        const rsNames = [];
+        for (let key of Object.keys(json)) {
+            if (json[key] && json[key].rs_name) {
+                rsNames.push(json[key].rs_name);
+            }
+        }
+        if (rsNames.length > 0) {
+            document.title = rsNames.join(";");
+        }
     }
 
     /**
