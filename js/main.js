@@ -118,7 +118,7 @@ const fetchDataAndProcess = (url, processFunction) => {
 export function main(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
-
+    setWindowTitle();
     const clmsModel = new SearchResultsModel();
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
@@ -140,7 +140,6 @@ export function main(apiBase, annotatorURL) {
             compositeModelInst.set("blosumColl", blosumCollInst);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
-            setWindowTitle();
             const split = initPageSplitter();
             views(compositeModelInst, split);
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
@@ -164,7 +163,7 @@ export function main(apiBase, annotatorURL) {
 export function validationPage(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
-
+    setWindowTitle();
     const clmsModel = new SearchResultsModel();
     const tasks = getTasks(apiBase, clmsModel);
     Promise.all(tasks)
@@ -174,7 +173,6 @@ export function validationPage(apiBase, annotatorURL) {
             const compositeModelInst = modelsEssential({}, clmsModel);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
-            setWindowTitle();
             const split = initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false, split});
             vent.trigger("spectrumShow", true);
