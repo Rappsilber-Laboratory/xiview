@@ -117,11 +117,6 @@ export function getGroupsMenuConfig(compositeModel) {
  */
 export function getLoadMenuConfig() {
     const loadButtonData = [{
-        name: "PDB",
-        eventName: "pdbFileChooserShow",
-        tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
-    },
-    {
         name: "STRING",
         eventName: "stringDataChooserShow",
         tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
@@ -151,7 +146,7 @@ export function getLoadMenuConfig() {
     });
 
     return {
-        title: "Import",
+        title: "Import-Metadata",
         menu: loadButtonData,
     };
 }
