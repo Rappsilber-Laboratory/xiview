@@ -460,7 +460,16 @@ export class SearchResultsModel {
      * @returns {Protein|undefined} The protein object, or undefined if not found
      */
     getProtein(proteinId) {
-        return this.#proteins.get(proteinId);
+        let protein = this.#proteins.get(proteinId);
+        if (protein === undefined && proteinId != null) {
+            // xi2 protein ids are numeric, so #proteins is keyed by numbers. When an id
+            // has round-tripped through plain-object or d3.map keys (e.g. chainMap /
+            // reverseChainMap) it arrives here stringified and misses the numeric key,
+            // so retry with a numeric lookup. Non-numeric ids coerce to NaN and miss
+            // harmlessly, preserving the undefined return.
+            protein = this.#proteins.get(Number(proteinId));
+        }
+        return protein;
     }
 
     /**
