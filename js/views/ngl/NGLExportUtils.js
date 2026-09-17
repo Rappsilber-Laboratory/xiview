@@ -57,7 +57,7 @@ export const NGLExportUtils = {
     exportPymolCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks) {
         const crosslinks = nglModelWrapper.getFullLinks();
         const pymolLinks = NGLExportUtils.makePymolCrossLinkSyntax(structure, crosslinks, remarks);
-        const fileName = downloadFilename("pymol", "pml");
+        const fileName = downloadFilename(nglModelWrapper.get("compositeModel"), "pymol", "pml");
         download(pymolLinks.join("\r\n"), "plain/text", fileName);
     },
 
@@ -149,7 +149,7 @@ export const NGLExportUtils = {
     exportHalfInLinksCSV: function (structure, nglModelWrapper, name, selectedOnly) {
         const crosslinks = nglModelWrapper.getHalfLinks();
         const linkExportArray = NGLExportUtils.makeHalfInLinkSyntax(structure, crosslinks, nglModelWrapper, selectedOnly);
-        const fileName = downloadFilename("half-in-NGL", "csv");
+        const fileName = downloadFilename(nglModelWrapper.get("compositeModel"), "half-in-NGL", "csv");
         download(linkExportArray.join("\r\n"), "plain/text", fileName);
     },
 
@@ -197,7 +197,7 @@ export const NGLExportUtils = {
 
             bondArray.push("#1/" + chainA + ":" + link.residueA.resno + "@CA #1/" + chainB + ":" + link.residueB.resno + "@CA " + color);
         }
-        const fileName = downloadFilename("ChimeraX", "pb");
+        const fileName = downloadFilename(nglModelWrapper.get("compositeModel"), "ChimeraX", "pb");
         download(bondArray.join("\r\n"), "plain/text", fileName);
     },
 
@@ -211,14 +211,14 @@ export const NGLExportUtils = {
             const chainB = chainProxy.chainname;
             crosslinkLines.push(link.residueA.resno + "|" + chainA + "|" + link.residueB.resno + "|" + chainB + "|");
         }
-        const fileName = downloadFilename("jWalk", "txt");
+        const fileName = downloadFilename(nglModelWrapper.get("compositeModel"), "jWalk", "txt");
         download(crosslinkLines.join("\r\n"), "plain/text", fileName);
     },
 
 
     // eslint-disable-next-line no-unused-vars
     exportXlinkAnalyzer: function (structure, nglModelWrapper, name, selectedOnly) {
-        const csvFileName = downloadFilename("xlinkAnalyzer_CSV", "csv");
+        const csvFileName = downloadFilename(nglModelWrapper.get("compositeModel"), "xlinkAnalyzer_CSV", "csv");
 
         const json = {
             data: [{
@@ -304,14 +304,14 @@ export const NGLExportUtils = {
         }
 
         download(header.concat(crosslinkLines).join("\r\n"), "plain/text", csvFileName);
-        const jsonFileName = downloadFilename("xlinkAnalyzer", "json");
+        const jsonFileName = downloadFilename(nglModelWrapper.get("compositeModel"), "xlinkAnalyzer", "json");
         download(JSON.stringify(json, null, 4), "json", jsonFileName);
     },
 
     exportHaddockCrossLinkSyntax: function (structure, nglModelWrapper, name, remarks, crosslinkerObj) {
         const crosslinks = nglModelWrapper.getFullLinks();
         const haddockLinks = NGLExportUtils.makeHaddockCrossLinkSyntax(structure, crosslinks, remarks, crosslinkerObj);
-        const fileName = downloadFilename("haddock", "tbl");
+        const fileName = downloadFilename(nglModelWrapper.get("compositeModel"), "haddock", "tbl");
         download(haddockLinks.join("\r\n"), "plain/text", fileName);
     },
 
