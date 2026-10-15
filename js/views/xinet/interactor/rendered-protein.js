@@ -1253,21 +1253,17 @@ export class RenderedProtein extends Interactor {
             if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
                 if (!subgraph.links.has(link.id)) {
                     subgraph.links.set(link.id, link);
-                    let otherEnd;
-                    if (link.renderedFromProtein === this) {
-                        otherEnd = link.renderedToProtein;
-                    } else {
-                        otherEnd = link.renderedFromProtein;
-                    }
-                    // if (otherEnd !== null) {
+                    const otherEnd = link.getOtherEnd(this);
                     const renderedOtherEnd = otherEnd.getRenderedInteractor();
-                    renderedOtherEnd.subgraph = subgraph;
-                    //if (!subgraph.nodes.has(renderedOtherEnd.id)) {
-                    subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
                     otherEnd.subgraph = subgraph;
-                    otherEnd.addConnectedNodes(subgraph);
-                    //}
-                    // }
+                    // continue from the rendered interactor (for a collapsed group that walks all its
+                    // members' links, not just this one member's), and only once per node - otherwise
+                    // a component gets split into overlapping subgraphs sharing nodes
+                    if (!subgraph.nodes.has(renderedOtherEnd.id)) {
+                        renderedOtherEnd.subgraph = subgraph;
+                        subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
+                        renderedOtherEnd.addConnectedNodes(subgraph);
+                    }
                 }
             }
         }

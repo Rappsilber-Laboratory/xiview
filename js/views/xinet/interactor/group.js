@@ -947,15 +947,14 @@ export class Group extends Interactor {
                         subgraph.links.set(link.id, link);
                         // far end relative to the member protein (comparing to the group itself never matched)
                         const otherEnd = link.getOtherEnd(p);
-                        // if (otherEnd !== null) {
                         const renderedOtherEnd = otherEnd.getRenderedInteractor();
-                        renderedOtherEnd.subgraph = subgraph;
-                        //if (!subgraph.nodes.has(renderedOtherEnd.id)) {
-                        subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
                         otherEnd.subgraph = subgraph;
-                        otherEnd.addConnectedNodes(subgraph);
-                        //}
-                        // }
+                        // continue from the rendered interactor, once per node (see RenderedProtein.addConnectedNodes)
+                        if (!subgraph.nodes.has(renderedOtherEnd.id)) {
+                            renderedOtherEnd.subgraph = subgraph;
+                            subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
+                            renderedOtherEnd.addConnectedNodes(subgraph);
+                        }
                     }
                 }
             }
