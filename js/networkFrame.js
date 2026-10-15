@@ -547,12 +547,19 @@ export function views(compositeModelInst, split) {
         .attr("type", "text")
         .attr("id", "groupSelected");
 
-    new DropDownMenuViewBB({
+    const groupsMenu = new DropDownMenuViewBB({
         el: "#groupsDropdownPlaceholder",
         model: compositeModelInst.get("clmsModel"),
         myOptions: getGroupsMenuConfig(compositeModelInst)
     })
         .wholeMenuEnabled(true);
+
+    // auto group items need UniProt annotations - disabled until they arrive (stay disabled if fetch fails)
+    const autoGroupMenuIndices = [2, 3, 4];
+    groupsMenu.enableItemsByIndex(autoGroupMenuIndices, false);
+    vent.once("uniprotLoaded", function () {
+        groupsMenu.enableItemsByIndex(autoGroupMenuIndices, true);
+    });
 
     // Generate buttons for load dropdown
     new DropDownMenuViewBB({

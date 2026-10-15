@@ -45,7 +45,6 @@ export class xiNetControlsViewBB extends Backbone.View {
                 const fixSelected = d3.select("input.fixSelected").property("checked");
                 vent.trigger("xinetAutoLayout", fixSelected ? this.model.get("selectedProteins") : []);
             },
-            "click .autoGroupButton": "autoGroup",
             "click .saveLayoutButton": "saveLayout",
             "change .showLabels": "setShowLabels",
             "change .fixedSize": "setFixedSize",

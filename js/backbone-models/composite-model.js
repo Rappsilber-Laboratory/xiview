@@ -6,7 +6,7 @@
  *   - FilteringPipelineMixin   — applyFilter() and its pipeline stages
  *   - SelectionHighlightMixin  — setMarkedCrossLinks/Matches, getMarked*, triggerFinalMatchLinksChange
  *   - ProteinVisibilityMixin   — hide/show/select/highlight protein methods
- *   - ProteinGroupManagerMixin — group CRUD, autoGroup, collapse/expandGroups
+ *   - ProteinGroupManagerMixin — group CRUD, UniProt-based auto grouping, collapse/expandGroups
  *
  * Delegate objects (created in initialize(), kept up-to-date via listenTo):
  *   - _distanceCalc  (CrosslinkDistanceCalculator) — 3D distance computation

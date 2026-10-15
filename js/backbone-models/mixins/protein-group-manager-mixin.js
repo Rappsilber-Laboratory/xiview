@@ -8,6 +8,136 @@ import {jqdialogs} from "../../ui-utils/dialogs";
 import d3 from "d3";
 import vent from "../../vent";
 
+const MIN_GROUP_SIZE = 2;
+
+/**
+ * Returns the hierarchical path of a protein's primary (first listed, canonical) UniProt
+ * subcellular location, e.g. "Cytoplasm, cytoskeleton, centrosome" -> ["Cytoplasm", "cytoskeleton", "centrosome"].
+ * @param {Object} protein - Protein with optional uniprot entry
+ * @returns {string[]|null} Location path segments, or null if none
+ */
+function getPrimaryLocationPath(protein) {
+    const comments = protein.uniprot && protein.uniprot.comments;
+    if (!Array.isArray(comments)) {
+        return null;
+    }
+    // prefer the canonical comment (no molecule = not isoform-specific)
+    const locComments = comments.filter(c => c.commentType === "SUBCELLULAR LOCATION");
+    const comment = locComments.find(c => !c.molecule) || locComments[0];
+    const locations = comment && comment.subcellularLocations;
+    const value = locations && locations.length && locations[0].location && locations[0].location.value;
+    if (!value) {
+        return null;
+    }
+    const path = value.split(",").map(s => s.trim()).filter(s => s);
+    return path.length ? path : null;
+}
+
+/**
+ * Returns Complex Portal complexes a protein belongs to, from its UniProt cross-references.
+ * @param {Object} protein - Protein with optional uniprot entry
+ * @returns {{id: string, name: string}[]} Complexes (empty if none)
+ */
+function getComplexes(protein) {
+    const xrefs = protein.uniprot && protein.uniprot.uniProtKBCrossReferences;
+    if (!Array.isArray(xrefs)) {
+        return [];
+    }
+    return xrefs
+        .filter(x => x.database === "ComplexPortal")
+        .map(function (x) {
+            const nameProp = Array.isArray(x.properties) ? x.properties.find(p => p.key === "EntryName") : null;
+            return {id: x.id, name: (nameProp && nameProp.value) || x.id};
+        });
+}
+
+/**
+ * Builds nested subcellular location groups. A protein whose primary location is "A, B, C" is placed in
+ * groups "A", "A, B" and "A, B, C", so parents are supersets of children and xiNET nests them.
+ * Ancestors with exactly the same members as a child are dropped (keeping the more specific name),
+ * as are groups smaller than MIN_GROUP_SIZE.
+ * @param {Iterable<Object>} proteins - Proteins to group
+ * @returns {Map<string, Set<string>>} Group name -> protein ids
+ */
+function buildLocationGroups(proteins) {
+    const groupMap = new Map();
+    const childKeys = new Map(); // group key -> Set of direct child group keys
+    for (let protein of proteins) {
+        const path = getPrimaryLocationPath(protein);
+        if (path) {
+            let parentKey = null;
+            for (let i = 1; i <= path.length; i++) {
+                const key = path.slice(0, i).join(", ");
+                if (!groupMap.has(key)) {
+                    groupMap.set(key, new Set());
+                    childKeys.set(key, new Set());
+                }
+                groupMap.get(key).add(protein.id);
+                if (parentKey) {
+                    childKeys.get(parentKey).add(key);
+                }
+                parentKey = key;
+            }
+        }
+    }
+
+    for (let [key, proteinIds] of groupMap) {
+        if (proteinIds.size < MIN_GROUP_SIZE) {
+            groupMap.delete(key);
+        }
+    }
+    // drop ancestors that are identical to one of their children (children always subsets, so compare sizes)
+    for (let [key, proteinIds] of Array.from(groupMap.entries())) {
+        for (let childKey of childKeys.get(key)) {
+            const child = groupMap.get(childKey);
+            if (child && child.size === proteinIds.size) {
+                groupMap.delete(key);
+                break;
+            }
+        }
+    }
+    return groupMap;
+}
+
+/**
+ * Builds Complex Portal complex groups (may overlap, a protein can be in several complexes).
+ * @param {Iterable<Object>} proteins - Proteins to group
+ * @returns {Map<string, Set<string>>} Complex name -> protein ids
+ */
+function buildComplexGroups(proteins) {
+    const byId = new Map(); // complex id -> {name, proteinIds}
+    for (let protein of proteins) {
+        for (let complex of getComplexes(protein)) {
+            if (!byId.has(complex.id)) {
+                byId.set(complex.id, {name: complex.name, proteinIds: new Set()});
+            }
+            byId.get(complex.id).proteinIds.add(protein.id);
+        }
+    }
+    const groupMap = new Map();
+    for (let [id, complex] of byId) {
+        if (complex.proteinIds.size >= MIN_GROUP_SIZE) {
+            const name = groupMap.has(complex.name) ? complex.name + " (" + id + ")" : complex.name;
+            groupMap.set(name, complex.proteinIds);
+        }
+    }
+    return groupMap;
+}
+
+/**
+ * Builds location groups and complex groups together; xiNET nests complexes inside locations
+ * where all members share a location.
+ * @param {Object[]} proteins - Proteins to group
+ * @returns {Map<string, Set<string>>} Group name -> protein ids
+ */
+function buildLocationAndComplexGroups(proteins) {
+    const groupMap = buildLocationGroups(proteins);
+    for (let [name, proteinIds] of buildComplexGroups(proteins)) {
+        groupMap.set(groupMap.has(name) ? name + " (complex)" : name, proteinIds);
+    }
+    return groupMap;
+}
+
 export const ProteinGroupManagerMixin = {
     /**
      * Creates a new protein group from currently selected proteins.
@@ -76,81 +206,48 @@ export const ProteinGroupManagerMixin = {
     },
 
     /**
-     * Automatically creates protein groups based on GO term annotations.
-     * Groups proteins by GO terms that are descendants of "protein complex" (GO0032991).
+     * Groups proteins by nested UniProt subcellular location (primary location only).
      * Clears existing groups after user confirmation.
      */
-    autoGroup() {
-        const self = this;
-        jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
-            const groupMap = new Map();
-            const go = self.get("go");
-            for (let goTerm of go.values()) {
-                if (!goTerm.subclasses && !goTerm.parts) {
-                    const proteins = goTerm.getProteins();
-                    if (proteins && proteins.size > 1) {
-                        if (goTerm.isDescendantOf("GO0032991")) {
-                            console.log(">" + goTerm.name);
-                            const proteinIds = new Set();
-                            for (let p of proteins) {
-                                proteinIds.add(p.id);
-                            }
-                            groupMap.set(goTerm.name, proteinIds);
-                        }
-                    }
-                }
-            }
-            self.set("groups", groupMap);
-            self.trigger("change:groups");
-        });
+    autoGroupBySubcellularLocation() {
+        this._applyAutoGroups(buildLocationGroups, "subcellular location");
     },
 
     /**
-     * Automatically creates protein groups based on cellular compartment GO annotations.
-     * Currently configured for nucleus (GO0005634).
+     * Groups proteins by Complex Portal complex membership (from UniProt cross-references).
+     * Clears existing groups after user confirmation.
      */
-    autoGroupCompartments() {
-        const go = this.get("go");
+    autoGroupByComplex() {
+        this._applyAutoGroups(buildComplexGroups, "Complex Portal complex");
+    },
 
-        // plasma membrane 0005886 n
-        // peroxysomes 0005777
-        // lysomes 0005764
-        // golgi 0005794 y
-        // cytosol 5829
-        // cytoskeleton 5856
-        // er 0005783 ?
-        // mitochondria 0005739
-        // nucleus 0005634
-        const groupMap = this.get("groups");
-        const termOfInterest = ["0005634"];
-        for (let term of termOfInterest) {
-            const goTerm = this.get("go").get("GO" + term);
-            const proteins = goTerm.getProteins();
-            if (proteins && proteins.size > 1) {
-                console.log("Compartment>" + goTerm.name);
-                const proteinIds = new Set();
-                groupMap.set(goTerm.name, proteinIds);
-            }
-        }
+    /**
+     * Groups proteins by both subcellular location and complex membership.
+     * Clears existing groups after user confirmation.
+     */
+    autoGroupBySubcellularLocationAndComplex() {
+        this._applyAutoGroups(buildLocationAndComplexGroups, "subcellular location or complex");
+    },
 
-        const proteins = this.get("clmsModel").getProteinsIterator();
-        for (let protein of proteins) {
-            if (protein.uniprot) {
-                for (let goId of protein.uniprot.go) {
-                    const goTerm = go.get(goId);
-                    if (goTerm) {
-                        for (let term of termOfInterest) {
-                            const termOfInterest = this.get("go").get("GO" + term);
-                            if (goTerm.isDescendantOf(termOfInterest.id)) {
-                                groupMap.get(termOfInterest.name).add(protein.id);
-                            }
-                        }
-                    }
-                }
-            }
+    /**
+     * Builds groups from UniProt annotations and, after confirmation, replaces existing groups with them.
+     * If no groups can be built, alerts and leaves existing groups untouched.
+     * @param {function(Object[]): Map<string, Set<string>>} buildFn - Builds group map from proteins
+     * @param {string} description - Annotation type, used in the "nothing found" message
+     * @private
+     */
+    _applyAutoGroups(buildFn, description) {
+        const self = this;
+        const proteins = Array.from(self.get("clmsModel").getProteinsIterator());
+        const groupMap = buildFn(proteins);
+        if (groupMap.size === 0) {
+            alert("No " + description + " data found in UniProt annotations - groups unchanged.");
+            return;
         }
-        this.set("groups", groupMap);
-        this.trigger("change:groups");
+        jqdialogs.areYouSureDialog("ClearGroupsDialog", "Auto group always clears existing groups - proceed?", "Clear Groups", "Yes", "No", function () {
+            self.set("groups", groupMap);
+            self.trigger("change:groups");
+        });
     },
 
     /**
