@@ -475,9 +475,20 @@ export class CrosslinkViewer extends Backbone.View {
         }
 
 
-        for (let group of groups) {
-            if (!group.expanded && group.isOverlappingGroup()) {
-                group.setExpanded(true);
+        // overlapping groups can't be drawn collapsed, so force them open. expand() calls back into
+        // hiddenProteinsChanged(); the flag stops that nested pass from starting its own forced
+        // expansions, which previously cascaded one level deeper per group.
+        if (!this._forcingOverlapExpansion) {
+            const overlapping = groups.filter(g => !g.expanded && g.isOverlappingGroup());
+            if (overlapping.length) {
+                this._forcingOverlapExpansion = true;
+                try {
+                    for (let group of overlapping) {
+                        group.setExpanded(true);
+                    }
+                } finally {
+                    this._forcingOverlapExpansion = false;
+                }
             }
         }
         for (let group of groups) {
@@ -529,29 +540,30 @@ export class CrosslinkViewer extends Backbone.View {
         //Sort subgraphs into linear and non-linear sets
         this.linearGraphs = [];
         this.nonLinearGraphs = [];
+        // a member of an expanded group resolves to itself (getRenderedInteractor), so it would
+        // otherwise pass as linear and get gridded — but it's laid out by cola within its expanded
+        // group (as one of the group's leaves), so it must be in a non-linear graph.
+        const isInsideExpandedGroup = function (node) {
+            for (let pg of node.parentGroups) {
+                if (pg.expanded && !pg.hidden) {
+                    return true;
+                }
+            }
+            return false;
+        };
         for (let graph of this.subgraphs) {
             // const nodes = graph.nodes.values();
             const nodeCount = graph.nodes.size;
             let isLinear = true;
             if (nodeCount === 1) {
-                isLinear = true;
+                // unlinked node - gridded unless it belongs inside an expanded group
+                isLinear = !isInsideExpandedGroup(graph.nodes.values().next().value);
             } else {
                 var endFound = false;
                 for (let node of graph.nodes.values()) {
                     const externalLinkCount = node.countExternalLinks();
                     // console.log("ELC*: " + externalLinkCount);
-                    // a member of an expanded group resolves to itself (getRenderedInteractor),
-                    // so a chain of such members would otherwise pass as linear and get gridded —
-                    // but they're laid out by cola within their expanded group, so gridding them
-                    // leaves a blank row. Force such subgraphs non-linear.
-                    let insideExpandedGroup = false;
-                    for (let pg of node.parentGroups) {
-                        if (pg.expanded && !pg.hidden) {
-                            insideExpandedGroup = true;
-                            break;
-                        }
-                    }
-                    if (node.expanded === true || insideExpandedGroup) {
+                    if (node.expanded === true || isInsideExpandedGroup(node)) {
                         isLinear = false;
                         break;
                     }
@@ -826,6 +838,15 @@ export class CrosslinkViewer extends Backbone.View {
                 }
             }
         }
+        // nodes with no links in a non-linear graph (e.g. unlinked members of an expanded group)
+        // still need to be cola nodes; expanded groups themselves are cola groups, not nodes
+        for (let graph of this.nonLinearGraphs) {
+            for (let node of graph.nodes.values()) {
+                if (!(node.type === "group" && node.expanded)) {
+                    nodeSet.add(node);
+                }
+            }
+        }
         const nodeArr = Array.from(nodeSet);
         const linkArr = Array.from(links.values());
         doLayout(nodeArr, linkArr, true);   // groups-free warm-start
@@ -866,7 +887,12 @@ export class CrosslinkViewer extends Backbone.View {
                                     }
                                 }
                                 if (!inSubGroup) {
-                                    g.leaves.push(nodes.indexOf(rp));
+                                    const nodeIndex = nodes.indexOf(rp);
+                                    if (nodeIndex !== -1) {
+                                        g.leaves.push(nodeIndex);
+                                    } else {
+                                        console.warn("xiNET layout: group member not in layout nodes", g.id, rp.id);
+                                    }
                                 }
                             }
                         }
@@ -893,8 +919,10 @@ export class CrosslinkViewer extends Backbone.View {
                                 if (g.subgroups[i].expanded) {
                                     g.groups.push(groups.indexOf(g.subgroups[i]));
 
-                                } else {
+                                } else if (nodes.indexOf(g.subgroups[i]) !== -1) {
                                     g.leaves.push(g.subgroups[i]);
+                                } else {
+                                    console.warn("xiNET layout: collapsed subgroup not in layout nodes", g.id, g.subgroups[i].id);
                                 }
                             }
                         }

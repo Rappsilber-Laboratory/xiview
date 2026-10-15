@@ -532,7 +532,7 @@ export class Group extends Interactor {
         this.controller.model.get("tooltipModel").set("contents", null);
         if (this.busy !== true) {
             if (this.isOverlappingGroup()) {
-                console.error("overlapping group", this.id);
+                console.warn("xiNET: group overlaps another group, keeping it expanded:", this.id);
                 expanded = true;
             }
             if (expanded) {
@@ -557,7 +557,7 @@ export class Group extends Interactor {
     collapse(svgP, transition = true) {
         // transition = false;
         if (this.isOverlappingGroup()) {
-            console.error("overlapping group", this.id);
+            console.warn("xiNET: group overlaps another group, keeping it expanded:", this.id);
             this.expand(false);
             return;
         }
@@ -945,12 +945,8 @@ export class Group extends Interactor {
                 if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
                     if (!subgraph.links.has(link.id)) {
                         subgraph.links.set(link.id, link);
-                        let otherEnd;
-                        if (link.renderedFromProtein === this) {
-                            otherEnd = link.renderedToProtein;
-                        } else {
-                            otherEnd = link.renderedFromProtein;
-                        }
+                        // far end relative to the member protein (comparing to the group itself never matched)
+                        const otherEnd = link.getOtherEnd(p);
                         // if (otherEnd !== null) {
                         const renderedOtherEnd = otherEnd.getRenderedInteractor();
                         renderedOtherEnd.subgraph = subgraph;
