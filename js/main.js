@@ -22,6 +22,7 @@ import {
     postDataLoaded
 } from "./networkFrame";
 import {showMessage} from "./ui-utils/message-popup";
+import {fetchJsonInBatches} from "./utils";
 import Split from "split.js";
 import {SearchResultsModel} from "./clms-model/search-results-model";
 import {BlosumCollection} from "./backbone-models/models";
@@ -269,25 +270,11 @@ function initPageSplitter() {
  */
 async function fetchAccessionsInBatches(accessions, batchSize = 50) {
     const baseURL = "https://rest.uniprot.org/uniprotkb/search";
-    let allResults = [];
-
-    for (let i = 0; i < accessions.length; i += batchSize) {
-        const batch = accessions.slice(i, i + batchSize);
+    const responses = await fetchJsonInBatches(accessions, batchSize, function (batch) {
         const query = `accession:${batch.join(" OR accession:")}`;
-        const url = `${baseURL}?query=${encodeURIComponent(query)}&format=json&size=${batchSize}`;
-
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`UniProt fetch failed (${response.status}) for batch starting ${batch[0]}`);
-        const data = await response.json();
-        allResults.push(...data.results);
-
-        // Light throttle to stay polite to the public endpoint
-        if (i + batchSize < accessions.length) {
-            await new Promise(resolve => setTimeout(resolve, 400));
-        }
-    }
-
-    return allResults;
+        return `${baseURL}?query=${encodeURIComponent(query)}&format=json&size=${batchSize}`;
+    }, "UniProt", 400);
+    return [].concat(...responses.map(data => data.results));
 }
 
 /**

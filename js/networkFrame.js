@@ -555,7 +555,7 @@ export function views(compositeModelInst, split) {
         .wholeMenuEnabled(true);
 
     // auto group items need UniProt annotations - disabled until they arrive (stay disabled if fetch fails)
-    const autoGroupMenuIndices = [2, 3, 4];
+    const autoGroupMenuIndices = [2];
     groupsMenu.enableItemsByIndex(autoGroupMenuIndices, false);
     vent.once("uniprotLoaded", function () {
         groupsMenu.enableItemsByIndex(autoGroupMenuIndices, true);
