@@ -14,6 +14,7 @@ import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {commonLabels, makeBackboneButtons} from "../utils";
 import d3 from "d3";
 import vent from "../vent";
+import {showMessage} from "../ui-utils/message-popup";
 
 /**
  * xiNET controls view with layout/display options.
@@ -54,72 +55,32 @@ export class xiNetControlsViewBB extends Backbone.View {
         });
     }
 
-    // saveLayout: function () {
-    //     // PRIDE - no saved layouts
-    //     // XI2 - anyone with url can save layout
-    //     // XIVIEW.ORG - only logged in users can save layout
-    //     if (window.compositeModelInst.get("serverFlavour") === "XIVIEW.ORG") {
-    //         const xmlhttp = new XMLHttpRequest();
-    //         const url = "./php/isLoggedIn.php";
-    //         xmlhttp.open("POST", url, true);
-    //         //Send the proper header information along with the request
-    //         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    //         xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-    //             if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-    //                 if (xmlhttp.responseText === "false") {
-    //                     alert("You must be logged in to save layout. A new tab will open for you to log in, you can then return here and Save.");
-    //                     window.open("../userGUI/userLogin.html", "_blank");
-    //                 } else if (xmlhttp.responseText === "no") {
-    //                     alert("Didn't save - not your search.");
-    //                 } else {
-    //                     const callback = function (layoutJson) {
-    //                         const xmlhttp = new XMLHttpRequest();
-    //                         const url = "./php/saveLayout.php";
-    //                         xmlhttp.open("POST", url, true);
-    //                         //Send the proper header information along with the request
-    //                         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    //                         xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-    //                             if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-    //                                 console.log("Saved layout " + xmlhttp.responseText, true);
-    //                                 alert("Layout Saved");
-    //                             }
-    //                         };
-    //                         const sid = window.compositeModelInst.get("clmsModel").get("sid");
-    //                         const params = "sid=" + sid +
-    //                             "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
-    //                             "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
-    //                         xmlhttp.send(params);
-    //                     };
-    //
-    //                     vent.trigger("xinetSaveLayout", callback);
-    //                 }
-    //             }
-    //         };
-    //         xmlhttp.send();
-    //     } else if (window.compositeModelInst.get("serverFlavour") === "XI2") {
-    //         const self = this;
-    //         const callback = function (layoutJson) {
-    //             const xmlhttp = new XMLHttpRequest();
-    //             const url = self.backbone-models.get("saveLayoutPath");
-    //             xmlhttp.open("POST", url, true);
-    //             //Send the proper header information along with the request
-    //             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    //             xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-    //                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-    //                     console.log("Saving layout result: " + xmlhttp.responseText);
-    //                     alert(xmlhttp.responseText);
-    //                 }
-    //             };
-    //             const sid = window.compositeModelInst.get("clmsModel").get("sid");
-    //             const params = "sid=" + sid +
-    //                 "&layout=" + encodeURIComponent(layoutJson.replace(/[\t\r\n']+/g, "")) +
-    //                 "&name=" + encodeURIComponent(d3.select(".savedLayoutName").property("value"));
-    //             xmlhttp.send(params);
-    //         };
-    //
-    //         vent.trigger("xinetSaveLayout", callback);
-    //     }
-    // }
+    /**
+     * Saves the current config (xiNET layout + filter settings) under the name in the name box.
+     * Each save is stored as a new entry; the most recent is loaded by default when the page opens.
+     * @returns {undefined}
+     */
+    saveLayout() {
+        const name = d3.select(this.el).select(".savedLayoutName").property("value");
+        const filterModel = this.model.get("filterModel");
+        const self = this;
+        vent.trigger("xinetSaveLayout", function (layout) {
+            const config = {version: 1, layout: layout, filter: filterModel.getSavedSettings()};
+            fetch(configUrl(self.model, "config"), {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({name: name, config: config}),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(() => showMessage("Layout and filter settings saved" + (name ? " as \"" + _.escape(name) + "\"" : ""), "info"))
+                .catch(error => showMessage("Couldn't save layout: " + error.message, "error"));
+        });
+    }
 
     initialize(viewOptions) {
 
@@ -141,15 +102,15 @@ export class xiNetControlsViewBB extends Backbone.View {
             buttonHtml
         );
 
-        // !XI2 !XI1 // todo - address saving layouts
-        // if (window.loggedIn == false) {
-        //     const saveButtonSel = d3.select(".saveLayoutButton");
-        //     saveButtonSel.style("display", "none");
-        // }
+        // saved configs only available for xi2 datasets
+        if (!this.model.get("configSaving")) {
+            mainDivSel.selectAll(".savedLayoutName, .saveLayoutButton, #loadLayoutButton").style("display", "none");
+        }
 
-        // if (this.backbone-models.get("clmsModel").get("xiNETLayout")) {
-        //     d3.select(".savedLayoutName").property("value", this.backbone-models.get("clmsModel").get("xiNETLayout").name);
-        // }
+        const savedConfig = this.model.get("savedConfig");
+        if (savedConfig) {
+            mainDivSel.select(".savedLayoutName").property("value", savedConfig.name);
+        }
 
         const tooltips = {
             autoLayoutButton: "Automatically relayout network of displayed proteins",
@@ -167,13 +128,15 @@ export class xiNetControlsViewBB extends Backbone.View {
         }, this);
 
         // Generate load layout drop down
-        // new xiNetLayoutListViewBB({
-        //     el: "#loadLayoutButton",
-        //     backbone-models: window.compositeModelInst,
-        //     myOptions: {
-        //         title: "Load ▼",
-        //     }
-        // });
+        if (this.model.get("configSaving")) {
+            new xiNetLayoutListViewBB({
+                el: "#loadLayoutButton",
+                model: this.model,
+                myOptions: {
+                    title: "Load ▼",
+                }
+            });
+        }
 
         // Various view options set up...
         const toggleButtonData = [
@@ -333,65 +296,56 @@ export class xiNetControlsViewBB extends Backbone.View {
 xiNetControlsViewBB.prototype.identifier = "xiNET Controls";
 
 
-// const xiNetLayoutListViewBB = DropDownMenuViewBB.extend({
-//     events: function () {
-//         let parentEvents = DropDownMenuViewBB.prototype.events;
-//         if (_.isFunction(parentEvents)) {
-//             parentEvents = parentEvents();
-//         }
-//         return _.extend({}, parentEvents, {});
-//     },
-//
-//     initialize: function () {
-//         xiNetLayoutListViewBB.__super__.initialize.apply(this, arguments);
-//     },
-//
-//     setVis: function (show) {
-//         const self = this;
-//         xiNetLayoutListViewBB.__super__.setVis.call(self, show);
-//         if (show) {
-//             const xmlhttp = new XMLHttpRequest();
-//             let url = this.backbone-models.get("loadLayoutPath");
-//             xmlhttp.open("POST", url, true);
-//             //Send the proper header information along with the request
-//             xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//             xmlhttp.onreadystatechange = function () { //Call a function when the state changes.
-//                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-//                     const layouts = JSON.parse(xmlhttp.responseText);
-//                     const menu = [];
-//                     for (let key in layouts) {
-//                         menu.push(menuItem(layouts, key));
-//                     }
-//                     self.options.menu = menu;
-//                     xiNetLayoutListViewBB.__super__.render.call(self);
-//                 }
-//                 // xiNetLayoutListViewBB.__super__.setVis.call(self, show);
-//             };
-//             const sid = window.compositeModelInst.get("clmsModel").get("sid");
-//             const params = "sid=" + sid;
-//             xmlhttp.send(params);
-//             return this;
-//         }
-//         // else {
-//         //     xiNetLayoutListViewBB.__super__.setVis.call(this, show);
-//         // }
-//
-//         function menuItem(layouts, selectedKey) {
-//             return {
-//                 name: selectedKey,
-//                 func: function () {
-//                     d3.select(".savedLayoutName").property("value", selectedKey);
-//                     // window.compositeModelInst.clearGroups();
-//                     // const self = this;
-//                     // jqdialogs.areYouSureDialog("ClearGroupsDialog", "Clear current groups before adding groups from saved layout?", "Clear Groups", "Combine current and saved", "Clear current, only groups from saved layout", function () {
-//                     //     self.set("groups", new Map());
-//                     //     self.trigger("change:groups");
-//                     // });
-//                     vent.trigger("xinetLoadLayout", layouts[selectedKey]);
-//                 },
-//                 context: window.compositeModelInst
-//             };
-//         }
-//     },
-//
-// });
+/**
+ * Makes the URL for a saved config API endpoint, passing on the page's query params (the dataset uuids).
+ * @param {Backbone.Model} model - Composite model, holds apiBase
+ * @param {string} endpoint - "config" or "configs"
+ * @returns {string} URL
+ */
+function configUrl(model, endpoint) {
+    return `${model.get("apiBase")}${endpoint}${window.location.search}`;
+}
+
+/**
+ * Dropdown listing previously saved configs (newest first). The list is fetched each time it's opened.
+ * Choosing one applies its xiNET layout and filter settings.
+ * @class
+ * @extends DropDownMenuViewBB
+ */
+class xiNetLayoutListViewBB extends DropDownMenuViewBB {
+    setVis(show) {
+        super.setVis(show);
+        if (show) {
+            fetch(configUrl(this.model, "configs"), {cache: "no-store"})
+                .then(response => response.json())
+                .then(configs => {
+                    this.options.menu = configs.length ? configs.map(c => this.menuItem(c)) : [{name: "No saved layouts"}];
+                    this.render();
+                })
+                .catch(error => console.error("Couldn't list saved layouts", error));
+        }
+        return this;
+    }
+
+    menuItem(configInfo) {
+        const model = this.model;
+        const date = new Date(configInfo.created).toLocaleString();
+        return {
+            name: (configInfo.name || "(unnamed)") + " — " + date,
+            func: function () {
+                fetch(configUrl(model, "config") + "&config_id=" + configInfo.id, {cache: "no-store"})
+                    .then(response => response.json())
+                    .then(savedConfig => {
+                        d3.select(".savedLayoutName").property("value", savedConfig.name);
+                        if (savedConfig.config.layout) {
+                            vent.trigger("xinetLoadLayout", savedConfig.config.layout);
+                        }
+                        if (savedConfig.config.filter) {
+                            model.get("filterModel").applySavedSettings(savedConfig.config.filter);
+                        }
+                    })
+                    .catch(error => showMessage("Couldn't load layout: " + error.message, "error"));
+            },
+        };
+    }
+}

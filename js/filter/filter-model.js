@@ -172,8 +172,8 @@ export class FilterModel extends Backbone.Model {
     }
 
     /**
-     * Resets all filter values to their initial state.
-     * Only used by tests. Restores values stored during initialization.
+     * Resets all filter values to their initial state (i.e. before any saved config was applied).
+     * Used by the filter bar's Reset button and by tests. Restores values stored during initialization.
      * @returns {FilterModel} This backbone-models instance for chaining
      */
     resetFilter() {
@@ -181,9 +181,49 @@ export class FilterModel extends Backbone.Model {
             .clear({
                 silent: true
             })
-            .set(this.resetValues);
+            .set(FilterModel.copyValues(this.resetValues));
 
         return this;
+    }
+
+    /**
+     * Copies filter values, copying array values (cutoffs, searchGroups) so they aren't shared.
+     * @param {Object} values - Filter attribute values
+     * @returns {Object} Copy of values
+     */
+    static copyValues(values) {
+        return _.mapObject(values, value => Array.isArray(value) ? value.slice() : value);
+    }
+
+    /**
+     * Gets the filter settings to store in a saved config.
+     * @returns {Object} Copy of the user-settable filter attribute values
+     */
+    getSavedSettings() {
+        return FilterModel.copyValues(_.pick(this.attributes, this.savedSettingKeys()));
+    }
+
+    /**
+     * Applies filter settings from a saved config.
+     * Unknown keys are ignored and searchGroups are restricted to those present in the current data.
+     * @param {Object} settings - Filter settings from getSavedSettings()
+     * @returns {FilterModel} This backbone-models instance for chaining
+     */
+    applySavedSettings(settings) {
+        const values = FilterModel.copyValues(_.pick(settings || {}, this.savedSettingKeys()));
+        if (values.searchGroups) {
+            values.searchGroups = _.intersection(values.searchGroups, this.possibleSearchGroups);
+        }
+        return this.set(values);
+    }
+
+    /**
+     * Keys of the filter attributes that are stored in saved configs.
+     * @returns {Array<string>} Attribute names
+     * @private
+     */
+    savedSettingKeys() {
+        return d3.keys(this.types).concat(["matchScoreCutoff", "distanceCutoff", "searchGroups"]);
     }
 
     /**

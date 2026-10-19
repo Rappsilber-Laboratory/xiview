@@ -602,11 +602,12 @@ export class CrosslinkViewer extends Backbone.View {
         this.d3cola.stop();
         if (this.firstRender) { // first render
             this.firstRender = false;
-            // if (this.backbone-models.get("clmsModel").get("xiNETLayout")) {
-            //     this.loadLayout(this.backbone-models.get("clmsModel").get("xiNETLayout").layout);
-            // } else {
-            this.autoLayout([]); //layout all
-            // }
+            const savedConfig = this.model.get("savedConfig");
+            if (savedConfig && savedConfig.config && savedConfig.config.layout) {
+                this.loadLayout(savedConfig.config.layout);
+            } else {
+                this.autoLayout([]); //layout all
+            }
         }
 
         for (let ppLink of this.renderedP_PLinks.values()) {
@@ -1119,9 +1120,9 @@ export class CrosslinkViewer extends Backbone.View {
         }
         layout.groups = Array.from(this.groupMap.values());
         layout.proteins = Array.from(this.renderedProteins.values());
+        // round trip through JSON to get plain objects (via toJSON) and strip null chars
         const myJSONText = JSON.stringify(layout, null);
-        console.log("SAVING", layout);
-        callback(myJSONText.replace(/\\u0000/gi, ""));
+        callback(JSON.parse(myJSONText.replace(/\\u0000/gi, "")));
     }
 
     //todo - this is becoming about config of all xiVIEw not just config of xiNET, should be moved
@@ -1173,7 +1174,8 @@ export class CrosslinkViewer extends Backbone.View {
                 //gonna need to check for proteins now missing from results
                 const presentProteins = new Set();
 
-                for (let pId of savedGroup.proteinIds) {
+                // older saved layouts use participantIds
+                for (let pId of savedGroup.proteinIds || savedGroup.participantIds || []) {
                     if (this.renderedProteins.get(pId)) {
                         presentProteins.add(pId);
                     }

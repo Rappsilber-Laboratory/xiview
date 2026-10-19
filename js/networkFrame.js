@@ -145,18 +145,11 @@ export function postDataLoaded(compositeModelInst) {
     vent.trigger("buildAsyncViews");
 
 
-    // const savedConfig = window.compositeModelInst.get("clmsModel").get("savedConfig");//.layout
-    // console.log("saved!", savedConfig);
-    // let proteinPositions, groups;
-    // // for backwards compatibility (after groups added to layout)
-    // if (layout.proteins) {
-    //     proteinPositions = layout.proteins;
-    //     groups = layout.groups;
-    // } else {
-    //     proteinPositions = layout;
-    // }
-    //
-    // loadConfig();
+    // apply filter settings from saved config, if any (layout is applied by xiNET on its first render)
+    const savedConfig = compositeModelInst.get("savedConfig");
+    if (savedConfig && savedConfig.config && savedConfig.config.filter) {
+        compositeModelInst.get("filterModel").applySavedSettings(savedConfig.config.filter);
+    }
 
     compositeModelInst.applyFilter(); // do it first time so filtered sets aren't empty
 
@@ -169,87 +162,6 @@ export function postDataLoaded(compositeModelInst) {
     }
 
 }
-
-/**
- * Commented-out function for loading saved layout configuration.
- * Would restore protein positions, rotations, zoom levels, groups from saved state.
- * Currently disabled - layout loading handled elsewhere or deprecated.
- */
-// function loadConfig(layout) {
-//
-//     let layoutIsDodgy = false;
-//     let namesChanged = false;
-//     for (let protLayout of proteinPositions) {
-//         const protein = this.renderedProteins.get(protLayout.id);
-//         if (protein !== undefined) {
-//             protein.setPositionFromXinet(protLayout["x"], protLayout["y"]);
-//             if (typeof protLayout["rot"] !== "undefined") {
-//                 protein.rotation = protLayout["rot"] - 0;
-//             }
-//             protein.ix = protLayout["x"];
-//             protein.iy = protLayout["y"];
-//             protein.newForm = protLayout["expanded"];
-//             if (CrosslinkViewer.barScales.indexOf(+protLayout["stickZoom"]) > -1) {
-//                 protein.stickZoom = protLayout["stickZoom"];
-//             }
-//             protein.rotation = protLayout["rot"] - 0;
-//             protein.flipped = protLayout["flipped"];
-//             protein.protein.manuallyHidden = protLayout["manuallyHidden"];
-//
-//             if (protLayout["name"]) {
-//                 protein.protein.name = protLayout["name"];
-//                 namesChanged = true;
-//             }
-//
-//         } else {
-//             layoutIsDodgy = true;
-//             console.log("! protein in layout but not search:" + protLayout.id);
-//         }
-//     }
-//
-//     for (let rp of this.renderedProteins.values()) {
-//         rp.setEverything();
-//     }
-//
-//     if (groups && typeof groups[Symbol.iterator] === "function") {
-//         const modelGroupMap = new Map();
-//         for (const savedGroup of groups) {
-//             //gonna need to check for proteins now missing from results
-//             const presentProteins = new Set();
-//             for (let pId of savedGroup.proteinIds) {
-//                 if (this.renderedProteins.get(pId)) {
-//                     presentProteins.add(pId);
-//                 }
-//             }
-//             modelGroupMap.set(savedGroup.id, presentProteins);
-//         }
-//         this.backbone-models.set("groups", modelGroupMap);
-//         this.backbone-models.trigger("change:groups");
-//
-//         for (const savedGroup of groups) {
-//             const xiNetGroup = this.groupMap.get(savedGroup.id);
-//             if (savedGroup.expanded === false) {
-//                 xiNetGroup.setExpanded(savedGroup.expanded);
-//                 xiNetGroup.setPositionFromXinet(savedGroup.x, savedGroup.y);
-//             }
-//         }
-//     }
-//
-//     this.backbone-models.get("filterModel").trigger("change", this.backbone-models.get("filterModel"));
-//
-//     // this.zoomToFullExtent();
-//
-//     if (layoutIsDodgy) {
-//         alert("Looks like something went wrong with the saved layout, if you can't see your proteins click Auto layout");
-//     }
-//
-//     if (namesChanged) {
-//         // vent.trigger("proteinMetadataUpdated", {}); //aint gonna work
-//         for (let renderedParticipant of this.renderedProteins.values()) {
-//             renderedParticipant.updateName();
-//         }
-//     }
-// }
 
 /**
  * Asynchronously loads BLOSUM substitution matrices from JSON file.

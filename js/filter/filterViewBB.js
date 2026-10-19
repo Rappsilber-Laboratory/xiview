@@ -43,6 +43,9 @@ export class FilterViewBB extends Backbone.View {
             "mouseup input.filterTypeNumber": "processNumberFilter",
             "click input.filterTypeToggle": "processBooleanFilter",
             "click input.groupToggleFilter": "processGroupToggleFilter",
+            "click .filterResetButton": function () {
+                this.model.resetFilter();
+            },
         };
     }
 
@@ -514,6 +517,11 @@ export class FilterViewBB extends Backbone.View {
         addFilterGroup.call(this, {id: "navNumberFilters", groupName: "PPI"}, ["urpPpi"]);
         addFilterGroup.call(this, {id: "groupFilters", groupName: "Groups"}, groupIDs);
         addFilterGroup.call(this, {id: "navMassSpecFilters", groupName: "Mass Spec"}, ["peaklistName", "scanNumber"]);
+        makeFilterControlDiv({id: "filterReset", expandable: false})
+            .append("button")
+            .attr("class", "btn btn-1 btn-1a filterResetButton")
+            .attr("title", "Reset filters to defaults")
+            .text("Reset");
         addScrollRightButton.call(this);
 
 

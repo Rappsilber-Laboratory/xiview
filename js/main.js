@@ -109,6 +109,21 @@ const fetchDataAndProcess = (url, processFunction) => {
 };
 
 /**
+ * Fetches the most recently saved config (xiNET layout + filter settings) for the current dataset(s).
+ * Soft-fails: any error is logged and resolves to null, so data loading is never blocked.
+ * @param {string} apiBase - Base URL for API endpoints
+ * @returns {Promise<Object|null>} Promise that resolves to the saved config row or null
+ * @private
+ */
+const fetchSavedConfig = (apiBase) => {
+    return fetchDataFromUrl(`${apiBase}config${window.location.search}`)
+        .catch((error) => {
+            console.warn("Couldn't load saved config", error);
+            return null;
+        });
+};
+
+/**
  * Main application initialization function for the full xiVIEW interface.
  * Loads all necessary data (API endpoints, BLOSUM matrices), initializes clms-backbone-models and views,
  * and sets up the complete application UI.
@@ -129,8 +144,15 @@ export function main(apiBase, annotatorURL) {
         blosumCollInst.fetch();
     });
 
-    // Add the blosum promise to the tasks array
-    const allTasks = [...tasks, blosumPromise];
+    // Saved config (xiNET layout + filter settings) - only for xi2 datasets, identified by uuid param
+    const configSaving = new URLSearchParams(window.location.search).has("uuid");
+    let savedConfig = null;
+    const configPromise = configSaving ? fetchSavedConfig(apiBase).then(config => {
+        savedConfig = config;
+    }) : Promise.resolve();
+
+    // Add the blosum and config promises to the tasks array
+    const allTasks = [...tasks, blosumPromise, configPromise];
 
     // Process all requests in parallel (including blosum loading)
     Promise.all(allTasks)
@@ -141,6 +163,8 @@ export function main(apiBase, annotatorURL) {
             compositeModelInst.set("blosumColl", blosumCollInst);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
+            compositeModelInst.set("configSaving", configSaving);
+            compositeModelInst.set("savedConfig", savedConfig);
             const split = initPageSplitter();
             views(compositeModelInst, split);
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
