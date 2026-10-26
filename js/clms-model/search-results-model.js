@@ -36,6 +36,9 @@ export class SearchResultsModel {
     /** @type {Map<number, {proteinIDSet: Set<string>, id: string, group: number}>} Map of search/upload IDs to search info */
     #uploadIdToProteinIdsAndGroup = new Map();
 
+    /** @type {Map<string, string>} Map of search/upload IDs to group labels given in the URL (xi2 aggregation) */
+    #searchGroupLabels = new Map();
+
     /** @type {boolean} Whether decoy proteins are present in results */
     #decoysPresent = false;
 
@@ -320,7 +323,7 @@ export class SearchResultsModel {
                         if (peptide.dec[p]) {
                             const protein = proteins.get(peptide.prt[p]);
                             if (!protein) {
-                                console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+                                throw new Error(`Protein ${peptide.prt[p]} not found for peptide ${peptide.u_id}_${peptide.id} (not aggregated data)`);
                             }
                             protein.is_decoy = true;
                             this.#decoysPresent = true;
@@ -329,19 +332,21 @@ export class SearchResultsModel {
                 }
             }
         } else { // is aggregated - use accession as protein id
+            // key by search id too, protein ids are only unique within a search (xi2)
             const tempProteins = new Map();
             for (let rawProtein of this._rawProteins) {
                 const protein = new Protein(rawProtein);
-                tempProteins.set(protein.id, protein);
+                tempProteins.set(rawProtein.search_id + "_" + protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
-                    const protein = tempProteins.get(peptide.prt[pe]);
+                    const protein = tempProteins.get(peptide.u_id + "_" + peptide.prt[pe]);
                     if (!protein) {
-                        console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[pe]);
+                        throw new Error(`Protein ${peptide.prt[pe]} not found for peptide ${peptide.u_id}_${peptide.id} (aggregated data)`);
                     }
-                    if (peptide.dec[pe]) {
+                    // PRIDE has isDecoy per peptide position (dec), in xi2 it's in the protein
+                    if (peptide.dec ? peptide.dec[pe] : protein.is_decoy) {
                         const decoyId = "DECOY_" + protein.accession;
                         protein.is_decoy = true;
                         protein.id = decoyId;
@@ -386,6 +391,15 @@ export class SearchResultsModel {
     }
 
     /**
+     * Set group labels for searches, used instead of the default numbering when grouping searches
+     * @param {Map<string, string>} labels - Map of search/upload IDs to group labels
+     * @returns {void}
+     */
+    setSearchGroupLabels(labels) {
+        this.#searchGroupLabels = labels;
+    }
+
+    /**
      * Connect searches to proteins
      * @param {Map<string, Peptide>} peptideMap - Map of peptide IDs to Peptide objects
      * @param {Array<SpectrumMatch>} matchArray - Array of spectrum matches
@@ -399,7 +413,8 @@ export class SearchResultsModel {
                 const prots = peptide.prt;
                 const searchId = match.uploadId;
                 const search = searchMap.get(searchId) || (() => {
-                    const newSearch = {proteinIDSet: new Set(), id: searchId, group: nextGroup++};
+                    const group = this.#searchGroupLabels.get(String(searchId).toLowerCase()) ?? nextGroup++;
+                    const newSearch = {proteinIDSet: new Set(), id: searchId, group: group};
                     searchMap.set(searchId, newSearch);
                     return newSearch;
                 })();

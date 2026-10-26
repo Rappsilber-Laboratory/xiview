@@ -159,6 +159,27 @@ const niceRoundMap = {
 };
 
 /**
+ * Parses xi2 dataset group labels from the uuid URL param(s).
+ * Aggregated datasets are written as "uuid=<id>~<group>.<id>~<group>...", and uuid may also be repeated.
+ * @param {string} search - URL query string, e.g. window.location.search
+ * @returns {Map<string, string>} Map of resultset id (lower case) to group label, for ids that have a label
+ * @example
+ * parseUuidGroupLabels("?uuid=a~B1.b~B2"); // Map {"a" => "B1", "b" => "B2"}
+ */
+export function parseUuidGroupLabels(search) {
+    const labels = new Map();
+    for (const value of new URLSearchParams(search).getAll("uuid")) {
+        for (const part of value.split(".")) {
+            const [id, group] = part.split("~", 2);
+            if (group) {
+                labels.set(id.toLowerCase(), group);
+            }
+        }
+    }
+    return labels;
+}
+
+/**
  * Rounds a value to a "nice" number suitable for chart axes (1, 2, 5, 10, 20, 50, etc.).
  * Used by minigram, circular, and distogram views.
  * @param {number} val - The value to round

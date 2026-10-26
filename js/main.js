@@ -22,7 +22,7 @@ import {
     postDataLoaded
 } from "./networkFrame";
 import {showMessage} from "./ui-utils/message-popup";
-import {fetchJsonInBatches} from "./utils";
+import {fetchJsonInBatches, parseUuidGroupLabels} from "./utils";
 import Split from "split.js";
 import {SearchResultsModel} from "./clms-model/search-results-model";
 import {BlosumCollection} from "./backbone-models/models";
@@ -136,6 +136,7 @@ export function main(apiBase, annotatorURL) {
     networkPageSpinner.spin(spinTarget);
     setWindowTitle();
     const clmsModel = new SearchResultsModel();
+    clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
     const blosumCollInst = new BlosumCollection();
@@ -190,6 +191,7 @@ export function validationPage(apiBase, annotatorURL) {
     networkPageSpinner.spin(spinTarget);
     setWindowTitle();
     const clmsModel = new SearchResultsModel();
+    clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
     const tasks = getTasks(apiBase, clmsModel);
     Promise.all(tasks)
         // eslint-disable-next-line no-unused-vars

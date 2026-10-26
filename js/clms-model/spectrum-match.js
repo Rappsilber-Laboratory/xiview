@@ -461,11 +461,11 @@ export class SpectrumMatch {
     }
 
     /**
-     * Get the group this match belongs to - todo
+     * Get the group this match belongs to
      * @returns {*} The group identifier
      */
     group() {
-        return this.#containingModel.getMzidentmlFiles().get(this.uploadId).group;
+        return this.#containingModel.getSearches().get(this.uploadId)?.group;
     }
 
     /**
