@@ -310,7 +310,8 @@ export class SearchResultsModel {
         //process actual data
         const proteins = this.#proteins;
         const peptides = new Map();
-        if (!this.isAggregatedData()) { // use id as protein id
+        const isXi2 = xi2SipJsonsByResultsetId.size > 0;
+        if (!isXi2 && !this.isAggregatedData()) { // single PRIDE file - use id as protein id
             for (let rawProtein of this._rawProteins) {
                 const protein = new Protein(rawProtein);
                 proteins.set(protein.id, protein);
@@ -331,7 +332,7 @@ export class SearchResultsModel {
                     }
                 }
             }
-        } else { // is aggregated - use accession as protein id
+        } else { // xi2 or aggregated - use accession as protein id
             // key by search id too, protein ids are only unique within a search (xi2)
             const tempProteins = new Map();
             for (let rawProtein of this._rawProteins) {
@@ -347,16 +348,17 @@ export class SearchResultsModel {
                     }
                     // PRIDE has isDecoy per peptide position (dec), in xi2 it's in the protein
                     if (peptide.dec ? peptide.dec[pe] : protein.is_decoy) {
-                        const decoyId = "DECOY_" + protein.accession;
+                        const decoyId = "DECOY_" + (protein.accession || peptide.prt[pe]);
                         protein.is_decoy = true;
                         protein.id = decoyId;
                         // how to get prot acc after id has been changed?
                         peptide.prt[pe] = decoyId;
                         this.#decoysPresent = true;
                     } else {
-                        // fix ids for target in aggregated data
-                        protein.id = protein.accession;
-                        peptide.prt[pe] = protein.accession;
+                        // fix ids for target (fall back to id if no accession)
+                        const targetId = protein.accession || peptide.prt[pe];
+                        protein.id = targetId;
+                        peptide.prt[pe] = targetId;
                     }
                 }
             }
