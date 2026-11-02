@@ -4,7 +4,10 @@
  * @returns {void}
  */
 export const loadSpectrum = function (match) {
-    // if (match.spectrum && match.spectrum.pks) {
+    // no peak list was uploaded for this match (e.g. CSV without peak lists): nothing to load
+    if (match.spectraDataId === null || match.spectraDataId === undefined) {
+        return;
+    }
     const formatted_data = {};
     const pep0 = match.matchedPeptides[0];
     const pep1 = match.matchedPeptides[1];

@@ -162,8 +162,7 @@ export class CollectionAsSelectViewBB extends Backbone.View {
     initialize(viewOptions) {
         this.options = $.extend({optionLabelField: "name", label: "label", name: "name"}, viewOptions);
         const topElem = d3.select(this.el).append("DIV").attr("class", "controlBlock");
-        const tpl = _.template("<LABEL><%= label %></LABEL><SELECT name='<%= name %>'></SELECT>");
-        topElem.html(tpl({label: viewOptions.label, name: viewOptions.name}));
+        topElem.html(`<LABEL>${_.escape(viewOptions.label)}</LABEL><SELECT name='${_.escape(viewOptions.name)}'></SELECT>`);
 
         this
             .listenTo(this.collection, "sync", function () {

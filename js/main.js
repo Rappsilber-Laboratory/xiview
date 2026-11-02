@@ -129,9 +129,12 @@ const fetchSavedConfig = (apiBase) => {
  * and sets up the complete application UI.
  * @param {string} apiBase - Base URL for API endpoints
  * @param {string} annotatorURL - URL for the annotation service
+ * @param {Object} [options] - Optional settings
+ * @param {boolean} [options.configSaving] - Enable saving/loading configs (xiNET layout + filter settings).
+ *     Defaults to true when the URL has a "uuid" param (xi2 datasets).
  * @returns {void}
  */
-export function main(apiBase, annotatorURL) {
+export function main(apiBase, annotatorURL, options = {}) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
     setWindowTitle();
@@ -145,8 +148,8 @@ export function main(apiBase, annotatorURL) {
         blosumCollInst.fetch();
     });
 
-    // Saved config (xiNET layout + filter settings) - only for xi2 datasets, identified by uuid param
-    const configSaving = new URLSearchParams(window.location.search).has("uuid");
+    // Saved config (xiNET layout + filter settings) - xi2 datasets (uuid param) or when enabled via options
+    const configSaving = options.configSaving ?? new URLSearchParams(window.location.search).has("uuid");
     let savedConfig = null;
     const configPromise = configSaving ? fetchSavedConfig(apiBase).then(config => {
         savedConfig = config;

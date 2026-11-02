@@ -118,11 +118,11 @@ class AbstractMetaDataFileChooserBB extends BaseFrameView {
                 const columns = metaMetaData.columns;
                 const matchedItemCount = metaMetaData.matchedItemCount;
                 const success = !!(!_.isEmpty(columns) && matchedItemCount);
-                const msg1 = _.template(this.options.parseMsgTemplate)({
+                const msg1 = this.options.parseMsgTemplate({
                     attrCount: columns ? columns.length : 0,
                     itemCount: matchedItemCount
                 });
-                self.setStatusText("File " + this.lastFileName + ":<br>" + (success ? "" : "Error! ") + msg1, success);
+                self.setStatusText("File " + _.escape(this.lastFileName) + ":<br>" + (success ? "" : "Error! ") + msg1, success);
             }
         });
     }
@@ -183,7 +183,7 @@ export class ProteinMetaDataFileChooserBB extends AbstractMetaDataFileChooserBB 
         const myDefaults = {
             buttonText: "Select Protein MetaData CSV File",
             loadedEventName: "proteinMetadataUpdated",
-            parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Proteins",
+            parseMsgTemplate: v => `Parsed ${v.attrCount} MetaData Attributes across ${v.itemCount} Identified Proteins`,
             docUrl: "./docs/html/import/proteinmeta.html",
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
@@ -227,7 +227,7 @@ export class LinkMetaDataFileChooserBB extends AbstractMetaDataFileChooserBB {
         const myDefaults = {
             buttonText: "Select Crosslink or PPI MetaData CSV File",
             loadedEventName: "linkMetadataUpdated",
-            parseMsgTemplate: "Parsed <%= attrCount %> MetaData Attributes across <%= itemCount %> Identified Crosslinks",
+            parseMsgTemplate: v => `Parsed ${v.attrCount} MetaData Attributes across ${v.itemCount} Identified Crosslinks`,
             docUrl: "./docs/html/import/crossmeta.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);
@@ -271,7 +271,7 @@ export class UserAnnotationsMetaDataFileChooserBB extends AbstractMetaDataFileCh
         const myDefaults = {
             buttonText: "Select User-Defined Annotations CSV File",
             loadedEventName: "userAnnotationsUpdated",
-            parseMsgTemplate: "Parsed <%= attrCount %> Annotation Types across <%= itemCount %> Annotations, these have been added to the 'ANNOTATIONS' menu and can be enabled there.",
+            parseMsgTemplate: v => `Parsed ${v.attrCount} Annotation Types across ${v.itemCount} Annotations, these have been added to the 'ANNOTATIONS' menu and can be enabled there.`,
             docUrl: "./docs/html/import/userannotations.html"
         };
         viewOptions.myOptions = _.extend(myDefaults, viewOptions.myOptions);

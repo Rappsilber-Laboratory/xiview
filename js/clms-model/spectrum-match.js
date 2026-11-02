@@ -112,6 +112,10 @@ export class SpectrumMatch {
      * @param {boolean} json.p - Pass threshold flag
      * @param {string} json.sd - Spectra data identifier
      * @param {string} json.sip - Spectrum identification protocol identifier
+     * @param {number} [json.sn] - Scan number (xi2 only)
+     * @param {number} [json.sc_i] - Scan index (xi2 only)
+     * @param {number} [json.rt] - Retention time (xi2 only)
+     * @param {number} [json.pc_i] - Precursor intensity (xi2 only)
      */
     constructor(containingModel, proteins, crosslinks, peptides, json) {
         this.#containingModel = containingModel;
@@ -666,15 +670,37 @@ export class SpectrumMatch {
         return this.#json.sd;
     }
 
+    /**
+     * Get scan number (xi2 only - pride/mzIdentML matches have no scan number field)
+     * @returns {number|undefined} Scan number
+     */
+    get scanNumber() {
+        return this.#json.sn;
+    }
 
+    /**
+     * Get scan index (xi2 only)
+     * @returns {number|undefined} Scan index
+     */
+    get scanIndex() {
+        return this.#json.sc_i;
+    }
 
-    // /**
-    //  * Get precursor intensity
-    //  * @returns {null} Always returns null
-    //  */
-    // get precursor_intensity() {
-    //     return null;
-    // }
+    /**
+     * Get retention time (xi2 only)
+     * @returns {number|undefined} Retention time
+     */
+    get retentionTime() {
+        return this.#json.rt;
+    }
+
+    /**
+     * Get precursor intensity (xi2 only)
+     * @returns {number|undefined} Precursor intensity
+     */
+    get precursor_intensity() {
+        return this.#json.pc_i;
+    }
 
     // /**
     //  * Get dataset identifier
@@ -682,14 +708,6 @@ export class SpectrumMatch {
     //  */
     // get datasetId() {
     //     return this.uploadId;
-    // }
-
-    // /**
-    //  * Get scan number
-    //  * @returns {string} Scan number
-    //  */
-    // get scanNumber() {
-    //     return this.spectrumId;
     // }
 
     // /**

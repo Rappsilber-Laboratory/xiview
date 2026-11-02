@@ -234,9 +234,12 @@ export class SpectrumViewWrapper extends BaseFrameView {
     }
 
     optionsToString() {
-        //console.log ("this", this);
-        const match = this.primaryMatch;
-        console.log("MATCH", match);
+        // primaryMatch used to be set by the (now commented out) alternatives listener in networkFrame.js,
+        // so use the currently selected match from the model instead
+        const match = this.model.get("lastSelectedMatch")?.match;
+        if (!match) {
+            return "no-match";
+        }
         const description = [{
             field: "id"
         },

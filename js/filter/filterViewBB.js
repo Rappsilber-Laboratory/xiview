@@ -347,10 +347,10 @@ export class FilterViewBB extends Backbone.View {
 
                 const sliderSection = cutoffDivSel.append("div").attr("class", "scoreSlider");
                 // Can validate template output at http://validator.w3.org/#validate_by_input+with_options
-                const tpl = _.template("<div><p>" + config.label + "</p><P class='vmin cutoffLabel'><span>&gt;</span></P><P>Min</P></div><div id='<%= eid %>'></div><div><p>" + config.label + "</p><P class='cutoffLabel vmax'><span>&lt;</span></P><P>Max</P></div><div class='undef'></div>");
-                sliderSection.html(tpl({
-                    eid: self.el.id + config.id + "SliderHolder"
-                }));
+                // config.label can be a score name from uploaded data: escape it
+                const label = _.escape(config.label);
+                const eid = _.escape(self.el.id + config.id + "SliderHolder");
+                sliderSection.html(`<div><p>${label}</p><P class='vmin cutoffLabel'><span>&gt;</span></P><P>Min</P></div><div id='${eid}'></div><div><p>${label}</p><P class='cutoffLabel vmax'><span>&lt;</span></P><P>Max</P></div><div class='undef'></div>`);
                 // sliderSection.style('display', (self.backbone-models.get("scores") === null) ? 'none' : null);
                 sliderSection.selectAll("p.cutoffLabel")
                     .attr("title", function () {
@@ -954,13 +954,13 @@ export class FilterSummaryViewBB extends Backbone.View {
 
     /**
      * Initializes view, creates templates, and sets up filteringDone listener.
-     * Creates two Underscore templates: one for datasets without decoys, one with decoy counts.
+     * Creates two template functions: one for datasets without decoys, one with decoy counts.
      * @returns {undefined}
      */
     initialize() {
-        const targetTemplateString = "Post-Filter: <strong><%= targets %></strong> of <%= possible %> TT Crosslinks";
-        this.targetTemplate = _.template(targetTemplateString);
-        this.allTemplate = _.template(targetTemplateString + " ( + <%= decoysTD %> TD; <%= decoysDD %> DD Decoys)");
+        const target = v => `Post-Filter: <strong>${v.targets}</strong> of ${v.possible} TT Crosslinks`;
+        this.targetTemplate = target;
+        this.allTemplate = v => target(v) + ` ( + ${v.decoysTD} TD; ${v.decoysDD} DD Decoys)`;
 
         this.listenTo(this.model, "filteringDone", this.render)
             .render();

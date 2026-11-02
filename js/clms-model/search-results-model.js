@@ -267,15 +267,16 @@ export class SearchResultsModel {
             }
             spectrumIdentificationsMap.get(spectrumIdentificationJson.upload_id).push(
                 new AnalysisCollection_SpectrumIdentification(spectrumIdentificationJson,
-                    indexedSIPs.get(spectrumIdentificationJson.upload_id).get(spectrumIdentificationJson.protocol_id),
-                    Array.from(this._indexedSpectraData.get(spectrumIdentificationJson.upload_id).values()).filter(sd => spectrumIdentificationJson.spectra_data_refs.indexOf(sd.id) !== -1))
+                    indexedSIPs.get(spectrumIdentificationJson.upload_id)?.get(spectrumIdentificationJson.protocol_id),
+                    Array.from((this._indexedSpectraData.get(spectrumIdentificationJson.upload_id) ?? new Map()).values()).filter(sd => spectrumIdentificationJson.spectra_data_refs.indexOf(sd.id) !== -1))
             );
         }
 
         for (let mzidJson of this._mzidentmlFilesJson) {
             this.#mzidentmlFiles.set(mzidJson.id, new MzidentmlFile(mzidJson,
                 spectrumIdentificationsMap.get(mzidJson.id),
-                this._indexedSpectraData.get(mzidJson.id), indexedSIPs.get(mzidJson.id)));
+                // uploads without peak lists (e.g. CSV) have no SpectraData / protocols
+                this._indexedSpectraData.get(mzidJson.id) ?? new Map(), indexedSIPs.get(mzidJson.id) ?? new Map()));
         }
         // Xi2 has no mzIdentML files; synthesise one stub per resultset so the
         // SpectrumMatch.spectrumIdentificationProtocol lookup path (mzidentmlFiles

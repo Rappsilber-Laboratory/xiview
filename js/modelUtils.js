@@ -8,7 +8,7 @@ import * as _ from "underscore";
 import $ from "jquery";
 import * as d3 from "d3";
 import {octree as d3octree} from "../vendor/d3-octree";
-import {commonRegexes, xilog} from "./utils";
+import {commonRegexes, parseDsvObjects, xilog} from "./utils";
 import vent from "./vent";
 
 /**
@@ -503,7 +503,7 @@ export function updateLinkMetadata(metaDataFileContents, clmsModel) {
     const matchedCrossLinks = [];
     let ppiCount = 0;
 
-    d3.csv.parse(metaDataFileContents, function (d) {
+    parseDsvObjects(d3.csv, metaDataFileContents, function (d) {
         const linkID = d.linkID || d.LinkID;
         let singleCrossLink = crosslinks.get(linkID);
         let rowCrossLinkArr;
@@ -619,7 +619,7 @@ export function updateProteinMetadata(metaDataFileContents, clmsModel, composite
     const protMap = makeMultiKeyProteinMap(clmsModel);
     let groupsFound = false;
 
-    d3.csv.parse(metaDataFileContents, function (d) {
+    parseDsvObjects(d3.csv, metaDataFileContents, function (d) {
         if (first) {
             const keys = d3.keys(d).map(function (key) {
                 return key.toLocaleLowerCase();
@@ -732,7 +732,7 @@ export function updateUserAnnotationsMetadata(userAnnotationsFileContents, clmsM
     const annotationMap = d3.map();
     const proteinSet = d3.set();
 
-    d3.csv.parse(userAnnotationsFileContents, function (d) {
+    parseDsvObjects(d3.csv, userAnnotationsFileContents, function (d) {
         if (first) {
             const keys = d3.keys(d).map(function (key) {
                 return key.toLocaleLowerCase();

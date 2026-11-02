@@ -945,3 +945,30 @@ export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delay
     }
     return responses;
 }
+
+
+/**
+ * Parse delimiter-separated text into row objects keyed by the header row, like d3 v3's
+ * d3.csv.parse / d3.tsv.parse but without their use of `new Function` (so it works under a
+ * Content-Security-Policy without 'unsafe-eval').
+ * @param {Object} dsv - d3.csv or d3.tsv
+ * @param {string} text - file contents
+ * @param {Function} [rowFunc] - called with (rowObject, index); rows for which it returns null/undefined are dropped
+ * @returns {Array} parsed rows
+ */
+export function parseDsvObjects(dsv, text, rowFunc) {
+    let header = null;
+    return dsv.parseRows(text, function (row, i) {
+        if (header === null) {
+            header = row;
+            return null;
+        }
+        const obj = {};
+        header.forEach(function (name, j) {
+            if (name !== "__proto__") {
+                obj[name] = row[j];
+            }
+        });
+        return rowFunc ? rowFunc(obj, i - 1) : obj;
+    });
+}
