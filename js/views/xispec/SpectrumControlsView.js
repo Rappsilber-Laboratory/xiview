@@ -173,7 +173,7 @@ export const SpectrumControlsView = Backbone.View.extend({
             .attr("id", "xispec_extra_spectrumControls_after");
         // helpLink
         let helpLink = this.wrapper.append("a")
-            .attr("href", "http://spectrumviewer.org/help.php")
+            .attr("href", "./docs/html/views/xispec.html")
             .attr("target", "_blank");
         // helpButton
         helpLink.append("i")
