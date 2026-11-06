@@ -686,16 +686,6 @@ export class Group extends Interactor {
 
         const cubicInOut = d3.ease("cubic-out");
 
-        // this.labelSVG.setAttribute("dominant-baseline", null);
-        // this.labelSVG.setAttribute("text-anchor", null);
-        // this.showSubgroups();
-        // this.controller.groupsSVG.appendChild(this.upperGroup);
-        // this.outline.setAttribute("fill-opacity", "0.5");
-        //
-        // for (let rp of this.renderedProteins) {
-        //     rp.setHidden(rp.participant.hidden || rp.inCollapsedGroup());
-        // }
-
         const tl = this.controller.svgElement.createSVGPoint();
         tl.x = 0;
         tl.y =0;
@@ -833,18 +823,7 @@ export class Group extends Interactor {
                 }
             }
 
-            // this.expanded = true;
-            this.labelSVG.setAttribute("dominant-baseline", null);
-            this.labelSVG.setAttribute("text-anchor", null);
-
-            this.showSubgroups();
-
-            this.controller.groupsSVG.appendChild(this.upperGroup);
-            this.outline.setAttribute("fill-opacity", "0.5");
-
-            for (let rp of this.renderedProteins) {
-                rp.setHidden(rp.protein.hidden || rp.inCollapsedGroup());
-            }
+            this.showExpanded();
 
             if (transition) { // yucky, transition is being used to indicate whether this is one interactor collapsing or from 'Collapse All'
                 this.controller.render();
@@ -854,6 +833,7 @@ export class Group extends Interactor {
                 return updateExpanding(elapsed / (RenderedProtein.transitionTime * 2));
             });
         } else {
+            this.showExpanded();
             updateExpanding(1);
         }
 
@@ -914,6 +894,19 @@ export class Group extends Interactor {
                 self.updateExpandedGroup();
                 return false;
             }
+        }
+    }
+
+    // switch the group's DOM from collapsed-symbol to expanded-outline form
+    // (mirror of the tidy-up at the end of collapse()); needed with or without transition
+    showExpanded() {
+        this.labelSVG.removeAttribute("dominant-baseline");
+        this.labelSVG.removeAttribute("text-anchor");
+        this.showSubgroups();
+        this.controller.groupsSVG.appendChild(this.upperGroup); // back below the proteins
+        this.outline.setAttribute("fill-opacity", "0.5");
+        for (let rp of this.renderedProteins) {
+            rp.setHidden(rp.protein.hidden || rp.inCollapsedGroup());
         }
     }
 
