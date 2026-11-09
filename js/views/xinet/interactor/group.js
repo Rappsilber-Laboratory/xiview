@@ -532,7 +532,7 @@ export class Group extends Interactor {
         this.controller.model.get("tooltipModel").set("contents", null);
         if (this.busy !== true) {
             if (this.isOverlappingGroup()) {
-                console.error("overlapping group", this.id);
+                console.warn("xiNET: group overlaps another group, keeping it expanded:", this.id);
                 expanded = true;
             }
             if (expanded) {
@@ -557,7 +557,7 @@ export class Group extends Interactor {
     collapse(svgP, transition = true) {
         // transition = false;
         if (this.isOverlappingGroup()) {
-            console.error("overlapping group", this.id);
+            console.warn("xiNET: group overlaps another group, keeping it expanded:", this.id);
             this.expand(false);
             return;
         }
@@ -685,16 +685,6 @@ export class Group extends Interactor {
         const collapsedSubgroupYPositionInterpolations = [];
 
         const cubicInOut = d3.ease("cubic-out");
-
-        // this.labelSVG.setAttribute("dominant-baseline", null);
-        // this.labelSVG.setAttribute("text-anchor", null);
-        // this.showSubgroups();
-        // this.controller.groupsSVG.appendChild(this.upperGroup);
-        // this.outline.setAttribute("fill-opacity", "0.5");
-        //
-        // for (let rp of this.renderedProteins) {
-        //     rp.setHidden(rp.participant.hidden || rp.inCollapsedGroup());
-        // }
 
         const tl = this.controller.svgElement.createSVGPoint();
         tl.x = 0;
@@ -833,18 +823,7 @@ export class Group extends Interactor {
                 }
             }
 
-            // this.expanded = true;
-            this.labelSVG.setAttribute("dominant-baseline", null);
-            this.labelSVG.setAttribute("text-anchor", null);
-
-            this.showSubgroups();
-
-            this.controller.groupsSVG.appendChild(this.upperGroup);
-            this.outline.setAttribute("fill-opacity", "0.5");
-
-            for (let rp of this.renderedProteins) {
-                rp.setHidden(rp.protein.hidden || rp.inCollapsedGroup());
-            }
+            this.showExpanded();
 
             if (transition) { // yucky, transition is being used to indicate whether this is one interactor collapsing or from 'Collapse All'
                 this.controller.render();
@@ -854,6 +833,7 @@ export class Group extends Interactor {
                 return updateExpanding(elapsed / (RenderedProtein.transitionTime * 2));
             });
         } else {
+            this.showExpanded();
             updateExpanding(1);
         }
 
@@ -917,6 +897,19 @@ export class Group extends Interactor {
         }
     }
 
+    // switch the group's DOM from collapsed-symbol to expanded-outline form
+    // (mirror of the tidy-up at the end of collapse()); needed with or without transition
+    showExpanded() {
+        this.labelSVG.removeAttribute("dominant-baseline");
+        this.labelSVG.removeAttribute("text-anchor");
+        this.showSubgroups();
+        this.controller.groupsSVG.appendChild(this.upperGroup); // back below the proteins
+        this.outline.setAttribute("fill-opacity", "0.5");
+        for (let rp of this.renderedProteins) {
+            rp.setHidden(rp.protein.hidden || rp.inCollapsedGroup());
+        }
+    }
+
     hideSubgroups() {
         for (let subgroup of this.subgroups) {
             subgroup.setHidden(true);
@@ -945,21 +938,16 @@ export class Group extends Interactor {
                 if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
                     if (!subgraph.links.has(link.id)) {
                         subgraph.links.set(link.id, link);
-                        let otherEnd;
-                        if (link.renderedFromProtein === this) {
-                            otherEnd = link.renderedToProtein;
-                        } else {
-                            otherEnd = link.renderedFromProtein;
-                        }
-                        // if (otherEnd !== null) {
+                        // far end relative to the member protein (comparing to the group itself never matched)
+                        const otherEnd = link.getOtherEnd(p);
                         const renderedOtherEnd = otherEnd.getRenderedInteractor();
-                        renderedOtherEnd.subgraph = subgraph;
-                        //if (!subgraph.nodes.has(renderedOtherEnd.id)) {
-                        subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
                         otherEnd.subgraph = subgraph;
-                        otherEnd.addConnectedNodes(subgraph);
-                        //}
-                        // }
+                        // continue from the rendered interactor, once per node (see RenderedProtein.addConnectedNodes)
+                        if (!subgraph.nodes.has(renderedOtherEnd.id)) {
+                            renderedOtherEnd.subgraph = subgraph;
+                            subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
+                            renderedOtherEnd.addConnectedNodes(subgraph);
+                        }
                     }
                 }
             }

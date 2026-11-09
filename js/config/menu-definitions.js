@@ -79,18 +79,34 @@ export function getGroupsMenuConfig(compositeModel) {
                 context: compositeModel,
                 tooltip: "Clears all groups"
             },
+            // index 2 is the auto group item, enabled once UniProt data has loaded (see networkFrame.js)
+            // other auto group options commented out for now
+            // {
+            //     name: "Auto Group by Subcellular Location",
+            //     func: compositeModel.autoGroupBySubcellularLocation,
+            //     context: compositeModel,
+            //     tooltip: "Group proteins by nested UniProt subcellular location (first listed location only). (Will clear old groups.)",
+            // },
+            // {
+            //     name: "Auto Group by Complex Portal",
+            //     func: compositeModel.autoGroupByComplex,
+            //     context: compositeModel,
+            //     tooltip: "Group proteins by Complex Portal complex membership (from UniProt). (Will clear old groups.)",
+            // },
             {
-                name: "Auto Group",
-                func: compositeModel.autoGroup,
+                name: "Auto Group by GO CC Complex",
+                func: compositeModel.autoGroupByGoComplex,
                 context: compositeModel,
-                tooltip: "Group protein complexes based on GO terms. (Will clear old groups.)",
+                tooltip: "Group proteins by GO Cellular Component protein-containing complex terms (from UniProt, includes electronic annotation; ontology from QuickGO). (Will clear old groups.)",
+                categoryTitle: "Auto Group",
+                sectionBegin: true,
+                sectionEnd: true
             },
             // {
-            //     name: "Auto Group Compartments",
-            //     func: compModel.autoGroupCompartments,
-            //     context: compModel,
-            //     tooltip: "Group protein into compartmenst based on GO terms.",
-            //     sectionEnd: true
+            //     name: "Auto Group by Subcell. & Complex",
+            //     func: compositeModel.autoGroupBySubcellularLocationAndComplex,
+            //     context: compositeModel,
+            //     tooltip: "Group proteins by UniProt subcellular location and Complex Portal complex membership (GO CC complex terms if no Complex Portal data). (Will clear old groups.)",
             // },
             {
                 name: "Collapse All",
@@ -117,11 +133,6 @@ export function getGroupsMenuConfig(compositeModel) {
  */
 export function getLoadMenuConfig() {
     const loadButtonData = [{
-        name: "PDB",
-        eventName: "pdbFileChooserShow",
-        tooltip: "Load a PDB File from local disk or by PDB ID code from RCSB.org. Allows viewing of 3D Structure and of distance background in Matrix View"
-    },
-    {
         name: "STRING",
         eventName: "stringDataChooserShow",
         tooltip: "Load STRING data from the STRING server. Note: limited to <2,000 proteins, for more generate a CSV file for import as PPI Metadata"
@@ -151,7 +162,7 @@ export function getLoadMenuConfig() {
     });
 
     return {
-        title: "Import",
+        title: "Import-Metadata",
         menu: loadButtonData,
     };
 }

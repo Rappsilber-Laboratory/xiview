@@ -12,7 +12,6 @@ import d3 from "d3";
 import JSONFormatter from "json-formatter-js";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
-import {makeLegalDomID} from "../utils";
 
 /**
  * Protein information view with tabbed interface for selected proteins.
@@ -95,7 +94,7 @@ export class ProteinInfoViewBB extends BaseFrameView {
             // d3 data bind
             const protJoin = d3.select(this.el).select("div.proteinTabs").selectAll(".protTab").data(prots,
                 function (d) {
-                    return makeLegalDomID(d.id);
+                    return d.id;
                 });
             const self = this;
             protJoin.enter().append("span")

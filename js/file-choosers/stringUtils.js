@@ -10,7 +10,7 @@
 import * as _ from "underscore";
 import $ from "jquery";
 import d3 from "d3";
-import {getLocalStorage, setLocalStorage} from "../utils";
+import {getLocalStorage, parseDsvObjects, setLocalStorage} from "../utils";
 import {filterOutDecoyProteins} from "../modelUtils";
 
 /**
@@ -43,7 +43,7 @@ export const STRINGUtils = {
         networkTsvString = networkTsvString.replace(/^.*/, function (m) {
             return m.replace(/\tscore/g, "\tSTRING Score");
         });
-        let rows = d3.tsv.parse(networkTsvString, function (d) {
+        let rows = parseDsvObjects(d3.tsv, networkTsvString, function (d) {
             d.SeqPos1 = null;
             d.SeqPos2 = null;
             d.Protein1 = stringToUniprotIDMap[d.ncbiTaxonId + "." + d.stringId_A];

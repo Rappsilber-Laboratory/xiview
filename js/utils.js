@@ -159,6 +159,27 @@ const niceRoundMap = {
 };
 
 /**
+ * Parses xi2 dataset group labels from the uuid URL param(s).
+ * Aggregated datasets are written as "uuid=<id>~<group>.<id>~<group>...", and uuid may also be repeated.
+ * @param {string} search - URL query string, e.g. window.location.search
+ * @returns {Map<string, string>} Map of resultset id (lower case) to group label, for ids that have a label
+ * @example
+ * parseUuidGroupLabels("?uuid=a~B1.b~B2"); // Map {"a" => "B1", "b" => "B2"}
+ */
+export function parseUuidGroupLabels(search) {
+    const labels = new Map();
+    for (const value of new URLSearchParams(search).getAll("uuid")) {
+        for (const part of value.split(".")) {
+            const [id, group] = part.split("~", 2);
+            if (group) {
+                labels.set(id.toLowerCase(), group);
+            }
+        }
+    }
+    return labels;
+}
+
+/**
  * Rounds a value to a "nice" number suitable for chart axes (1, 2, 5, 10, 20, 50, etc.).
  * Used by minigram, circular, and distogram views.
  * @param {number} val - The value to round
@@ -899,3 +920,55 @@ export function getLocalStorage(objName) {
 //             return false;
 //         }
 //     }
+
+/**
+ * Fetches JSON for a list of items in batches, one request per batch, sequentially.
+ * @param {string[]} items - Items (e.g. accessions or ids) to fetch
+ * @param {number} batchSize - Number of items per request
+ * @param {function(string[]): string} makeUrl - Builds the request URL for a batch
+ * @param {string} label - Service name used in error messages
+ * @param {number} [delayMs=0] - Pause between requests, to stay polite to public endpoints
+ * @returns {Promise<Object[]>} Parsed JSON response for each batch, in order
+ * @throws {Error} If any request fails
+ */
+export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delayMs = 0) {
+    const responses = [];
+    for (let i = 0; i < items.length; i += batchSize) {
+        const batch = items.slice(i, i + batchSize);
+        const response = await fetch(makeUrl(batch));
+        if (!response.ok) throw new Error(`${label} fetch failed (${response.status}) for batch starting ${batch[0]}`);
+        responses.push(await response.json());
+
+        if (delayMs && i + batchSize < items.length) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+    return responses;
+}
+
+
+/**
+ * Parse delimiter-separated text into row objects keyed by the header row, like d3 v3's
+ * d3.csv.parse / d3.tsv.parse but without their use of `new Function` (so it works under a
+ * Content-Security-Policy without 'unsafe-eval').
+ * @param {Object} dsv - d3.csv or d3.tsv
+ * @param {string} text - file contents
+ * @param {Function} [rowFunc] - called with (rowObject, index); rows for which it returns null/undefined are dropped
+ * @returns {Array} parsed rows
+ */
+export function parseDsvObjects(dsv, text, rowFunc) {
+    let header = null;
+    return dsv.parseRows(text, function (row, i) {
+        if (header === null) {
+            header = row;
+            return null;
+        }
+        const obj = {};
+        header.forEach(function (name, j) {
+            if (name !== "__proto__") {
+                obj[name] = row[j];
+            }
+        });
+        return rowFunc ? rowFunc(obj, i - 1) : obj;
+    });
+}

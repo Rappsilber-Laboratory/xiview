@@ -55,13 +55,8 @@ export class AlignCollectionViewBB extends BaseFrameView {
         const topElem = d3.select(this.el);
         const modelViewID = topElem.attr("id") + "IndView";
         const holdingDiv = topElem.append("DIV").attr("class", "alignView");
-        const template = _.template("<P><span><%= headerText %></span><span class='alignSortWidget'></span></P><DIV class='checkHolder'></DIV><DIV id='<%= alignModelViewID %>'></DIV><DIV><P class='smallHeading'>Per Protein Settings</P><DIV id='<%= alignControlID %>'></DIV></DIV><DIV><DIV id='<%= alignControlID2 %>'></DIV></DIV>");
-        holdingDiv.html(template({
-            headerText: "Select Protein Name in Tab for Details",
-            alignModelViewID: modelViewID,
-            alignControlID: modelViewID + "Controls",
-            alignControlID2: modelViewID + "Controls2",
-        }));
+        const esc = _.escape;
+        holdingDiv.html(`<P><span>${esc("Select Protein Name in Tab for Details")}</span><span class='alignSortWidget'></span></P><DIV class='checkHolder'></DIV><DIV id='${esc(modelViewID)}'></DIV><DIV><P class='smallHeading'>Per Protein Settings</P><DIV id='${esc(modelViewID + "Controls")}'></DIV></DIV><DIV><DIV id='${esc(modelViewID + "Controls2")}'></DIV></DIV>`);
 
         // Sort dropdown
         const self = this;
@@ -280,12 +275,8 @@ export class ProtAlignViewBB extends Backbone.View {
 
         const topElem = d3.select(this.el);
         const holdingDiv = topElem.append("DIV").attr("class", "alignView");
-        const template = _.template("<P class='proteinName'><%= proteinDescriptor %></P><DIV class='tableWrapper'><TABLE><THEAD><TR><TH><%= firstColHeader %></TH><TH><%= secondColHeader %></TH></TR></THEAD></TABLE><DIV class='seqDiv'><TABLE class='seqTable'></TABLE></DIV></DIV><div class='alignChoiceGroup'></div>");
-        holdingDiv.html(template({
-            proteinDescriptor: this.model.get("displayLabel"),
-            firstColHeader: "Name",
-            secondColHeader: "Sequence",
-        }));
+        // displayLabel comes from uploaded data: escape it
+        holdingDiv.html(`<P class='proteinName'>${_.escape(this.model.get("displayLabel"))}</P><DIV class='tableWrapper'><TABLE><THEAD><TR><TH>Name</TH><TH>Sequence</TH></TR></THEAD></TABLE><DIV class='seqDiv'><TABLE class='seqTable'></TABLE></DIV></DIV><div class='alignChoiceGroup'></div>`);
         const labelData = [{
             label: "Show differences only",
             value: 1

@@ -97,10 +97,10 @@
     line-height: 1.2em;
 }
 
-.proteinInfoPanel tbody tr:hover td.fixedSizeFont {
-    color: grey;
-}
-
-.proteinInfoPanel .json-formatter-row a:hover {
+/* Disable the global table-row hover highlight (common.css) in this panel */
+.proteinInfoPanel tbody tr:hover td,
+.proteinInfoPanel tbody tr:hover td a {
+    color: inherit;
     background-color: transparent;
+    transition: none;
 }

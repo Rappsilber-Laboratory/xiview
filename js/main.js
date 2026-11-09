@@ -22,6 +22,7 @@ import {
     postDataLoaded
 } from "./networkFrame";
 import {showMessage} from "./ui-utils/message-popup";
+import {fetchJsonInBatches, parseUuidGroupLabels} from "./utils";
 import Split from "split.js";
 import {SearchResultsModel} from "./clms-model/search-results-model";
 import {BlosumCollection} from "./backbone-models/models";
@@ -108,18 +109,37 @@ const fetchDataAndProcess = (url, processFunction) => {
 };
 
 /**
+ * Fetches the most recently saved config (xiNET layout + filter settings) for the current dataset(s).
+ * Soft-fails: any error is logged and resolves to null, so data loading is never blocked.
+ * @param {string} apiBase - Base URL for API endpoints
+ * @returns {Promise<Object|null>} Promise that resolves to the saved config row or null
+ * @private
+ */
+const fetchSavedConfig = (apiBase) => {
+    return fetchDataFromUrl(`${apiBase}config${window.location.search}`)
+        .catch((error) => {
+            console.warn("Couldn't load saved config", error);
+            return null;
+        });
+};
+
+/**
  * Main application initialization function for the full xiVIEW interface.
  * Loads all necessary data (API endpoints, BLOSUM matrices), initializes clms-backbone-models and views,
  * and sets up the complete application UI.
  * @param {string} apiBase - Base URL for API endpoints
  * @param {string} annotatorURL - URL for the annotation service
+ * @param {Object} [options] - Optional settings
+ * @param {boolean} [options.configSaving] - Enable saving/loading configs (xiNET layout + filter settings).
+ *     Defaults to true when the URL has a "uuid" param (xi2 datasets).
  * @returns {void}
  */
-export function main(apiBase, annotatorURL) {
+export function main(apiBase, annotatorURL, options = {}) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
-
+    setWindowTitle();
     const clmsModel = new SearchResultsModel();
+    clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
     const blosumCollInst = new BlosumCollection();
@@ -128,8 +148,15 @@ export function main(apiBase, annotatorURL) {
         blosumCollInst.fetch();
     });
 
-    // Add the blosum promise to the tasks array
-    const allTasks = [...tasks, blosumPromise];
+    // Saved config (xiNET layout + filter settings) - xi2 datasets (uuid param) or when enabled via options
+    const configSaving = options.configSaving ?? new URLSearchParams(window.location.search).has("uuid");
+    let savedConfig = null;
+    const configPromise = configSaving ? fetchSavedConfig(apiBase).then(config => {
+        savedConfig = config;
+    }) : Promise.resolve();
+
+    // Add the blosum and config promises to the tasks array
+    const allTasks = [...tasks, blosumPromise, configPromise];
 
     // Process all requests in parallel (including blosum loading)
     Promise.all(allTasks)
@@ -140,7 +167,8 @@ export function main(apiBase, annotatorURL) {
             compositeModelInst.set("blosumColl", blosumCollInst);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
-            setWindowTitle();
+            compositeModelInst.set("configSaving", configSaving);
+            compositeModelInst.set("savedConfig", savedConfig);
             const split = initPageSplitter();
             views(compositeModelInst, split);
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
@@ -164,8 +192,9 @@ export function main(apiBase, annotatorURL) {
 export function validationPage(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
-
+    setWindowTitle();
     const clmsModel = new SearchResultsModel();
+    clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
     const tasks = getTasks(apiBase, clmsModel);
     Promise.all(tasks)
         // eslint-disable-next-line no-unused-vars
@@ -174,7 +203,6 @@ export function validationPage(apiBase, annotatorURL) {
             const compositeModelInst = modelsEssential({}, clmsModel);
             compositeModelInst.set("apiBase", apiBase);
             compositeModelInst.set("annotatorURL", annotatorURL);
-            setWindowTitle();
             const split = initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false, split});
             vent.trigger("spectrumShow", true);
@@ -271,25 +299,11 @@ function initPageSplitter() {
  */
 async function fetchAccessionsInBatches(accessions, batchSize = 50) {
     const baseURL = "https://rest.uniprot.org/uniprotkb/search";
-    let allResults = [];
-
-    for (let i = 0; i < accessions.length; i += batchSize) {
-        const batch = accessions.slice(i, i + batchSize);
+    const responses = await fetchJsonInBatches(accessions, batchSize, function (batch) {
         const query = `accession:${batch.join(" OR accession:")}`;
-        const url = `${baseURL}?query=${encodeURIComponent(query)}&format=json&size=${batchSize}`;
-
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`UniProt fetch failed (${response.status}) for batch starting ${batch[0]}`);
-        const data = await response.json();
-        allResults.push(...data.results);
-
-        // Light throttle to stay polite to the public endpoint
-        if (i + batchSize < accessions.length) {
-            await new Promise(resolve => setTimeout(resolve, 400));
-        }
-    }
-
-    return allResults;
+        return `${baseURL}?query=${encodeURIComponent(query)}&format=json&size=${batchSize}`;
+    }, "UniProt", 400);
+    return [].concat(...responses.map(data => data.results));
 }
 
 /**

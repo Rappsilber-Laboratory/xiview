@@ -277,14 +277,9 @@ export class CircularViewBB extends BaseFrameView {
         // this.el is the dom element this should be getting added to, replaces targetDiv
         const mainDivSel = d3.select(this.el);
         // defs to store path definitions for curved text, two nested g's, one for translating, then one for rotating
-        const template = _.template("<DIV class='toolbar toolbarArea'></DIV><DIV class='panelInner backdrop' flex-grow='1'><svg class='<%= svgClass %>'><defs></defs><g><g></g></g></svg></DIV>");
         mainDivSel.append("div")
             .attr("class", "verticalFlexContainer")
-            .html(
-                template({
-                    svgClass: "circularView",
-                })
-            );
+            .html("<DIV class='toolbar toolbarArea'></DIV><DIV class='panelInner backdrop' flex-grow='1'><svg class='circularView'><defs></defs><g><g></g></g></svg></DIV>");
         mainDivSel.select(".backdrop")
             // can replace .backdrop class colouring with this option if defined
             .style("background-color", this.options.background);

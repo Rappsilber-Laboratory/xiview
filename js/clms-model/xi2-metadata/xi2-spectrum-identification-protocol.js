@@ -9,7 +9,8 @@
  * Constructed from one value of the dict returned by
  *   GET /xi2/data/get_xiview_spectrum_identification_protocols
  * where each value carries: id (resultset id), rs_name, rs_note, rs_config
- * (JSON string), rs_main_score, resultset_type, s_id, s_name, s_config
+ * (already-parsed object when it is JSON, otherwise a raw text report
+ * string), rs_main_score, resultset_type, s_id, s_name, s_config
  * (already-parsed search config object), s_note.
  *
  * Enzymes / search modifications / crosslinkers / fragmentation rules all
@@ -24,18 +25,8 @@ export class Xi2SpectrumIdentificationProtocol {
     constructor(json) {
         this.#json = json;
         this.#sConfig = json?.s_config ?? {};
-
-        let parsedRsConfig = {};
-        if (json?.rs_config) {
-            try {
-                parsedRsConfig = typeof json.rs_config === "string"
-                    ? JSON.parse(json.rs_config)
-                    : json.rs_config;
-            } catch (e) {
-                console.warn("Xi2SpectrumIdentificationProtocol: failed to parse rs_config", e);
-            }
-        }
-        this.#rsConfig = parsedRsConfig;
+        // this could be JSON or text string.
+        this.#rsConfig = json.rs_config;
     }
 
     get id() {
@@ -48,6 +39,46 @@ export class Xi2SpectrumIdentificationProtocol {
 
     get uploadId() {
         return this.#json.id;
+    }
+
+    /**
+     * Search id (peptides carry this as their u_id, so it is used to map a
+     * peptide back to the protocol that defines its modifications).
+     * @returns {string}
+     */
+    get searchId() {
+        return this.#json.s_id;
+    }
+
+    /**
+     * The raw search config (s_config) object. Passed verbatim as the
+     * `config` field of the xi2-style annotator request, from which the
+     * annotator resolves modification masses, crosslinker stubs, etc.
+     * @returns {Object}
+     */
+    get searchConfig() {
+        return this.#sConfig;
+    }
+
+    /**
+     * The ordered modifications list from the search config. In xi2 a
+     * peptide's/match's modification ids are 0-based indexes into this array.
+     * Mirrors the `searchModifications` getter on the mzIdentML
+     * SpectrumIdentificationProtocol so consumers need not branch on source.
+     * Note: some entries carry only `composition` (no `mass`).
+     * @returns {Array<Object>} modification defs {name, long_name, mass?, composition?, specificity, type, level}
+     */
+    get searchModifications() {
+        return this.#sConfig?.modification?.modifications ?? [];
+    }
+
+    /**
+     * Resolve a 0-based modification index to its config definition.
+     * @param {number} index
+     * @returns {Object|undefined}
+     */
+    modificationByIndex(index) {
+        return this.searchModifications[index];
     }
 
     get fragmentTolerance() {

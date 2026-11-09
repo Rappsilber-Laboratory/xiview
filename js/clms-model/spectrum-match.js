@@ -18,6 +18,17 @@ export class SpectrumMatch {
     }
 
     /**
+     * Get search identifier - peptides are keyed by this concatenated with their id
+     * complication whereby this behaves diff in xisearch2
+     * in pride this is 'ui' (upload id) in xi2 it is 'si' (search id)
+     * @returns {string} search identifier
+     */
+    get searchId() {
+        if (this.#json.si) return this.#json.si;
+        return this.#json.ui;
+    }
+
+    /**
      * Reference to the parent SearchResultsModel containing this match
      * @type {SearchResultsModel}
      * @private
@@ -90,6 +101,8 @@ export class SpectrumMatch {
      * @param {string} json.ui - Spectrum identification/upload identifier
      * @param {string} json.pi1 - Peptide identifier 1
      * @param {string} [json.pi2] - Peptide identifier 2 (null for loop links, undefined for linear peptides)
+     * @param {number} [json.s1] - Crosslink site position within peptide 1 (xi2; 1-based). Falls back to peptide.linkSite1 (ls1) for pride mzIdentML data.
+     * @param {number} [json.s2] - Crosslink site position within peptide 2, or second site of a loop link (xi2; 1-based). Falls back to peptide.linkSite for pride data.
      * @param {string} json.id - PSM (peptide-spectrum match) identifier
      * @param {string} json.sp - Spectrum identifier
      * @param {Object} json.sc - Scores object containing score name-value pairs
@@ -99,6 +112,10 @@ export class SpectrumMatch {
      * @param {boolean} json.p - Pass threshold flag
      * @param {string} json.sd - Spectra data identifier
      * @param {string} json.sip - Spectrum identification protocol identifier
+     * @param {number} [json.sn] - Scan number (xi2 only)
+     * @param {number} [json.sc_i] - Scan index (xi2 only)
+     * @param {number} [json.rt] - Retention time (xi2 only)
+     * @param {number} [json.pc_i] - Precursor intensity (xi2 only)
      */
     constructor(containingModel, proteins, crosslinks, peptides, json) {
         this.#containingModel = containingModel;
@@ -116,32 +133,42 @@ export class SpectrumMatch {
             scoreExtent.processScore(scoreValue);
         }
 
-        this.matchedPeptides[0] = peptides.get(this.uploadId + "_" + json.pi1);
+        // *xi2 vrs pride difference* in id of dataset (xi2 has search sets and result sets) is handled by this.searchId
+        this.matchedPeptides[0] = peptides.get(this.searchId + "_" + json.pi1); // u r here
+
         if (!this.matchedPeptides[0]) {
             alert("peptide error (missing peptide evidence?) for:" + json.pi1);
         } else {
-            if (this.matchedPeptides[0].is_decoy.indexOf("1") != -1) {
-                this.is_decoy = true;
+            if (this.matchedPeptides[0].is_decoy?.indexOf("1") != -1) {// *xi2 vrs pride difference*
+                this.is_decoy = true; // issue here, is this used? it is. needs a fix for xi2.
                 this.#containingModel.setDecoysPresent();
             }
         }
         if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
-            this.matchedPeptides[1] = peptides.get(this.uploadId + "_" + json.pi2);
+            this.matchedPeptides[1] = peptides.get(this.searchId + "_" + json.pi2);// *xi2 vrs pride difference*
             if (!this.matchedPeptides[1]) {
                 alert("peptide error (missing peptide evidence?) for:" + +json.pi2);
-            } else if (this.matchedPeptides[1].is_decoy.indexOf("1") != -1) {
+            } else if (this.matchedPeptides[1].is_decoy?.indexOf("1") != -1) {// *xi2 vrs pride difference*
                 this.is_decoy = true;
                 this.#containingModel.setDecoysPresent();
             }
         }
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
-        this.linkPos1 = +this.matchedPeptides[0].linkSite1;
+        // xi2 carries crosslink sites on the match (s1/s2); mzIdentML
+        // carries them on the peptide (ls1/ls2). Prefer the match when present.
+        this.linkPos1 = (json.s1 !== undefined)
+            ? +json.s1
+            : +this.matchedPeptides[0].linkSite1;
         this.linkPos2 = undefined;
         if (this.matchedPeptides[1]) {
-            this.linkPos2 = this.matchedPeptides[1].linkSite1;
-        } else if (json.pi2 === null) {
-            this.linkPos2 = +this.matchedPeptides[0].linkSite2;
+            this.linkPos2 = (json.s2 !== undefined)
+                ? +json.s2
+                : this.matchedPeptides[1].linkSite1;
+        } else if (json.pi2 === null) { // loop link: both sites on peptide 0
+            this.linkPos2 = (json.s2 !== undefined)
+                ? +json.s2
+                : +this.matchedPeptides[0].linkSite2;
         }
 
         // the protein IDs and residue numers we eventually want to get:-
@@ -433,16 +460,16 @@ export class SpectrumMatch {
      * @returns {string} The peaklist file name
      */
     peaklistFileName() {
-        const spectraData = this.#containingModel.getMzidentmlFiles().get(this.uploadId).getSpectraDataById(this.#json.sd);
-        return spectraData.location.split("/").pop().split("\\").pop();
+        const spectraData = this.#containingModel.getMzidentmlFiles().get(this.uploadId)?.getSpectraDataById(this.spectraDataId);
+        return spectraData ? spectraData.fileName() : "";
     }
 
     /**
-     * Get the group this match belongs to - todo
+     * Get the group this match belongs to
      * @returns {*} The group identifier
      */
     group() {
-        return this.#containingModel.getMzidentmlFiles().get(this.uploadId).group;
+        return this.#containingModel.getSearches().get(this.uploadId)?.group;
     }
 
     /**
@@ -627,6 +654,7 @@ export class SpectrumMatch {
      * @returns {boolean} True if passes threshold
      */
     get passThreshold() {
+        if (this.#json.p === undefined) return true;
         return this.#json.p;
     }
 
@@ -642,15 +670,37 @@ export class SpectrumMatch {
         return this.#json.sd;
     }
 
+    /**
+     * Get scan number (xi2 only - pride/mzIdentML matches have no scan number field)
+     * @returns {number|undefined} Scan number
+     */
+    get scanNumber() {
+        return this.#json.sn;
+    }
 
+    /**
+     * Get scan index (xi2 only)
+     * @returns {number|undefined} Scan index
+     */
+    get scanIndex() {
+        return this.#json.sc_i;
+    }
 
-    // /**
-    //  * Get precursor intensity
-    //  * @returns {null} Always returns null
-    //  */
-    // get precursor_intensity() {
-    //     return null;
-    // }
+    /**
+     * Get retention time (xi2 only)
+     * @returns {number|undefined} Retention time
+     */
+    get retentionTime() {
+        return this.#json.rt;
+    }
+
+    /**
+     * Get precursor intensity (xi2 only)
+     * @returns {number|undefined} Precursor intensity
+     */
+    get precursor_intensity() {
+        return this.#json.pc_i;
+    }
 
     // /**
     //  * Get dataset identifier
@@ -658,14 +708,6 @@ export class SpectrumMatch {
     //  */
     // get datasetId() {
     //     return this.uploadId;
-    // }
-
-    // /**
-    //  * Get scan number
-    //  * @returns {string} Scan number
-    //  */
-    // get scanNumber() {
-    //     return this.spectrumId;
     // }
 
     // /**

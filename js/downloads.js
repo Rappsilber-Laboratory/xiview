@@ -13,6 +13,7 @@ import {
     pepPosConcat,
     searchesToString
 } from "./utils";
+import {showMessage} from "./ui-utils/message-popup";
 import d3 from "d3";
 
 /**
@@ -82,8 +83,12 @@ export function downloadSSL(compositeModelInst) {
  * @returns {undefined}
  */
 export function downloadAlphaLink2(compositeModelInst){
-    download(getAlphaLink2CSV(compositeModelInst).csv, "text/csv", "alphalink.txt");
-    download(getAlphaLink2CSV(compositeModelInst).fasta, "text/csv", "alphalink.fasta");
+    const alphaLink2 = getAlphaLink2CSV(compositeModelInst);
+    if (!alphaLink2) {
+        return;
+    }
+    download(alphaLink2.csv, "text/csv", "alphalink.txt");
+    download(alphaLink2.fasta, "text/plain", "alphalink.fasta");
 }
 
 /**
@@ -548,10 +553,15 @@ export function getLinksCSV(compositeModelInst) {
  * FASTA format: ">proteinID-stoichIndex\nsequence\n". Handles stoichiometry by replicating chains.
  * Only includes: selected proteins, non-decoy proteins, filtered crosslinks, heteromeric/homomeric links
  * where both ends are selected. Eliminates duplicate crosslinks. Chains labeled A-Z, a-z, 0-9 (max 62 chains).
- * @returns {Object} Object with {csv: restraints, fasta: sequences}
+ * @returns {Object|null} Object with {csv: restraints, fasta: sequences}, or null if there are too many chains
  */
 function getAlphaLink2CSV(compositeModelInst){
     const selectedProteins = compositeModelInst.get("selectedProteins");
+    if (!selectedProteins || selectedProteins.length === 0) {
+        showMessage("No proteins selected — the AlphaLink2 export only includes crosslinks between selected proteins. Select some proteins and try again.", "warning");
+        return null;
+    }
+
     const proteins = new Map();
     let csv = "", fasta = "";
 
@@ -562,24 +572,26 @@ function getAlphaLink2CSV(compositeModelInst){
         if (proteins.has(chainKey)) {
             return proteins.get(chainKey).chainChar;
         } else {
-            chainCharIndex++;
-            if (chainCharIndex > chainChars.length) {
-                alert ("Too many chains for Alphalink2 export");
-                return;
+            if (chainCharIndex + 1 >= chainChars.length) {
+                return null; // out of chain labels, caller abandons the export
             }
+            chainCharIndex++;
             const ch = chainChars[chainCharIndex];
             proteins.set(chainKey, {chainChar: ch, seq: protein.sequence});
             return ch;
         }
     }
 
+    let tooManyChains = false;
     const seenCrosslinks = new Set(); // need to eliminate duplicates (het. links will be crosslinks of two proteins)
+    proteinLoop:
     for (let selectedProtein of selectedProteins) {
         if (selectedProtein.is_decoy !== true) {
             for (let crosslink of selectedProtein.crosslinks) {
                 if (!seenCrosslinks.has(crosslink) // eliminating duplicates
-                        && !crosslink.fromProtein.isDecoy && !crosslink.toProtein.isDecoy // neither end is decoy
-                        && crosslink.filteredMatches_pp // tests if it has passed all the current filters
+                        && crosslink.toProtein // not a linear / monolink
+                        && !crosslink.isDecoyLink() // neither end is decoy
+                        && crosslink.filteredMatches_pp.length // tests if it has passed all the current filters
                         // tests if both ends are selected proteins
                         && selectedProteins.indexOf(crosslink.fromProtein) != -1
                         && selectedProteins.indexOf(crosslink.toProtein) != -1) {
@@ -591,16 +603,33 @@ function getAlphaLink2CSV(compositeModelInst){
                     for (let i = 0; i < fromStoich; i++) {
                         for (let j = 0; j < toStoich; j++) {
 
+                            const fromChain = getChainCharForProtein(crosslink.fromProtein, i);
+                            const toChain = getChainCharForProtein(crosslink.toProtein, j);
+                            if (fromChain === null || toChain === null) {
+                                tooManyChains = true;
+                                break proteinLoop;
+                            }
+
                             csv += crosslink.fromResidue + " "
-                                + getChainCharForProtein(crosslink.fromProtein, i) + " "
+                                + fromChain + " "
                                 + crosslink.toResidue + " "
-                                + getChainCharForProtein(crosslink.toProtein, j) + " 0.05\n";
+                                + toChain + " 0.05\n";
 
                         }
                     }
                 }
             }
         }
+    }
+
+    if (tooManyChains) {
+        showMessage("Too many chains for the AlphaLink2 export (maximum " + chainChars.length + ") — nothing exported.", "error");
+        return null;
+    }
+
+    if (seenCrosslinks.size === 0) {
+        showMessage("No crosslinks between the selected proteins pass the current filters — nothing exported.", "warning");
+        return null;
     }
 
     //make fasta
