@@ -369,8 +369,12 @@ export class Group extends Interactor {
                     group.updateExpandedGroup();
                 }
             }
+            // only the group-group links ending at this group move (updating all of them for every group
+            // made each layout tick O(groups x links) DOM writes on large networks)
             for (let ggLink of this.controller.g_gLinks.values()) {
-                ggLink.setLineCoordinates();
+                if (ggLink.group1 === this || ggLink.group2 === this) {
+                    ggLink.setLineCoordinates();
+                }
             }
             if (this.selfLink != null) {
                 if (typeof this.selfLink.thickLine !== "undefined") {

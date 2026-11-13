@@ -622,6 +622,11 @@ export class CrosslinkViewer extends Backbone.View {
                 this.autoLayout([]); //layout all
             }
         }
+        // While a large network's first layout is deferred (waiting to group and collapse it) nothing is
+        // visible, so don't create link SVG yet: most links get hidden by the collapse, and creating them all
+        // up front builds >100k elements. Visibility (and filter counts) are still worked out as usual, and
+        // cancelDeferredFirstLayout() renders again to show what's needed.
+        const deferLinkSVG = this.firstLayoutPending === true;
 
         for (let ppLink of this.renderedP_PLinks.values()) {
 
@@ -708,7 +713,7 @@ export class CrosslinkViewer extends Backbone.View {
                             (fromProtInCollapsedGroup && toProtInCollapsedGroup)
                         ) {
                             ppLink.hide();
-                        } else {
+                        } else if (!deferLinkSVG) {
                             ppLink.show();
                         }
                     }
@@ -716,8 +721,10 @@ export class CrosslinkViewer extends Backbone.View {
                 // }
             }
         }
-        for (let cLink of this.renderedCrosslinks.values()) {
-            cLink.check();
+        if (!deferLinkSVG) {
+            for (let cLink of this.renderedCrosslinks.values()) {
+                cLink.check();
+            }
         }
         const ggLinkIdsToRemove = [];
         for (let ggLink of this.g_gLinks.values()) {
@@ -727,7 +734,9 @@ export class CrosslinkViewer extends Backbone.View {
                 && this.groupMap.has(ggLink.group1.id) && this.groupMap.has(ggLink.group2.id)
                 && !(ggLink.group1.inCollapsedGroup() || ggLink.group2.inCollapsedGroup())
             ) {
-                ggLink.show();
+                if (!deferLinkSVG) {
+                    ggLink.show();
+                }
                 //set line coord?
             } else {
                 ggLinkIdsToRemove.push(ggLink.id);
@@ -1180,6 +1189,7 @@ export class CrosslinkViewer extends Backbone.View {
         this.stopListening(vent, "uniprotProgress");
         this.container.removeAttribute("visibility");
         this.showStatus(null);
+        this.render(); // creates / shows the link SVG that render() held back while the layout was deferred
     }
 
     /**
@@ -1612,7 +1622,8 @@ export class CrosslinkViewer extends Backbone.View {
             }
         }
         for (let p_pLink of this.renderedP_PLinks.values()) {
-            if (p_pLink.renderedToProtein && p_pLink.renderedFromProtein !== p_pLink.renderedToProtein &&
+            // hidden links are rescaled in show(), touching them here dirties the style of every hidden element
+            if (p_pLink.shown && p_pLink.renderedToProtein && p_pLink.renderedFromProtein !== p_pLink.renderedToProtein &&
                 !p_pLink.renderedFromProtein.expanded && !p_pLink.renderedToProtein.expanded) {
                 if (p_pLink.line) {
                     p_pLink.line.setAttribute("stroke-width", this.z * CrosslinkViewer.linkWidth);
@@ -1625,7 +1636,7 @@ export class CrosslinkViewer extends Backbone.View {
             }
         }
         for (let gg of this.g_gLinks.values()) {
-            if (gg.group1 !== gg.group2) {
+            if (gg.shown && gg.line && gg.group1 !== gg.group2) {
                 //     if (p_pLink.line) {
                 gg.line.setAttribute("stroke-width", this.z * CrosslinkViewer.linkWidth);
                 gg.highlightLine.setAttribute("stroke-width", this.z * 10);

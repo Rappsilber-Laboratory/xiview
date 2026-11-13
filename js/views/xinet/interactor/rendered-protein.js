@@ -420,7 +420,7 @@ export class RenderedProtein extends Interactor {
             this.placeRotators();
 
             for (let residueLink of this.renderedCrosslinks) {
-                if (residueLink.crosslink.isSelfLink() || residueLink.crosslink.isMonoLink()) {
+                if (residueLink.line && (residueLink.crosslink.isSelfLink() || residueLink.crosslink.isMonoLink())) {
                     const path = this.getCrossLinkPath(residueLink);
                     d3.select(residueLink.line).attr("d", path);
                     d3.select(residueLink.highlightLine).attr("d", path);
@@ -647,6 +647,9 @@ export class RenderedProtein extends Interactor {
                 .duration(transitionTime);
             const aggSelfLinkPath = this.getAggregateSelfLinkPath();
             for (let residueLink of this.renderedCrosslinks) {
+                if (!residueLink.line) {
+                    continue; // never shown, so no SVG to animate (it's created lazily in show())
+                }
                 const crosslinkPath = this.getCrossLinkPath(residueLink);
                 const lineSel = d3.select(residueLink.line);
                 if (residueLink.crosslink.isSelfLink()) {
@@ -826,6 +829,9 @@ export class RenderedProtein extends Interactor {
 
         const aggSelfLinkPath = this.getAggregateSelfLinkPath();
         for (let residueLink of this.renderedCrosslinks) {
+            if (!residueLink.line) {
+                continue; // not shown (checkLinks() above created the SVG of the ones that are)
+            }
             const crosslinkPath = this.getCrossLinkPath(residueLink);
             const lineSel = d3.select(residueLink.line);
             const highlightLineSel = d3.select(residueLink.highlightLine);

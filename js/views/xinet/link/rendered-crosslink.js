@@ -252,8 +252,10 @@ export class RenderedCrosslink extends Link {
      */
     check() {
         // neither end is a bar which isn't in a collapsed group? then hide
+        // (a mono link has only one end; on a circle it would be drawn as an empty path, so hide it too -
+        // that way residue link SVG only gets created (lazily, in show()) when a protein is shown as a bar)
         if ((!this.renderedFromProtein.expanded || (this.renderedFromProtein.inCollapsedGroup())) &&
-            (this.renderedToProtein ? (!this.renderedToProtein.expanded || this.renderedToProtein.inCollapsedGroup()) : false)) {
+            (this.renderedToProtein ? (!this.renderedToProtein.expanded || this.renderedToProtein.inCollapsedGroup()) : true)) {
             this.hide();
             return false;
         }
