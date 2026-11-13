@@ -827,7 +827,7 @@ export class CrosslinkViewer extends Backbone.View {
 
         const self = this;
 
-        const {nodes: nodeArr, links: linkArr} = this.getColaGraph();
+        const {nodes: nodeArr, links: linkArr, leaves} = this.getColaGraph();
         doLayout(nodeArr, linkArr, true);   // groups-free warm-start
         doLayout(nodeArr, linkArr, false);  // restart with groups, seeded from warm-start
 
@@ -961,6 +961,7 @@ export class CrosslinkViewer extends Backbone.View {
                     // node.setPositionFromCola();
                     node.setAllLinkCoordinates();
                 }
+                self.placeLeaves(leaves, links);
                 for (let g of self.d3cola.groups()) { // todo -  seems a bit of a weird way to have done this?
                     if (g.expanded) {
                         g.updateExpandedGroup();
@@ -1008,7 +1009,11 @@ export class CrosslinkViewer extends Backbone.View {
     /**
      * The graph autoLayout hands to cola: proteins / collapsed groups in non-linear subgraphs (linear ones
      * are gridded instead) and one link per linked pair of them. Expanded groups are cola groups, not nodes.
-     * @returns {{nodes: Object[], links: {source: Object, target: Object, id: string}[]}}
+     * With PLACE_ONE_LINK_NODES, nodes with a single link to a node that has more are left out (as `leaves`)
+     * and placed next to that node after each layout tick instead (see placeLeaves), which shrinks the layout a
+     * lot on large sparse networks. Fixed nodes and nodes inside an expanded group stay in the layout.
+     * @returns {{nodes: Object[], links: {source: Object, target: Object, id: string}[],
+     *     leaves: {node: Object, anchor: Object}[]}}
      */
     getColaGraph() {
         const links = new Map();
@@ -1040,7 +1045,94 @@ export class CrosslinkViewer extends Backbone.View {
                 }
             }
         }
-        return {nodes: Array.from(nodeSet), links: Array.from(links.values())};
+        if (!CrosslinkViewer.PLACE_ONE_LINK_NODES) {
+            return {nodes: Array.from(nodeSet), links: Array.from(links.values()), leaves: []};
+        }
+        const degree = new Map();
+        for (let link of links.values()) {
+            degree.set(link.source, (degree.get(link.source) || 0) + 1);
+            degree.set(link.target, (degree.get(link.target) || 0) + 1);
+        }
+        const isInsideExpandedGroup = node => Array.from(node.parentGroups).some(pg => pg.expanded && !pg.hidden);
+        const leaves = [];
+        const leafLinkIds = new Set();
+        for (let link of links.values()) {
+            for (let [leaf, anchor] of [[link.source, link.target], [link.target, link.source]]) {
+                if (degree.get(leaf) === 1 && degree.get(anchor) > 1 && !leaf.fixed && !isInsideExpandedGroup(leaf)) {
+                    leaves.push({node: leaf, anchor: anchor});
+                    nodeSet.delete(leaf);
+                    leafLinkIds.add(link.id);
+                }
+            }
+        }
+        return {
+            nodes: Array.from(nodeSet),
+            links: Array.from(links.values()).filter(link => !leafLinkIds.has(link.id)),
+            leaves: leaves,
+        };
+    }
+
+    /**
+     * Places nodes left out of the cola layout (getColaGraph leaves) around the node they're linked to: fanned
+     * out on the side away from that node's other (laid out) neighbours, or all round it if it has none, at half
+     * the mean on-screen length of the laid out links, in further rings out when there are too many for one.
+     * @param {{node: Object, anchor: Object}[]} leaves - From getColaGraph
+     * @param {{source: Object, target: Object}[]} links - The links cola laid out
+     */
+    placeLeaves(leaves, links) {
+        if (leaves.length === 0) {
+            return;
+        }
+        const neighbours = new Map(); // laid out node -> its laid out neighbours
+        let totalLength = 0;
+        for (let link of links) {
+            for (let [a, b] of [[link.source, link.target], [link.target, link.source]]) {
+                if (!neighbours.has(a)) {
+                    neighbours.set(a, []);
+                }
+                neighbours.get(a).push(b);
+            }
+            totalLength += Math.hypot(link.source.ix - link.target.ix, link.source.iy - link.target.iy);
+        }
+        const distance = links.length ? 0.5 * totalLength / links.length : 50 * this.z;
+        const leavesByAnchor = new Map();
+        for (let {node, anchor} of leaves) {
+            if (!leavesByAnchor.has(anchor)) {
+                leavesByAnchor.set(anchor, []);
+            }
+            leavesByAnchor.get(anchor).push(node);
+        }
+        const minGap = 0.4 * distance; // between neighbouring leaves on a ring
+        for (let [anchor, anchorLeaves] of leavesByAnchor) {
+            const others = neighbours.get(anchor) || [];
+            let awayAngle = 0;
+            if (others.length) {
+                let cx = 0, cy = 0;
+                for (let other of others) {
+                    cx += other.ix;
+                    cy += other.iy;
+                }
+                awayAngle = Math.atan2(anchor.iy - cy / others.length, anchor.ix - cx / others.length);
+            }
+            // fill rings outwards: a fan centred on awayAngle, or a full circle when a ring is full or the
+            // anchor has no laid out neighbours
+            let placedCount = 0, ring = 0;
+            while (placedCount < anchorLeaves.length) {
+                const radius = distance * (1 + 0.6 * ring);
+                const capacity = Math.max(1, Math.floor(2 * Math.PI * radius / minGap));
+                const n = Math.min(anchorLeaves.length - placedCount, capacity);
+                const step = (n === capacity || others.length === 0) ? 2 * Math.PI / n : minGap / radius;
+                const startAngle = awayAngle - step * (n - 1) / 2;
+                for (let i = 0; i < n; i++) {
+                    const angle = startAngle + i * step;
+                    const leaf = anchorLeaves[placedCount + i];
+                    leaf.setPositionFromXinet(anchor.ix + radius * Math.cos(angle), anchor.iy + radius * Math.sin(angle), false);
+                    leaf.setAllLinkCoordinates();
+                }
+                placedCount += n;
+                ring++;
+            }
+        }
     }
 
     /**
@@ -2170,6 +2262,8 @@ CrosslinkViewer.STATES = {
 CrosslinkViewer.barScales = [0.01, 0.2, 0.5, 0.8, 1, 2, 4, 8];
 // networks with more cola nodes than this get auto grouped and collapsed before their first layout
 CrosslinkViewer.LARGE_NETWORK_COLA_NODES = 500;
+// leave nodes with a single link out of the cola layout and place them next to their neighbour (see getColaGraph)
+CrosslinkViewer.PLACE_ONE_LINK_NODES = true;
 // auto group strategies (keys of AUTO_GROUP_STRATEGIES) tried in order for large networks, until one finds groups.
 // On DUC-XL-MS (6.7k proteins, 5171 cola nodes ungrouped) complexesInLocations leaves 306 cola nodes (30 top-level
 // groups, 1167 in all, complexes kept and nested inside organelles), laminarAll 492 (66 top-level, 424 in all),
