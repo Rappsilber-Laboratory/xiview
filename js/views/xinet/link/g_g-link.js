@@ -74,10 +74,6 @@ export class G_GLink extends Link {
         this.thickLine.setAttribute("stroke-linecap", "round");
         this.thickLine.setAttribute("stroke-linejoin", "round");
 
-        this.controller.p_pLinksWide.appendChild(this.thickLine);
-        this.controller.highlights.appendChild(this.highlightLine);
-        this.controller.p_pLinks.appendChild(this.line);
-
         //set the events for it
         const self = this;
         const setMouseEvents = function (svgElement) {
@@ -312,11 +308,22 @@ export class G_GLink extends Link {
     //     }
     // }
 
+    /**
+     * Where this link's SVG goes (see lazy-svg.js): the wide line under all proteins, the highlight over the
+     * proteins' lower parts (their highlight / selection outlines), the line under the proteins' upper parts.
+     * @returns {Array[]}
+     */
+    svgLayers() {
+        return [[this.thickLine, this.controller.p_pLinksWide], [this.highlightLine, this.controller.highlights],
+            [this.line, this.controller.p_pLinks]];
+    }
+
     show() {
         //if (!this.shown) { - causing problems with load layout, TODO - look at again
-        if (typeof this.line === "undefined") {
-            this.initSVG();
+        if (!this.ensureSVG()) {
+            return; // viewer is holding SVG back, render() shows it later
         }
+        this.attachSVG();
         this.shown = true;
         if (this.group1 === this.group2) {
             this.thickLine.setAttribute("transform", "translate(" +
@@ -333,9 +340,6 @@ export class G_GLink extends Link {
             this.highlightLine.setAttribute("stroke-width", (this.controller.z * 10).toString());
             this.setLineCoordinates();
         }
-        d3.select(this.thickLine).style("display", null);
-        d3.select(this.line).style("display", null);
-        d3.select(this.highlightLine).style("display", null);
         //}
 
         if (this.controller.model.get("xinetThickLinks") === false) {
@@ -371,12 +375,20 @@ export class G_GLink extends Link {
     }
 
     hide() {
-        // if (this.shown) {
-        //     this.shown = false;
-        d3.select(this.thickLine).style("display", "none");
-        d3.select(this.highlightLine).style("display", "none");
-        d3.select(this.line).style("display", "none");
-        // }
+        if (this.shown) {
+            this.shown = false;
+            this.detachSVG();
+        }
+    }
+
+    /**
+     * For when the viewer drops this link (a later link between the same groups is a new G_GLink).
+     */
+    remove() {
+        this.hide();
+        if (this.group1.selfLink === this) {
+            this.group1.selfLink = null;
+        }
     }
 
     setLineCoordinates() {

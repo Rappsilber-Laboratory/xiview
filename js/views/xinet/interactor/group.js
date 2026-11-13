@@ -818,7 +818,7 @@ export class Group extends Interactor {
             //move all prots / subgroups to
             for (let rp of this.renderedProteins) {
                 if (!rp.hidden){
-                    rp.setPositionFromXinet(ix, iy);
+                    rp.setPositionFromXinet(ix, iy, false); // the group is refitted by updateExpanding(), not per protein
                 }
             }
             for (let sg of this.subgroups) {

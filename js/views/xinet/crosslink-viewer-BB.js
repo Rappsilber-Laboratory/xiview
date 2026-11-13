@@ -227,16 +227,12 @@ export class CrosslinkViewer extends Backbone.View {
 
         this.defaultBarScale = takeClosest(CrosslinkViewer.barScales, defaultPixPerRes);
 
+        // proteins' SVG is built when they're first displayed (see lazy-svg.js), in the form set here
         const expand = this.renderedProteins.size < 4;
         for (let rp of this.renderedProteins.values()) {
-            //to do - should this really be here
-            this.proteinLower.appendChild(rp.lowerGroup);
-            this.proteinUpper.appendChild(rp.upperGroup);
             if (!rp.stickZoom) {
                 rp.stickZoom = this.defaultBarScale;
             }
-            rp.scale();
-            // rp.width;// cause it to store a constant value for unexpanded width?
             if (expand) {
                 rp.toStickNoTransition();
             }
@@ -621,12 +617,10 @@ export class CrosslinkViewer extends Backbone.View {
             } else {
                 this.autoLayout([]); //layout all
             }
+            if (!this.svgOnHold) {
+                this.buildVisibleProteinSVG(); // held back until now (see svgOnHold)
+            }
         }
-        // While a large network's first layout is deferred (waiting to group and collapse it) nothing is
-        // visible, so don't create link SVG yet: most links get hidden by the collapse, and creating them all
-        // up front builds >100k elements. Visibility (and filter counts) are still worked out as usual, and
-        // cancelDeferredFirstLayout() renders again to show what's needed.
-        const deferLinkSVG = this.firstLayoutPending === true;
 
         for (let ppLink of this.renderedP_PLinks.values()) {
 
@@ -713,7 +707,7 @@ export class CrosslinkViewer extends Backbone.View {
                             (fromProtInCollapsedGroup && toProtInCollapsedGroup)
                         ) {
                             ppLink.hide();
-                        } else if (!deferLinkSVG) {
+                        } else {
                             ppLink.show();
                         }
                     }
@@ -721,10 +715,8 @@ export class CrosslinkViewer extends Backbone.View {
                 // }
             }
         }
-        if (!deferLinkSVG) {
-            for (let cLink of this.renderedCrosslinks.values()) {
-                cLink.check();
-            }
+        for (let cLink of this.renderedCrosslinks.values()) {
+            cLink.check();
         }
         const ggLinkIdsToRemove = [];
         for (let ggLink of this.g_gLinks.values()) {
@@ -734,13 +726,11 @@ export class CrosslinkViewer extends Backbone.View {
                 && this.groupMap.has(ggLink.group1.id) && this.groupMap.has(ggLink.group2.id)
                 && !(ggLink.group1.inCollapsedGroup() || ggLink.group2.inCollapsedGroup())
             ) {
-                if (!deferLinkSVG) {
-                    ggLink.show();
-                }
+                ggLink.show();
                 //set line coord?
             } else {
                 ggLinkIdsToRemove.push(ggLink.id);
-                ggLink.hide();
+                ggLink.remove();
             }
         }
         for (let id of ggLinkIdsToRemove) {
@@ -1189,7 +1179,27 @@ export class CrosslinkViewer extends Backbone.View {
         this.stopListening(vent, "uniprotProgress");
         this.container.removeAttribute("visibility");
         this.showStatus(null);
-        this.render(); // creates / shows the link SVG that render() held back while the layout was deferred
+        this.buildVisibleProteinSVG(); // held back while waiting (see svgOnHold)
+        this.render(); // and links
+    }
+
+    /**
+     * xiNET elements build no SVG (see lazy-svg.js) until the first render has decided how to lay out, and while
+     * the first layout of a large network is deferred: nothing is visible yet, and on a large network most of it
+     * will be hidden by grouping and collapsing.
+     * @returns {boolean}
+     */
+    get svgOnHold() {
+        return this.firstRender === true || this.firstLayoutPending === true;
+    }
+
+    /**
+     * Builds the SVG of the proteins that are displayed but have none (because of svgOnHold).
+     */
+    buildVisibleProteinSVG() {
+        for (let rp of this.renderedProteins.values()) {
+            rp.setHidden(rp.hidden);
+        }
     }
 
     /**
@@ -1536,7 +1546,7 @@ export class CrosslinkViewer extends Backbone.View {
     proteinColoursUpdated() {
         const proteinColourModel = this.model.get("proteinColourAssignment");
         for (let renderedParticipant of this.renderedProteins.values()) {
-            if (proteinColourModel) {
+            if (proteinColourModel && renderedParticipant.svgCreated) { // (initSVG() sets the colour)
                 const c = proteinColourModel.getColour(renderedParticipant.protein);
                 d3.select(renderedParticipant.outline)
                     .attr("fill", c);
@@ -1625,18 +1635,16 @@ export class CrosslinkViewer extends Backbone.View {
             // hidden links are rescaled in show(), touching them here dirties the style of every hidden element
             if (p_pLink.shown && p_pLink.renderedToProtein && p_pLink.renderedFromProtein !== p_pLink.renderedToProtein &&
                 !p_pLink.renderedFromProtein.expanded && !p_pLink.renderedToProtein.expanded) {
-                if (p_pLink.line) {
-                    p_pLink.line.setAttribute("stroke-width", this.z * CrosslinkViewer.linkWidth);
-                    p_pLink.highlightLine.setAttribute("stroke-width", this.z * 10);
-                    p_pLink.updateThickLineWidth();
-                    if (p_pLink.ambiguous) {
-                        p_pLink.dashedLine(true); //rescale spacing of dashes // performance issue?
-                    }
+                p_pLink.line.setAttribute("stroke-width", this.z * CrosslinkViewer.linkWidth);
+                p_pLink.highlightLine.setAttribute("stroke-width", this.z * 10);
+                p_pLink.updateThickLineWidth();
+                if (p_pLink.ambiguous) {
+                    p_pLink.dashedLine(true); //rescale spacing of dashes // performance issue?
                 }
             }
         }
         for (let gg of this.g_gLinks.values()) {
-            if (gg.shown && gg.line && gg.group1 !== gg.group2) {
+            if (gg.shown && gg.group1 !== gg.group2) {
                 //     if (p_pLink.line) {
                 gg.line.setAttribute("stroke-width", this.z * CrosslinkViewer.linkWidth);
                 gg.highlightLine.setAttribute("stroke-width", this.z * 10);
@@ -1662,6 +1670,7 @@ export class CrosslinkViewer extends Backbone.View {
     }
 
     setAnnotations() {
+        this.annotationsSet = true; // proteins drawn from now on add their annotations (RenderedProtein.initSVG)
         for (let renderedProtein of this.renderedProteins.values()) {
             renderedProtein.setPositionalFeatures();
         }

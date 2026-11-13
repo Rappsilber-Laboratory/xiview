@@ -41,7 +41,7 @@ export class P_PLink extends Link {
     }
 
     /**
-     * Initializes the SVG elements for this protein-protein link.
+     * Initializes the SVG elements for this protein-protein link, the first time it's shown (see lazy-svg.js).
      * Creates line or path elements depending on whether it's a self-link.
      */
     initSVG() {
@@ -75,10 +75,6 @@ export class P_PLink extends Link {
         this.thickLine.setAttribute("stroke", "#ddd");
         this.thickLine.setAttribute("stroke-linecap", "round");
         this.thickLine.setAttribute("stroke-linejoin", "round");
-
-        this.controller.p_pLinksWide.appendChild(this.thickLine);
-        this.controller.highlights.appendChild(this.highlightLine);
-        this.controller.p_pLinks.appendChild(this.line);
 
         //set the events for it
         const self = this;
@@ -234,7 +230,6 @@ export class P_PLink extends Link {
                         //         }
                         //     }
                         // }
-                        console.log("yo");
                         if (match.crosslinks.length == 1) {
                             this.ambiguous = false;
                         }
@@ -279,11 +274,22 @@ export class P_PLink extends Link {
         }
     }
 
+    /**
+     * Where this link's SVG goes (see lazy-svg.js): the wide line under all proteins, the highlight over the
+     * proteins' lower parts (their highlight / selection outlines), the line under the proteins' upper parts.
+     * @returns {Array[]}
+     */
+    svgLayers() {
+        return [[this.thickLine, this.controller.p_pLinksWide], [this.highlightLine, this.controller.highlights],
+            [this.line, this.controller.p_pLinks]];
+    }
+
     show() {
         //if (!this.shown) { - causing problems with load layout, TODO - look at again
-        if (typeof this.line === "undefined") {
-            this.initSVG();
+        if (!this.ensureSVG()) {
+            return; // viewer is holding SVG back, render() shows it later
         }
+        this.attachSVG();
         this.shown = true;
         if (this.renderedFromProtein === this.renderedToProtein) {
             this.thickLine.setAttribute("transform", "translate(" +
@@ -301,9 +307,6 @@ export class P_PLink extends Link {
             this.setLineCoordinates(this.renderedFromProtein);
             this.setLineCoordinates(this.renderedToProtein);
         }
-        d3.select(this.thickLine).style("display", null);
-        d3.select(this.line).style("display", null);
-        d3.select(this.highlightLine).style("display", null);
         //}
 
         if (this.controller.model.get("xinetThickLinks") === false) {
@@ -352,9 +355,7 @@ export class P_PLink extends Link {
     hide() {
         if (this.shown) {
             this.shown = false;
-            d3.select(this.thickLine).style("display", "none");
-            d3.select(this.highlightLine).style("display", "none");
-            d3.select(this.line).style("display", "none");
+            this.detachSVG();
         }
     }
 

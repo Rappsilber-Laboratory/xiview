@@ -1,3 +1,5 @@
+import {applyLazySVG} from "../lazy-svg";
+
 /**
  * Base class for links in the crosslink visualization.
  * Represents connections between proteins or residues.
@@ -11,7 +13,8 @@ export class Link {
      */
     constructor(crosslinkViewer) {
         this.controller = crosslinkViewer;
-        this.shown = false; //used to avoid some unnecessary manipulation of DOM
+        this.shown = false; // only ever true with SVG (see lazy-svg.js), so update paths can just check this
+        this.svgCreated = false;
         this.isSelected = false;
     }
 
@@ -42,3 +45,5 @@ export class Link {
         }
     }
 }
+
+applyLazySVG(Link); // ensureSVG() / attachSVG() / detachSVG(); subclasses define initSVG() and svgLayers()

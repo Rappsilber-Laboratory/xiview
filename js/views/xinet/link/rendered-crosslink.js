@@ -32,23 +32,21 @@ export class RenderedCrosslink extends Link {
     }
 
     /**
-     * Initializes the SVG elements for this crosslink.
+     * Initializes the SVG elements for this crosslink, the first time it's shown (see lazy-svg.js).
      * Creates line or path elements depending on link type (self-link, mono-link, or inter-protein).
      */
     initSVG() {
         if (this.crosslink.isSelfLink() || this.crosslink.isMonoLink()) {
+            // drawn inside the protein's SVG, so that needs to exist (a link is only shown when its protein is)
+            this.renderedFromProtein.ensureSVG();
             this.line = document.createElementNS(CrosslinkViewer.svgns, "path");
             this.line.setAttribute("stroke-width", CrosslinkViewer.linkWidth);
             this.highlightLine = document.createElementNS(CrosslinkViewer.svgns, "path");
-            this.renderedFromProtein.selfLinksHighlights.appendChild(this.highlightLine);
-            this.renderedFromProtein.selfLinks.appendChild(this.line);
         } else {
             this.line = document.createElementNS(CrosslinkViewer.svgns, "line");
             this.line.setAttribute("stroke-linecap", "round");
             this.highlightLine = document.createElementNS(CrosslinkViewer.svgns, "line");
             this.highlightLine.setAttribute("stroke-linecap", "round");
-            this.controller.highlights.appendChild(this.highlightLine);
-            this.controller.res_resLinks.appendChild(this.line);
         }
         this.line.setAttribute("class", "link");
         this.line.setAttribute("fill", "none");
@@ -78,6 +76,18 @@ export class RenderedCrosslink extends Link {
         };
         setMouseEvents(this.line);
         setMouseEvents(this.highlightLine);
+    }
+
+    /**
+     * Where this link's SVG goes (see lazy-svg.js): a self or mono link is drawn in its protein's SVG (under the
+     * protein's label etc.), a link between proteins in the viewer's highlight and residue link layers.
+     * @returns {Array[]}
+     */
+    svgLayers() {
+        if (this.crosslink.isSelfLink() || this.crosslink.isMonoLink()) {
+            return [[this.highlightLine, this.renderedFromProtein.selfLinksHighlights], [this.line, this.renderedFromProtein.selfLinks]];
+        }
+        return [[this.highlightLine, this.controller.highlights], [this.line, this.controller.res_resLinks]];
     }
 
     mouseOver(evt) {
@@ -178,6 +188,9 @@ export class RenderedCrosslink extends Link {
     }
 
     showPeptides(pepBounds, renderedProtein) {
+        if (!renderedProtein.svgCreated) {
+            return; // the other end is a bar inside a collapsed group, never drawn
+        }
         let y = -RenderedProtein.STICKHEIGHT / 2;
         const count = pepBounds.length;
         const yIncrement = RenderedProtein.STICKHEIGHT / count;
@@ -279,10 +292,10 @@ export class RenderedCrosslink extends Link {
 
     show() {
         if (!this.shown) {
-            this.shown = true;
-            if (typeof this.line === "undefined") {
-                this.initSVG();
+            if (!this.ensureSVG()) {
+                return; // viewer is holding SVG back, render() shows it later
             }
+            this.shown = true;
             if (!this.renderedToProtein) {
                 let path;
                 if (this.renderedFromProtein.expanded) {
@@ -300,8 +313,7 @@ export class RenderedCrosslink extends Link {
                     this.setLineCoordinates(this.renderedToProtein);
                 }
             }
-            d3.select(this.highlightLine).style("display", null);
-            d3.select(this.line).style("display", null);
+            this.attachSVG();
         }
 
         if (this.crosslink.isSelfLink() && this.renderedToProtein) {
@@ -333,8 +345,7 @@ export class RenderedCrosslink extends Link {
     hide() {
         if (this.shown) {
             this.shown = false;
-            d3.select(this.highlightLine).style("display", "none");
-            d3.select(this.line).style("display", "none");
+            this.detachSVG();
             this.removePeptides();
         }
     }

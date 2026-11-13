@@ -6,6 +6,7 @@ import {CrosslinkViewer} from "../crosslink-viewer-BB";
 import d3 from "d3";
 import {makeTooltipContents, makeTooltipTitle} from "../../../ui-utils/make-tooltip";
 import {rotatePointAboutPoint, trig} from "../trig";
+import {applyLazySVG} from "../lazy-svg";
 
 /**
  * Represents a rendered protein in the xiNET visualization.
@@ -36,14 +37,17 @@ export class RenderedProtein extends Interactor {
         this.isFlipped = false;
         // this.isSelected = false;
         // this.isHighlighted = false;
-        this.createElements();
+        this.svgCreated = false; // SVG is built the first time the protein is displayed (see lazy-svg.js)
+        this.scaleLabels = [];
+        this.updateName();
     }
 
-    createElements() {
-        //'rotators'
-        this.lowerRotator = new Rotator(this, 0, this.controller);
-        this.upperRotator = new Rotator(this, 1, this.controller);
-
+    /**
+     * Builds the protein's SVG, drawn in its current state (form, position, zoom, colour, label, annotations,
+     * highlight / selection), and puts it in the viewer's protein layers. Called through ensureSVG() the first time
+     * the protein is displayed, so proteins only ever seen inside collapsed groups never get any.
+     */
+    initSVG() {
         /*
          * Lower group
          * svg group for elements that appear underneath links
@@ -84,8 +88,7 @@ export class RenderedProtein extends Interactor {
             .attr("x", 0)
             .attr("y", 0)
             .classed("protein xlv_text proteinLabel", true);
-        this.labelTextNode = document.createTextNode(this.protein.name);
-        this.updateName();
+        this.labelTextNode = document.createTextNode(this.labelText);
         this.labelSVG.appendChild(this.labelTextNode);
 
         //ticks (and animo acid letters)
@@ -104,10 +107,6 @@ export class RenderedProtein extends Interactor {
         this.circDomains.setAttribute("opacity", "1");
         this.upperGroup.appendChild(this.circDomains);
         this.upperGroup.appendChild(this.labelSVG);
-
-        this.scaleLabels = [];
-
-        this.toCircle(null, false);
 
         // events
         const self = this;
@@ -128,6 +127,65 @@ export class RenderedProtein extends Interactor {
             // }
             return false;
         };
+
+        const controller = this.controller;
+        if (!this.hidden) { // (it's built when first displayed, so expected)
+            this.attachSVG(); // before drawing, which measures the label
+        }
+
+        // bring it up to date with whatever happened to the protein before it was drawn
+        if (controller.model.get("xinetShowLabels") === false) {
+            this.showLabel(false);
+        }
+        if (this.isFlipped) {
+            this.selfLinks.setAttribute("transform", "scale (1 -1)");
+            this.selfLinksHighlights.setAttribute("transform", "scale (1 -1)");
+        }
+        if (this._highlight || this._selected) {
+            d3.select(this.highlight)
+                .classed("highlightedProtein", this._highlight)
+                .classed("selectedProtein", !this._highlight)
+                .attr("stroke-opacity", "1");
+        }
+        if (controller.annotationsSet) {
+            this.setPositionalFeatures();
+        }
+        this.drawCircle();
+        this.setPosition(this.ix, this.iy);
+        if (this.expanded) {
+            this.toStickNoTransition();
+        }
+    }
+
+    /**
+     * Draws the protein as a circle, at once (what toCircle() ends with, without its link updates).
+     */
+    drawCircle() {
+        const r = this.symbolRadius;
+        const colour = this.controller.model.get("proteinColourAssignment").getColour(this.protein);
+        for (let el of [this.outline, this.background]) {
+            d3.select(el).attr("fill-opacity", 1).attr("fill", colour)
+                .attr("x", -r).attr("y", -r)
+                .attr("width", r * 2).attr("height", r * 2)
+                .attr("rx", r).attr("ry", r);
+        }
+        d3.select(this.highlight)
+            .attr("width", (r * 2) + 5).attr("height", (r * 2) + 5)
+            .attr("x", -r - 2.5).attr("y", -r - 2.5)
+            .attr("rx", r + 2.5).attr("ry", r + 2.5);
+        d3.select(this.rectDomains).attr("opacity", 0).attr("transform", "scale(1, 1)");
+        d3.select(this.circDomains).attr("opacity", 1).attr("transform", "scale(1, 1)");
+        d3.select(this.peptides).attr("transform", "scale(" + (this.stickZoom) + ", 1)");
+    }
+
+    /**
+     * Where this protein's SVG goes (see lazy-svg.js): parts under the links in proteinLower, the rest in
+     * proteinUpper, both at the start of the layer, so proteins shown later stay under the collapsed group symbols
+     * that share proteinUpper (as when all proteins were drawn up front and groups added after).
+     * @returns {Array[]}
+     */
+    svgLayers() {
+        return [[this.lowerGroup, this.controller.proteinLower, true], [this.upperGroup, this.controller.proteinUpper, true]];
     }
 
     get proteins() {
@@ -135,6 +193,9 @@ export class RenderedProtein extends Interactor {
     }
 
     get bBox() {
+        if (!this.svgCreated) {
+            return {x: 0, y: 0, width: 0, height: 0}; // never displayed
+        }
         return this.upperGroup.getBBox();
         // return {
         //     x:this.ix - 30,
@@ -192,7 +253,9 @@ export class RenderedProtein extends Interactor {
         if (this.labelText.length > 25) {
             this.labelText = this.labelText.substr(0, 16) + "...";
         }
-        this.labelTextNode.textContent = this.labelText;
+        if (this.labelTextNode) {
+            this.labelTextNode.textContent = this.labelText;
+        }
     }
 
     mouseOver(evt) {
@@ -210,7 +273,7 @@ export class RenderedProtein extends Interactor {
     }
 
     resize() {
-        if (!this.expanded) {
+        if (this.svgCreated && !this.expanded) { // (initSVG() draws it at the current size)
             const r = this.symbolRadius;
             d3.select(this.outline)
                 .attr("x", -r).attr("y", -r)
@@ -258,6 +321,9 @@ export class RenderedProtein extends Interactor {
         this.rotation = angle % 360;
         if (this.rotation < 0) {
             this.rotation += 360;
+        }
+        if (!this.svgCreated) {
+            return;
         }
         this.upperGroup.setAttribute("transform", "translate(" + this.ix + " " + this.iy + ")" +
             " scale(" + (this.controller.z) + ") " + "rotate(" + this.rotation + ")");
@@ -309,7 +375,7 @@ export class RenderedProtein extends Interactor {
     set this.x and this.y as cola would have them,
         call setPosition with same params this received
     */
-    setPositionFromXinet(ix, iy) {
+    setPositionFromXinet(ix, iy, updateGroups = true) {
         this.px = this.x;
         this.py = this.y;
         let xOffset = 0;
@@ -322,14 +388,18 @@ export class RenderedProtein extends Interactor {
         this.x = ix - xOffset;
         this.y = iy;
         this.setPosition(ix, iy);
-        this.updateExpandedGroup();
+        if (updateGroups) {
+            this.updateExpandedGroup();
+        }
     }
 
     // more accurately described as setting transform for top svg elements (sets scale also)
     setPosition(ix, iy) {
         this.ix = ix;
         this.iy = iy;
-        if (this.expanded) {
+        if (!this.svgCreated) {
+            // nothing drawn yet; a self link is drawn at the protein so it can't be shown either
+        } else if (this.expanded) {
             this.upperGroup.setAttribute("transform", "translate(" + this.ix + " " + this.iy + ")" +
                 " scale(" + (this.controller.z) + ") " + "rotate(" + this.rotation + ")");
             this.lowerGroup.setAttribute("transform", "translate(" + this.ix + " " + this.iy + ")" +
@@ -390,6 +460,9 @@ export class RenderedProtein extends Interactor {
     }
 
     scale() {
+        if (!this.svgCreated) {
+            return; // initSVG() draws at the current scale
+        }
         d3.select(this.peptides).attr("transform", "scale(" + (this.stickZoom) + ", 1)");
         const protLength = (this.protein.size) * this.stickZoom;
         if (this.expanded) {
@@ -420,7 +493,7 @@ export class RenderedProtein extends Interactor {
             this.placeRotators();
 
             for (let residueLink of this.renderedCrosslinks) {
-                if (residueLink.line && (residueLink.crosslink.isSelfLink() || residueLink.crosslink.isMonoLink())) {
+                if (residueLink.svgCreated && (residueLink.crosslink.isSelfLink() || residueLink.crosslink.isMonoLink())) {
                     const path = this.getCrossLinkPath(residueLink);
                     d3.select(residueLink.line).attr("d", path);
                     d3.select(residueLink.highlightLine).attr("d", path);
@@ -515,6 +588,9 @@ export class RenderedProtein extends Interactor {
 
     toggleFlipped() {
         this.isFlipped = !this.isFlipped;
+        if (!this.svgCreated) {
+            return;
+        }
         if (this.isFlipped) {
             this.selfLinks.setAttribute("transform", "scale (1 -1)");
             this.selfLinksHighlights.setAttribute("transform", "scale (1 -1)");
@@ -527,12 +603,23 @@ export class RenderedProtein extends Interactor {
     setHidden(bool) {
         // MJG
         const wasHidden = this.hidden;
-        d3.select(this.upperGroup).style("display", bool ? "none" : null);
-        d3.select(this.lowerGroup).style("display", bool ? "none" : null);
         this.hidden = !!bool;
-        // the controller's scale() skips hidden proteins, so catch up with the current zoom when shown again
+        if (!this.svgCreated) {
+            if (!this.hidden) {
+                this.ensureSVG(); // first time displayed - drawn as it is now, so nothing to catch up on below
+            }
+            return;
+        }
+        if (this.hidden) {
+            this.detachSVG();
+        } else {
+            this.attachSVG();
+        }
+        // the controller's scale() skips hidden proteins, so catch up with the current zoom when shown again.
+        // (setPosition(), not setPositionFromXinet(): that refits the groups around the protein, i.e. every member's
+        // bBox for each protein shown - O(n^2) when a big group expands. Whoever shows proteins refits groups after.)
         if (wasHidden && !this.hidden && this.ix !== undefined) {
-            this.setPositionFromXinet(this.ix, this.iy);
+            this.setPosition(this.ix, this.iy);
             if (this.expanded) {
                 this.setAllLinkCoordinates();
             }
@@ -561,11 +648,18 @@ export class RenderedProtein extends Interactor {
      * @param {boolean} [transition=true] - Whether to animate the transition
      */
     toCircle(svgP, transition = true) {
+        if (!this.svgCreated) { // not displayed - just change form (initSVG() draws it this way)
+            this.expanded = false;
+            this.checkLinks();
+            return;
+        }
         const transitionTime = transition ? RenderedProtein.transitionTime : 0; //this maybe isn't so good
 
         this.busy = true;
-        CrosslinkViewer.removeDomElement(this.lowerRotator.svg);
-        CrosslinkViewer.removeDomElement(this.upperRotator.svg);
+        if (this.lowerRotator) {
+            CrosslinkViewer.removeDomElement(this.lowerRotator.svg);
+            CrosslinkViewer.removeDomElement(this.upperRotator.svg);
+        }
 
         // const protLength = this.protein.size * this.stickZoom;
         const r = this.symbolRadius;
@@ -647,7 +741,7 @@ export class RenderedProtein extends Interactor {
                 .duration(transitionTime);
             const aggSelfLinkPath = this.getAggregateSelfLinkPath();
             for (let residueLink of this.renderedCrosslinks) {
-                if (!residueLink.line) {
+                if (!residueLink.svgCreated) {
                     continue; // never shown, so no SVG to animate (it's created lazily in show())
                 }
                 const crosslinkPath = this.getCrossLinkPath(residueLink);
@@ -777,12 +871,23 @@ export class RenderedProtein extends Interactor {
      * @param {boolean} [transition=true] - Whether to animate the transition
      */
     toStick(transition = true) {
+        if (!this.svgCreated) {
+            // not displayed - just change form (initSVG() draws it this way). Shows its residue links if they're
+            // to be seen, building the protein's SVG then if it has self links (see RenderedCrosslink.initSVG)
+            this.expanded = true;
+            this.checkLinks();
+            return;
+        }
         const transitionTime = transition ? RenderedProtein.transitionTime : 0;
 
         this.busy = true;
         this.expanded = true;
 
         //place rotators
+        if (!this.lowerRotator) { // only bars have them
+            this.lowerRotator = new Rotator(this, 0, this.controller);
+            this.upperRotator = new Rotator(this, 1, this.controller);
+        }
         this.upperGroup.appendChild(this.lowerRotator.svg);
         this.upperGroup.appendChild(this.upperRotator.svg);
         this.placeRotators();
@@ -829,7 +934,7 @@ export class RenderedProtein extends Interactor {
 
         const aggSelfLinkPath = this.getAggregateSelfLinkPath();
         for (let residueLink of this.renderedCrosslinks) {
-            if (!residueLink.line) {
+            if (!residueLink.svgCreated) {
                 continue; // not shown (checkLinks() above created the SVG of the ones that are)
             }
             const crosslinkPath = this.getCrossLinkPath(residueLink);
@@ -1039,6 +1144,9 @@ export class RenderedProtein extends Interactor {
      * Handles alignment between different coordinate systems (e.g., PDB to sequence).
      */
     setPositionalFeatures() {
+        if (!this.svgCreated) {
+            return; // initSVG() adds them
+        }
         this.clearPositionalFeatures();
         const annotationTypes = this.controller.model.get("annotationTypes");
         //create new annotations
@@ -1305,6 +1413,8 @@ export class RenderedProtein extends Interactor {
     }
 
 }
+
+applyLazySVG(RenderedProtein); // ensureSVG() / attachSVG() / detachSVG()
 
 RenderedProtein.STICKHEIGHT = 20; // height of stick in pixels
 RenderedProtein.LABELMAXLENGTH = 60; // maximal width reserved for protein-labels
