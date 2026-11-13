@@ -367,8 +367,8 @@ export class RenderedProtein extends Interactor {
         this.py = this.y;
         // leave this.x/this.y as cola set them (cola recomputes from them each tick);
         // render at the scaled coords passed in.
+        // groups aren't refitted here: the layout tick refits every expanded group once after moving all nodes
         this.setPosition(ix, iy);
-        this.updateExpandedGroup();
     }
 
     /* calculate top left of interactor's glyph,
@@ -422,8 +422,9 @@ export class RenderedProtein extends Interactor {
         }
     }
 
+    // refits the innermost expanded groups containing this protein; each refits its own parents
     updateExpandedGroup() {
-        for (let group of this.parentGroups) {
+        for (let group of this.directParentGroups) {
             if (group.expanded && !this.hidden) {
                 group.updateExpandedGroup();
             }
@@ -1005,7 +1006,7 @@ export class RenderedProtein extends Interactor {
             self.stickZoom = stickZoomInterpol(cubicInOut(interp));
             self.setAllLinkCoordinates();
 
-            for (let group of self.parentGroups) {
+            for (let group of self.directParentGroups) {
                 group.updateExpandedGroup();
             }
 

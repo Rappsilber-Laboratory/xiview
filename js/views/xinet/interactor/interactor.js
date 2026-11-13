@@ -178,6 +178,21 @@ export class Interactor {
     }
 
     /**
+     * The innermost groups containing this interactor: its parent groups that don't contain another of its
+     * parent groups. (parentGroups holds every containing group, ancestors included, so refitting all of them,
+     * each of which refits all of its own, cost 2^depth refits for deeply nested groups.)
+     *
+     * @returns {Group[]} Direct parent groups
+     */
+    get directParentGroups() {
+        const parents = Array.from(this.parentGroups);
+        if (parents.length < 2) {
+            return parents;
+        }
+        return parents.filter(p => !parents.some(q => q !== p && q.parentGroups.has(p)));
+    }
+
+    /**
      * Checks if this interactor is contained in a collapsed group.
      *
      * @returns {boolean} True if in a collapsed group

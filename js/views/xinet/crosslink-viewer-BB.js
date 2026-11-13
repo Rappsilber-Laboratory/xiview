@@ -433,7 +433,6 @@ export class CrosslinkViewer extends Backbone.View {
                     const group2 = groups[gj];
                     if (group1.isSubsetOf(group2)) {
                         group2.subgroups.push(group1);
-                        console.log(group1.name, "is SUBSET of", group2.name);
                     }
                 }
             }
@@ -496,7 +495,9 @@ export class CrosslinkViewer extends Backbone.View {
                 }
             }
         }
-        for (let group of groups) {
+        // smallest first (groups was reversed above), so subgroups are fitted before the groups containing them
+        // and each group is refitted once, rather than every refit also refitting all of its parents
+        for (let group of groups.slice().reverse()) {
             let hasVisible = false;
             for (let p of group.renderedProteins) {
                 if (p.protein.hidden === false) {
@@ -509,9 +510,9 @@ export class CrosslinkViewer extends Backbone.View {
                 group.setHidden(false);
                 group.updateCountLabel();
                 if (group.expanded) {
-                    group.updateExpandedGroup();
+                    group.updateExpandedGroup(false);
                 } else {
-                    group.setPosition(group.ix, group.iy);
+                    group.setPosition(group.ix, group.iy, false);
                 }
             }
         }
@@ -2170,9 +2171,10 @@ CrosslinkViewer.barScales = [0.01, 0.2, 0.5, 0.8, 1, 2, 4, 8];
 // networks with more cola nodes than this get auto grouped and collapsed before their first layout
 CrosslinkViewer.LARGE_NETWORK_COLA_NODES = 500;
 // auto group strategies (keys of AUTO_GROUP_STRATEGIES) tried in order for large networks, until one finds groups.
-// On DUC-XL-MS (6.7k proteins, 5171 cola nodes ungrouped) laminarAll leaves 492 cola nodes (66 top-level groups
-// with 358 nested inside them), goComplexLaminar 3438. Both need QuickGO; location doesn't, so it's the last resort.
-CrosslinkViewer.LARGE_NETWORK_GROUPING_STRATEGIES = ["laminarAll", "goComplexLaminar", "location"];
+// On DUC-XL-MS (6.7k proteins, 5171 cola nodes ungrouped) complexesInLocations leaves 306 cola nodes (30 top-level
+// groups, 1167 in all, complexes kept and nested inside organelles), laminarAll 492 (66 top-level, 424 in all),
+// goComplexLaminar 3438. These need QuickGO (and the first UniProt locations); location doesn't, so it's the last resort.
+CrosslinkViewer.LARGE_NETWORK_GROUPING_STRATEGIES = ["complexesInLocations", "laminarAll", "goComplexLaminar", "location"];
 // how long a large network waits without progress on UniProt annotations / GO grouping before being laid out ungrouped
 CrosslinkViewer.LARGE_NETWORK_GROUPING_TIMEOUT_MS = 60000;
 // resolves after the browser has had a chance to paint (e.g. a status message before a long blocking task)
