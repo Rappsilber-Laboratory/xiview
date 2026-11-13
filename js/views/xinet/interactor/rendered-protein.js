@@ -526,9 +526,17 @@ export class RenderedProtein extends Interactor {
 
     setHidden(bool) {
         // MJG
+        const wasHidden = this.hidden;
         d3.select(this.upperGroup).style("display", bool ? "none" : null);
         d3.select(this.lowerGroup).style("display", bool ? "none" : null);
         this.hidden = !!bool;
+        // the controller's scale() skips hidden proteins, so catch up with the current zoom when shown again
+        if (wasHidden && !this.hidden && this.ix !== undefined) {
+            this.setPositionFromXinet(this.ix, this.iy);
+            if (this.expanded) {
+                this.setAllLinkCoordinates();
+            }
+        }
     }
 
     setExpanded(expanded, svgP) {

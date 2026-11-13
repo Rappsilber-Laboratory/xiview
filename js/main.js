@@ -292,6 +292,7 @@ function initPageSplitter() {
 /**
  * Fetches protein data from UniProt in batches to avoid rate limiting.
  * Queries the UniProt REST API for multiple accession IDs in batches.
+ * Fires vent.trigger("uniprotProgress", done, total) after each batch.
  * @param {string[]} accessions - Array of UniProt accession IDs to fetch
  * @param {number} [batchSize=50] - Number of accessions to fetch per batch
  * @returns {Promise<Object[]>} Promise that resolves to array of UniProt entry objects
@@ -302,14 +303,18 @@ async function fetchAccessionsInBatches(accessions, batchSize = 50) {
     const responses = await fetchJsonInBatches(accessions, batchSize, function (batch) {
         const query = `accession:${batch.join(" OR accession:")}`;
         return `${baseURL}?query=${encodeURIComponent(query)}&format=json&size=${batchSize}`;
-    }, "UniProt", 400);
+    }, "UniProt", 400, function (done, total) {
+        vent.trigger("uniprotProgress", done, total);
+    });
     return [].concat(...responses.map(data => data.results));
 }
 
 /**
  * Fetches UniProt KB data for the proteins in clmsModel and assigns each
  * returned entry to its matching Protein.uniprot. Fires vent.trigger("uniprotLoaded")
- * on success. Soft-fails: errors are logged and proteins keep uniprot=null.
+ * on success. Soft-fails: errors are logged, proteins keep uniprot=null and
+ * vent.trigger("uniprotFailed", error) is fired. The outcome is also recorded as
+ * clmsModel.uniprotStatus ("loaded" or "failed") for late listeners.
  * @param {string[]} accessions - Array of UniProt accession IDs (already filtered/legal)
  * @param {SearchResultsModel} clmsModel - The CLMS results model whose Protein objects to populate
  * @returns {Promise<void>}
@@ -349,10 +354,15 @@ export async function fetchUniprotKB(accessions, clmsModel) {
         }
         console.log(`UniProt: assigned data to ${assigned} of ${accessions.length} requested proteins`);
 
-        vent.trigger("uniprotLoaded");
+        clmsModel.uniprotStatus = "loaded";
     } catch (error) {
         console.error("UniProt fetch failed, continuing without annotations:", error);
+        clmsModel.uniprotStatus = "failed";
+        vent.trigger("uniprotFailed", error);
+        return;
     }
+    // outside the try so an error in a listener isn't reported as a failed fetch
+    vent.trigger("uniprotLoaded");
 }
 
 export const _test = process.env.NODE_ENV !== "production" ? {

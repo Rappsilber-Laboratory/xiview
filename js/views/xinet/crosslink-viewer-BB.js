@@ -17,6 +17,7 @@ import {G_GLink} from "./link/g_g-link";
 import {ManualColourModel} from "../../backbone-models/color/protein-color-model";
 import {linkColor} from "../../backbone-models/color/setup-colors";
 import vent from "../../vent";
+import {AUTO_GROUP_STRATEGIES} from "../../backbone-models/mixins/protein-group-manager-mixin";
 
 /**
  * Main controller class for the xiNET crosslink network visualization.
@@ -184,6 +185,14 @@ export class CrosslinkViewer extends Backbone.View {
         this.state = CrosslinkViewer.STATES.MOUSE_UP;
 
         this.firstRender = true;
+
+        // benchmarking hook: a harness can define window.xinetDebug before the page loads to get at the
+        // viewer and cola, and set skipFirstLayout to time layouts itself (e.g. to compare auto group strategies)
+        if (window.xinetDebug) {
+            window.xinetDebug.viewer = this;
+            window.xinetDebug.cola = cola;
+            window.xinetDebug.strategyNames = Object.keys(AUTO_GROUP_STRATEGIES);
+        }
 
         // calculate default bar scale
         let maxSeqLength = 0;
@@ -603,8 +612,12 @@ export class CrosslinkViewer extends Backbone.View {
         if (this.firstRender) { // first render
             this.firstRender = false;
             const savedConfig = this.model.get("savedConfig");
-            if (savedConfig && savedConfig.config && savedConfig.config.layout) {
+            if (window.xinetDebug && window.xinetDebug.skipFirstLayout) {
+                console.log("xiNET: first layout skipped (xinetDebug.skipFirstLayout)");
+            } else if (savedConfig && savedConfig.config && savedConfig.config.layout) {
                 this.loadLayout(savedConfig.config.layout);
+            } else if (this.countColaNodes() > CrosslinkViewer.LARGE_NETWORK_COLA_NODES) {
+                this.deferFirstLayout(); // too big for cola as is - group and collapse first
             } else {
                 this.autoLayout([]); //layout all
             }
@@ -733,6 +746,7 @@ export class CrosslinkViewer extends Backbone.View {
      */
     autoLayout(fixedParticipants) {
         console.log("xiNET AUTO LAYOUT");
+        this.cancelDeferredFirstLayout(); // e.g. user pressed Auto Layout while we were waiting for UniProt
         this.d3cola.stop();
         if (fixedParticipants.length === 0) {
             this.container.setAttribute("transform", "scale(" + 1 + ")");// translate(" + ((width / scaleFactor) - bbox.width - bbox.x) + " " + -bbox.y + ")");
@@ -813,43 +827,7 @@ export class CrosslinkViewer extends Backbone.View {
 
         const self = this;
 
-        const links = new Map();
-        const nodeSet = new Set();
-        //for (let crosslink of self.model.getFilteredCrossLinks()) {
-        for (let graph of this.nonLinearGraphs) {
-            for (let link of graph.links.values()) {
-                // structural self-link test (see countExternalLinks): crosslinks[0] is
-                // unreliable for ambiguous links bundling several crosslinks.
-                if (link.renderedFromProtein !== link.renderedToProtein) {
-                    const source = self.renderedProteins.get(link.renderedFromProtein.protein.id).getRenderedInteractor();
-                    const target = self.renderedProteins.get(link.renderedToProtein.protein.id).getRenderedInteractor();
-                    nodeSet.add(source);
-                    const fromId = link.renderedFromProtein.protein.id;
-                    const toId = link.renderedToProtein.protein.id;
-                    const linkId = fromId + "-" + toId;
-                    if (!links.has(linkId)) {
-                        const linkObj = {};
-                        // todo - maybe do use indexes, might avoid probs in cola
-                        linkObj.source = source;
-                        linkObj.target = target;
-                        nodeSet.add(target); // bit weird doing ths here
-                        linkObj.id = linkId;
-                        links.set(linkId, linkObj);
-                    }
-                }
-            }
-        }
-        // nodes with no links in a non-linear graph (e.g. unlinked members of an expanded group)
-        // still need to be cola nodes; expanded groups themselves are cola groups, not nodes
-        for (let graph of this.nonLinearGraphs) {
-            for (let node of graph.nodes.values()) {
-                if (!(node.type === "group" && node.expanded)) {
-                    nodeSet.add(node);
-                }
-            }
-        }
-        const nodeArr = Array.from(nodeSet);
-        const linkArr = Array.from(links.values());
+        const {nodes: nodeArr, links: linkArr} = this.getColaGraph();
         doLayout(nodeArr, linkArr, true);   // groups-free warm-start
         doLayout(nodeArr, linkArr, false);  // restart with groups, seeded from warm-start
 
@@ -1027,6 +1005,199 @@ export class CrosslinkViewer extends Backbone.View {
         }
     }
 
+    /**
+     * The graph autoLayout hands to cola: proteins / collapsed groups in non-linear subgraphs (linear ones
+     * are gridded instead) and one link per linked pair of them. Expanded groups are cola groups, not nodes.
+     * @returns {{nodes: Object[], links: {source: Object, target: Object, id: string}[]}}
+     */
+    getColaGraph() {
+        const links = new Map();
+        const nodeSet = new Set();
+        for (let graph of this.nonLinearGraphs || []) {
+            for (let link of graph.links.values()) {
+                // structural self-link test (see countExternalLinks): crosslinks[0] is
+                // unreliable for ambiguous links bundling several crosslinks.
+                if (link.renderedFromProtein !== link.renderedToProtein) {
+                    const source = this.renderedProteins.get(link.renderedFromProtein.protein.id).getRenderedInteractor();
+                    const target = this.renderedProteins.get(link.renderedToProtein.protein.id).getRenderedInteractor();
+                    nodeSet.add(source);
+                    nodeSet.add(target);
+                    // one link per pair of interactors - proteins in the same collapsed group give no link,
+                    // and many protein pairs between two collapsed groups give one
+                    const linkId = source.id < target.id ? source.id + "-" + target.id : target.id + "-" + source.id;
+                    if (source !== target && !links.has(linkId)) {
+                        links.set(linkId, {source: source, target: target, id: linkId});
+                    }
+                }
+            }
+        }
+        // nodes with no links in a non-linear graph (e.g. unlinked members of an expanded group)
+        // still need to be cola nodes; expanded groups themselves are cola groups, not nodes
+        for (let graph of this.nonLinearGraphs || []) {
+            for (let node of graph.nodes.values()) {
+                if (!(node.type === "group" && node.expanded)) {
+                    nodeSet.add(node);
+                }
+            }
+        }
+        return {nodes: Array.from(nodeSet), links: Array.from(links.values())};
+    }
+
+    /**
+     * Number of nodes autoLayout would hand to cola.
+     * @returns {number}
+     */
+    countColaNodes() {
+        return this.getColaGraph().nodes.length;
+    }
+
+    /**
+     * Very large networks freeze the page in cola (its start() is synchronous, builds an all-pairs
+     * shortest path matrix and runs O(n^2) iterations), so instead of laying them out straight away we wait
+     * for UniProt, auto group the proteins (LARGE_NETWORK_GROUPING_STRATEGIES), collapse the groups and
+     * then lay out the (smaller) result.
+     * Falls back to laying out ungrouped if UniProt fails, or if the UniProt fetch or the grouping makes no
+     * progress for LARGE_NETWORK_GROUPING_TIMEOUT_MS.
+     */
+    deferFirstLayout() {
+        const nodeCount = this.countColaNodes();
+        console.log("xiNET LARGE NETWORK: " + nodeCount + " nodes for cola (threshold " +
+            CrosslinkViewer.LARGE_NETWORK_COLA_NODES + ") - deferring first layout until proteins are grouped");
+        this.firstLayoutPending = true;
+        this.container.setAttribute("visibility", "hidden"); // nothing has a position yet
+        this.showStatus("Large network (" + nodeCount + " interconnected proteins) - waiting for UniProt annotations " +
+            "to group proteins before layout...");
+
+        const uniprotStatus = this.model.get("clmsModel").uniprotStatus;
+        if (uniprotStatus === "loaded") {
+            this.groupAndLayoutLargeNetwork();
+        } else if (uniprotStatus === "failed") {
+            this.runDeferredFirstLayout("UniProt annotations unavailable");
+        } else {
+            this.listenToOnce(vent, "uniprotLoaded", this.groupAndLayoutLargeNetwork);
+            this.listenToOnce(vent, "uniprotFailed", function () {
+                this.runDeferredFirstLayout("UniProt annotations failed to load");
+            });
+            // big datasets take minutes to fetch from UniProt, so time out on lack of progress, not total time
+            this.listenTo(vent, "uniprotProgress", function (done, total) {
+                this.showStatus("Large network (" + nodeCount + " interconnected proteins) - waiting for UniProt annotations " +
+                    "to group proteins before layout (" + done + " / " + total + ")...");
+                this.restartFirstLayoutTimer();
+            });
+            this.restartFirstLayoutTimer();
+        }
+    }
+
+    /**
+     * (Re)starts the timer after which a deferred large network layout gives up waiting for grouping.
+     */
+    restartFirstLayoutTimer() {
+        clearTimeout(this.firstLayoutTimer);
+        this.firstLayoutTimer = setTimeout(() => {
+            this.runDeferredFirstLayout("No progress for " + (CrosslinkViewer.LARGE_NETWORK_GROUPING_TIMEOUT_MS / 1000) +
+                "s waiting for UniProt annotations / auto grouping");
+        }, CrosslinkViewer.LARGE_NETWORK_GROUPING_TIMEOUT_MS);
+    }
+
+    /**
+     * Called when UniProt annotations arrive while the first layout of a large network is deferred.
+     * Auto groups proteins (unless there are already groups), collapses all groups, then lays out.
+     * @returns {Promise<void>}
+     */
+    async groupAndLayoutLargeNetwork() {
+        if (!this.firstLayoutPending) {
+            return;
+        }
+        this.stopListening(vent, "uniprotProgress");
+        if (this.model.get("groups").size === 0) {
+            let groupMap = null;
+            for (let strategy of CrosslinkViewer.LARGE_NETWORK_GROUPING_STRATEGIES) { // first is preferred, rest fallbacks
+                this.restartFirstLayoutTimer(); // each strategy (its QuickGO requests) gets its own full timeout
+                this.showStatus("Large network - auto grouping proteins (" + strategy + ")...");
+                try {
+                    groupMap = await this.model.buildAutoGroupsByStrategy(strategy);
+                } catch (e) {
+                    console.warn("xiNET: auto grouping (" + strategy + ") failed", e);
+                    groupMap = null;
+                }
+                if (!this.firstLayoutPending) {
+                    return; // timed out, or user laid out / loaded a layout meanwhile - don't touch groups now
+                }
+                if (groupMap && groupMap.size > 0) {
+                    console.log("xiNET: auto grouped large network into " + groupMap.size + " groups (" + strategy + ")");
+                    break;
+                }
+            }
+            if (groupMap && groupMap.size > 0 && this.model.get("groups").size === 0) {
+                this.showStatus("Large network - collapsing " + groupMap.size + " auto groups...");
+                await CrosslinkViewer.yieldToBrowser();
+                if (!this.firstLayoutPending) {
+                    return;
+                }
+                this.model.set("groups", groupMap);
+                this.model.trigger("change:groups");
+            } else {
+                console.warn("xiNET: no auto groups found, laying out ungrouped");
+            }
+        }
+        this.collapseGroups();
+        this.runDeferredFirstLayout();
+    }
+
+    /**
+     * Ends the wait for grouping and runs the deferred first layout.
+     * @param {string} [reason] - Why it's running without grouping, if it is (logged as a warning)
+     * @returns {Promise<void>}
+     */
+    async runDeferredFirstLayout(reason) {
+        if (!this.firstLayoutPending) {
+            return;
+        }
+        if (reason) {
+            console.warn("xiNET: " + reason + " - laying out large network without grouping, this may take a long time");
+        }
+        const nodeCount = this.countColaNodes();
+        this.showStatus((reason ? reason + ". " : "") + "Laying out " + nodeCount + " nodes - the page may be unresponsive for a while...");
+        await CrosslinkViewer.yieldToBrowser(); // let the status paint before cola blocks the thread
+        if (!this.firstLayoutPending) {
+            return;
+        }
+        console.log("xiNET: first layout of large network with " + nodeCount + " cola nodes");
+        this.autoLayout([]); // clears firstLayoutPending, shows container, hides status
+    }
+
+    /**
+     * Stops waiting to lay out a large network (if we were) and reveals it.
+     */
+    cancelDeferredFirstLayout() {
+        if (!this.firstLayoutPending) {
+            return;
+        }
+        this.firstLayoutPending = false;
+        clearTimeout(this.firstLayoutTimer);
+        this.stopListening(vent, "uniprotLoaded", this.groupAndLayoutLargeNetwork);
+        this.stopListening(vent, "uniprotFailed");
+        this.stopListening(vent, "uniprotProgress");
+        this.container.removeAttribute("visibility");
+        this.showStatus(null);
+    }
+
+    /**
+     * Shows a status message over the network, or hides it.
+     * @param {string|null} message - Text to show; null hides the message
+     */
+    showStatus(message) {
+        if (!this.statusSel) {
+            this.statusSel = d3.select(this.el).append("div")
+                .attr("class", "xinet-status")
+                .style({
+                    position: "absolute", top: "40%", left: "10%", right: "10%",
+                    "text-align": "center", "font-size": "1.2em", "pointer-events": "none"
+                });
+        }
+        this.statusSel.text(message || "").style("display", message ? null : "none");
+    }
+
     //functions used...
     xForColumn(c) {
         const maxBlobRadius = 40;
@@ -1128,6 +1299,7 @@ export class CrosslinkViewer extends Backbone.View {
     //todo - this is becoming about config of all xiVIEw not just config of xiNET, should be moved
     loadLayout(layout) {
         console.log("xiNET LOAD LAYOUT", layout);
+        this.cancelDeferredFirstLayout();
         let proteinPositions, groups;
         // for backwards compatibility (after groups added to layout)
         if (layout.proteins) {
@@ -1423,6 +1595,9 @@ export class CrosslinkViewer extends Backbone.View {
             this.z = 1;
         }
         for (let prot of this.renderedProteins.values()) {
+            if (prot.hidden) {
+                continue; // rescaled when shown again (see RenderedProtein.setHidden) - big win for large collapsed groups
+            }
             prot.setPositionFromXinet(prot.ix, prot.iy); // this rescales the protein
             if (prot.expanded)
                 prot.setAllLinkCoordinates();
@@ -1972,3 +2147,15 @@ CrosslinkViewer.STATES = {
 };
 
 CrosslinkViewer.barScales = [0.01, 0.2, 0.5, 0.8, 1, 2, 4, 8];
+// networks with more cola nodes than this get auto grouped and collapsed before their first layout
+CrosslinkViewer.LARGE_NETWORK_COLA_NODES = 500;
+// auto group strategies (keys of AUTO_GROUP_STRATEGIES) tried in order for large networks, until one finds groups.
+// On DUC-XL-MS (6.7k proteins, 5171 cola nodes ungrouped) laminarAll leaves 492 cola nodes (66 top-level groups
+// with 358 nested inside them), goComplexLaminar 3438. Both need QuickGO; location doesn't, so it's the last resort.
+CrosslinkViewer.LARGE_NETWORK_GROUPING_STRATEGIES = ["laminarAll", "goComplexLaminar", "location"];
+// how long a large network waits without progress on UniProt annotations / GO grouping before being laid out ungrouped
+CrosslinkViewer.LARGE_NETWORK_GROUPING_TIMEOUT_MS = 60000;
+// resolves after the browser has had a chance to paint (e.g. a status message before a long blocking task)
+CrosslinkViewer.yieldToBrowser = function () {
+    return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+};

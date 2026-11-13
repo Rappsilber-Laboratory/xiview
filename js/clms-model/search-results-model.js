@@ -22,6 +22,12 @@ export class SearchResultsModel {
     /** @type {Map<string, Protein>} Map of protein objects keyed by protein ID */
     #proteins = new Map();
 
+    /**
+     * Outcome of the UniProt annotation fetch: null while pending (or never started), "loaded" or "failed"
+     * @type {string|null}
+     */
+    uniprotStatus = null;
+
     /** @type {Map<string, ScoreExtent>} Map of score type names to ScoreExtent objects */
     scoreExtents = new Map();
 

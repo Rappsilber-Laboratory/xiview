@@ -269,6 +269,172 @@ async function buildLocationAndComplexGroups(proteins) {
     return groupMap;
 }
 
+/**
+ * Keeps a laminar subset of groups: every kept pair is either disjoint or nested (one a subset of the other);
+ * only partial overlaps are dropped. Groups are taken largest first (ties broken by name, so the result is
+ * deterministic), so a group can only ever be a subset of an already kept one, never a superset, and the
+ * biggest groups win. Exact duplicates of a kept group are dropped.
+ * xiNET supports nested groups (a collapsed parent hides its subgroups), so all kept groups can be collapsed.
+ * @param {Map<string, Set<string>>} groupMap - Group name -> protein ids
+ * @returns {Map<string, Set<string>>} New map with the kept groups
+ */
+function keepNonOverlappingGroups(groupMap) {
+    const kept = [];
+    const sorted = Array.from(groupMap.entries())
+        .sort((a, b) => (b[1].size - a[1].size) || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+    for (let [name, proteinIds] of sorted) {
+        const rejected = kept.some(function ([, keptIds]) {
+            let shared = 0;
+            for (let id of proteinIds) {
+                if (keptIds.has(id)) {
+                    shared++;
+                }
+            }
+            // keptIds is at least as big: partial overlap if some but not all shared; duplicate if same size
+            return (shared > 0 && shared < proteinIds.size) || (shared === keptIds.size);
+        });
+        if (!rejected) {
+            kept.push([name, proteinIds]);
+        }
+    }
+    if (kept.length < groupMap.size) {
+        console.log("Auto group: kept " + kept.length + " of " + groupMap.size + " groups (dropped partially overlapping or duplicate ones)");
+    }
+    return new Map(kept);
+}
+
+/**
+ * Returns the set of unordered protein id pairs that have at least one (non-decoy, non-self) crosslink.
+ * @param {SearchResultsModel} clmsModel
+ * @returns {Set<string>} "idA\tidB" keys with idA < idB
+ */
+function getLinkedProteinPairs(clmsModel) {
+    const pairs = new Set();
+    for (let crosslink of clmsModel.getCrosslinks().values()) {
+        if (crosslink.toProtein && !crosslink.isDecoyLink() && crosslink.fromProtein.id !== crosslink.toProtein.id) {
+            const a = crosslink.fromProtein.id, b = crosslink.toProtein.id;
+            pairs.add(a < b ? a + "\t" + b : b + "\t" + a);
+        }
+    }
+    return pairs;
+}
+
+/**
+ * Counts crosslinked protein pairs within a group.
+ * @param {Set<string>} proteinIds
+ * @param {Set<string>} linkedPairs - from getLinkedProteinPairs
+ * @returns {number}
+ */
+function countIntraGroupLinks(proteinIds, linkedPairs) {
+    const ids = Array.from(proteinIds);
+    let count = 0;
+    if (ids.length * ids.length / 2 < linkedPairs.size) {
+        for (let i = 0; i < ids.length; i++) {
+            for (let j = i + 1; j < ids.length; j++) {
+                const a = ids[i], b = ids[j];
+                if (linkedPairs.has(a < b ? a + "\t" + b : b + "\t" + a)) {
+                    count++;
+                }
+            }
+        }
+    } else {
+        for (let pair of linkedPairs) {
+            const [a, b] = pair.split("\t");
+            if (proteinIds.has(a) && proteinIds.has(b)) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+/**
+ * Merges several group maps into one, suffixing names that clash.
+ * @param {Map<string, Set<string>>[]} groupMaps
+ * @returns {Map<string, Set<string>>}
+ */
+function mergeGroupMaps(groupMaps) {
+    const merged = new Map();
+    for (let groupMap of groupMaps) {
+        for (let [name, proteinIds] of groupMap) {
+            let key = name, n = 2;
+            while (merged.has(key)) {
+                key = name + " (" + n++ + ")";
+            }
+            merged.set(key, proteinIds);
+        }
+    }
+    return merged;
+}
+
+/**
+ * Turns (possibly overlapping) groups into a partition: groups are visited in order (most proteins first, or
+ * most crosslinked protein pairs inside the group first), each takes the proteins not already assigned to an
+ * earlier group, and groups left with fewer than MIN_GROUP_SIZE proteins are dropped.
+ * Every protein ends up in at most one group, so all groups can be collapsed.
+ * @param {Map<string, Set<string>>} groupMap - Group name -> protein ids
+ * @param {"size"|"links"} order - Visiting order
+ * @param {Set<string>} [linkedPairs] - Needed for order "links" (from getLinkedProteinPairs)
+ * @returns {Map<string, Set<string>>} Group name -> protein ids
+ */
+function partitionGroups(groupMap, order, linkedPairs) {
+    const entries = Array.from(groupMap.entries()).map(function ([name, proteinIds]) {
+        const score = order === "links" ? countIntraGroupLinks(proteinIds, linkedPairs) : proteinIds.size;
+        return {name, proteinIds, score};
+    });
+    entries.sort((a, b) => (b.score - a.score) || (b.proteinIds.size - a.proteinIds.size));
+    const assigned = new Set();
+    const partition = new Map();
+    for (let {name, proteinIds} of entries) {
+        const remaining = new Set();
+        for (let id of proteinIds) {
+            if (!assigned.has(id)) {
+                remaining.add(id);
+            }
+        }
+        if (remaining.size >= MIN_GROUP_SIZE) {
+            partition.set(name, remaining);
+            for (let id of remaining) {
+                assigned.add(id);
+            }
+        }
+    }
+    return partition;
+}
+
+/**
+ * Auto grouping strategies by name. Each takes (proteins, clmsModel) and returns (a promise of) a
+ * group name -> protein ids map. The menu items use the first four (which may give overlapping groups);
+ * the others are non-overlapping variants for collapsing very large networks (see xiNET deferFirstLayout).
+ * @type {Object<string, function(Object[], SearchResultsModel): (Map<string, Set<string>>|Promise<Map<string, Set<string>>>)>}
+ */
+export const AUTO_GROUP_STRATEGIES = {
+    goComplex: proteins => buildGoComplexGroups(proteins),
+    location: proteins => buildLocationGroups(proteins),
+    complexPortal: proteins => buildComplexGroups(proteins),
+    locationAndComplex: proteins => buildLocationAndComplexGroups(proteins),
+    // GO complex groups minus those partially overlapping a bigger one (nesting kept)
+    goComplexLaminar: async proteins => keepNonOverlappingGroups(await buildGoComplexGroups(proteins)),
+    // laminar (disjoint or nested) subset of the union of location, Complex Portal and GO complex groups
+    laminarAll: async proteins => keepNonOverlappingGroups(await buildAllGroups(proteins)),
+    // partitions of the union of location, Complex Portal and GO complex groups
+    partitionAllBySize: async proteins => partitionGroups(await buildAllGroups(proteins), "size"),
+    partitionAllByLinks: async (proteins, clmsModel) =>
+        partitionGroups(await buildAllGroups(proteins), "links", getLinkedProteinPairs(clmsModel)),
+    // partitions of the union of Complex Portal and GO complex groups (no locations)
+    partitionComplexesBySize: async proteins => partitionGroups(await buildAllComplexGroups(proteins), "size"),
+    partitionComplexesByLinks: async (proteins, clmsModel) =>
+        partitionGroups(await buildAllComplexGroups(proteins), "links", getLinkedProteinPairs(clmsModel)),
+};
+
+async function buildAllComplexGroups(proteins) {
+    return mergeGroupMaps([buildComplexGroups(proteins), await buildGoComplexGroups(proteins)]);
+}
+
+async function buildAllGroups(proteins) {
+    return mergeGroupMaps([buildLocationGroups(proteins), await buildAllComplexGroups(proteins)]);
+}
+
 export const ProteinGroupManagerMixin = {
     /**
      * Creates a new protein group from currently selected proteins.
@@ -395,6 +561,19 @@ export const ProteinGroupManagerMixin = {
             self.set("groups", groupMap);
             self.trigger("change:groups");
         });
+    },
+
+    /**
+     * Non-interactive auto grouping by a named strategy (see AUTO_GROUP_STRATEGIES), used by xiNET to shrink
+     * very large networks before their first layout (and by benchmarks). Doesn't change the model's groups or
+     * ask the user anything - the caller applies the result.
+     * @param {string} strategy - Key of AUTO_GROUP_STRATEGIES
+     * @returns {Promise<Map<string, Set<string>>>} Group name -> protein ids (empty if none found)
+     * @throws {Error} If building the groups fails (e.g. QuickGO request fails)
+     */
+    async buildAutoGroupsByStrategy(strategy) {
+        const clmsModel = this.get("clmsModel");
+        return AUTO_GROUP_STRATEGIES[strategy](Array.from(clmsModel.getProteinsIterator()), clmsModel);
     },
 
     /**

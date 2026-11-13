@@ -139,6 +139,8 @@ export function postDataLoaded(compositeModelInst) {
     const accessions = getLegalAccessionIDs(compositeModelInst.get("clmsModel").getProteinsMap());
     if (accessions.length) {
         fetchUniprotKB(accessions, compositeModelInst.get("clmsModel"));
+    } else {
+        compositeModelInst.get("clmsModel").uniprotStatus = "failed";
     }
 
     //viewsThatNeedAsyncData(compositeModelInst);

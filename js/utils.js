@@ -928,16 +928,20 @@ export function getLocalStorage(objName) {
  * @param {function(string[]): string} makeUrl - Builds the request URL for a batch
  * @param {string} label - Service name used in error messages
  * @param {number} [delayMs=0] - Pause between requests, to stay polite to public endpoints
+ * @param {function(number, number)} [onProgress] - Called after each batch with (items done, total items)
  * @returns {Promise<Object[]>} Parsed JSON response for each batch, in order
  * @throws {Error} If any request fails
  */
-export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delayMs = 0) {
+export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delayMs = 0, onProgress = null) {
     const responses = [];
     for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
         const response = await fetch(makeUrl(batch));
         if (!response.ok) throw new Error(`${label} fetch failed (${response.status}) for batch starting ${batch[0]}`);
         responses.push(await response.json());
+        if (onProgress) {
+            onProgress(Math.min(i + batchSize, items.length), items.length);
+        }
 
         if (delayMs && i + batchSize < items.length) {
             await new Promise(resolve => setTimeout(resolve, delayMs));
