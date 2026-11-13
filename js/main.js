@@ -137,6 +137,7 @@ const fetchSavedConfig = (apiBase) => {
 export function main(apiBase, annotatorURL, options = {}) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
+    showDataLoadStatus(spinTarget);
     setWindowTitle();
     const clmsModel = new SearchResultsModel();
     clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
@@ -160,6 +161,7 @@ export function main(apiBase, annotatorURL, options = {}) {
 
     // Process all requests in parallel (including blosum loading)
     Promise.all(allTasks)
+        .then(showBuildingViews)
         // eslint-disable-next-line no-unused-vars
         .then((results) => {
             console.log("API data and blosum backbone-models are ready.");
@@ -173,11 +175,13 @@ export function main(apiBase, annotatorURL, options = {}) {
             views(compositeModelInst, split);
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
             networkPageSpinner.stop();
+            hideDataLoadStatus();
         })
         .catch((error) => {
             showMessage(error.stack || error.message || error, "error");
             console.error(error);
             networkPageSpinner.stop();
+            hideDataLoadStatus();
         });
 }
 
@@ -192,11 +196,13 @@ export function main(apiBase, annotatorURL, options = {}) {
 export function validationPage(apiBase, annotatorURL) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
+    showDataLoadStatus(spinTarget);
     setWindowTitle();
     const clmsModel = new SearchResultsModel();
     clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
     const tasks = getTasks(apiBase, clmsModel);
     Promise.all(tasks)
+        .then(showBuildingViews)
         // eslint-disable-next-line no-unused-vars
         .then((results) => {
             console.log("API data ready.");
@@ -209,6 +215,7 @@ export function validationPage(apiBase, annotatorURL) {
             const allMatches = compositeModelInst.get("clmsModel").getMatches();
             compositeModelInst.setMarkedMatches("selection", allMatches);
             networkPageSpinner.stop();
+            hideDataLoadStatus();
             const targetProteinCount = clmsModel.getTargetProteinCount();
             if (targetProteinCount > 2000) {
                 showMessage("More than 2000 proteins (" + targetProteinCount + ") — network view not available.", "info");
@@ -218,8 +225,86 @@ export function validationPage(apiBase, annotatorURL) {
             showMessage(error.stack || error.message || error, "error");
             console.error(error);
             networkPageSpinner.stop();
+            hideDataLoadStatus();
         });
 }
+
+/**
+ * What's loading, shown under the page spinner: label -> true once loaded. See showDataLoadStatus.
+ * @type {Map<string, boolean>}
+ * @private
+ */
+const loadStages = new Map();
+
+/**
+ * Shows a line under the page spinner saying what's still loading (see trackLoad), until hideDataLoadStatus.
+ * @param {Element} target - Element the spinner is in
+ * @private
+ */
+function showDataLoadStatus(target) {
+    loadStages.clear();
+    d3.select(target).append("div")
+        .attr("class", "data-load-status")
+        .style({
+            position: "absolute", top: "62%", left: "10%", right: "10%",
+            "text-align": "center", "font-size": "1.2em", "pointer-events": "none"
+        });
+}
+
+/**
+ * Sets the text under the page spinner: the given message, or else the load stages and whether they're done.
+ * @param {string} [message]
+ * @private
+ */
+function updateDataLoadStatus(message) {
+    const text = message || "Loading " + Array.from(loadStages,
+        ([label, done]) => label + (done ? " \u2713" : "\u2026")).join(" \u00b7 ");
+    d3.selectAll(".data-load-status").text(text);
+}
+
+/**
+ * Removes the line shown by showDataLoadStatus.
+ * @private
+ */
+function hideDataLoadStatus() {
+    d3.selectAll(".data-load-status").remove();
+}
+
+/**
+ * Says "Building views..." under the page spinner, and gives the browser a moment to show it before the
+ * (synchronous, on big datasets long) view setup that follows.
+ * @param {*} results - Passed through
+ * @returns {Promise} Resolves to results
+ * @private
+ */
+function showBuildingViews(results) {
+    updateDataLoadStatus("Building views\u2026");
+    return new Promise(resolve => setTimeout(() => resolve(results), 20));
+}
+
+/**
+ * Lists a load stage under the page spinner and ticks it off when the promise resolves.
+ * Several promises can share a label; it's ticked off when all of them have resolved.
+ * @param {string} label - e.g. "matches"
+ * @param {Promise} promise
+ * @returns {Promise} The promise
+ * @private
+ */
+function trackLoad(label, promise) {
+    const pending = (trackLoad.pending[label] || 0) + 1;
+    trackLoad.pending[label] = pending;
+    loadStages.set(label, false);
+    updateDataLoadStatus();
+    return promise.then((result) => {
+        trackLoad.pending[label] -= 1;
+        if (trackLoad.pending[label] === 0) {
+            loadStages.set(label, true);
+            updateDataLoadStatus();
+        }
+        return result;
+    });
+}
+trackLoad.pending = {};
 
 /**
  * Creates an array of data fetching tasks for all required API endpoints.
@@ -242,16 +327,18 @@ function getTasks(apiBase, clmsModel) {
     const peptidesUrl = `${apiBase}get_xiview_peptides${window.location.search}`;
     const proteinUrl = `${apiBase}get_xiview_proteins${window.location.search}`;
 
+    trackLoad.pending = {};
+    const metadata = (url, process) => trackLoad("search metadata", fetchDataAndProcess(url, process));
     return [
-        fetchDataAndProcess(mzIdentMLUrl, (data) => clmsModel.storeMzIdentMLFiles(data)),
-        fetchDataAndProcess(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.storeAnalysisCollectionSpectrumIdentifications(data)),
-        fetchDataAndProcess(spectrumIdentificationProtocolUrl, (data) => clmsModel.storeSpectrumIdentificationProtocols(data)),
-        fetchDataAndProcess(spectraDataUrl, (data) => clmsModel.storeSpectraData(data)),
-        fetchDataAndProcess(enzymesUrl, (data) => clmsModel.storeEnzymes(data)),
-        fetchDataAndProcess(searchModificationsUrl, (data) => clmsModel.storeSearchModifications(data)),
-        fetchDataAndProcess(proteinUrl, (data) => clmsModel.storeProteins(data)),
-        fetchDataAndProcess(peptidesUrl, (data) => clmsModel.storePeptides(data)),
-        fetchDataAndProcess(matchesUrl, (data) => clmsModel.storeMatches(data)),
+        metadata(mzIdentMLUrl, (data) => clmsModel.storeMzIdentMLFiles(data)),
+        metadata(analysisCollection_spectrum_identificationsUrl, (data) => clmsModel.storeAnalysisCollectionSpectrumIdentifications(data)),
+        metadata(spectrumIdentificationProtocolUrl, (data) => clmsModel.storeSpectrumIdentificationProtocols(data)),
+        metadata(spectraDataUrl, (data) => clmsModel.storeSpectraData(data)),
+        metadata(enzymesUrl, (data) => clmsModel.storeEnzymes(data)),
+        metadata(searchModificationsUrl, (data) => clmsModel.storeSearchModifications(data)),
+        trackLoad("proteins", fetchDataAndProcess(proteinUrl, (data) => clmsModel.storeProteins(data))),
+        trackLoad("peptides", fetchDataAndProcess(peptidesUrl, (data) => clmsModel.storePeptides(data))),
+        trackLoad("matches", fetchDataAndProcess(matchesUrl, (data) => clmsModel.storeMatches(data))),
     ];
 }
 
