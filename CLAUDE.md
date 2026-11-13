@@ -186,4 +186,3 @@ xiview-server serves `network.html` at `/network.html` via Flask's static file h
 - Do not upgrade from d3 v3
 - Never modify code in `vendor/` directories
 - Do not add QUnit import to HTML files (it is included in the development bundle)
-- Do not lint, test, or build — the user will do that
