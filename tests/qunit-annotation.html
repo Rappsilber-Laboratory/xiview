@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>QUnit Annotation Request Tests</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.21.1.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+<script type="text/javascript" src="../dist/vendors.js"></script>
+<script type="text/javascript" src="../dist/xiview.js"></script>
+
+<script>
+    // Wait for the xiview module to load
+    window.addEventListener('load', function() {
+        if (window.xiview._test && window.xiview._test.testAnnotationRequest) {
+            window.xiview._test.testAnnotationRequest();
+        } else {
+            console.error('xiview._test.testAnnotationRequest is not available');
+            console.log('Available xiview exports:', Object.keys(window.xiview || {}));
+        }
+    });
+</script>
+
+</body>
+</html>

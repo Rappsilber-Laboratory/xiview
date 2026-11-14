@@ -601,5 +601,9 @@ export const _test = process.env.NODE_ENV !== "production" ? {
         // eslint-disable-next-line no-undef
         QUnit.config.notrycatch = true;
         return testSetup();
+    },
+    testAnnotationRequest: async () => {
+        const { testSetup } = await import("../tests/annotation-request-tests");
+        return testSetup();
     }
 } : undefined;

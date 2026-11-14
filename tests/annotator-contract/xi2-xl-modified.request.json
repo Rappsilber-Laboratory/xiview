@@ -1,0 +1,163 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "M",
+          "Modification": "(ox)"
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "C",
+          "Modification": "(cm)"
+        },
+        {
+          "aminoAcid": "R",
+          "Modification": ""
+        }
+      ],
+      "base_sequence": "MEKCR",
+      "modification_positions": [
+        1,
+        4
+      ],
+      "modification_ids": [
+        1,
+        0
+      ]
+    },
+    {
+      "sequence": [
+        {
+          "aminoAcid": "K",
+          "Modification": "(ac)"
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "C",
+          "Modification": "(cm)"
+        }
+      ],
+      "base_sequence": "KVLC",
+      "modification_positions": [
+        0,
+        4
+      ],
+      "modification_ids": [
+        2,
+        0
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 2
+    },
+    {
+      "id": 0,
+      "peptideId": 1,
+      "linkSite": 0
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "xl-modified",
+    "crosslinkerID": 0,
+    "precursorCharge": 4,
+    "modifications": [],
+    "precursorMZ": 412.211,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": []
+    },
+    "config": {
+      "crosslinker": [
+        {
+          "name": "BS3",
+          "mass": 138.06807961,
+          "specificity": [
+            [
+              "K",
+              "S",
+              "T",
+              "Y",
+              "nterm"
+            ]
+          ]
+        }
+      ],
+      "modification": {
+        "modifications": [
+          {
+            "name": "cm",
+            "long_name": "Carbamidomethyl",
+            "specificity": [
+              "C"
+            ],
+            "type": "fixed",
+            "mass": 57.021464,
+            "level": "peptide"
+          },
+          {
+            "name": "ox",
+            "long_name": "Oxidation",
+            "specificity": [
+              "M"
+            ],
+            "type": "variable",
+            "mass": 15.994915,
+            "level": "peptide"
+          },
+          {
+            "name": "ac",
+            "long_name": "Acetyl",
+            "specificity": [
+              "nterm"
+            ],
+            "type": "variable",
+            "composition": "C2H2O",
+            "level": "protein"
+          },
+          {
+            "name": "am",
+            "long_name": "Amidated",
+            "specificity": [
+              "cterm"
+            ],
+            "type": "variable",
+            "mass": -0.984016,
+            "level": "peptide"
+          }
+        ]
+      },
+      "fragmentation": {
+        "nterm_ions": [
+          "b"
+        ],
+        "cterm_ions": [
+          "y"
+        ],
+        "add_precursor": true
+      },
+      "ms1_tol": "5 ppm",
+      "ms2_tol": "10 ppm"
+    }
+  }
+}

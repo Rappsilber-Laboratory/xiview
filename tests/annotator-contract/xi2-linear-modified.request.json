@@ -1,0 +1,110 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "G",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "C",
+          "Modification": "(cm)"
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": "(am)"
+        }
+      ],
+      "base_sequence": "GCLK",
+      "modification_positions": [
+        2,
+        32767
+      ],
+      "modification_ids": [
+        0,
+        3
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": -1
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "linear-modified",
+    "precursorCharge": 2,
+    "modifications": [],
+    "precursorMZ": 233.6,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": []
+    },
+    "config": {
+      "crosslinker": [],
+      "modification": {
+        "modifications": [
+          {
+            "name": "cm",
+            "long_name": "Carbamidomethyl",
+            "specificity": [
+              "C"
+            ],
+            "type": "fixed",
+            "mass": 57.021464,
+            "level": "peptide"
+          },
+          {
+            "name": "ox",
+            "long_name": "Oxidation",
+            "specificity": [
+              "M"
+            ],
+            "type": "variable",
+            "mass": 15.994915,
+            "level": "peptide"
+          },
+          {
+            "name": "ac",
+            "long_name": "Acetyl",
+            "specificity": [
+              "nterm"
+            ],
+            "type": "variable",
+            "composition": "C2H2O",
+            "level": "protein"
+          },
+          {
+            "name": "am",
+            "long_name": "Amidated",
+            "specificity": [
+              "cterm"
+            ],
+            "type": "variable",
+            "mass": -0.984016,
+            "level": "peptide"
+          }
+        ]
+      },
+      "fragmentation": {
+        "nterm_ions": [
+          "b"
+        ],
+        "cterm_ions": [
+          "y"
+        ],
+        "add_precursor": true
+      },
+      "ms1_tol": "5 ppm",
+      "ms2_tol": "10 ppm"
+    }
+  }
+}

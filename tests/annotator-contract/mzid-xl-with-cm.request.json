@@ -1,0 +1,213 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "S",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "C",
+          "Modification": "(carbamidomethyl)"
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "I",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "S",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        }
+      ]
+    },
+    {
+      "sequence": [
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "P",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "C",
+          "Modification": "(carbamidomethyl)"
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "G",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "W",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "I",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "R",
+          "Modification": ""
+        }
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 0
+    },
+    {
+      "id": 0,
+      "peptideId": 1,
+      "linkSite": 17
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "SII_2_1",
+    "precursorCharge": 6,
+    "modifications": [
+      {
+        "id": "(carbamidomethyl)",
+        "mass": 57.02147,
+        "aminoAcids": [
+          "*"
+        ]
+      }
+    ],
+    "precursorMZ": 752.7466713415814,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": [],
+      "modMass": 82.04186
+    },
+    "fragmentTolerance": {
+      "tolerance": 5,
+      "unit": "ppm"
+    },
+    "ions": [
+      {
+        "type": "BIon"
+      },
+      {
+        "type": "YIon"
+      }
+    ]
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "N",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "M",
+          "Modification": "(oxidation)"
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "F",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "N",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "P",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "R",
+          "Modification": ""
+        }
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 14
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "SII_11_1",
+    "precursorCharge": 3,
+    "modifications": [
+      {
+        "id": "(oxidation)",
+        "mass": 15.994915,
+        "aminoAcids": [
+          "*"
+        ]
+      }
+    ],
+    "precursorMZ": 682.99096,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": [],
+      "modMass": -18.010565
+    },
+    "fragmentTolerance": {
+      "tolerance": 0.03,
+      "unit": "Da"
+    },
+    "ions": [
+      {
+        "type": "BIon"
+      },
+      {
+        "type": "YIon"
+      }
+    ]
+  }
+}

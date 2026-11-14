@@ -1,0 +1,139 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        }
+      ],
+      "base_sequence": "AKT",
+      "modification_positions": [],
+      "modification_ids": []
+    },
+    {
+      "sequence": [
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "M",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "R",
+          "Modification": ""
+        }
+      ],
+      "base_sequence": "KMR",
+      "modification_positions": [],
+      "modification_ids": []
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 1
+    },
+    {
+      "id": 0,
+      "peptideId": 1,
+      "linkSite": 0
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "xl-unmodified",
+    "crosslinkerID": 0,
+    "precursorCharge": 3,
+    "modifications": [],
+    "precursorMZ": 297.509118,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": []
+    },
+    "config": {
+      "crosslinker": [
+        {
+          "name": "BS3",
+          "mass": 138.06807961,
+          "specificity": [
+            [
+              "K",
+              "S",
+              "T",
+              "Y",
+              "nterm"
+            ]
+          ]
+        }
+      ],
+      "modification": {
+        "modifications": [
+          {
+            "name": "cm",
+            "long_name": "Carbamidomethyl",
+            "specificity": [
+              "C"
+            ],
+            "type": "fixed",
+            "mass": 57.021464,
+            "level": "peptide"
+          },
+          {
+            "name": "ox",
+            "long_name": "Oxidation",
+            "specificity": [
+              "M"
+            ],
+            "type": "variable",
+            "mass": 15.994915,
+            "level": "peptide"
+          },
+          {
+            "name": "ac",
+            "long_name": "Acetyl",
+            "specificity": [
+              "nterm"
+            ],
+            "type": "variable",
+            "composition": "C2H2O",
+            "level": "protein"
+          },
+          {
+            "name": "am",
+            "long_name": "Amidated",
+            "specificity": [
+              "cterm"
+            ],
+            "type": "variable",
+            "mass": -0.984016,
+            "level": "peptide"
+          }
+        ]
+      },
+      "fragmentation": {
+        "nterm_ions": [
+          "b"
+        ],
+        "cterm_ions": [
+          "y"
+        ],
+        "add_precursor": true
+      },
+      "ms1_tol": "5 ppm",
+      "ms2_tol": "10 ppm"
+    }
+  }
+}

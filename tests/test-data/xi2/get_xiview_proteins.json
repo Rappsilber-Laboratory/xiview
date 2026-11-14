@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "PA",
+    "accession": "PA",
+    "sequence": "MAKTKMRMEKCRKVLCGCLK",
+    "search_id": "S1",
+    "is_decoy": false
+  },
+  {
+    "id": 1,
+    "name": "PA",
+    "accession": "PA",
+    "sequence": "MAKTKMRMEKCRKVLCGCLK",
+    "search_id": "S0",
+    "is_decoy": false
+  },
+  {
+    "id": 1,
+    "name": "PA",
+    "accession": "PA",
+    "sequence": "MAKTKMRMEKCRKVLCGCLK",
+    "search_id": "S2",
+    "is_decoy": false
+  }
+]

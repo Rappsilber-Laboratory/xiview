@@ -1,0 +1,101 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        }
+      ]
+    },
+    {
+      "sequence": [
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "I",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        }
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 7
+    },
+    {
+      "id": 0,
+      "peptideId": 1,
+      "linkSite": 0
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "SII_8_2_p1",
+    "precursorCharge": 3,
+    "modifications": [],
+    "precursorMZ": 506.29079,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": [],
+      "modMass": -18.010565
+    },
+    "fragmentTolerance": {
+      "tolerance": 0.03,
+      "unit": "Da"
+    },
+    "ions": [
+      {
+        "type": "BIon"
+      },
+      {
+        "type": "YIon"
+      }
+    ]
+  }
+}

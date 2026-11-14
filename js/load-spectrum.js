@@ -4,9 +4,54 @@
  * @returns {void}
  */
 export const loadSpectrum = function (match) {
+    const json_request = buildAnnotationRequest(match);
+    // no peak list was uploaded for this match (e.g. CSV without peak lists): nothing to load
+    if (json_request === null) {
+        return;
+    }
+
+    const url = this.get("apiBase") + "get_annotated_peaklist"
+        + "?id=" + encodeURIComponent(match.spectrumId)
+        + "&sd_ref=" + encodeURIComponent(match.spectraDataId)
+        + "&upload_id=" + encodeURIComponent(match.uploadId);
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(json_request),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const rangeErrorEl = document.querySelector("#range-error");
+            if (rangeErrorEl) {
+                rangeErrorEl.textContent = "";
+            }
+            this.get("xispec_wrapper").receiveAnnotatedData(data, json_request);
+        })
+        .catch(error => {
+            console.log("error getting annotated peak list", error);
+        });
+};
+
+/**
+ * Build the annotation request body that loadSpectrum POSTs (via the API, which
+ * injects the peaks) to the annotator. Pure apart from the alert() on a missing
+ * modification mass; exported so the request shape can be tested.
+ * @param {SpectrumMatch} match - The spectrum match to annotate
+ * @returns {Object|null} The annotation request, or null if the match has no peak list
+ */
+export function buildAnnotationRequest (match) {
     // no peak list was uploaded for this match (e.g. CSV without peak lists): nothing to load
     if (match.spectraDataId === null || match.spectraDataId === undefined) {
-        return;
+        return null;
     }
     const formatted_data = {};
     const pep0 = match.matchedPeptides[0];
@@ -99,41 +144,10 @@ export const loadSpectrum = function (match) {
         }).join(";");
     }
 
-    const json_request = convert_to_json_request(formatted_data);
+    return convert_to_json_request(formatted_data);
+}
 
-    const url = this.get("apiBase") + "get_annotated_peaklist"
-        + "?id=" + encodeURIComponent(match.spectrumId)
-        + "&sd_ref=" + encodeURIComponent(match.spectraDataId)
-        + "&upload_id=" + encodeURIComponent(match.uploadId);
-
-    fetch(url, {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(json_request),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(data => {
-            const rangeErrorEl = document.querySelector("#range-error");
-            if (rangeErrorEl) {
-                rangeErrorEl.textContent = "";
-            }
-            this.get("xispec_wrapper").receiveAnnotatedData(data, json_request);
-        })
-        .catch(error => {
-            console.log("error getting annotated peak list", error);
-        });
-    // }
-};
-
-function arrayifyPeptide (seq_mods) {
+export function arrayifyPeptide (seq_mods) {
     let peptide = {};
     peptide.sequence = [];
 
@@ -155,7 +169,7 @@ function arrayifyPeptide (seq_mods) {
     return peptide;
 }
 
-function convert_to_json_request(data) {
+export function convert_to_json_request(data) {
 
     //if (!this.sanityChecks(data)) return false;
 

@@ -1,0 +1,85 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "P",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "P",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        }
+      ]
+    },
+    {
+      "sequence": [
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "I",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        }
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 3
+    },
+    {
+      "id": 0,
+      "peptideId": 1,
+      "linkSite": 0
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "ETD_SII_0",
+    "precursorCharge": 3,
+    "modifications": [],
+    "precursorMZ": 210.093,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": [],
+      "modMass": 158.003765
+    },
+    "fragmentTolerance": {
+      "tolerance": 10,
+      "unit": "ppm"
+    },
+    "ions": [
+      {
+        "type": "BIon"
+      },
+      {
+        "type": "YIon"
+      }
+    ]
+  }
+}

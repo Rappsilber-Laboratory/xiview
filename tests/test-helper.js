@@ -64,3 +64,32 @@ export const expectedCounts = {
     crosslinks: 22, // Will be determined after processing
     searches: 4 // Based on unique search_id values in proteins
 };
+
+/**
+ * Loads the xi2-format test data (tests/test-data/xi2/) into a SearchResultsModel,
+ * going through the same store...() / parseJSON() path as xi2 data from the API.
+ * xi2 has no mzIdentML / enzyme / search-modification / spectra-data endpoints, so
+ * those are empty.
+ * @param {string} baseUrl - Base URL for the xi2 test data files
+ * @returns {Promise<SearchResultsModel>} - populated model
+ */
+export async function loadXi2TestData(baseUrl = "./test-data/xi2") {
+    const clmsModel = new SearchResultsModel();
+    const [protocolsData, proteinsData, peptidesData, matchesData] = await Promise.all([
+        fetch(`${baseUrl}/get_xiview_spectrum_identification_protocols.json`).then(r => r.json()),
+        fetch(`${baseUrl}/get_xiview_proteins.json`).then(r => r.json()),
+        fetch(`${baseUrl}/get_xiview_peptides.json`).then(r => r.json()),
+        fetch(`${baseUrl}/get_xiview_matches.json`).then(r => r.json())
+    ]);
+    clmsModel.storeMatches(matchesData);
+    clmsModel.storePeptides(peptidesData);
+    clmsModel.storeProteins(proteinsData);
+    clmsModel.storeSearchModifications([]);
+    clmsModel.storeEnzymes([]);
+    clmsModel.storeSpectraData([]);
+    clmsModel.storeSpectrumIdentificationProtocols(protocolsData);
+    clmsModel.storeAnalysisCollectionSpectrumIdentifications([]);
+    clmsModel.storeMzIdentMLFiles([]);
+    clmsModel.parseJSON({});
+    return clmsModel;
+}

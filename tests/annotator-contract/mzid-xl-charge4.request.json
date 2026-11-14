@@ -1,0 +1,165 @@
+{
+  "Peptides": [
+    {
+      "sequence": [
+        {
+          "aminoAcid": "H",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "N",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "M",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "F",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "N",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "P",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "T",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "K",
+          "Modification": ""
+        }
+      ]
+    },
+    {
+      "sequence": [
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "L",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "V",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "Q",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "D",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "E",
+          "Modification": ""
+        },
+        {
+          "aminoAcid": "A",
+          "Modification": ""
+        }
+      ]
+    }
+  ],
+  "LinkSite": [
+    {
+      "id": 0,
+      "peptideId": 0,
+      "linkSite": 4
+    },
+    {
+      "id": 0,
+      "peptideId": 1,
+      "linkSite": 7
+    }
+  ],
+  "peaks": [],
+  "annotation": {
+    "requestID": "SII_17_1_p1",
+    "precursorCharge": 4,
+    "modifications": [],
+    "precursorMZ": 825.15557,
+    "returnModSyntax": "Xmod",
+    "crosslinker": {
+      "stubs1": [],
+      "stubs2": [],
+      "modMass": -18.010565
+    },
+    "fragmentTolerance": {
+      "tolerance": 0.03,
+      "unit": "Da"
+    },
+    "ions": [
+      {
+        "type": "BIon"
+      },
+      {
+        "type": "YIon"
+      }
+    ]
+  }
+}

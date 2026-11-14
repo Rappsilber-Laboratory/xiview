@@ -1,0 +1,102 @@
+[
+  {
+    "id": "xl-unmodified",
+    "pi1": 1,
+    "pi2": 2,
+    "s1": 2,
+    "s2": 1,
+    "sc": {
+      "score": 10.0
+    },
+    "cl": 0,
+    "si": "S1",
+    "cm": null,
+    "pc_c": 3,
+    "pc_mz": 297.509118,
+    "sp": "spectrum-xl-unmodified",
+    "rs_id": "RS1",
+    "ui": "RS1",
+    "sip": "RS1",
+    "pc_i": 1000.0,
+    "sn": 100,
+    "sc_i": 99,
+    "rt": 12.3,
+    "run": "run1",
+    "sd": "peaklist-1"
+  },
+  {
+    "id": "xl-modified",
+    "pi1": 3,
+    "pi2": 4,
+    "s1": 3,
+    "s2": 1,
+    "sc": {
+      "score": 10.0
+    },
+    "cl": 0,
+    "si": "S1",
+    "cm": null,
+    "pc_c": 4,
+    "pc_mz": 412.211,
+    "sp": "spectrum-xl-modified",
+    "rs_id": "RS1",
+    "ui": "RS1",
+    "sip": "RS1",
+    "pc_i": 1000.0,
+    "sn": 100,
+    "sc_i": 99,
+    "rt": 12.3,
+    "run": "run1",
+    "sd": "peaklist-1"
+  },
+  {
+    "id": "linear-modified",
+    "pi1": 1,
+    "pi2": null,
+    "s1": null,
+    "s2": null,
+    "sc": {
+      "score": 10.0
+    },
+    "cl": null,
+    "si": "S0",
+    "cm": null,
+    "pc_c": 2,
+    "pc_mz": 233.6,
+    "sp": "spectrum-linear-modified",
+    "rs_id": "RS0",
+    "ui": "RS0",
+    "sip": "RS0",
+    "pc_i": 1000.0,
+    "sn": 100,
+    "sc_i": 99,
+    "rt": 12.3,
+    "run": "run1",
+    "sd": "peaklist-1"
+  },
+  {
+    "id": "xl-two-crosslinkers",
+    "pi1": 1,
+    "pi2": 2,
+    "s1": 2,
+    "s2": 1,
+    "sc": {
+      "score": 10.0
+    },
+    "cl": 1,
+    "si": "S2",
+    "cm": null,
+    "pc_c": 3,
+    "pc_mz": 304.15,
+    "sp": "spectrum-xl-two-crosslinkers",
+    "rs_id": "RS2",
+    "ui": "RS2",
+    "sip": "RS2",
+    "pc_i": 1000.0,
+    "sn": 100,
+    "sc_i": 99,
+    "rt": 12.3,
+    "run": "run1",
+    "sd": "peaklist-1"
+  }
+]
