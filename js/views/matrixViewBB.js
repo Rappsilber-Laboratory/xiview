@@ -314,7 +314,7 @@ export class DistanceMatrixViewBB extends BaseFrameView {
             this.renderCrossLinks({rehighlightOnly: true});
         });
         this.listenTo(this.model, "change:linkColourAssignment", this.render);
-        this.listenTo(this.model, "change:selectedProteins", this.makeProteinPairingOptions);
+        this.listenTo(this.model, "change:selectedProteins", this.selectedProteinsChanged);
         this.listenTo(this.colourScaleModel, "colourModelChanged", function () {
             this.render({noResize: true});
         }); // colourScaleModel is pointer to distance colour backbone-models, so this triggers even if not current colour backbone-models (redraws background)
@@ -356,6 +356,31 @@ export class DistanceMatrixViewBB extends BaseFrameView {
             .matrixChosen(pairing)
             .resetZoomHandler(this)
             .render();
+    }
+
+    /**
+     * Rebuilds the protein pairing dropdown for a new protein selection, or, while the view is hidden, marks it
+     * to be rebuilt when the view is next shown (see reshow): rebuilding counts every crosslink, which took
+     * seconds on large datasets for a dropdown nobody could see.
+     */
+    selectedProteinsChanged() {
+        if (this.isVisible()) {
+            this.makeProteinPairingOptions();
+        } else {
+            this.pairingOptionsStale = true;
+        }
+    }
+
+    /**
+     * Called when the view is shown: rebuilds the protein pairing dropdown if the selection changed while hidden.
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
+    reshow() {
+        if (this.pairingOptionsStale) {
+            this.pairingOptionsStale = false;
+            this.makeProteinPairingOptions();
+        }
+        return super.reshow();
     }
 
     /**

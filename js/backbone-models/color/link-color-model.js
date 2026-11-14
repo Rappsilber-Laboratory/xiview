@@ -141,6 +141,7 @@ export class GroupColourModel extends ColourModel {
      */
     getValue(link) {
         // choose value if link definitely belongs to just one group or set as undefined (-1)
+        // (value === null, not !value: group 0 is a real group, so "!value" let a later group overwrite it)
         let value = null;
         if (link.isAggregateLink) {
             for (let crosslink of link.getCrosslinks()) {
@@ -148,11 +149,10 @@ export class GroupColourModel extends ColourModel {
                 for (let fm_pp of filteredMatchesAndPepPositions) {
                     const match = fm_pp.match;
                     const group = this.searchMap.get(match.uploadId).group;
-                    if (!value) {
+                    if (value === null) {
                         value = group;
                     } else if (value !== group) { //check if link uniquely belongs to one group
-                        value = -1;    //undefined;
-                        break;
+                        return -1; // in more than one group - no need to look at the rest
                     }
                 }
             }
@@ -161,11 +161,10 @@ export class GroupColourModel extends ColourModel {
             for (let fm_pp = filteredMatchesAndPepPositions.length; --fm_pp >= 0;) {
                 const match = filteredMatchesAndPepPositions[fm_pp].match;
                 const group = this.searchMap.get(match.uploadId).group;
-                if (!value) {
+                if (value === null) {
                     value = group;
                 } else if (value !== group) { //check if link uniquely belongs to one group
-                    value = -1;    //undefined;
-                    break;
+                    return -1; // in more than one group
                 }
             }
         }

@@ -31,16 +31,20 @@ export const ProteinVisibilityMixin = {
         if (!add) {
             toSelect = [...new Set(pArr)];
         } else {
+            // toggle: already selected proteins in pArr are deselected, the others in pArr added
+            // (Sets, not indexOf, which was O(n x m) for thousands of proteins)
             const alreadySelected = this.get("selectedProteins");
+            const alreadySelectedSet = new Set(alreadySelected);
+            const pSet = new Set(pArr);
             toSelect = [];
             for (let a = 0; a < alreadySelected.length; a++) {
-                if (pArr.indexOf(alreadySelected[a]) == -1) {
+                if (!pSet.has(alreadySelected[a])) {
                     toSelect.push(alreadySelected[a]);
                 }
             }
             for (let p = 0; p < pArr.length; p++) {
                 const protein = pArr[p];
-                if (alreadySelected.indexOf(protein) == -1) {
+                if (!alreadySelectedSet.has(protein)) {
                     toSelect.push(protein);
                 }
             }

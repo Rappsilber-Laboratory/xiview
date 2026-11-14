@@ -35,9 +35,13 @@ export class G_GLink extends Link {
      * @returns {Array} Array of all crosslink objects
      */
     getCrosslinks() {
-        let allCrosslinks = [];
+        // one array filled with push: concat per p_p link copied the growing array each time, which was
+        // quadratic and took seconds per render for group links bundling thousands of p_p links
+        const allCrosslinks = [];
         for (let pp of this.p_pLinks.values()) {
-            allCrosslinks = allCrosslinks.concat(pp.crosslinks);
+            for (let crosslink of pp.crosslinks) {
+                allCrosslinks.push(crosslink);
+            }
         }
         return allCrosslinks;
     }
