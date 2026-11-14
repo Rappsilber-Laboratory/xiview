@@ -952,6 +952,39 @@ export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delay
 
 
 /**
+ * fetch() that retries when the server answers 429 (too many requests) or 503, waiting 1 s, 2 s, 4 s ... (at most
+ * 30 s) between tries. Exponential back-off rather than Retry-After, which browsers often can't read (UniProt doesn't
+ * expose it to CORS requests).
+ * @param {string} url
+ * @param {RequestInit} [init] - fetch options
+ * @param {string} label - Service name used in log and error messages
+ * @param {Object} [options]
+ * @param {number} [options.retries=8] - Retries on 429 / 503
+ * @param {function()} [options.onWait] - Called before each wait, e.g. to report that we're still going
+ * @returns {Promise<Response>} The successful response
+ * @throws {Error} If the request fails, or still gets 429 / 503 after all retries
+ */
+export async function fetchWithBackoff(url, init, label, {retries = 8, onWait = null} = {}) {
+    for (let attempt = 0; ; attempt++) {
+        const response = await fetch(url, init);
+        if (response.ok) {
+            return response;
+        }
+        if ((response.status === 429 || response.status === 503) && attempt < retries) {
+            const waitMs = Math.min(1000 * Math.pow(2, attempt), 30000);
+            console.warn(`${label}: ${response.status}, retrying in ${waitMs} ms`);
+            if (onWait) {
+                onWait();
+            }
+            await new Promise(resolve => setTimeout(resolve, waitMs));
+            continue;
+        }
+        throw new Error(`${label} request failed (${response.status})`);
+    }
+}
+
+
+/**
  * Parse delimiter-separated text into row objects keyed by the header row, like d3 v3's
  * d3.csv.parse / d3.tsv.parse but without their use of `new Function` (so it works under a
  * Content-Security-Policy without 'unsafe-eval').

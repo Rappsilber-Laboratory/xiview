@@ -623,6 +623,12 @@ export class CrosslinkViewer extends Backbone.View {
             }
         }
 
+        // While a large network's first layout is deferred the network is hidden, so skip the link totals and
+        // show/hide. cancelDeferredFirstLayout renders again when it reveals the network.
+        if (this.firstLayoutPending) {
+            return this;
+        }
+
         for (let ppLink of this.renderedP_PLinks.values()) {
 
 

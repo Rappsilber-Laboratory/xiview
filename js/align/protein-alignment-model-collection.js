@@ -367,14 +367,16 @@ export class ProtAlignCollection extends Backbone.Collection {
     addNewProteins(proteinArray) {
         const decoysOut = filterOutDecoyProteins(proteinArray);
 
-        decoysOut.forEach(function (prot) {
-            //console.log ("entry", entry);
-            this.add([{
+        // one add call, so the collection (kept sorted by displayLabel) is sorted once rather than once per protein
+        this.add(decoysOut.map(function (prot) {
+            return {
                 id: prot.id,
                 displayLabel: prot.name,//.replace("_", " "),
                 refID: "Search",
                 refSeq: prot.sequence,
-            }]);
+            };
+        }));
+        decoysOut.forEach(function (prot) {
             if (prot.uniprot) {
                 this.addSequence(prot.id, "Canonical", prot.uniprot.sequence);
             }
