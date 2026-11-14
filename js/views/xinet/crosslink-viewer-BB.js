@@ -825,185 +825,293 @@ export class CrosslinkViewer extends Backbone.View {
 
         this.d3cola.size([width - layoutXOffset - 120, height - 60]).symmetricDiffLinkLengths(linkLength);
 
-        const self = this;
-
         const {nodes: nodeArr, links: linkArr, leaves} = this.getColaGraph();
-        doLayout(nodeArr, linkArr, true);   // groups-free warm-start
-        doLayout(nodeArr, linkArr, false);  // restart with groups, seeded from warm-start
+        const groups = this.getColaGroups(nodeArr, this.groupMap.values());
+        // scale cola's layout to fill the space right of the gridded linear graphs
+        const place = function (colaNodes) {
+            let x1 = null, y1 = null, x2 = null, y2 = null;
+            for (let node of colaNodes) {
+                if (!x1 || node.x < x1) {
+                    x1 = node.x;
+                }
+                if (!y1 || node.y < y1) {
+                    y1 = node.y;
+                }
+                if (!x2 || node.x > x2) {
+                    x2 = node.x;
+                }
+                if (!y2 || node.y > y2) {
+                    y2 = node.y;
+                }
+            }
 
-        function doLayout(nodes, links, preRun) {
-            //don't know how necessary these deletions are
+            let xr = (width - layoutXOffset - 120) / (x2 - x1);
+            let yr = ((height - 60) / (y2 - y1));
+
+            for (let node of colaNodes) {
+                node.setPositionFromCola((node.x * xr) - (x1 * xr) + layoutXOffset,
+                    (node.y * yr) - (y1 * yr) + 30);
+                node.setAllLinkCoordinates();
+            }
+        };
+        this.runCola(nodeArr, linkArr, leaves, groups, place, groups, () => {
+            if (fixedParticipants.length === 0) {
+                this.zoomToFullExtent();
+            }
+        });
+    }
+
+    /**
+     * Lays out the visible contents of an expanded group - its proteins, collapsed subgroups and nested expanded
+     * subgroups - with cola, centred on where the group is now. Nothing outside the group moves (its links to
+     * the outside are left out of the layout); groups containing it are refitted round the result.
+     * Cola's positions are used at their natural size (one cola unit is one pixel on screen, like the glyphs
+     * cola keeps from overlapping), rather than stretched to fill the view as autoLayout does.
+     *
+     * @param {Group} group - An expanded group
+     */
+    autoLayoutGroup(group) {
+        console.log("xiNET AUTO LAYOUT GROUP", group.id);
+        this.cancelDeferredFirstLayout();
+        this.d3cola.stop();
+
+        const {nodes, links, leaves} = this.getColaGraph(group);
+        if (nodes.length === 0) {
+            return;
+        }
+        // centre of the group's contents now
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+        for (let node of nodes) {
+            x1 = Math.min(x1, node.ix);
+            y1 = Math.min(y1, node.iy);
+            x2 = Math.max(x2, node.ix);
+            y2 = Math.max(y2, node.iy);
+        }
+        const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2;
+
+        // start the group's contents afresh; nothing else is handed to cola so nothing else is touched
+        for (let node of nodes) {
+            delete node.x;
+            delete node.y;
+            delete node.px;
+            delete node.py;
+            delete node.index;
+            delete node.parent; // else cola leaves it out of its root group (see cola's groups())
+            node.fixed = false; // the protein Fix Selected option of the last autoLayout doesn't apply here
+        }
+        const candidateGroups = [group].concat(group.subgroups);
+        for (let g of candidateGroups) {
+            delete g.parent;
+        }
+        const groups = this.getColaGroups(nodes, candidateGroups);
+
+        // expanded groups the layout changes the size of, besides the cola groups (and the groups containing
+        // them, which updateExpandedGroup refits): groups overlapping this one
+        const refitGroups = new Set(groups);
+        for (let node of nodes) {
+            for (let pg of node.parentGroups) {
+                if (pg.expanded && !pg.hidden && pg !== group && !group.parentGroups.has(pg)) {
+                    refitGroups.add(pg);
+                }
+            }
+        }
+
+        const width = this.svgElement.parentNode.clientWidth;
+        const height = this.svgElement.parentNode.clientHeight;
+        const linkLength = (nodes.length < 20) ? 40 : 30;
+        this.d3cola.size([width, height]).symmetricDiffLinkLengths(linkLength);
+
+        const z = this.z;
+        const place = function (colaNodes) {
+            let mx1 = Infinity, my1 = Infinity, mx2 = -Infinity, my2 = -Infinity;
+            for (let node of colaNodes) {
+                mx1 = Math.min(mx1, node.x);
+                my1 = Math.min(my1, node.y);
+                mx2 = Math.max(mx2, node.x);
+                my2 = Math.max(my2, node.y);
+            }
+            const mx = (mx1 + mx2) / 2, my = (my1 + my2) / 2;
+            for (let node of colaNodes) {
+                node.setPositionFromCola(cx + (node.x - mx) * z, cy + (node.y - my) * z);
+                node.setAllLinkCoordinates();
+            }
+        };
+        this.runCola(nodes, links, leaves, groups, place, refitGroups);
+    }
+
+    /**
+     * The expanded groups to hand to cola, from candidateGroups, with their leaves (indexes of their proteins
+     * in nodes that aren't in a subgroup, and their collapsed subgroups) and groups (their expanded subgroups,
+     * innermost only) filled in.
+     *
+     * @param {Object[]} nodes - Cola's nodes (from getColaGraph)
+     * @param {Iterable<Group>} candidateGroups - Groups to consider; must include the subgroups of each
+     * @returns {Group[]}
+     */
+    getColaGroups(nodes, candidateGroups) {
+        const groups = [];
+        for (let g of candidateGroups) {
+            delete g.index;
+            if (!g.hidden && g.expanded) {
+                g.groups = [];
+                g.leaves = [];
+                // put any rp not contained in a subgroup in group1.leaves
+                for (let rp of g.renderedProteins) {
+                    if (!rp.hidden) {
+                        let inSubGroup = false;
+                        for (let subgroup of g.subgroups) {
+                            if (subgroup.contains(rp)) {
+                                inSubGroup = true;
+                                break;
+                            }
+                        }
+                        if (!inSubGroup) {
+                            const nodeIndex = nodes.indexOf(rp);
+                            if (nodeIndex !== -1) {
+                                g.leaves.push(nodeIndex);
+                            } else {
+                                console.warn("xiNET layout: group member not in layout nodes", g.id, rp.id);
+                            }
+                        }
+                    }
+                }
+                groups.push(g);
+            }
+        }
+        //need to use indexes of groups
+        for (let g of groups) {
+            console.log("GROUP ", g.unhiddenProteinCount, g.id);
+            for (let i = 0; i < g.subgroups.length; i++) {
+                console.log("\tSUBGROUP ", g.subgroups[i].unhiddenProteinCount, g.subgroups[i].id);
+                if (!g.subgroups[i].hidden) {
+                    // todo - this is where you need to sort out issue of nested subgroups...
+                    // the problem is when the same subgroup gets added to multiple parent groups
+                    // the following seems to be working but not convinced it's totally reliable (depends on order groups end up in?)
+                    let isSubset = false;
+                    for (let j = i + 1; j < g.subgroups.length; j++) {
+                        if (g.subgroups[i].isSubsetOf(g.subgroups[j])) {
+                            isSubset = true;
+                            break;
+                        }
+                    }
+                    if (!isSubset) {
+                        if (g.subgroups[i].expanded) {
+                            g.groups.push(groups.indexOf(g.subgroups[i]));
+
+                        } else if (nodes.indexOf(g.subgroups[i]) !== -1) {
+                            g.leaves.push(g.subgroups[i]);
+                        } else {
+                            console.warn("xiNET layout: collapsed subgroup not in layout nodes", g.id, g.subgroups[i].id);
+                        }
+                    }
+                }
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * Runs cola on a graph from getColaGraph and groups from getColaGroups: briefly without groups first, which
+     * warm-starts the grouped layout, then with groups, which keeps running. Each tick, place(nodes) turns cola's
+     * positions into xiNET ones, the one-link leaves are placed next to their anchors and refitGroups refitted.
+     *
+     * @param {Object[]} nodes
+     * @param {{source: Object, target: Object}[]} links
+     * @param {{node: Object, anchor: Object}[]} leaves
+     * @param {Group[]} groups
+     * @param {function(Object[])} place - Sets the xiNET positions of the nodes from their cola ones
+     * @param {Iterable<Group>} refitGroups - Expanded groups to refit after each tick
+     * @param {function()} [afterTick]
+     */
+    runCola(nodes, links, leaves, groups, place, refitGroups, afterTick) {
+        const self = this;
+        //don't know how necessary these deletions are
+        const resetCola = function () {
             delete self.d3cola._lastStress;
             delete self.d3cola._alpha;
             delete self.d3cola._descent;
             delete self.d3cola._rootGroup;
+        };
 
-            if (preRun) {
-                // Run the layout briefly without groups first; this warm-starts the grouped
-                // layout below. The grouped run uses start(0, ...) so cola's group-aware
-                // initialLayout is a no-op and these settled node positions are retained.
-                self.d3cola.nodes(nodes).links(links);
-                const initialUnconstrainedIterations = nodes.length < 10 ? 10 : 23;
-                self.d3cola.groups([]).start(initialUnconstrainedIterations, 10, 1, 0, false);
-                return;
-            }
+        // Run the layout briefly without groups first; this warm-starts the grouped
+        // layout below. The grouped run uses start(0, ...) so cola's group-aware
+        // initialLayout is a no-op and these settled node positions are retained.
+        resetCola();
+        self.d3cola.nodes(nodes).links(links);
+        const initialUnconstrainedIterations = nodes.length < 10 ? 10 : 23;
+        self.d3cola.groups([]).start(initialUnconstrainedIterations, 10, 1, 0, false);
 
-            const groups = [];
-            if (self.groupMap) {
-                for (let g of self.groupMap.values()) {
-                    delete g.index;
-                    if (!g.hidden && g.expanded) {
-                        g.groups = [];
-                        g.leaves = [];
-                        // put any rp not contained in a subgroup in group1.leaves
-                        for (let rp of g.renderedProteins) {
-                            if (!rp.hidden) {
-                                let inSubGroup = false;
-                                for (let subgroup of g.subgroups) {
-                                    if (subgroup.contains(rp)) {
-                                        inSubGroup = true;
-                                        break;
-                                    }
-                                }
-                                if (!inSubGroup) {
-                                    const nodeIndex = nodes.indexOf(rp);
-                                    if (nodeIndex !== -1) {
-                                        g.leaves.push(nodeIndex);
-                                    } else {
-                                        console.warn("xiNET layout: group member not in layout nodes", g.id, rp.id);
-                                    }
-                                }
-                            }
-                        }
-                        groups.push(g);
-                    }
-                }
-                //need to use indexes of groups
-                for (let g of groups) {
-                    console.log("GROUP ", g.unhiddenProteinCount, g.id);
-                    for (let i = 0; i < g.subgroups.length; i++) {
-                        console.log("\tSUBGROUP ", g.subgroups[i].unhiddenProteinCount, g.subgroups[i].id);
-                        if (!g.subgroups[i].hidden) {
-                            // todo - this is where you need to sort out issue of nested subgroups...
-                            // the problem is when the same subgroup gets added to multiple parent groups
-                            // the following seems to be working but not convinced it's totally reliable (depends on order groups end up in?)
-                            let isSubset = false;
-                            for (let j = i + 1; j < g.subgroups.length; j++) {
-                                if (g.subgroups[i].isSubsetOf(g.subgroups[j])) {
-                                    isSubset = true;
-                                    break;
-                                }
-                            }
-                            if (!isSubset) {
-                                if (g.subgroups[i].expanded) {
-                                    g.groups.push(groups.indexOf(g.subgroups[i]));
-
-                                } else if (nodes.indexOf(g.subgroups[i]) !== -1) {
-                                    g.leaves.push(g.subgroups[i]);
-                                } else {
-                                    console.warn("xiNET layout: collapsed subgroup not in layout nodes", g.id, g.subgroups[i].id);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            let participantDebugSel, groupDebugSel;
-            if (self.debug) {
-                participantDebugSel = d3.select(self.groupsSVG).selectAll(".node")
-                    .data(nodes);
-                participantDebugSel.enter().append("rect")
-                    .classed("node", true)
-                    .attr({
-                        rx: 5,
-                        ry: 5
-                    })
-                    .style("stroke", "red")
-                    .style("fill", "none")
-                    .style("pointer-events", "none");
-                groupDebugSel = d3.select(self.groupsSVG).selectAll(".group")
-                    .data(groups);
-                groupDebugSel.enter().append("rect")
-                    .classed("group", true)
-                    .attr({
-                        rx: 5,
-                        ry: 5
-                    })
-                    .style("stroke", "blue")
-                    .style("fill", "none")
-                    .style("pointer-events", "none");
-                groupDebugSel.exit().remove();
-                participantDebugSel.exit().remove();
-            }
-            self.d3cola.nodes(nodes).groups(groups).links(links).start(0, 10, 1, 0, true).on("tick", function () { // start(0, ...) keeps the groups-free pre-run positions
-                let x1 = null, y1 = null, x2 = null, y2 = null;
-                for (let node of self.d3cola.nodes()) {
-                    if (!x1 || node.x < x1) {
-                        x1 = node.x;
-                    }
-                    if (!y1 || node.y < y1) {
-                        y1 = node.y;
-                    }
-                    if (!x2 || node.x > x2) {
-                        x2 = node.x;
-                    }
-                    if (!y2 || node.y > y2) {
-                        y2 = node.y;
-                    }
-                }
-
-                let xr = (width - layoutXOffset - 120) / (x2 - x1);
-                let yr = ((height - 60) / (y2 - y1));
-
-                for (let node of self.d3cola.nodes()) {
-                    node.setPositionFromCola((node.x * xr) - (x1 * xr) + layoutXOffset,
-                        (node.y * yr) - (y1 * yr) + 30);
-                    // node.setPositionFromCola();
-                    node.setAllLinkCoordinates();
-                }
-                self.placeLeaves(leaves, links);
-                for (let g of self.d3cola.groups()) { // todo -  seems a bit of a weird way to have done this?
-                    if (g.expanded) {
-                        g.updateExpandedGroup();
-                    }
-                }
-                if (fixedParticipants.length === 0) {
-                    self.zoomToFullExtent();
-                }
-
-                if (self.debug) {
-                    groupDebugSel.attr({
-                        x: function (d) {
-                            return d.bounds.x;
-                        },
-                        y: function (d) {
-                            return d.bounds.y;
-                        },
-                        width: function (d) {
-                            return d.bounds.width();
-                        },
-                        height: function (d) {
-                            return d.bounds.height();
-                        }
-                    });
-                    participantDebugSel.attr({
-                        x: function (d) {
-                            return d.bounds.x;
-                        },
-                        y: function (d) {
-                            return d.bounds.y;
-                        },
-                        width: function (d) {
-                            return d.bounds.width();
-                        },
-                        height: function (d) {
-                            return d.bounds.height();
-                        }
-                    });
-                }
-            });
-            //}
+        resetCola();
+        let participantDebugSel, groupDebugSel;
+        if (self.debug) {
+            participantDebugSel = d3.select(self.groupsSVG).selectAll(".node")
+                .data(nodes);
+            participantDebugSel.enter().append("rect")
+                .classed("node", true)
+                .attr({
+                    rx: 5,
+                    ry: 5
+                })
+                .style("stroke", "red")
+                .style("fill", "none")
+                .style("pointer-events", "none");
+            groupDebugSel = d3.select(self.groupsSVG).selectAll(".group")
+                .data(groups);
+            groupDebugSel.enter().append("rect")
+                .classed("group", true)
+                .attr({
+                    rx: 5,
+                    ry: 5
+                })
+                .style("stroke", "blue")
+                .style("fill", "none")
+                .style("pointer-events", "none");
+            groupDebugSel.exit().remove();
+            participantDebugSel.exit().remove();
         }
+        self.d3cola.nodes(nodes).groups(groups).links(links).start(0, 10, 1, 0, true).on("tick", function () { // start(0, ...) keeps the groups-free pre-run positions
+            place(self.d3cola.nodes());
+            self.placeLeaves(leaves, links);
+            for (let g of refitGroups) { // todo -  seems a bit of a weird way to have done this?
+                if (g.expanded) {
+                    g.updateExpandedGroup();
+                }
+            }
+            if (afterTick) {
+                afterTick();
+            }
+
+            if (self.debug) {
+                groupDebugSel.attr({
+                    x: function (d) {
+                        return d.bounds.x;
+                    },
+                    y: function (d) {
+                        return d.bounds.y;
+                    },
+                    width: function (d) {
+                        return d.bounds.width();
+                    },
+                    height: function (d) {
+                        return d.bounds.height();
+                    }
+                });
+                participantDebugSel.attr({
+                    x: function (d) {
+                        return d.bounds.x;
+                    },
+                    y: function (d) {
+                        return d.bounds.y;
+                    },
+                    width: function (d) {
+                        return d.bounds.width();
+                    },
+                    height: function (d) {
+                        return d.bounds.height();
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -1012,10 +1120,12 @@ export class CrosslinkViewer extends Backbone.View {
      * With PLACE_ONE_LINK_NODES, nodes with a single link to a node that has more are left out (as `leaves`)
      * and placed next to that node after each layout tick instead (see placeLeaves), which shrinks the layout a
      * lot on large sparse networks. Fixed nodes and nodes inside an expanded group stay in the layout.
+     * @param {Group} [scope] - An expanded group: only take the nodes inside it, and the links between them
      * @returns {{nodes: Object[], links: {source: Object, target: Object, id: string}[],
      *     leaves: {node: Object, anchor: Object}[]}}
      */
-    getColaGraph() {
+    getColaGraph(scope) {
+        const inScope = node => !scope || node.parentGroups.has(scope);
         const links = new Map();
         const nodeSet = new Set();
         for (let graph of this.nonLinearGraphs || []) {
@@ -1025,6 +1135,9 @@ export class CrosslinkViewer extends Backbone.View {
                 if (link.renderedFromProtein !== link.renderedToProtein) {
                     const source = this.renderedProteins.get(link.renderedFromProtein.protein.id).getRenderedInteractor();
                     const target = this.renderedProteins.get(link.renderedToProtein.protein.id).getRenderedInteractor();
+                    if (!inScope(source) || !inScope(target)) {
+                        continue;
+                    }
                     nodeSet.add(source);
                     nodeSet.add(target);
                     // one link per pair of interactors - proteins in the same collapsed group give no link,
@@ -1040,7 +1153,7 @@ export class CrosslinkViewer extends Backbone.View {
         // still need to be cola nodes; expanded groups themselves are cola groups, not nodes
         for (let graph of this.nonLinearGraphs || []) {
             for (let node of graph.nodes.values()) {
-                if (!(node.type === "group" && node.expanded)) {
+                if (!(node.type === "group" && node.expanded) && inScope(node)) {
                     nodeSet.add(node);
                 }
             }
@@ -2141,16 +2254,23 @@ export class CrosslinkViewer extends Backbone.View {
                         this.collapseInteractor(renderedInteractor);
                     });
                 }
-                // menuListSel.append("li").text("Autolayout Group").on("click", () => {
-                //     this.autoLayoutGroup(renderedInteractor, []);
-                //     d3.select(".xinet-context-menu").style("display", "none");
-                // });
+                menuListSel.append("li").text("Auto Layout Group").on("click", () => {
+                    d3.select(".xinet-context-menu").style("display", "none");
+                    this.autoLayoutGroup(renderedInteractor);
+                });
             } else {
                 menuListSel.append("li").text("Expand Group").on("click", () => {
                     renderedInteractor.setExpanded(true, this.getEventPoint(evt));
                     d3.select(".xinet-context-menu").style("display", "none");
                 });
             }
+
+            menuListSel.append("li").text("Hide Group").on("click", () => {
+                d3.select(".xinet-context-menu").style("display", "none");
+                this.model.setHighlightedProteins([]);
+                this.contextMenuParticipant = null;
+                this.model.hideProteins(renderedInteractor.proteins);
+            });
 
             menuListSel.append("li").text("Ungroup").on("click", () => {
                 this.ungroup(renderedInteractor);

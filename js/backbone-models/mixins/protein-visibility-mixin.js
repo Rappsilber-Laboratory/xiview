@@ -54,12 +54,19 @@ export const ProteinVisibilityMixin = {
      */
     hideSelectedProteins() {
         const selectedArr = this.get("selectedProteins");
-        const selectedCount = selectedArr.length;
-        for (let s = 0; s < selectedCount; s++) {
-            const protein = selectedArr[s];
+        this.setSelectedProteins([]);
+        this.hideProteins(selectedArr);
+    },
+
+    /**
+     * Hides the given proteins (sets manuallyHidden); leaves the selection as it is.
+     * Triggers filter backbone-models change to reapply filtering.
+     * @param {Iterable} proteins - Protein objects to hide
+     */
+    hideProteins(proteins) {
+        for (let protein of proteins) {
             protein.manuallyHidden = true;
         }
-        this.setSelectedProteins([]);
         this.get("filterModel").trigger("change", this.get("filterModel"));
     },
 
