@@ -26,6 +26,9 @@ export class G_GLink extends Link {
         this.p_pLinks = new Map();
         this.group1 = group1;
         this.group2 = group2;
+        // so a group's move updates only its own group links (see Group.setPosition); remove() takes it out
+        group1.ggLinks.add(this);
+        group2.ggLinks.add(this);
     }
 
     /**
@@ -104,13 +107,15 @@ export class G_GLink extends Link {
 
     mouseOver(evt) {
         const p = this.controller.getEventPoint(evt);
-        let allCrosslinks = [];
+        const allCrosslinks = [];
         this.filteredCrosslinkCount = 0;
         let filteredMatchCount = 0;
         let ppiCount = 0;
         for (let pp of this.p_pLinks.values()) {
             if (pp.filteredCrossLinkCount > 0) {
-                allCrosslinks = allCrosslinks.concat(pp.crosslinks);
+                for (let crosslink of pp.crosslinks) { // push, not concat (quadratic, see getCrosslinks)
+                    allCrosslinks.push(crosslink);
+                }
                 ppiCount++;
                 this.filteredCrosslinkCount += pp.filteredCrossLinkCount;
                 filteredMatchCount += pp.filteredMatchCount;
@@ -137,16 +142,14 @@ export class G_GLink extends Link {
     // event handler for starting dragging or rotation (or flipping internal links)
     mouseDown(evt) {
         this.controller.d3cola.stop();
-        let allCrosslinks = [];
-        for (let pp of this.p_pLinks.values()) {
-            allCrosslinks = allCrosslinks.concat(pp.crosslinks);
-        }
+        const allCrosslinks = this.getCrosslinks();
         this.controller.dragElement = this;
         if (evt.shiftKey || evt.ctrlKey) {
             let selection = this.controller.model.get("selection");
             if (this.isSelected) {
+                const toDeselect = new Set(allCrosslinks);
                 selection = selection.filter(function (d) {
-                    return allCrosslinks.indexOf(d) === -1;
+                    return !toDeselect.has(d);
                 });
             } else {
                 selection = selection.concat(allCrosslinks);
@@ -390,6 +393,8 @@ export class G_GLink extends Link {
      */
     remove() {
         this.hide();
+        this.group1.ggLinks.delete(this);
+        this.group2.ggLinks.delete(this);
         if (this.group1.selfLink === this) {
             this.group1.selfLink = null;
         }

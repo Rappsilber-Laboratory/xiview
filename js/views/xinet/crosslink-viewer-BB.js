@@ -337,7 +337,10 @@ export class CrosslinkViewer extends Backbone.View {
         for (let group of this.groupMap.values()) {
             if (group.expanded === false) {
                 // group.setExpanded(true);
-                group.expand(false);// todo: reanme this to expandNoTransition
+                // no refit: hiddenProteinsChanged() refits every group once, innermost first. Refitting each
+                // group and its parents as it expanded forced a layout per group after its DOM changes (31 s on
+                // DUC-XL-MS's 1.2k auto groups)
+                group.expand(false, false);// todo: reanme this to expandNoTransition
             }
         }
         this.hiddenProteinsChanged();
@@ -421,18 +424,42 @@ export class CrosslinkViewer extends Backbone.View {
         }
 
         //sort it by count not hidden (not manually hidden and not filtered)
-        const sortedGroupMap = new Map([...this.groupMap.entries()].sort((a, b) => a[1].unhiddenProteinCount - b[1].unhiddenProteinCount));
-
-        // get maximal set of possible subgroups
-        const groups = Array.from(sortedGroupMap.values());
+        // (counts worked out once, not by the getter in every comparison)
+        const unhiddenCounts = new Map();
+        for (let g of this.groupMap.values()) {
+            unhiddenCounts.set(g, g.unhiddenProteinCount);
+        }
+        const groups = Array.from(this.groupMap.values()).sort((a, b) => unhiddenCounts.get(a) - unhiddenCounts.get(b));
         const gCount = groups.length; // contains xiNET.Groups
+        // refitExpandedGroups() refits in this order, so subgroups come before the groups containing them
+        for (let gi = 0; gi < gCount; gi++) {
+            groups[gi].refitRank = gi;
+        }
+
+        // get maximal set of possible subgroups.
+        // A group can only be a subset of groups that contain its first unhidden protein, so only those are
+        // tested, rather than every later group (all pairs was O(groups^2) subset tests, ~700k for 1.2k auto groups).
+        const groupIndexesByProtein = new Map(); // rendered protein -> indexes in groups of the groups containing it
+        for (let gi = 0; gi < gCount; gi++) {
+            for (let rp of groups[gi].renderedProteins) {
+                let indexes = groupIndexesByProtein.get(rp);
+                if (!indexes) {
+                    indexes = [];
+                    groupIndexesByProtein.set(rp, indexes);
+                }
+                indexes.push(gi);
+            }
+        }
         for (let gi = 0; gi < gCount - 1; gi++) {
             const group1 = groups[gi];
-            if (group1.unhiddenProteinCount > 0) {
-                for (let gj = gi + 1; gj < gCount; gj++) {
-                    const group2 = groups[gj];
-                    if (group1.isSubsetOf(group2)) {
-                        group2.subgroups.push(group1);
+            if (unhiddenCounts.get(group1) > 0) {
+                const firstUnhidden = group1.renderedProteins.find(rp => !rp.protein.hidden);
+                for (let gj of groupIndexesByProtein.get(firstUnhidden)) {
+                    if (gj > gi) {
+                        const group2 = groups[gj];
+                        if (group1.isSubsetOf(group2)) {
+                            group2.subgroups.push(group1); // (gi ascending, so subgroups stay smallest first)
+                        }
                     }
                 }
             }
@@ -502,6 +529,7 @@ export class CrosslinkViewer extends Backbone.View {
             for (let p of group.renderedProteins) {
                 if (p.protein.hidden === false) {
                     hasVisible = true;
+                    break;
                 }
             }
             if (!hasVisible || group.inCollapsedGroup()) {
@@ -532,8 +560,13 @@ export class CrosslinkViewer extends Backbone.View {
                 interactor.getSubgraph();//adds new subgraphs to this.subgraphs
             }
         }
+        // collapsed groups only: an expanded group's members are walked as themselves (or as the collapsed
+        // subgroup they're in), and the walk never marks the expanded group as visited, so starting from each
+        // expanded group walked its whole component again, adding a duplicate subgraph each time (48 of 49 s of
+        // this function with DUC-XL-MS's 1.2k auto groups expanded). The duplicates added nothing: everything they
+        // reached is in another subgraph, which is non-linear anyway as it holds a member of the expanded group.
         for (let interactor of this.groupMap.values()) {
-            if (!interactor.hidden) {
+            if (!interactor.hidden && !interactor.expanded) {
                 interactor.getSubgraph();//adds new subgraphs to this.subgraphs
             }
         }
@@ -956,23 +989,26 @@ export class CrosslinkViewer extends Backbone.View {
      */
     getColaGroups(nodes, candidateGroups) {
         const groups = [];
+        // node -> index lookups (nodes.indexOf per member was O(members x nodes))
+        const nodeIndexes = new Map();
+        nodes.forEach((node, i) => nodeIndexes.set(node, i));
         for (let g of candidateGroups) {
             delete g.index;
             if (!g.hidden && g.expanded) {
                 g.groups = [];
                 g.leaves = [];
                 // put any rp not contained in a subgroup in group1.leaves
+                // (one Set of subgroup members, rather than asking each subgroup about each member)
+                const inSubgroup = new Set();
+                for (let subgroup of g.subgroups) {
+                    for (let rp of subgroup.renderedProteins) {
+                        inSubgroup.add(rp);
+                    }
+                }
                 for (let rp of g.renderedProteins) {
                     if (!rp.hidden) {
-                        let inSubGroup = false;
-                        for (let subgroup of g.subgroups) {
-                            if (subgroup.contains(rp)) {
-                                inSubGroup = true;
-                                break;
-                            }
-                        }
-                        if (!inSubGroup) {
-                            const nodeIndex = nodes.indexOf(rp);
+                        if (!inSubgroup.has(rp)) {
+                            const nodeIndex = nodeIndexes.has(rp) ? nodeIndexes.get(rp) : -1;
                             if (nodeIndex !== -1) {
                                 g.leaves.push(nodeIndex);
                             } else {
@@ -986,9 +1022,13 @@ export class CrosslinkViewer extends Backbone.View {
         }
         //need to use indexes of groups
         for (let g of groups) {
-            console.log("GROUP ", g.unhiddenProteinCount, g.id);
+            if (this.debug) { // a line per group and per subgroup of each - thousands with nested auto groups
+                console.log("GROUP ", g.unhiddenProteinCount, g.id);
+            }
             for (let i = 0; i < g.subgroups.length; i++) {
-                console.log("\tSUBGROUP ", g.subgroups[i].unhiddenProteinCount, g.subgroups[i].id);
+                if (this.debug) {
+                    console.log("\tSUBGROUP ", g.subgroups[i].unhiddenProteinCount, g.subgroups[i].id);
+                }
                 if (!g.subgroups[i].hidden) {
                     // todo - this is where you need to sort out issue of nested subgroups...
                     // the problem is when the same subgroup gets added to multiple parent groups
@@ -1004,7 +1044,7 @@ export class CrosslinkViewer extends Backbone.View {
                         if (g.subgroups[i].expanded) {
                             g.groups.push(groups.indexOf(g.subgroups[i]));
 
-                        } else if (nodes.indexOf(g.subgroups[i]) !== -1) {
+                        } else if (nodeIndexes.has(g.subgroups[i])) {
                             g.leaves.push(g.subgroups[i]);
                         } else {
                             console.warn("xiNET layout: collapsed subgroup not in layout nodes", g.id, g.subgroups[i].id);
@@ -1444,8 +1484,13 @@ export class CrosslinkViewer extends Backbone.View {
     }
 
     reorderedNodes(linearGraph) {
+        // walk the chain from one end: a loop, rather than appendNode() recursing once per node of the chain
         const reorderedNodes = [];
-        appendNode(getStartNode(), new Set ());
+        const checkedNodes = new Set();
+        let currentNode = getStartNode();
+        while (currentNode) {
+            currentNode = appendNode(currentNode, checkedNodes);
+        }
         return reorderedNodes;
 
         function getStartNode() {
@@ -1489,12 +1534,13 @@ export class CrosslinkViewer extends Backbone.View {
             // currentNode may be a RenderedProtein or a Group; only proteins have
             // renderedP_PLinks, so resolve neighbours via the rendered interactor of
             // each link's other end (same approach as countExternalLinks).
+            // returns the next node along, for the caller to append
             for (let nextNode of getNeighbours(currentNode)) {
                 if (!checkedNodes.has(nextNode.id)) {
-                    appendNode(nextNode, checkedNodes);
-                    break;
+                    return nextNode;
                 }
             }
+            return null;
         }
 
         function getNeighbours(node) {
@@ -1643,9 +1689,10 @@ export class CrosslinkViewer extends Backbone.View {
         for (let p_pLink of this.renderedP_PLinks.values()) {
             p_pLink.showHighlight(false);
         }
-        const highlightedCrossLinks = this.model.getMarkedCrossLinks("highlights");
+        // Sets, not indexOf: that was O(crosslinks x marked) per change (e.g. hovering a group link)
+        const highlightedCrossLinks = new Set(this.model.getMarkedCrossLinks("highlights"));
         for (let renderedCrossLink of this.renderedCrosslinks.values()) {
-            if (highlightedCrossLinks.indexOf(renderedCrossLink.crosslink) !== -1) {
+            if (highlightedCrossLinks.has(renderedCrossLink.crosslink)) {
                 if (renderedCrossLink.renderedFromProtein.expanded ||
                     !renderedCrossLink.renderedToProtein || renderedCrossLink.renderedToProtein.expanded) {
                     renderedCrossLink.showHighlight(true);
@@ -1668,9 +1715,9 @@ export class CrosslinkViewer extends Backbone.View {
         for (let p_pLink of this.renderedP_PLinks.values()) {
             p_pLink.setSelected(false);
         }
-        const selectedCrossLinks = this.model.getMarkedCrossLinks("selection");
+        const selectedCrossLinks = new Set(this.model.getMarkedCrossLinks("selection"));
         for (let renderedCrossLink of this.renderedCrosslinks.values()) {
-            if (selectedCrossLinks.indexOf(renderedCrossLink.crosslink) !== -1) {
+            if (selectedCrossLinks.has(renderedCrossLink.crosslink)) {
                 renderedCrossLink.setSelected(true);
                 if (renderedCrossLink.renderedToProtein) {
                     const p_pLink = this.renderedP_PLinks.get(
@@ -1689,8 +1736,10 @@ export class CrosslinkViewer extends Backbone.View {
 
     selectedProteinsChanged() {
         const selectedProteins = this.model.get("selectedProteins");
+        // a Set, not indexOf: that was O(proteins x selected), seconds when selecting a big group
+        const selectedSet = new Set(selectedProteins);
         for (let renderedProtein of this.renderedProteins.values()) {
-            if (selectedProteins.indexOf(renderedProtein.protein) === -1 ){//&& renderedProtein.isSelected === true) {
+            if (!selectedSet.has(renderedProtein.protein)){//&& renderedProtein.isSelected === true) {
                 renderedProtein.selected = false;
             }
         }
@@ -1709,9 +1758,10 @@ export class CrosslinkViewer extends Backbone.View {
 
     highlightedProteinsChanged() {
         const highlightedProteins = this.model.get("highlightedProteins");
-
+        // a Set, not indexOf: that was O(proteins x highlighted) on every mouse over of a group
+        const highlightedSet = new Set(highlightedProteins);
         for (let renderedProtein of this.renderedProteins.values()) {
-            if (highlightedProteins.indexOf(renderedProtein.protein) === -1){//} && renderedProtein.highlight === true) {
+            if (!highlightedSet.has(renderedProtein.protein)){//} && renderedProtein.highlight === true) {
                 renderedProtein.highlighted = false;
             }
         }
@@ -1830,7 +1880,7 @@ export class CrosslinkViewer extends Backbone.View {
             if (prot.hidden) {
                 continue; // rescaled when shown again (see RenderedProtein.setHidden) - big win for large collapsed groups
             }
-            prot.setPositionFromXinet(prot.ix, prot.iy); // this rescales the protein
+            prot.setPositionFromXinet(prot.ix, prot.iy, false); // this rescales the protein (groups refitted below)
             if (prot.expanded)
                 prot.setAllLinkCoordinates();
         }
@@ -1867,18 +1917,64 @@ export class CrosslinkViewer extends Backbone.View {
                 // }
             }
         }
+        // collapsed groups first (expanded ones containing them fit round their symbols), then each expanded group
+        // once, innermost first - refitting each group and, from there, all the groups containing it was
+        // O(groups x depth) refits, each reading the bBox of every member
+        const expandedGroups = [];
         for (let g of this.groupMap.values()) {
             if (!g.hidden) {
                 g.outline.setAttribute("stroke-width", this.z * 5);
                 g.highlight.setAttribute("stroke-width", this.z * 5);
                 if (g.expanded) {
-                    g.updateExpandedGroup();
+                    expandedGroups.push(g);
                 } else {
-                    g.setPositionFromXinet(g.ix, g.iy);
+                    g.setPositionFromXinet(g.ix, g.iy, false);
                 }
                 g.dashed = g._dashed; // rescale dashes
             }
         }
+        this.refitExpandedGroups(expandedGroups);
+    }
+
+    /**
+     * Refits each of the given groups that is expanded and shown once, innermost first (by the refitRank
+     * hiddenProteinsChanged() gives groups), without each refit also refitting the groups containing it.
+     * For moving many interactors at once: move them without refitting (setPositionFromXinet(x, y, false)),
+     * then refit all the groups containing them here, rather than refitting the whole chain of groups round
+     * each one as it moves (O(interactors x group size) bBox reads, e.g. on dragging a big group).
+     *
+     * @param {Iterable<Group>} groups - Groups to refit; duplicates and collapsed or hidden groups are skipped
+     */
+    refitExpandedGroups(groups) {
+        const toRefit = [];
+        for (let g of new Set(groups)) {
+            if (g.expanded && !g.hidden) {
+                toRefit.push(g);
+            }
+        }
+        const rank = g => (g.refitRank === undefined ? Infinity : g.refitRank);
+        toRefit.sort((a, b) => rank(a) - rank(b));
+        for (let g of toRefit) {
+            g.updateExpandedGroup(false);
+        }
+    }
+
+    /**
+     * The expanded groups containing any of the given interactors (all levels up), for refitExpandedGroups().
+     *
+     * @param {Iterable<Interactor>} interactors
+     * @returns {Set<Group>}
+     */
+    groupsContaining(interactors) {
+        const groups = new Set();
+        for (let interactor of interactors) {
+            for (let pg of interactor.parentGroups) {
+                if (pg.expanded) {
+                    groups.add(pg);
+                }
+            }
+        }
+        return groups;
     }
 
     setAnnotations() {
@@ -1932,22 +2028,27 @@ export class CrosslinkViewer extends Backbone.View {
                     // we are currently dragging things around
                     if (this.dragElement.type === "group" && this.dragElement.expanded) {
                         if (!this.dragElement.selected) {
+                            // move everything without refitting, then refit each group affected once
+                            // (refitting round each protein as it moved was O(members^2) bBox reads per mouse move)
                             const toDrag = this.dragElement.renderedProteins;
+                            const moved = [];
                             for (let d = 0; d < toDrag.length; d++) {
                                 const renderedProtein = toDrag[d];
-                                renderedProtein.setPositionFromXinet(renderedProtein.ix - dx, renderedProtein.iy - dy);
+                                renderedProtein.setPositionFromXinet(renderedProtein.ix - dx, renderedProtein.iy - dy, false);
                                 renderedProtein.setAllLinkCoordinates();
+                                moved.push(renderedProtein);
                             }
                             for (let g of this.dragElement.subgroups) {
                                 if (!g.expanded) {
-                                    g.setPositionFromXinet(g.ix - dx, g.iy - dy);
+                                    g.setPositionFromXinet(g.ix - dx, g.iy - dy, false);
                                     g.setAllLinkCoordinates();
+                                    moved.push(g);
                                 }
                             }
-                        }else {
+                            this.refitExpandedGroups(this.groupsContaining(moved));
+                        } else {
                             this.moveSelected(dx, dy);
                         }
-                        this.dragElement.updateExpandedGroup();
                     } else if (this.dragElement.protein || this.dragElement.type === "group"){ //collapsed group or protein
                         if (!this.dragElement.selected) {
                             this.dragElement.setPositionFromXinet(this.dragElement.ix - dx, this.dragElement.iy - dy);
@@ -2050,18 +2151,27 @@ export class CrosslinkViewer extends Backbone.View {
     }
 
     moveSelected(dx, dy) {
+        // moves without refitting, then refits each group affected once (see refitExpandedGroups)
         const toDrag = this.model.get("selectedProteins");
+        const moved = [];
         for (let d = 0; d < toDrag.length; d++) {
             const renderedProtein = this.renderedProteins.get(toDrag[d].id);
-            renderedProtein.setPositionFromXinet(renderedProtein.ix - dx, renderedProtein.iy - dy);
+            if (!renderedProtein) {
+                continue; // decoy
+            }
+            renderedProtein.setPositionFromXinet(renderedProtein.ix - dx, renderedProtein.iy - dy, false);
             renderedProtein.setAllLinkCoordinates();
+            moved.push(renderedProtein);
         }
+        const selectedSet = new Set(toDrag); // (group.selected builds this per group)
         for (let g of this.groupMap.values()) {
-            if (!g.expanded && g.selected) {
-                g.setPositionFromXinet(g.ix - dx, g.iy - dy);
+            if (!g.expanded && g.allProteinsIn(selectedSet)) {
+                g.setPositionFromXinet(g.ix - dx, g.iy - dy, false);
                 g.setAllLinkCoordinates();
+                moved.push(g);
             }
         }
+        this.refitExpandedGroups(this.groupsContaining(moved));
     }
 
     /**

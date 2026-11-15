@@ -1370,27 +1370,17 @@ export class RenderedProtein extends Interactor {
         return this.protein.id;
     }
 
-    addConnectedNodes (subgraph) {
+    /**
+     * This protein's visible, non-self links and the protein at the other end of each, for addConnectedNodes.
+     * @yields {Array} [P_PLink, RenderedProtein]
+     */
+    * linkedEnds() {
         for (let link of this.renderedP_PLinks.values()) {
             //visible, non-self links only
             if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
-                if (!subgraph.links.has(link.id)) {
-                    subgraph.links.set(link.id, link);
-                    const otherEnd = link.getOtherEnd(this);
-                    const renderedOtherEnd = otherEnd.getRenderedInteractor();
-                    otherEnd.subgraph = subgraph;
-                    // continue from the rendered interactor (for a collapsed group that walks all its
-                    // members' links, not just this one member's), and only once per node - otherwise
-                    // a component gets split into overlapping subgraphs sharing nodes
-                    if (!subgraph.nodes.has(renderedOtherEnd.id)) {
-                        renderedOtherEnd.subgraph = subgraph;
-                        subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
-                        renderedOtherEnd.addConnectedNodes(subgraph);
-                    }
-                }
+                yield [link, link.getOtherEnd(this)];
             }
         }
-        return subgraph;
     }
 
 

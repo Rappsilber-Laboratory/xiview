@@ -221,4 +221,39 @@ export class Interactor {
         }
         return this.subgraph;
     }
+
+    /**
+     * Adds everything connected to this interactor (by links passing the filter, through rendered interactors)
+     * to subgraph. A depth first walk in the same order as the recursive one this replaced, but with its own
+     * stack: recursing once per node overflowed the call stack on big connected components (thousands of
+     * proteins before grouping).
+     *
+     * @param {{nodes: Map, links: Map}} subgraph
+     * @returns {{nodes: Map, links: Map}} subgraph
+     */
+    addConnectedNodes(subgraph) {
+        const stack = [this.linkedEnds()];
+        while (stack.length > 0) {
+            const next = stack[stack.length - 1].next();
+            if (next.done) {
+                stack.pop();
+                continue;
+            }
+            const [link, otherEnd] = next.value;
+            if (!subgraph.links.has(link.id)) {
+                subgraph.links.set(link.id, link);
+                const renderedOtherEnd = otherEnd.getRenderedInteractor();
+                otherEnd.subgraph = subgraph;
+                // continue from the rendered interactor (for a collapsed group that walks all its
+                // members' links, not just this one member's), and only once per node - otherwise
+                // a component gets split into overlapping subgraphs sharing nodes
+                if (!subgraph.nodes.has(renderedOtherEnd.id)) {
+                    renderedOtherEnd.subgraph = subgraph;
+                    subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
+                    stack.push(renderedOtherEnd.linkedEnds());
+                }
+            }
+        }
+        return subgraph;
+    }
 }
