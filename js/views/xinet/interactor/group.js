@@ -671,11 +671,11 @@ export class Group extends Interactor {
 
                 for (let i = 0; i < self.subgroups.length; i++) {
                     const sg = self.subgroups[i];
-                    // if (!sg.expanded) {
-                    if (transition){
+                    // collapsed subgroups only: an expanded one has no position of its own (its members were just
+                    // put back), and setPosition on it only logged an error
+                    if (transition && !sg.expanded) {
                         sg.setPositionFromXinet(originalCollapsedSubgroupPositions[i][0], originalCollapsedSubgroupPositions[i][1]);
                     }
-                    // }
                 }
                 self.labelSVG.setAttribute("dominant-baseline", "central");
                 self.labelSVG.setAttribute("text-anchor", "middle");
@@ -874,8 +874,9 @@ export class Group extends Interactor {
                 }
             }
             for (let sg of this.subgroups) {
-                if (!sg.hidden) {
-                    sg.setPositionFromXinet(ix, iy);
+                // collapsed subgroups only (see collapse); expanded ones are fitted round their members
+                if (!sg.hidden && !sg.expanded) {
+                    sg.setPositionFromXinet(ix, iy, false);
                 }
             }
 
