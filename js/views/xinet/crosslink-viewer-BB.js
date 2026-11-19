@@ -868,28 +868,23 @@ export class CrosslinkViewer extends Backbone.View {
         const groups = this.getColaGroups(nodeArr, this.groupMap.values());
         // scale cola's layout to fill the space right of the gridded linear graphs
         const place = function (colaNodes) {
-            let x1 = null, y1 = null, x2 = null, y2 = null;
+            let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
             for (let node of colaNodes) {
-                if (!x1 || node.x < x1) {
-                    x1 = node.x;
-                }
-                if (!y1 || node.y < y1) {
-                    y1 = node.y;
-                }
-                if (!x2 || node.x > x2) {
-                    x2 = node.x;
-                }
-                if (!y2 || node.y > y2) {
-                    y2 = node.y;
-                }
+                x1 = Math.min(x1, node.x);
+                y1 = Math.min(y1, node.y);
+                x2 = Math.max(x2, node.x);
+                y2 = Math.max(y2, node.y);
             }
-
-            let xr = (width - layoutXOffset - 120) / (x2 - x1);
-            let yr = ((height - 60) / (y2 - y1));
+            const availWidth = width - layoutXOffset - 120;
+            const availHeight = height - 60;
+            // A single node, or nodes in a horizontal/vertical line, have zero extent in that
+            // direction: centre them rather than dividing by zero (which gave NaN positions)
+            const scaleAxis = (v, min, max, avail, offset) =>
+                max > min ? ((v - min) * avail / (max - min)) + offset : offset + (avail / 2);
 
             for (let node of colaNodes) {
-                node.setPositionFromCola((node.x * xr) - (x1 * xr) + layoutXOffset,
-                    (node.y * yr) - (y1 * yr) + 30);
+                node.setPositionFromCola(scaleAxis(node.x, x1, x2, availWidth, layoutXOffset),
+                    scaleAxis(node.y, y1, y2, availHeight, 30));
                 node.setAllLinkCoordinates();
             }
         };
