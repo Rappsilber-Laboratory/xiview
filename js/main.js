@@ -124,6 +124,18 @@ const fetchSavedConfig = (apiBase) => {
 };
 
 /**
+ * Group labels for searches: from options.groupLabels if given, else from the "uuid" URL param (xi2).
+ * @param {Object} options - main / validationPage options
+ * @returns {Map<string, string>} Map of upload id (lower case) to group label
+ */
+function groupLabelsFrom(options) {
+    if (options.groupLabels) {
+        return new Map(Object.entries(options.groupLabels).map(([id, label]) => [String(id).toLowerCase(), String(label)]));
+    }
+    return parseUuidGroupLabels(window.location.search);
+}
+
+/**
  * Main application initialization function for the full xiVIEW interface.
  * Loads all necessary data (API endpoints, BLOSUM matrices), initializes clms-backbone-models and views,
  * and sets up the complete application UI.
@@ -132,6 +144,8 @@ const fetchSavedConfig = (apiBase) => {
  * @param {Object} [options] - Optional settings
  * @param {boolean} [options.configSaving] - Enable saving/loading configs (xiNET layout + filter settings).
  *     Defaults to true when the URL has a "uuid" param (xi2 datasets).
+ * @param {Object<string, string>} [options.groupLabels] - Group label per upload id. Overrides the labels
+ *     in the "uuid" URL param (xi2).
  * @returns {void}
  */
 export function main(apiBase, annotatorURL, options = {}) {
@@ -140,7 +154,7 @@ export function main(apiBase, annotatorURL, options = {}) {
     showDataLoadStatus(spinTarget);
     setWindowTitle();
     const clmsModel = new SearchResultsModel();
-    clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
+    clmsModel.setSearchGroupLabels(groupLabelsFrom(options));
     const tasks = getTasks(apiBase, clmsModel);
     // Create a promise that resolves when blosum data is loaded
     const blosumCollInst = new BlosumCollection();
@@ -191,15 +205,17 @@ export function main(apiBase, annotatorURL, options = {}) {
  * Unlike main(), this does not load BLOSUM matrices or full visualization components.
  * @param {string} apiBase - Base URL for API endpoints
  * @param {string} annotatorURL - URL for the annotation service
+ * @param {Object} [options] - Optional settings
+ * @param {Object<string, string>} [options.groupLabels] - Group label per upload id (see main)
  * @returns {void}
  */
-export function validationPage(apiBase, annotatorURL) {
+export function validationPage(apiBase, annotatorURL, options = {}) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
     showDataLoadStatus(spinTarget);
     setWindowTitle();
     const clmsModel = new SearchResultsModel();
-    clmsModel.setSearchGroupLabels(parseUuidGroupLabels(window.location.search));
+    clmsModel.setSearchGroupLabels(groupLabelsFrom(options));
     const tasks = getTasks(apiBase, clmsModel);
     Promise.all(tasks)
         .then(showBuildingViews)
