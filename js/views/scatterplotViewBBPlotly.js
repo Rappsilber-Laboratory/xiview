@@ -641,7 +641,7 @@ export class ScatterplotViewBB extends BaseFrameView {
             const tipExtra = isMatchLevel ? makeTooltipContents.match(this.nearest.match) :
                 makeTooltipContents.link(this.nearest.link);
             tooltipData = tooltipData.concat([
-                ["&nbsp;"],
+                ["\u00a0"],
                 ["Nearest " + (isMatchLevel ? "Match" : "Crosslink")]
             ]).concat(tipExtra);
         }

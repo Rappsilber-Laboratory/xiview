@@ -192,7 +192,7 @@ export function main(apiBase, annotatorURL, options = {}) {
             hideDataLoadStatus();
         })
         .catch((error) => {
-            showMessage(error.stack || error.message || error, "error");
+            showMessage(escapeHtml(error.stack || error.message || error), "error");
             console.error(error);
             networkPageSpinner.stop();
             hideDataLoadStatus();
@@ -238,7 +238,7 @@ export function validationPage(apiBase, annotatorURL, options = {}) {
             }
         })
         .catch((error) => {
-            showMessage(error.stack || error.message || error, "error");
+            showMessage(escapeHtml(error.stack || error.message || error), "error");
             console.error(error);
             networkPageSpinner.stop();
             hideDataLoadStatus();

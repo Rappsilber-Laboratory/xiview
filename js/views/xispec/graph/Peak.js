@@ -1,5 +1,6 @@
 import * as _ from "underscore";
 import d3 from "d3";
+import {TrustedHtml} from "../../../ui-utils/trusted-html";
 
 /**
  * Represents a single peak in a mass spectrum.
@@ -141,7 +142,7 @@ Peak.prototype.draw = function () {
                 let charge = clusterInfo.matchedCharge;
                 let chargeStr = (charge > 1) ? charge : "";
                 let error = clusterInfo.error.toFixed(self.graph.model.get("showDecimals")) + " " + clusterInfo.errorUnit;
-                header.push(fragments[f].name + "<span style=\"vertical-align:super;font-size: 0.8em;\">" + chargeStr + "+</span>");
+                header.push(_.escape(fragments[f].name) + "<span style=\"vertical-align:super;font-size: 0.8em;\">" + chargeStr + "+</span>");
 
                 let fragName = fragments[f].name + " (" + fragments[f].sequence + ")";
                 let fragInfo = "charge: " + charge + ", error: " + error;
@@ -154,14 +155,14 @@ Peak.prototype.draw = function () {
             // Tooltip
             if (self.graph.tooltipIsBBModel) {
                 self.graph.tooltip.set("contents", contents)
-                    .set("header", header.join(" "))
+                    .set("header", new TrustedHtml(header.join(" ")))
                     .set("location", {pageX: x, pageY: y});
                 //.set("location", {pageX: d3.event.pageX, pageY: d3.event.pageY})
             } else {
                 let html = header.join("; ");
                 for (let i = contents.length - 1; i >= 0; i--) {
                     html += "</br>";
-                    html += contents[i].join(": ");
+                    html += contents[i].map(c => _.escape(String(c))).join(": ");
                 }
                 self.graph.tooltip.html(html);
                 self.graph.tooltip.transition()

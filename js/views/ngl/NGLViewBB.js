@@ -711,8 +711,8 @@ export class NGLViewBB extends BaseFrameView {
         xilog("REPOPULATE", this.model, stageModel);
         const sname = stageModel.getStructureName();
         let overText = "PDB File: " + (sname.length === 4 ?
-            "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + sname + "'>" + sname + "</A>" : sname) +
-            " - " + stageModel.get("structureComp").structure.title;
+            "<A class='outsideLink' target='_blank' href='https://www.rcsb.org/pdb/explore.do?structureId=" + encodeURIComponent(sname) + "'>" + _.escape(sname) + "</A>" : _.escape(sname)) +
+            " - " + _.escape(stageModel.get("structureComp").structure.title);
 
         const proteins = filterOutDecoyProteins(Array.from(this.model.get("clmsModel").getProteinsIterator()));
         const alignColl = this.model.get("alignColl");

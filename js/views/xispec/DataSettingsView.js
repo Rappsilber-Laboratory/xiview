@@ -702,14 +702,14 @@ export const DataSettingsView = SettingsView.extend({
             "columnDefs": [
                 {
                     "render": function (data, type, row, meta) {
-                        return "<input class=\"xispec_form-control\" id=\"modName_" + meta.row + "\" title=\"modification code\" name=\"mods[]\" readonly type=\"text\" value=\"" + data + "\">";
+                        return "<input class=\"xispec_form-control\" id=\"modName_" + meta.row + "\" title=\"modification code\" name=\"mods[]\" readonly type=\"text\" value=\"" + _.escape(String(data)) + "\">";
                     },
                     "class": "invisible",
                     "targets": 0,
                 },
                 {
                     "render": function (data, type, row) {
-                        return row[0] + "<i class=\"fa fa-undo xispec_resetMod\" title=\"reset modification to default\" aria-hidden=\"true\"></i></span>";
+                        return _.escape(row[0]) + "<i class=\"fa fa-undo xispec_resetMod\" title=\"reset modification to default\" aria-hidden=\"true\"></i></span>";
                     },
                     "targets": 1,
                 },
@@ -731,7 +731,7 @@ export const DataSettingsView = SettingsView.extend({
                         //     let stepSize = '0.' + '0'.repeat(data.toString().split('.')[1].length - 1) + 1;
                         // else
                         //     let stepSize = 1;
-                        return "<input class=\"xispec_form-control stepInput\" id=\"modMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"modification mass\" name=\"modMasses[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
+                        return "<input class=\"xispec_form-control stepInput\" id=\"modMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"modification mass\" name=\"modMasses[]\" type=\"text\" required value=\"" + _.escape(String(data)) + "\" autocomplete=off>";
                     },
                     "targets": 2,
                 },
@@ -750,7 +750,7 @@ export const DataSettingsView = SettingsView.extend({
                             }
                         }
                         data = data.join(", ");
-                        return "<input class=\"xispec_form-control\" id=\"modSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"comma separated list of amino acids that can be modified\" name=\"modSpecificities[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
+                        return "<input class=\"xispec_form-control\" id=\"modSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"comma separated list of amino acids that can be modified\" name=\"modSpecificities[]\" type=\"text\" required value=\"" + _.escape(String(data)) + "\" autocomplete=off>";
                     },
                     "targets": 3,
                 }
@@ -818,20 +818,20 @@ export const DataSettingsView = SettingsView.extend({
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return "<input class=\"xispec_form-control\" style=\"width:100px\" id=\"lossName_" + meta.row + "\" title=\"neutral loss name\" name=\"losses[]\" type=\"text\" value=\"" + data + "\">";
+                        return "<input class=\"xispec_form-control\" style=\"width:100px\" id=\"lossName_" + meta.row + "\" title=\"neutral loss name\" name=\"losses[]\" type=\"text\" value=\"" + _.escape(String(data)) + "\">";
                     },
                     "targets": 1,
                 },
                 {
                     "render": function (data, type, row, meta) {
-                        return "<input class=\"xispec_form-control stepInput\" style=\"width:120px\" id=\"lossMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss mass\" name=\"lossMasses[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
+                        return "<input class=\"xispec_form-control stepInput\" style=\"width:120px\" id=\"lossMass_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss mass\" name=\"lossMasses[]\" type=\"text\" required value=\"" + _.escape(String(data)) + "\" autocomplete=off>";
                     },
                     "targets": 2,
                 },
                 {
                     "render": function (data, type, row, meta) {
                         data = data.join(", ");
-                        return "<input class=\"xispec_form-control\" id=\"lossSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss specificity\" name=\"lossSpecificities[]\" type=\"text\" required value=\"" + data + "\" autocomplete=off>";
+                        return "<input class=\"xispec_form-control\" id=\"lossSpec_" + meta.row + "\" row=\"" + meta.row + "\" title=\"neutral loss specificity\" name=\"lossSpecificities[]\" type=\"text\" required value=\"" + _.escape(String(data)) + "\" autocomplete=off>";
                     },
                     "targets": 3,
                 }

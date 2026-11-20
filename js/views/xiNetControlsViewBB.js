@@ -73,12 +73,15 @@ export class xiNetControlsViewBB extends Backbone.View {
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        // the server explains some refusals (e.g. a limit on saved layouts) as {"error": "..."}
+                        return response.json().catch(() => ({})).then(body => {
+                            throw new Error(body && typeof body.error === "string" ? body.error : `HTTP error! status: ${response.status}`);
+                        });
                     }
                     return response.json();
                 })
                 .then(() => showMessage("Layout and filter settings saved" + (name ? " as \"" + _.escape(name) + "\"" : ""), "info"))
-                .catch(error => showMessage("Couldn't save layout: " + error.message, "error"));
+                .catch(error => showMessage("Couldn't save layout: " + _.escape(error.message), "error"));
         });
     }
 
@@ -344,7 +347,7 @@ class xiNetLayoutListViewBB extends DropDownMenuViewBB {
                             model.get("filterModel").applySavedSettings(savedConfig.config.filter);
                         }
                     })
-                    .catch(error => showMessage("Couldn't load layout: " + error.message, "error"));
+                    .catch(error => showMessage("Couldn't load layout: " + _.escape(error.message), "error"));
             },
         };
     }

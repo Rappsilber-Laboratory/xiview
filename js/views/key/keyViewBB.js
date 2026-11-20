@@ -433,8 +433,9 @@ export class KeyViewBB extends BaseFrameView {
 
                 colourSection.rows = labelColourPairings.map(function (val, i) {
                     const rgbaCol = val[1];
-                    const span = "<input class='color-chooser' data-jscolor='{}' value='" + rgbaCol + "' readonly title='Press to change colour for " + val[0] + "'/>";
-                    return [span, val[0], i];
+                    // labels can come from data (group names, metadata values): escaped
+                    const span = "<input class='color-chooser' data-jscolor='{}' value='" + _.escape(rgbaCol) + "' readonly title='Press to change colour for " + _.escape(val[0]) + "'/>";
+                    return [span, _.escape(val[0]), i];
                 });
             }
         }, this);
