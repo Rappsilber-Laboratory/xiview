@@ -62,7 +62,6 @@ import {
     ProteinMetaDataFileChooserBB,
     UserAnnotationsMetaDataFileChooserBB
 } from "./file-choosers/metaDataFileChoosers";
-import {GoTermsViewBB} from "./views/go/goTermsSankeyViewBB";
 import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels, linkColor} from "./backbone-models/color/setup-colors";
@@ -762,7 +761,7 @@ export function viewsEssential(compositeModelInst, options) {
  * (link and protein color schemes), AlignCollectionViewBB (sequence alignments),
  * DistogramBB (distance histogram), DistanceMatrixViewBB (distance matrix heatmap),
  * NGLViewBB (3D molecular viewer), PDBFileChooserBB (PDB file loader), STRINGFileChooserBB (STRING data),
- * ScatterplotViewBB, metadata file choosers (link, protein, user annotations), GoTermsViewBB (GO terms Sankey),
+ * ScatterplotViewBB, metadata file choosers (link, protein, user annotations),
  * ProteinInfoViewBB (protein details), FDRViewBB (FDR threshold selection), FDRSummaryViewBB (FDR summary),
  * initializes ByRei_dynDiv window system, creates CrosslinkViewer (xiNET network visualization).
  * @param {CompositeModel} compositeModelInst - Main composite backbone-models instance
@@ -913,12 +912,6 @@ function viewsThatNeedAsyncData(compositeModelInst) {
         el: "#userAnnotationsMetaLoadPanel",
         model: compositeModelInst,
         displayEventName: "userAnnotationsMetaDataFileChooserShow",
-    });
-
-    new GoTermsViewBB({
-        el: "#goTermsPanel",
-        model: compositeModelInst,
-        displayEventName: "goTermsViewShow",
     });
 
     new ProteinInfoViewBB({
