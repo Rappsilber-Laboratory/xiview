@@ -1,21 +1,22 @@
-# CLAUDE.md - xiview_all
+# CLAUDE.md
 
 This file provides guidance to Claude Code when working with this repository.
 
 ## Project Overview
 
-xiVIEW is a web-based visualization tool for crosslinking mass spectrometry data developed by the Rappsilber Laboratory. This repository is a **merged, single-repository** version of what was previously organised as a git submodule project (`build-xiview`). All four original components have been combined into one codebase.
+xiVIEW is a web-based visualization tool for crosslinking mass spectrometry data developed by the Rappsilber Laboratory.
 
-## Repository Structure
+## Correctness Comes First — Read This Before Any Change
 
-What were previously four separate git submodules are now merged into this single repository:
+xiVIEW is a **scientific data visualisation tool**. Researchers draw conclusions, and publish them, from what it shows. **The top priority, above performance, appearance and code elegance, is that every view always shows exactly the correct data.** Every link, colour, count, position, filter result, table cell and export has to match the underlying data exactly, every time.
 
-| Original submodule | Original branch | Now located at |
-|--------------------|-----------------|----------------|
-| xiview | v2 | `js/`, `css/`, `images/`, `tests/` (top level) |
-| CLMS-model | v2 | `js/clms-model/` |
-| spectrum (xiSPEC) | dev | `js/views/xispec/` |
-| crosslink-viewer (xiNET) | master | `js/views/xinet/` |
+What this means in practice:
+
+- **No trade-offs that are "almost always right".** Do not suggest or make an optimisation, cache, shortcut or approximation that has *any* chance, however small, of showing a wrong result. For example: a link drawn in the wrong colour, a stale selection or highlight state, a filtered-out item still visible (or the reverse), or a rounded or truncated value shown as if exact. A small chance of wrong output is a bug, not an acceptable cost. (Real example: a xiNET rendering speed-up that skipped link colour updates and so could leave a link the wrong colour was rejected for exactly this reason.)
+- **Performance work must be provably equivalent.** A speed-up is only acceptable if the rendered output is identical to the unoptimised path in every case. Before proposing one, work out and state *why* it can't change the output: which invariants it depends on, and what keeps them true (all events and update paths that touch the cached or skipped state). If you can't show that, don't propose it, or present it clearly as unsafe.
+- **Caches and dirty flags have to be invalidated everywhere.** Anything that skips recomputation (memoisation, "only update what changed", reused DOM or SVG elements, throttled or debounced redraws) must be invalidated by *every* change that can affect its output: filter changes, selection and highlight, colour scheme or colour model changes, grouping/collapse/expand, hide/show, data reloads, etc. When in doubt, recompute.
+- **Raise uncertainty, don't hide it.** If you aren't sure a change keeps the output exact, say so to the user explicitly rather than presenting it as safe. Don't silently swallow errors or fall back to defaults in a way that could show plausible but wrong data. Failing visibly is better than showing something wrong.
+- **Check output, not just that it runs.** For changes that affect what's displayed, check the actual rendered result (colours, counts, which items are shown) against the expected data, and add or extend tests where possible.
 
 ## Architecture
 
@@ -24,11 +25,11 @@ What were previously four separate git submodules are now merged into this singl
 - **`js/`** - Main application JavaScript
   - **`js/main.js`** - Application entry point and loader
   - **`js/networkFrame.js`** - Main application initialisation, wires up all views and models
-  - **`js/clms-model/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.) — originally CLMS-model
+  - **`js/clms-model/`** - Core CLMS data models (CrossLink, Peptide, SearchResultsModel, etc.)
   - **`js/backbone-models/`** - Application-specific models extending the core CLMS models
   - **`js/views/`** - UI view components using Backbone.js
-  - **`js/views/xinet/`** - xiNET crosslink network visualization — originally crosslink-viewer
-  - **`js/views/xispec/`** - xiSPEC spectrum viewer — originally spectrum submodule
+  - **`js/views/xinet/`** - xiNET crosslink network visualization
+  - **`js/views/xispec/`** - xiSPEC spectrum viewer
   - **`js/filter/`** - Data filtering and search functionality
   - **`js/align/`** - Sequence alignment utilities
   - **`js/config/`** - Configuration and menu definitions
@@ -76,8 +77,6 @@ npm run lint        # ESLint (JS only)
 npm run lint:css    # stylelint (CSS only)
 ```
 
-Note: `stylelint` currently reports ~166 pre-existing errors (camelCase IDs, duplicate properties, etc.) that have not yet been resolved.
-
 ### Pre-commit hooks
 
 Hooks are configured in `.pre-commit-config.yaml` and installed automatically via the `prepare` npm script (runs on `npm install`). On commit: trailing whitespace, EOF, YAML/JSON checks, ESLint, stylelint. On push: webpack build + QUnit tests.
@@ -90,8 +89,9 @@ npm test                       # Run tests against existing build in dist/
 
 **Test Infrastructure**:
 - **Framework**: QUnit 2.21.1 with Puppeteer headless execution
-- **Test Files**: `tests/qunit.html`, `tests/qunit2.html`, `tests/tests.js`, `tests/tests2.js`, `tests/clms-model-tests.js`
-- **Coverage**: 67 tests covering data parsing, filtering, selection, scoring, alignment, distance calculations, and CSV export
+- **Test pages** (run by `scripts/run-tests.js`): `tests/qunit.html`, `tests/qunit2.html`, `tests/qunit-clms-backbone-models.html`, `tests/qunit-annotation.html`
+- **Test scripts**: `tests/tests.js`, `tests/tests2.js`, `tests/clms-model-tests.js`, `tests/annotation-request-tests.js`, `tests/test-helper.js`
+- **Coverage**: ~130 tests covering data parsing, filtering, selection, scoring, alignment, distance calculations, annotation requests and CSV export
 
 ## Build System
 
@@ -122,10 +122,20 @@ npm test                       # Run tests against existing build in dist/
 
 ### How data is loaded
 
-`js/main.js` exports `xiview.main(apiBase, annotatorURL)`. The entry HTML (`network.html` in xiview-server) calls it with the production API base URL:
+`js/main.js` exports `xiview.main(apiBase, annotatorURL, options)` (and `validationPage(...)` with the same signature). `options` is optional:
+
+- `configSaving` — enable saving/loading of saved configs (xiNET layout + filter settings) via `${apiBase}config`. Defaults to true when the page URL has a `uuid` param (xi2 datasets).
+- `groupLabels` — map of upload id → group label. Overrides labels parsed from the `uuid` URL param.
+
+The entry HTML (`network.html` in xiview-server) chooses the API base from an `?api=` URL param (`pride-prod` (default), `pride-local`, `xi2-local`):
 
 ```javascript
-xiview.main("https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/", "xiAnnotator/");
+const APIS = {
+    'pride-prod':  "https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/",
+    'pride-local': "http://127.0.0.1:5005/pride/ws/archive/crosslinking/v3/data/",
+    'xi2-local':   "http://127.0.0.1:5005/xi2/data/",
+};
+xiview.main(APIS[apiKey] || APIS['pride-prod'], "xiAnnotator/");
 ```
 
 Inside `main()`, every data fetch appends `window.location.search` verbatim to the `apiBase` URL. This means the page's own URL query parameters are forwarded to every API call. For example:
@@ -141,14 +151,16 @@ API call:  https://.../data/get_xiview_matches?project=PXD53341&file=some_file.m
 |-----------|----------|-------------|
 | `project` | yes | PRIDE project accession, e.g. `PXD53341` |
 | `file` | no | Specific mzIdentML filename within the project. If omitted, data from all files in the project is aggregated. |
+| `uuid` | no | xi2 dataset id(s), `.`-separated, each optionally `id~groupLabel`; used instead of `project` for xi2. Turns on config saving. |
+| `api` | no | Read by `network.html` only: picks the API base (see above). |
 
 Example URLs:
 - All files in a project: `network.html?project=PXD53341`
 - Single file: `network.html?project=PXD53341&file=SomeSearch.mzid`
 
-### The crosslinking-api backend (sibling submodule)
+### The crosslinking-api backend (sibling repository)
 
-The API is provided by the `crosslinking-api` submodule (FastAPI, Python 3.11, PostgreSQL). Base path: `/pride/ws/archive/crosslinking/v3`.
+The API is provided by the `crosslinking-api` repository (`../crosslinking-api`) (FastAPI, Python 3.11, PostgreSQL). Base path: `/pride/ws/archive/crosslinking/v3`.
 
 **xiVIEW data endpoints** (all under `/data/`, all accept `?project=&file=`):
 
@@ -168,20 +180,19 @@ The API is provided by the `crosslinking-api` submodule (FastAPI, Python 3.11, P
 
 Production API base: `https://www.ebi.ac.uk/pride/ws/archive/crosslinking/v3/data/`
 
-Local dev API base (from the commented-out line in `network.html`): `http://127.0.0.1:8000/pride/ws/archive/crosslinking/v2/data/`
+Local dev API base: `http://127.0.0.1:5005/pride/ws/archive/crosslinking/v3/data/` (open `network.html?api=pride-local&project=...`)
 
 ### network.html (xiview-server)
 
 `xiview-server/static/network.html` is the main HTML entry point served by xiview-server (Flask). It loads `vendors.js` and `xiview.js` (built output), then calls `xiview.main(...)`. The `pride.css` stylesheet is conditionally applied when a `pride` URL param is present or the host ends with `ebi.ac.uk`.
 
 xiview-server serves `network.html` at `/network.html` via Flask's static file handling. To run locally with a local API:
-1. Build xiview: `npm run build-dev` (outputs `dist/xiview.js`)
-2. Copy or symlink build output into `xiview-server/static/`
-3. Edit the `xiview.main(...)` call in `network.html` to point at your local API
-4. Run xiview-server and open `http://localhost:{port}/network.html?project=PXD53341`
+1. Build and copy: `npm run build-dev-and-copy-to-xiview-server` (builds `dist/` and copies it into `../xiview-server/static/`)
+2. Run xiview-server and open `http://localhost:{port}/network.html?api=pride-local&project=PXD53341`
 
 ## Important Rules
 
+- Correctness of displayed data beats performance, always (see "Correctness Comes First" above)
 - crosslink and crosslinking are not hyphenated
 - Do not upgrade from d3 v3
 - Never modify code in `vendor/` directories
