@@ -540,11 +540,24 @@ async function fetchUniprotByIdMapping(accessions, onProgress) {
 }
 
 /**
+ * Escapes text for use in the HTML showMessage displays.
+ * @param {string} text
+ * @returns {string}
+ * @private
+ */
+function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"})[c]);
+}
+
+/**
  * Fetches UniProt KB data for the proteins in clmsModel and assigns each
  * returned entry to its matching Protein.uniprot. Fires vent.trigger("uniprotLoaded")
  * on success (even if some results are missing - those proteins keep uniprot=null);
  * vent.trigger("uniprotProgress", done, total) while waiting and after each page. Soft-fails: errors are logged,
  * proteins keep uniprot=null and vent.trigger("uniprotFailed", error) is fired.
+ * Anything short of a full set of annotations (fetch failed, some results pages failed, accessions UniProt doesn't
+ * know, no UniProt accessions at all) is also shown to the user (showMessage), so missing annotations aren't
+ * mistaken for proteins that have none.
  * The outcome is also recorded as clmsModel.uniprotStatus ("loaded" or "failed") for late listeners.
  * @param {string[]} accessions - Protein accessions (decoys already filtered out)
  * @param {SearchResultsModel} clmsModel - The CLMS results model whose Protein objects to populate
@@ -558,7 +571,12 @@ export async function fetchUniprotKB(accessions, clmsModel) {
                 "or not a plain UniProt accession)");
         }
         if (!queryAccessions.length) {
-            throw new Error("no valid UniProt accessions");
+            console.log("UniProt: no valid UniProt accessions, not fetching annotations");
+            showMessage("None of the protein accessions are UniProt accessions, so no UniProt annotations " +
+                "(features, subcellular locations, GO terms) are shown.", "info");
+            clmsModel.uniprotStatus = "failed";
+            vent.trigger("uniprotFailed", new Error("no valid UniProt accessions"));
+            return;
         }
         const onProgress = (done, total) => vent.trigger("uniprotProgress", done, total);
         const {results, failedIds, complete} = await fetchUniprotByIdMapping(queryAccessions, onProgress);
@@ -592,9 +610,29 @@ export async function fetchUniprotKB(accessions, clmsModel) {
             (failedIds.length ? `; UniProt doesn't know ${failedIds.length}` : "") +
             (complete ? "" : "; some results pages failed"));
 
+        const problems = [];
+        if (!complete) {
+            const unknown = new Set(failedIds);
+            const missing = queryAccessions.filter(acc => !lookup.has(acc) && !unknown.has(acc)).length;
+            problems.push(`Some UniProt results failed to download, so ${missing} of ${queryAccessions.length} ` +
+                "proteins are missing their UniProt annotations. Reload the page to try again.");
+        }
+        if (failedIds.length) {
+            const examples = failedIds.slice(0, 5).map(escapeHtml).join(", ") + (failedIds.length > 5 ? ", ..." : "");
+            problems.push(`UniProt has no entry for ${failedIds.length} accession${failedIds.length > 1 ? "s" : ""} ` +
+                `(${examples}), so ${failedIds.length > 1 ? "those proteins have" : "that protein has"} no UniProt annotations.`);
+        }
+        if (problems.length) {
+            showMessage("UniProt annotations incomplete (features, subcellular locations, GO terms and auto groups " +
+                "are affected):<br>" + problems.join("<br>"), "warning");
+        }
+
         clmsModel.uniprotStatus = "loaded";
     } catch (error) {
         console.error("UniProt fetch failed, continuing without annotations:", error);
+        showMessage("UniProt annotations could not be loaded (" + escapeHtml(error.message || String(error)) + "), " +
+            "so proteins are shown without UniProt features, subcellular locations or GO terms. " +
+            "Reload the page to try again.", "warning");
         clmsModel.uniprotStatus = "failed";
         vent.trigger("uniprotFailed", error);
         return;

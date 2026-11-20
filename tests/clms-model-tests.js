@@ -1,5 +1,6 @@
 import {module, test, start} from "qunit";
 import {loadTestData} from "./test-helper";
+import {nestComplexesInLocations} from "../js/backbone-models/mixins/protein-group-manager-mixin";
 
 /**
  * CLMS-backbone-models Test Suite
@@ -409,6 +410,44 @@ export async function testSetup() {
     test("isAggregatedData method", function (assert) {
         const isAggregated = clmsModel.isAggregatedData();
         assert.equal(isAggregated, true);
+    });
+
+    module("Auto grouping (nestComplexesInLocations)");
+
+    // every protein in a kept group must be one of that group's own (annotated) proteins
+    const assertOnlyOwnMembers = function (assert, kept, sources) {
+        for (let [name, members] of kept) {
+            const source = sources.get(name.replace(/ \(\d+\)$/, ""));
+            for (let id of members) {
+                assert.ok(source.has(id), name + " only holds its own proteins (" + id + ")");
+            }
+        }
+    };
+
+    test("complex isn't absorbed into a location unless all its proteins are annotated to it", function (assert) {
+        const complexes = new Map([["Complex X", new Set(["a", "b", "c"])]]);
+        // c is annotated to Cytoplasm only; a majority of the complex is nuclear
+        const locations = new Map([["Nucleus", new Set(["a", "b", "d", "e"])], ["Cytoplasm", new Set(["c", "f"])]]);
+        const kept = nestComplexesInLocations(complexes, locations);
+        assertOnlyOwnMembers(assert, kept, new Map([...complexes, ...locations]));
+        assert.deepEqual([...kept.get("Complex X")].sort(), ["a", "b", "c"], "complex kept whole");
+        assert.deepEqual([...kept.get("Nucleus")].sort(), ["d", "e"], "Nucleus leaves out the complex's proteins");
+        assert.notOk(kept.has("Cytoplasm"), "Cytoplasm left with one protein is dropped");
+    });
+
+    test("complex is absorbed when all its proteins are annotated to the location", function (assert) {
+        const complexes = new Map([["Complex X", new Set(["a", "b"])]]);
+        const locations = new Map([["Nucleus", new Set(["a", "b", "c"])]]);
+        const kept = nestComplexesInLocations(complexes, locations);
+        assert.deepEqual([...kept.get("Nucleus")].sort(), ["a", "b", "c"], "Nucleus contains the complex");
+        assert.deepEqual([...kept.get("Complex X")].sort(), ["a", "b"], "complex kept as a subgroup");
+    });
+
+    test("bigger complex doesn't absorb a smaller one it only half covers", function (assert) {
+        const complexes = new Map([["Small", new Set(["a", "b"])], ["Big", new Set(["a", "x", "y"])]]);
+        const kept = nestComplexesInLocations(complexes, new Map());
+        assertOnlyOwnMembers(assert, kept, complexes);
+        assert.deepEqual([...kept.get("Big")].sort(), ["x", "y"], "Big leaves out the shared protein");
     });
 
     start();

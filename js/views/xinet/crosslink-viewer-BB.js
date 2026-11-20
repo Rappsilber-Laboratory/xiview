@@ -1158,9 +1158,10 @@ export class CrosslinkViewer extends Backbone.View {
     /**
      * The graph autoLayout hands to cola: proteins / collapsed groups in non-linear subgraphs (linear ones
      * are gridded instead) and one link per linked pair of them. Expanded groups are cola groups, not nodes.
-     * With PLACE_ONE_LINK_NODES, nodes with a single link to a node that has more are left out (as `leaves`)
-     * and placed next to that node after each layout tick instead (see placeLeaves), which shrinks the layout a
-     * lot on large sparse networks. Fixed nodes and nodes inside an expanded group stay in the layout.
+     * With PLACE_ONE_LINK_NODES, on graphs of more than PLACE_ONE_LINK_NODES_MIN_NODES nodes, nodes with a single
+     * link to a node that has more are left out (as `leaves`) and placed next to that node after each layout tick
+     * instead (see placeLeaves), which shrinks the layout a lot on large sparse networks. (On small networks cola
+     * copes with them and lays them out better.) Fixed nodes and nodes inside an expanded group stay in the layout.
      * @param {Group} [scope] - An expanded group: only take the nodes inside it, and the links between them
      * @returns {{nodes: Object[], links: {source: Object, target: Object, id: string}[],
      *     leaves: {node: Object, anchor: Object}[]}}
@@ -1199,7 +1200,7 @@ export class CrosslinkViewer extends Backbone.View {
                 }
             }
         }
-        if (!CrosslinkViewer.PLACE_ONE_LINK_NODES) {
+        if (!CrosslinkViewer.PLACE_ONE_LINK_NODES || nodeSet.size <= CrosslinkViewer.PLACE_ONE_LINK_NODES_MIN_NODES) {
             return {nodes: Array.from(nodeSet), links: Array.from(links.values()), leaves: []};
         }
         const degree = new Map();
@@ -2495,10 +2496,14 @@ CrosslinkViewer.barScales = [0.01, 0.2, 0.5, 0.8, 1, 2, 4, 8];
 CrosslinkViewer.LARGE_NETWORK_COLA_NODES = 500;
 // leave nodes with a single link out of the cola layout and place them next to their neighbour (see getColaGraph)
 CrosslinkViewer.PLACE_ONE_LINK_NODES = true;
+// ... but only on graphs with more nodes than this (before leaving any out): on small networks it makes the layout worse
+// (below LARGE_NETWORK_COLA_NODES, so it still applies to a large network once auto grouped and collapsed - 306 nodes
+// on DUC-XL-MS)
+CrosslinkViewer.PLACE_ONE_LINK_NODES_MIN_NODES = 200;
 // auto group strategies (keys of AUTO_GROUP_STRATEGIES) tried in order for large networks, until one finds groups.
-// On DUC-XL-MS (6.7k proteins, 5171 cola nodes ungrouped) complexesInLocations leaves 306 cola nodes (30 top-level
+// On DUC-XL-MS (6.7k proteins, 5171 cola nodes ungrouped) complexesInLocations left 306 cola nodes (30 top-level
 // groups, 1167 in all, complexes kept and nested inside organelles), laminarAll 492 (66 top-level, 424 in all),
-// goComplexLaminar 3438. These need QuickGO (and the first UniProt locations); location doesn't, so it's the last resort.
+// goComplexLaminar 3438 (measured before complexesInLocations was made strict - groups only get annotated members). These need QuickGO (and the first UniProt locations); location doesn't, so it's the last resort.
 CrosslinkViewer.LARGE_NETWORK_GROUPING_STRATEGIES = ["complexesInLocations", "laminarAll", "goComplexLaminar", "location"];
 // how long a large network waits without progress on UniProt annotations / GO grouping before being laid out ungrouped
 CrosslinkViewer.LARGE_NETWORK_GROUPING_TIMEOUT_MS = 60000;

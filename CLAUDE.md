@@ -190,9 +190,16 @@ xiview-server serves `network.html` at `/network.html` via Flask's static file h
 1. Build and copy: `npm run build-dev-and-copy-to-xiview-server` (builds `dist/` and copies it into `../xiview-server/static/`)
 2. Run xiview-server and open `http://localhost:{port}/network.html?api=pride-local&project=PXD53341`
 
+## Known Correctness Issues
+
+Open problems where xiVIEW can display wrong data. Fix them when working nearby, and don't add more like them.
+
+- **UniProt accession mapped to several entries** (`fetchUniprotKB` in `js/main.js`): UniProt's ID mapping can return more than one entry for one accession (e.g. a secondary accession whose entry was split / demerged). `lookup.set(result.from, result.to)` keeps whichever comes last, so the protein silently gets one arbitrary entry's annotations (features, subcellular location, GO terms, and so auto groups). It should detect the ambiguity, leave such proteins unannotated and tell the user.
+
 ## Important Rules
 
 - Correctness of displayed data beats performance, always (see "Correctness Comes First" above)
+- Auto grouping (`protein-group-manager-mixin.js`) only ever puts a protein in a group if it is annotated with the group's term or a term the group contains. No heuristics (majority membership, crosslink partners, etc.) that add proteins to a group they aren't annotated to — the group label is a claim about every member
 - crosslink and crosslinking are not hyphenated
 - Do not upgrade from d3 v3
 - Never modify code in `vendor/` directories

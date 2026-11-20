@@ -267,13 +267,12 @@ async function fetchGoParents(termIds, batchSize = 100) {
  * sub-compartments. Groups may overlap (e.g. Cilium membrane is in Cilium and Cell membrane).
  * Proteins without a UniProt location are placed by their GO Cellular Component terms instead, see
  * placeByGoComponents.
+ * Every protein in a group is annotated with the group's location or a location it contains.
  * @param {Iterable<Object>} proteins - Proteins to group
- * @param {Map<string, Set<string>>} [neighbours] - Protein id -> ids of the proteins crosslinked to it, used to
- *     choose between several GO locations
  * @returns {Promise<Map<string, Set<string>>>} Location name -> protein ids (groups of MIN_GROUP_SIZE or more)
  * @throws {Error} If the vocabulary (or, for GO placement, QuickGO) can't be fetched
  */
-async function buildLocationHierarchyGroups(proteins, neighbours = new Map()) {
+async function buildLocationHierarchyGroups(proteins) {
     const vocabulary = await fetchLocationVocabulary();
     const containersOf = makeContainerLookup(id => (vocabulary.has(id) ? vocabulary.get(id).parents : []));
     const idsByName = new Map();
@@ -311,9 +310,15 @@ async function buildLocationHierarchyGroups(proteins, neighbours = new Map()) {
         }
         unlocated.push(protein);
     }
-    const placed = await placeByGoComponents(unlocated, vocabulary, containersOf, idsByProtein, neighbours);
-    for (let [proteinId, slId] of placed) {
-        idsByProtein.set(proteinId, locationIds(slId, []));
+    const placed = await placeByGoComponents(unlocated, vocabulary, containersOf, idsByProtein);
+    for (let [proteinId, slIds] of placed) {
+        const ids = new Set();
+        for (let slId of slIds) {
+            for (let id of locationIds(slId, [])) {
+                ids.add(id);
+            }
+        }
+        idsByProtein.set(proteinId, ids);
     }
 
     const groupMap = new Map(); // SL id -> protein ids
@@ -336,21 +341,21 @@ async function buildLocationHierarchyGroups(proteins, neighbours = new Map()) {
 }
 
 /**
- * Chooses a UniProt location for proteins that have none, from their GO Cellular Component terms. Each term is
+ * Finds UniProt locations for proteins that have none, from their GO Cellular Component terms. Each term is
  * translated with UniProt's own GO mapping of its location vocabulary, or, if not mapped, through its mapped GO
  * ancestors. Only locations already used by proteins with UniProt locations are considered (GO's plasma membrane
  * also maps to e.g. the bacterial Cell inner membrane), and of those the most specific (e.g. Cytosol rather
- * than Cytoplasm). If several remain (e.g. Cytosol and Nucleoplasm), the one holding most of the protein's
- * crosslinked partners is chosen, then the one used by most proteins.
+ * than Cytoplasm). A protein goes in all of the most specific locations its annotations give (e.g. Cytosol and
+ * Nucleoplasm): choosing one of them (e.g. by where its crosslinked partners are) would put it in a group it
+ * isn't annotated to, and choosing by crosslinks would be circular.
  * @param {Object[]} proteins - Proteins without a UniProt location
  * @param {Map<string, Object>} vocabulary - From fetchLocationVocabulary
  * @param {function(string): Set<string>} containersOf - From makeContainerLookup on the vocabulary
  * @param {Map<string, Set<string>>} idsByProtein - SL ids of the groups each located protein goes in
- * @param {Map<string, Set<string>>} neighbours - Protein id -> crosslinked protein ids
- * @returns {Promise<Map<string, string>>} Protein id -> chosen SL id, for the proteins that could be placed
+ * @returns {Promise<Map<string, string[]>>} Protein id -> SL ids, for the proteins that could be placed
  * @throws {Error} If a QuickGO request fails
  */
-async function placeByGoComponents(proteins, vocabulary, containersOf, idsByProtein, neighbours) {
+async function placeByGoComponents(proteins, vocabulary, containersOf, idsByProtein) {
     const slIdsByGoId = new Map();
     for (let [slId, term] of vocabulary) {
         for (let goId of term.goIds) {
@@ -406,24 +411,10 @@ async function placeByGoComponents(proteins, vocabulary, containersOf, idsByProt
                 general.add(k);
             }
         }
-        const specific = Array.from(candidates).filter(id => !general.has(id));
-        if (specific.length === 0) {
-            continue;
+        const specific = Array.from(candidates).filter(id => !general.has(id)).sort();
+        if (specific.length > 0) {
+            placed.set(proteinId, specific);
         }
-        const partners = neighbours.get(proteinId) || new Set();
-        const partnersIn = function (slId) {
-            let count = 0;
-            for (let partnerId of partners) {
-                const ids = idsByProtein.get(partnerId);
-                if (ids && ids.has(slId)) {
-                    count++;
-                }
-            }
-            return count;
-        };
-        const scored = specific.map(id => ({id, partners: partnersIn(id), usage: usage.get(id)}));
-        scored.sort((a, b) => (b.partners - a.partners) || (b.usage - a.usage) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-        placed.set(proteinId, scored[0].id);
     }
     return placed;
 }
@@ -436,9 +427,8 @@ async function placeByGoComponents(proteins, vocabulary, containersOf, idsByProt
  * protein is annotated with are added if they contain at least two annotated complexes and are complexes or
  * non-membrane-bounded organelles (like the ribosome). Pruned as for location groups.
  * @param {Iterable<Object>} proteins - Proteins to group
- * @returns {Promise<{groups: Map<string, Set<string>>, containers: Map<Set<string>, Set<Set<string>>>}>}
- *     GO term name -> protein ids, and each group's protein id set -> the protein id sets of the groups
- *     GO says contain it (an entry for every group, so callers can tell GO groups from others)
+ * @returns {Promise<Map<string, Set<string>>>} GO term name -> protein ids (containing groups are supersets of
+ *     the groups they contain)
  * @throws {Error} If a QuickGO request fails
  */
 async function buildGoComplexContainmentGroups(proteins) {
@@ -454,7 +444,7 @@ async function buildGoComplexContainmentGroups(proteins) {
         }
     }
     if (termNames.size === 0) {
-        return {groups: new Map(), containers: new Map()};
+        return new Map();
     }
 
     const ancestors = await fetchGoAncestors(Array.from(termNames.keys()));
@@ -523,14 +513,11 @@ async function buildGoComplexContainmentGroups(proteins) {
     pruneGroups(groupMap, descendantKeys);
 
     const namedGroupMap = new Map();
-    const containers = new Map();
     for (let [id, proteinIds] of groupMap) {
         const name = termNames.get(id) || names.get(id) || id;
         namedGroupMap.set(namedGroupMap.has(name) ? name + " (" + id + ")" : name, proteinIds);
-        containers.set(proteinIds, new Set(Array.from(containerIds.get(id))
-            .filter(c => groupMap.has(c)).map(c => groupMap.get(c))));
     }
-    return {groups: namedGroupMap, containers};
+    return namedGroupMap;
 }
 
 /**
@@ -746,28 +733,25 @@ function smallestFirst(groupMap) {
 
 /**
  * Builds a laminar (disjoint or nested) set of groups bottom up, so the smallest complexes are always kept and
- * bigger groups are built around them:
- * 1. Complexes, smallest first. Each is compared with the top-level groups kept so far that share proteins with
- *    it. It absorbs one whole (making it a subgroup) if GO says it contains it, or, when either isn't a GO group,
- *    if at least half of that group's proteins are in it; otherwise the shared proteins are left out of it.
- *    E.g. the small-subunit processome shares the cytosolic small ribosomal subunit's proteins but doesn't
- *    absorb it, so the subunit stays free to join the cytosolic ribosome.
- * 2. Locations, smallest first, the same way, except that each top-level complex goes to its home location:
- *    the one holding most of its proteins, ties going to the most specific (smallest) location.
+ * bigger groups are built around them: complexes first, smallest first, then locations, smallest first.
+ * Each candidate is compared with the top-level groups kept so far that share proteins with it. It absorbs one
+ * (making it a subgroup) only if every protein in that group is one of the candidate's own proteins; otherwise the
+ * shared proteins are left out of the candidate. So every protein in a kept group is annotated with the group's
+ * term (or a term it contains): groups can lose members to other groups, but never gain ones that aren't theirs.
+ * E.g. the small-subunit processome shares the cytosolic small ribosomal subunit's proteins but doesn't absorb
+ * it, so the subunit stays free to join the cytosolic ribosome.
  * Candidates left with fewer than MIN_GROUP_SIZE proteins, or identical to a kept group, are dropped.
- * @param {Map<string, Set<string>>} complexGroups - Complex name -> protein ids
- * @param {Map<Set<string>, Set<Set<string>>>} goContainers - For GO complex groups, protein id set -> the
- *     protein id sets of the GO groups containing it (see buildGoComplexContainmentGroups)
+ * @param {Map<string, Set<string>>} complexGroups - Complex name -> protein ids, where containing complexes are
+ *     supersets of the complexes they contain
  * @param {Map<string, Set<string>>} locationGroups - Location name -> protein ids, where containing locations
  *     are supersets of the locations they contain
  * @returns {Map<string, Set<string>>} Kept group name -> protein ids
  */
-function nestComplexesInLocations(complexGroups, goContainers, locationGroups) {
+export function nestComplexesInLocations(complexGroups, locationGroups) {
     const kept = new Map();
-    const sourceIds = new Map(); // kept name -> the candidate's own protein id set (before absorbing / trimming)
     const rootOf = new Map(); // protein id -> name of the top-level kept group containing it
 
-    function addCandidate(name, proteinIds, shouldAbsorb) {
+    function addCandidate(name, proteinIds) {
         const shared = new Map(); // top-level kept group name -> number of shared proteins
         for (let id of proteinIds) {
             const root = rootOf.get(id);
@@ -779,11 +763,10 @@ function nestComplexesInLocations(complexGroups, goContainers, locationGroups) {
         const absorbed = [];
         for (let [root, count] of shared) {
             const rootIds = kept.get(root);
-            if (shouldAbsorb(root, count)) {
+            if (count === rootIds.size) {
+                // all of the root's proteins are the candidate's own, so it becomes a subgroup (members already
+                // has them all)
                 absorbed.push(root);
-                for (let id of rootIds) {
-                    members.add(id);
-                }
             } else {
                 for (let id of rootIds) {
                     members.delete(id);
@@ -799,50 +782,16 @@ function nestComplexesInLocations(complexGroups, goContainers, locationGroups) {
             key = name + " (" + n++ + ")";
         }
         kept.set(key, members);
-        sourceIds.set(key, proteinIds);
         for (let id of members) {
             rootOf.set(id, key);
         }
     }
 
     for (let [name, proteinIds] of smallestFirst(complexGroups)) {
-        addCandidate(name, proteinIds, function (root, count) {
-            const rootContainers = goContainers.get(sourceIds.get(root));
-            return rootContainers && goContainers.has(proteinIds) ? rootContainers.has(proteinIds)
-                : count * 2 >= kept.get(root).size;
-        });
+        addCandidate(name, proteinIds);
     }
-
-    const homes = new Map(); // top-level complex name -> protein ids of its home location
-    for (let root of new Set(rootOf.values())) {
-        const rootIds = kept.get(root);
-        let best = null, bestCount = 0;
-        for (let locationIds of locationGroups.values()) {
-            let count = 0;
-            for (let id of rootIds) {
-                if (locationIds.has(id)) {
-                    count++;
-                }
-            }
-            if (count > bestCount || (count === bestCount && count > 0 && locationIds.size < best.size)) {
-                best = locationIds;
-                bestCount = count;
-            }
-        }
-        if (best) {
-            homes.set(root, best);
-        }
-    }
-
     for (let [name, proteinIds] of smallestFirst(locationGroups)) {
-        addCandidate(name, proteinIds, function (root, count) {
-            const home = homes.get(root);
-            if (home) {
-                // the home location, or one containing it
-                return home === proteinIds || (home.size <= proteinIds.size && Array.from(home).every(id => proteinIds.has(id)));
-            }
-            return count * 2 >= kept.get(root).size;
-        });
+        addCandidate(name, proteinIds);
     }
     return kept;
 }
@@ -850,27 +799,14 @@ function nestComplexesInLocations(complexGroups, goContainers, locationGroups) {
 /**
  * Builds the groups used to collapse very large networks: Complex Portal and GO complexes (nested by
  * containment) inside UniProt subcellular locations (nested by containment), see nestComplexesInLocations.
- * Proteins without a UniProt location are placed by GO, preferring the location of their crosslinked partners.
+ * Proteins without a UniProt location are placed by their GO Cellular Component terms (see placeByGoComponents).
  * @param {Object[]} proteins - Proteins to group
- * @param {SearchResultsModel} [clmsModel] - For the crosslinked partners
  * @returns {Promise<Map<string, Set<string>>>} Group name -> protein ids
  */
-async function buildComplexesInLocationsGroups(proteins, clmsModel) {
-    const neighbours = new Map();
-    if (clmsModel) {
-        for (let pair of getLinkedProteinPairs(clmsModel)) {
-            const [a, b] = pair.split("\t");
-            for (let [x, y] of [[a, b], [b, a]]) {
-                if (!neighbours.has(x)) {
-                    neighbours.set(x, new Set());
-                }
-                neighbours.get(x).add(y);
-            }
-        }
-    }
-    const go = await buildGoComplexContainmentGroups(proteins);
-    const complexGroups = mergeGroupMaps([buildComplexGroups(proteins), go.groups]);
-    return nestComplexesInLocations(complexGroups, go.containers, await buildLocationHierarchyGroups(proteins, neighbours));
+async function buildComplexesInLocationsGroups(proteins) {
+    const goComplexGroups = await buildGoComplexContainmentGroups(proteins);
+    const complexGroups = mergeGroupMaps([buildComplexGroups(proteins), goComplexGroups]);
+    return nestComplexesInLocations(complexGroups, await buildLocationHierarchyGroups(proteins));
 }
 
 /**
@@ -988,7 +924,7 @@ export const AUTO_GROUP_STRATEGIES = {
     // laminar (disjoint or nested) subset of the union of location, Complex Portal and GO complex groups
     laminarAll: async proteins => keepNonOverlappingGroups(await buildAllGroups(proteins)),
     // bottom up: Complex Portal and GO complexes (smallest first), then locations nested around them
-    complexesInLocations: (proteins, clmsModel) => buildComplexesInLocationsGroups(proteins, clmsModel),
+    complexesInLocations: proteins => buildComplexesInLocationsGroups(proteins),
     // partitions of the union of location, Complex Portal and GO complex groups
     partitionAllBySize: async proteins => partitionGroups(await buildAllGroups(proteins), "size"),
     partitionAllByLinks: async (proteins, clmsModel) =>
@@ -1104,6 +1040,15 @@ export const ProteinGroupManagerMixin = {
      */
     autoGroupBySubcellularLocationAndComplex() {
         this._applyAutoGroups(buildLocationAndComplexGroups, "subcellular location or complex");
+    },
+
+    /**
+     * Groups proteins by complex (Complex Portal and GO), nested inside their subcellular locations - the same
+     * grouping xiNET uses for large networks (see buildComplexesInLocationsGroups).
+     * Clears existing groups after user confirmation.
+     */
+    autoGroupByComplexesInLocations() {
+        this._applyAutoGroups(buildComplexesInLocationsGroups, "complex or subcellular location");
     },
 
     /**

@@ -433,7 +433,8 @@ export class Group extends Interactor {
      *     one afterwards (they refit theirs in turn); false when the caller refits all groups, smallest first
      */
     updateExpandedGroup(updateParentGroups = true) {
-        let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+        // (Infinity, not 0, for "nothing yet": a box edge at exactly 0 was taken as unset and overwritten)
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
         const z = this.controller.z, pad = 5 * z;
 
         // proteins in subgroups are covered by the subgroups' boxes (one Set, rather than asking each subgroup
@@ -447,16 +448,16 @@ export class Group extends Interactor {
         for (let rp of this.renderedProteins) {
             if (!rp.hidden && !inSubgroup.has(rp)) {
                 const rpBbox = rp.bBox;
-                if (!x1 || (rpBbox.x * z) + rp.ix < x1) {
+                if ((rpBbox.x * z) + rp.ix < x1) {
                     x1 = (rpBbox.x * z) + rp.ix;
                 }
-                if (!y1 || (rpBbox.y * z) + rp.iy < y1) {
+                if ((rpBbox.y * z) + rp.iy < y1) {
                     y1 = (rpBbox.y * z) + rp.iy;
                 }
-                if (!x2 || ((rpBbox.x + rpBbox.width) * z) + rp.ix > x2) {
+                if (((rpBbox.x + rpBbox.width) * z) + rp.ix > x2) {
                     x2 = ((rpBbox.x + rpBbox.width) * z) + rp.ix;
                 }
-                if (!y2 || ((rpBbox.y + rpBbox.height) * z) + rp.iy > y2) {
+                if (((rpBbox.y + rpBbox.height) * z) + rp.iy > y2) {
                     y2 = ((rpBbox.y + rpBbox.height) * z) + rp.iy;
                 }
             }
@@ -465,19 +466,23 @@ export class Group extends Interactor {
         for (let sg of this.subgroups) {
             if (!sg.hidden) {
                 const sgBbox = sg.bBox;
-                if (!x1 || (sgBbox.x) < x1) {
+                if (sgBbox.x < x1) {
                     x1 = (sgBbox.x);
                 }
-                if (!y1 || (sgBbox.y) < y1) {
+                if (sgBbox.y < y1) {
                     y1 = (sgBbox.y);
                 }
-                if (!x2 || ((sgBbox.x + sgBbox.width)) > x2) {
+                if (sgBbox.x + sgBbox.width > x2) {
                     x2 = ((sgBbox.x + sgBbox.width));
                 }
-                if (!y2 || ((sgBbox.y + sgBbox.height)) > y2) {
+                if (sgBbox.y + sgBbox.height > y2) {
                     y2 = ((sgBbox.y + sgBbox.height));
                 }
             }
+        }
+
+        if (x1 > x2) { // nothing visible in it: an empty box at 0, 0, as before
+            x1 = y1 = x2 = y2 = 0;
         }
 
         const updateOutline = function (svgElement) {
