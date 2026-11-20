@@ -419,8 +419,11 @@ const WHOLE_UNIPROT_ACCESSION = /^(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9](?:
 
 /**
  * The UniProtKB accession to query for a protein accession: the accession itself if that's all it is, or the middle
- * part of a FASTA-style "sp|P04637|P53_HUMAN". Anything else (e.g. "DECOY_P04637", "P04637.1") gives null, because
- * UniProt rejects the whole batch query (400) if any accession in it is malformed.
+ * part of a FASTA-style "sp|P04637|P53_HUMAN". A hyphenated suffix is stripped, so isoforms ("P04637-2") and
+ * user-named variants ("P02768-A") get their entry's annotations. (Positional features are mapped through the
+ * sequence alignment, but entry-level annotations - subcellular location, GO terms - are the canonical protein's.)
+ * Anything else (e.g. "DECOY_P04637", "P04637.1") gives null, because UniProt rejects the whole batch query (400) if
+ * any accession in it is malformed.
  * @param {string} accession
  * @returns {string|null} Upper case accession, or null
  */
@@ -428,13 +431,20 @@ export function toUniprotQueryAccession(accession) {
     if (typeof accession !== "string") {
         return null;
     }
+    const withoutSuffix = id => id.replace(/-[A-Za-z0-9]+$/, "");
     const trimmed = accession.trim();
-    if (WHOLE_UNIPROT_ACCESSION.test(trimmed)) {
-        return trimmed.toUpperCase();
+    for (let candidate of [trimmed, withoutSuffix(trimmed)]) {
+        if (WHOLE_UNIPROT_ACCESSION.test(candidate)) {
+            return candidate.toUpperCase();
+        }
     }
     const parts = trimmed.split("|");
-    if (parts.length === 3 && WHOLE_UNIPROT_ACCESSION.test(parts[1])) {
-        return parts[1].toUpperCase();
+    if (parts.length === 3) {
+        for (let candidate of [parts[1], withoutSuffix(parts[1])]) {
+            if (WHOLE_UNIPROT_ACCESSION.test(candidate)) {
+                return candidate.toUpperCase();
+            }
+        }
     }
     return null;
 }
@@ -572,7 +582,7 @@ export async function fetchUniprotKB(accessions, clmsModel) {
         }
         if (!queryAccessions.length) {
             console.log("UniProt: no valid UniProt accessions, not fetching annotations");
-            showMessage("None of the protein accessions are UniProt accessions, so no UniProt annotations " +
+            showMessage("None of the protein accessions could be looked up in UniProt, so no UniProt annotations " +
                 "(features, subcellular locations, GO terms) are shown.", "info");
             clmsModel.uniprotStatus = "failed";
             vent.trigger("uniprotFailed", new Error("no valid UniProt accessions"));

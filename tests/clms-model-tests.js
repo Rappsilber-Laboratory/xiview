@@ -1,6 +1,7 @@
 import {module, test, start} from "qunit";
 import {loadTestData} from "./test-helper";
 import {nestComplexesInLocations} from "../js/backbone-models/mixins/protein-group-manager-mixin";
+import {toUniprotQueryAccession} from "../js/main";
 
 /**
  * CLMS-backbone-models Test Suite
@@ -448,6 +449,21 @@ export async function testSetup() {
         const kept = nestComplexesInLocations(complexes, new Map());
         assertOnlyOwnMembers(assert, kept, complexes);
         assert.deepEqual([...kept.get("Big")].sort(), ["x", "y"], "Big leaves out the shared protein");
+    });
+
+    module("UniProt query accessions (toUniprotQueryAccession)");
+
+    test("accessions, FASTA ids and suffixes", function (assert) {
+        assert.equal(toUniprotQueryAccession("P02768"), "P02768", "plain accession");
+        assert.equal(toUniprotQueryAccession(" p02768 "), "P02768", "trimmed, upper cased");
+        assert.equal(toUniprotQueryAccession("A0A096LP01"), "A0A096LP01", "10 character accession");
+        assert.equal(toUniprotQueryAccession("sp|P04637|P53_HUMAN"), "P04637", "FASTA id");
+        assert.equal(toUniprotQueryAccession("P04637-2"), "P04637", "isoform suffix stripped");
+        assert.equal(toUniprotQueryAccession("P02768-A"), "P02768", "other suffix stripped");
+        assert.equal(toUniprotQueryAccession("sp|P04637-2|P53_HUMAN"), "P04637", "suffix stripped in FASTA id");
+        assert.equal(toUniprotQueryAccession("DECOY_P04637"), null, "decoy");
+        assert.equal(toUniprotQueryAccession("P04637.1"), null, "version suffix");
+        assert.equal(toUniprotQueryAccession("NOT-AN-ACC"), null, "not an accession");
     });
 
     start();

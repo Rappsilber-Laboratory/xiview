@@ -195,6 +195,7 @@ xiview-server serves `network.html` at `/network.html` via Flask's static file h
 Open problems where xiVIEW can display wrong data. Fix them when working nearby, and don't add more like them.
 
 - **UniProt accession mapped to several entries** (`fetchUniprotKB` in `js/main.js`): UniProt's ID mapping can return more than one entry for one accession (e.g. a secondary accession whose entry was split / demerged). `lookup.set(result.from, result.to)` keeps whichever comes last, so the protein silently gets one arbitrary entry's annotations (features, subcellular location, GO terms, and so auto groups). It should detect the ambiguity, leave such proteins unannotated and tell the user.
+- **Isoforms / suffixed accessions get the canonical entry's annotations** (`toUniprotQueryAccession` in `js/main.js`): a hyphenated suffix is stripped (`P04637-2`, `P02768-A`), a deliberate choice. Positional features go through the sequence alignment, but entry-level annotations (subcellular location, GO terms, and so auto groups) are the canonical protein's, which can be wrong for an isoform (UniProt sometimes gives isoform-specific locations).
 
 ## Important Rules
 
