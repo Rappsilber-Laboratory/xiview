@@ -85,6 +85,14 @@ export class SearchResultsModel {
     storeMzIdentMLFiles(json) {
         // this var will be deleted after data is processed
         this._mzidentmlFilesJson = json;
+        // Without a PRIDE project in the URL (e.g. xiview.org), title the page with the
+        // uploaded files' names, as xi2 does with its resultset names below.
+        if (!new URLSearchParams(window.location.search).get("project")) {
+            const names = [...new Set(json.map(f => f.identification_file_name).filter(Boolean))];
+            if (names.length > 0) {
+                document.title = names.join(";");
+            }
+        }
     }
 
     /**

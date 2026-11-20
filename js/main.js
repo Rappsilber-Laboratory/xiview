@@ -366,6 +366,9 @@ function getTasks(apiBase, clmsModel) {
 function setWindowTitle() {
     const params = new URLSearchParams(window.location.search);
     const project = params.get("project");
+    if (!project) {
+        return; // no PRIDE project (xi2, xiview.org): the title comes from the data (SearchResultsModel)
+    }
     const file = params.get("file");
     document.title = file ? `${project}; ${file}` : project;
 }
