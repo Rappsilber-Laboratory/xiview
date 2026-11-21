@@ -2,6 +2,7 @@ import {module, test, start} from "qunit";
 import {loadTestData, loadXi2TestData} from "./test-helper";
 import {Peptide} from "../js/clms-model/peptide";
 import {arrayifyPeptide, buildAnnotationRequest, convert_to_json_request} from "../js/load-spectrum";
+import {SpectrumIdentificationProtocol} from "../js/clms-model/mzidentml-metadata/spectrum-identification-protocol";
 
 /**
  * Tests of the annotation request xiVIEW sends to the annotator (via
@@ -368,10 +369,80 @@ export async function testSetup() {
         assert.deepEqual(req.annotation.fragmentTolerance, {tolerance: 0.03, unit: "Da"});
     });
 
-    test("KNOWN: ion types are always b/y, even for an ETD (c/z) protocol", function (assert) {
-        // SpectrumMatch.ionTypes() returns a hard-coded [bIon, yIon] (todo in spectrum-match.js)
+    test("ion types come from the protocol: c/z for an ETD protocol", function (assert) {
         const req = buildAnnotationRequest(mzidMatch("ETD_SII_0"));
+        assert.deepEqual(req.annotation.ions, [{type: "CIon"}, {type: "ZIon"}]);
+    });
+
+    test("ion types come from the protocol: b/y for an HCD protocol", function (assert) {
+        const req = buildAnnotationRequest(mzidMatch("SII_2_1"));
         assert.deepEqual(req.annotation.ions, [{type: "BIon"}, {type: "YIon"}]);
+    });
+
+    test("neutral losses come from the protocol (MS:1000336 H2O, NH3)", function (assert) {
+        const req = wire(buildAnnotationRequest(mzidMatch("ETD_SII_0")));
+        assert.deepEqual(req.annotation.losses, [
+            {id: "H2O", mass: 18.01056027, specificity: ["S", "T", "D", "E", "CTerm"]},
+            {id: "NH3", mass: 17.02654493, specificity: ["R", "K", "N", "Q", "NTerm"]},
+        ]);
+    });
+
+    module("SpectrumIdentificationProtocol: ion series and neutral losses");
+
+    const sipWith = (params) => new SpectrumIdentificationProtocol({id: 0, sip_ref: "SIP", upload_id: 1, additional_search_params: params}, [], []);
+    const types = (sip) => sip.ionTypes().map(i => i.type);
+    const lossIds = (sip) => sip.losses().map(l => l.id);
+
+    test("current MS:1002473 ion series terms", function (assert) {
+        const sip = sipWith({"MS:1001263": "param: z ion", "MS:1001108": "param: a ion", "MS:1001119": "param: c ion",
+            "MS:1001261": "param: x ion", "MS:1001118": "param: b ion", "MS:1001262": "param: y ion"});
+        assert.deepEqual(types(sip), ["aIon", "bIon", "cIon", "xIon", "yIon", "zIon"], "all six, in a b c x y z order");
+        assert.deepEqual(lossIds(sip), ["H2O", "NH3"], "no loss named: H2O and NH3");
+        assert.deepEqual(sip.fragmentationWarnings, []);
+    });
+
+    test("deprecated ion series + loss terms give the series and the loss (e.g. Scout)", function (assert) {
+        const sip = sipWith({"MS:1001118": "param: b ion", "MS:1001149": "param: b ion-NH3", "MS:1001262": "param: y ion",
+            "MS:1001151": "param: y ion-NH3"});
+        assert.deepEqual(types(sip), ["bIon", "yIon"]);
+        assert.deepEqual(lossIds(sip), ["NH3"], "only the loss named");
+        assert.deepEqual(sip.fragmentationWarnings, []);
+        assert.deepEqual(types(sipWith({"MS:1001150": "param: b ion-H2O"})), ["bIon"], "a loss term alone still names its series");
+    });
+
+    test("neutral loss values (MS:1000336), single or repeated, and obsolete loss terms", function (assert) {
+        assert.deepEqual(lossIds(sipWith({"MS:1001118": "", "MS:1000336": "water"})), ["H2O"]);
+        assert.deepEqual(lossIds(sipWith({"MS:1001118": "", "MS:1000336": ["NH3", "H2O"]})), ["H2O", "NH3"]);
+        assert.deepEqual(lossIds(sipWith({"MS:1001118": "", "MS:1002456": "NH3 neutral loss"})), ["NH3"]);
+    });
+
+    test("named losses that aren't supported are left out, with a warning, and not replaced by the defaults", function (assert) {
+        const sip = sipWith({"MS:1001118": "param: b ion", "MS:1002450": "param: b ion-H3PO4"});
+        assert.deepEqual(types(sip), ["bIon"]);
+        assert.deepEqual(lossIds(sip), [], "no losses, not H2O/NH3");
+        assert.equal(sip.fragmentationWarnings.length, 1);
+        assert.ok(sip.fragmentationWarnings[0].includes("H3PO4"));
+    });
+
+    test("no supported ion series: b and y, with a warning", function (assert) {
+        const none = sipWith({"MS:1001211": "parent mass type mono"});
+        assert.deepEqual(types(none), ["bIon", "yIon"]);
+        assert.equal(none.fragmentationWarnings.length, 1);
+        const unsupported = sipWith({"MS:1001408": "param: z+1 ion"});
+        assert.deepEqual(types(unsupported), ["bIon", "yIon"]);
+        assert.equal(unsupported.fragmentationWarnings.length, 2, "one for the left-out series, one for the default");
+        assert.ok(unsupported.fragmentationWarnings[0].includes("z+1"));
+        const missing = new SpectrumIdentificationProtocol({id: 0}, [], []);
+        assert.deepEqual(types(missing), ["bIon", "yIon"], "no additional_search_params at all");
+    });
+
+    test("ionTypes() / losses() return new objects each call", function (assert) {
+        const sip = sipWith({"MS:1001118": ""});
+        const a = sip.ionTypes();
+        a[0].type = "changed";
+        sip.losses()[0].specificity.push("X");
+        assert.deepEqual(types(sip), ["bIon"]);
+        assert.deepEqual(sip.losses()[0].specificity, ["S", "T", "D", "E", "CTerm"]);
     });
 
     test("KNOWN: loop link sends one peptide and only the first link site", function (assert) {

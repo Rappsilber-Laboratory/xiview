@@ -1,3 +1,115 @@
+// Ion series and neutral losses searched for, read from the protocol's AdditionalSearchParams.
+// See https://github.com/HUPO-PSI/mzIdentML/issues/128 for why this needs several CV branches.
+
+/**
+ * Ion series the annotator supports, by CV accession (children of MS:1002473 "ion series considered in search").
+ * @type {Object<string, string>}
+ */
+const ION_SERIES = {
+    "MS:1001108": "a",
+    "MS:1001118": "b",
+    "MS:1001119": "c",
+    "MS:1001261": "x",
+    "MS:1001262": "y",
+    "MS:1001263": "z",
+};
+
+/**
+ * Deprecated ion series + neutral loss terms (children of MS:1001066 "ions series considered in search"),
+ * still written by some software. Each means its base ion series, searched with that loss.
+ * @type {Object<string, Array<string>>}
+ */
+const ION_SERIES_WITH_LOSS = {
+    "MS:1001146": ["a", "NH3"],
+    "MS:1001148": ["a", "H2O"],
+    "MS:1001149": ["b", "NH3"],
+    "MS:1001150": ["b", "H2O"],
+    "MS:1001151": ["y", "NH3"],
+    "MS:1001152": ["y", "H2O"],
+    "MS:1002450": ["b", "H3PO4"],
+    "MS:1002451": ["y", "H3PO4"],
+};
+
+/**
+ * Ion series in the CV that the annotator can't annotate.
+ * @type {Object<string, string>}
+ */
+const UNSUPPORTED_ION_SERIES = {
+    "MS:1001257": "v ion",
+    "MS:1001258": "d ion",
+    "MS:1001259": "immonium ion",
+    "MS:1001260": "w ion",
+    "MS:1001406": "internal yb ion",
+    "MS:1001407": "internal ya ion",
+    "MS:1001408": "z+1 ion",
+    "MS:1001409": "z+2 ion",
+};
+
+/**
+ * Neutral loss terms: obsolete children of MS:1002473, giving the loss by accession.
+ * @type {Object<string, string>}
+ */
+const LOSS_TERMS = {
+    "MS:1002455": "H2O",
+    "MS:1002456": "NH3",
+    "MS:1002457": "H3PO4",
+};
+
+/**
+ * MS:1000336 "neutral loss": the cvParam value(s) name the loss.
+ * @type {string}
+ */
+const NEUTRAL_LOSS = "MS:1000336";
+
+/**
+ * Losses the annotator can be given, as xi1-style annotation request losses (same masses and
+ * specificities as xi2annotator's default H2O and NH3 losses).
+ * @type {Object<string, {id: string, mass: number, specificity: Array<string>}>}
+ */
+const SUPPORTED_LOSSES = {
+    H2O: {id: "H2O", mass: 18.01056027, specificity: ["S", "T", "D", "E", "CTerm"]},
+    NH3: {id: "NH3", mass: 17.02654493, specificity: ["R", "K", "N", "Q", "NTerm"]},
+};
+
+/**
+ * Other names the neutral loss cvParam value may use for a supported loss.
+ * @type {Object<string, string>}
+ */
+const LOSS_ALIASES = {h2o: "H2O", water: "H2O", nh3: "NH3", ammonia: "NH3"};
+
+/**
+ * Ion series used when a protocol names none: b and y.
+ * @type {Array<string>}
+ */
+export const DEFAULT_ION_SERIES = ["b", "y"];
+
+/**
+ * Losses used when a protocol names none: H2O and NH3.
+ * @type {Array<string>}
+ */
+export const DEFAULT_LOSSES = ["H2O", "NH3"];
+
+/**
+ * Ion types as used in annotation requests, e.g. [{type: "bIon"}, {type: "yIon"}]. New objects on every call.
+ * @param {Array<string>} series - Ion series letters
+ * @returns {Array<Object>} Ion type objects
+ */
+export function ionTypeObjects(series) {
+    return series.map(s => ({type: s + "Ion"}));
+}
+
+/**
+ * Losses as used in annotation requests. New objects on every call.
+ * @param {Array<string>} losses - Loss names (keys of SUPPORTED_LOSSES)
+ * @returns {Array<Object>} Loss objects {id, mass, specificity}
+ */
+export function lossObjects(losses) {
+    return losses.map(l => {
+        const loss = SUPPORTED_LOSSES[l];
+        return {id: loss.id, mass: loss.mass, specificity: loss.specificity.slice()};
+    });
+}
+
 export class SpectrumIdentificationProtocol {
     /**
      * Private JSON data sent by crosslinking-API
@@ -18,6 +130,24 @@ export class SpectrumIdentificationProtocol {
     #searchModifications;
 
     /**
+     * Ion series searched for (letters, in a, b, c, x, y, z order), from AdditionalSearchParams
+     * @type {Array<string>}
+     */
+    #ionSeries;
+
+    /**
+     * Neutral losses searched for (names, in H2O, NH3 order), from AdditionalSearchParams
+     * @type {Array<string>}
+     */
+    #losses;
+
+    /**
+     * Problems found reading ion series / losses, for showing to the user
+     * @type {Array<string>}
+     */
+    #fragmentationWarnings;
+
+    /**
      * Create a SpectrumIdentificationProtocol instance
      * @param {Object} json - JSON data sent by crosslinking-API
      * @param {number} json.id - Protocol identifier
@@ -35,6 +165,64 @@ export class SpectrumIdentificationProtocol {
         this.#json = json;
         this.#enzymes = enzymes;
         this.#searchModifications = searchModifications;
+        this.#readFragmentation(json.additional_search_params || {});
+    }
+
+    /**
+     * Work out the ion series and neutral losses from AdditionalSearchParams.
+     * Unsupported ion series and losses are left out, with a warning. If no supported ion series
+     * is named, b and y are used, with a warning. If no loss is named at all, H2O and NH3 are used
+     * (the annotator's own default); if losses are named but none is supported, none is used.
+     * @param {Object} params - CV accession -> name or value(s)
+     * @returns {void}
+     * @private
+     */
+    #readFragmentation(params) {
+        const series = new Set();
+        const losses = new Set();
+        const unsupportedSeries = [];
+        const unsupportedLosses = new Set();
+        let lossNamed = false;
+        const addLoss = (name) => {
+            lossNamed = true;
+            const canonical = SUPPORTED_LOSSES[name] ? name : LOSS_ALIASES[String(name).trim().toLowerCase()];
+            if (canonical) {
+                losses.add(canonical);
+            } else {
+                unsupportedLosses.add(String(name));
+            }
+        };
+        for (const accession of Object.keys(params)) {
+            if (ION_SERIES[accession]) {
+                series.add(ION_SERIES[accession]);
+            } else if (ION_SERIES_WITH_LOSS[accession]) {
+                series.add(ION_SERIES_WITH_LOSS[accession][0]);
+                addLoss(ION_SERIES_WITH_LOSS[accession][1]);
+            } else if (UNSUPPORTED_ION_SERIES[accession]) {
+                unsupportedSeries.push(UNSUPPORTED_ION_SERIES[accession]);
+            } else if (LOSS_TERMS[accession]) {
+                addLoss(LOSS_TERMS[accession]);
+            } else if (accession === NEUTRAL_LOSS) {
+                const value = params[accession];
+                for (const name of (Array.isArray(value) ? value : [value])) {
+                    addLoss(name);
+                }
+            }
+        }
+
+        const warnings = [];
+        if (unsupportedSeries.length) {
+            warnings.push("ion series the annotator does not support were left out: " + unsupportedSeries.join(", "));
+        }
+        if (series.size === 0) {
+            warnings.push("no supported ion series given, so b and y ions are used");
+        }
+        if (unsupportedLosses.size) {
+            warnings.push("neutral losses the annotator does not support were left out: " + Array.from(unsupportedLosses).join(", "));
+        }
+        this.#ionSeries = series.size ? Object.values(ION_SERIES).filter(s => series.has(s)) : DEFAULT_ION_SERIES.slice();
+        this.#losses = lossNamed ? Object.keys(SUPPORTED_LOSSES).filter(l => losses.has(l)) : DEFAULT_LOSSES.slice();
+        this.#fragmentationWarnings = warnings;
     }
 
     // {
@@ -158,14 +346,27 @@ export class SpectrumIdentificationProtocol {
     }
 
     /**
-     * Get ion types for this match
-     * @returns {Array<Object>} Array of ion type objects
+     * Get the ion types searched for (b and y if the protocol names none)
+     * @returns {Array<Object>} Array of ion type objects, e.g. [{type: "bIon"}, {type: "yIon"}]; new objects on every call
      */
     ionTypes() {
-        // // Initialize ion types
-        // // todo - get from SIP, also CV term issues to be addressed (needed CV terms were deprecated)
-        // this.ions = [{type:"bIon"}, {type:"yIon"}];
-        return this.ions;
+        return ionTypeObjects(this.#ionSeries);
+    }
+
+    /**
+     * Get the neutral losses searched for (H2O and NH3 if the protocol names none)
+     * @returns {Array<Object>} Array of xi1-style annotation request losses {id, mass, specificity}; new objects on every call
+     */
+    losses() {
+        return lossObjects(this.#losses);
+    }
+
+    /**
+     * Problems found reading the ion series / neutral losses (unsupported ones left out, defaults used)
+     * @returns {Array<string>} Warning messages, empty if none
+     */
+    get fragmentationWarnings() {
+        return this.#fragmentationWarnings.slice();
     }
 
     // /**

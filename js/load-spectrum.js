@@ -1,3 +1,44 @@
+import * as _ from "underscore";
+import {showMessage} from "./ui-utils/message-popup";
+import {DEFAULT_LOSSES, lossObjects} from "./clms-model/mzidentml-metadata/spectrum-identification-protocol";
+
+/**
+ * Protocols whose ion series / neutral loss warnings have already been shown (once per protocol per page)
+ * @type {WeakSet<Object>}
+ */
+const fragmentationWarningsShown = new WeakSet();
+
+/**
+ * Uploads for which the "no protocol, so default ion series / losses" warning has been shown
+ * @type {Set<*>}
+ */
+const noProtocolWarningShown = new Set();
+
+/**
+ * Show, once per protocol, any problems reading the ion series / neutral losses used to annotate this match.
+ * @param {SpectrumMatch} match - The spectrum match being annotated
+ * @returns {void}
+ */
+function showFragmentationWarnings(match) {
+    const sip = match.spectrumIdentificationProtocol;
+    if (!sip) {
+        if (!noProtocolWarningShown.has(match.uploadId)) {
+            noProtocolWarningShown.add(match.uploadId);
+            console.warn("No spectrum identification protocol for upload " + match.uploadId + ", using b and y ions and H2O and NH3 losses");
+            showMessage("Spectrum annotation: no search protocol for this match, so b and y ions and H2O and NH3 losses are used.", "warning");
+        }
+        return;
+    }
+    const warnings = sip.fragmentationWarnings;
+    if (!warnings || warnings.length === 0 || fragmentationWarningsShown.has(sip)) { // xi2 SIPs have no fragmentationWarnings
+        return;
+    }
+    fragmentationWarningsShown.add(sip);
+    console.warn("Spectrum identification protocol " + sip.spectrumIdentificationProtocolRef + ":", warnings);
+    showMessage("Spectrum annotation (protocol " + _.escape(String(sip.spectrumIdentificationProtocolRef)) + "): "
+        + warnings.map(w => _.escape(w)).join("; ") + ".", "warning");
+}
+
 /**
  * Load spectrum data from PRIDE for a given spectrum match
  * @param {SpectrumMatch} match - The spectrum match to load spectrum data for
@@ -8,6 +49,9 @@ export const loadSpectrum = function (match) {
     // no peak list was uploaded for this match (e.g. CSV without peak lists): nothing to load
     if (json_request === null) {
         return;
+    }
+    if (json_request.annotation.config === undefined) { // mzIdentML style: ion series / losses come from the SIP
+        showFragmentationWarnings(match);
     }
 
     const url = this.get("apiBase") + "get_annotated_peaklist"
@@ -142,6 +186,8 @@ export function buildAnnotationRequest (match) {
         formatted_data.ionTypes = ions.map(function (ion) {
             return ion.type.replace("Ion", "");
         }).join(";");
+        // neutral losses from the protocol (H2O and NH3 if it names none, as the annotator would do itself)
+        formatted_data.losses = sip ? sip.losses() : lossObjects(DEFAULT_LOSSES);
     }
 
     return convert_to_json_request(formatted_data);

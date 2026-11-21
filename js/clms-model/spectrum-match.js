@@ -1,5 +1,6 @@
 import {Crosslink} from "./crosslink";
 import {ScoreExtent} from "./score-extent";
+import {DEFAULT_ION_SERIES, ionTypeObjects} from "./mzidentml-metadata/spectrum-identification-protocol";
 
 export class SpectrumMatch {
     /**
@@ -120,8 +121,6 @@ export class SpectrumMatch {
     constructor(containingModel, proteins, crosslinks, peptides, json) {
         this.#containingModel = containingModel;
         this.#json = json;
-
-        this.ions = [{type:"bIon"}, {type:"yIon"}]; //todo -remove
 
         //scores
         const scores = json.sc;
@@ -530,11 +529,14 @@ export class SpectrumMatch {
     }
 
     /**
-     * Get ion types for this match - todo -remove
-     * @returns {Array<Object>} Array of ion type objects
+     * Get the ion types searched for, from this match's spectrum identification protocol
+     * (mzIdentML: AdditionalSearchParams; xi2: the search config). b and y ions if the match has no protocol
+     * (e.g. CSV uploads).
+     * @returns {Array<Object>} Array of ion type objects, e.g. [{type: "bIon"}, {type: "yIon"}]
      */
     ionTypes() {
-        return this.ions;
+        const sip = this.#containingModel.getMzidentmlFiles().get(this.uploadId)?.getSpectrumIdentificationProtocolById(this.#json.sip);
+        return sip ? sip.ionTypes() : ionTypeObjects(DEFAULT_ION_SERIES);
     }
 
     /**
