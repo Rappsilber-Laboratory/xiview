@@ -53,6 +53,11 @@ export const FilteringPipelineMixin = {
         }
 
         // Stage 2: Per-crosslink filtering
+        // Protein name / description search text, worked out once per protein for this call (standard mode only).
+        // Exact because protein names, descriptions, accessions and keywords don't change during applyFilter(),
+        // and the cache is local to this call, so it's never reused after anything changes.
+        const proteinSearchTextCache = new Map();
+
         function filterCrossLink(crosslink) {
             crosslink.filteredMatches_pp = [];
             const isSelf = crosslink.isSelfLink();
@@ -123,7 +128,7 @@ export const FilteringPipelineMixin = {
                             crosslink.ambiguous = false;
                         }
 
-                        pass = pass && filterModel.navigationFilter(match) && filterModel.groupFilter(match);
+                        pass = pass && filterModel.navigationFilter(match, proteinSearchTextCache) && filterModel.groupFilter(match);
 
                         if (pass) {
                             crosslink.filteredMatches_pp.push(matchAndPepPos);
@@ -167,16 +172,16 @@ export const FilteringPipelineMixin = {
         if (filterModel) {
             const uniqueResiduePairsPerPPI = filterModel.get("urpPpi");
             if (uniqueResiduePairsPerPPI > 1) {
+                const ppiKey = function (crosslink) {
+                    return crosslink.toProtein ?
+                        crosslink.fromProtein.id + " - " + crosslink.toProtein.id :
+                        crosslink.fromProtein.id + " - linear";
+                };
                 let value;
                 const ppiMap = new Map();
                 for (let crosslink of crosslinksArr) {
                     if (crosslink.filteredMatches_pp.length) {
-                        let key;
-                        if (crosslink.toProtein) {
-                            key = crosslink.fromProtein.id + " - " + crosslink.toProtein.id;
-                        } else {
-                            key = crosslink.fromProtein.id + " - linear";
-                        }
+                        const key = ppiKey(crosslink);
                         value = ppiMap.get(key);
                         if (typeof value == "undefined") {
                             value = 1;
@@ -186,14 +191,9 @@ export const FilteringPipelineMixin = {
                         ppiMap.set(key, value);
                     }
                 }
-                for (let crosslink of this.getAllCrossLinks()) {
-                    let key;
-                    if (crosslink.toProtein) {
-                        key = crosslink.fromProtein.id + " - " + crosslink.toProtein.id;
-                    } else {
-                        key = crosslink.fromProtein.id + " - linear";
-                    }
-                    value = ppiMap.get(key);
+                // crosslinksArr holds the same crosslinks as getAllCrossLinks() (an array copy of the same map)
+                for (let crosslink of crosslinksArr) {
+                    value = ppiMap.get(ppiKey(crosslink));
                     if (value < uniqueResiduePairsPerPPI) {
                         crosslink.filteredMatches_pp = [];
                     }
@@ -243,14 +243,28 @@ export const FilteringPipelineMixin = {
         }
 
         // Stage 7: Update stats
-        const ppiSet = new Set();
+        // Distinct (from, to) protein id pairs first, then one "from-to" string per pair: the same set of
+        // strings as building one per crosslink, without building and hashing a string for every crosslink.
+        const toIdsByFromId = new Map();
         let heteromericLinks = 0, selfLinks = 0;
         for (let crosslink of this.getFilteredCrossLinks()) {
             if (crosslink.isSelfLink()) {
                 selfLinks++;
             } else {
                 heteromericLinks++;
-                ppiSet.add(crosslink.fromProtein.id + "-" + crosslink.toProtein.id);
+                const fromId = crosslink.fromProtein.id;
+                let toIds = toIdsByFromId.get(fromId);
+                if (!toIds) {
+                    toIds = new Set();
+                    toIdsByFromId.set(fromId, toIds);
+                }
+                toIds.add(crosslink.toProtein.id);
+            }
+        }
+        const ppiSet = new Set();
+        for (const [fromId, toIds] of toIdsByFromId) {
+            for (const toId of toIds) {
+                ppiSet.add(fromId + "-" + toId);
             }
         }
 

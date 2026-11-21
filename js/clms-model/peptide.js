@@ -7,6 +7,14 @@ export class Peptide {
     #json;
 
     /**
+     * Base sequence (no modifications), worked out on first use and kept, as it's read for every match
+     * on every filter pass. Relies on #json.seq never changing after construction (nothing does this).
+     * @type {string}
+     * @private
+     */
+    #sequence;
+
+    /**
      * Canonical, source-agnostic modification list resolved once at
      * construction. Each entry: {pos, name, mass, isCrosslinker, stub}.
      * All modification getters read from this so nothing downstream branches
@@ -140,7 +148,10 @@ export class Peptide {
      * @returns {string} Peptide base sequence
      */
     get sequence() {
-        return this.#json.seq.replace(/[^A-Z]/g, "");
+        if (this.#sequence === undefined) {
+            this.#sequence = this.#json.seq.replace(/[^A-Z]/g, "");
+        }
+        return this.#sequence;
     }
 
     /**
