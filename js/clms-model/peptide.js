@@ -56,39 +56,37 @@ export class Peptide {
      * @private
      */
     #resolveModifications(searchModifications){
-        const mods = [];
         const positions = this.#json.m_ps ?? [];
         const refs = this.#json.m_as ?? [];
         const masses = this.#json.m_ms;
-        for (let i = 0; i < positions.length; i++) {
-            const pos = positions[i];
+        // map rather than push onto [], so the array is allocated at its final size (one entry per position)
+        return positions.map((pos, i) => {
             const ref = refs[i];
             if (searchModifications) {
                 // xi2: ref is a 0-based index into the config modifications list.
                 // mass may be undefined (some defs carry only `composition`) - by design.
                 const def = searchModifications[ref];
-                mods.push({
+                return {
                     pos,
                     name: def ? def.name : String(ref),
                     mass: def ? def.mass : undefined,
                     isCrosslinker: false,
                     stub: undefined
-                });
+                };
             } else {
                 // mzIdentML: ref is a CV-term object {accession: name}.
                 const keys = Object.keys(ref);
                 const isCrosslinker = keys.includes("MS:1002509") || keys.includes("MS:1002510");
                 const firstVal = Object.values(ref)[0];
-                mods.push({
+                return {
                     pos,
                     name: firstVal != null ? String(firstVal).toLowerCase().replace(/ /g, "") : "",
                     mass: masses ? masses[i] : undefined,
                     isCrosslinker,
                     stub: isCrosslinker ? ref["MS:1003390"] : undefined
-                });
+                };
             }
-        }
-        return mods;
+        });
     }
 
     /**

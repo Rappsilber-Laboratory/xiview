@@ -335,7 +335,6 @@ export class SearchResultsModel {
                 proteins.set(protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
-                peptide.sequence = peptide.base_seq;
                 peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
                 if (peptide.dec) { // in xi2 the isDecoy info is in the protein
                     for (let p = 0; p < peptide.prt.length; p++) {
