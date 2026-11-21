@@ -12,7 +12,6 @@
 
 import "../../css/scatterplot.css";
 import * as _ from "underscore";
-import $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {attributeOptions} from "../clms-model/attribute-options";
@@ -20,7 +19,7 @@ import {
     addMultipleSelectControls, ceil, commonLabels,
     crossBrowserElementX,
     crossBrowserElementY,
-    declutterAxis, floor,
+    floor,
     makeBackboneButtons
 } from "../utils";
 import d3 from "d3";

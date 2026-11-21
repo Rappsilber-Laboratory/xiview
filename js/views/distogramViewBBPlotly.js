@@ -19,10 +19,8 @@ import {attributeOptions} from "../clms-model/attribute-options";
 import {
     addMultipleSelectControls,
     commonLabels,
-    declutterAxis,
     makeBackboneButtons,
-    niceRound,
-    niceValueAxis
+    niceRound
 } from "../utils";
 import {DropDownMenuViewBB} from "../ui-utils/ddMenuViewBB";
 import {crosslinkerSpecificityPerLinker} from "../modelUtils";
