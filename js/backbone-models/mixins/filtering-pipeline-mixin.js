@@ -4,7 +4,8 @@
  *
  * Pipeline stages (in order):
  *   1. FDR pre-processing — clear fdrPass flags, run FDR algorithm, set threshold attributes
- *   2. Per-crosslink filtering — FDR mode or standard mode, with protein hiding and distance checks
+ *   2. Per-crosslink filtering — FDR mode or standard mode, with protein hiding, then distance
+ *      recalculation for crosslinks whose homomultimer state changed, then distance filtering
  *   3. Multi-group filter — remove crosslinks spanning too many groups (if enabled)
  *   4. Unique residue pairs per PPI filter
  *   5. Categorisation — populate filteredXLinks cache (all, targets, linears, decoys)
@@ -102,10 +103,6 @@ export const FilteringPipelineMixin = {
                             }
                         }
                     }
-
-                    if (!filterModel.distanceFilter(crosslink)) {
-                        crosslink.filteredMatches_pp = [];
-                    }
                 }
             } else {
                 // Standard (non-FDR) mode
@@ -137,10 +134,6 @@ export const FilteringPipelineMixin = {
                             }
                         }
                     }
-
-                    if (!filterModel.distanceFilter(crosslink)) {
-                        crosslink.filteredMatches_pp = [];
-                    }
                 }
             }
         }
@@ -157,7 +150,18 @@ export const FilteringPipelineMixin = {
                 homomultiSwitchers.push(crosslink);
             }
         }
+        // A crosslink's distance depends on its confirmedHomomultimer state, which the loop above has just
+        // worked out, so recalculate distances for crosslinks whose state changed before distance filtering
         this.getCrossLinkDistances(homomultiSwitchers);
+
+        // Distance filter (both modes), on up-to-date distances
+        if (filterModel) {
+            for (let crosslink of crosslinksArr) {
+                if (crosslink.filteredMatches_pp.length && !filterModel.distanceFilter(crosslink)) {
+                    crosslink.filteredMatches_pp = [];
+                }
+            }
+        }
 
         // Stage 3: Multi-group filter
         if (filterModel && !filterModel.get("multipleGroup")) {
