@@ -148,6 +148,24 @@ function groupLabelsFrom(options) {
  *     in the "uuid" URL param (xi2).
  * @returns {void}
  */
+/**
+ * Tell the user if some matches have a peptide on both target and decoy proteins: those matches
+ * are counted as decoys (Decoys / Targets filter, score histogram), which may not be what they expect.
+ * @param {SearchResultsModel} clmsModel - The loaded search results
+ * @returns {void}
+ */
+function warnMixedTargetDecoyMatches(clmsModel) {
+    const count = clmsModel.getMixedTargetDecoyMatchCount();
+    if (count > 0) {
+        const text = count + " match" + (count === 1 ? " has a peptide" : "es have peptides")
+            + " found in both target and decoy proteins. These matches are counted as decoys"
+            + " in the Decoys/Targets filter and the score histogram, so hiding decoys also removes them from"
+            + " their crosslinks between target proteins.";
+        console.warn(text);
+        showMessage(text, "warning");
+    }
+}
+
 export function main(apiBase, annotatorURL, options = {}) {
     const spinTarget = d3.select("#main").node();
     networkPageSpinner.spin(spinTarget);
@@ -190,6 +208,7 @@ export function main(apiBase, annotatorURL, options = {}) {
             postDataLoaded(compositeModelInst); // todo -this could be tidied up?, call postDatalOaded from end of views
             networkPageSpinner.stop();
             hideDataLoadStatus();
+            warnMixedTargetDecoyMatches(clmsModel);
         })
         .catch((error) => {
             showMessage(escapeHtml(error.stack || error.message || error), "error");

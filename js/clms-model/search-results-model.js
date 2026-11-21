@@ -48,6 +48,9 @@ export class SearchResultsModel {
     /** @type {boolean} Whether decoy proteins are present in results */
     #decoysPresent = false;
 
+    /** @type {number} Number of matches with a peptide on both target and decoy proteins (counted as decoys) */
+    #mixedTargetDecoyMatchCount = 0;
+
     /** @type {boolean} Whether ambiguous matches are present */
     #ambiguousPresent = false;
 
@@ -602,6 +605,23 @@ export class SearchResultsModel {
      */
     setDecoysPresent() {
         this.#decoysPresent = true;
+    }
+
+    /**
+     * Count a match that has a peptide on both target and decoy proteins (such a match is a decoy).
+     * Called from SpectrumMatch during parsing.
+     * @returns {undefined}
+     */
+    noteMixedTargetDecoyMatch() {
+        this.#mixedTargetDecoyMatchCount++;
+    }
+
+    /**
+     * Number of matches with a peptide on both target and decoy proteins; they are counted as decoys
+     * @returns {number} Match count
+     */
+    getMixedTargetDecoyMatchCount() {
+        return this.#mixedTargetDecoyMatchCount;
     }
 
     /**

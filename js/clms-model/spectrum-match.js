@@ -2,6 +2,28 @@ import {Crosslink} from "./crosslink";
 import {ScoreExtent} from "./score-extent";
 import {DEFAULT_ION_SERIES, ionTypeObjects} from "./mzidentml-metadata/spectrum-identification-protocol";
 
+/**
+ * Whether a peptide maps to decoy proteins, target proteins, or both.
+ * Uses the proteins' is_decoy, which parseJSON has set for every data source
+ * (mzIdentML / CSV: from the per-position dec flags; xi2: from the protein).
+ * A protein id with no protein counts as target (that error is reported when the link is made).
+ * @param {Peptide} peptide - The peptide
+ * @param {Map<string, Protein>} proteins - Map of protein IDs to Protein objects
+ * @returns {{decoy: boolean, target: boolean}} Whether any position is on a decoy / on a target protein
+ */
+function peptideDecoyState(peptide, proteins) {
+    let decoy = false;
+    let target = false;
+    for (const proteinId of peptide.prt) {
+        if (proteins.get(proteinId)?.is_decoy === true) {
+            decoy = true;
+        } else {
+            target = true;
+        }
+    }
+    return {decoy, target};
+}
+
 export class SpectrumMatch {
     /**
      * Private identification data JSON from crosslinking-API
@@ -62,11 +84,11 @@ export class SpectrumMatch {
     linkPos2;
 
     /**
-     * Whether this match involves a decoy peptide
+     * Whether this match involves a decoy peptide (one with any position on a decoy protein)
      * @type {boolean}
      * @private
      */
-    #is_decoy;
+    #is_decoy = false;
 
     /**
      * Whether this match could belong to a protein heteromeric crosslink ('between link')
@@ -142,11 +164,6 @@ export class SpectrumMatch {
 
         if (!pep0) {
             alert("peptide error (missing peptide evidence?) for:" + json.pi1);
-        } else {
-            if (pep0.is_decoy?.indexOf("1") != -1) {// *xi2 vrs pride difference*
-                this.is_decoy = true; // issue here, is this used? it is. needs a fix for xi2.
-                containingModel.setDecoysPresent();
-            }
         }
         let pep1;
         if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
@@ -154,12 +171,30 @@ export class SpectrumMatch {
             this.matchedPeptides = [pep0, pep1];
             if (!pep1) {
                 alert("peptide error (missing peptide evidence?) for:" + +json.pi2);
-            } else if (pep1.is_decoy?.indexOf("1") != -1) {// *xi2 vrs pride difference*
-                this.is_decoy = true;
-                containingModel.setDecoysPresent();
             }
         } else {
             this.matchedPeptides = [pep0];
+        }
+
+        // decoy: either peptide has a position on a decoy protein (TD or DD). A peptide on both target
+        // and decoy proteins makes the match a decoy too; those matches are counted so the user can be told.
+        let mixedDecoyPeptide = false;
+        for (const pep of this.matchedPeptides) {
+            if (pep) {
+                const state = peptideDecoyState(pep, proteins);
+                if (state.decoy) {
+                    this.#is_decoy = true;
+                    if (state.target) {
+                        mixedDecoyPeptide = true;
+                    }
+                }
+            }
+        }
+        if (this.#is_decoy) {
+            containingModel.setDecoysPresent();
+            if (mixedDecoyPeptide) {
+                containingModel.noteMixedTargetDecoyMatch();
+            }
         }
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
@@ -429,7 +464,8 @@ export class SpectrumMatch {
     }
 
     /**
-     * Check if this match involves a decoy protein
+     * Check if this match involves a decoy protein: true if either peptide has any position on a
+     * decoy protein (so also for a peptide on both target and decoy proteins)
      * @returns {boolean} True if match involves decoy
      */
     isDecoy() {
