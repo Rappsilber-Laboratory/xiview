@@ -1,6 +1,7 @@
 import {module, test, start} from "qunit";
 import {loadTestData, loadXi2TestData} from "./test-helper";
 import {SearchResultsModel} from "../js/clms-model/search-results-model";
+import {PeptideLookup} from "../js/clms-model/peptide-lookup";
 import {FilterModel} from "../js/filter/filter-model";
 import {flattenMatches} from "../js/modelUtils";
 import {nestComplexesInLocations} from "../js/backbone-models/mixins/protein-group-manager-mixin";
@@ -382,6 +383,38 @@ export async function testSetup() {
     //         assert.ok(true, "scoreExtent not set (may be expected for this dataset)");
     //     }
     // });
+
+    module("PeptideLookup");
+
+    test("ids match exactly when their String() forms are equal (as the old uploadId_peptideId keys did)", function (assert) {
+        const lookup = new PeptideLookup();
+        const a = {name: "a"}, b = {name: "b"}, c = {name: "c"};
+        lookup.set("1", 0, a);           // test data: peptide u_id is a string, match ui a number
+        lookup.set("S1", "7", b);
+        lookup.set(7, 0.5, c);
+        assert.strictEqual(lookup.get(1, 0), a);
+        assert.strictEqual(lookup.get("1", "0"), a);
+        assert.strictEqual(lookup.get(1, -0), a, "-0 prints as 0");
+        assert.strictEqual(lookup.get("S1", 7), b);
+        assert.strictEqual(lookup.get("7", "0.5"), c);
+        assert.strictEqual(lookup.get("01", 0), undefined, "\"01\" isn't \"1\"");
+        assert.strictEqual(lookup.get(" 1", 0), undefined);
+        assert.strictEqual(lookup.get(1, "00"), undefined);
+        assert.strictEqual(lookup.get("s1", 7), undefined, "case matters");
+        assert.strictEqual(lookup.get(2, 0), undefined, "unknown upload");
+        assert.strictEqual(lookup.get(1, 1), undefined, "unknown peptide");
+    });
+
+    test("ids containing _ no longer collide; the same ids again replace the peptide", function (assert) {
+        const lookup = new PeptideLookup();
+        const a = {name: "a"}, b = {name: "b"}, c = {name: "c"};
+        lookup.set("1_2", 3, a);
+        lookup.set("1", "2_3", b);       // both were key "1_2_3"
+        assert.strictEqual(lookup.get("1_2", 3), a);
+        assert.strictEqual(lookup.get("1", "2_3"), b);
+        lookup.set(1, "2_3", c);
+        assert.strictEqual(lookup.get("1", "2_3"), c);
+    });
 
     module("SearchResultsModel Methods");
 

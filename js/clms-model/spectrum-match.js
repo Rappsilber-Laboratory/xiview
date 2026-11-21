@@ -127,7 +127,7 @@ export class SpectrumMatch {
      * @param {SearchResultsModel} containingModel - The containing search results backbone-models
      * @param {Map<string, Protein>} proteins - Map of protein IDs to Protein objects
      * @param {Map<string, Crosslink>} crosslinks - Map of crosslink IDs to Crosslink objects
-     * @param {Map<string, Peptide>} peptides - Map of peptide IDs to Peptide objects
+     * @param {PeptideLookup} peptides - Peptides by (search id, peptide id)
      * @param {Object} json - Raw identification data object
      * @param {string} json.ui - Spectrum identification/upload identifier
      * @param {string} json.pi1 - Peptide identifier 1
@@ -168,14 +168,14 @@ export class SpectrumMatch {
         // matchedPeptides is assigned as a whole (one element, or two for a second peptide) rather than
         // filled in by index; same contents, but the array is allocated at its final size.
         const searchId = this.searchId;
-        const pep0 = peptides.get(searchId + "_" + json.pi1); // u r here
+        const pep0 = peptides.get(searchId, json.pi1); // u r here
 
         if (!pep0) {
             alert("peptide error (missing peptide evidence?) for:" + json.pi1);
         }
         let pep1;
         if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
-            pep1 = peptides.get(searchId + "_" + json.pi2);// *xi2 vrs pride difference*
+            pep1 = peptides.get(searchId, json.pi2);// *xi2 vrs pride difference*
             this.matchedPeptides = [pep0, pep1];
             if (!pep1) {
                 alert("peptide error (missing peptide evidence?) for:" + +json.pi2);

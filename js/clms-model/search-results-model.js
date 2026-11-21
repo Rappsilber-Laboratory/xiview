@@ -1,5 +1,6 @@
 import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
+import {PeptideLookup} from "./peptide-lookup";
 import {Protein} from "./protein";
 import {SpectrumIdentificationProtocol} from "./mzidentml-metadata/spectrum-identification-protocol";
 import {Xi2SpectrumIdentificationProtocol} from "./xi2-metadata/xi2-spectrum-identification-protocol";
@@ -342,7 +343,7 @@ export class SearchResultsModel {
         // this.#xiNETLayout = json.xiNETLayout;
         //process actual data
         const proteins = this.#proteins;
-        const peptides = new Map();
+        const peptides = new PeptideLookup();
         const isXi2 = xi2SipJsonsByResultsetId.size > 0;
         if (!isXi2 && !this.isAggregatedData()) { // single PRIDE file - use id as protein id
             for (let rawProtein of this._rawProteins) {
@@ -350,7 +351,7 @@ export class SearchResultsModel {
                 proteins.set(protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
-                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
+                peptides.set(peptide.u_id, peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id)));
                 if (peptide.dec) { // in xi2 the isDecoy info is in the protein
                     for (let p = 0; p < peptide.prt.length; p++) {
                         if (peptide.dec[p]) {
@@ -391,7 +392,7 @@ export class SearchResultsModel {
                 tempProteins.set(rawProtein.search_id + "_" + protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
-                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
+                peptides.set(peptide.u_id, peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id)));
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
                     const protein = tempProteins.get(peptide.u_id + "_" + peptide.prt[pe]);
                     if (!protein) {
@@ -468,7 +469,7 @@ export class SearchResultsModel {
 
     /**
      * Connect searches to proteins
-     * @param {Map<string, Peptide>} peptideMap - Map of peptide IDs to Peptide objects
+     * @param {PeptideLookup} peptideMap - Peptides by (upload / search id, peptide id) (not used)
      * @param {Array<SpectrumMatch>} matchArray - Array of spectrum matches
      * @returns {Map<string, Object>} Map of search IDs to search objects with proteinIDSet and id
      */
