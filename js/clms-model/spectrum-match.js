@@ -631,9 +631,10 @@ export class SpectrumMatch {
      * @returns {number} Modification count
      */
     modificationCount() {
-        const modCount1 = this.matchedPeptides[0].mod_pos.length;
+        // modifications has one entry per mod_pos entry
+        const modCount1 = this.matchedPeptides[0].modifications.length;
         if (this.matchedPeptides[1]) {
-            const modCount2 = this.matchedPeptides[1].mod_pos.length;
+            const modCount2 = this.matchedPeptides[1].modifications.length;
             if (modCount2 > modCount1) {
                 return modCount2;
             }
