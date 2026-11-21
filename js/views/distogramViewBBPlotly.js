@@ -1,8 +1,8 @@
 /**
  * @fileoverview Histogram/distogram view (Plotly port).
- * Same behaviour as distogramViewBB.js but built on Plotly.js (basic-dist-min) instead of c3.js.
- * The class API, defaultOptions, Backbone listeners and toolbar wiring are kept identical to
- * the original so the two files can be diffed cleanly. The chart engine internals — c3.generate,
+ * Same behaviour as the c3.js-based distogramViewBB.js it replaced (since removed; see git history)
+ * but built on Plotly.js (basic-dist-min). The class API, defaultOptions, Backbone listeners and
+ * toolbar wiring were kept identical to the original so the two could be diffed cleanly. The chart engine internals — c3.generate,
  * c3 internal API access, the redraw-shortcut hacks, the SVG <pattern> fill, and the manual
  * "make bars sit between ticks" shim — are replaced with Plotly.newPlot / Plotly.react and
  * built-in Plotly features (yaxis2, marker.pattern, plotly_click / plotly_hover events).

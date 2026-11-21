@@ -1,6 +1,6 @@
 /**
  * @fileoverview Scatterplot view (Plotly port).
- * Same behaviour as scatterplotViewBB.js but built on Plotly.js (basic-dist-min) instead of
+ * Same behaviour as scatterplotViewBB.js, which it replaced (since removed; see git history), but built on Plotly.js (basic-dist-min) instead of
  * the custom D3 v3 + dual-canvas implementation. Backbone wiring, the toolbar (jitter / log /
  * download), the X / Y axis-attribute dropdowns, the model event listeners and the public
  * methods (render, recolourCrossLinks, rehighlightCrossLinks, optionsToString, takeImage)
