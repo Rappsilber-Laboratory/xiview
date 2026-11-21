@@ -24,6 +24,14 @@ function peptideDecoyState(peptide, proteins) {
     return {decoy, target};
 }
 
+/**
+ * The overlap of a match that isn't a confirmed homomultimer: one shared, frozen empty array rather than
+ * one per match. Reads give undefined as from any empty array; a write would throw, not change every match
+ * (the constructor assigns a new array when there is an overlap).
+ * @type {Array<number>}
+ */
+const NO_OVERLAP = Object.freeze([]);
+
 export class SpectrumMatch {
     /**
      * Private identification data JSON from crosslinking-API
@@ -238,7 +246,7 @@ export class SpectrumMatch {
         this.couldBelongToBetweenLink = false;
         this.couldBelongToSelfLink = false;
         this.confirmedHomomultimer = false;
-        this.overlap = [];
+        this.overlap = NO_OVERLAP;
 
         //looplinks
         if (!pep1) {
@@ -301,25 +309,14 @@ export class SpectrumMatch {
                 const pep2_end = pep2_start + (pep2length - 1);
                 if (pep1_start >= pep2_start && pep1_start <= pep2_end) {
                     this.confirmedHomomultimer = true;
-                    this.overlap[0] = pep1_start - 1;
-                    if (pep1_end < pep2_end) {
-                        this.overlap[1] = pep1_end;
-                    } else {
-                        this.overlap[1] = pep2_end;
-                    }
+                    this.overlap = [pep1_start - 1, (pep1_end < pep2_end) ? pep1_end : pep2_end];
                 } else if (pep2_start >= pep1_start && pep2_start <= pep1_end) {
                     this.confirmedHomomultimer = true;
-                    this.overlap[0] = pep2_start - 1;
-                    if (pep2_end < pep1_end) {
-                        this.overlap[1] = pep2_end;
-                    } else {
-                        this.overlap[1] = pep1_end;
-                    }
+                    this.overlap = [pep2_start - 1, (pep2_end < pep1_end) ? pep2_end : pep1_end];
                 }
             } else if (res1 === res2) {
                 this.confirmedHomomultimer = true;
-                this.overlap[0] = res1 - 1;
-                this.overlap[1] = res2;
+                this.overlap = [res1 - 1, res2];
             }
         }
     }

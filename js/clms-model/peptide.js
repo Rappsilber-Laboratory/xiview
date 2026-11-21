@@ -1,8 +1,10 @@
 export class Peptide {
     // The fields of the raw peptide JSON that are used, copied out of it at construction so the raw
     // object itself (and its m_ps / m_ms arrays, which #modifications duplicates) isn't kept.
-    // prt, pos, dec and m_as are the raw arrays themselves, not copies: parseJSON rewrites prt
+    // prt, pos and m_as are the raw arrays themselves, not copies: parseJSON rewrites prt
     // entries in place after construction (aggregated / xi2 data), and the getters return them.
+    // The per-position decoy flags (dec) aren't kept: parseJSON puts decoy status on the proteins,
+    // and SpectrumMatch / Crosslink read it from there.
 
     /** @type {string|number} Upload id (mzIdentML) / search id (xi2) */
     #uploadId;
@@ -14,8 +16,6 @@ export class Peptide {
     #prt;
     /** @type {Array<number>} Start positions in the proteins */
     #pos;
-    /** @type {Array<boolean>|undefined} Decoy flag per position (mzIdentML / CSV only) */
-    #dec;
     /** @type {number} Link site 1 */
     #ls1;
     /** @type {number} Link site 2 */
@@ -69,7 +69,6 @@ export class Peptide {
         this.#seq = json.seq;
         this.#prt = json.prt;
         this.#pos = json.pos;
-        this.#dec = json.dec;
         this.#ls1 = json.ls1;
         this.#ls2 = json.ls2;
         this.#clModMass = json.cl_m;
@@ -158,14 +157,6 @@ export class Peptide {
      */
     get pos(){
         return this.#pos;
-    }
-
-    /**
-     * Get decoy status for each protein mapping
-     * @returns {Array<boolean>} Array of decoy flags
-     */
-    get is_decoy(){
-        return this.#dec;
     }
 
     /**

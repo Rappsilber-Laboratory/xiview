@@ -149,20 +149,31 @@ function groupLabelsFrom(options) {
  * @returns {void}
  */
 /**
- * Tell the user if some matches have a peptide on both target and decoy proteins: those matches
- * are counted as decoys (Decoys / Targets filter, score histogram), which may not be what they expect.
+ * Tell the user about decoy status that may not be what they expect: proteins with both target and decoy
+ * peptide evidence, and matches with a peptide on both target and decoy proteins (counted as decoys).
  * @param {SearchResultsModel} clmsModel - The loaded search results
  * @returns {void}
  */
 function warnMixedTargetDecoyMatches(clmsModel) {
+    // one message box, so both warnings go in one message
+    const warnings = [];
+    const inconsistent = clmsModel.getInconsistentDecoyProteins();
+    if (inconsistent.length > 0) {
+        const shown = inconsistent.slice(0, 5).join(", ") + (inconsistent.length > 5 ? ", \u2026" : "");
+        warnings.push(inconsistent.length + " protein" + (inconsistent.length === 1 ? " has" : "s have")
+            + " both target and decoy peptide evidence in the data (" + shown + "). xiVIEW treats each protein"
+            + " as wholly target or wholly decoy, so the decoy status of their crosslinks and matches may be wrong.");
+    }
     const count = clmsModel.getMixedTargetDecoyMatchCount();
     if (count > 0) {
-        const text = count + " match" + (count === 1 ? " has a peptide" : "es have peptides")
+        warnings.push(count + " match" + (count === 1 ? " has a peptide" : "es have peptides")
             + " found in both target and decoy proteins. These matches are counted as decoys"
             + " in the Decoys/Targets filter and the score histogram, so hiding decoys also removes them from"
-            + " their crosslinks between target proteins.";
-        console.warn(text);
-        showMessage(text, "warning");
+            + " their crosslinks between target proteins.");
+    }
+    if (warnings.length > 0) {
+        console.warn(warnings.join("\n"));
+        showMessage(warnings.map(w => escapeHtml(w)).join("<br><br>"), "warning");
     }
 }
 

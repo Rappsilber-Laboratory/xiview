@@ -1,5 +1,6 @@
 import {module, test, start} from "qunit";
 import {loadTestData, loadXi2TestData} from "./test-helper";
+import {SearchResultsModel} from "../js/clms-model/search-results-model";
 import {FilterModel} from "../js/filter/filter-model";
 import {flattenMatches} from "../js/modelUtils";
 import {nestComplexesInLocations} from "../js/backbone-models/mixins/protein-group-manager-mixin";
@@ -512,7 +513,56 @@ export async function testSetup() {
         xi2DecoyRaw = data;
     });
 
+    // single mzIdentML file data (15884.json: one file, 4 REV_ decoy proteins), optionally changed first
+    const load15884 = async (transform) => {
+        const data = await (await fetch("./15884.json")).json();
+        if (transform) {
+            transform(data);
+        }
+        const model = new SearchResultsModel();
+        model.storeMzIdentMLFiles(data.mzidentmlFiles);
+        model.storeAnalysisCollectionSpectrumIdentifications([]);
+        model.storeSpectrumIdentificationProtocols(data.spectrumIdentificationProtocols || []);
+        model.storeSpectraData(data.spectraData || []);
+        model.storeEnzymes([]);
+        model.storeSearchModifications([]);
+        model.storeProteins(data.proteins);
+        model.storePeptides(data.peptides);
+        model.storeMatches(data.matches);
+        model.parseJSON();
+        return model;
+    };
+    let revProteinId;
+    const single = await load15884();
+    const singleInconsistent = await load15884(data => {
+        // a target peptide position on a decoy protein
+        const decoyPep = data.peptides.find(p => p.dec[0]);
+        revProteinId = decoyPep.prt[0];
+        const targetPep = data.peptides.find(p => !p.dec[0]);
+        targetPep.prt = targetPep.prt.concat([revProteinId]);
+        targetPep.pos = targetPep.pos.concat([targetPep.pos[0]]);
+        targetPep.dec = targetPep.dec.concat([false]);
+    });
+    // aggregated data: protein_A with decoy evidence from one peptide, target evidence from the others
+    const aggregatedInconsistentError = await loadTestData("./test-data", data => {
+        Object.assign(peptide0(data), {dec: [true]});
+    }).then(() => null, error => error);
+
     module("Decoy matches");
+
+    test("proteins with both target and decoy evidence are reported (single file data)", function (assert) {
+        assert.ok(single.getDecoysPresent(), "15884 has decoys");
+        assert.deepEqual(single.getInconsistentDecoyProteins(), [], "15884: each protein is wholly target or decoy");
+        assert.deepEqual(clmsModel.getInconsistentDecoyProteins(), [], "mzIdentML test data: none");
+        assert.deepEqual(xi2Plain.getInconsistentDecoyProteins(), [], "xi2 (decoy flag is on the protein): none");
+        const revProtein = singleInconsistent.getProtein(revProteinId);
+        assert.deepEqual(singleInconsistent.getInconsistentDecoyProteins(), [String(revProtein.accession || revProtein.name || revProtein.id)]);
+    });
+
+    test("aggregated data with a protein with both target and decoy evidence fails to load, naming it", function (assert) {
+        assert.ok(aggregatedInconsistentError instanceof Error, "parseJSON throws");
+        assert.ok(aggregatedInconsistentError && aggregatedInconsistentError.message.includes("(PA)"), aggregatedInconsistentError && aggregatedInconsistentError.message);
+    });
 
     test("mzIdentML data without decoys: no decoy matches, no decoys present", function (assert) {
         assert.ok(clmsModel.getMatches().every(m => m.isDecoy() === false), "isDecoy() is false (not undefined) for every match");
