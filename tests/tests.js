@@ -4,6 +4,7 @@ import * as NGL from "ngl";
 import * as d3 from "d3";
 
 import {Protein} from "../js/clms-model/protein";
+import {Peptide} from "../js/clms-model/peptide";
 import {mostReadableMultipleId,} from "../js/downloads";
 import {GotohAligner} from "../js/align/bioseq32";
 import {
@@ -43,6 +44,7 @@ import {setupColourModels} from "../js/backbone-models/color/setup-colors";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {SearchResultsModel} from "../js/clms-model/search-results-model";
 import vent from "../js/vent";
+import {addHtmlEscapingTests} from "./html-escaping-tests";
 
 // Enable full stack traces in console for test failures
 QUnit.config.notrycatch = true;
@@ -55,6 +57,8 @@ function testCallback(model) {
     const dseq1AO6 = "SEVAHRFKDLGEENFKALVLIAFAQYLQQCPFEDHVKLVNEVTEFAKTCVADESAENCDKSLHTLFGDKLCTVATLRETYGEMADCCAKQEPERNECFLQHKDDNPNLPRLVRPEVDVMCTAFHDNEETFLKKYLYEIARRHPYFYAPELLFFAKRYKAAFTECCQAADKAACLLPKLDELRDEGKASSAKQRLKCASLQKFGERAFKAWAVARLSQRFPKAEFAEVSKLVTDLTKVHTECCHGDLLECADDRADLAKYICENQDSISSKLKECCEKPLLEKSHCIAEVENDEMPADLPSLAADFVESKDVCKNYAEAKDVFLGMFLYEYARRHPDYSVVLLLRLAKTYETTLEKCCAAADPHECYAKVFDEFKPLVEEPQNLIKQNCELFEQLGEYKFQNALLVRYTKKVPQVSTPTLVEVSRNLGKVGSKCCKHPEAKRMPCAEDYLSVVLNQLCVLHEKTPVSDRVTKCCTESLVNRRPCFSALEVDETYVPKEFNAETFTFHADICTLSEKERQIKKQTALVELVKHKPKATKEQLKAVMDDFAAFVEKCCKADDKETCFAEEGKKLVAASQAA";
 
     start();
+
+    addHtmlEscapingTests();
 
     module("Parsing");
     test("JSON to Model Parsing", function (assert) {
@@ -162,6 +166,126 @@ function testCallback(model) {
         assert.deepEqual(model.getFilteredCrossLinks().length, expectedLinks, "Expected " + JSON.stringify(expectedLinks) + " filtered crosslinks with adding peplength=6, Passed!");
 
         model.get("filterModel").resetFilter();
+    });
+
+    // applyFilter() caches protein search text for the pass and uses faster stats counting;
+    // check its results against a plain evaluation of the (uncached) filter methods
+    test("Standard mode filtering matches a plain evaluation of the filters", function (assert) {
+        const filterModel = model.get("filterModel");
+        const proteins = Array.from(clmsModel.getProteinsIterator());
+        const p0 = proteins[0];
+        const seqPart = clmsModel.getMatches()[0].matchedPeptides[0].sequence.slice(1, 4);
+        const configs = [
+            {},
+            {pepLength: 6},
+            {selfLinks: false},
+            {ambig: false},
+            {aaApart: 10},
+            {pass: true, fail: true},
+            {protNames: p0.name.slice(0, 3)},
+            {protNames: p0.name.slice(0, 3) + "-" + p0.name.slice(0, 2)},
+            {protNames: "zzzz," + p0.accession.slice(0, 4)},
+            {protNames: "zzzz"},
+            {protDesc: "a"},
+            {protDesc: "a-e,zzzz"},
+            {pepSeq: seqPart},
+            {pepSeq: seqPart + "-" + seqPart.slice(0, 2)},
+            {pepSeq: "k"},
+        ];
+
+        configs.forEach(function (config) {
+            filterModel.resetFilter().set(config);  // triggers applyFilter()
+            const label = JSON.stringify(config);
+
+            let mismatches = 0;
+            const ppiStrings = new Set();
+            let selfLinks = 0, hetLinks = 0;
+            for (const crosslink of model.getAllCrossLinks()) {
+                const hidden = crosslink.fromProtein.manuallyHidden == true || (crosslink.toProtein && crosslink.toProtein.manuallyHidden == true);
+                let expected = hidden ? [] : crosslink.matches_pp.filter(function (mpp) {
+                    const match = mpp.match;
+                    return filterModel.subsetFilter(match) && filterModel.validationStatusFilter(match) &&
+                        filterModel.scoreFilter(match) && filterModel.decoyFilter(match) &&
+                        filterModel.navigationFilter(match) && filterModel.groupFilter(match);
+                });
+                if (!hidden && !filterModel.distanceFilter(crosslink)) {
+                    expected = [];
+                }
+                const actual = crosslink.filteredMatches_pp;
+                if (actual.length !== expected.length || actual.some((mpp, i) => mpp !== expected[i])) {
+                    mismatches++;
+                }
+                if (expected.length && !crosslink.isLinearLink() && !crosslink.isDecoyLink()) {
+                    if (crosslink.isSelfLink()) {
+                        selfLinks++;
+                    } else {
+                        hetLinks++;
+                        ppiStrings.add(crosslink.fromProtein.id + "-" + crosslink.toProtein.id);
+                    }
+                }
+            }
+            assert.strictEqual(mismatches, 0, "Filtered matches equal plain filter evaluation for " + label);
+            assert.deepEqual(
+                [model.get("selfLinkCount"), model.get("hetLinkCount"), model.get("ppiCount")],
+                [selfLinks, hetLinks, ppiStrings.size],
+                "Self link, heteromeric link and PPI counts are correct for " + label
+            );
+        });
+
+        filterModel.resetFilter();
+    });
+
+    // A crosslink's distance depends on its homomultimer state, which applyFilter() works out. When that state
+    // changes, the distance filter must use the recalculated distance, not the one from before the change.
+    test("Distance filter uses distances recalculated after homomultimer state changes", function (assert) {
+        const filterModel = model.get("filterModel");
+        const distanceCalc = model._distanceCalc;
+        const realDistancesObj = distanceCalc.distancesObj;
+        // stub: distance depends only on the crosslink's homomultimer state
+        const stubDistancesObj = {
+            getXLinkDistance: function (xlink) {
+                return xlink.confirmedHomomultimer ? 5 : 50;
+            }
+        };
+
+        [{}, {fdrMode: true, manualMode: false}].forEach(function (modeSettings) {
+            const label = modeSettings.fdrMode ? "FDR mode" : "standard mode";
+            filterModel.resetFilter().set(modeSettings);
+            // self-links that pass the filter, and their homomultimer state as worked out by filtering
+            const selfLinks = model.getAllCrossLinks().filter(xl => xl.isSelfLink() && xl.filteredMatches_pp.length);
+            assert.ok(selfLinks.length > 0, "Test data has self-links passing the filter in " + label);
+            const states = new Map(selfLinks.map(xl => [xl, xl.confirmedHomomultimer]));
+
+            distanceCalc.distancesObj = stubDistancesObj;
+            filterModel.set({distanceCutoff: [0, 20]}, {silent: true});
+            // make every self-link's state and distance stale: the opposite state, with the matching distance
+            selfLinks.forEach(function (xl) {
+                xl.confirmedHomomultimer = !states.get(xl);
+                xl.setMeta("distance", xl.confirmedHomomultimer ? 5 : 50);
+            });
+            model.applyFilter();
+
+            let wrong = 0;
+            selfLinks.forEach(function (xl) {
+                const expectedDistance = states.get(xl) ? 5 : 50;
+                const shouldPass = expectedDistance <= 20;
+                if (xl.getMeta("distance") !== expectedDistance || (xl.filteredMatches_pp.length > 0) !== shouldPass) {
+                    wrong++;
+                }
+            });
+            assert.strictEqual(wrong, 0, "Self-links whose homomultimer state changed are distance filtered on their new distance in " + label);
+
+            distanceCalc.distancesObj = realDistancesObj;
+            model.getCrossLinkDistances(model.getAllCrossLinks());
+        });
+
+        filterModel.resetFilter();
+    });
+
+    test("Peptide sequence strips lowercase modification annotations", function (assert) {
+        const peptide = new Peptide({u_id: 1, id: 1, seq: "ACcmDEKox", prt: ["P1"], pos: [1], dec: [false], m_ps: [], m_as: [], m_ms: []});
+        assert.strictEqual(peptide.sequence, "ACDEK", "Base sequence has modifications stripped");
+        assert.strictEqual(peptide.sequence, "ACDEK", "Base sequence is the same on a second read");
     });
 
 

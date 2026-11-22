@@ -1,5 +1,11 @@
 import {module, test, start} from "qunit";
-import {loadTestData} from "./test-helper";
+import {loadTestData, loadXi2TestData} from "./test-helper";
+import {SearchResultsModel} from "../js/clms-model/search-results-model";
+import {PeptideLookup} from "../js/clms-model/peptide-lookup";
+import {FilterModel} from "../js/filter/filter-model";
+import {flattenMatches} from "../js/modelUtils";
+import {nestComplexesInLocations} from "../js/backbone-models/mixins/protein-group-manager-mixin";
+import {toUniprotQueryAccession} from "../js/main";
 
 /**
  * CLMS-backbone-models Test Suite
@@ -378,6 +384,38 @@ export async function testSetup() {
     //     }
     // });
 
+    module("PeptideLookup");
+
+    test("ids match exactly when their String() forms are equal (as the old uploadId_peptideId keys did)", function (assert) {
+        const lookup = new PeptideLookup();
+        const a = {name: "a"}, b = {name: "b"}, c = {name: "c"};
+        lookup.set("1", 0, a);           // test data: peptide u_id is a string, match ui a number
+        lookup.set("S1", "7", b);
+        lookup.set(7, 0.5, c);
+        assert.strictEqual(lookup.get(1, 0), a);
+        assert.strictEqual(lookup.get("1", "0"), a);
+        assert.strictEqual(lookup.get(1, -0), a, "-0 prints as 0");
+        assert.strictEqual(lookup.get("S1", 7), b);
+        assert.strictEqual(lookup.get("7", "0.5"), c);
+        assert.strictEqual(lookup.get("01", 0), undefined, "\"01\" isn't \"1\"");
+        assert.strictEqual(lookup.get(" 1", 0), undefined);
+        assert.strictEqual(lookup.get(1, "00"), undefined);
+        assert.strictEqual(lookup.get("s1", 7), undefined, "case matters");
+        assert.strictEqual(lookup.get(2, 0), undefined, "unknown upload");
+        assert.strictEqual(lookup.get(1, 1), undefined, "unknown peptide");
+    });
+
+    test("ids containing _ no longer collide; the same ids again replace the peptide", function (assert) {
+        const lookup = new PeptideLookup();
+        const a = {name: "a"}, b = {name: "b"}, c = {name: "c"};
+        lookup.set("1_2", 3, a);
+        lookup.set("1", "2_3", b);       // both were key "1_2_3"
+        assert.strictEqual(lookup.get("1_2", 3), a);
+        assert.strictEqual(lookup.get("1", "2_3"), b);
+        lookup.set(1, "2_3", c);
+        assert.strictEqual(lookup.get("1", "2_3"), c);
+    });
+
     module("SearchResultsModel Methods");
 
     test("getProteinSearchMap method", function (assert) {
@@ -409,6 +447,201 @@ export async function testSetup() {
     test("isAggregatedData method", function (assert) {
         const isAggregated = clmsModel.isAggregatedData();
         assert.equal(isAggregated, true);
+    });
+
+    module("Auto grouping (nestComplexesInLocations)");
+
+    // every protein in a kept group must be one of that group's own (annotated) proteins
+    const assertOnlyOwnMembers = function (assert, kept, sources) {
+        for (let [name, members] of kept) {
+            const source = sources.get(name.replace(/ \(\d+\)$/, ""));
+            for (let id of members) {
+                assert.ok(source.has(id), name + " only holds its own proteins (" + id + ")");
+            }
+        }
+    };
+
+    test("complex isn't absorbed into a location unless all its proteins are annotated to it", function (assert) {
+        const complexes = new Map([["Complex X", new Set(["a", "b", "c"])]]);
+        // c is annotated to Cytoplasm only; a majority of the complex is nuclear
+        const locations = new Map([["Nucleus", new Set(["a", "b", "d", "e"])], ["Cytoplasm", new Set(["c", "f"])]]);
+        const kept = nestComplexesInLocations(complexes, locations);
+        assertOnlyOwnMembers(assert, kept, new Map([...complexes, ...locations]));
+        assert.deepEqual([...kept.get("Complex X")].sort(), ["a", "b", "c"], "complex kept whole");
+        assert.deepEqual([...kept.get("Nucleus")].sort(), ["d", "e"], "Nucleus leaves out the complex's proteins");
+        assert.notOk(kept.has("Cytoplasm"), "Cytoplasm left with one protein is dropped");
+    });
+
+    test("complex is absorbed when all its proteins are annotated to the location", function (assert) {
+        const complexes = new Map([["Complex X", new Set(["a", "b"])]]);
+        const locations = new Map([["Nucleus", new Set(["a", "b", "c"])]]);
+        const kept = nestComplexesInLocations(complexes, locations);
+        assert.deepEqual([...kept.get("Nucleus")].sort(), ["a", "b", "c"], "Nucleus contains the complex");
+        assert.deepEqual([...kept.get("Complex X")].sort(), ["a", "b"], "complex kept as a subgroup");
+    });
+
+    test("bigger complex doesn't absorb a smaller one it only half covers", function (assert) {
+        const complexes = new Map([["Small", new Set(["a", "b"])], ["Big", new Set(["a", "x", "y"])]]);
+        const kept = nestComplexesInLocations(complexes, new Map());
+        assertOnlyOwnMembers(assert, kept, complexes);
+        assert.deepEqual([...kept.get("Big")].sort(), ["x", "y"], "Big leaves out the shared protein");
+    });
+
+    module("UniProt query accessions (toUniprotQueryAccession)");
+
+    test("accessions, FASTA ids and suffixes", function (assert) {
+        assert.equal(toUniprotQueryAccession("P02768"), "P02768", "plain accession");
+        assert.equal(toUniprotQueryAccession(" p02768 "), "P02768", "trimmed, upper cased");
+        assert.equal(toUniprotQueryAccession("A0A096LP01"), "A0A096LP01", "10 character accession");
+        assert.equal(toUniprotQueryAccession("sp|P04637|P53_HUMAN"), "P04637", "FASTA id");
+        assert.equal(toUniprotQueryAccession("P04637-2"), "P04637", "isoform suffix stripped");
+        assert.equal(toUniprotQueryAccession("P02768-A"), "P02768", "other suffix stripped");
+        assert.equal(toUniprotQueryAccession("sp|P04637-2|P53_HUMAN"), "P04637", "suffix stripped in FASTA id");
+        assert.equal(toUniprotQueryAccession("DECOY_P04637"), null, "decoy");
+        assert.equal(toUniprotQueryAccession("P04637.1"), null, "version suffix");
+        assert.equal(toUniprotQueryAccession("NOT-AN-ACC"), null, "not an accession");
+    });
+
+    // ---- Decoy matches ----
+    // mzIdentML / CSV data flag decoys per peptide position (dec); xi2 data only on the protein.
+    // A match is a decoy if either peptide has any position on a decoy protein.
+
+    /**
+     * Ids of the raw matches that use one of the given peptides
+     * @param {Array<Object>} matches - raw matches
+     * @param {Function} isPeptide - (searchId, peptideId) => boolean
+     * @param {boolean} xi2 - whether matches key peptides by si (xi2) rather than ui
+     * @returns {Array<string>} match ids, sorted
+     */
+    const rawMatchIdsUsing = (matches, isPeptide, xi2) => matches
+        .filter(m => [m.pi1, m.pi2].some(pi => pi !== undefined && pi !== null && isPeptide(String(xi2 ? m.si : m.ui), pi)))
+        .map(m => m.id).sort();
+    const decoyMatchIds = (model) => model.getMatches().filter(m => m.isDecoy()).map(m => m.id).sort();
+
+    // a decoy copy of protein_A, so marking peptides decoy doesn't touch the target protein other peptides use
+    const addDecoyProteinA = (data) => {
+        const a = data.proteins.find(p => p.id === "protein_A");
+        data.proteins.push(Object.assign({}, a, {id: "protein_A_decoy", accession: "REV_PA", name: "REV_Protein A"}));
+    };
+    const peptide0 = (data) => data.peptides.find(p => p.u_id === "1" && p.id === 0);
+
+    // (parseJSON rewrites peptide prt ids in place, so anything derived from them is worked out in the transform)
+    let mzidDecoyRaw, mzidMixedRaw, xi2DecoyRaw, xi2DecoyPeptides;
+    const mzidDecoy = await loadTestData("./test-data", data => {
+        addDecoyProteinA(data);
+        Object.assign(peptide0(data), {prt: ["protein_A_decoy"], dec: [true]});
+        mzidDecoyRaw = data;
+    });
+    const mzidMixed = await loadTestData("./test-data", data => {
+        addDecoyProteinA(data);
+        const p = peptide0(data);
+        Object.assign(p, {prt: ["protein_A", "protein_A_decoy"], pos: [p.pos[0], p.pos[0]], dec: [false, true]});
+        mzidMixedRaw = data;
+    });
+    const xi2Plain = await loadXi2TestData();
+    const xi2Decoy = await loadXi2TestData("./test-data/xi2", data => {
+        // protein ids are only unique within a search: make protein 1 of search S1 a decoy
+        data.proteins.find(p => p.id === 1 && p.search_id === "S1").is_decoy = true;
+        xi2DecoyPeptides = new Set(data.peptides.filter(p => p.u_id === "S1" && p.prt.includes(1)).map(p => p.u_id + "_" + p.id));
+        xi2DecoyRaw = data;
+    });
+
+    // single mzIdentML file data (15884.json: one file, 4 REV_ decoy proteins), optionally changed first
+    const load15884 = async (transform) => {
+        const data = await (await fetch("./15884.json")).json();
+        if (transform) {
+            transform(data);
+        }
+        const model = new SearchResultsModel();
+        model.storeMzIdentMLFiles(data.mzidentmlFiles);
+        model.storeAnalysisCollectionSpectrumIdentifications([]);
+        model.storeSpectrumIdentificationProtocols(data.spectrumIdentificationProtocols || []);
+        model.storeSpectraData(data.spectraData || []);
+        model.storeEnzymes([]);
+        model.storeSearchModifications([]);
+        model.storeProteins(data.proteins);
+        model.storePeptides(data.peptides);
+        model.storeMatches(data.matches);
+        model.parseJSON();
+        return model;
+    };
+    let revProteinId;
+    const single = await load15884();
+    const singleInconsistent = await load15884(data => {
+        // a target peptide position on a decoy protein
+        const decoyPep = data.peptides.find(p => p.dec[0]);
+        revProteinId = decoyPep.prt[0];
+        const targetPep = data.peptides.find(p => !p.dec[0]);
+        targetPep.prt = targetPep.prt.concat([revProteinId]);
+        targetPep.pos = targetPep.pos.concat([targetPep.pos[0]]);
+        targetPep.dec = targetPep.dec.concat([false]);
+    });
+    // aggregated data: protein_A with decoy evidence from one peptide, target evidence from the others
+    const aggregatedInconsistentError = await loadTestData("./test-data", data => {
+        Object.assign(peptide0(data), {dec: [true]});
+    }).then(() => null, error => error);
+
+    module("Decoy matches");
+
+    test("proteins with both target and decoy evidence are reported (single file data)", function (assert) {
+        assert.ok(single.getDecoysPresent(), "15884 has decoys");
+        assert.deepEqual(single.getInconsistentDecoyProteins(), [], "15884: each protein is wholly target or decoy");
+        assert.deepEqual(clmsModel.getInconsistentDecoyProteins(), [], "mzIdentML test data: none");
+        assert.deepEqual(xi2Plain.getInconsistentDecoyProteins(), [], "xi2 (decoy flag is on the protein): none");
+        const revProtein = singleInconsistent.getProtein(revProteinId);
+        assert.deepEqual(singleInconsistent.getInconsistentDecoyProteins(), [String(revProtein.accession || revProtein.name || revProtein.id)]);
+    });
+
+    test("aggregated data with a protein with both target and decoy evidence fails to load, naming it", function (assert) {
+        assert.ok(aggregatedInconsistentError instanceof Error, "parseJSON throws");
+        assert.ok(aggregatedInconsistentError && aggregatedInconsistentError.message.includes("(PA)"), aggregatedInconsistentError && aggregatedInconsistentError.message);
+    });
+
+    test("mzIdentML data without decoys: no decoy matches, no decoys present", function (assert) {
+        assert.ok(clmsModel.getMatches().every(m => m.isDecoy() === false), "isDecoy() is false (not undefined) for every match");
+        assert.strictEqual(clmsModel.getDecoysPresent(), false);
+        assert.strictEqual(clmsModel.getMixedTargetDecoyMatchCount(), 0);
+    });
+
+    test("mzIdentML: matches using a decoy peptide are decoys (dec flags)", function (assert) {
+        const expected = rawMatchIdsUsing(mzidDecoyRaw.matches, (si, pi) => si === "1" && pi === 0, false);
+        assert.ok(expected.length > 0, "test data has matches using the peptide");
+        assert.deepEqual(decoyMatchIds(mzidDecoy), expected);
+        assert.strictEqual(mzidDecoy.getDecoysPresent(), true);
+        assert.strictEqual(mzidDecoy.getMixedTargetDecoyMatchCount(), 0);
+    });
+
+    test("mzIdentML: a peptide on both a target and a decoy protein makes its matches decoys, and is counted", function (assert) {
+        const expected = rawMatchIdsUsing(mzidMixedRaw.matches, (si, pi) => si === "1" && pi === 0, false);
+        assert.deepEqual(decoyMatchIds(mzidMixed), expected);
+        assert.strictEqual(mzidMixed.getMixedTargetDecoyMatchCount(), expected.length);
+        const m = mzidMixed.getMatches().find(x => x.id === expected[0]);
+        assert.ok(m.crosslinks.some(x => !x.isDecoyLink()) && m.crosslinks.some(x => x.isDecoyLink()),
+            "the match supports both a target and a decoy crosslink");
+    });
+
+    test("xi2 data without decoys: no decoy matches, no decoys present", function (assert) {
+        assert.ok(xi2Plain.getMatches().length > 0);
+        assert.ok(xi2Plain.getMatches().every(m => m.isDecoy() === false));
+        assert.strictEqual(xi2Plain.getDecoysPresent(), false, "xi2 peptides have no dec; that mustn't mean decoy");
+    });
+
+    test("xi2: matches using peptides on a decoy protein are decoys (protein is_decoy)", function (assert) {
+        const expected = rawMatchIdsUsing(xi2DecoyRaw.matches, (si, pi) => xi2DecoyPeptides.has(si + "_" + pi), true);
+        assert.ok(expected.length > 0 && expected.length < xi2DecoyRaw.matches.length, "some but not all matches");
+        assert.deepEqual(decoyMatchIds(xi2Decoy), expected);
+        assert.strictEqual(xi2Decoy.getDecoysPresent(), true);
+    });
+
+    test("Decoys / Targets filter and score histogram use match decoy status", function (assert) {
+        const matches = mzidDecoy.getMatches();
+        const decoyFilter = (attrs, m) => FilterModel.prototype.decoyFilter.call({attributes: attrs}, m);
+        const nDecoy = matches.filter(m => m.isDecoy()).length;
+        assert.equal(matches.filter(m => decoyFilter({decoys: false, targets: true}, m)).length, matches.length - nDecoy, "decoys hidden");
+        assert.equal(matches.filter(m => decoyFilter({decoys: true, targets: false}, m)).length, nDecoy, "targets hidden");
+        const [targetScores, decoyScores] = flattenMatches(matches);
+        assert.equal(targetScores.length, matches.length - nDecoy);
+        assert.equal(decoyScores.length, nDecoy);
     });
 
     start();

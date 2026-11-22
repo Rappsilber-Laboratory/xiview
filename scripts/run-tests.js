@@ -16,8 +16,14 @@ const path = require('path');
 const TEST_FILES = [
     'tests/qunit.html',
     'tests/qunit2.html',
-    'tests/qunit-clms-backbone-models.html'
+    'tests/qunit-clms-backbone-models.html',
+    'tests/qunit-annotation.html'
 ];
+
+// Golden annotation-request files (see tests/annotation-request-tests.js).
+// UPDATE_GOLDEN=1 exposes window.writeGolden so the tests rewrite them.
+const GOLDEN_DIR = path.join(__dirname, '..', 'tests', 'annotator-contract');
+const UPDATE_GOLDEN = process.env.UPDATE_GOLDEN === '1';
 
 const SERVER_PORT = 8080;
 const TEST_TIMEOUT = 60000; // 60 seconds per test file
@@ -83,6 +89,17 @@ async function runTest(browser, baseUrl, testFile) {
     });
 
     try {
+        if (UPDATE_GOLDEN) {
+            await page.exposeFunction('writeGolden', (name, text) => {
+                // only plain case names, so nothing is written outside GOLDEN_DIR
+                if (!/^[A-Za-z0-9_-]+$/.test(name)) {
+                    throw new Error(`bad golden file name: ${name}`);
+                }
+                fs.mkdirSync(GOLDEN_DIR, { recursive: true });
+                fs.writeFileSync(path.join(GOLDEN_DIR, `${name}.request.json`), text);
+            });
+        }
+
         // Inject failure collector before page loads so QUnit hooks fire
         await page.evaluateOnNewDocument(() => {
             window.__qunitFailures = [];

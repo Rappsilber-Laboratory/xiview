@@ -319,7 +319,7 @@ export const ErrorPlotView = Backbone.View.extend({
                 .set("header", header.join(" "))
                 .set("location", {pageX: x, pageY: y});
         } else {
-            let html = header.join(" ");
+            let html = _.escape(header.join(" "));
 
             let charge = data.charge;
             // clusterInfo.matchedCharge;
@@ -328,7 +328,7 @@ export const ErrorPlotView = Backbone.View.extend({
 
             for (let i = contents.length - 1; i >= 0; i--) {
                 html += "</br>";
-                html += contents[i].join(": ");
+                html += contents[i].map(c => _.escape(String(c))).join(": ");
             }
             this.tooltip.html(html);
             this.tooltip.transition()

@@ -585,7 +585,7 @@ export const FragmentationKeyView = Backbone.View.extend({
                         const modMass = this.__data__.modMass;
                         let tooltipHTML = "";
                         if (modMass !== undefined)
-                            tooltipHTML += "Modification mass: " + modMass + "</br>";
+                            tooltipHTML += "Modification mass: " + _.escape(String(modMass)) + "</br>";
                         if (!self.options.disabled)
                             tooltipHTML += "Click to change the position";
 

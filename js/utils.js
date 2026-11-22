@@ -928,22 +928,59 @@ export function getLocalStorage(objName) {
  * @param {function(string[]): string} makeUrl - Builds the request URL for a batch
  * @param {string} label - Service name used in error messages
  * @param {number} [delayMs=0] - Pause between requests, to stay polite to public endpoints
+ * @param {function(number, number)} [onProgress] - Called after each batch with (items done, total items)
  * @returns {Promise<Object[]>} Parsed JSON response for each batch, in order
  * @throws {Error} If any request fails
  */
-export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delayMs = 0) {
+export async function fetchJsonInBatches(items, batchSize, makeUrl, label, delayMs = 0, onProgress = null) {
     const responses = [];
     for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
         const response = await fetch(makeUrl(batch));
         if (!response.ok) throw new Error(`${label} fetch failed (${response.status}) for batch starting ${batch[0]}`);
         responses.push(await response.json());
+        if (onProgress) {
+            onProgress(Math.min(i + batchSize, items.length), items.length);
+        }
 
         if (delayMs && i + batchSize < items.length) {
             await new Promise(resolve => setTimeout(resolve, delayMs));
         }
     }
     return responses;
+}
+
+
+/**
+ * fetch() that retries when the server answers 429 (too many requests) or 503, waiting 1 s, 2 s, 4 s ... (at most
+ * 30 s) between tries. Exponential back-off rather than Retry-After, which browsers often can't read (UniProt doesn't
+ * expose it to CORS requests).
+ * @param {string} url
+ * @param {RequestInit} [init] - fetch options
+ * @param {string} label - Service name used in log and error messages
+ * @param {Object} [options]
+ * @param {number} [options.retries=8] - Retries on 429 / 503
+ * @param {function()} [options.onWait] - Called before each wait, e.g. to report that we're still going
+ * @returns {Promise<Response>} The successful response
+ * @throws {Error} If the request fails, or still gets 429 / 503 after all retries
+ */
+export async function fetchWithBackoff(url, init, label, {retries = 8, onWait = null} = {}) {
+    for (let attempt = 0; ; attempt++) {
+        const response = await fetch(url, init);
+        if (response.ok) {
+            return response;
+        }
+        if ((response.status === 429 || response.status === 503) && attempt < retries) {
+            const waitMs = Math.min(1000 * Math.pow(2, attempt), 30000);
+            console.warn(`${label}: ${response.status}, retrying in ${waitMs} ms`);
+            if (onWait) {
+                onWait();
+            }
+            await new Promise(resolve => setTimeout(resolve, waitMs));
+            continue;
+        }
+        throw new Error(`${label} request failed (${response.status})`);
+    }
 }
 
 

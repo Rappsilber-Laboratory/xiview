@@ -26,6 +26,9 @@ export class G_GLink extends Link {
         this.p_pLinks = new Map();
         this.group1 = group1;
         this.group2 = group2;
+        // so a group's move updates only its own group links (see Group.setPosition); remove() takes it out
+        group1.ggLinks.add(this);
+        group2.ggLinks.add(this);
     }
 
     /**
@@ -35,9 +38,13 @@ export class G_GLink extends Link {
      * @returns {Array} Array of all crosslink objects
      */
     getCrosslinks() {
-        let allCrosslinks = [];
+        // one array filled with push: concat per p_p link copied the growing array each time, which was
+        // quadratic and took seconds per render for group links bundling thousands of p_p links
+        const allCrosslinks = [];
         for (let pp of this.p_pLinks.values()) {
-            allCrosslinks = allCrosslinks.concat(pp.crosslinks);
+            for (let crosslink of pp.crosslinks) {
+                allCrosslinks.push(crosslink);
+            }
         }
         return allCrosslinks;
     }
@@ -74,10 +81,6 @@ export class G_GLink extends Link {
         this.thickLine.setAttribute("stroke-linecap", "round");
         this.thickLine.setAttribute("stroke-linejoin", "round");
 
-        this.controller.p_pLinksWide.appendChild(this.thickLine);
-        this.controller.highlights.appendChild(this.highlightLine);
-        this.controller.p_pLinks.appendChild(this.line);
-
         //set the events for it
         const self = this;
         const setMouseEvents = function (svgElement) {
@@ -104,13 +107,15 @@ export class G_GLink extends Link {
 
     mouseOver(evt) {
         const p = this.controller.getEventPoint(evt);
-        let allCrosslinks = [];
+        const allCrosslinks = [];
         this.filteredCrosslinkCount = 0;
         let filteredMatchCount = 0;
         let ppiCount = 0;
         for (let pp of this.p_pLinks.values()) {
             if (pp.filteredCrossLinkCount > 0) {
-                allCrosslinks = allCrosslinks.concat(pp.crosslinks);
+                for (let crosslink of pp.crosslinks) { // push, not concat (quadratic, see getCrosslinks)
+                    allCrosslinks.push(crosslink);
+                }
                 ppiCount++;
                 this.filteredCrosslinkCount += pp.filteredCrossLinkCount;
                 filteredMatchCount += pp.filteredMatchCount;
@@ -137,16 +142,14 @@ export class G_GLink extends Link {
     // event handler for starting dragging or rotation (or flipping internal links)
     mouseDown(evt) {
         this.controller.d3cola.stop();
-        let allCrosslinks = [];
-        for (let pp of this.p_pLinks.values()) {
-            allCrosslinks = allCrosslinks.concat(pp.crosslinks);
-        }
+        const allCrosslinks = this.getCrosslinks();
         this.controller.dragElement = this;
         if (evt.shiftKey || evt.ctrlKey) {
             let selection = this.controller.model.get("selection");
             if (this.isSelected) {
+                const toDeselect = new Set(allCrosslinks);
                 selection = selection.filter(function (d) {
-                    return allCrosslinks.indexOf(d) === -1;
+                    return !toDeselect.has(d);
                 });
             } else {
                 selection = selection.concat(allCrosslinks);
@@ -312,11 +315,22 @@ export class G_GLink extends Link {
     //     }
     // }
 
+    /**
+     * Where this link's SVG goes (see lazy-svg.js): the wide line under all proteins, the highlight over the
+     * proteins' lower parts (their highlight / selection outlines), the line under the proteins' upper parts.
+     * @returns {Array[]}
+     */
+    svgLayers() {
+        return [[this.thickLine, this.controller.p_pLinksWide], [this.highlightLine, this.controller.highlights],
+            [this.line, this.controller.p_pLinks]];
+    }
+
     show() {
         //if (!this.shown) { - causing problems with load layout, TODO - look at again
-        if (typeof this.line === "undefined") {
-            this.initSVG();
+        if (!this.ensureSVG()) {
+            return; // viewer is holding SVG back, render() shows it later
         }
+        this.attachSVG();
         this.shown = true;
         if (this.group1 === this.group2) {
             this.thickLine.setAttribute("transform", "translate(" +
@@ -333,9 +347,6 @@ export class G_GLink extends Link {
             this.highlightLine.setAttribute("stroke-width", (this.controller.z * 10).toString());
             this.setLineCoordinates();
         }
-        d3.select(this.thickLine).style("display", null);
-        d3.select(this.line).style("display", null);
-        d3.select(this.highlightLine).style("display", null);
         //}
 
         if (this.controller.model.get("xinetThickLinks") === false) {
@@ -371,12 +382,22 @@ export class G_GLink extends Link {
     }
 
     hide() {
-        // if (this.shown) {
-        //     this.shown = false;
-        d3.select(this.thickLine).style("display", "none");
-        d3.select(this.highlightLine).style("display", "none");
-        d3.select(this.line).style("display", "none");
-        // }
+        if (this.shown) {
+            this.shown = false;
+            this.detachSVG();
+        }
+    }
+
+    /**
+     * For when the viewer drops this link (a later link between the same groups is a new G_GLink).
+     */
+    remove() {
+        this.hide();
+        this.group1.ggLinks.delete(this);
+        this.group2.ggLinks.delete(this);
+        if (this.group1.selfLink === this) {
+            this.group1.selfLink = null;
+        }
     }
 
     setLineCoordinates() {

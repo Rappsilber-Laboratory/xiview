@@ -220,7 +220,9 @@ export class ProteinInfoViewBB extends BaseFrameView {
                             for (let subValue of value) {
                                 let row = innerInnerTBody.insertRow();
                                 let cell1 = row.insertCell();
-                                if (subkey === "go") {
+                                // GO term names need the GO ontology, which isn't loaded at
+                                // present (no "go" map): then show just the ids
+                                if (subkey === "go" && goTermsMap) {
                                     const goTerm = goTermsMap.get(subValue);
                                     const goTermName = goTerm? goTerm.name : "GO term not found";
                                     cell1.textContent = subValue + " : " + goTermName;

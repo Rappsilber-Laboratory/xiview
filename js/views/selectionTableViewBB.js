@@ -202,7 +202,8 @@ export class SelectionTableViewBB extends Backbone.View {
         };
         const emphasiseLinkedResidue = function (str, linkPos) {
             const i = findIndexofNthUpperCaseLetter(str, linkPos);
-            return i !== undefined && i !== -1 ? str.substr(0, i) + "<span class='linkedResidue'>" + str[i] + "</span>" + str.substr(i + 1) : str;
+            // str can hold modification names from the data: escape the text around the markup
+            return i !== undefined && i !== -1 ? _.escape(str.substr(0, i)) + "<span class='linkedResidue'>" + _.escape(str[i]) + "</span>" + _.escape(str.substr(i + 1)) : _.escape(str);
             //return i !== undefined ? str.substr(0,i+1) + "&#829;" + str.substr(i+1) : str;
         };
         this.cellFuncs = {
@@ -668,9 +669,9 @@ export class SelectionTableViewBB extends Backbone.View {
         const deemphasiseFraction = function (text) {
             const str = text ? text.toString() : "";
             const dpoint = str.indexOf(".");
-            if (dpoint < 0) return text;
+            if (dpoint < 0) return text == null ? "" : _.escape(String(text));
             const sci = str.indexOf("+", dpoint + 1);
-            return text.slice(0, dpoint) + "<span class='smallText'>" + (sci >= 0 ? text.slice(dpoint, sci) + "</span>" + text.slice(sci) : text.slice(dpoint) + "</span>");
+            return _.escape(str.slice(0, dpoint)) + "<span class='smallText'>" + (sci >= 0 ? _.escape(str.slice(dpoint, sci)) + "</span>" + _.escape(str.slice(sci)) : _.escape(str.slice(dpoint)) + "</span>");
         };
 
         // function that sets contents of individual cell

@@ -131,7 +131,7 @@ export class AlignCollectionViewBB extends BaseFrameView {
 
     setTabContents(d) {
         const seqCount = d.get("seqCollection") ? d.get("seqCollection").length : 0;
-        return d.get("displayLabel") + (seqCount ? "<span class='alignSeqCount'>" + seqCount + "</span>" : "");
+        return _.escape(d.get("displayLabel")) + (seqCount ? "<span class='alignSeqCount'>" + seqCount + "</span>" : "");
     }
 
     renderTab(indAlignModel) {
@@ -536,7 +536,7 @@ export class ProtAlignViewBB extends Backbone.View {
         // update th element with row label
         rowBind.select("th") // .select rather than .selectAll pushes changes in datum on existing rows in rowBind down to the th element
             .html(function (d) {
-                return d.rowLabel;
+                return _.escape(d.rowLabel);
             });
 
         const seqTypeLabelMap = {

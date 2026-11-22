@@ -314,21 +314,26 @@ export class DistanceMatrixViewBB extends BaseFrameView {
             this.renderCrossLinks({rehighlightOnly: true});
         });
         this.listenTo(this.model, "change:linkColourAssignment", this.render);
-        this.listenTo(this.model, "change:selectedProteins", this.makeProteinPairingOptions);
+        this.listenTo(this.model, "change:selectedProteins", this.selectedProteinsChanged);
         this.listenTo(this.colourScaleModel, "colourModelChanged", function () {
             this.render({noResize: true});
         }); // colourScaleModel is pointer to distance colour backbone-models, so this triggers even if not current colour backbone-models (redraws background)
         this.listenTo(this.model, "change:distancesObj", this.distancesChanged); // Entire new set of distances
         // this.listenTo(this.backbone-models.get("clmsModel"), "change:matches", this.matchesChanged); // New matches added (via csv generally) - clmsModel no longer extends Backbone
         this.listenTo(vent, "proteinMetadataUpdated", function () {
-            this.makeProteinPairingOptions();
+            this.selectedProteinsChanged(); // rebuilds the dropdown now, or when next shown
             this.updateAxisLabels();
         });
         this.listenTo(vent, "PDBPermittedChainSetsUpdated changeAllowInterModelDistances", this.distancesChanged); // New PDB or existing residues/pdb but distances changed
 
-        const entries = this.makeProteinPairingOptions();
-        const startPairing = _.isEmpty(entries) ? undefined : entries[0].value;
-        this.setAndShowPairing(startPairing);
+        // The dropdown lists every protein pairing (tens of thousands on large datasets), so if the view starts
+        // hidden it's built, and the first pairing chosen, when the view is first shown (see reshow).
+        if (this.isVisible()) {
+            const entries = this.makeProteinPairingOptions();
+            this.setAndShowPairing(_.isEmpty(entries) ? undefined : entries[0].value);
+        } else {
+            this.firstPairingPending = true;
+        }
 
         this.setMatrixDragMode({
             target: {
@@ -357,6 +362,38 @@ export class DistanceMatrixViewBB extends BaseFrameView {
             .resetZoomHandler(this)
             .render();
     }
+
+    /**
+     * Rebuilds the protein pairing dropdown for a new protein selection, or, while the view is hidden, marks it
+     * to be rebuilt when the view is next shown (see reshow): rebuilding counts every crosslink, which took
+     * seconds on large datasets for a dropdown nobody could see.
+     */
+    selectedProteinsChanged() {
+        if (this.isVisible()) {
+            this.makeProteinPairingOptions();
+        } else {
+            this.pairingOptionsStale = true;
+        }
+    }
+
+    /**
+     * Called when the view is shown: rebuilds the protein pairing dropdown if the selection changed while hidden.
+     * @returns {DistanceMatrixViewBB} This view instance for chaining
+     */
+    reshow() {
+        if (this.firstPairingPending) {
+            this.firstPairingPending = false;
+            this.pairingOptionsStale = false;
+            const entries = this.makeProteinPairingOptions();
+            // setVisible renders straight after this
+            this.matrixChosen(_.isEmpty(entries) ? undefined : entries[0].value).resetZoomHandler(this);
+        } else if (this.pairingOptionsStale) {
+            this.pairingOptionsStale = false;
+            this.makeProteinPairingOptions();
+        }
+        return super.reshow();
+    }
+
 
     /**
      * Builds dropdown options for protein pairings based on available crosslinks.

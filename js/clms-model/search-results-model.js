@@ -1,5 +1,6 @@
 import {SpectrumMatch} from "./spectrum-match";
 import {Peptide} from "./peptide";
+import {PeptideLookup} from "./peptide-lookup";
 import {Protein} from "./protein";
 import {SpectrumIdentificationProtocol} from "./mzidentml-metadata/spectrum-identification-protocol";
 import {Xi2SpectrumIdentificationProtocol} from "./xi2-metadata/xi2-spectrum-identification-protocol";
@@ -8,6 +9,18 @@ import {MzidentmlFile} from "./mzidentml-metadata/mzidentml-file";
 import {AnalysisCollection_SpectrumIdentification} from "./mzidentml-metadata/analysis-collection-spectrum-identification";
 import {SearchModification} from "./mzidentml-metadata/search-modification";
 import {Enzyme} from "./mzidentml-metadata/enzyme";
+
+/**
+ * parseInt, but a missing / non-numeric value gives the one NaN constant rather than a new NaN number
+ * object per call (most peptides have no second link site, so this is one boxed NaN per peptide).
+ * NaN is NaN whichever object holds it, so the result is the same.
+ * @param {*} value - Value to parse
+ * @returns {number} Integer, or NaN
+ */
+function parseIntSharedNaN(value) {
+    const n = parseInt(value);
+    return Number.isNaN(n) ? NaN : n;
+}
 
 export class SearchResultsModel {
     /** @type {Map<number, MzidentmlFile>} Map of mzIdentML file objects keyed by upload ID */
@@ -21,6 +34,12 @@ export class SearchResultsModel {
 
     /** @type {Map<string, Protein>} Map of protein objects keyed by protein ID */
     #proteins = new Map();
+
+    /**
+     * Outcome of the UniProt annotation fetch: null while pending (or never started), "loaded" or "failed"
+     * @type {string|null}
+     */
+    uniprotStatus = null;
 
     /** @type {Map<string, ScoreExtent>} Map of score type names to ScoreExtent objects */
     scoreExtents = new Map();
@@ -41,6 +60,12 @@ export class SearchResultsModel {
 
     /** @type {boolean} Whether decoy proteins are present in results */
     #decoysPresent = false;
+
+    /** @type {number} Number of matches with a peptide on both target and decoy proteins (counted as decoys) */
+    #mixedTargetDecoyMatchCount = 0;
+
+    /** @type {Array<string>} Proteins (accession, or name / id) with both target and decoy peptide evidence */
+    #inconsistentDecoyProteins = [];
 
     /** @type {boolean} Whether ambiguous matches are present */
     #ambiguousPresent = false;
@@ -79,6 +104,14 @@ export class SearchResultsModel {
     storeMzIdentMLFiles(json) {
         // this var will be deleted after data is processed
         this._mzidentmlFilesJson = json;
+        // Without a PRIDE project in the URL (e.g. xiview.org), title the page with the
+        // uploaded files' names, as xi2 does with its resultset names below.
+        if (!new URLSearchParams(window.location.search).get("project")) {
+            const names = [...new Set(json.map(f => f.identification_file_name).filter(Boolean))];
+            if (names.length > 0) {
+                document.title = names.join(";");
+            }
+        }
     }
 
     /**
@@ -204,8 +237,8 @@ export class SearchResultsModel {
         this._rawPeptides = json;
         //check and convert data types
         for (let peptideJson of this._rawPeptides) {
-            peptideJson.ls1 = parseInt(peptideJson.ls1);
-            peptideJson.ls2 = parseInt(peptideJson.ls2);
+            peptideJson.ls1 = parseIntSharedNaN(peptideJson.ls1);
+            peptideJson.ls2 = parseIntSharedNaN(peptideJson.ls2);
             peptideJson.pos = peptideJson.pos.map(p => parseInt(p));
         }
     }
@@ -310,7 +343,7 @@ export class SearchResultsModel {
         // this.#xiNETLayout = json.xiNETLayout;
         //process actual data
         const proteins = this.#proteins;
-        const peptides = new Map();
+        const peptides = new PeptideLookup();
         const isXi2 = xi2SipJsonsByResultsetId.size > 0;
         if (!isXi2 && !this.isAggregatedData()) { // single PRIDE file - use id as protein id
             for (let rawProtein of this._rawProteins) {
@@ -318,8 +351,7 @@ export class SearchResultsModel {
                 proteins.set(protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
-                peptide.sequence = peptide.base_seq;
-                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
+                peptides.set(peptide.u_id, peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id)));
                 if (peptide.dec) { // in xi2 the isDecoy info is in the protein
                     for (let p = 0; p < peptide.prt.length; p++) {
                         if (peptide.dec[p]) {
@@ -333,19 +365,41 @@ export class SearchResultsModel {
                     }
                 }
             }
+            // a protein is wholly target or decoy here: find any with target as well as decoy evidence
+            // (only possible if there are decoys, so data without decoys doesn't pay for this pass)
+            if (this.#decoysPresent) {
+                const inconsistent = new Set();
+                for (const peptide of this._rawPeptides) {
+                    if (peptide.dec) {
+                        for (let p = 0; p < peptide.prt.length; p++) {
+                            const protein = proteins.get(peptide.prt[p]);
+                            if (!peptide.dec[p] && protein?.is_decoy) { // a missing protein is reported when its link is made
+                                inconsistent.add(protein);
+                            }
+                        }
+                    }
+                }
+                this.#noteInconsistentDecoyProteins(inconsistent);
+            }
         } else { // xi2 or aggregated - use accession as protein id
             // key by search id too, protein ids are only unique within a search (xi2)
             const tempProteins = new Map();
+            // proteins with decoy / target per-position evidence (dec; PRIDE only), to find any with both
+            const decoyEvidence = new Set();
+            const targetEvidence = new Set();
             for (let rawProtein of this._rawProteins) {
                 const protein = new Protein(rawProtein);
                 tempProteins.set(rawProtein.search_id + "_" + protein.id, protein);
             }
             for (let peptide of this._rawPeptides) {
-                peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id))); // concat upload_id and peptide.id
+                peptides.set(peptide.u_id, peptide.id, new Peptide(peptide, xi2ModificationsBySearchId.get(peptide.u_id)));
                 for (let pe = 0; pe < peptide.prt.length; pe++) {
                     const protein = tempProteins.get(peptide.u_id + "_" + peptide.prt[pe]);
                     if (!protein) {
                         throw new Error(`Protein ${peptide.prt[pe]} not found for peptide ${peptide.u_id}_${peptide.id} (aggregated data)`);
+                    }
+                    if (peptide.dec) {
+                        (peptide.dec[pe] ? decoyEvidence : targetEvidence).add(protein);
                     }
                     // PRIDE has isDecoy per peptide position (dec), in xi2 it's in the protein
                     if (peptide.dec ? peptide.dec[pe] : protein.is_decoy) {
@@ -362,6 +416,17 @@ export class SearchResultsModel {
                         peptide.prt[pe] = targetId;
                     }
                 }
+            }
+            // A protein with both target and decoy evidence can't be loaded here: the loop above renamed the
+            // one protein object for each position (DECOY_<accession> / <accession>), so peptides on the
+            // losing id would refer to a protein that doesn't exist. Say so, rather than fail later.
+            const inconsistent = Array.from(decoyEvidence).filter(p => targetEvidence.has(p));
+            if (inconsistent.length > 0) {
+                const names = inconsistent.map(p => String(p.accession || p.name || p.id));
+                throw new Error(names.length + " protein" + (names.length === 1 ? " has" : "s have")
+                    + " both target and decoy peptide evidence (" + names.slice(0, 5).join(", ")
+                    + (names.length > 5 ? ", \u2026" : "") + "), so this data can't be loaded with several files"
+                    + " together: xiVIEW treats each protein as wholly target or wholly decoy.");
             }
             for (let protein of tempProteins.values()) {
                 proteins.set(protein.id, protein);
@@ -404,7 +469,7 @@ export class SearchResultsModel {
 
     /**
      * Connect searches to proteins
-     * @param {Map<string, Peptide>} peptideMap - Map of peptide IDs to Peptide objects
+     * @param {PeptideLookup} peptideMap - Peptides by (upload / search id, peptide id) (not used)
      * @param {Array<SpectrumMatch>} matchArray - Array of spectrum matches
      * @returns {Map<string, Object>} Map of search IDs to search objects with proteinIDSet and id
      */
@@ -588,6 +653,48 @@ export class SearchResultsModel {
      */
     setDecoysPresent() {
         this.#decoysPresent = true;
+    }
+
+    /**
+     * Record proteins that have both target and decoy peptide evidence (per-position dec flags) in single file
+     * data, where they're treated as decoys. xiVIEW treats a protein as wholly target or wholly decoy, so their
+     * decoy status can't be right. (Aggregated data with such proteins can't be loaded; parseJSON throws.)
+     * @param {Set<Protein>} inconsistent - The proteins
+     * @returns {void}
+     * @private
+     */
+    #noteInconsistentDecoyProteins(inconsistent) {
+        for (const protein of inconsistent) {
+            this.#inconsistentDecoyProteins.push(String(protein.accession || protein.name || protein.id));
+        }
+        if (inconsistent.size > 0) {
+            console.warn("Proteins with both target and decoy peptide evidence:", this.#inconsistentDecoyProteins);
+        }
+    }
+
+    /**
+     * Proteins with both target and decoy peptide evidence in the data (their decoy status can't be right)
+     * @returns {Array<string>} Accessions (or names / ids); empty if none
+     */
+    getInconsistentDecoyProteins() {
+        return this.#inconsistentDecoyProteins.slice();
+    }
+
+    /**
+     * Count a match that has a peptide on both target and decoy proteins (such a match is a decoy).
+     * Called from SpectrumMatch during parsing.
+     * @returns {undefined}
+     */
+    noteMixedTargetDecoyMatch() {
+        this.#mixedTargetDecoyMatchCount++;
+    }
+
+    /**
+     * Number of matches with a peptide on both target and decoy proteins; they are counted as decoys
+     * @returns {number} Match count
+     */
+    getMixedTargetDecoyMatchCount() {
+        return this.#mixedTargetDecoyMatchCount;
     }
 
     /**

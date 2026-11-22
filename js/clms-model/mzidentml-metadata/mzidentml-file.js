@@ -1,4 +1,3 @@
-import {AnalysisCollection_SpectrumIdentification} from "./analysis-collection-spectrum-identification";
 
 export class MzidentmlFile {
     /**

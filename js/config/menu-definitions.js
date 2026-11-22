@@ -80,34 +80,16 @@ export function getGroupsMenuConfig(compositeModel) {
                 tooltip: "Clears all groups"
             },
             // index 2 is the auto group item, enabled once UniProt data has loaded (see networkFrame.js)
-            // other auto group options commented out for now
-            // {
-            //     name: "Auto Group by Subcellular Location",
-            //     func: compositeModel.autoGroupBySubcellularLocation,
-            //     context: compositeModel,
-            //     tooltip: "Group proteins by nested UniProt subcellular location (first listed location only). (Will clear old groups.)",
-            // },
-            // {
-            //     name: "Auto Group by Complex Portal",
-            //     func: compositeModel.autoGroupByComplex,
-            //     context: compositeModel,
-            //     tooltip: "Group proteins by Complex Portal complex membership (from UniProt). (Will clear old groups.)",
-            // },
             {
-                name: "Auto Group by GO CC Complex",
-                func: compositeModel.autoGroupByGoComplex,
+                name: "Autogroup",
+                func: compositeModel.autoGroupByComplexesInLocations,
                 context: compositeModel,
-                tooltip: "Group proteins by GO Cellular Component protein-containing complex terms (from UniProt, includes electronic annotation; ontology from QuickGO). (Will clear old groups.)",
-                categoryTitle: "Auto Group",
+                tooltip: "Group proteins by complex (Complex Portal and GO Cellular Component complexes), nested inside " +
+                    "their UniProt subcellular locations (GO Cellular Component terms for proteins without one). A protein " +
+                    "only goes in a group it is annotated to. (Will clear old groups.)",
                 sectionBegin: true,
                 sectionEnd: true
             },
-            // {
-            //     name: "Auto Group by Subcell. & Complex",
-            //     func: compositeModel.autoGroupBySubcellularLocationAndComplex,
-            //     context: compositeModel,
-            //     tooltip: "Group proteins by UniProt subcellular location and Complex Portal complex membership (GO CC complex terms if no Complex Portal data). (Will clear old groups.)",
-            // },
             {
                 name: "Collapse All",
                 func: compositeModel.collapseGroups,

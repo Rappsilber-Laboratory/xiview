@@ -31,16 +31,20 @@ export const ProteinVisibilityMixin = {
         if (!add) {
             toSelect = [...new Set(pArr)];
         } else {
+            // toggle: already selected proteins in pArr are deselected, the others in pArr added
+            // (Sets, not indexOf, which was O(n x m) for thousands of proteins)
             const alreadySelected = this.get("selectedProteins");
+            const alreadySelectedSet = new Set(alreadySelected);
+            const pSet = new Set(pArr);
             toSelect = [];
             for (let a = 0; a < alreadySelected.length; a++) {
-                if (pArr.indexOf(alreadySelected[a]) == -1) {
+                if (!pSet.has(alreadySelected[a])) {
                     toSelect.push(alreadySelected[a]);
                 }
             }
             for (let p = 0; p < pArr.length; p++) {
                 const protein = pArr[p];
-                if (alreadySelected.indexOf(protein) == -1) {
+                if (!alreadySelectedSet.has(protein)) {
                     toSelect.push(protein);
                 }
             }
@@ -54,12 +58,19 @@ export const ProteinVisibilityMixin = {
      */
     hideSelectedProteins() {
         const selectedArr = this.get("selectedProteins");
-        const selectedCount = selectedArr.length;
-        for (let s = 0; s < selectedCount; s++) {
-            const protein = selectedArr[s];
+        this.setSelectedProteins([]);
+        this.hideProteins(selectedArr);
+    },
+
+    /**
+     * Hides the given proteins (sets manuallyHidden); leaves the selection as it is.
+     * Triggers filter backbone-models change to reapply filtering.
+     * @param {Iterable} proteins - Protein objects to hide
+     */
+    hideProteins(proteins) {
+        for (let protein of proteins) {
             protein.manuallyHidden = true;
         }
-        this.setSelectedProteins([]);
         this.get("filterModel").trigger("change", this.get("filterModel"));
     },
 

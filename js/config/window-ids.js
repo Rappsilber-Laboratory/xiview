@@ -31,6 +31,5 @@ export const DYNAMIC_CONTAINER_IDS = [
     "gafAnnotationsMetaLoadPanel",
     "scatterplotPanel",
     "urlSearchBox",
-    "listPanel",
-    "goTermsPanel"
+    "listPanel"
 ];

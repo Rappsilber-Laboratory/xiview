@@ -10,10 +10,8 @@
 
 import "../css/networkPage.css";
 import "../css/xispecAdjust.css";
-import packageInfo from "../package.json";
 
 import * as _ from "underscore";
-import Backbone from "backbone";
 import $ from "jquery";
 import d3 from "d3";
 import {ByRei_dynDiv} from "../vendor/byrei-dyndiv_1.0rc1-src";
@@ -62,7 +60,6 @@ import {
     ProteinMetaDataFileChooserBB,
     UserAnnotationsMetaDataFileChooserBB
 } from "./file-choosers/metaDataFileChoosers";
-import {GoTermsViewBB} from "./views/go/goTermsSankeyViewBB";
 import {ProteinInfoViewBB} from "./views/proteinInfoViewBB";
 
 import {setupColourModels, linkColor} from "./backbone-models/color/setup-colors";
@@ -139,6 +136,8 @@ export function postDataLoaded(compositeModelInst) {
     const accessions = getLegalAccessionIDs(compositeModelInst.get("clmsModel").getProteinsMap());
     if (accessions.length) {
         fetchUniprotKB(accessions, compositeModelInst.get("clmsModel"));
+    } else {
+        compositeModelInst.get("clmsModel").uniprotStatus = "failed";
     }
 
     //viewsThatNeedAsyncData(compositeModelInst);
@@ -760,7 +759,7 @@ export function viewsEssential(compositeModelInst, options) {
  * (link and protein color schemes), AlignCollectionViewBB (sequence alignments),
  * DistogramBB (distance histogram), DistanceMatrixViewBB (distance matrix heatmap),
  * NGLViewBB (3D molecular viewer), PDBFileChooserBB (PDB file loader), STRINGFileChooserBB (STRING data),
- * ScatterplotViewBB, metadata file choosers (link, protein, user annotations), GoTermsViewBB (GO terms Sankey),
+ * ScatterplotViewBB, metadata file choosers (link, protein, user annotations),
  * ProteinInfoViewBB (protein details), FDRViewBB (FDR threshold selection), FDRSummaryViewBB (FDR summary),
  * initializes ByRei_dynDiv window system, creates CrosslinkViewer (xiNET network visualization).
  * @param {CompositeModel} compositeModelInst - Main composite backbone-models instance
@@ -911,12 +910,6 @@ function viewsThatNeedAsyncData(compositeModelInst) {
         el: "#userAnnotationsMetaLoadPanel",
         model: compositeModelInst,
         displayEventName: "userAnnotationsMetaDataFileChooserShow",
-    });
-
-    new GoTermsViewBB({
-        el: "#goTermsPanel",
-        model: compositeModelInst,
-        displayEventName: "goTermsViewShow",
     });
 
     new ProteinInfoViewBB({

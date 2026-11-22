@@ -1,12 +1,101 @@
+import * as _ from "underscore";
+import {showMessage} from "./ui-utils/message-popup";
+import {DEFAULT_LOSSES, lossObjects} from "./clms-model/mzidentml-metadata/spectrum-identification-protocol";
+
+/**
+ * Protocols whose ion series / neutral loss warnings have already been shown (once per protocol per page)
+ * @type {WeakSet<Object>}
+ */
+const fragmentationWarningsShown = new WeakSet();
+
+/**
+ * Uploads for which the "no protocol, so default ion series / losses" warning has been shown
+ * @type {Set<*>}
+ */
+const noProtocolWarningShown = new Set();
+
+/**
+ * Show, once per protocol, any problems reading the ion series / neutral losses used to annotate this match.
+ * @param {SpectrumMatch} match - The spectrum match being annotated
+ * @returns {void}
+ */
+function showFragmentationWarnings(match) {
+    const sip = match.spectrumIdentificationProtocol;
+    if (!sip) {
+        if (!noProtocolWarningShown.has(match.uploadId)) {
+            noProtocolWarningShown.add(match.uploadId);
+            console.warn("No spectrum identification protocol for upload " + match.uploadId + ", using b and y ions and H2O and NH3 losses");
+            showMessage("Spectrum annotation: no search protocol for this match, so b and y ions and H2O and NH3 losses are used.", "warning");
+        }
+        return;
+    }
+    const warnings = sip.fragmentationWarnings;
+    if (!warnings || warnings.length === 0 || fragmentationWarningsShown.has(sip)) { // xi2 SIPs have no fragmentationWarnings
+        return;
+    }
+    fragmentationWarningsShown.add(sip);
+    console.warn("Spectrum identification protocol " + sip.spectrumIdentificationProtocolRef + ":", warnings);
+    showMessage("Spectrum annotation (protocol " + _.escape(String(sip.spectrumIdentificationProtocolRef)) + "): "
+        + warnings.map(w => _.escape(w)).join("; ") + ".", "warning");
+}
+
 /**
  * Load spectrum data from PRIDE for a given spectrum match
  * @param {SpectrumMatch} match - The spectrum match to load spectrum data for
  * @returns {void}
  */
 export const loadSpectrum = function (match) {
+    const json_request = buildAnnotationRequest(match);
+    // no peak list was uploaded for this match (e.g. CSV without peak lists): nothing to load
+    if (json_request === null) {
+        return;
+    }
+    if (json_request.annotation.config === undefined) { // mzIdentML style: ion series / losses come from the SIP
+        showFragmentationWarnings(match);
+    }
+
+    const url = this.get("apiBase") + "get_annotated_peaklist"
+        + "?id=" + encodeURIComponent(match.spectrumId)
+        + "&sd_ref=" + encodeURIComponent(match.spectraDataId)
+        + "&upload_id=" + encodeURIComponent(match.uploadId);
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(json_request),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const rangeErrorEl = document.querySelector("#range-error");
+            if (rangeErrorEl) {
+                rangeErrorEl.textContent = "";
+            }
+            this.get("xispec_wrapper").receiveAnnotatedData(data, json_request);
+        })
+        .catch(error => {
+            console.log("error getting annotated peak list", error);
+        });
+};
+
+/**
+ * Build the annotation request body that loadSpectrum POSTs (via the API, which
+ * injects the peaks) to the annotator. Pure apart from the alert() on a missing
+ * modification mass; exported so the request shape can be tested.
+ * @param {SpectrumMatch} match - The spectrum match to annotate
+ * @returns {Object|null} The annotation request, or null if the match has no peak list
+ */
+export function buildAnnotationRequest (match) {
     // no peak list was uploaded for this match (e.g. CSV without peak lists): nothing to load
     if (match.spectraDataId === null || match.spectraDataId === undefined) {
-        return;
+        return null;
     }
     const formatted_data = {};
     const pep0 = match.matchedPeptides[0];
@@ -97,43 +186,14 @@ export const loadSpectrum = function (match) {
         formatted_data.ionTypes = ions.map(function (ion) {
             return ion.type.replace("Ion", "");
         }).join(";");
+        // neutral losses from the protocol (H2O and NH3 if it names none, as the annotator would do itself)
+        formatted_data.losses = sip ? sip.losses() : lossObjects(DEFAULT_LOSSES);
     }
 
-    const json_request = convert_to_json_request(formatted_data);
+    return convert_to_json_request(formatted_data);
+}
 
-    const url = this.get("apiBase") + "get_annotated_peaklist"
-        + "?id=" + encodeURIComponent(match.spectrumId)
-        + "&sd_ref=" + encodeURIComponent(match.spectraDataId)
-        + "&upload_id=" + encodeURIComponent(match.uploadId);
-
-    fetch(url, {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(json_request),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(data => {
-            const rangeErrorEl = document.querySelector("#range-error");
-            if (rangeErrorEl) {
-                rangeErrorEl.textContent = "";
-            }
-            this.get("xispec_wrapper").receiveAnnotatedData(data, json_request);
-        })
-        .catch(error => {
-            console.log("error getting annotated peak list", error);
-        });
-    // }
-};
-
-function arrayifyPeptide (seq_mods) {
+export function arrayifyPeptide (seq_mods) {
     let peptide = {};
     peptide.sequence = [];
 
@@ -155,7 +215,7 @@ function arrayifyPeptide (seq_mods) {
     return peptide;
 }
 
-function convert_to_json_request(data) {
+export function convert_to_json_request(data) {
 
     //if (!this.sanityChecks(data)) return false;
 

@@ -11,6 +11,7 @@ import "../../css/tooltip.css";
 import Backbone from "backbone";
 import d3 from "d3";
 import $ from "jquery";
+import {toHtml} from "../ui-utils/trusted-html";
 
 /**
  * Global tooltip view for contextual information display.
@@ -67,7 +68,10 @@ export class TooltipViewBB extends Backbone.View {
 
         const self = this;
         const tooltip = d3.select(this.el);
-        tooltip.select("h2").html(this.model.get("header"));
+        // header and contents can hold data (protein names, group names, ...): escaped,
+        // except values the caller marked as TrustedHtml
+        const header = this.model.get("header");
+        tooltip.select("h2").html(header == null ? "" : toHtml(header));
 
         const oned = $.isArray(contents);
         const twod = oned ? $.isArray(contents[0]) : false;
@@ -86,16 +90,16 @@ export class TooltipViewBB extends Backbone.View {
                         colspan = " COLSPAN=\"" + (headerCount - row.length + 1) + "\"";
                     }
                     const val = isNaN(cell) ? cell : self.numberFormat(cell);
-                    str += "<" + rtype + colspan + ">" + val + "</" + rtype + ">";
+                    str += "<" + rtype + colspan + ">" + toHtml(val) + "</" + rtype + ">";
                 });
                 rtype = "td";
                 cstring += "<tr>" + str + "</tr>";
             });
             cstring += "</table>";
         } else if (oned) {
-            cstring = "<ul><li>" + contents.join("<li>") + "</ul>";
+            cstring = "<ul><li>" + contents.map(c => c == null ? "" : toHtml(c)).join("<li>") + "</ul>";
         } else {
-            cstring = contents;
+            cstring = contents === undefined ? "" : toHtml(contents);
         }
 
         tooltip.select("p").html(cstring);

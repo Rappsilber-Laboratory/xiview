@@ -32,6 +32,7 @@ export class Group extends Interactor {
         }
         this.parentGroups = new Set();
         this.subgroups = [];
+        this.ggLinks = new Set(); // the G_GLinks ending at this group (see G_GLink), so a move updates only those
 
         this.expanded = true;
         this.hidden = false;
@@ -173,9 +174,19 @@ export class Group extends Interactor {
     }
 
     get selected () {
-        const selectedProteins = this.controller.model.get("selectedProteins");
+        return this.allProteinsIn(new Set(this.controller.model.get("selectedProteins")));
+    }
+
+    /**
+     * Whether all of this group's proteins are in proteinSet (a Set, not the selectedProteins array, which
+     * indexOf made O(members x selected) per group).
+     *
+     * @param {Set} proteinSet - Set of proteins (not RenderedProteins)
+     * @returns {boolean}
+     */
+    allProteinsIn(proteinSet) {
         for (let rp of this.renderedProteins) {
-            if (selectedProteins.indexOf(rp.protein) === -1) {
+            if (!proteinSet.has(rp.protein)) {
                 return false;
             }
         }
@@ -200,10 +211,25 @@ export class Group extends Interactor {
         }
     }
 
+    /**
+     * The group's rendered proteins as a Set, for fast membership tests. Rebuilt when renderedProteins is
+     * replaced or grows (it's only ever built by pushing, in the constructor and in groupsChanged()).
+     * @returns {Set<RenderedProtein>}
+     */
+    get renderedProteinSet () {
+        if (this._renderedProteinSetSource !== this.renderedProteins
+            || this._renderedProteinSet.size !== this.renderedProteins.length) {
+            this._renderedProteinSet = new Set(this.renderedProteins);
+            this._renderedProteinSetSource = this.renderedProteins;
+        }
+        return this._renderedProteinSet;
+    }
+
     // result depends on whats hidden
     isSubsetOf(anotherGroup) {
+        const others = anotherGroup.renderedProteinSet;
         for (let renderedProtein of this.renderedProteins) {
-            if (!renderedProtein.protein.hidden && anotherGroup.renderedProteins.indexOf(renderedProtein) === -1) {
+            if (!renderedProtein.protein.hidden && !others.has(renderedProtein)) {
                 return false;
             }
         }
@@ -211,12 +237,7 @@ export class Group extends Interactor {
     }
 
     contains(renderedProtein) {
-        for (let rp of this.renderedProteins) {
-            if (rp === renderedProtein) {
-                return true;
-            }
-        }
-        return false;
+        return this.renderedProteinSet.has(renderedProtein);
     }
 
     containsInSubgroup(renderedProtein) {
@@ -235,10 +256,19 @@ export class Group extends Interactor {
      * @returns {boolean} True if this group overlaps with other groups
      */
     isOverlappingGroup() {
+        // each other group is checked once, not once per shared protein (big nested groups made that quadratic)
+        const checked = new Set([this]);
+        const overlaps = (other) => {
+            if (checked.has(other)) {
+                return false;
+            }
+            checked.add(other);
+            return !other.isSubsetOf(this) && !this.isSubsetOf(other);
+        };
         for (let renderedProtein of this.renderedProteins) {
             if (!renderedProtein.protein.hidden && renderedProtein.parentGroups.size > 1) {
                 for (let parentGroup of renderedProtein.parentGroups) {
-                    if (!parentGroup.isSubsetOf(this) && !this.isSubsetOf(parentGroup)) {
+                    if (overlaps(parentGroup)) {
                         return true;
                     }
                 }
@@ -247,7 +277,7 @@ export class Group extends Interactor {
         for (let subgroup of this.subgroups) {
             if (!subgroup.hidden && subgroup.parentGroups.size > 1) {
                 for (let subgroupParentGroup of subgroup.parentGroups) {
-                    if (!subgroupParentGroup.isSubsetOf(this) && !this.isSubsetOf(subgroupParentGroup)) {
+                    if (overlaps(subgroupParentGroup)) {
                         return true;
                     }
                 }
@@ -319,7 +349,7 @@ export class Group extends Interactor {
     set this.x and this.y as cola would have them,
         call setPosition with same params this received
     */
-    setPositionFromXinet(ix, iy) {
+    setPositionFromXinet(ix, iy, updateParentGroups = true) {
         this.px = this.x;
         this.py = this.y;
         let xOffset = 0;
@@ -331,11 +361,12 @@ export class Group extends Interactor {
         }
         this.x = ix - xOffset;
         this.y = iy;
-        this.setPosition(ix, iy);
+        this.setPosition(ix, iy, updateParentGroups);
     }
 
     //also setting size of collapsed group symbol; scaling line widths, corner radii
-    setPosition(ix, iy) { //todo - array for coordinate param?
+    // updateParentGroups false skips refitting expanded parent groups (the caller refits them once)
+    setPosition(ix, iy, updateParentGroups = true) { //todo - array for coordinate param?
         if (!this.expanded) {
             this.ix = ix;
             this.iy = iy;
@@ -364,12 +395,17 @@ export class Group extends Interactor {
             this.labelSVG.setAttribute("transform", "translate(" + this.ix + " " + this.iy + ")" +
                 " scale(" + (this.controller.z) + ")");
 
-            for (let group of this.parentGroups) {
-                if (group.expanded && !this.hidden) {
-                    group.updateExpandedGroup();
+            if (updateParentGroups) {
+                for (let group of this.directParentGroups) {
+                    if (group.expanded && !this.hidden) {
+                        group.updateExpandedGroup();
+                    }
                 }
             }
-            for (let ggLink of this.controller.g_gLinks.values()) {
+            // only the group-group links ending at this group move (updating all of them for every group
+            // made each layout tick O(groups x links) DOM writes on large networks), found through this.ggLinks
+            // rather than by checking every one of the controller's g_gLinks for each group moved
+            for (let ggLink of this.ggLinks) {
                 ggLink.setLineCoordinates();
             }
             if (this.selfLink != null) {
@@ -392,24 +428,36 @@ export class Group extends Interactor {
      * Updates the bounding box and visual representation of an expanded group.
      * Calculates the minimum rectangle containing all member proteins and subgroups.
      * Updates the group outline, highlight, and label positions.
+     *
+     * @param {boolean} [updateParentGroups=true] - Whether to refit the expanded groups directly containing this
+     *     one afterwards (they refit theirs in turn); false when the caller refits all groups, smallest first
      */
-    updateExpandedGroup() {
-        let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    updateExpandedGroup(updateParentGroups = true) {
+        // (Infinity, not 0, for "nothing yet": a box edge at exactly 0 was taken as unset and overwritten)
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
         const z = this.controller.z, pad = 5 * z;
 
+        // proteins in subgroups are covered by the subgroups' boxes (one Set, rather than asking each subgroup
+        // about each protein, which was O(proteins x subgroups) for big nested groups)
+        const inSubgroup = new Set();
+        for (let sg of this.subgroups) {
+            for (let rp of sg.renderedProteins) {
+                inSubgroup.add(rp);
+            }
+        }
         for (let rp of this.renderedProteins) {
-            if (!rp.hidden && !this.containsInSubgroup(rp)) {
+            if (!rp.hidden && !inSubgroup.has(rp)) {
                 const rpBbox = rp.bBox;
-                if (!x1 || (rpBbox.x * z) + rp.ix < x1) {
+                if ((rpBbox.x * z) + rp.ix < x1) {
                     x1 = (rpBbox.x * z) + rp.ix;
                 }
-                if (!y1 || (rpBbox.y * z) + rp.iy < y1) {
+                if ((rpBbox.y * z) + rp.iy < y1) {
                     y1 = (rpBbox.y * z) + rp.iy;
                 }
-                if (!x2 || ((rpBbox.x + rpBbox.width) * z) + rp.ix > x2) {
+                if (((rpBbox.x + rpBbox.width) * z) + rp.ix > x2) {
                     x2 = ((rpBbox.x + rpBbox.width) * z) + rp.ix;
                 }
-                if (!y2 || ((rpBbox.y + rpBbox.height) * z) + rp.iy > y2) {
+                if (((rpBbox.y + rpBbox.height) * z) + rp.iy > y2) {
                     y2 = ((rpBbox.y + rpBbox.height) * z) + rp.iy;
                 }
             }
@@ -418,19 +466,23 @@ export class Group extends Interactor {
         for (let sg of this.subgroups) {
             if (!sg.hidden) {
                 const sgBbox = sg.bBox;
-                if (!x1 || (sgBbox.x) < x1) {
+                if (sgBbox.x < x1) {
                     x1 = (sgBbox.x);
                 }
-                if (!y1 || (sgBbox.y) < y1) {
+                if (sgBbox.y < y1) {
                     y1 = (sgBbox.y);
                 }
-                if (!x2 || ((sgBbox.x + sgBbox.width)) > x2) {
+                if (sgBbox.x + sgBbox.width > x2) {
                     x2 = ((sgBbox.x + sgBbox.width));
                 }
-                if (!y2 || ((sgBbox.y + sgBbox.height)) > y2) {
+                if (sgBbox.y + sgBbox.height > y2) {
                     y2 = ((sgBbox.y + sgBbox.height));
                 }
             }
+        }
+
+        if (x1 > x2) { // nothing visible in it: an empty box at 0, 0, as before
+            x1 = y1 = x2 = y2 = 0;
         }
 
         const updateOutline = function (svgElement) {
@@ -453,9 +505,11 @@ export class Group extends Interactor {
         this.labelSVG.setAttribute("transform", "translate(" + (x1 - pad) + " " + (y1 - pad) + ")" +
             " scale(" + (this.controller.z) + ")");
 
-        for (let group of this.parentGroups) {
-            if (group.expanded && !this.hidden) {
-                group.updateExpandedGroup();
+        if (updateParentGroups) {
+            for (let group of this.directParentGroups) {
+                if (group.expanded && !this.hidden) {
+                    group.updateExpandedGroup();
+                }
             }
         }
     }
@@ -607,7 +661,9 @@ export class Group extends Interactor {
         function updateCollapsing(interp) {
             if (interp === 1) { // finished - tidy up
                 self.expanded = false;
-                self.setPositionFromXinet(newX, newY);
+                // without a transition the caller (collapseGroups, loadLayout) refits parent groups once afterwards,
+                // instead of each collapsed group refitting all its expanded parents
+                self.setPositionFromXinet(newX, newY, transition);
 
                 for (let i = 0; i < self.renderedProteins.length; i++) {
                     const rp = self.renderedProteins[i];
@@ -620,11 +676,11 @@ export class Group extends Interactor {
 
                 for (let i = 0; i < self.subgroups.length; i++) {
                     const sg = self.subgroups[i];
-                    // if (!sg.expanded) {
-                    if (transition){
+                    // collapsed subgroups only: an expanded one has no position of its own (its members were just
+                    // put back), and setPosition on it only logged an error
+                    if (transition && !sg.expanded) {
                         sg.setPositionFromXinet(originalCollapsedSubgroupPositions[i][0], originalCollapsedSubgroupPositions[i][1]);
                     }
-                    // }
                 }
                 self.labelSVG.setAttribute("dominant-baseline", "central");
                 self.labelSVG.setAttribute("text-anchor", "middle");
@@ -640,11 +696,13 @@ export class Group extends Interactor {
             } else if (interp > 1 || isNaN(interp)) {
                 return updateCollapsing(1);
             } else {
+                // move everything without refitting, then refit the subgroups and this group once each
+                // (refitting round each protein as it moved was O(members^2) bBox reads per frame)
                 for (let i = 0; i < self.renderedProteins.length; i++) {
                     const rp = self.renderedProteins[i];
                     const x = proteinXPositionInterpolations[i](cubicInOut(interp));
                     const y = proteinYPositionInterpolations[i](cubicInOut(interp));
-                    rp.setPositionFromXinet(x, y);
+                    rp.setPositionFromXinet(x, y, false);
                     rp.setAllLinkCoordinates();
                 }
 
@@ -653,10 +711,11 @@ export class Group extends Interactor {
                     if (!sg.expanded) {
                         const x = collapsedSubgroupXPositionInterpolations[i](cubicInOut(interp));
                         const y = collapsedSubgroupYPositionInterpolations[i](cubicInOut(interp));
-                        sg.setPositionFromXinet(x, y);
+                        sg.setPositionFromXinet(x, y, false);
                     }
                 }
-                self.updateExpandedGroup();
+                self.refitSubgroups();
+                self.updateExpandedGroup(); // and the groups containing this one
                 return false;
             }
         }
@@ -668,8 +727,10 @@ export class Group extends Interactor {
      * Attempts to keep proteins on screen by scaling and translating as needed.
      *
      * @param {boolean} [transition=true] - Whether to animate the transition
+     * @param {boolean} [refit=true] - Without a transition, whether to refit this group (and the groups containing
+     *     it) straight away; false when the caller refits all groups once afterwards (see expandGroups)
      */
-    expand(transition = true) {
+    expand(transition = true, refit = true) {
         // transition = false;
         this.busy = true;
         const self = this;
@@ -814,12 +875,13 @@ export class Group extends Interactor {
             //move all prots / subgroups to
             for (let rp of this.renderedProteins) {
                 if (!rp.hidden){
-                    rp.setPositionFromXinet(ix, iy);
+                    rp.setPositionFromXinet(ix, iy, false); // the group is refitted by updateExpanding(), not per protein
                 }
             }
             for (let sg of this.subgroups) {
-                if (!sg.hidden) {
-                    sg.setPositionFromXinet(ix, iy);
+                // collapsed subgroups only (see collapse); expanded ones are fitted round their members
+                if (!sg.hidden && !sg.expanded) {
+                    sg.setPositionFromXinet(ix, iy, false);
                 }
             }
 
@@ -862,7 +924,9 @@ export class Group extends Interactor {
 
         function updateExpanding(interp) {
             if (interp === 1) { // finished - tidy up
-                self.updateExpandedGroup();
+                if (refit || transition) {
+                    self.updateExpandedGroup();
+                }
                 if (transition) { // yucky, transition is being used to indicate whether this is one interactor collapsing or from 'Collapse All'
                     self.controller.hiddenProteinsChanged();
                     self.controller.render();
@@ -885,13 +949,13 @@ export class Group extends Interactor {
                     if (!sg.expanded) {
                         const x = collapsedSubgroupXPositionInterpolations[i](cubicInOut(interp));
                         const y = collapsedSubgroupYPositionInterpolations[i](cubicInOut(interp));
-                        sg.setPosition(x, y);
-                    } else {
-                        sg.updateExpandedGroup();
+                        sg.setPosition(x, y, false);
                     }
                 }
-
-                self.updateExpandedGroup();
+                // each expanded subgroup once, innermost first (each refitting all the groups containing it
+                // refitted this group and its parents once per subgroup, per frame)
+                self.refitSubgroups();
+                self.updateExpandedGroup(); // and the groups containing this one
                 return false;
             }
         }
@@ -907,6 +971,19 @@ export class Group extends Interactor {
         this.outline.setAttribute("fill-opacity", "0.5");
         for (let rp of this.renderedProteins) {
             rp.setHidden(rp.protein.hidden || rp.inCollapsedGroup());
+        }
+    }
+
+    /**
+     * Refits this group's expanded, shown subgroups (all levels down) once each, innermost first, without
+     * refitting the groups containing them; the caller refits this group (and so its parents) after.
+     */
+    refitSubgroups() {
+        // subgroups is smallest first (see CrosslinkViewer.hiddenProteinsChanged), so innermost first
+        for (let sg of this.subgroups) {
+            if (sg.expanded && !sg.hidden) {
+                sg.updateExpandedGroup(false);
+            }
         }
     }
 
@@ -931,28 +1008,20 @@ export class Group extends Interactor {
         }
     }
 
-    addConnectedNodes (subgraph) {
+    /**
+     * The visible, non-self links of this group's members and the protein at the far end of each (relative to
+     * the member - comparing to the group itself never matched), for addConnectedNodes.
+     * @yields {Array} [P_PLink, RenderedProtein]
+     */
+    * linkedEnds() {
         for (let p of this.renderedProteins) {
             for (let link of p.renderedP_PLinks.values()) {
                 //visible, non-self links only
                 if (link.renderedFromProtein !== link.renderedToProtein && link.isPassingFilter()) {
-                    if (!subgraph.links.has(link.id)) {
-                        subgraph.links.set(link.id, link);
-                        // far end relative to the member protein (comparing to the group itself never matched)
-                        const otherEnd = link.getOtherEnd(p);
-                        const renderedOtherEnd = otherEnd.getRenderedInteractor();
-                        otherEnd.subgraph = subgraph;
-                        // continue from the rendered interactor, once per node (see RenderedProtein.addConnectedNodes)
-                        if (!subgraph.nodes.has(renderedOtherEnd.id)) {
-                            renderedOtherEnd.subgraph = subgraph;
-                            subgraph.nodes.set(renderedOtherEnd.id, renderedOtherEnd);
-                            renderedOtherEnd.addConnectedNodes(subgraph);
-                        }
-                    }
+                    yield [link, link.getOtherEnd(p)];
                 }
             }
         }
-        return subgraph;
     }
 
     countExternalLinks () {

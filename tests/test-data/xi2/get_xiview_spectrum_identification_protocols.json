@@ -1,0 +1,266 @@
+{
+  "RS1": {
+    "id": "RS1",
+    "rs_name": "resultset one crosslinker",
+    "rs_note": null,
+    "rs_config": {},
+    "rs_main_score": "score",
+    "resultset_type": "xi2",
+    "s_id": "S1",
+    "s_name": "search one crosslinker",
+    "s_config": {
+      "crosslinker": [
+        {
+          "name": "BS3",
+          "mass": 138.06807961,
+          "specificity": [
+            [
+              "K",
+              "S",
+              "T",
+              "Y",
+              "nterm"
+            ]
+          ]
+        }
+      ],
+      "modification": {
+        "modifications": [
+          {
+            "name": "cm",
+            "long_name": "Carbamidomethyl",
+            "specificity": [
+              "C"
+            ],
+            "type": "fixed",
+            "mass": 57.021464,
+            "level": "peptide"
+          },
+          {
+            "name": "ox",
+            "long_name": "Oxidation",
+            "specificity": [
+              "M"
+            ],
+            "type": "variable",
+            "mass": 15.994915,
+            "level": "peptide"
+          },
+          {
+            "name": "ac",
+            "long_name": "Acetyl",
+            "specificity": [
+              "nterm"
+            ],
+            "type": "variable",
+            "composition": "C2H2O",
+            "level": "protein"
+          },
+          {
+            "name": "am",
+            "long_name": "Amidated",
+            "specificity": [
+              "cterm"
+            ],
+            "type": "variable",
+            "mass": -0.984016,
+            "level": "peptide"
+          }
+        ]
+      },
+      "fragmentation": {
+        "nterm_ions": [
+          "b"
+        ],
+        "cterm_ions": [
+          "y"
+        ],
+        "add_precursor": true
+      },
+      "ms1_tol": "5 ppm",
+      "ms2_tol": "10 ppm"
+    },
+    "s_note": null
+  },
+  "RS0": {
+    "id": "RS0",
+    "rs_name": "resultset no crosslinker (linear search)",
+    "rs_note": null,
+    "rs_config": {},
+    "rs_main_score": "score",
+    "resultset_type": "xi2",
+    "s_id": "S0",
+    "s_name": "search no crosslinker (linear search)",
+    "s_config": {
+      "crosslinker": [],
+      "modification": {
+        "modifications": [
+          {
+            "name": "cm",
+            "long_name": "Carbamidomethyl",
+            "specificity": [
+              "C"
+            ],
+            "type": "fixed",
+            "mass": 57.021464,
+            "level": "peptide"
+          },
+          {
+            "name": "ox",
+            "long_name": "Oxidation",
+            "specificity": [
+              "M"
+            ],
+            "type": "variable",
+            "mass": 15.994915,
+            "level": "peptide"
+          },
+          {
+            "name": "ac",
+            "long_name": "Acetyl",
+            "specificity": [
+              "nterm"
+            ],
+            "type": "variable",
+            "composition": "C2H2O",
+            "level": "protein"
+          },
+          {
+            "name": "am",
+            "long_name": "Amidated",
+            "specificity": [
+              "cterm"
+            ],
+            "type": "variable",
+            "mass": -0.984016,
+            "level": "peptide"
+          }
+        ]
+      },
+      "fragmentation": {
+        "nterm_ions": [
+          "b"
+        ],
+        "cterm_ions": [
+          "y"
+        ],
+        "add_precursor": true
+      },
+      "ms1_tol": "5 ppm",
+      "ms2_tol": "10 ppm"
+    },
+    "s_note": null
+  },
+  "RS2": {
+    "id": "RS2",
+    "rs_name": "resultset two crosslinkers",
+    "rs_note": null,
+    "rs_config": {},
+    "rs_main_score": "score",
+    "resultset_type": "xi2",
+    "s_id": "S2",
+    "s_name": "search two crosslinkers",
+    "s_config": {
+      "crosslinker": [
+        {
+          "name": "BS3",
+          "mass": 138.06807961,
+          "specificity": [
+            [
+              "K",
+              "S",
+              "T",
+              "Y",
+              "nterm"
+            ]
+          ]
+        },
+        {
+          "name": "DSSO",
+          "mass": 158.0037648,
+          "specificity": [
+            [
+              "K",
+              "S",
+              "T",
+              "Y",
+              "nterm"
+            ]
+          ],
+          "cleavage_stubs": [
+            {
+              "name": "A",
+              "mass": 54.01056,
+              "pairs_with": [
+                "S"
+              ]
+            },
+            {
+              "name": "S",
+              "mass": 103.9932,
+              "pairs_with": [
+                "A"
+              ]
+            }
+          ]
+        }
+      ],
+      "modification": {
+        "modifications": [
+          {
+            "name": "cm",
+            "long_name": "Carbamidomethyl",
+            "specificity": [
+              "C"
+            ],
+            "type": "fixed",
+            "mass": 57.021464,
+            "level": "peptide"
+          },
+          {
+            "name": "ox",
+            "long_name": "Oxidation",
+            "specificity": [
+              "M"
+            ],
+            "type": "variable",
+            "mass": 15.994915,
+            "level": "peptide"
+          },
+          {
+            "name": "ac",
+            "long_name": "Acetyl",
+            "specificity": [
+              "nterm"
+            ],
+            "type": "variable",
+            "composition": "C2H2O",
+            "level": "protein"
+          },
+          {
+            "name": "am",
+            "long_name": "Amidated",
+            "specificity": [
+              "cterm"
+            ],
+            "type": "variable",
+            "mass": -0.984016,
+            "level": "peptide"
+          }
+        ]
+      },
+      "fragmentation": {
+        "nterm_ions": [
+          "b"
+        ],
+        "cterm_ions": [
+          "y"
+        ],
+        "add_precursor": true
+      },
+      "ms1_tol": "5 ppm",
+      "ms2_tol": "10 ppm"
+    },
+    "s_note": null
+  }
+}

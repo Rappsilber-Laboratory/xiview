@@ -80,10 +80,4 @@ export const VIEW_CHECKBOX_CONFIGS = [
         tooltip: "Shows metadata for current searches",
         sectionEnd: false
     },
-    {
-        id: "goTermsChkBxPlaceholder",
-        label: "GO Terms",
-        eventName: "goTermsViewShow",
-        tooltip: "Browse Gene Ontology terms"
-    },
 ];

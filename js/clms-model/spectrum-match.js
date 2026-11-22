@@ -1,5 +1,36 @@
 import {Crosslink} from "./crosslink";
 import {ScoreExtent} from "./score-extent";
+import {DEFAULT_ION_SERIES, ionTypeObjects} from "./mzidentml-metadata/spectrum-identification-protocol";
+
+/**
+ * Whether a peptide maps to decoy proteins, target proteins, or both.
+ * Uses the proteins' is_decoy, which parseJSON has set for every data source
+ * (mzIdentML / CSV: from the per-position dec flags; xi2: from the protein).
+ * A protein id with no protein counts as target (that error is reported when the link is made).
+ * @param {Peptide} peptide - The peptide
+ * @param {Map<string, Protein>} proteins - Map of protein IDs to Protein objects
+ * @returns {{decoy: boolean, target: boolean}} Whether any position is on a decoy / on a target protein
+ */
+function peptideDecoyState(peptide, proteins) {
+    let decoy = false;
+    let target = false;
+    for (const proteinId of peptide.prt) {
+        if (proteins.get(proteinId)?.is_decoy === true) {
+            decoy = true;
+        } else {
+            target = true;
+        }
+    }
+    return {decoy, target};
+}
+
+/**
+ * The overlap of a match that isn't a confirmed homomultimer: one shared, frozen empty array rather than
+ * one per match. Reads give undefined as from any empty array; a write would throw, not change every match
+ * (the constructor assigns a new array when there is an overlap).
+ * @type {Array<number>}
+ */
+const NO_OVERLAP = Object.freeze([]);
 
 export class SpectrumMatch {
     /**
@@ -61,11 +92,11 @@ export class SpectrumMatch {
     linkPos2;
 
     /**
-     * Whether this match involves a decoy peptide
+     * Whether this match involves a decoy peptide (one with any position on a decoy protein)
      * @type {boolean}
      * @private
      */
-    #is_decoy;
+    #is_decoy = false;
 
     /**
      * Whether this match could belong to a protein heteromeric crosslink ('between link')
@@ -96,7 +127,7 @@ export class SpectrumMatch {
      * @param {SearchResultsModel} containingModel - The containing search results backbone-models
      * @param {Map<string, Protein>} proteins - Map of protein IDs to Protein objects
      * @param {Map<string, Crosslink>} crosslinks - Map of crosslink IDs to Crosslink objects
-     * @param {Map<string, Peptide>} peptides - Map of peptide IDs to Peptide objects
+     * @param {PeptideLookup} peptides - Peptides by (search id, peptide id)
      * @param {Object} json - Raw identification data object
      * @param {string} json.ui - Spectrum identification/upload identifier
      * @param {string} json.pi1 - Peptide identifier 1
@@ -121,36 +152,56 @@ export class SpectrumMatch {
         this.#containingModel = containingModel;
         this.#json = json;
 
-        this.ions = [{type:"bIon"}, {type:"yIon"}]; //todo -remove
-
         //scores
-        for (const [scoreType, scoreValue] of Object.entries(this.#json.sc)) {
-            let scoreExtent = this.#containingModel.scoreExtents.get(scoreType);
+        const scores = json.sc;
+        const scoreExtents = containingModel.scoreExtents;
+        for (const scoreType of Object.keys(scores)) {
+            let scoreExtent = scoreExtents.get(scoreType);
             if (!scoreExtent) {
                 scoreExtent = new ScoreExtent(scoreType);
-                this.#containingModel.scoreExtents.set(scoreType, scoreExtent);
+                scoreExtents.set(scoreType, scoreExtent);
             }
-            scoreExtent.processScore(scoreValue);
+            scoreExtent.processScore(scores[scoreType]);
         }
 
         // *xi2 vrs pride difference* in id of dataset (xi2 has search sets and result sets) is handled by this.searchId
-        this.matchedPeptides[0] = peptides.get(this.searchId + "_" + json.pi1); // u r here
+        // matchedPeptides is assigned as a whole (one element, or two for a second peptide) rather than
+        // filled in by index; same contents, but the array is allocated at its final size.
+        const searchId = this.searchId;
+        const pep0 = peptides.get(searchId, json.pi1); // u r here
 
-        if (!this.matchedPeptides[0]) {
+        if (!pep0) {
             alert("peptide error (missing peptide evidence?) for:" + json.pi1);
+        }
+        let pep1;
+        if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
+            pep1 = peptides.get(searchId, json.pi2);// *xi2 vrs pride difference*
+            this.matchedPeptides = [pep0, pep1];
+            if (!pep1) {
+                alert("peptide error (missing peptide evidence?) for:" + +json.pi2);
+            }
         } else {
-            if (this.matchedPeptides[0].is_decoy?.indexOf("1") != -1) {// *xi2 vrs pride difference*
-                this.is_decoy = true; // issue here, is this used? it is. needs a fix for xi2.
-                this.#containingModel.setDecoysPresent();
+            this.matchedPeptides = [pep0];
+        }
+
+        // decoy: either peptide has a position on a decoy protein (TD or DD). A peptide on both target
+        // and decoy proteins makes the match a decoy too; those matches are counted so the user can be told.
+        let mixedDecoyPeptide = false;
+        for (const pep of this.matchedPeptides) {
+            if (pep) {
+                const state = peptideDecoyState(pep, proteins);
+                if (state.decoy) {
+                    this.#is_decoy = true;
+                    if (state.target) {
+                        mixedDecoyPeptide = true;
+                    }
+                }
             }
         }
-        if (json.pi2 !== undefined && json.pi2 !== null) { //null if loop link
-            this.matchedPeptides[1] = peptides.get(this.searchId + "_" + json.pi2);// *xi2 vrs pride difference*
-            if (!this.matchedPeptides[1]) {
-                alert("peptide error (missing peptide evidence?) for:" + +json.pi2);
-            } else if (this.matchedPeptides[1].is_decoy?.indexOf("1") != -1) {// *xi2 vrs pride difference*
-                this.is_decoy = true;
-                this.#containingModel.setDecoysPresent();
+        if (this.#is_decoy) {
+            containingModel.setDecoysPresent();
+            if (mixedDecoyPeptide) {
+                containingModel.noteMixedTargetDecoyMatch();
             }
         }
         //if the match is ambiguous it will relate to many crosslinks
@@ -159,16 +210,16 @@ export class SpectrumMatch {
         // carries them on the peptide (ls1/ls2). Prefer the match when present.
         this.linkPos1 = (json.s1 !== undefined)
             ? +json.s1
-            : +this.matchedPeptides[0].linkSite1;
+            : +pep0.linkSite1;
         this.linkPos2 = undefined;
-        if (this.matchedPeptides[1]) {
+        if (pep1) {
             this.linkPos2 = (json.s2 !== undefined)
                 ? +json.s2
-                : this.matchedPeptides[1].linkSite1;
+                : pep1.linkSite1;
         } else if (json.pi2 === null) { // loop link: both sites on peptide 0
             this.linkPos2 = (json.s2 !== undefined)
                 ? +json.s2
-                : +this.matchedPeptides[0].linkSite2;
+                : +pep0.linkSite2;
         }
 
         // the protein IDs and residue numers we eventually want to get:-
@@ -176,14 +227,16 @@ export class SpectrumMatch {
 
         if (this.isNotCrosslinked()) {
             //its a linear
-            this.#containingModel.setLinearsPresent();
-            for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
-                p1ID = this.matchedPeptides[0].prt[i];
+            containingModel.setLinearsPresent();
+            const prt0 = pep0.prt;
+            for (let i = 0; i < prt0.length; i++) {
+                p1ID = prt0[i];
                 this.#associateWithLink(proteins, crosslinks, p1ID);
             }
-            if (this.matchedPeptides[1]) {
-                for (let i = 0; i < this.matchedPeptides[1].prt.length; i++) {
-                    p1ID = this.matchedPeptides[1].prt[i];
+            if (pep1) {
+                const prt1 = pep1.prt;
+                for (let i = 0; i < prt1.length; i++) {
+                    p1ID = prt1[i];
                     this.#associateWithLink(proteins, crosslinks, p1ID);
                 }
             }
@@ -193,45 +246,53 @@ export class SpectrumMatch {
         this.couldBelongToBetweenLink = false;
         this.couldBelongToSelfLink = false;
         this.confirmedHomomultimer = false;
-        this.overlap = [];
+        this.overlap = NO_OVERLAP;
 
         //looplinks
-        if (!this.matchedPeptides[1]) {
+        if (!pep1) {
             this.couldBelongToSelfLink = true;
-            for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
-                p1ID = this.matchedPeptides[0].prt[i];
-                this.#associateWithLink(proteins, crosslinks, p1ID, p1ID, this.matchedPeptides[0].pos[i] + this.linkPos1 - 1, this.matchedPeptides[0].pos[i] + this.linkPos2 - 1, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length);
+            const prt0 = pep0.prt;
+            const pos0 = pep0.pos;
+            for (let i = 0; i < prt0.length; i++) {
+                p1ID = prt0[i];
+                this.#associateWithLink(proteins, crosslinks, p1ID, p1ID, pos0[i] + this.linkPos1 - 1, pos0[i] + this.linkPos2 - 1, pos0[i] - 0, pep0.sequence.length);
             }
             return;
         }
 
         //loop to produce all alternative linkage site combinations
         //(position1 count * position2 count alternative)
-        for (let i = 0; i < this.matchedPeptides[0].pos.length; i++) {
-            for (let j = 0; j < this.matchedPeptides[1].pos.length; j++) {
+        const prt0 = pep0.prt;
+        const pos0 = pep0.pos;
+        const prt1 = pep1.prt;
+        const pos1 = pep1.pos;
+        const linkPos1 = this.linkPos1;
+        const linkPos2 = this.linkPos2;
+        for (let i = 0; i < pos0.length; i++) {
+            for (let j = 0; j < pos1.length; j++) {
 
                 if (i > 0 || j > 0) {
-                    this.#containingModel.setAmbiguousPresent();
+                    containingModel.setAmbiguousPresent();
                 }
 
                 //some files (must be csv) are not puting in duplicate protein ids in ambig links
                 //in this case use last one
-                if (i < this.matchedPeptides[0].prt.length) {
-                    p1ID = this.matchedPeptides[0].prt[i];
+                if (i < prt0.length) {
+                    p1ID = prt0[i];
                 } else {
-                    p1ID = this.matchedPeptides[0].prt[this.matchedPeptides[0].prt.length - 1];
+                    p1ID = prt0[prt0.length - 1];
                 }
-                if (j < this.matchedPeptides[1].prt.length) {
-                    p2ID = this.matchedPeptides[1].prt[j];
+                if (j < prt1.length) {
+                    p2ID = prt1[j];
                 } else {
-                    p2ID = this.matchedPeptides[1].prt[this.matchedPeptides[1].prt.length - 1];
+                    p2ID = prt1[prt1.length - 1];
                 }
 
                 // * residue numbering starts at 1 *
-                res1 = +this.matchedPeptides[0].pos[i] - 1 + this.linkPos1;
-                res2 = +this.matchedPeptides[1].pos[j] - 1 + this.linkPos2;
+                res1 = +pos0[i] - 1 + linkPos1;
+                res2 = +pos1[j] - 1 + linkPos2;
 
-                this.#associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
+                this.#associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, pos0[i] - 0, pep0.sequence.length, pos1[j], pep1.sequence.length);
             }
         }
 
@@ -248,25 +309,14 @@ export class SpectrumMatch {
                 const pep2_end = pep2_start + (pep2length - 1);
                 if (pep1_start >= pep2_start && pep1_start <= pep2_end) {
                     this.confirmedHomomultimer = true;
-                    this.overlap[0] = pep1_start - 1;
-                    if (pep1_end < pep2_end) {
-                        this.overlap[1] = pep1_end;
-                    } else {
-                        this.overlap[1] = pep2_end;
-                    }
+                    this.overlap = [pep1_start - 1, (pep1_end < pep2_end) ? pep1_end : pep2_end];
                 } else if (pep2_start >= pep1_start && pep2_start <= pep1_end) {
                     this.confirmedHomomultimer = true;
-                    this.overlap[0] = pep2_start - 1;
-                    if (pep2_end < pep1_end) {
-                        this.overlap[1] = pep2_end;
-                    } else {
-                        this.overlap[1] = pep1_end;
-                    }
+                    this.overlap = [pep2_start - 1, (pep2_end < pep1_end) ? pep2_end : pep1_end];
                 }
             } else if (res1 === res2) {
                 this.confirmedHomomultimer = true;
-                this.overlap[0] = res1 - 1;
-                this.overlap[1] = res2;
+                this.overlap = [res1 - 1, res2];
             }
         }
     }
@@ -379,31 +429,26 @@ export class SpectrumMatch {
             }
         }
 
-        const peptidePositions = [];
-        if (endsReversedInResLinkId === false) {
-            peptidePositions.push({
-                start: pep1_start,
-                length: pep1_length
-            });
-            peptidePositions.push({
-                start: pep2_start,
-                length: pep2_length
-            });
-        } else {
-            peptidePositions.push({
-                start: pep2_start,
-                length: pep2_length
-            });
-            peptidePositions.push({
-                start: pep1_start,
-                length: pep1_length
-            });
-        }
+        // array literals rather than push onto [], so each array is allocated at its final size
+        const pepPos1 = {
+            start: pep1_start,
+            length: pep1_length
+        };
+        const pepPos2 = {
+            start: pep2_start,
+            length: pep2_length
+        };
+        const peptidePositions = (endsReversedInResLinkId === false) ? [pepPos1, pepPos2] : [pepPos2, pepPos1];
         resLink.matches_pp.push({
             match: this,
             pepPos: peptidePositions
         });
-        this.crosslinks.push(resLink);
+        // most matches have one crosslink: start the array with it rather than pushing onto []
+        if (this.crosslinks.length === 0) {
+            this.crosslinks = [resLink];
+        } else {
+            this.crosslinks.push(resLink);
+        }
     }
 
     /**
@@ -416,7 +461,8 @@ export class SpectrumMatch {
     }
 
     /**
-     * Check if this match involves a decoy protein
+     * Check if this match involves a decoy protein: true if either peptide has any position on a
+     * decoy protein (so also for a peptide on both target and decoy proteins)
      * @returns {boolean} True if match involves decoy
      */
     isDecoy() {
@@ -516,11 +562,14 @@ export class SpectrumMatch {
     }
 
     /**
-     * Get ion types for this match - todo -remove
-     * @returns {Array<Object>} Array of ion type objects
+     * Get the ion types searched for, from this match's spectrum identification protocol
+     * (mzIdentML: AdditionalSearchParams; xi2: the search config). b and y ions if the match has no protocol
+     * (e.g. CSV uploads).
+     * @returns {Array<Object>} Array of ion type objects, e.g. [{type: "bIon"}, {type: "yIon"}]
      */
     ionTypes() {
-        return this.ions;
+        const sip = this.#containingModel.getMzidentmlFiles().get(this.uploadId)?.getSpectrumIdentificationProtocolById(this.#json.sip);
+        return sip ? sip.ionTypes() : ionTypeObjects(DEFAULT_ION_SERIES);
     }
 
     /**
@@ -579,9 +628,10 @@ export class SpectrumMatch {
      * @returns {number} Modification count
      */
     modificationCount() {
-        const modCount1 = this.matchedPeptides[0].mod_pos.length;
+        // modifications has one entry per mod_pos entry
+        const modCount1 = this.matchedPeptides[0].modifications.length;
         if (this.matchedPeptides[1]) {
-            const modCount2 = this.matchedPeptides[1].mod_pos.length;
+            const modCount2 = this.matchedPeptides[1].modifications.length;
             if (modCount2 > modCount1) {
                 return modCount2;
             }

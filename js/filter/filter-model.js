@@ -308,34 +308,34 @@ export class FilterModel extends Backbone.Model {
 
         //linears? - if linear (linkPos === 0) and linears not selected return false
         //cross-links? - if xl (linkPos > 0) and xls not selected return false
-        if (mono && !this.get("monolinks")) {
+        if (mono && !this.attributes["monolinks"]) {
             return false;
-        } else if (linear && !this.get("linears")) {
+        } else if (linear && !this.attributes["linears"]) {
             return false;
         }
-        if (!linear && !this.get("crosslinks")) {
+        if (!linear && !this.attributes["crosslinks"]) {
             return false;
-        } else if (!linear && !mono && !((match.couldBelongToSelfLink && this.get("selfLinks")) ||
-            (match.couldBelongToBetweenLink && this.get("betweenLinks")))) {
+        } else if (!linear && !mono && !((match.couldBelongToSelfLink && this.attributes["selfLinks"]) ||
+            (match.couldBelongToBetweenLink && this.attributes["betweenLinks"]))) {
             //self-links? - if self links's not selected and match is self link return false
             // possible an ambiguous self link will still get displayed
             return false;
         }
 
         //ambigs? - if ambig's not selected and match is ambig return false
-        if (ambig && !this.get("ambig")) {
+        if (ambig && !this.attributes["ambig"]) {
             return false;
         }
 
         if (match.couldBelongToSelfLink) {
-            if (match.confirmedHomomultimer && !this.get("homomultimericLinks")) {
+            if (match.confirmedHomomultimer && !this.attributes["homomultimericLinks"]) {
                 return false;
-            } else if (!match.confirmedHomomultimer && !this.get("notHomomult")) {
+            } else if (!match.confirmedHomomultimer && !this.attributes["notHomomult"]) {
                 return false;
             }
         }
 
-        const aaApart = +this.get("aaApart");
+        const aaApart = +this.attributes["aaApart"];
         if (!isNaN(aaApart)) {
             // if not homomultimer and not ambig and is a selfLink
             if ( /* !match.confirmedHomomultimer &&*/ !ambig && match.crosslinks[0].isSelfLink()) {
@@ -347,7 +347,7 @@ export class FilterModel extends Backbone.Model {
             }
         }
 
-        const pepLengthFilter = +this.get("pepLength");
+        const pepLengthFilter = +this.attributes["pepLength"];
         if (!isNaN(pepLengthFilter)) {
             const seq1length = match.matchedPeptides[0].sequence.length;
             if (seq1length > 0 && (seq1length < pepLengthFilter ||
@@ -372,7 +372,7 @@ export class FilterModel extends Backbone.Model {
         if (isNaN(score)) {
             return true;
         }
-        const msc = this.get("matchScoreCutoff");
+        const msc = this.attributes["matchScoreCutoff"];
         return (msc[0] == undefined || score >= msc[0]) && (msc[1] == undefined || score <= msc[1]); // == undefined cos shared links get undefined json'ified to null
     }
 
@@ -384,9 +384,9 @@ export class FilterModel extends Backbone.Model {
      */
     decoyFilter(match) {
         if (match.isDecoy()) {
-            return this.get("decoys");
+            return this.attributes["decoys"];
         } else {
-            return this.get("targets");
+            return this.attributes["targets"];
         }
     }
 
@@ -401,9 +401,9 @@ export class FilterModel extends Backbone.Model {
         const dist = crosslink.getMeta("distance");
         if (dist === undefined) {   // show undefined distances if either no distances or specifically allowed (distanceUndef flag)
             const noDistances = this.distanceExtent[0] === undefined;
-            return noDistances || this.get("distanceUndef");
+            return noDistances || this.attributes["distanceUndef"];
         }
-        const dsc = this.get("distanceCutoff");
+        const dsc = this.attributes["distanceCutoff"];
         return (dsc[0] == undefined || dist >= dsc[0]) && (dsc[1] == undefined || dist <= dsc[1]); // == undefined cos shared links get undefined json'ified to null
     }
 
@@ -415,10 +415,10 @@ export class FilterModel extends Backbone.Model {
      * @returns {boolean} True if match passes validation status filter, false otherwise
      */
     validationStatusFilter(match) {
-        if (this.get("pass") && match.passThreshold == true) {
+        if (this.attributes["pass"] && match.passThreshold == true) {
             return true;
         }
-        if (this.get("fail") && match.passThreshold == false) {
+        if (this.attributes["fail"] && match.passThreshold == false) {
             return true;
         }
         return false;
@@ -432,7 +432,7 @@ export class FilterModel extends Backbone.Model {
      * @returns {boolean} True if match passes PDB protein filter (or filter inactive), false otherwise
      */
     pdbProteinFilter(match) {
-        if (this.get("protPDB")) {
+        if (this.attributes["protPDB"]) {
             const dObj = this.compositeModel.get("distancesObj");
             if (dObj) {
                 const chainMap = dObj.chainMap;
@@ -452,6 +452,29 @@ export class FilterModel extends Backbone.Model {
     }
 
     /**
+     * Gets the lowercased text that the protein name / description filters search for a protein.
+     * Name: name + " " + accession (if there's an accession). Description: description + UniProt keywords (if any).
+     * @param {Object} protein - Protein object
+     * @param {string} dataField - "name" or "description"
+     * @returns {string|null} Lowercased search text, or null if there's no text to search
+     */
+    static proteinLowerSearchText(protein, dataField) {
+        let toSearch = protein[dataField];// + " " + protein.description;
+
+        //hacky
+        if (dataField === "description") {
+            if (protein.uniprot) {
+                toSearch += protein.uniprot.keywords;
+            }
+        }
+
+        if (dataField == "name" && protein.accession) {  // hacky nevermind
+            toSearch = toSearch + " " + protein.accession;
+        }
+        return toSearch ? toSearch.toLowerCase() : null;
+    }
+
+    /**
      * Filters matches by protein name or description search strings.
      * Supports complex queries: comma-separated for OR, hyphen-separated for AND.
      * Example: "A-B,C-D" means (A AND B) OR (C AND D).
@@ -460,10 +483,35 @@ export class FilterModel extends Backbone.Model {
      * @param {string} searchString - User input search string (raw)
      * @param {string} dataField - Field to search in protein object ("name" or "description")
      * @param {string} preProcessedField - Key for preprocessedInputValues ("protNames" or "protDesc")
+     * @param {Map} [searchTextCache] - Optional cache of protein search text, valid only for one filtering pass
      * @returns {boolean} True if match passes protein filter (or filter inactive), false otherwise
      */
-    proteinFilter(match, searchString, dataField, preProcessedField) {
+    proteinFilter(match, searchString, dataField, preProcessedField, searchTextCache) {
         if (searchString) {
+            // Lowercased text to search for this protein, or null if there is none.
+            // With a searchTextCache (a Map that the caller owns and that lives for one filtering pass,
+            // during which protein names / descriptions / accessions / keywords don't change) it's
+            // worked out once per protein and field, rather than once per match, protein and search term.
+            let fieldCache;
+            if (searchTextCache) {
+                fieldCache = searchTextCache.get(dataField);
+                if (!fieldCache) {
+                    fieldCache = new Map();
+                    searchTextCache.set(dataField, fieldCache);
+                }
+            }
+            const proteinLowerSearchText = function (protein) {
+                if (fieldCache) {
+                    let text = fieldCache.get(protein);
+                    if (text === undefined) {
+                        text = FilterModel.proteinLowerSearchText(protein, dataField);
+                        fieldCache.set(protein, text);
+                    }
+                    return text;
+                }
+                return FilterModel.proteinLowerSearchText(protein, dataField);
+            };
+
             //protein name check
             const stringPartArrays = this.preprocessedInputValues.get(preProcessedField);
             const proteins = this.compositeModel.get("clmsModel").getProteinsMap();
@@ -486,19 +534,8 @@ export class FilterModel extends Backbone.Model {
                             const pidCount = pids.length;
                             for (let p = 0; p < pidCount; p++) {
                                 const protein = proteins.get(pids[p]);
-                                let toSearch = protein[dataField];// + " " + protein.description;
-
-                                //hacky
-                                if (dataField === "description") {
-                                    if (protein.uniprot) {
-                                        toSearch += protein.uniprot.keywords;
-                                    }
-                                }
-
-                                if (dataField == "name" && protein.accession) {  // hacky nevermind
-                                    toSearch = toSearch + " " + protein.accession;
-                                }
-                                if (toSearch && toSearch.toLowerCase().indexOf(partString) != -1) {
+                                const lowerSearchText = proteinLowerSearchText(protein);
+                                if (lowerSearchText !== null && lowerSearchText.indexOf(partString) != -1) {
                                     found = true;
                                     used[i] = true; // so can't match two strings to same peptide e.g. "dog-cat" to protein associated with same peptide
                                     break;
@@ -529,9 +566,10 @@ export class FilterModel extends Backbone.Model {
      * Arranged with cheaper checks first for performance. Calls proteinFilter() for name/description searches,
      * pdbProteinFilter() for PDB checks, and internal seqCheck() for peptide sequence matching.
      * @param {Object} match - Match object to filter
+     * @param {Map} [proteinSearchTextCache] - Optional cache of protein search text, valid only for one filtering pass
      * @returns {boolean} True if match passes navigation filter, false otherwise
      */
-    navigationFilter(match) {
+    navigationFilter(match, proteinSearchTextCache) {
         // Arranged so cheaper checks are done first
 
         //run name check
@@ -551,12 +589,12 @@ export class FilterModel extends Backbone.Model {
         }
 
         //protein name check
-        if (this.proteinFilter(match, this.get("protNames"), "name", "protNames") === false) {
+        if (this.proteinFilter(match, this.attributes["protNames"], "name", "protNames", proteinSearchTextCache) === false) {
             return false;
         }
 
         //protein description check
-        if (this.proteinFilter(match, this.get("protDesc"), "description", "protDesc") === false) {
+        if (this.proteinFilter(match, this.attributes["protDesc"], "description", "protDesc", proteinSearchTextCache) === false) {
             return false;
         }
 
@@ -566,7 +604,7 @@ export class FilterModel extends Backbone.Model {
         }
 
         //peptide seq check
-        if (seqCheck(this.get("pepSeq"), this.preprocessedInputValues.get("pepSeq")) === false) {
+        if (seqCheck(this.attributes["pepSeq"], this.preprocessedInputValues.get("pepSeq")) === false) {
             return false;
         }
 

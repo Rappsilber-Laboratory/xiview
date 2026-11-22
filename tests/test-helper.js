@@ -3,9 +3,10 @@ import {SearchResultsModel} from "../js/clms-model/search-results-model";
 /**
  * Loads test data from JSON files and populates a SearchResultsModel
  * @param {string} baseUrl - Base URL for fetching test data files
+ * @param {Function} [transform] - Optional function given {proteins, peptides, matches} (raw JSON) to change before loading
  * @returns {Promise<SearchResultsModel>} - Promise that resolves with populated backbone-models
  */
-export async function loadTestData(baseUrl = "./test-data") {
+export async function loadTestData(baseUrl = "./test-data", transform = null) {
     const clmsModel = new SearchResultsModel();
 
     try {
@@ -32,6 +33,9 @@ export async function loadTestData(baseUrl = "./test-data") {
             fetch(`${baseUrl}/get_xiview_matches.json`).then(r => r.json())
         ]);
 
+        if (transform) {
+            transform({proteins: proteinsData, peptides: peptidesData, matches: matchesData});
+        }
         // Process data
         clmsModel.storeMatches(matchesData);
         clmsModel.storePeptides(peptidesData);
@@ -64,3 +68,36 @@ export const expectedCounts = {
     crosslinks: 22, // Will be determined after processing
     searches: 4 // Based on unique search_id values in proteins
 };
+
+/**
+ * Loads the xi2-format test data (tests/test-data/xi2/) into a SearchResultsModel,
+ * going through the same store...() / parseJSON() path as xi2 data from the API.
+ * xi2 has no mzIdentML / enzyme / search-modification / spectra-data endpoints, so
+ * those are empty.
+ * @param {string} baseUrl - Base URL for the xi2 test data files
+ * @param {Function} [transform] - Optional function given {proteins, peptides, matches} (raw JSON) to change before loading
+ * @returns {Promise<SearchResultsModel>} - populated model
+ */
+export async function loadXi2TestData(baseUrl = "./test-data/xi2", transform = null) {
+    const clmsModel = new SearchResultsModel();
+    const [protocolsData, proteinsData, peptidesData, matchesData] = await Promise.all([
+        fetch(`${baseUrl}/get_xiview_spectrum_identification_protocols.json`).then(r => r.json()),
+        fetch(`${baseUrl}/get_xiview_proteins.json`).then(r => r.json()),
+        fetch(`${baseUrl}/get_xiview_peptides.json`).then(r => r.json()),
+        fetch(`${baseUrl}/get_xiview_matches.json`).then(r => r.json())
+    ]);
+    if (transform) {
+        transform({proteins: proteinsData, peptides: peptidesData, matches: matchesData});
+    }
+    clmsModel.storeMatches(matchesData);
+    clmsModel.storePeptides(peptidesData);
+    clmsModel.storeProteins(proteinsData);
+    clmsModel.storeSearchModifications([]);
+    clmsModel.storeEnzymes([]);
+    clmsModel.storeSpectraData([]);
+    clmsModel.storeSpectrumIdentificationProtocols(protocolsData);
+    clmsModel.storeAnalysisCollectionSpectrumIdentifications([]);
+    clmsModel.storeMzIdentMLFiles([]);
+    clmsModel.parseJSON({});
+    return clmsModel;
+}

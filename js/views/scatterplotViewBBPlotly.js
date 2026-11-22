@@ -1,6 +1,6 @@
 /**
  * @fileoverview Scatterplot view (Plotly port).
- * Same behaviour as scatterplotViewBB.js but built on Plotly.js (basic-dist-min) instead of
+ * Same behaviour as scatterplotViewBB.js, which it replaced (since removed; see git history), but built on Plotly.js (basic-dist-min) instead of
  * the custom D3 v3 + dual-canvas implementation. Backbone wiring, the toolbar (jitter / log /
  * download), the X / Y axis-attribute dropdowns, the model event listeners and the public
  * methods (render, recolourCrossLinks, rehighlightCrossLinks, optionsToString, takeImage)
@@ -12,7 +12,6 @@
 
 import "../../css/scatterplot.css";
 import * as _ from "underscore";
-import $ from "jquery";
 
 import {BaseFrameView} from "../ui-utils/base-frame-view";
 import {attributeOptions} from "../clms-model/attribute-options";
@@ -20,7 +19,7 @@ import {
     addMultipleSelectControls, ceil, commonLabels,
     crossBrowserElementX,
     crossBrowserElementY,
-    declutterAxis, floor,
+    floor,
     makeBackboneButtons
 } from "../utils";
 import d3 from "d3";
@@ -641,7 +640,7 @@ export class ScatterplotViewBB extends BaseFrameView {
             const tipExtra = isMatchLevel ? makeTooltipContents.match(this.nearest.match) :
                 makeTooltipContents.link(this.nearest.link);
             tooltipData = tooltipData.concat([
-                ["&nbsp;"],
+                ["\u00a0"],
                 ["Nearest " + (isMatchLevel ? "Match" : "Crosslink")]
             ]).concat(tipExtra);
         }

@@ -1,10 +1,37 @@
 export class Peptide {
+    // The fields of the raw peptide JSON that are used, copied out of it at construction so the raw
+    // object itself (and its m_ps / m_ms arrays, which #modifications duplicates) isn't kept.
+    // prt, pos and m_as are the raw arrays themselves, not copies: parseJSON rewrites prt
+    // entries in place after construction (aggregated / xi2 data), and the getters return them.
+    // The per-position decoy flags (dec) aren't kept: parseJSON puts decoy status on the proteins,
+    // and SpectrumMatch / Crosslink read it from there.
+
+    /** @type {string|number} Upload id (mzIdentML) / search id (xi2) */
+    #uploadId;
+    /** @type {string|number} Peptide id within the upload / search */
+    #peptideId;
+    /** @type {string} Raw sequence (xi2: mods embedded lowercase) */
+    #seq;
+    /** @type {Array<string>} Protein ids, one per position */
+    #prt;
+    /** @type {Array<number>} Start positions in the proteins */
+    #pos;
+    /** @type {number} Link site 1 */
+    #ls1;
+    /** @type {number} Link site 2 */
+    #ls2;
+    /** @type {number} Crosslinker modification mass */
+    #clModMass;
+    /** @type {Array<Object|number>} Raw modification references (m_as) */
+    #modAcc;
+
     /**
-     * Private raw peptide data object containing all peptide properties
-     * @type {Object}
+     * Base sequence (no modifications), worked out on first use and kept, as it's read for every match
+     * on every filter pass. Relies on #seq never changing after construction (nothing does this).
+     * @type {string}
      * @private
      */
-    #json;
+    #sequence;
 
     /**
      * Canonical, source-agnostic modification list resolved once at
@@ -37,50 +64,57 @@ export class Peptide {
      */
     constructor(json, searchModifications){
         console.assert(json.m_ps.length == json.m_as.length &&  (!json.m_ms || json.m_ps.length == json.m_ms.length), "Inconsistent mod data on peptide", json);
-        this.#json = json;
-        this.#modifications = this.#resolveModifications(searchModifications);
+        this.#uploadId = json.u_id;
+        this.#peptideId = json.id;
+        this.#seq = json.seq;
+        this.#prt = json.prt;
+        this.#pos = json.pos;
+        this.#ls1 = json.ls1;
+        this.#ls2 = json.ls2;
+        this.#clModMass = json.cl_m;
+        this.#modAcc = json.m_as;
+        this.#modifications = this.#resolveModifications(json, searchModifications);
     }
 
     /**
      * Resolve the raw m_ps/m_as (and m_ms) into the canonical modification list.
+     * @param {Object} json - Raw peptide data object
      * @param {Array<Object>} [searchModifications] - xi2 config mod list, or undefined for mzIdentML
      * @returns {Array<Object>} [{pos, name, mass, isCrosslinker, stub}]
      * @private
      */
-    #resolveModifications(searchModifications){
-        const mods = [];
-        const positions = this.#json.m_ps ?? [];
-        const refs = this.#json.m_as ?? [];
-        const masses = this.#json.m_ms;
-        for (let i = 0; i < positions.length; i++) {
-            const pos = positions[i];
+    #resolveModifications(json, searchModifications){
+        const positions = json.m_ps ?? [];
+        const refs = json.m_as ?? [];
+        const masses = json.m_ms;
+        // map rather than push onto [], so the array is allocated at its final size (one entry per position)
+        return positions.map((pos, i) => {
             const ref = refs[i];
             if (searchModifications) {
                 // xi2: ref is a 0-based index into the config modifications list.
                 // mass may be undefined (some defs carry only `composition`) - by design.
                 const def = searchModifications[ref];
-                mods.push({
+                return {
                     pos,
                     name: def ? def.name : String(ref),
                     mass: def ? def.mass : undefined,
                     isCrosslinker: false,
                     stub: undefined
-                });
+                };
             } else {
                 // mzIdentML: ref is a CV-term object {accession: name}.
                 const keys = Object.keys(ref);
                 const isCrosslinker = keys.includes("MS:1002509") || keys.includes("MS:1002510");
                 const firstVal = Object.values(ref)[0];
-                mods.push({
+                return {
                     pos,
                     name: firstVal != null ? String(firstVal).toLowerCase().replace(/ /g, "") : "",
                     mass: masses ? masses[i] : undefined,
                     isCrosslinker,
                     stub: isCrosslinker ? ref["MS:1003390"] : undefined
-                });
+                };
             }
-        }
-        return mods;
+        });
     }
 
     /**
@@ -88,7 +122,7 @@ export class Peptide {
      * @returns {string} Peptide identifier (upload_id + "_" + peptide_id)
      */
     get id(){
-        return this.#json.u_id + "_" + this.#json.id;
+        return this.#uploadId + "_" + this.#peptideId;
     }
 
     /**
@@ -96,7 +130,7 @@ export class Peptide {
      * @returns {number} Link site 1 position
      */
     get linkSite1(){
-        return this.#json.ls1;
+        return this.#ls1;
     }
 
     /**
@@ -104,7 +138,7 @@ export class Peptide {
      * @returns {number} Link site 2 position
      */
     get linkSite2(){
-        return this.#json.ls2;
+        return this.#ls2;
     }
 
     //todo - link site 2 for internally linked peptides
@@ -114,7 +148,7 @@ export class Peptide {
      * @returns {Array<string>} Array of protein IDs
      */
     get prt(){
-        return this.#json.prt;
+        return this.#prt;
     }
 
     /**
@@ -122,15 +156,7 @@ export class Peptide {
      * @returns {Array<number>} Array of protein positions
      */
     get pos(){
-        return this.#json.pos;
-    }
-
-    /**
-     * Get decoy status for each protein mapping
-     * @returns {Array<boolean>} Array of decoy flags
-     */
-    get is_decoy(){
-        return this.#json.dec;
+        return this.#pos;
     }
 
     /**
@@ -140,7 +166,10 @@ export class Peptide {
      * @returns {string} Peptide base sequence
      */
     get sequence() {
-        return this.#json.seq.replace(/[^A-Z]/g, "");
+        if (this.#sequence === undefined) {
+            this.#sequence = this.#seq.replace(/[^A-Z]/g, "");
+        }
+        return this.#sequence;
     }
 
     /**
@@ -172,11 +201,11 @@ export class Peptide {
     }
 
     /**
-     * Get modification positions in the peptide
-     * @returns {Array<int>} Array of modification positions
+     * Get modification positions in the peptide (the raw m_ps values, in order)
+     * @returns {Array<int>} Array of modification positions; a new array on every call
      */
     get mod_pos() {
-        return this.#json.m_ps;
+        return this.#modifications.map(mod => mod.pos);
     }
 
     /**
@@ -194,7 +223,7 @@ export class Peptide {
      * @returns {Array<Object|number>} Array of raw modification references
      */
     get mod_acc() {
-        return this.#json.m_as;
+        return this.#modAcc;
     }
 
     /**
@@ -202,7 +231,7 @@ export class Peptide {
      * @returns {number} Crosslinker modification mass
      */
     get cl_modmass(){
-        return this.#json.cl_m;
+        return this.#clModMass;
     }
 
     /**
