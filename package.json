@@ -1,6 +1,6 @@
 {
   "name": "xiview",
-  "version": "2.0.10",
+  "version": "2.1.0",
   "description": "visualisation of crosslinking  mass spectrometry data",
   "keywords": [
     "xiVIEW",
@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git@github.com:Rappsilber-Laboratory/xiview.git"
   },
-  "license": "GPL-3.0-or-later",
+  "license": "AGPL-3.0-or-later",
   "author": {
     "name": "Colin Combe",
     "email": "colin.combe@ed.ac.uk"
