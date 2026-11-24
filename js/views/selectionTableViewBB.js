@@ -117,7 +117,7 @@ export class SelectionTableViewBB extends Backbone.View {
             group: "Group",
             searchId: "mzIdentML File",
             peaklistName: "Peak List",
-            scanNumber: "Scan Number",
+            scanNumber: "Scan ID",
             precursorCharge: "Charge (Z)",
             expMZ: "Exp M/Z",
             expMass: "Exp Mass",
@@ -298,7 +298,7 @@ export class SelectionTableViewBB extends Backbone.View {
                 return d.modificationCount();
             },
             scanNumber: function (d) {
-                return d.scanNumber;
+                return d.scanId;
             }
         };
 

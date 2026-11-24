@@ -180,10 +180,10 @@ export class FilterViewBB extends Backbone.View {
                     tooltip: "Filter to matches whose peaklist file name includes this text e.g. 07_Lumos"
                 },
                 {
-                    label: "Scan",
+                    label: "Scan ID",
                     id: "scanNumber",
                     chars: 5,
-                    tooltip: "Filter to matches with this scan number e.g. 44565",
+                    tooltip: "Filter to matches whose scan identifier includes this text e.g. 44565 or index=12",
                 },
                 {
                     label: "Multi",

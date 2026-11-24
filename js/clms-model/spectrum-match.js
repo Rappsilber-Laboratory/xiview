@@ -729,6 +729,17 @@ export class SpectrumMatch {
     }
 
     /**
+     * Identifier of the matched spectrum in the source data, as shown to users ("Scan ID"):
+     * xi2's scan number when the API sends one (xi2 sends "sn", possibly null; its "sp" is an
+     * internal database key, never shown), otherwise the spectrum identifier "sp", which for
+     * mzIdentML data (PRIDE, xiview.org) is the spectrumID from the file or the CSV scanid.
+     * @returns {string|number|null|undefined} Scan identifier
+     */
+    get scanId() {
+        return this.#json.sn !== undefined ? this.#json.sn : this.#json.sp;
+    }
+
+    /**
      * Get scan index (xi2 only)
      * @returns {number|undefined} Scan index
      */

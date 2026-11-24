@@ -292,7 +292,7 @@ export class SpectrumViewWrapper extends BaseFrameView {
             label: "run",
             value: match.peaklistFileName()
         }, {
-            field: "scanNumber"
+            field: "scanId"
         }, {
             field: "is_decoy",
             label: "Decoy"

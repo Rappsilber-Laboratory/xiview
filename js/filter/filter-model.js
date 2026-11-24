@@ -88,7 +88,7 @@ export class FilterModel extends Backbone.Model {
             protDesc: "text",
             protPDB: "boolean",
             peaklistName: "text",
-            scanNumber: "number",
+            scanNumber: "text",   // matched against SpectrumMatch.scanId (name kept: saved configs use it)
             urpPpi: "number",
         };
     }
@@ -281,7 +281,8 @@ export class FilterModel extends Backbone.Model {
         this.preprocessedInputValues.set("pepSeq", splitPepSeq);
 
         this.preprocessedInputValues.set("peaklistName", this.get("peaklistName").toLowerCase());
-        this.preprocessedInputValues.set("scanNumber", parseInt(this.get("scanNumber")));
+        // String(): saved configs from before may hold a number here
+        this.preprocessedInputValues.set("scanNumber", String(this.get("scanNumber") ?? "").trim().toLowerCase());
 
         // Search group pre calculations
         this.precalcedSearchGroupsSet = d3.set(this.get("searchGroups"));
@@ -579,12 +580,10 @@ export class FilterModel extends Backbone.Model {
             return false;
         }
 
-        //scan number check
-        const scanNumberFilter = this.preprocessedInputValues.get("scanNumber");
-        if (!isNaN(scanNumberFilter) &&
-            match.scanNumber !== scanNumberFilter
-            //match.scanNumber.toString().toLowerCase().indexOf(scanNumberFilter.toLowerCase()) == -1
-        ) {
+        //scan identifier check (text contained in the identifier, ignoring case; no identifier never matches)
+        const scanIdFilter = this.preprocessedInputValues.get("scanNumber");
+        if (scanIdFilter &&
+            String(match.scanId ?? "").toLowerCase().indexOf(scanIdFilter) === -1) {
             return false;
         }
 

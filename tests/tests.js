@@ -235,6 +235,28 @@ function testCallback(model) {
         filterModel.resetFilter();
     });
 
+    // The scan ID filter is a text filter on SpectrumMatch.scanId (the spectrum identifier "sp" for
+    // mzIdentML data such as this test data, which has no xi2 "sn").
+    test("Scan ID filter matches text contained in the spectrum identifier", function (assert) {
+        const filterModel = model.get("filterModel");
+        const matches = clmsModel.getMatches();
+        assert.ok(matches.every(m => m.scanId === m.spectrumId), "scanId is the spectrum identifier without sn");
+        const someId = String(matches[matches.length - 1].scanId);
+        const part = someId.slice(-2);
+        [part, someId.toUpperCase(), "no such id"].forEach(function (value) {
+            filterModel.resetFilter().set({scanNumber: value});
+            const want = value.toLowerCase();
+            const wrong = matches.filter(m => filterModel.navigationFilter(m) !==
+                (String(m.scanId ?? "").toLowerCase().indexOf(want) !== -1));
+            assert.strictEqual(wrong.length, 0, "navigationFilter agrees with 'contains' for " + JSON.stringify(value));
+        });
+        filterModel.resetFilter().set({scanNumber: 12});  // a saved config from before: a number
+        assert.ok(matches.every(m => filterModel.navigationFilter(m) === String(m.scanId).includes("12")),
+            "a numeric value from an old saved config still works");
+        filterModel.resetFilter();
+        assert.ok(matches.every(m => filterModel.navigationFilter(m)), "empty filter passes everything");
+    });
+
     // A crosslink's distance depends on its homomultimer state, which applyFilter() works out. When that state
     // changes, the distance filter must use the recalculated distance, not the one from before the change.
     test("Distance filter uses distances recalculated after homomultimer state changes", function (assert) {
