@@ -403,7 +403,6 @@ export class CrosslinkViewer extends Backbone.View {
     // specifically subgroups could change as result of things being hidden so this is here
     // (i.e. overlapping group becomes subgroup)
     hiddenProteinsChanged() {
-        console.log("xiNET HIDDEN PROTEINS CHANGED");
         this.d3cola.stop();
 
         //clear parent groups of all proteins
@@ -637,7 +636,6 @@ export class CrosslinkViewer extends Backbone.View {
      * @returns {CrosslinkViewer} Returns this for method chaining
      */
     render() {
-        console.log("xiNET RENDER");
         this.d3cola.stop();
         if (this.firstRender) { // first render
             this.firstRender = false;
