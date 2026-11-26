@@ -10,6 +10,7 @@ import {PrecursorInfoView} from "./PrecursorInfoView";
 import {QCwrapperView} from "./QCwrapperView";
 import {ErrorPlotView} from "./ErrorPlotView";
 import d3 from "d3";
+import {showMessage} from "../../ui-utils/message-popup";
 
 export const SpectrumWrapper = Backbone.View.extend({
     events: {
@@ -30,9 +31,14 @@ export const SpectrumWrapper = Backbone.View.extend({
         delete model_options.targetDiv;
         delete model_options.showCustomConfig;
         delete model_options.showQualityControl;
-        delete model_options.xiAnnotatorBaseURL;
+        delete model_options.apiBase;
 
-        this.xiAnnotatorBaseURL = options.opt.xiAnnotatorBaseURL;
+        // annotation requests go to the API's get_annotated_peaklist, which adds the spectrum's peaks from the DB
+        this.apiBase = options.opt.apiBase;
+        // {id, sd_ref, upload_id} of the spectrum this panel shows; null while none is shown or a new one is loading
+        this.spectrumRef = null;
+        // number of the latest annotation request; responses to earlier requests are dropped
+        this.annotationRequestCount = 0;
         this.id = options.id;
 
         // init clms-backbone-models
@@ -281,23 +287,55 @@ export const SpectrumWrapper = Backbone.View.extend({
             xiSPECUI.vent.trigger("QCWrapperShow", this.id);
     },
 
-    requestAnnotation: function (json_request, annotatorURL, isOriginalMatchRequest) {
-        if (json_request.annotation.requestID) {
-            xiSPECUI.lastRequestedID = json_request.annotation.requestID;
-        }
+    /**
+     * Load and annotate a newly selected spectrum in this panel.
+     * @param {{id: string, sd_ref: string|number, upload_id: string|number}} spectrumRef - where the API finds the peaks
+     * @param {Object} json_request - annotation request (without peaks, the API adds them)
+     * @returns {void}
+     */
+    loadSpectrum: function (spectrumRef, json_request) {
+        // until the new spectrum arrives there is no shown spectrum to re-annotate
+        this.spectrumRef = null;
+        this.fetchAnnotation(spectrumRef, json_request, true);
+    },
 
+    /**
+     * Re-annotate the spectrum this panel shows with a changed request.
+     * @param {Object} json_request - annotation request; its peaks are ignored, the API adds the stored ones
+     * @returns {void}
+     */
+    requestAnnotation: function (json_request) {
+        if (!this.spectrumRef) {
+            showMessage("Can't re-annotate: no spectrum is loaded (or the selected one is still loading).", "error");
+            return;
+        }
+        this.fetchAnnotation(this.spectrumRef, json_request, false);
+    },
+
+    /**
+     * POST an annotation request for a stored spectrum and show the result.
+     * Only the response to the latest request is shown, so a slow earlier response can't replace a later one.
+     * @param {{id: string, sd_ref: string|number, upload_id: string|number}} spectrumRef - where the API finds the peaks
+     * @param {Object} json_request - annotation request
+     * @param {boolean} isNewSpectrum - true when loading a newly selected spectrum, false when re-annotating
+     * @returns {void}
+     */
+    fetchAnnotation: function (spectrumRef, json_request, isNewSpectrum) {
+        const requestNumber = ++this.annotationRequestCount;
         this.spectrumModel.trigger("requestAnnotation:pending");
 
-        let self = this;
+        const url = this.apiBase + "get_annotated_peaklist"
+            + "?id=" + encodeURIComponent(spectrumRef.id)
+            + "&sd_ref=" + encodeURIComponent(spectrumRef.sd_ref)
+            + "&upload_id=" + encodeURIComponent(spectrumRef.upload_id);
 
-        fetch(this.xiAnnotatorBaseURL + annotatorURL, {
+        fetch(url, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(json_request),
-            referrer: window.location.href
         })
             .then(response => {
                 if (!response.ok) {
@@ -306,34 +344,73 @@ export const SpectrumWrapper = Backbone.View.extend({
                 return response.json();
             })
             .then(data => {
-                if (data && data.annotation && data.annotation.requestID &&
-                    data.annotation.requestID === xiSPECUI.lastRequestedID) {
-                    self.spectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-                    self.settingsSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-                    self.settingsSpectrumModel.trigger("change:JSONdata");
-                    self.spectrumModel.trigger("requestAnnotation:done");
-
-                    if (isOriginalMatchRequest) {
-                        self.originalSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-                        self.originalSpectrumModel.updateKnownModifications();
-                        self.spectrumModel.updateKnownModifications();
-                        self.originalMatchRequest = Object.assign({}, json_request);
-                        self.originalAnnotator = annotatorURL;
-                    }
+                if (requestNumber !== this.annotationRequestCount) {
+                    return; // superseded by a later request
                 }
+                if (isNewSpectrum) {
+                    this.showNewSpectrum(spectrumRef, data, json_request);
+                } else {
+                    this.showAnnotation(data, json_request);
+                }
+                this.spectrumModel.trigger("requestAnnotation:done");
             })
             .catch(error => {
+                if (requestNumber !== this.annotationRequestCount) {
+                    return;
+                }
                 console.error("Error during annotation request:", error);
+                this.spectrumModel.trigger("requestAnnotation:done");
+                if (isNewSpectrum) {
+                    // the spectrum view stays empty: the previous spectrum is not the selected one
+                    showMessage("Couldn't load the spectrum for the selected match (" + _.escape(String(error.message)) + ").", "error");
+                } else {
+                    // redraw the last annotation that succeeded; the models still hold it
+                    this.spectrumModel.trigger("change:JSONdata");
+                    showMessage("Re-annotation failed (" + _.escape(String(error.message)) + "). The previous annotation is shown.", "error");
+                }
             });
     },
 
+    /**
+     * Show a newly loaded spectrum: reset per-spectrum state and keep its request for revert.
+     * @param {Object} spectrumRef - where the API finds the peaks
+     * @param {Object} data - annotation response
+     * @param {Object} json_request - the request it answers
+     * @returns {void}
+     */
+    showNewSpectrum: function (spectrumRef, data, json_request) {
+        const specModel = this.spectrumModel;
+        specModel.set("butterfly", false);
+        specModel.set("changedAnnotation", false);
+        specModel.reset_all_modifications();
+        specModel.set("spectrum_id", data.spectrum_id);
+        specModel.set("spectrum_title", data.spectrum_title);
+        this.originalMatchRequest = $.extend(true, {}, json_request);
+
+        this.showAnnotation(data, json_request);
+        this.originalSpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+        this.originalSpectrumModel.updateKnownModifications();
+        specModel.updateKnownModifications();
+        // set last, with the data it belongs to, so a re-annotation always pairs this spectrum with its own request
+        this.spectrumRef = spectrumRef;
+    },
+
+    /**
+     * @param {Object} data - annotation response
+     * @param {Object} json_request - the request it answers
+     * @returns {void}
+     */
+    showAnnotation: function (data, json_request) {
+        this.spectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+        this.settingsSpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+        this.settingsSpectrumModel.trigger("change:JSONdata");
+    },
 
     revertAnnotation: function () {
         if (this.spectrumModel.get("changedAnnotation")) {
             this.spectrumModel.reset_all_modifications();
             this.settingsSpectrumModel.reset_all_modifications();
-            this.spectrumModel.set("annotatorURL", this.originalAnnotator);
-            this.requestAnnotation(this.originalMatchRequest, this.spectrumModel.get("annotatorURL"));
+            this.requestAnnotation($.extend(true, {}, this.originalMatchRequest));
             this.spectrumModel.set("changedAnnotation", false);
         }
     },

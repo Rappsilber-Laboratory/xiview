@@ -675,7 +675,7 @@ export function viewsEssential(compositeModelInst, options) {
     const xiSPEC_options = {
         targetDiv: "modular_xispec",
         // baseDir: window.xiSpecBaseDir,
-        xiAnnotatorBaseURL: compositeModelInst.get("annotatorURL"),
+        apiBase: compositeModelInst.get("apiBase"),
         dbView: window.dbView,
         compositeModelInst: compositeModelInst,
         showCustomConfig: true,

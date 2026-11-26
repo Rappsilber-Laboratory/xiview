@@ -54,35 +54,9 @@ export const loadSpectrum = function (match) {
         showFragmentationWarnings(match);
     }
 
-    const url = this.get("apiBase") + "get_annotated_peaklist"
-        + "?id=" + encodeURIComponent(match.spectrumId)
-        + "&sd_ref=" + encodeURIComponent(match.spectraDataId)
-        + "&upload_id=" + encodeURIComponent(match.uploadId);
-
-    fetch(url, {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(json_request),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(data => {
-            const rangeErrorEl = document.querySelector("#range-error");
-            if (rangeErrorEl) {
-                rangeErrorEl.textContent = "";
-            }
-            this.get("xispec_wrapper").receiveAnnotatedData(data, json_request);
-        })
-        .catch(error => {
-            console.log("error getting annotated peak list", error);
-        });
+    this.get("xispec_wrapper").loadSpectrum(
+        {id: match.spectrumId, sd_ref: match.spectraDataId, upload_id: match.uploadId},
+        json_request);
 };
 
 /**

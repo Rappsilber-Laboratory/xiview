@@ -133,11 +133,6 @@
   height: 2.7em;
 }
 
-.xispec_settings_main #xispec_settingsPeaklist{
-  height:100%;
-  white-space: pre-wrap;
-}
-
 .pointer{
   cursor: pointer;
 }
@@ -150,13 +145,6 @@
     color: #446EB0;
     margin-left: 5px;
     cursor: pointer;
-}
-
-.xispec_settingsDataLeft{
-    display: inline;
-    margin-right: 2%;
-    flex-grow: 5;
-    flex-basis: 275px;
 }
 
 .xispec_settingsDataRight{
@@ -204,16 +192,6 @@
 
 .xispec_settings_main #xispec_ionList input{
     width: unset;
-}
-
-#xispec_settingsPeaklist{
-  height: 170px;
-  min-height: 140px;
-  min-width: 220px;
-  white-space: nowrap;
-  line-height: 1.4em;
-  padding-left: 10px;
-  padding-top: 8px;
 }
 
 #xispec_customCfgHelp{

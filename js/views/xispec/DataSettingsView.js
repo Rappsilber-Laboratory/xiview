@@ -19,7 +19,6 @@ export const DataSettingsView = SettingsView.extend({
             "click #xispec_toggleCustomCfgHelp": "toggleCustomCfgHelp",
             "click #xispec_settingsCustomCfgApply": "applyCustomCfg",
             "click #xispec_settingsCustomCfgDbSave": "saveCustomCfg",
-            "click #xispec_settingsAnnotatorApply": "applyAnnotator",
             "submit #xispec_settingsForm": "applyData",
             // 'keyup .stepInput' : 'updateStepSizeKeyUp',
             "change .xispec_ionSelectChkbox": "updateIons",
@@ -32,7 +31,7 @@ export const DataSettingsView = SettingsView.extend({
         // load default options and super initialize the parent view
         const defaultOptions = {
             showCustomCfg: true,
-            tabs: ["general", "custom config"] //, "annotator"] disabled, all xi2 for now
+            tabs: ["general", "custom config"]
         };
         this.options = _.extend(defaultOptions, options);
         arguments[0] = this.options;
@@ -67,15 +66,6 @@ export const DataSettingsView = SettingsView.extend({
 
         let dataFlexRow = topDataDiv.append("div").attr("class", "xispec_flex-row xispec_splitDataDiv");
 
-        let leftDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataLeft");
-
-        this.peaklist = leftDiv.append("label").attr("class", "xispec_flex-column").attr("style", "height: 100%").text("Peak list (m/z\tintensity): ").append("textarea")
-            .attr("required", "")
-            .attr("id", "xispec_settingsPeaklist")
-            .attr("type", "text")
-            .attr("placeholder", "Peak List [m/z intensity]")
-            .attr("name", "peaklist")
-            .attr("class", "xispec_form-control");
         let rightDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataRight");
 
         let ionSelector = rightDiv.append("label").attr("class", "xispec_flex-row").text("Fragment Ions: ")
@@ -256,36 +246,6 @@ export const DataSettingsView = SettingsView.extend({
             .attr("value", "Cancel")
             .attr("type", "button");
 
-        // annotatorTab
-        let annotatorTab = this.mainDiv.append("div")
-            .attr("class", "xispec_settings-tab xispec_flex-column")
-            .attr("id", "xispec_annotator_tab")
-            .style("display", "none");
-
-        let annotatorWrapper = annotatorTab.append("label")
-            .attr("class", "xispec_label")
-            .text("Choose Annotator to use: ");
-
-        this.annotatorDropdown = annotatorWrapper.append("select")
-            .attr("name", "annotator")
-            .attr("class", "xispec_form-control")
-            .attr("id", "xispec_annotatorDropdown");
-        this.annotatorDropdown.append("option").attr("value", "annotate/FULL").text("classic");
-        this.annotatorDropdown.append("option").attr("value", "test/FULL").text("test");
-        let annotatorBottom = annotatorTab.append("div")
-            .attr("class", "xispec_settings-bottom");
-        // eslint-disable-next-line no-unused-vars
-        let annotatorSubmit = annotatorBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
-            .attr("value", "Apply")
-            .attr("id", "xispec_settingsAnnotatorApply")
-            .attr("type", "submit");
-
-        // eslint-disable-next-line no-unused-vars
-        let annotatorCancel = annotatorBottom.append("input")
-            .attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
-            .attr("value", "Cancel")
-            .attr("type", "button");
         // end Tabs
 
         let d3el = d3.select(this.el);
@@ -328,12 +288,10 @@ export const DataSettingsView = SettingsView.extend({
         });
         $("#xispec_ionSelection").val(ionSelectionArr.join(", "));
 
-        this.peaklist[0][0].value = this.model.peaksToMGF();
         this.precursorZ[0][0].value = this.model.precursor.charge;
         this.toleranceValue[0][0].value = this.model.MSnTolerance.tolerance;
         this.toleranceUnit[0][0].value = this.model.MSnTolerance.unit;
         this.crossLinkerModMass[0][0].value = this.model.crossLinkerModMass;
-        this.annotatorDropdown[0][0].value = this.displayModel.get("annotatorURL");
         if (this.model.isLinear)
             $(this.crossLinkerModMassWrapper[0][0]).hide();
         else
@@ -361,17 +319,9 @@ export const DataSettingsView = SettingsView.extend({
     applyCustomCfg: function () {
         let json = this.model.get("JSONrequest");
         json.annotation.custom = $("#xispec_settingsCustomCfg-input").val().split("\n");
-        xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
+        xiSPECUI.vent.trigger("requestAnnotation", json);
         this.displayModel.set("changedAnnotation", true);
         // this.render();
-    },
-
-    applyAnnotator: function (e) {
-        e.preventDefault();
-        let json = this.model.get("JSONrequest");
-        this.displayModel.set("annotatorURL", $("#xispec_annotatorDropdown").val());
-        xiSPECUI.vent.trigger("requestAnnotation", json, this.displayModel.get("annotatorURL"));
-        this.displayModel.set("changedAnnotation", true);
     },
 
     applyData: function (e) {
@@ -397,9 +347,8 @@ export const DataSettingsView = SettingsView.extend({
 
         json_request["annotation"]["custom"] = this.displayModel.get("JSONdata").annotation.custom;
         json_request["annotation"]["precursorMZ"] = this.displayModel.precursor.expMz;
-        json_request["annotation"]["requestID"] = xiSPECUI.lastRequestedID + Date.now();
         json_request["annotation"]["returnModSyntax"] = "Xmod";
-        xiSPECUI.vent.trigger("requestAnnotation", json_request, this.displayModel.get("annotatorURL"));
+        xiSPECUI.vent.trigger("requestAnnotation", json_request);
         this.displayModel.set("changedAnnotation", true);
         this.displayModel.knownModifications = $.extend(true, [], this.model.knownModifications);
 
@@ -436,12 +385,6 @@ export const DataSettingsView = SettingsView.extend({
             let linkSite = {"id": 0, "peptideId": i, "linkSite": link_pos};
             linkSitesJSON.push(linkSite);
         }
-        // peak block
-        let peaks = formData.get("peaklist").trim().split(/[\r\n]/);
-        let peaksJSON = peaks.map(function(p){
-            p = p.split(/\s/);
-            return {"mz": p[0], "intensity": p[1]};
-        });
         // xi2 config - modifications
         let mods_xi2 = Array();
         let mods = formData.getAll("mods[]");
@@ -513,7 +456,8 @@ export const DataSettingsView = SettingsView.extend({
         // annotation block - JSON assembly
         xi2_request.Peptides = peptidesJSON;
         xi2_request.LinkSite = linkSitesJSON;
-        xi2_request.peaks = peaksJSON;
+        // no peaks: the API adds the spectrum's stored peaks
+        xi2_request.peaks = [];
 
         return xi2_request;
 
@@ -546,12 +490,6 @@ export const DataSettingsView = SettingsView.extend({
             let linkSite = {"id": 0, "peptideId": i, "linkSite": link_pos};
             linkSitesJSON.push(linkSite);
         }
-        // peak block
-        let peaks = formData.get("peaklist").trim().split(/[\r\n]/);
-        let peaksJSON = peaks.map(function(p){
-            p = p.split(/\s/);
-            return {"mz": p[0], "intensity": p[1]};
-        });
         // annotation block - modifications
         let modsJSON = Array();
         let mods = formData.getAll("mods[]");
@@ -617,7 +555,7 @@ export const DataSettingsView = SettingsView.extend({
         return {
             "Peptides": peptidesJSON,
             "LinkSite": linkSitesJSON,
-            "peaks": peaksJSON,
+            "peaks": [], // the API adds the spectrum's stored peaks
             "annotation": annotationJSON
         };
     },
@@ -641,12 +579,6 @@ export const DataSettingsView = SettingsView.extend({
             return false;
         }
 
-        // peakList
-        invalidChar = invalidChars(formData.get("peaklist"), /([^\d.\s]+)/);
-        if (invalidChar) {
-            alert("Invalid character(s) in peak list: " + invalidChar);
-            return false;
-        }
         // clModMass
         invalidChar = invalidChars(formData.get("clModMass"), /([^\d.-]+)/);
         if (invalidChar) {

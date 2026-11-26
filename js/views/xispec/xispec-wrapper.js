@@ -25,7 +25,7 @@ export const XispecWrapper = Backbone.View.extend({
             showCustomConfig: false,
             showQualityControl: "bottom",
             baseDir: "./",
-            xiAnnotatorBaseURL: "xiAnnotator/",
+            apiBase: "",
             knownModifications: [],
             labelFragmentCharge: false,
             labelCutoff: 0,
@@ -132,27 +132,14 @@ export const XispecWrapper = Backbone.View.extend({
     //     this.activeSpectrum.setTitle(data.spectrum_title);
     // },
 
-    receiveAnnotatedData: function (data, json_request) {
-        let activeSpecModel = this.activeSpectrum.spectrumModel;
-        activeSpecModel.set("butterfly", false);
-        activeSpecModel.set("changedAnnotation", false);
-        activeSpecModel.reset_all_modifications();
-        activeSpecModel.set("spectrum_id", data.spectrum_id);
-        activeSpecModel.set("spectrum_title", data.spectrum_title);
-        this.activeSpectrum.originalMatchRequest = $.extend(true, {}, json_request);
-        let originalAnnotator = this.activeSpectrum.originalSpectrumModel.get("annotatorURL");
-        activeSpecModel.set("annotatorURL", originalAnnotator);
-
-        let spec = this.activeSpectrum;
-        spec.spectrumModel.trigger("requestAnnotation:pending");
-        spec.spectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-        spec.settingsSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-        spec.settingsSpectrumModel.trigger("change:JSONdata");
-        spec.spectrumModel.trigger("requestAnnotation:done");
-        spec.originalSpectrumModel.set({ "JSONdata": data, "JSONrequest": json_request });
-        spec.originalSpectrumModel.updateKnownModifications();
-        spec.spectrumModel.updateKnownModifications();
-        spec.originalAnnotator = originalAnnotator;
+    /**
+     * Load and annotate a newly selected spectrum in the active spectrum panel.
+     * @param {{id: string, sd_ref: string|number, upload_id: string|number}} spectrumRef - where the API finds the peaks
+     * @param {Object} json_request - annotation request (without peaks, the API adds them)
+     * @returns {void}
+     */
+    loadSpectrum: function (spectrumRef, json_request) {
+        this.activeSpectrum.loadSpectrum(spectrumRef, json_request);
     },
 
     requestAnnotation: function (...args) {
@@ -360,9 +347,9 @@ export const XispecWrapper = Backbone.View.extend({
         this.spectra.push(newSpec);
 
         // if there is already an activeSpectrum copy it's originalMatchRequest
-        if (this.activeSpectrum) {
-            newSpec.requestAnnotation(this.activeSpectrum.originalMatchRequest,
-                this.activeSpectrum.originalAnnotator, true);
+        if (this.activeSpectrum && this.activeSpectrum.spectrumRef) {
+            newSpec.loadSpectrum(this.activeSpectrum.spectrumRef,
+                $.extend(true, {}, this.activeSpectrum.originalMatchRequest));
             newSpec.setTitle(this.activeSpectrum.title);
         }
 

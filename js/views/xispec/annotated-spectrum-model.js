@@ -39,7 +39,6 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
             highlightWidth: 8,
             peakColor: "#a6a6a6",
             colorScheme: "RdBu",
-            annotatorURL: "annotate/FULL",
             labelFragmentCharge: false,
             labelCutoff: 0,
             labelFontSize: 10,
@@ -427,7 +426,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
         if (this.get("JSONrequest") !== undefined) {
             let json_req = $.extend(true, {}, this.get("JSONrequest"));
             json_req.LinkSite = newLinkSites;
-            xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
+            xiSPECUI.vent.trigger("requestAnnotation", json_req);
         } else {
             this.get("JSONdata").LinkSite = newLinkSites;
             this.setData();
@@ -467,7 +466,7 @@ export const AnnotatedSpectrumModel = Backbone.Model.extend({
                 if (annotationMod[0].aminoAcids.indexOf(myNew.aminoAcid) === -1)
                     annotationMod[0].aminoAcids.push(myNew.aminoAcid);
             }
-            xiSPECUI.vent.trigger("requestAnnotation", json_req, this.get("annotatorURL"));
+            xiSPECUI.vent.trigger("requestAnnotation", json_req);
         } else {
             //Preview
             this.get("JSONdata").Peptides[newPepIndex].sequence[newPos].Modification = this.get("JSONdata").Peptides[oldPepIndex].sequence[oldPos].Modification;

@@ -140,7 +140,8 @@ function groupLabelsFrom(options) {
  * Loads all necessary data (API endpoints, BLOSUM matrices), initializes clms-backbone-models and views,
  * and sets up the complete application UI.
  * @param {string} apiBase - Base URL for API endpoints
- * @param {string} annotatorURL - URL for the annotation service
+ * @param {string} annotatorURL - Unused, kept so existing callers still work: spectra are annotated by
+ *     the API (apiBase + "get_annotated_peaklist")
  * @param {Object} [options] - Optional settings
  * @param {boolean} [options.configSaving] - Enable saving/loading configs (xiNET layout + filter settings).
  *     Defaults to true when the URL has a "uuid" param (xi2 datasets).
@@ -211,7 +212,6 @@ export function main(apiBase, annotatorURL, options = {}) {
             const compositeModelInst = models({}, clmsModel);
             compositeModelInst.set("blosumColl", blosumCollInst);
             compositeModelInst.set("apiBase", apiBase);
-            compositeModelInst.set("annotatorURL", annotatorURL);
             compositeModelInst.set("configSaving", configSaving);
             compositeModelInst.set("savedConfig", savedConfig);
             const split = initPageSplitter();
@@ -234,7 +234,8 @@ export function main(apiBase, annotatorURL, options = {}) {
  * Loads essential data and initializes a minimal view set focused on spectrum validation.
  * Unlike main(), this does not load BLOSUM matrices or full visualization components.
  * @param {string} apiBase - Base URL for API endpoints
- * @param {string} annotatorURL - URL for the annotation service
+ * @param {string} annotatorURL - Unused, kept so existing callers still work: spectra are annotated by
+ *     the API (apiBase + "get_annotated_peaklist")
  * @param {Object} [options] - Optional settings
  * @param {Object<string, string>} [options.groupLabels] - Group label per upload id (see main)
  * @returns {void}
@@ -254,7 +255,6 @@ export function validationPage(apiBase, annotatorURL, options = {}) {
             console.log("API data ready.");
             const compositeModelInst = modelsEssential({}, clmsModel);
             compositeModelInst.set("apiBase", apiBase);
-            compositeModelInst.set("annotatorURL", annotatorURL);
             const split = initPageSplitter();
             viewsEssential(compositeModelInst, {"specWrapperDiv": "#topDiv", spectrumToTop: false, split});
             vent.trigger("spectrumShow", true);
