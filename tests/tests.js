@@ -1,5 +1,6 @@
 import * as $ from "jquery";
 import * as _ from "underscore";
+import Backbone from "backbone";
 import * as NGL from "ngl";
 import * as d3 from "d3";
 
@@ -40,7 +41,8 @@ import {getLinksCSV, getMatchesCSV, getResidueCount} from "../js/downloads";
 
 import {start, module, test} from "qunit";
 import {blosumLoading, models, postDataLoaded} from "../js/networkFrame";
-import {setupColourModels} from "../js/backbone-models/color/setup-colors";
+import {linkColor, setupColourModels} from "../js/backbone-models/color/setup-colors";
+import {DistanceMatrixViewBB} from "../js/views/matrixViewBB";
 import {repopulateNGL} from "../js/views/ngl/RepopulateNGL";
 import {SearchResultsModel} from "../js/clms-model/search-results-model";
 import vent from "../js/vent";
@@ -1610,6 +1612,78 @@ function testCallback(model) {
 
         const fileContents = "ProteinID,cat,dog\nsp|P02768-A|ALBU,2,4\n";
         updateProteinMetadata(fileContents, clmsModel);
+    });
+
+
+    // Issue #573: a protein metadata CSV with a Name column didn't rename proteins in xiNET. The matrix view starts
+    // hidden with no pairing chosen, its proteinMetadataUpdated listener threw, and Backbone stops at the first
+    // listener that throws, so views that registered later (xiNET, circle view, etc.) never heard about the new names.
+    const withHiddenMatrixView = function (testBody) {
+        const protein = clmsModel.getProtein("sp|P02768-A|ALBU");
+        const originalName = protein.name;
+        const originalMeta = protein.meta ? $.extend({}, protein.meta) : protein.meta;
+        const div = d3.select("body").append("div").attr("id", "issue573MatrixPanel").node();
+        const matrixView = new DistanceMatrixViewBB({
+            el: div,
+            model: model,
+            colourScaleModel: linkColor.distanceColoursBB,
+            displayEventName: "issue573MatrixViewShow",
+        });
+        try {
+            testBody(protein, matrixView);
+        } finally {
+            matrixView.remove();
+            protein.name = originalName;
+            protein.meta = originalMeta;
+        }
+    };
+
+    const matrixAxisLabels = function (matrixView) {
+        return d3.select(matrixView.el).selectAll("g.label text")[0].map(function (node) {
+            return node.textContent;
+        });
+    };
+
+    test("Protein Metadata Name reaches listeners registered after a hidden matrix view (issue #573)", function (assert) {
+        withHiddenMatrixView(function (protein, matrixView) {
+            assert.notOk(matrixView.isVisible(), "Matrix view starts hidden, Passed!");
+            assert.notOk(matrixView.options.matrixObj, "Hidden matrix view has no pairing chosen yet, Passed!");
+
+            // stands in for xiNET etc., which register their listeners after the matrix view
+            const namesSeenByLaterListener = [];
+            const laterListener = _.extend({}, Backbone.Events);
+            laterListener.listenTo(vent, "proteinMetadataUpdated", function (metaMetaData) {
+                namesSeenByLaterListener.push(metaMetaData.items.get(protein.id).name);
+            });
+
+            try {
+                updateProteinMetadata("ProteinID,Name\nsp|P02768-A|ALBU,Renamed_Albumin\n", clmsModel);
+            } finally {
+                laterListener.stopListening();
+            }
+
+            assert.strictEqual(protein.name, "Renamed_Albumin", "Protein renamed from Name column, Passed!");
+            assert.deepEqual(namesSeenByLaterListener, ["Renamed_Albumin"], "Listener registered after the hidden matrix view got the event with the new name, Passed!");
+        });
+    });
+
+    test("Matrix view axis labels show a protein renamed while it was hidden (issue #573)", function (assert) {
+        withHiddenMatrixView(function (protein, matrixView) {
+            updateProteinMetadata("ProteinID,Name\nsp|P02768-A|ALBU,Renamed_Albumin\n", clmsModel);
+            vent.trigger("issue573MatrixViewShow", true);
+            assert.deepEqual(matrixAxisLabels(matrixView).slice(0, 2), ["Renamed Albumin", "Renamed Albumin"], "Axis labels show the new name once the view is shown, Passed!");
+        });
+    });
+
+    test("Matrix view axis labels follow a rename while it is shown (issue #573)", function (assert) {
+        withHiddenMatrixView(function (protein, matrixView) {
+            vent.trigger("issue573MatrixViewShow", true);
+            const originalLabel = protein.name.replace("_", " ");
+            assert.deepEqual(matrixAxisLabels(matrixView).slice(0, 2), [originalLabel, originalLabel], "Axis labels show the original name, Passed!");
+
+            updateProteinMetadata("ProteinID,Name\nsp|P02768-A|ALBU,Renamed_Albumin\n", clmsModel);
+            assert.deepEqual(matrixAxisLabels(matrixView).slice(0, 2), ["Renamed Albumin", "Renamed Albumin"], "Axis labels updated to the new name, Passed!");
+        });
     });
 
 

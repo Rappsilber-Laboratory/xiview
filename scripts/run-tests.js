@@ -83,9 +83,12 @@ async function runTest(browser, baseUrl, testFile) {
 
     const page = await browser.newPage();
 
-    // Capture console errors for debugging
+    // Uncaught errors count as failures: tests.js sets QUnit.config.notrycatch, so an exception thrown in a test
+    // escapes QUnit, stops the rest of that page's tests, and QUnit itself can still report everything that ran as passed
+    const pageErrors = [];
     page.on('pageerror', error => {
         console.log(`  Page Error: ${error.message}`);
+        pageErrors.push(error.message);
     });
 
     try {
@@ -201,6 +204,15 @@ async function runTest(browser, baseUrl, testFile) {
                 checkQUnit();
             });
         });
+
+        if (pageErrors.length) {
+            results.failed += pageErrors.length;
+            results.failures = (results.failures || []).concat(pageErrors.map(message => ({
+                module: 'Uncaught page error',
+                name: 'remaining tests on this page may not have run',
+                assertions: [{ message: message }]
+            })));
+        }
 
         // Display results
         console.log(`\nResults:`);

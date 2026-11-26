@@ -483,8 +483,13 @@ export class DistanceMatrixViewBB extends BaseFrameView {
     /**
      * Updates axis labels with current protein names.
      * Fetches protein IDs and updates label text elements.
+     * Does nothing until a pairing is chosen (the view starts hidden, see firstPairingPending): matrixChosen calls
+     * this again once one is, reading the names from the proteins then.
      */
     updateAxisLabels() {
+        if (!this.options.matrixObj) {
+            return;
+        }
         const protIDs = this.getCurrentProteinIDs();
         this.vis.selectAll("g.label text").data(protIDs)
             .text(function (d) {
