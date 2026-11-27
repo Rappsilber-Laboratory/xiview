@@ -87,10 +87,10 @@ export class SearchResultsModel {
 
     _enzymeSpecificity = [];
 
-    /** @type {Map<*, Map<*, Array<Enzyme>>>} upload id -> protocol id -> Enzymes (a protocol may use several) */
+    /** @type {Map<*, Map<*, Array<Enzyme>>>} upload id -> protocol sip_ref -> Enzymes (a protocol may use several) */
     _indexedEnzymes = new Map();
 
-    /** @type {Map<*, Map<*, Array<SearchModification>>>} upload id -> protocol id -> SearchModifications */
+    /** @type {Map<*, Map<*, Array<SearchModification>>>} upload id -> protocol sip_ref -> SearchModifications */
     _indexedSearchModifications = new Map();
 
     /** @type {Map<*, Map<*, SpectraData>>} upload id -> spectra data id -> SpectraData */
@@ -276,9 +276,11 @@ export class SearchResultsModel {
                 if (!indexedSIPs.has(sipJson.upload_id)) {
                     indexedSIPs.set(sipJson.upload_id, new Map());
                 }
+                // enzymes and search modifications name their protocol by its sip_ref (their
+                // protocol_id is a foreign key to it), not by its id
                 const sip = new SpectrumIdentificationProtocol(sipJson,
-                    this._indexedEnzymes.get(sipJson.upload_id)?.get(sipJson.id),
-                    this._indexedSearchModifications.get(sipJson.upload_id)?.get(sipJson.id));
+                    this._indexedEnzymes.get(sipJson.upload_id)?.get(sipJson.sip_ref),
+                    this._indexedSearchModifications.get(sipJson.upload_id)?.get(sipJson.sip_ref));
                 indexedSIPs.get(sipJson.upload_id).set(sipJson.id, sip);
             }
         } else {

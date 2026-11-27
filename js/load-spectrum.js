@@ -40,6 +40,69 @@ function showFragmentationWarnings(match) {
 }
 
 /**
+ * Protocols whose "crosslinker stubs not found" warning has already been shown (once per protocol per page)
+ * @type {WeakSet<Object>}
+ */
+const stubWarningsShown = new WeakSet();
+
+/**
+ * Crosslinker cleavage stubs for an mzIdentML match, from its protocol's search modifications:
+ * each crosslinker modification of a peptide names its search modification (MS:1003393), which
+ * lists the stubs (MS:1003390). A looplink peptide gets the stubs of both of its crosslinker
+ * modifications.
+ * @param {SpectrumMatch} match - The spectrum match
+ * @returns {{stubs1: Array<string>, stubs2: Array<string>, unresolved: boolean}} unresolved is true
+ *  if a crosslinker modification could not be matched to a search modification
+ */
+export function crosslinkerStubs(match) {
+    const sip = match.spectrumIdentificationProtocol;
+    let unresolved = false;
+    const peptideStubs = function (peptide) {
+        const stubs = [];
+        if (!peptide) {
+            return stubs;
+        }
+        for (const mod of peptide.crosslinkerModifications) {
+            const ref = mod.searchModificationRef;
+            const found = (sip && ref !== undefined && ref !== null) ? sip.crosslinkerStubs(ref) : undefined;
+            if (found === undefined) {
+                unresolved = true;
+                continue;
+            }
+            for (const stub of found) {
+                if (!stubs.includes(stub)) {
+                    stubs.push(stub);
+                }
+            }
+        }
+        return stubs;
+    };
+    const stubs1 = peptideStubs(match.matchedPeptides[0]);
+    const stubs2 = peptideStubs(match.matchedPeptides[1]);
+    return {stubs1, stubs2, unresolved};
+}
+
+/**
+ * Show, once per protocol, that a match's crosslinker could not be matched to a search
+ * modification of a protocol that has crosslinker cleavage stubs, so stubs may be missing from
+ * its annotation. (If the protocol has no stubs at all, nothing is missing and nothing is shown.)
+ * @param {SpectrumMatch} match - The spectrum match being annotated
+ * @returns {void}
+ */
+function showStubWarning(match) {
+    const sip = match.spectrumIdentificationProtocol;
+    if (!sip || !sip.hasCrosslinkerStubs || stubWarningsShown.has(sip) || !crosslinkerStubs(match).unresolved) {
+        return;
+    }
+    stubWarningsShown.add(sip);
+    const message = "Spectrum annotation (protocol " + _.escape(String(sip.spectrumIdentificationProtocolRef))
+        + "): a crosslinker modification could not be matched to one of the protocol's search modifications"
+        + " (no or unknown search modification id ref), so crosslinker cleavage stubs may be missing from the annotation.";
+    console.warn(message);
+    showMessage(message, "warning");
+}
+
+/**
  * Load spectrum data from PRIDE for a given spectrum match
  * @param {SpectrumMatch} match - The spectrum match to load spectrum data for
  * @returns {void}
@@ -52,6 +115,7 @@ export const loadSpectrum = function (match) {
     }
     if (json_request.annotation.config === undefined) { // mzIdentML style: ion series / losses come from the SIP
         showFragmentationWarnings(match);
+        showStubWarning(match);
     }
 
     this.get("xispec_wrapper").loadSpectrum(
@@ -138,12 +202,13 @@ export function buildAnnotationRequest (match) {
 
         collectMods(pep0);
         formatted_data.sequence1 = pep0.seq_mods;
-        formatted_data.stubs1 = pep0.stubs;
         if (pep1) {
             collectMods(pep1);
             formatted_data.sequence2 = pep1.seq_mods;
-            formatted_data.stubs2 = pep1.stubs;
         }
+        const stubs = crosslinkerStubs(match);
+        formatted_data.stubs1 = stubs.stubs1;
+        formatted_data.stubs2 = stubs.stubs2;
         formatted_data.crossLinkerModMass = match.crosslinkerModMass();
 
         const modifications = [];

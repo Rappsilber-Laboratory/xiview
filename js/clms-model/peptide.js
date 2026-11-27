@@ -35,7 +35,7 @@ export class Peptide {
 
     /**
      * Canonical, source-agnostic modification list resolved once at
-     * construction. Each entry: {pos, name, mass, isCrosslinker, stub}.
+     * construction. Each entry: {pos, name, mass, isCrosslinker, searchModificationRef}.
      * All modification getters read from this so nothing downstream branches
      * on data source.
      * @type {Array<Object>}
@@ -80,7 +80,7 @@ export class Peptide {
      * Resolve the raw m_ps/m_as (and m_ms) into the canonical modification list.
      * @param {Object} json - Raw peptide data object
      * @param {Array<Object>} [searchModifications] - xi2 config mod list, or undefined for mzIdentML
-     * @returns {Array<Object>} [{pos, name, mass, isCrosslinker, stub}]
+     * @returns {Array<Object>} [{pos, name, mass, isCrosslinker, searchModificationRef}]
      * @private
      */
     #resolveModifications(json, searchModifications){
@@ -99,7 +99,7 @@ export class Peptide {
                     name: def ? def.name : String(ref),
                     mass: def ? def.mass : undefined,
                     isCrosslinker: false,
-                    stub: undefined
+                    searchModificationRef: undefined
                 };
             } else {
                 // mzIdentML: ref is a CV-term object {accession: name}.
@@ -111,7 +111,9 @@ export class Peptide {
                     name: firstVal != null ? String(firstVal).toLowerCase().replace(/ /g, "") : "",
                     mass: masses ? masses[i] : undefined,
                     isCrosslinker,
-                    stub: isCrosslinker ? ref["MS:1003390"] : undefined
+                    // MS:1003393 search modification id ref: the protocol's search modification
+                    // (MS:1003392) this is, which holds e.g. the crosslinker's cleavage stubs
+                    searchModificationRef: ref["MS:1003393"]
                 };
             }
         });
@@ -174,7 +176,7 @@ export class Peptide {
 
     /**
      * Get the canonical, source-agnostic modification list.
-     * @returns {Array<Object>} [{pos, name, mass, isCrosslinker, stub}]
+     * @returns {Array<Object>} [{pos, name, mass, isCrosslinker, searchModificationRef}]
      */
     get modifications() {
         return this.#modifications;
@@ -235,17 +237,11 @@ export class Peptide {
     }
 
     /**
-     * Get crosslink stubs (reporter ions)
-     * @returns {*|undefined} Stub information or undefined
+     * The crosslinker modifications of this peptide (two for a looplink)
+     * @returns {Array<Object>} [{pos, name, mass, isCrosslinker, searchModificationRef}]
      */
-    //todo - needs fixed for loop links
-    get stubs() {
-        for (const mod of this.#modifications) {
-            if (mod.isCrosslinker) {
-                return mod.stub;
-            }
-        }
-        return undefined;
+    get crosslinkerModifications() {
+        return this.#modifications.filter(mod => mod.isCrosslinker);
     }
 
     /**

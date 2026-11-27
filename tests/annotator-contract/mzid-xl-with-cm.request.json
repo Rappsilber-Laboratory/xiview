@@ -193,8 +193,12 @@
     "precursorMZ": 752.7466713415814,
     "returnModSyntax": "Xmod",
     "crosslinker": {
-      "stubs1": [],
-      "stubs2": [],
+      "stubs1": [
+        "O:0:S"
+      ],
+      "stubs2": [
+        "S:82.041865:O"
+      ],
       "modMass": 82.04186
     },
     "fragmentTolerance": {

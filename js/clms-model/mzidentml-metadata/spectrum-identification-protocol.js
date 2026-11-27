@@ -322,6 +322,61 @@ export class SpectrumIdentificationProtocol {
         return this.#searchModifications;
     }
 
+    /**
+     * Crosslinker cleavage stubs (MS:1003390, "name:mass:pairs with") of the search modification
+     * with this search modification id (MS:1003392), which a peptide's modification names with
+     * MS:1003393 (search modification id ref).
+     * @param {string} searchModificationId - The search modification id
+     * @returns {Array<string>|undefined} The stubs ([] if that modification has none), or undefined
+     *  if no search modification has this id, or several do with different stubs
+     */
+    crosslinkerStubs(searchModificationId) {
+        const stubs = this.#stubIndex().get(String(searchModificationId));
+        return stubs === null ? undefined : stubs;
+    }
+
+    /**
+     * Whether any search modification of this protocol has crosslinker cleavage stubs (MS:1003390)
+     * @returns {boolean}
+     */
+    get hasCrosslinkerStubs() {
+        for (const stubs of this.#stubIndex().values()) {
+            if (stubs === null || stubs.length) { // null: ambiguous, so has some
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Search modification id -> its stubs, or null if the id is given to several search
+     * modifications with different stubs. Not cached: it is cheap, and so can't go stale.
+     * @returns {Map<string, Array<string>|null>}
+     */
+    #stubIndex() {
+        const index = new Map();
+        for (const searchMod of this.#searchModifications ?? []) {
+            const accessions = searchMod.accessions ?? {};
+            const id = accessions["MS:1003392"];
+            if (id === undefined || id === null) {
+                continue;
+            }
+            const value = accessions["MS:1003390"];
+            // one stub is stored as a string, several as a list
+            const stubs = value === undefined || value === null ? [] : (Array.isArray(value) ? value.map(String) : [String(value)]);
+            const key = String(id);
+            if (index.has(key)) {
+                const previous = index.get(key);
+                if (previous === null || previous.length !== stubs.length || previous.some((s, i) => s !== stubs[i])) {
+                    index.set(key, null);
+                }
+            } else {
+                index.set(key, stubs);
+            }
+        }
+        return index;
+    }
+
     // /**
     //  * Get fragment tolerance settings
     //  * @returns {Object} Object with tolerance and unit properties

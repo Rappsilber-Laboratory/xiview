@@ -1,8 +1,9 @@
 import {module, test, start} from "qunit";
 import {loadTestData, loadXi2TestData} from "./test-helper";
 import {Peptide} from "../js/clms-model/peptide";
-import {arrayifyPeptide, buildAnnotationRequest, convert_to_json_request} from "../js/load-spectrum";
+import {arrayifyPeptide, buildAnnotationRequest, convert_to_json_request, crosslinkerStubs} from "../js/load-spectrum";
 import {SpectrumIdentificationProtocol} from "../js/clms-model/mzidentml-metadata/spectrum-identification-protocol";
+import {SearchModification} from "../js/clms-model/mzidentml-metadata/search-modification";
 
 /**
  * Tests of the annotation request xiVIEW sends to the annotator (via
@@ -364,6 +365,33 @@ export async function testSetup() {
         assert.notOk("base_sequence" in req.Peptides[0], "no xi2 peptide fields for mzIdentML");
     });
 
+    test("crosslinker stubs from the protocol's search modifications: DSSO (several stubs)", function (assert) {
+        const dsso = ["A:54.0105647:ST", "S:103.9932001:A", "T:85.9826354:A"];
+        for (const id of ["ETD_SII_0", "HCD_SII_0"]) {
+            const req = wire(buildAnnotationRequest(mzidMatch(id)));
+            assert.deepEqual(req.annotation.crosslinker.stubs1, dsso, id + " donor stubs");
+            assert.deepEqual(req.annotation.crosslinker.stubs2, dsso, id + " acceptor stubs");
+            assert.notOk(crosslinkerStubs(mzidMatch(id)).unresolved, id + " resolved");
+        }
+    });
+
+    test("crosslinker stubs from the protocol's search modifications: SDA (one stub each, different)", function (assert) {
+        const match = mzidMatch("SII_2_1");
+        const refs = match.matchedPeptides.map(p => p.crosslinkerModifications[0].searchModificationRef);
+        const expected = {SDA_crosslink_donor: ["S:82.041865:O"], SDA_crosslink_acceptor: ["O:0:S"]};
+        const req = wire(buildAnnotationRequest(match));
+        assert.deepEqual(req.annotation.crosslinker.stubs1, expected[refs[0]], "peptide 1 (" + refs[0] + ")");
+        assert.deepEqual(req.annotation.crosslinker.stubs2, expected[refs[1]], "peptide 2 (" + refs[1] + ")");
+    });
+
+    test("crosslinker without search modification id refs (mzIdentML 1.2): no stubs", function (assert) {
+        const match = mzidMatch("SII_11_1");
+        const req = wire(buildAnnotationRequest(match));
+        assert.deepEqual(req.annotation.crosslinker.stubs1, []);
+        assert.deepEqual(req.annotation.crosslinker.stubs2, []);
+        assert.notOk(match.spectrumIdentificationProtocol.hasCrosslinkerStubs, "protocol has no stubs, so nothing is missing");
+    });
+
     test("Da fragment tolerance from the protocol", function (assert) {
         const req = buildAnnotationRequest(mzidMatch("SII_8_2_p1"));
         assert.deepEqual(req.annotation.fragmentTolerance, {tolerance: 0.03, unit: "Da"});
@@ -477,20 +505,76 @@ export async function testSetup() {
             ["(phosphoser)", "", "(phosphoser)", "", "(acetyl)"]);
     });
 
-    test("crosslinker stubs (MS:1003390) are passed as stubs1/stubs2", function (assert) {
-        const pep0 = new Peptide({
-            id: 1, u_id: "1", seq: "AKT", m_ps: [2],
-            m_as: [{"MS:1002509": 1, "MS:1003390": "A:54.01056:S"}], m_ms: [158.0038], cl_m: 158.0038
-        });
-        const pep1 = new Peptide({
-            id: 2, u_id: "1", seq: "KMR", m_ps: [1],
-            m_as: [{"MS:1002510": 1, "MS:1003390": "S:103.9932:A"}], m_ms: [0], cl_m: 0
-        });
-        const req = buildAnnotationRequest(fakeMzidMatch([pep0, pep1], {crosslinkerModMass: () => 158.0038}));
-        assert.deepEqual(req.annotation.crosslinker.stubs1, "A:54.01056:S");
-        assert.deepEqual(req.annotation.crosslinker.stubs2, "S:103.9932:A");
+    // A protocol whose search modifications are the given {id (MS:1003392): stubs (MS:1003390)} pairs
+    const sipWithSearchMods = (mods) => new SpectrumIdentificationProtocol({id: 0, sip_ref: "SIP", upload_id: 1}, [],
+        mods.map(([id, stubs], i) => new SearchModification({id: i, upload_id: 1, protocol_id: 0,
+            accessions: stubs === undefined ? {"MS:1003392": id} : {"MS:1003392": id, "MS:1003390": stubs}})));
+    const dsso = ["A:54.0105647:ST", "S:103.9932001:A", "T:85.9826354:A"];
+    const xlPeptides = (ref1, ref2) => [
+        new Peptide({id: 1, u_id: "1", seq: "AKT", m_ps: [2],
+            m_as: [{"MS:1002509": 1, "MS:1003393": ref1}], m_ms: [158.0038], cl_m: 158.0038}),
+        new Peptide({id: 2, u_id: "1", seq: "KMR", m_ps: [1],
+            m_as: [{"MS:1002510": 1, "MS:1003393": ref2}], m_ms: [0], cl_m: 0}),
+    ];
+
+    test("crosslinker stubs come from the search modification each crosslinker mod refers to (MS:1003393)", function (assert) {
+        const sip = sipWithSearchMods([["XL_donor", dsso], ["XL_acceptor", "O:0:S"], ["other", ["X:1:Y"]]]);
+        const req = buildAnnotationRequest(fakeMzidMatch(xlPeptides("XL_donor", "XL_acceptor"),
+            {spectrumIdentificationProtocol: sip, crosslinkerModMass: () => 158.0038}));
+        assert.deepEqual(req.annotation.crosslinker.stubs1, dsso, "several stubs: a list");
+        assert.deepEqual(req.annotation.crosslinker.stubs2, ["O:0:S"], "one stub (stored as a string): still a list");
         assert.strictEqual(req.annotation.crosslinker.modMass, 158.0038);
         assert.deepEqual(req.annotation.modifications, [], "crosslinker mods excluded");
+        assert.notOk(crosslinkerStubs(fakeMzidMatch(xlPeptides("XL_donor", "XL_acceptor"),
+            {spectrumIdentificationProtocol: sip})).unresolved);
+    });
+
+    test("MS:1003390 on the peptide's own modification is not used", function (assert) {
+        const pep = new Peptide({id: 1, u_id: "1", seq: "AKT", m_ps: [2],
+            m_as: [{"MS:1002509": 1, "MS:1003390": "A:54.01056:S"}], m_ms: [158.0038], cl_m: 158.0038});
+        const sip = sipWithSearchMods([["XL_donor", dsso]]);
+        const match = fakeMzidMatch([pep], {spectrumIdentificationProtocol: sip});
+        assert.deepEqual(buildAnnotationRequest(match).annotation.crosslinker.stubs1, []);
+        assert.ok(crosslinkerStubs(match).unresolved, "no search modification id ref: unresolved");
+    });
+
+    test("crosslinker mod whose search modification can't be found, or is ambiguous: no stubs, unresolved", function (assert) {
+        const unknown = fakeMzidMatch(xlPeptides("XL_donor", "missing"),
+            {spectrumIdentificationProtocol: sipWithSearchMods([["XL_donor", dsso]])});
+        assert.deepEqual(crosslinkerStubs(unknown), {stubs1: dsso, stubs2: [], unresolved: true});
+
+        const ambiguous = fakeMzidMatch(xlPeptides("XL_donor", "XL_donor"),
+            {spectrumIdentificationProtocol: sipWithSearchMods([["XL_donor", dsso], ["XL_donor", "S:1:A"]])});
+        assert.deepEqual(crosslinkerStubs(ambiguous), {stubs1: [], stubs2: [], unresolved: true},
+            "same id with different stubs: neither is used");
+
+        const repeated = fakeMzidMatch(xlPeptides("XL_donor", "XL_donor"),
+            {spectrumIdentificationProtocol: sipWithSearchMods([["XL_donor", dsso], ["XL_donor", dsso.slice()]])});
+        assert.deepEqual(crosslinkerStubs(repeated), {stubs1: dsso, stubs2: dsso, unresolved: false},
+            "same id with the same stubs: fine");
+
+        const noSip = fakeMzidMatch(xlPeptides("XL_donor", "XL_acceptor"));
+        assert.deepEqual(crosslinkerStubs(noSip), {stubs1: [], stubs2: [], unresolved: true}, "no protocol");
+    });
+
+    test("non-cleavable crosslinker: no stubs, resolved; linear peptide: no stubs", function (assert) {
+        const sip = sipWithSearchMods([["XL_donor", undefined], ["XL_acceptor", undefined]]);
+        assert.notOk(sip.hasCrosslinkerStubs);
+        assert.deepEqual(crosslinkerStubs(fakeMzidMatch(xlPeptides("XL_donor", "XL_acceptor"),
+            {spectrumIdentificationProtocol: sip})), {stubs1: [], stubs2: [], unresolved: false});
+        const linear = new Peptide({id: 1, u_id: "1", seq: "MEK", m_ps: [1], m_as: [{"UNIMOD:35": "Oxidation"}], m_ms: [15.9949], cl_m: 0});
+        assert.deepEqual(crosslinkerStubs(fakeMzidMatch([linear], {spectrumIdentificationProtocol: sip})),
+            {stubs1: [], stubs2: [], unresolved: false});
+        assert.ok(sipWithSearchMods([["XL_donor", "S:1:A"]]).hasCrosslinkerStubs);
+    });
+
+    test("looplink: stubs of both crosslinker mods, without duplicates", function (assert) {
+        const loop = new Peptide({id: 1, u_id: "1", seq: "AKTKR", m_ps: [2, 4],
+            m_as: [{"MS:1002509": 1, "MS:1003393": "XL_donor"}, {"MS:1002510": 1, "MS:1003393": "XL_acceptor"}],
+            m_ms: [82.04, 0], cl_m: 82.04});
+        const sip = sipWithSearchMods([["XL_donor", ["S:82.041865:O", "A:1:B"]], ["XL_acceptor", ["O:0:S", "A:1:B"]]]);
+        assert.deepEqual(crosslinkerStubs(fakeMzidMatch([loop], {spectrumIdentificationProtocol: sip})),
+            {stubs1: ["S:82.041865:O", "A:1:B", "O:0:S"], stubs2: [], unresolved: false});
     });
 
     test("missing modification mass triggers an alert", function (assert) {
