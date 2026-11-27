@@ -9,8 +9,6 @@ import * as Spinner from "spin";
 import {xiSPECUI} from "./xispecui";
 
 import {Graph} from "./graph/Graph";
-import {capture, makeXMLStr} from "../../svgexp";
-import {download} from "./download";
 
 /**
  * Backbone view for rendering and managing a spectrum visualization.
@@ -80,7 +78,6 @@ export const SpectrumView = Backbone.View.extend({
         this.listenTo(this.model, "change:hideNotSelectedFragments", this.updatePeakHighlighting);
         this.listenTo(this.model, "change:showLossLabels", this.showLossy);
 
-        this.listenTo(xiSPECUI.vent, "downloadSpectrumSVG", this.downloadSVG);
         this.listenTo(xiSPECUI.vent, "resize:spectrum", this.resize);
         this.listenTo(xiSPECUI.vent, "clearSpectrumHighlights", this.clearHighlights);
 
@@ -307,46 +304,6 @@ export const SpectrumView = Backbone.View.extend({
             }
         }
 
-    },
-
-    /**
-     * Downloads the current spectrum view as an SVG file.
-     * Filename includes peptide sequences and charge state.
-     *
-     * @method downloadSVG
-     */
-    downloadSVG: function () {
-        let svgSel = d3.select(this.el.parentNode);
-        let svgArr = svgSel[0];
-        let svgStrings = capture(svgArr);
-        let svgXML = makeXMLStr(new XMLSerializer(), svgStrings[0]);
-
-        let charge = this.model.get("JSONdata").annotation.precursorCharge;
-        let pepStrs = this.model.pepStrsMods;
-        let linkSites = Array(this.model.get("JSONdata").LinkSite.length);
-
-        this.model.get("JSONdata").LinkSite.forEach(function (ls) {
-            linkSites[ls.peptideId] = ls.linkSite;
-        });
-
-        //insert CL sites with #
-        if (linkSites.length > 0) {
-            pepStrs.forEach(function (pepStr, index) {
-                let positions = [];
-                for (let i = 0; i < pepStr.length; i++) {
-                    if (pepStr[i].match(/[A-Z]/) != null) {
-                        positions.push(i);
-                    }
-                }
-                let clAA_index = positions[linkSites[index]] + 1;
-                pepStrs[index] = pepStr.slice(0, clAA_index) + "#" + pepStr.slice(clAA_index, pepStr.length);
-            });
-        }
-
-        let svg_name = pepStrs.join("-") + "_z=" + charge;
-        svg_name += svgSel.node().id;
-        svg_name += ".svg";
-        download(svgXML, "application/svg", svg_name);
     },
 
     /**

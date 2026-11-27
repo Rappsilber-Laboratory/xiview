@@ -47,7 +47,6 @@ export const XispecWrapper = Backbone.View.extend({
         this.listenTo(xiSPECUI.vent, "requestAnnotation", this.requestAnnotation);
         this.listenTo(xiSPECUI.vent, "revertAnnotation", this.revertAnnotation);
         this.listenTo(xiSPECUI.vent, "setCustomConfigOverwrite", this.setCustomConfigOverwrite);
-        this.listenTo(xiSPECUI.vent, "addSpectrum", this.addSpectrum);
         this.listenTo(xiSPECUI.vent, "closeSpecPanel", this.closeSpectrum);
         this.listenTo(xiSPECUI.vent, "activateSpecPanel", this.activateSpectrum);
         this.listenTo(xiSPECUI.vent, "butterflyHighlight", this.butterflyHighlight);

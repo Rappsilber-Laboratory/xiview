@@ -12,7 +12,6 @@ export const SpectrumControlsView = Backbone.View.extend({
         "click #xispec_clearHighlights": "clearHighlights",
         "click #xispec_measuringTool": "toggleMeasuringMode",
         "click #xispec_moveLabels": "toggleMoveLabels",
-        "click #xispec_dl_spectrum_SVG": "downloadSpectrumSVG",
         "click #xispec_toggleDataSettings": "toggleDataSettings",
         "click #xispec_toggleAppearanceSettings": "toggleAppearanceSettings",
         "click #xispec_revertAnnotation": "revertAnnotation",
@@ -20,7 +19,6 @@ export const SpectrumControlsView = Backbone.View.extend({
         "click #xispec_butterflyChkbx": "toggleButterfly",
         "click #xispec_butterflySwap": "butterflySwap",
         "click #xispec_butterflyHighlightBtn": "butterflyHighlight",
-        "click #xispec_addSpectrum": "addSpectrum",
     },
 
     initialize: function () {
@@ -37,13 +35,6 @@ export const SpectrumControlsView = Backbone.View.extend({
         // spectrum controls before
         this.wrapper.append("span")
             .attr("id", "xispec_extra_spectrumControls_before");
-        // downloadSVG
-        this.wrapper.append("i")
-            .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-download")
-            .attr("aria-hidden", "true")
-            .attr("id", "xispec_dl_spectrum_SVG")
-            .attr("title", "download SVG")
-            .attr("style", "cursor: pointer;");
         // moveLabelsLabel
         let moveLabelsLabel = this.wrapper.append("label")
             .attr("class", "xispec_btn")
@@ -129,12 +120,6 @@ export const SpectrumControlsView = Backbone.View.extend({
             .attr("aria-hidden", "true")
             .attr("id", "xispec_revertAnnotation")
             .attr("title", "revert to original annotation");
-        // addSpectrumBtn
-        this.wrapper.append("i")
-            .attr("id", "xispec_addSpectrum")
-            .attr("title", "Add another spectrum panel")
-            .attr("class", "xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-plus")
-            .attr("aria-hidden", "true");
         // butterflyControls
         this.butterflyControls = this.wrapper.append("div")
             .attr("id", "xispec_butterflyControls")
@@ -286,10 +271,6 @@ export const SpectrumControlsView = Backbone.View.extend({
         this.model.resetZoom();
     },
 
-    downloadSpectrumSVG: function () {
-        xiSPECUI.vent.trigger("downloadSpectrumSVG");
-    },
-
     toggleSpecList: function () {
         xiSPECUI.vent.trigger("toggleTableView");
     },
@@ -314,10 +295,6 @@ export const SpectrumControlsView = Backbone.View.extend({
                 .addClass("xispec_disabled")
                 .removeClass("xispec_btn-1a");
         }
-    },
-
-    addSpectrum: function () {
-        xiSPECUI.vent.trigger("addSpectrum");
     },
 
     changedModel: function () {
