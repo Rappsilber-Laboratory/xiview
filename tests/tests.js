@@ -1852,6 +1852,37 @@ function testCallback(model) {
         assert.notOk(result.includes("P12345"), "Row with unresolvable partner is filtered out");
     });
 
+    test("translateToCSV with taxon-prefixed STRING IDs (current STRING API)", function (assert) {
+        const idMap = {
+            "P07900": "9606.ENSP00000335153",
+            "P08238": "9606.ENSP00000360609",
+            "P0CG48": "9606.ENSP00000441543"
+        };
+        // real response shape from https://string-db.org/api/tsv/network (Nov 2026)
+        const tsv = "stringId_A\tstringId_B\tpreferredName_A\tpreferredName_B\tncbiTaxonId\tscore\tnscore\n" +
+                    "9606.ENSP00000335153\t9606.ENSP00000441543\tHSP90AA1\tUBC\t9606\t0.904\t0\n" +
+                    "9606.ENSP00000335153\t9606.ENSP00000360609\tHSP90AA1\tHSP90AB1\t9606\t0.999\t0\n";
+
+        const rows = d3.csv.parse(STRINGUtils.translateToCSV(idMap, tsv));
+
+        assert.deepEqual(rows.map(function (r) {
+            return [r.Protein1, r.Protein2, r["STRING Score"], r.nscore];
+        }), [["P07900", "P0CG48", "0.904", "0"], ["P07900", "P08238", "0.999", "0"]], "both rows kept, mapped to the right UniProt IDs and scores");
+    });
+
+    test("findCachedNetwork only reuses a cached network containing every requested ID", function (assert) {
+        const cache = {};
+        cache[["9606.ENSP00000335153", "9606.ENSP00000360609", "9606.ENSP00000441543"].join("\r")] = "big";
+        cache[["9606.ENSP00000335153", "9606.ENSP00000360609"].join("\r")] = "pair";
+
+        assert.equal(STRINGUtils.findCachedNetwork(cache, ["9606.ENSP00000335153", "9606.ENSP00000360609"]), "pair", "exact key");
+        assert.equal(STRINGUtils.findCachedNetwork(cache, ["9606.ENSP00000335153", "9606.ENSP00000441543"]), "big", "subset of a cached network");
+        // ...3515 is a prefix of ...35153; X differs from "." only where the old regex treated "." as a wildcard
+        assert.strictEqual(STRINGUtils.findCachedNetwork(cache, ["9606.ENSP0000033515", "9606.ENSP00000360609"]), null, "ID that is a substring of a cached ID");
+        assert.strictEqual(STRINGUtils.findCachedNetwork(cache, ["9606XENSP00000335153", "9606.ENSP00000360609"]), null, "'.' is not a wildcard");
+        assert.strictEqual(STRINGUtils.findCachedNetwork(cache, ["9606.ENSP00000335153", "9606.ENSP00000999999"]), null, "ID not in any cached network");
+    });
+
     module("File download string generation");
 
     test("Residues CSV", function (assert) {

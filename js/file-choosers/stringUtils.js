@@ -43,11 +43,17 @@ export const STRINGUtils = {
         networkTsvString = networkTsvString.replace(/^.*/, function (m) {
             return m.replace(/\tscore/g, "\tSTRING Score");
         });
+        // STRING's network TSV now gives full taxon-prefixed IDs (e.g. "9606.ENSP00000335153"), as
+        // get_string_ids does. Older responses (possibly still in the localStorage cache) gave them
+        // without the "9606." prefix. Both are exact lookups, so neither can match the wrong protein.
+        const toUniprot = function (stringId, taxonId) {
+            return stringToUniprotIDMap[stringId] || stringToUniprotIDMap[taxonId + "." + stringId];
+        };
         let rows = parseDsvObjects(d3.tsv, networkTsvString, function (d) {
             d.SeqPos1 = null;
             d.SeqPos2 = null;
-            d.Protein1 = stringToUniprotIDMap[d.ncbiTaxonId + "." + d.stringId_A];
-            d.Protein2 = stringToUniprotIDMap[d.ncbiTaxonId + "." + d.stringId_B];
+            d.Protein1 = toUniprot(d.stringId_A, d.ncbiTaxonId);
+            d.Protein2 = toUniprot(d.stringId_B, d.ncbiTaxonId);
             // return empty string if protein ids not in current id map
             return (d.Protein1 && d.Protein2 ? _.omit(d, ["ncbiTaxonId", "stringId_A", "stringId_B", "preferredName_A", "preferredName_B"]) : null);
         });
@@ -75,7 +81,6 @@ export const STRINGUtils = {
         const alreadyKnown = split[0];
         const todo = split[1];
         const echo = 1;
-        console.log(stringIDCache, identifiersBySpecies, todo);
 
         if (todo.length) {
             const pidString = todo.join("\r");
@@ -107,7 +112,6 @@ export const STRINGUtils = {
                         }
 
                         const idMap = _.pick(identifiersBySpecies, proteinIDs);
-                        console.log("IDMAP FROM STRING", idMap, identifiersBySpecies, proteinIDs);
                         resolve(idMap);
                     })
                     // eslint-disable-next-line no-unused-vars
@@ -118,7 +122,6 @@ export const STRINGUtils = {
             return promiseObj;
         } else {
             const idMap = _.pick(identifiersBySpecies, alreadyKnown);
-            console.log("IDMAP CACHED", idMap);
             return Promise.resolve(idMap);
         }
     },
@@ -133,6 +136,29 @@ export const STRINGUtils = {
      * @param {string} taxonID - NCBI Taxon ID
      * @returns {Promise<Object>} Promise resolving to {idMap: Object, networkTsv: string} or rejecting with error message
      */
+    /**
+     * Finds a cached (LZW-encoded) network covering every one of stringIDs, or null.
+     * A STRING network holds every interaction among its query proteins, so a cached network whose
+     * ID set contains all of stringIDs has all of their interactions. Whole IDs are compared exactly:
+     * a substring/regex match could accept a network that is missing one of the proteins.
+     * @param {Object} idBySpecies - cache for one taxon: "\r"-joined sorted STRING IDs → encoded network
+     * @param {Array<string>} stringIDs - sorted STRING IDs
+     * @returns {string|null}
+     */
+    findCachedNetwork: function (idBySpecies, stringIDs) {
+        const exact = idBySpecies[stringIDs.join("\r")];
+        if (exact) {
+            return exact;
+        }
+        const matchingKey = d3.keys(idBySpecies).find(function (key) {
+            const keyIDs = new Set(key.split("\r"));
+            return stringIDs.every(function (sid) {
+                return keyIDs.has(sid);
+            });
+        });
+        return matchingKey !== undefined ? idBySpecies[matchingKey] : null;
+    },
+
     queryStringInteractions: function (idMap, taxonID) {
         const stringIDs = d3.values(idMap);
         if (stringIDs.length > 1) {
@@ -141,17 +167,7 @@ export const STRINGUtils = {
 
             const stringNetworkScoreCache = getLocalStorage("StringNetworkScores");
             const idBySpecies = stringNetworkScoreCache[taxonID] || {};
-            let cachedNetwork = idBySpecies[networkKey];    // exact key match in cache?
-
-            if (!cachedNetwork) {  // match in cache where network is subnetwork of larger network?
-                const allSpeciesNetworkKeys = d3.keys(idBySpecies);
-                // since stringIds were sorted, and stored network keys generated from them, this regex will find the first stored network key that contains all current stringIDs
-                const idKeyRegex = new RegExp(".*" + stringIDs.join(".*") + ".*");
-                const matchingKeyIndex = _.findIndex(allSpeciesNetworkKeys, function (key) {
-                    return idKeyRegex.test(key);
-                });
-                cachedNetwork = matchingKeyIndex >= 0 ? idBySpecies[allSpeciesNetworkKeys[matchingKeyIndex]] : null;
-            }
+            const cachedNetwork = STRINGUtils.findCachedNetwork(idBySpecies, stringIDs);
 
             // If no cached network, go to STRING
             if (!cachedNetwork) {
@@ -186,7 +202,6 @@ export const STRINGUtils = {
                 });
                 return promiseObj;
             } else {
-                console.log("Using cached network");
                 return Promise.resolve({idMap: idMap, networkTsv: STRINGUtils.lzw_decode(cachedNetwork)});
             }
         }
@@ -220,7 +235,6 @@ export const STRINGUtils = {
         for (let i = 0; i < out.length; i++) {
             out[i] = String.fromCodePoint(out[i]);
         }
-        //console.log ("LZW MAP SIZE", dict.size, out.slice (-50), out.length, out.join("").length);
         return out.join("");
     },
 
@@ -271,14 +285,12 @@ export const STRINGUtils = {
      */
     loadStringDataFromModel: function (clmsModel, taxonID, callback) {
         let viableProteinIDs = _.pluck(STRINGUtils.filterProteinsToPPISet(clmsModel), "id");
-        console.log("vids", viableProteinIDs.length);
 
         if (viableProteinIDs.length >= STRINGUtils.stringAPIMaxProteins) {
             const proteins = clmsModel.getProteinsMap();
             viableProteinIDs = viableProteinIDs.filter(function (pid) {
                 return !proteins.get(pid).hidden;
             });
-            console.log("vids2", viableProteinIDs.length);
         }
 
         STRINGUtils.loadStringData(viableProteinIDs, taxonID, callback);
@@ -308,7 +320,6 @@ export const STRINGUtils = {
                 if (!csv || csv.length === 0) {
                     return chainError("No meaningful STRING interactions found for protein set.");
                 }
-                console.log("CSV", csv);
                 callback(csv);
             }, chainError)
             .catch(function (errorReason) {
