@@ -505,6 +505,74 @@ export async function testSetup() {
             ["(phosphoser)", "", "(phosphoser)", "", "(acetyl)"]);
     });
 
+    // The mass the annotator will use at each residue of each peptide of a request (null: unmodified)
+    const residueMasses = (req) => {
+        const massOf = new Map(req.annotation.modifications.map(m => [m.id, m.mass]));
+        if (massOf.size !== req.annotation.modifications.length) {
+            throw new Error("modification ids are not unique");
+        }
+        return req.Peptides.map(p => p.sequence.map(a => a.Modification === "" ? null : massOf.get(a.Modification)));
+    };
+
+    test("one name, several masses in a peptide (DSSO stub and monolink): each mass gets its own name", function (assert) {
+        // MS3 fragment PEPKSK: stub A on K4, hydrolysed DSSO monolink on K6, both named Xlink:DSSO
+        const pep = new Peptide({
+            id: 1, u_id: "1", seq: "PEPKSK", m_ps: [4, 6],
+            m_as: [{"UNIMOD:1842": "Xlink:DSSO", "MS:1003393": "DSSO_crosslink_stub_a"},
+                {"UNIMOD:1842": "Xlink:DSSO", "MS:1003393": "DSSO_monolink_W"}],
+            m_ms: [54.010565, 176.01433], cl_m: 0
+        });
+        const req = wire(buildAnnotationRequest(fakeMzidMatch([pep])));
+        assert.deepEqual(req.annotation.modifications, [
+            {id: "(xlink:dsso_54.010565)", mass: 54.010565, aminoAcids: ["*"]},
+            {id: "(xlink:dsso_176.01433)", mass: 176.01433, aminoAcids: ["*"]},
+        ]);
+        assert.deepEqual(residueMasses(req), [[null, null, null, 54.010565, null, 176.01433]]);
+        assert.strictEqual(pep.seq_mods, "PEPK(xlink:dsso)SK(xlink:dsso)", "seq_mods (display, export) unchanged");
+    });
+
+    test("MS3 stub-only peptide: the stub is an ordinary modification, no crosslinker stubs", function (assert) {
+        // peptide 2 of tests/test-data/get_xiview_peptides.json (mzIdentML 1.3 draft fixture, MS3 of DSSO stub A)
+        const pep = new Peptide({id: 2, u_id: "1", seq: "PEPK", m_ps: [4],
+            m_as: [{"UNIMOD:1842": "Xlink:DSSO", "MS:1003393": "DSSO_crosslink_stub_a"}], m_ms: [54.010565], cl_m: 0});
+        const match = fakeMzidMatch([pep]);
+        const req = wire(buildAnnotationRequest(match));
+        assert.deepEqual(req.annotation.modifications, [{id: "(xlink:dsso)", mass: 54.010565, aminoAcids: ["*"]}]);
+        assert.deepEqual(residueMasses(req), [[null, null, null, 54.010565]]);
+        assert.deepEqual(crosslinkerStubs(match), {stubs1: [], stubs2: [], unresolved: false});
+    });
+
+    test("one name, several masses across the two peptides of a crosslink: each mass gets its own name", function (assert) {
+        const pep0 = new Peptide({id: 1, u_id: "1", seq: "AKTK", m_ps: [2, 4],
+            m_as: [{"MS:1002509": 1}, {"UNIMOD:1842": "Xlink:DSSO"}], m_ms: [158.003765, 176.01433], cl_m: 158.003765});
+        const pep1 = new Peptide({id: 2, u_id: "1", seq: "KMKR", m_ps: [1, 3],
+            m_as: [{"MS:1002510": 1}, {"UNIMOD:1842": "Xlink:DSSO"}], m_ms: [0, 175.030314], cl_m: 0});
+        const req = wire(buildAnnotationRequest(fakeMzidMatch([pep0, pep1], {crosslinkerModMass: () => 158.003765})));
+        assert.deepEqual(req.annotation.modifications.map(m => m.id), ["(xlink:dsso_176.01433)", "(xlink:dsso_175.030314)"]);
+        assert.deepEqual(residueMasses(req), [[null, null, null, 176.01433], [null, null, 175.030314, null]]);
+    });
+
+    test("one name with the same mass in both peptides: one name, as it is", function (assert) {
+        const ox = (id, seq, pos) => new Peptide({id, u_id: "1", seq, m_ps: [pos],
+            m_as: [{"UNIMOD:35": "Oxidation"}], m_ms: [15.994915], cl_m: 0});
+        const req = wire(buildAnnotationRequest(fakeMzidMatch([ox(1, "MEK", 1), ox(2, "KMR", 2)])));
+        assert.deepEqual(req.annotation.modifications, [{id: "(oxidation)", mass: 15.994915, aminoAcids: ["*"]}]);
+        assert.deepEqual(residueMasses(req), [[15.994915, null, null], [null, 15.994915, null]]);
+    });
+
+    test("names with a mass appended: no \"-\", and never the same as another modification's name", function (assert) {
+        const pep = new Peptide({
+            id: 1, u_id: "1", seq: "QKKK", m_ps: [1, 2, 3],
+            m_as: [{"UNIMOD:1": "X"}, {"UNIMOD:2": "X"}, {"UNIMOD:3": "x_42.010565"}],
+            m_ms: [-17.026549, 42.010565, 1], cl_m: 0
+        });
+        const req = wire(buildAnnotationRequest(fakeMzidMatch([pep])));
+        assert.deepEqual(req.annotation.modifications.map(m => m.id),
+            ["(x_minus17.026549)", "(x_42.010565_2)", "(x_42.010565)"]);
+        assert.notOk(req.annotation.modifications.some(m => m.id.includes("-")), "no \"-\" (terminal mod) in names");
+        assert.deepEqual(residueMasses(req), [[-17.026549, 42.010565, 1, null]]);
+    });
+
     // A protocol whose search modifications are the given {id (MS:1003392): stubs (MS:1003390)} pairs
     const sipWithSearchMods = (mods) => new SpectrumIdentificationProtocol({id: 0, sip_ref: "SIP", upload_id: 1}, [],
         mods.map(([id, stubs], i) => new SearchModification({id: i, upload_id: 1, protocol_id: 0,

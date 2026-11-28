@@ -103,6 +103,65 @@ function showStubWarning(match) {
 }
 
 /**
+ * The modification names to send to the annotator for an mzIdentML match. Each modification
+ * is named by its CV name (Peptide modification name), but different modifications can share
+ * one: e.g. "Xlink:DSSO" is given to every DSSO stub and monolink, which differ in mass. The
+ * annotator gets one mass per name, so a name that has several masses in the request (in
+ * either peptide) gets its mass appended, one name per mass ("-" is written as "minus": in a
+ * name, the annotator reads "-" as marking a terminal modification). A name with one mass
+ * is used as it is.
+ * @param {Array<Peptide>} peptides - The match's peptides
+ * @returns {{nameOf: function(Object): string, modifications: Array<{name: string, mass: number}>}}
+ *  nameOf gives the annotator name of a (non-crosslinker) modification of one of the peptides;
+ *  modifications lists each annotator name once, with its mass, in order of first occurrence
+ */
+export function annotatorModifications(peptides) {
+    const massesByName = new Map();
+    for (const peptide of peptides) {
+        for (const mod of peptide.modifications) {
+            if (mod.isCrosslinker) {
+                continue;
+            }
+            if (!massesByName.has(mod.name)) {
+                massesByName.set(mod.name, []);
+            }
+            const masses = massesByName.get(mod.name);
+            if (!masses.includes(mod.mass)) {
+                masses.push(mod.mass);
+            }
+        }
+    }
+    // names used as they are, so that a name with a mass appended can't be the same as one
+    const used = new Set();
+    for (const [name, masses] of massesByName) {
+        if (masses.length === 1) {
+            used.add(name);
+        }
+    }
+    const annotatorNames = new Map(); // name -> mass -> annotator name
+    const modifications = [];
+    for (const [name, masses] of massesByName) {
+        const byMass = new Map();
+        for (const mass of masses) {
+            let annotatorName = name;
+            if (masses.length > 1) {
+                const withMass = name + "_" + String(mass).replace(/-/g, "minus");
+                annotatorName = withMass;
+                for (let n = 2; used.has(annotatorName); n++) {
+                    annotatorName = withMass + "_" + n;
+                }
+            }
+            used.add(annotatorName);
+            byMass.set(mass, annotatorName);
+            modifications.push({name: annotatorName, mass});
+        }
+        annotatorNames.set(name, byMass);
+    }
+    const nameOf = mod => annotatorNames.get(mod.name).get(mod.mass);
+    return {nameOf, modifications};
+}
+
+/**
  * Load spectrum data from PRIDE for a given spectrum match
  * @param {SpectrumMatch} match - The spectrum match to load spectrum data for
  * @returns {void}
@@ -181,30 +240,10 @@ export function buildAnnotationRequest (match) {
         }
     } else {
         // mzIdentML style: peptides self-describe their mods via CV objects.
-        const modMap = new Map();
-        /**
-         * Collect modifications from a peptide
-         * @param {Peptide} peptide - The peptide to collect modifications from
-         * @returns {void}
-         */
-        const collectMods = function (peptide) { // yeah, this is awful, tidy up once knwo what annotator really needs
-            for (let i = 0; i < peptide.mod_pos.length; i++) {
-                const allModCvs = peptide.mod_acc[i]; // take out the crosslinker mods
-                const allModCvsKeys = Object.keys(allModCvs);
-                if (!allModCvsKeys.includes("MS:1002509") && !allModCvsKeys.includes("MS:1002510")) {
-                    const modName = "(" + Object.values(allModCvs)[0].toLowerCase().replace(/\s+/g, "") + ")";
-                    if (!modMap.has(modName)) {
-                        modMap.set(modName, peptide.mod_masses[i]);
-                    }
-                }
-            }
-        };
-
-        collectMods(pep0);
-        formatted_data.sequence1 = pep0.seq_mods;
+        const annotatorMods = annotatorModifications(pep1 ? [pep0, pep1] : [pep0]);
+        formatted_data.sequence1 = pep0.modifiedSequence(annotatorMods.nameOf);
         if (pep1) {
-            collectMods(pep1);
-            formatted_data.sequence2 = pep1.seq_mods;
+            formatted_data.sequence2 = pep1.modifiedSequence(annotatorMods.nameOf);
         }
         const stubs = crosslinkerStubs(match);
         formatted_data.stubs1 = stubs.stubs1;
@@ -212,12 +251,12 @@ export function buildAnnotationRequest (match) {
         formatted_data.crossLinkerModMass = match.crosslinkerModMass();
 
         const modifications = [];
-        modMap.forEach(function (value, key) {
-            modifications.push({id: key, mass: value, aminoAcids: ["*"]});
-            if (value === undefined || value === null) {
+        for (const {name, mass} of annotatorMods.modifications) {
+            modifications.push({id: "(" + name + ")", mass, aminoAcids: ["*"]});
+            if (mass === undefined || mass === null) {
                 alert("Failed: modification mass is undefined");
             }
-        });
+        }
         formatted_data.modifications = modifications;
         formatted_data.fragmentTolerance = match.fragmentTolerance();
 

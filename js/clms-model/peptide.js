@@ -189,13 +189,23 @@ export class Peptide {
      * @returns {string} Sequence with modifications
      */
     get seq_mods() {
+        return this.modifiedSequence(mod => mod.name);
+    }
+
+    /**
+     * Peptide sequence in the "BASE(label)BASE" format of seq_mods, with each
+     * (non-crosslinker) modification written as "(" + label(mod) + ")".
+     * @param {function(Object): string} label - Label for a modification of this.modifications
+     * @returns {string} Sequence with modifications
+     */
+    modifiedSequence(label) {
         const base = this.sequence;
         let seq_mods = "";
         let lastIndex = 0;
         for (const mod of this.#modifications) {
             if (mod.isCrosslinker) continue;
             seq_mods = seq_mods + base.slice(lastIndex, mod.pos);
-            seq_mods = seq_mods + "(" + mod.name + ")";
+            seq_mods = seq_mods + "(" + label(mod) + ")";
             lastIndex = mod.pos;
         }
         seq_mods = seq_mods + base.slice(lastIndex);
